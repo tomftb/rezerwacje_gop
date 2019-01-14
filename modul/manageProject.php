@@ -9,6 +9,7 @@ class manageProject extends initialDb
     private $user="";
     protected $err="";
     protected $valueToReturn=null;
+    protected $idProject=null;
     protected $infoArray=array
             (
                 "numer_umowy"=>array
@@ -20,6 +21,11 @@ class manageProject extends initialDb
                 (
                     "Nie podano tematu projektu",
                     "Istnieje już projekt o podanym temacie"
+                ),
+                "id_projekt"=>array
+                (
+                    "Musisz wskazać co najmniej jedną osobę do projektu",
+                    "Pracownik jest już przypisany do projektu"
                 )
             );
     
@@ -58,29 +64,134 @@ class manageProject extends initialDb
     private function checkExistInDb($tableName,$whereCondition,$valueToCheck)
     {
         $arrayOfWhere=$this->explodeValue($whereCondition,'=');
-        if($valueToCheck!='')
+        //print_r($arrayOfWhere);
+        //echo $valueToCheck;
+        if(trim($valueToCheck)!='')
         {
             $this->query('SELECT * FROM '.$tableName.' WHERE '.$whereCondition,$valueToCheck)."<br/>";
-            
-            if(count($this->queryReturnValue()))
-            {  
-                $this->err.=$this->infoArray[$arrayOfWhere[0]][1]."<br/>";
-            };
+            return(count($this->queryReturnValue()));
         }
         else
         {
-            $this->err.=$this->infoArray[$arrayOfWhere[0]][0]."<br/>";
+            $this->err.="NO VALUE TO CHECK<br/>";
+            return(0);
         };
     }
     private function explodeValue($valueToExplode,$delimiter)
     {
         return $arrayOfValue=explode($delimiter,$valueToExplode);
     }
+    protected function getTeamValueToFind()
+    {
+        if(!$this->err)
+        {
+            $teamValueToFind=array(
+                                    'team_czlonek_grupy_pers', 
+                                    'team_czlonek_grupy_percent',
+                                    'd-start_team_czlonek_grupy',
+                                    'd-end_team_czlonek_grupy'
+            );
+            return($teamValueToFind);
+        }
+    }
+    protected function checkAndAddignTeamValue($key,$value,&$teamValueToFind,&$persAttributes,&$allPers,&$counter,$teamValueToFindLength)
+    {
+        $found=strpos($key,$teamValueToFind);
+        if($found!==null && trim($found)!=='')
+        {    
+            //echo 'str pos - '.$found."\n";
+            $persAttributes[$counter]=$value;
+            $counter++;
+            if($counter===$teamValueToFindLength)
+            {
+                // LAST ELEMENT OF PERS
+                array_push($allPers,$persAttributes);
+                $counter=0;
+            }
+        }
+    }
+    protected function getTeam()
+    {
+        $teamValueToFind=$this->getTeamValueToFind();
+        $teamValueToFindLength=count($teamValueToFind);
+        $persAttributes=array();
+        $allPers=array();
+        $counter=0;
+        if(!$this->err)
+        {
+            foreach($this->inpArray as $key =>$value)
+            {
+                //echo $key.' - '.$value.' - '.$teamValueToFind[$counter]."\n";
+                if($key==='addTeamToProjectid')
+                {
+                    $this->idProject=$value;
+                }
+                $this->checkAndAddignTeamValue($key,$value,$teamValueToFind[$counter],$persAttributes,$allPers,$counter,$teamValueToFindLength);
+            }
+            //print_r($allPers);
+            return($allPers);
+        }
+        return($allPers);
+    }
+    protected function addTeamToProject($valueToAdd)
+    {
+        /*
+         * team[][0] - id
+         * team[][1] - percent to setup
+         * team[][2] - data start
+         * team[][3] - data end
+         */
+        $this->parsePostData($valueToAdd);
+        $team=$this->getTeam();
+        $curretDateTime=date('Y-m-d H:i:s');
+        if(!$this->err)
+        {
+            // CHECK EXIST $this->idProject
+            foreach($team as $value)
+            {
+               $this->checkExistInDb('projekt_pracownik','id_projekt=? AND id_uzytkownik=? ',$this->idProject.','.$value[0]); 
+            }
+            if(!$this->err)
+            {
+                //echo 'NOT FOUND IN DB';
+                foreach($team as $value)
+                {
+                   $this->query('INSERT INTO projekt_pracownik 
+            (id_projekt,id_uzytkownik,imie,nazwisko,udzial_procent,dat_od,dat_do,mod_dat,mod_user_id,mod_user_name) 
+		VALUES
+		(?,?,?,?,?,?,?,?,?,?)'
+        ,$this->idProject.','.$value[0].',novalue,novalue,'.$value[1].','.$value[2].','.$value[3].','.$curretDateTime.',1,'.$this->user);
+                 
+                }
+                //$this->getError();
+            }
+        }
+    }
+    protected function checkValuesOfProject()
+    {
+        $valueToCheck=array(
+            'numer_umowy',
+            'temat_umowy'
+        );
+        foreach($valueToCheck as $value)
+        {
+            if(trim($this->inpArray[$value])==='')
+            {
+                $this->err.=$this->infoArray[$value][0]."<br/>";
+            }
+            else
+            {
+                if($this->checkExistInDb('projekt_nowy',$value.'=? AND wsk_u=? ',$this->inpArray[$value].",0")>0)
+                {
+                    $this->err.=$this->infoArray[$value][1]."<br/>";
+                }
+            }
+        } 
+    }
     protected function addNewProject($valueToAdd)
     {
         $this->parsePostData($valueToAdd);
-        $this->checkExistInDb('projekt_nowy','numer_umowy=? AND wsk_u=? ',$this->inpArray['numer_umowy'].",0");
-        $this->checkExistInDb('projekt_nowy','temat_umowy=? AND wsk_u=? ',$this->inpArray['temat_umowy'].",0");
+        $this->checkValuesOfProject();
         
         if(!$this->err)
         {
@@ -90,7 +201,7 @@ class manageProject extends initialDb
             $nadzor=explode('|',$this->inpArray['nadzor']);
             $curretDateTime=date('Y-m-d H:i:s');
             
-                $this->query('INSERT INTO projekt_nowy 
+            $this->query('INSERT INTO projekt_nowy 
             (create_user,create_date,typ_umowy,typ_umowy_alt,numer_umowy,temat_umowy,kier_grupy,kier_grupy_id,term_realizacji,harm_data,koniec_proj,nadzor,nadzor_id,mod_user,mod_user_id) 
 		VALUES
 		(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
@@ -192,6 +303,7 @@ class checkGetData extends manageProject
         "getprojectsmanager",
         "gettypeofagreement",
         "getadditionaldictdoc",
+        "addteam"
     );
     function __construct()
     {
@@ -253,6 +365,10 @@ class checkGetData extends manageProject
             $this->setUser($_SESSION["username"]);
             $this->addNewProject($_POST);
             break;
+        case "addteam":
+            $this->setUser($_SESSION["username"]);
+            $this->addTeamToProject($_POST);
+            break;
         case "edit":
             break;
         case "del":
@@ -262,13 +378,13 @@ class checkGetData extends manageProject
             $this->getAllProjects();
             break;
         case "getprojectsmember":
-            $this->getProjectPers('v_czlonek_proj');
+            $this->getProjectPers('v_slo_czlonek_proj');
             break;
         case "getprojectsleader":
-            $this->getProjectPers('v_lider_proj');
+            $this->getProjectPers('v_slo_lider_proj');
             break;
         case "getprojectsmanager":
-            $this->getProjectPers('v_kier_proj');
+            $this->getProjectPers('v_slo_kier_proj');
             break;
         case "gettypeofagreement":
             $this->getProjectSlo('v_slo_um_proj');

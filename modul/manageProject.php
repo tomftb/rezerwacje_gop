@@ -10,6 +10,7 @@ class manageProject extends initialDb
     protected $err="";
     protected $valueToReturn=null;
     protected $idProject=null;
+    const maxPercentPersToProj=100;
     protected $infoArray=array
             (
                 "numer_umowy"=>array
@@ -133,6 +134,60 @@ class manageProject extends initialDb
         }
         return($allPers);
     }
+    protected function checkPersPercent($dataArray)
+    {
+        $id=$dataArray[0];
+        $percentToSetup=$dataArray[1];
+        /*
+        echo __METHOD__."\n";
+        echo "id - ${id}\n";
+        echo "id project - ".$this->idProject."\n";
+        echo "percent to setup - ${percentToSetup}\n";
+         */
+        // MAX 100% percent per person
+        $percentOverall=0;
+        $percentCurrentProj=0;
+        $overallPercent=0;
+        $percentToChange=0;
+        $maxAvaliable=0;
+        if(trim($id)!='')
+        {
+            $this->query('SELECT udzialProcent FROM v_udzial_uzyt_proj_percent WHERE idUzytkownik=? AND idProjekt=?',$id.','.$this->idProject);
+            $percentCurrentProj=$this->queryReturnValue();
+            //print_r($percentCurrentProj);
+            //echo "count returned values - ".count($percentCurrentProj)."\n";
+            if(count($percentCurrentProj)===0)
+            {
+                $percentCurrentProj[0]['udzialProcent']=0;
+            }
+            //echo "Percent in current project - ".$percentCurrentProj[0]['udzialProcent']."\n";
+            $this->query('SELECT sumProcentowyUdzial FROM v_udzial_sum_procent_uzyt WHERE idUzytkownik=?',$id);
+            $percentOverall=$this->queryReturnValue();
+            if(count($percentOverall)===0)
+            {
+                $percentOverall[0]['sumProcentowyUdzial']=0;
+            }
+            //echo "Percent overall - ".$percentOverall[0]['sumProcentowyUdzial']."\n";
+            $overallPercent=$percentOverall[0]['sumProcentowyUdzial']-$percentCurrentProj[0]['udzialProcent'];
+            //echo "Percent used in antoher project - ".$overallPercent."\n";
+            //$overallPercent+=$percentToSetup;
+            //echo "const - ".self:: maxPercentPersToProj."\n";
+            $maxAvaliable=self:: maxPercentPersToProj-$overallPercent;
+            //echo "Max percent to setup - ".$maxAvaliable."\n";
+            $availablePercent=self:: maxPercentPersToProj-($percentOverall[0]['sumProcentowyUdzial']-$percentCurrentProj[0]['udzialProcent']);
+            if($maxAvaliable>=$percentToSetup)
+            {
+                //echo "Percent can be setup - (max avaliable - ${availablePercent}%)\n";
+                return true;
+            }
+            $percentToChange=$percentToSetup-$maxAvaliable;
+            //echo $this->err;
+            $this->err.="[".$dataArray['imie']." ".$dataArray['nazwisko']."]Too much percent to setup - (must remove ${percentToChange}%)</br>";
+            return false;
+        }
+        $this->err.="NO VALUE TO CHECK<br/>";
+        return false;
+    }
     protected function addTeamToProject($valueToAdd)
     {
         /*
@@ -143,29 +198,81 @@ class manageProject extends initialDb
          */
         $this->parsePostData($valueToAdd);
         $team=$this->getTeam();
-        $curretDateTime=date('Y-m-d H:i:s');
+        $persData=array();
+        $count=0;
         if(!$this->err)
         {
-            // CHECK EXIST $this->idProject
-            foreach($team as $value)
+            foreach($team as $id => $value)
             {
-               $this->checkExistInDb('projekt_pracownik','id_projekt=? AND id_uzytkownik=? ',$this->idProject.','.$value[0]); 
+                //echo "${id} - ${value[0]}\n";
+                $persData=$this->getPersonData($value[0]);
+                $team[$id]['imie']=$persData[0]['imie'];
+                $team[$id]['nazwisko']=$persData[0]['nazwisko'];
+                //$this->manageTeamPersActionIdDb($id,$team);
+                $this->manageTeamPersActionIdDb($team[$id]);
             }
             if(!$this->err)
             {
-                //echo 'NOT FOUND IN DB';
                 foreach($team as $value)
                 {
-                   $this->query('INSERT INTO projekt_pracownik 
+                    $this->updateTeamInDb($value);
+                }
+            }
+        }
+    }
+    protected function manageTeamPersActionIdDb(&$teamRow)
+    //protected function manageTeamPersActionIdDb($id,&$team)
+    {
+        // CHECK PERCENT
+        if($this->checkPersPercent($teamRow))
+        //if($this->checkPersPercent($team[$id]))
+        {
+            $count=$this->checkExistInDb('projekt_pracownik','id_projekt=? AND id_uzytkownik=? ',$this->idProject.','.$teamRow[0]);
+            //$count=$this->checkExistInDb('projekt_pracownik','id_projekt=? AND id_uzytkownik=? ',$this->idProject.','.$team[$id][0]);
+            if($count>0)
+            {
+                // UPDATE
+                array_push($teamRow,'UPDATE');
+                //array_push($team[$id],'UPDATE');
+            }
+            else
+            {
+                // INSERT
+                array_push($teamRow,'INSERT');
+                //array_push($team[$id],'INSERT');
+            }
+        }
+    }
+    protected function updateTeamInDb($dataArray)
+    {
+        $curretDateTime=date('Y-m-d H:i:s');
+        if(end($dataArray)==='UPDATE')
+        {
+             $this->query(
+                     'UPDATE projekt_pracownik SET imie=?,nazwisko=?,udzial_procent=?,dat_od=?,dat_do=?,mod_dat=?,mod_user_id=?,mod_user_name=?,wsk_u=? WHERE id_projekt=? AND id_uzytkownik=?',
+                     $dataArray['imie'].','.$dataArray['nazwisko'].','.$dataArray[1].','.$dataArray[2].','.$dataArray[3].','.$curretDateTime.',1,'.$this->user.',0,'.$this->idProject.','.$dataArray[0]);            
+        }
+        else
+        {
+            $this->query('INSERT INTO projekt_pracownik 
             (id_projekt,id_uzytkownik,imie,nazwisko,udzial_procent,dat_od,dat_do,mod_dat,mod_user_id,mod_user_name) 
 		VALUES
 		(?,?,?,?,?,?,?,?,?,?)'
-        ,$this->idProject.','.$value[0].',novalue,novalue,'.$value[1].','.$value[2].','.$value[3].','.$curretDateTime.',1,'.$this->user);
-                 
-                }
-                //$this->getError();
-            }
+        ,$this->idProject.','.$dataArray[0].','.$dataArray['imie'].','.$dataArray['nazwisko'].','.$dataArray[1].','.$dataArray[2].','.$dataArray[3].','.$curretDateTime.',1,'.$this->user);        
+        }            
+    }
+    protected function getPersonData($id)
+    {
+        $this->query('SELECT * FROM uzytkownik WHERE id=?',$id);
+        $personData=$this->queryReturnValue();
+        if(count($personData)>0)
+        {
+            return($personData);
         }
+        else
+        {
+            $this->err.="[${id}] NO DATA ABOUT PERSON IN DB!<br/>";
+        };
     }
     protected function checkValuesOfProject()
     {
@@ -357,6 +464,9 @@ class checkGetData extends manageProject
         }
         return 0;
     }
+    protected function parsePostData()
+    {
+    }
     private function runTask()
     {
         switch($this->urlGetData['task']):
@@ -399,8 +509,10 @@ class checkGetData extends manageProject
         endswitch;
     }
     function __destruct()
-    {}
+    {
+        $this->getErrValue();
+    }
 }
 $manageProject=NEW checkGetData();
-$manageProject->getErrValue();
+
 

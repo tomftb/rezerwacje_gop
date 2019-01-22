@@ -17,6 +17,8 @@ var extraDivCounter=0;
 var teamElementCounter=0;
 var lastTeamMemberId=-1;
 var idProject=0;
+var teamEditPers=new Array();
+
 $.fn.datepicker.defaults.format = "dd.mm.yyyy";
 $.fn.datepicker.defaults.todayHighlight = true;
 $.fn.datepicker.defaults.language = 'pl';
@@ -472,9 +474,7 @@ function createOl(dataArray,fieldId,fieldName)
         li.appendChild(optionText);
         ol.appendChild(li);
         addHiddenInput("addDoc"+i,dataArray[i][fieldsToSetup[0]]+"|"+dataArray[i][fieldsToSetup[1]]);
-
     };
-
     return ol;
 }
 // NOT USED
@@ -491,8 +491,12 @@ function createDiv(elementWhereAdd)
     return divName;
 }
 // FUNCTION CREATE DEFAULT DATE PICKER ELEMENT
-function createDatePicker(idDatePicker,nameDatePicker)
+function createDatePicker(idDatePicker,nameDatePicker,value)
 {
+    if(value==null)
+    {
+        value='';
+    }
     //console.log('---createDatePicker---');
     //var datePickerElement;
     // input PARAMETERS
@@ -501,6 +505,7 @@ function createDatePicker(idDatePicker,nameDatePicker)
 	Array('class','form-control'),
 	Array('name',nameDatePicker),
 	Array('id',idDatePicker),
+        Array('value',value),
 	Array('placeholder','DD.MM.RRRR')
 	);
     var datePickerClass=new Array(
@@ -593,11 +598,13 @@ function createRemoveButton()
     divRemoveButtonElement.appendChild(iElement);
     return(divRemoveButtonElement); 
 }
-function createTeamRow(whereAppend,rowName)
+function createTeamRow(whereAppend,rowName,type)
 {
     console.log('---createTeamRow---');
     console.log(whereAppend);
     console.log(rowName);
+    var teamPersLength=teamEditPers.length;
+    var tmpArray=new Array;
     // div-row
     var i=0;
     var z;
@@ -677,8 +684,6 @@ function createTeamRow(whereAppend,rowName)
     var selectTeamWorkerElement=createHtmlElement('select',selectTeamWorkerAttribute,selectTeamWorkerClass,selectTeamWorkerStyle);
     selectTeamWorkerElement.onfocus=function(){ manageActMemberProjTab(this.value,this);}; //onclick onfocus
     selectTeamWorkerElement.onchange=function(){ updateActTeamMember(this.value,this);};
-//selectTeamWorkerElement.onchange=function(){ setActTeamMember(this.value);};
-    // option-team-worker PARAMETERS
     var optionTeamWorkerAttribute=new Array(
             Array('value','dynamicChange')
             );
@@ -704,43 +709,95 @@ function createTeamRow(whereAppend,rowName)
             );
     var optionTeamWorkerPercentElement;
     // CREATE SELECT WITH OPTION percent of usage
-    for(z=i+1;z<101;z++)
+    var usedPercent=0;
+    if(teamPersLength>0)
     {
-        //optionTeamWorkerAttribute[0][1]=memberProjTab[z][0]+'|'+memberProjTab[z][1];
-        optionTeamWorkerPercentAttribute[0][1]=z;
+        usedPercent=teamEditPers[0][2]; 
+        console.log('PERCENT - '+usedPercent);
+        optionTeamWorkerPercentAttribute[0][1]=usedPercent;
         //console.log(optionTeamWorkerAttribute[0]['value']);
         optionTeamWorkerPercentElement=createHtmlElement('option',optionTeamWorkerPercentAttribute,null,null);
-        optionTeamWorkerPercentElement.textContent=z+'%';
+        optionTeamWorkerPercentElement.textContent=usedPercent+'%';
         selectTeamWorkerPercentElement.appendChild(optionTeamWorkerPercentElement);
+    }
+    for(z=i+1;z<101;z++)
+    {
+        if(z!=usedPercent)
+        {
+             //optionTeamWorkerAttribute[0][1]=memberProjTab[z][0]+'|'+memberProjTab[z][1];
+            optionTeamWorkerPercentAttribute[0][1]=z;
+            //console.log(optionTeamWorkerAttribute[0]['value']);
+            optionTeamWorkerPercentElement=createHtmlElement('option',optionTeamWorkerPercentAttribute,null,null);
+            optionTeamWorkerPercentElement.textContent=z+'%';
+            selectTeamWorkerPercentElement.appendChild(optionTeamWorkerPercentElement); 
+        }
     };
    
     // CREATE SELECT WITH OPTION czlonek_grupy
+    var tmpPers=new Array();
+    
     for(z=i;z<memberProjTab.length;z++)
     {
-        includeInArray=actUsedMemberProjTab.indexOf(memberProjTab[z][0]);
-        //console.log('indexOf - '+includeInArray);
-        if(actUsedMemberProjTab.indexOf(memberProjTab[z][0])===-1)
+        if(teamPersLength>0)
         {
-            if(firstElement===0)
-            {
-                console.log('Add element to actUsedMemberProjTab - '+memberProjTab[z][0]);
-                actUsedMemberProjTab.push(memberProjTab[z][0]);
-            };
-            firstElement=1;
-
-            //optionTeamWorkerAttribute[0][1]=memberProjTab[z][0]+'|'+memberProjTab[z][1];
-            optionTeamWorkerAttribute[0][1]=memberProjTab[z][0];
+            console.log('ADD EXIST PERS');
+            //teamEditPers[0];
+            //optionTeamWorkerAttribute[0][1]=teamEditPers[0][0];
+            // IN FUTURE
+            tmpPers[0]=teamEditPers[0][0];
             //console.log(optionTeamWorkerAttribute[0]['value']);
-            optionTeamWorkerElement=createHtmlElement('option',optionTeamWorkerAttribute,null,null);
-            optionTeamWorkerElement.textContent=memberProjTab[z][1];
-            selectTeamWorkerElement.appendChild(optionTeamWorkerElement);
+            //optionTeamWorkerElement=createHtmlElement('option',optionTeamWorkerAttribute,null,null);
+            tmpPers[1]=teamEditPers[0][1];
+            //optionTeamWorkerElement.textContent=teamEditPers[0][1];
+            //selectTeamWorkerElement.appendChild(optionTeamWorkerElement);
+            // ADD TO TABLE WITH USER PERS
+            actUsedMemberProjTab.push(teamEditPers[0][0]);
+            break;
         }
-       
+        else
+        {
+            if(type==='new')
+            {
+                console.log('ADD NEW PERS');
+                /* */
+                includeInArray=actUsedMemberProjTab.indexOf(memberProjTab[z][0]);
+                //console.log('indexOf - '+includeInArray);
+                if(actUsedMemberProjTab.indexOf(memberProjTab[z][0])===-1)
+                {
+                    if(firstElement===0)
+                    {
+                        console.log('Add element to actUsedMemberProjTab - '+memberProjTab[z][0]);
+                        actUsedMemberProjTab.push(memberProjTab[z][0]);
+                    };
+                    firstElement=1;
+                    //optionTeamWorkerAttribute[0][1]=memberProjTab[z][0]+'|'+memberProjTab[z][1];
+                    //optionTeamWorkerAttribute[0][1]=memberProjTab[z][0];
+                    tmpPers[0]=memberProjTab[z][0];
+                    //console.log(optionTeamWorkerAttribute[0]['value']);
+                    //optionTeamWorkerElement=createHtmlElement('option',optionTeamWorkerAttribute,null,null);
+                    tmpPers[1]=memberProjTab[z][1];
+                    //optionTeamWorkerElement.textContent=memberProjTab[z][1];
+                    //selectTeamWorkerElement.appendChild(optionTeamWorkerElement);
+                    break;
+                }
+            }
+        }
     };
+    optionTeamWorkerAttribute[0][1]=tmpPers[0];
+    optionTeamWorkerElement=createHtmlElement('option',optionTeamWorkerAttribute,null,null);
+    optionTeamWorkerElement.textContent= tmpPers[1];
+    selectTeamWorkerElement.appendChild(optionTeamWorkerElement);
     
-    divColSmElement.append(createDatePicker('d-start_'+rowName+teamElementCounter,'d-start_'+rowName+teamElementCounter));
+    var dateStart=null;
+    var dateEnd=null;    
+    if(teamPersLength>0)
+    {
+        dateStart=teamEditPers[0][3];
+        dateEnd=teamEditPers[0][4];
+    }
+    divColSmElement.append(createDatePicker('d-start_'+rowName+teamElementCounter,'d-start_'+rowName+teamElementCounter,dateStart));
     datePickerCounter++;
-    divColSmElement2.append(createDatePicker('d-end_'+rowName+teamElementCounter,'d-end_'+rowName+teamElementCounter));
+    divColSmElement2.append(createDatePicker('d-end_'+rowName+teamElementCounter,'d-end_'+rowName+teamElementCounter,dateEnd));
     var removeButtonElement=createRemoveButton();
     removeButtonElement.onclick=function(){removeTeamPersRow(this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode),this.parentNode.parentNode,rowName+'_pers'+teamElementCounter);};
     divColMdAutoElement.append(removeButtonElement);
@@ -753,11 +810,16 @@ function createTeamRow(whereAppend,rowName)
     divRowElement.appendChild(divColSmElement2);
     divRowElement.appendChild(divColMdAutoElement);
     document.getElementById(whereAppend).append(divRowElement);
-    //document.getElementById()
-    //var divRow=document.createElement('div');
-    //return (divRow);
+
     console.log(document.getElementById(whereAppend));
     teamElementCounter++;
+    // REKURENCCJA
+    if(teamPersLength>0)
+    {
+        teamEditPers.shift();
+        createTeamRow(whereAppend,rowName,'exist');
+    };
+    // KONIEC REKURENCCJA
 }
 function manageActMemberProjTab(idToSetup,elementWhereAppend)
 {
@@ -850,6 +912,7 @@ function createTeamBodyContent(elementWhereAdd,data)
     //console.log('elementWhereAdd - '+elementWhereAdd);
     //console.log(data);
     var dataLength=data.length;
+    var tmpArray=new Array();
     //console.log('data length - '+dataLength);
     if(dataLength>0)
     {
@@ -881,10 +944,11 @@ function createTeamBodyContent(elementWhereAdd,data)
                ); 
     var editButtonElement=createHtmlElement('button',editButtonAttribute,editButtonClass,null);
     editButtonElement.innerText = "Edytuj zespół";
-    
+    editButtonElement.onclick = function() { createAddTeamBodyContent(document.getElementById(elementWhereAdd),'addTeamToProject',idProject); };
     if(dataLength>0)
     {
          divElement.appendChild(editButtonElement);
+         
     }
     else
     {
@@ -892,7 +956,7 @@ function createTeamBodyContent(elementWhereAdd,data)
     };
     var theadLabels=new Array(
             'ID',
-            'Nazwisko Imie',
+            'Imię i nazwisko',
             'Procent udziału',
             'Data od',
             'Data do'
@@ -935,6 +999,7 @@ function createTeamBodyContent(elementWhereAdd,data)
     {
         trTbody=document.createElement('tr');
         Object.keys(data[i]).forEach(function(key,index) {
+            tmpArray.push(data[i][key]);
             //console.log(key);
             //console.log(data[i][key]);
             th=document.createElement("th");
@@ -942,8 +1007,11 @@ function createTeamBodyContent(elementWhereAdd,data)
             th.textContent = data[i][key];
             trTbody.appendChild(th);
         });
-         tbody.appendChild(trTbody);
+        teamEditPers.push(tmpArray);
+        tmpArray=[];
+        tbody.appendChild(trTbody);
     };
+    //console.log(teamEditPers);
     thead.appendChild(trThead);
     table.appendChild(thead);
     table.appendChild(tbody);
@@ -952,13 +1020,13 @@ function createTeamBodyContent(elementWhereAdd,data)
     //console.log(table);
     createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'showTeamProject','noValue');
 }
+//##################################### createAddTeamBodyContent ##########################################
 function createAddTeamBodyContent(elementWhereAdd,formName,idData)
-{
-    
+{ 
     console.log('---createAddTeamBodyContent---');
     console.log('elementWhereAdd :');
     console.log(elementWhereAdd);
-    
+   
     removeHtmlChilds(elementWhereAdd);
     removeHtmlChilds(document.getElementById('ProjectAdaptedButtonsBottom'));
     actUsedMemberProjTab=[];
@@ -996,7 +1064,7 @@ function createAddTeamBodyContent(elementWhereAdd,formName,idData)
     button.classList.add("btn-success");
     button.classList.add("btn-add");
     button.setAttribute("type","button");
-    button.onclick=function(){createTeamRow('addTeamToProject','team_czlonek_grupy');};
+    button.onclick=function(){createTeamRow('addTeamToProject','team_czlonek_grupy','new');};
 
     var iIco=document.createElement("i");
     iIco.setAttribute('class','fa');
@@ -1007,11 +1075,18 @@ function createAddTeamBodyContent(elementWhereAdd,formName,idData)
     divAdd.appendChild(button);
     formElement.appendChild(inputIdElement);
     elementWhereAdd.appendChild(formElement);
-    createTeamRow(formName,'team_czlonek_grupy');
+    var typeOfRow='new';
+    if(teamEditPers.length>0)
+    {
+        typeOfRow='exist';
+    };
+    createTeamRow(formName,'team_czlonek_grupy',typeOfRow);
+    
     elementWhereAdd.appendChild(divAdd);
     console.log(elementWhereAdd);
     createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'addTeamToProject',idData);
 }
+//##################################### createAddTeamBodyContent END ######################################
 //function createBodyButtonContent(elementWhereAdd,formName)
 function createBodyButtonContent(elementWhereAdd,task,formName)
 {
@@ -1215,6 +1290,9 @@ function setAdaptedModalProperties(modalType,idData)
             title.innerHTML="DOKUMENTY PROJEKTU:";
             break;
         case 'team':
+            actUsedMemberProjTab=[];
+            teamElementCounter=0;
+            teamEditPers=[];
             idProject=idData;
             document.getElementById("errDiv-Adapted-overall").style.display = "none";
             document.getElementById("errText-Adapted-overall").innerHTML = "";

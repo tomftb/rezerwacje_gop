@@ -16,6 +16,7 @@ var appendElementCounter=0;
 var extraDivCounter=0;
 var teamElementCounter=0;
 var lastTeamMemberId=-1;
+var idProject=0;
 $.fn.datepicker.defaults.format = "dd.mm.yyyy";
 $.fn.datepicker.defaults.todayHighlight = true;
 $.fn.datepicker.defaults.language = 'pl';
@@ -290,12 +291,12 @@ function addFormField()
         counter++;
 }
 //function getAjaxData(modul,task)
-function getAjaxData(task,idToSetup,nameToSetup)
+function getAjaxData(task,idToSetup,nameToSetup,addon)
 {
     console.log("getAjaxData - "+task);
     var host =  getUrl();
     // example of url host + modul/manageProject.php?task+ task getprojects
-    var url =  host+'modul/manageProject.php?task='+task;
+    var url =  host+'modul/manageProject.php?task='+task+addon;
     var xmlhttp = new XMLHttpRequest();
     var ajaxData;
     xmlhttp.onreadystatechange = function()
@@ -325,7 +326,8 @@ function getAjaxData(task,idToSetup,nameToSetup)
 }
 function manageTask(taskToRun,data,id,name)
 {
-    //console.log('manageTask'+taskToRun);
+    console.log('---manageTask---\ntak to run - '+taskToRun);
+    //console.log('data - '+data+'\nid - '+id+'\nname - '+name);
     switch(taskToRun)
     {
         case 'getprojects':
@@ -364,8 +366,12 @@ function manageTask(taskToRun,data,id,name)
             //console.log('Dictionary of Additional Documents Array:');
             //console.log(AddDictDoc);
             break;
+        case 'getprojectteam':
+                createTeamBodyContent(id,data);
+                
+                break;
         default:
-            alert('ERROR - wrong task');
+            alert('[manageTask]ERROR - wrong task');
             break;
     }
 }
@@ -477,7 +483,7 @@ function createDiv(elementWhereAdd)
     console.log('createDIV');
     var divName='divBodyData';
     var div=document.createElement("DIV");
-    div.setAttribute("id",divName)
+    div.setAttribute("id",divName);
     div.setAttribute("class","col-sm-12");
     div.classList.add("mt-1");
     
@@ -732,9 +738,9 @@ function createTeamRow(whereAppend,rowName)
        
     };
     
-    divColSmElement.append(createDatePicker(rowName+'_dateStart'+teamElementCounter,rowName+'_dateStart'+teamElementCounter));
+    divColSmElement.append(createDatePicker('d-start_'+rowName+teamElementCounter,'d-start_'+rowName+teamElementCounter));
     datePickerCounter++;
-    divColSmElement2.append(createDatePicker(rowName+'_dateEnd'+teamElementCounter,rowName+'_dateEnd'+teamElementCounter));
+    divColSmElement2.append(createDatePicker('d-end_'+rowName+teamElementCounter,'d-end_'+rowName+teamElementCounter));
     var removeButtonElement=createRemoveButton();
     removeButtonElement.onclick=function(){removeTeamPersRow(this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode),this.parentNode.parentNode,rowName+'_pers'+teamElementCounter);};
     divColMdAutoElement.append(removeButtonElement);
@@ -838,16 +844,129 @@ function appendElement(elementToAdd,whereToAdd)
     console.log(document.getElementById('divBodyData'));
     appendElementCounter++;
 }
-function createTeamBodyContent(elementWhereAdd)
+function createTeamBodyContent(elementWhereAdd,data)
 {
-    console.log('---createTeamBodyContent---');
+    console.log('---createTeamtBodyContent---');
+    //console.log('elementWhereAdd - '+elementWhereAdd);
+    //console.log(data);
+    var dataLength=data.length;
+    //console.log('data length - '+dataLength);
+    if(dataLength>0)
+    {
+        var objLength=Object.keys(data[0]).length;
+        //console.log('data rec length - '+objLength);
+    }
+    //data[]['idPracownik'];
+    //data[]['NazwiskoImie'];
+    //data[]['procentUdzial'];
+    //data[]['datOd'];
+    //data[]['datDo'];
+    var divElement=createHtmlElement('div',null,null,null);
+    var addButtonAttribute=new Array(
+                Array('class','btn')
+                );
+    var addButtonClass=new Array(
+              'btn-success',
+              'pull-left'
+               ); 
+    var addButtonElement=createHtmlElement('button',addButtonAttribute,addButtonClass,null);
+    addButtonElement.innerText = "Dodaj zespół";
+    addButtonElement.onclick = function() { createAddTeamBodyContent(document.getElementById(elementWhereAdd),'addTeamToProject',idProject); };
+    var editButtonAttribute=new Array(
+                Array('class','btn')
+                );
+    var editButtonClass=new Array(
+              'btn-primary',
+              'pull-left'
+               ); 
+    var editButtonElement=createHtmlElement('button',editButtonAttribute,editButtonClass,null);
+    editButtonElement.innerText = "Edytuj zespół";
+    
+    if(dataLength>0)
+    {
+         divElement.appendChild(editButtonElement);
+    }
+    else
+    {
+        divElement.appendChild(addButtonElement);
+    };
+    var theadLabels=new Array(
+            'ID',
+            'Nazwisko Imie',
+            'Procent udziału',
+            'Data od',
+            'Data do'
+            );
+    // table PARAMETERS
+    var tableAttribute=new Array(
+	Array('class','table')
+	);
+    var tableClass=new Array(
+	'table-striped',
+        'table-condensed'
+	);
+    // thead PARAMETERS
+    var theadAttribute=new Array(
+	Array('class','bg-warning')
+	);
+   
+    // tbody PARAMETERS
+    var tbodyAttribute=new Array(
+	Array('id','teamBodyPers')
+	);
+   
+    var table=createHtmlElement('table',tableAttribute,tableClass,null);
+    var thead=createHtmlElement('thead',theadAttribute,null,null);
+    var trThead=createHtmlElement('tr',null,null,null);
+    //var th=createHtmlElement('th',thAttribute,null,null);
+    var th;
+    var trTbody; // =createHtmlElement('tr',null,null,null);
+    var tbody=createHtmlElement('tbody',tbodyAttribute,null,null);
+    // THEAD
+    for(i=0;i<theadLabels.length;i++)
+    {
+        th=document.createElement("th");
+        th.setAttribute("scope","col");
+        th.textContent = theadLabels[i];
+        trThead.appendChild(th);
+    };
+    // TBODY
+    for(i=0;i<data.length;i++)
+    {
+        trTbody=document.createElement('tr');
+        Object.keys(data[i]).forEach(function(key,index) {
+            //console.log(key);
+            //console.log(data[i][key]);
+            th=document.createElement("th");
+            th.setAttribute("scope","col");
+            th.textContent = data[i][key];
+            trTbody.appendChild(th);
+        });
+         tbody.appendChild(trTbody);
+    };
+    thead.appendChild(trThead);
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    divElement.appendChild(table); 
+    document.getElementById(elementWhereAdd).append(divElement);
+    //console.log(table);
+    createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'showTeamProject','noValue');
+}
+function createAddTeamBodyContent(elementWhereAdd,formName,idData)
+{
+    
+    console.log('---createAddTeamBodyContent---');
     console.log('elementWhereAdd :');
     console.log(elementWhereAdd);
+    
+    removeHtmlChilds(elementWhereAdd);
+    removeHtmlChilds(document.getElementById('ProjectAdaptedButtonsBottom'));
+    actUsedMemberProjTab=[];
+    teamElementCounter=0;
     // add-team FORM
-    //class="form-horizontal"  autocomplete="off" method="POST"  ENCTYPE="multipart/form-data" action="javascript:void(0);" name="createPdfForm"
     var formAttribute=new Array(
-        Array('name','addTeamToProject'),
-        Array('id','addTeamToProject'),
+        Array('name',formName),
+        Array('id',formName),
         Array('class','form-horizontal'),
         Array('autocomplete','off'),
         Array('method','POST'),
@@ -856,14 +975,18 @@ function createTeamBodyContent(elementWhereAdd)
 	);
     var formElement=createHtmlElement('form',formAttribute,null,null); 
     // END add-team FORM
-    var nameOfDynamicDiv="dynamicDivField";
+    // input hidden with id FORM
+    // 
     // TITLE OF SELECT
     var text = document.createTextNode("Członkowie zespołu:");
     elementWhereAdd.appendChild(text);
     // END TITLE OF SELECT
-    var divDynamic=document.createElement("div");
-    divDynamic.setAttribute("id",nameOfDynamicDiv);
-    elementWhereAdd.appendChild(divDynamic);
+    var inputIdAttribute=new Array(
+        Array('name',formName+'id'),
+        Array('type','hidden'),
+        Array('value',idData)
+	);
+    var inputIdElement=createHtmlElement('input',inputIdAttribute,null,null);
     var divAdd=document.createElement("div");
     divAdd.setAttribute("class","entry");
     divAdd.classList.add("input-group");
@@ -874,7 +997,7 @@ function createTeamBodyContent(elementWhereAdd)
     button.classList.add("btn-add");
     button.setAttribute("type","button");
     button.onclick=function(){createTeamRow('addTeamToProject','team_czlonek_grupy');};
-    //button.onclick=function(){createTeamRow(nameOfDynamicDiv,'team_czlonek_grupy');};
+
     var iIco=document.createElement("i");
     iIco.setAttribute('class','fa');
     iIco.classList.add("fa-plus");
@@ -882,48 +1005,82 @@ function createTeamBodyContent(elementWhereAdd)
     button.appendChild(iIco);
     // END add BUTTON
     divAdd.appendChild(button);
-
-    createTeamRow(nameOfDynamicDiv,'team_czlonek_grupy');
-    //formElement.appendChild(divAdd);
-    
+    formElement.appendChild(inputIdElement);
     elementWhereAdd.appendChild(formElement);
+    createTeamRow(formName,'team_czlonek_grupy');
     elementWhereAdd.appendChild(divAdd);
     console.log(elementWhereAdd);
+    createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'addTeamToProject',idData);
 }
-function createBodyButtonContent(elementWhereAdd)
+//function createBodyButtonContent(elementWhereAdd,formName)
+function createBodyButtonContent(elementWhereAdd,task,formName)
 {
-    console.log('---createTeamBodyContent---');
-    console.log('elementWhereAdd :');
-    console.log(elementWhereAdd);
-    // cancel BUTTON
-    var cancelButtonAttribute=new Array(
-        Array('class','btn')
-	);
-    var canceButtonClass=new Array(
-        'btn-warning',
-        'pull-right'
-	);
-    var cancelButtonElement=createHtmlElement('button',cancelButtonAttribute,canceButtonClass,null);
-    cancelButtonElement.innerText = "Anuluj";
-    cancelButtonElement.onclick = function() { closeModal('ProjectAdaptedModal'); };
-    // END cancel BUTTON
-    // confirm BUTTON
-    var confirmButtonAttribute=new Array(
-        Array('class','btn')
-	);
-    var confirmButtonClass=new Array(
-        'btn-info',
-        'pull-right'
-	); 
-    var confirmButtonElement=createHtmlElement('button',confirmButtonAttribute,confirmButtonClass,null);
-    confirmButtonElement.innerText = "Zatwierdź";
-    // END confirm BUTTON
-    elementWhereAdd.appendChild(confirmButtonElement);
-    elementWhereAdd.appendChild(cancelButtonElement);
-    
+    console.log('---createBodyButtonContent---');
+    //console.log('elementWhereAdd - '+elementWhereAdd);
+    //console.log('task - '+task);
+    switch(task)
+    {
+        case 'showTeamProject':
+            var cancelButtonAttribute=new Array(
+                Array('class','btn')
+                );
+            var canceButtonClass=new Array(
+                'btn-dark',
+                'pull-right'
+                );
+            var cancelButtonElement=createHtmlElement('button',cancelButtonAttribute,canceButtonClass,null);
+            cancelButtonElement.innerText = "Zamknij";
+            cancelButtonElement.onclick = function() { closeModal('ProjectAdaptedModal'); };
+            elementWhereAdd.appendChild(cancelButtonElement);
+            break;
+        case 'addTeamToProject':
+            // div btn-group
+            var divButtonAttribute=new Array(
+                Array('class','btn-group')
+                );
+            var divButtonClass=new Array(
+                'pull-right'
+                );
+            var divButtonElement=createHtmlElement('div',divButtonAttribute,divButtonClass,null);
+             // cancel BUTTON
+            var cancelButtonAttribute=new Array(
+                Array('class','btn')
+                );
+            var canceButtonClass=new Array(
+                'btn-warning',
+                'pull-right'
+                );
+            var cancelButtonElement=createHtmlElement('button',cancelButtonAttribute,canceButtonClass,null);
+            cancelButtonElement.innerText = "Anuluj";
+            cancelButtonElement.onclick = function() { closeModal('ProjectAdaptedModal'); };
+            // END cancel BUTTON
+            // confirm BUTTON
+            var confirmButtonAttribute=new Array(
+                Array('class','btn')
+                );
+            var confirmButtonClass=new Array(
+                'btn-info',
+                'pull-right'
+                ); 
+            var confirmButtonElement=createHtmlElement('button',confirmButtonAttribute,confirmButtonClass,null);
+            confirmButtonElement.innerText = "Zatwierdź";
+            confirmButtonElement.onclick = function() { postDataToUrl(task); };
+            // END confirm BUTTON
+            divButtonElement.appendChild(cancelButtonElement);
+            divButtonElement.appendChild(confirmButtonElement);
+            
+            //elementWhereAdd.appendChild(confirmButtonElement);
+            //elementWhereAdd.appendChild(cancelButtonElement);
+            elementWhereAdd.appendChild(divButtonElement);
+            break;
+        default:
+            alert('[createBodyButtonContent]ERROR - wrong task');
+            break;
+    };
 }
 function addHiddenInput(name,value)
 {
+    console.log('---addHiddenInput---');
     var input=document.createElement("input");
         input.setAttribute("type", "hidden");
         input.setAttribute("value",value);
@@ -945,7 +1102,7 @@ function createSelect(dataArray,fieldId,fieldName)
     select.setAttribute("class","form-control");
     if(fieldName==='czlonek_grupy')
     {
-        console.log('add - gt-no-rounded-right');
+        //console.log('add - gt-no-rounded-right');
         select.classList.add("gt-border-light-blue");
         select.style.borderColor = "#80bfff";
         select.style.borderTopRightRadius = "0px";
@@ -1017,7 +1174,7 @@ function createAdaptedModal(modalType,idData,titleData)
 {
     console.log('---createAdaptedModal---');
     console.log("TASK "+modalType+" - "+idData+" - "+titleData);
-    setAdaptedModalProperties(modalType);
+    setAdaptedModalProperties(modalType,idData);
     idRecord=idData;
     //console.log("record to deleted - "+id);
     document.getElementById("projectTitle").innerHTML = titleData;
@@ -1030,7 +1187,7 @@ function removeHtmlChilds(htmlElement)
         htmlElement.firstChild.remove(); 
     };
 };
-function setAdaptedModalProperties(modalType)
+function setAdaptedModalProperties(modalType,idData)
 {
     console.log('---setAdaptedModalProperties---');
     var bgTitle = document.getElementById("ProjectAdaptedBgTitle");
@@ -1058,17 +1215,23 @@ function setAdaptedModalProperties(modalType)
             title.innerHTML="DOKUMENTY PROJEKTU:";
             break;
         case 'team':
-            actUsedMemberProjTab=[];
-            teamElementCounter=0;
+            idProject=idData;
+            document.getElementById("errDiv-Adapted-overall").style.display = "none";
+            document.getElementById("errText-Adapted-overall").innerHTML = "";
             bgTitle.classList.add("bg-warning");
             title.innerHTML="ZESPÓŁ PROJEKTU:";
-            createTeamBodyContent(document.getElementById('ProjectAdaptedDynamicData'));
-            createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'));
+            getAjaxData('getprojectteam','ProjectAdaptedDynamicData','zespol_projektu','&id='+idData);
+            
             break;
         case 'delete':
             bgTitle.classList.add("bg-danger");
             title.innerHTML="USUWANIE PROJEKTU:";
             break;
+        case 'team_edit':
+            actUsedMemberProjTab=[];
+            teamElementCounter=0;
+            createAddTeamBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'addTeamToProject',idData);
+            createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'addTeamToProject',idData);
         default:
             alert('[ModalCreate]ERROR - wrong type');
             break;
@@ -1154,21 +1317,40 @@ function deleteData()
 }
 function postDataToUrl(nameOfForm)
 {
-    parseValue( document.getElementById('temat_umowy').value,"temat_umowy");
-    parseValue( document.getElementById('numer_umowy').value,"numer_umowy");
-    if(checkErr())
+    console.log('---postDataToUrl---');
+    console.log(nameOfForm);
+    var taskUrl;
+    var errTextAjax='';
+    var errDivAjax='';
+    switch(nameOfForm)
     {
-        console.log("err is true");
-        return(0);
+        case 'addTeamToProject':
+            taskUrl='modul/manageProject.php?task=addteam';
+            errTextAjax='errText-Adapted-overall';
+            errDivAjax='errDiv-Adapted-overall';
+            break;
+        case 'createPdfForm':
+            parseValue( document.getElementById('temat_umowy').value,"temat_umowy");
+            parseValue( document.getElementById('numer_umowy').value,"numer_umowy");
+            if(checkErr())
+            {
+                console.log("err is true");
+                return(0);
+            };
+            taskUrl='modul/manageProject.php?task=add';
+            document.getElementById("errDiv-overall").style.display = "none";
+            errTextAjax='errText-overall';
+            errDivAjax='errDiv-overall';
+            break;
+        default:
+            break;
     };
-    
     //console.log('postDataToUrl()');
     var xmlhttp = new XMLHttpRequest();
     var host =  getUrl();
     var response="";
-    var url =  host+'modul/manageProject.php?task=add';
-    document.getElementById("errDiv-overall").style.display = "none";
-
+    var url =  host+taskUrl;
+   
     xmlhttp.onreadystatechange = function()
     {
       if (this.readyState === 4 && this.status === 200)
@@ -1180,14 +1362,12 @@ function postDataToUrl(nameOfForm)
         {
             //err.push(typeOfValueToParse); 
             //console.log("response not null - "+response);
-            document.getElementById("errText-overall").innerHTML=response[1];
-            document.getElementById("errDiv-overall").style.display = "block";
+            document.getElementById(errTextAjax).innerHTML=response[1];
+            document.getElementById(errDivAjax).style.display = "block";
         }
         else
         {
-            //getDataFromUrl();
-            getAjaxData('getprojects','test','test');
-            $('#addProjectModal').modal('hide');
+            runTaskAfterAjax(nameOfForm);
         }
       }
       else
@@ -1199,6 +1379,24 @@ function postDataToUrl(nameOfForm)
     xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xmlhttp.send(getDataForm(nameOfForm));
 }
+function runTaskAfterAjax(nameOfForm)
+{
+    
+    switch(nameOfForm)
+    {
+        case 'addTeamToProject':
+            alert('ok');
+            $('#ProjectAdaptedModal').modal('hide'); 
+            break;
+        case 'createPdfForm':
+            getAjaxData('getprojects','test','test');
+            $('#addProjectModal').modal('hide'); 
+            break;
+        default:
+            alert('ok'+nameOfForm);
+            break;
+    };
+};
 function getDataForm(nameOfForm)
 {
     console.log('---getDataForm---\nName of form - '+nameOfForm);
@@ -1303,10 +1501,11 @@ function removeTeamPersRow(nodeToClose,clearErr)
     
 }
 //getAllProjects();
-getAjaxData('getprojects','test','test');
-getAjaxData('getprojectsleader','inputPdf7','nadzor');
-getAjaxData('getprojectsmanager','inputPdf3','kier_grupy');
-getAjaxData('gettypeofagreement','inputPdf0','typ_umowy');
-getAjaxData('getprojectsmember','projectsmember','czlonek_grupy');
-getAjaxData('getadditionaldictdoc','inputPdf8','dodatkowe_dokumenty');
+getAjaxData('getprojects','test','test','');
+getAjaxData('getprojectsleader','inputPdf7','nadzor','');
+getAjaxData('getprojectsmanager','inputPdf3','kier_grupy','');
+getAjaxData('gettypeofagreement','inputPdf0','typ_umowy','');
+getAjaxData('getprojectsmember','projectsmember','czlonek_grupy','');
+getAjaxData('getadditionaldictdoc','inputPdf8','dodatkowe_dokumenty','');
+
 

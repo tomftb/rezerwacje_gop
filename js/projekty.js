@@ -710,8 +710,20 @@ function createTeamRow(whereAppend,rowName,type)
     var optionTeamWorkerPercentElement;
     // CREATE SELECT WITH OPTION percent of usage
     var usedPercent=0;
+
+    // CREATE SELECT WITH OPTION czlonek_grupy
+    var tmpPers=new Array();
+    var dateStart=null;
+    var dateEnd=null;  
     if(teamPersLength>0)
     {
+        console.log('ADD EXIST PERS');
+        tmpPers[0]=teamEditPers[0][0];
+        tmpPers[1]=teamEditPers[0][1];
+        actUsedMemberProjTab.push(teamEditPers[0][0]);   
+        dateStart=teamEditPers[0][3];
+        dateEnd=teamEditPers[0][4];
+        // PERCENT
         usedPercent=teamEditPers[0][2]; 
         console.log('PERCENT - '+usedPercent);
         optionTeamWorkerPercentAttribute[0][1]=usedPercent;
@@ -720,7 +732,24 @@ function createTeamRow(whereAppend,rowName,type)
         optionTeamWorkerPercentElement.textContent=usedPercent+'%';
         selectTeamWorkerPercentElement.appendChild(optionTeamWorkerPercentElement);
     }
-    for(z=i+1;z<101;z++)
+    else
+    {
+        for(z=i;z<memberProjTab.length;z++)
+        {
+            if(type==='new')
+            {
+                console.log('ADD NEW PERS');
+                if(actUsedMemberProjTab.indexOf(memberProjTab[z][0])===-1)
+                {
+                    actUsedMemberProjTab.push(memberProjTab[z][0]);
+                    tmpPers[0]=memberProjTab[z][0];
+                    tmpPers[1]=memberProjTab[z][1];
+                    break;
+                }
+            }   
+        };
+    }
+   for(z=i+1;z<101;z++)
     {
         if(z!=usedPercent)
         {
@@ -732,69 +761,12 @@ function createTeamRow(whereAppend,rowName,type)
             selectTeamWorkerPercentElement.appendChild(optionTeamWorkerPercentElement); 
         }
     };
-   
-    // CREATE SELECT WITH OPTION czlonek_grupy
-    var tmpPers=new Array();
     
-    for(z=i;z<memberProjTab.length;z++)
-    {
-        if(teamPersLength>0)
-        {
-            console.log('ADD EXIST PERS');
-            //teamEditPers[0];
-            //optionTeamWorkerAttribute[0][1]=teamEditPers[0][0];
-            // IN FUTURE
-            tmpPers[0]=teamEditPers[0][0];
-            //console.log(optionTeamWorkerAttribute[0]['value']);
-            //optionTeamWorkerElement=createHtmlElement('option',optionTeamWorkerAttribute,null,null);
-            tmpPers[1]=teamEditPers[0][1];
-            //optionTeamWorkerElement.textContent=teamEditPers[0][1];
-            //selectTeamWorkerElement.appendChild(optionTeamWorkerElement);
-            // ADD TO TABLE WITH USER PERS
-            actUsedMemberProjTab.push(teamEditPers[0][0]);
-            break;
-        }
-        else
-        {
-            if(type==='new')
-            {
-                console.log('ADD NEW PERS');
-                /* */
-                includeInArray=actUsedMemberProjTab.indexOf(memberProjTab[z][0]);
-                //console.log('indexOf - '+includeInArray);
-                if(actUsedMemberProjTab.indexOf(memberProjTab[z][0])===-1)
-                {
-                    if(firstElement===0)
-                    {
-                        console.log('Add element to actUsedMemberProjTab - '+memberProjTab[z][0]);
-                        actUsedMemberProjTab.push(memberProjTab[z][0]);
-                    };
-                    firstElement=1;
-                    //optionTeamWorkerAttribute[0][1]=memberProjTab[z][0]+'|'+memberProjTab[z][1];
-                    //optionTeamWorkerAttribute[0][1]=memberProjTab[z][0];
-                    tmpPers[0]=memberProjTab[z][0];
-                    //console.log(optionTeamWorkerAttribute[0]['value']);
-                    //optionTeamWorkerElement=createHtmlElement('option',optionTeamWorkerAttribute,null,null);
-                    tmpPers[1]=memberProjTab[z][1];
-                    //optionTeamWorkerElement.textContent=memberProjTab[z][1];
-                    //selectTeamWorkerElement.appendChild(optionTeamWorkerElement);
-                    break;
-                }
-            }
-        }
-    };
     optionTeamWorkerAttribute[0][1]=tmpPers[0];
     optionTeamWorkerElement=createHtmlElement('option',optionTeamWorkerAttribute,null,null);
     optionTeamWorkerElement.textContent= tmpPers[1];
     selectTeamWorkerElement.appendChild(optionTeamWorkerElement);
     
-    var dateStart=null;
-    var dateEnd=null;    
-    if(teamPersLength>0)
-    {
-        dateStart=teamEditPers[0][3];
-        dateEnd=teamEditPers[0][4];
-    }
     divColSmElement.append(createDatePicker('d-start_'+rowName+teamElementCounter,'d-start_'+rowName+teamElementCounter,dateStart));
     datePickerCounter++;
     divColSmElement2.append(createDatePicker('d-end_'+rowName+teamElementCounter,'d-end_'+rowName+teamElementCounter,dateEnd));

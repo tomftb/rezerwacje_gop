@@ -1,5 +1,7 @@
 <?php
 if(checkFile('function/ldap.php')) include('function/ldap.php');
+if(checkFile('.cfg/config.php')) include_once('.cfg/config.php');
+
 class validLogin extends ldapAuth
 {
     private $info="";
@@ -8,6 +10,7 @@ class validLogin extends ldapAuth
     private $bgColor="";
     private $userName="";
     private $userPassword="";
+    private $userData=array();
     private $showLog=0;
     
     public function __construct()
@@ -101,11 +104,25 @@ class validLogin extends ldapAuth
     }
     private function checkLoginInValidUsers()
     {
-        if($this->showLog>0) { echo "[".__METHOD__."]<br/>"; };
-        if(checkFile('.cfg/users.php')) include('.cfg/users.php');
+        $dbLink=NEW initialDb();
+        $dbLink->getDbLink();	
+        $dbLink->query('SELECT id,imie,nazwisko,login FROM uzytkownik WHERE wsk_u=? AND login=?','0,'.$this->userName);
+        $userData=$dbLink->queryReturnValue();
         
-        if(in_array($this->userName,$conf['validusers']))
+        #print_r($this->userFullInfo);
+        #print_r($dbLink->queryReturnValue());
+         
+        #echo "Ilość znależionych rekordów - ".count($dbLink->queryReturnValue())."</br>";
+        #die('STOP');
+        if($this->showLog>0) { echo "[".__METHOD__."]<br/>"; };
+        # OLD VERSION
+        #if(checkFile('.cfg/users.php')) include('.cfg/users.php');
+        # OLD VERSION
+        #if(in_array($this->userName,$conf['validusers']))
+        if(count($userData)>0)
         {
+            $this->userData=$userData[0];
+            $_SESSION["id"]=$this->userData['id'];
             return 1;
         }
         else

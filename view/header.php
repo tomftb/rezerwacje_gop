@@ -17,13 +17,22 @@
 <link rel="apple-touch-icon" sizes="180x180" href="<?php echo $URL; ?>/gt_utilities/ico/apple-icon-180x180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="<?php echo $URL; ?>/gt_utilities/ico/android-icon-192x192.png">
 <link rel="icon" type="image/png" sizes="32x32" href="<?php echo $URL; ?>/gt_utilities/ico/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="96x96" href="<?php $URL; ?>/gt_utilities/ico/favicon-96x96.png">
-<link rel="icon" type="image/png" sizes="16x16" href="<?php $URL; ?>/gt_utilities/ico/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="96x96" href="<?php echo $URL; ?>/gt_utilities/ico/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="<?php echo $URL; ?>/gt_utilities/ico/favicon-16x16.png">
 <link rel="manifest" href="<?php echo $URL; ?>/gt_utilities/ico/manifest.json">
 <meta name="msapplication-TileColor" content="#ffffff">
 <meta name="msapplication-TileImage" content="<?php echo $URL; ?>/gt_utilities/ico/ms-icon-144x144.png">
 <meta name="theme-color" content="#ffffff">
 <!-- KONIEC IKONKA GT -->
+<!-- CSS -->
+<link rel="stylesheet" href="<?php echo $URL; ?>/css/gt-admin.css" >
+<link rel="stylesheet" href="<?php echo $URL; ?>/css/bootstrap.min.4.1.1.css" >
+<link rel="stylesheet" href="<?php echo $URL; ?>/css/bootstrap-datepicker.min.css" >
+<link rel="stylesheet" href="<?php echo $URL; ?>/css/font-awesome.min.4.7.0.css" >
+<link rel="stylesheet" href="<?php echo $URL; ?>/css/bootstrap-datepicker3.css" >
+<link rel="stylesheet" href="<?php echo $URL; ?>/css/header.css" >
+<link rel="stylesheet" href="<?php echo $URL; ?>/js/jquery.validationEngine/validationEngine.jquery.css" type="text/css" />
+<!-- END CSS -->
 <!-- JS -->
 <script src="<?php echo $URL; ?>/js/jquery-3.3.1.min.js"></script>
 <script type="text/javascript" src="<?php echo $URL; ?>/js/jquery.validationEngine/lang/languages_new/jquery.validationEngine-pl.js"></script>
@@ -35,15 +44,7 @@
 <script type="text/javascript" src="<?php echo $URL; ?>/js/datepicker_pl.js"></script>
 <script src="<?php echo $URL; ?>/js/popper-1.14.3.min.js"></script>
 <!-- END JS -->
-<!-- CSS -->
-<link rel="stylesheet" href="<?php echo $URL; ?>/css/gt-admin.css" >
-<link rel="stylesheet" href="<?php echo $URL; ?>/css/bootstrap.min.4.1.1.css" >
-<link rel="stylesheet" href="<?php echo $URL; ?>/css/bootstrap-datepicker.min.css" >
-<link rel="stylesheet" href="<?php echo $URL; ?>/css/font-awesome.min.4.7.0.css" >
-<link rel="stylesheet" href="<?php echo $URL; ?>/css/bootstrap-datepicker3.css" >
-<link rel="stylesheet" href="<?php echo $URL; ?>/css/header.css" >
-<link rel="stylesheet" href="<?php echo $URL; ?>/js/jquery.validationEngine/validationEngine.jquery.css" type="text/css" />
-<!-- END CSS -->
+
 <style>
 @font-face {
     font-family: CrimsonText-Regular;

@@ -152,7 +152,7 @@ class manageProject extends initialDb
         $maxAvaliable=0;
         if(trim($id)!='')
         {
-            $this->query('SELECT udzialProcent FROM v_udzial_uzyt_proj_percent WHERE idUzytkownik=? AND idProjekt=?',$id.','.$this->idProject);
+            $this->query('SELECT udzialProcent FROM v_udzial_prac_proj_percent WHERE idPracownik=? AND idProjekt=?',$id.','.$this->idProject);
             $percentCurrentProj=$this->queryReturnValue();
             //print_r($percentCurrentProj);
             //echo "count returned values - ".count($percentCurrentProj)."\n";
@@ -161,7 +161,7 @@ class manageProject extends initialDb
                 $percentCurrentProj[0]['udzialProcent']=0;
             }
             //echo "Percent in current project - ".$percentCurrentProj[0]['udzialProcent']."\n";
-            $this->query('SELECT sumProcentowyUdzial FROM v_udzial_sum_procent_uzyt WHERE idUzytkownik=?',$id);
+            $this->query('SELECT sumProcentowyUdzial FROM v_udzial_sum_procent_prac WHERE idPracownik=?',$id);
             $percentOverall=$this->queryReturnValue();
             if(count($percentOverall)===0)
             {
@@ -227,7 +227,7 @@ class manageProject extends initialDb
         if($this->checkPersPercent($teamRow))
         //if($this->checkPersPercent($team[$id]))
         {
-            $count=$this->checkExistInDb('projekt_pracownik','id_projekt=? AND id_uzytkownik=? ',$this->idProject.','.$teamRow[0]);
+            $count=$this->checkExistInDb('projekt_pracownik','id_projekt=? AND id_pracownik=? ',$this->idProject.','.$teamRow[0]);
             //$count=$this->checkExistInDb('projekt_pracownik','id_projekt=? AND id_uzytkownik=? ',$this->idProject.','.$team[$id][0]);
             if($count>0)
             {
@@ -249,13 +249,13 @@ class manageProject extends initialDb
         if(end($dataArray)==='UPDATE')
         {
              $this->query(
-                     'UPDATE projekt_pracownik SET imie=?,nazwisko=?,udzial_procent=?,dat_od=?,dat_do=?,mod_dat=?,mod_user_id=?,mod_user_name=?,wsk_u=? WHERE id_projekt=? AND id_uzytkownik=?',
+                     'UPDATE projekt_pracownik SET imie=?,nazwisko=?,udzial_procent=?,dat_od=?,dat_do=?,mod_dat=?,mod_user_id=?,mod_user_name=?,wsk_u=? WHERE id_projekt=? AND id_pracownik=?',
                      $dataArray['imie'].','.$dataArray['nazwisko'].','.$dataArray[1].','.$dataArray[2].','.$dataArray[3].','.$curretDateTime.',1,'.$this->user.',0,'.$this->idProject.','.$dataArray[0]);            
         }
         else
         {
             $this->query('INSERT INTO projekt_pracownik 
-            (id_projekt,id_uzytkownik,imie,nazwisko,udzial_procent,dat_od,dat_do,mod_dat,mod_user_id,mod_user_name) 
+            (id_projekt,id_pracownik,imie,nazwisko,udzial_procent,dat_od,dat_do,mod_dat,mod_user_id,mod_user_name) 
 		VALUES
 		(?,?,?,?,?,?,?,?,?,?)'
         ,$this->idProject.','.$dataArray[0].','.$dataArray['imie'].','.$dataArray['nazwisko'].','.$dataArray[1].','.$dataArray[2].','.$dataArray[3].','.$curretDateTime.',1,'.$this->user);        
@@ -376,6 +376,12 @@ class manageProject extends initialDb
         $this->parsePostData($valueToDelete);
         $this->query('UPDATE projekt_nowy SET wsk_u=? WHERE id=?',"1,".$this->inpArray['id']);
     }
+    # DELETED PROJECT IN DB
+    function getProjectTeam($idProject)
+    {
+        $this->query('SELECT idPracownik,ImieNazwisko,procentUdzial,datOd,datDo FROM v_proj_prac WHERE idProjekt=?',$idProject);
+        $this->valueToReturn=$this->queryReturnValue();
+    }
     public function getReturnedValue()
     {
         echo json_encode($this->valueToReturn);
@@ -408,6 +414,7 @@ class checkGetData extends manageProject
         "getprojectsmember",
         "getprojectsleader",
         "getprojectsmanager",
+        "getprojectteam",
         "gettypeofagreement",
         "getadditionaldictdoc",
         "addteam"
@@ -501,6 +508,10 @@ class checkGetData extends manageProject
             break;
         case "getadditionaldictdoc":
             $this->getProjectSlo('v_slo_dok');
+            break;
+        case  "getprojectteam":
+            $idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+            $this->getProjectTeam($idProject);
             break;
         default:
             //no task

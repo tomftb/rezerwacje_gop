@@ -128,7 +128,7 @@
        </div> 
     <div class="form-group row mb-0" >
        <div class=" col-sm-12" >
-         <button  id="postData" class="btn btn-info pull-right" onclick="postDataToUrl()">Utwórz</button>
+         <button  id="postData" class="btn btn-info pull-right" onclick="postDataToUrl('createPdfForm')">Utwórz</button>
        </div>
      </div>
     </form>
@@ -170,18 +170,19 @@
                 </button>
             </div>
             <div class="modal-body mb-0 pb-1 pt-1" id="ProjectAdaptedBodyContent">
-                <div class="form-group row" style="border:1px solid green" id="ProjectAdaptedBodyContentTitle">
+                <div class="form-group row" style="border:0px solid green" id="ProjectAdaptedBodyContentTitle">
                     <div class=" col-sm-12 mt-4" >
                         <h5 class="modal-title text-center" id="fieldModalLabel"><span id="projectTitle"></span></h5> 
                         
                     </div>
                 </div>
-                <div class="form-group row" style="border:1px solid red" id="ProjectAdaptedDynamicData">
-                   
+                <div class="form-group row" >
+                    <div class="col-sm-12"  id="ProjectAdaptedDynamicData">
+                    </div>
                 </div>
-                <div class="form-group row" style="border:1px solid orange">
-                    <div class=" col-sm-12" >
-                        <button class="btn btn-danger pull-right" id="ProjectAdaptedButton">Usuń</button>
+                <div class="form-group row" >
+                    <div class=" col-sm-12" id="ProjectAdaptedButtonsBottom">
+                        
                     </div>
                 </div>
             </div>
@@ -202,20 +203,20 @@
 <div id="readroot" style="display: none">
         <div class="input-group" name="pdfExtra">
             <input type="text" class="entry form-control" id="inputPdfDok" placeholder="" name="inputPdfDok" onblur="parseValue(this,'inputPdfDok')"/>            
-        <div class="input-group-addon input-group-append ">
-            <div class=" btn  btn-danger rounded-right" onclick="closeNode(this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode),this.parentNode.parentNode)">
-             <i class="fa fa-minus" aria-hidden="true"></i>
-            </div>
-           </div>
-        <div class="text-left w-100 mb-0 mt-0" id="errDiv-pdfExtra" style="display: none;" >
-            <div class="alert alert-danger mb-0">
-                <span id="errText-pdfExtra"></span>
+                <div class="input-group-addon input-group-append ">
+                    <div class=" btn  btn-danger rounded-right" onclick="closeNode(this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode),this.parentNode.parentNode)">
+                        <i class="fa fa-minus" aria-hidden="true"></i>
+                    </div>
+                </div>
+            <div class="text-left w-100 mb-0 mt-0" id="errDiv-pdfExtra" style="display: none;" >
+                <div class="alert alert-danger mb-0">
+                    <span id="errText-pdfExtra"></span>
             </div>  
-            </div>
+        </div>
     </div>  
 </div>
-<div id="div-inputPdf7a"></div>
-<script>
 
+<div id="div-inputPdf7a" style="display:block; border:0px solid black;"></div>
+<script>
 window.onload=setDefault();
 </script>

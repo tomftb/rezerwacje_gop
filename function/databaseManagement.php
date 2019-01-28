@@ -126,7 +126,7 @@ class dbManage
 				if ($lvl==0)
 				{
 					$this->error.=$this->css['pS'].$this->css['sErrS'].$function.$this->css['sE'].$data.$this->css['pS'];
-					//die($this->getError());
+					die($this->getError());
                                         //echo $this->getError();
                                         //die();
 				}

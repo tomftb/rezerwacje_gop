@@ -5,6 +5,17 @@ body{
 	margin:1px;
         overflow: scroll !important;
 }
+.gt-no-rounded-left{
+    border-bottom-left-radius:0%;
+    border-top-left-radius:0%;
+}
+.gt-no-rounded-right{
+    border-bottom-right-radius:0%;
+    border-top-right-radius:0%;
+}
+.gt-border-light-blue{
+    border:1px solid #80bfff;
+}
 .modal-open {
   position: fixed;
   overflow: scroll;

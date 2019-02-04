@@ -1,19 +1,23 @@
 <?php require_once($_SERVER["DOCUMENT_ROOT"]."/function/redirectToLoginPage.php"); ?>
 
-<center><table class="t_main">	
+<center><table class="t_main" style="margin-top:0px;">	
 	<tr>
-	<th colspan="10"><p class="p_24_b">Aktualny przydział nodów:</p>
+	<th colspan="2"><h2 class="text-center pt-1">Aktualny przydział nodów:</h2>
 	</th>
 	</tr>
 	<tr>
-	<th class="th_main" width="200px">Pracownia :</th>
-	<th class="th_main" width="600px">Przypisane nody :</th>
+            <th class="th_main" width="200px"><h5 class="text-center pt-1">Pracownia :</h5></th>
+	<th class="th_main" width="600px"><h5 class="text-center pt-1">Przypisane nody :</h5></th>
         </tr>
 		
 <?php
 	/* PONOWNE WYWOLANIE W CELU AKTUALIZACJI DANYCH */	
-	$tablicaKlaster=selectData("SELECT `id`,`nod`,`pracownia` FROM `klaster` ORDER BY `id`",$connection);
-	$tablicaPrac=selectData("SELECT `id`,`nazwa` FROM `pracownia` WHERE `WSK_U`=0 ORDER BY `id` ",$connection);
+       
+        $dbLink->query('SELECT id,nod,pracownia FROM klaster WHERE 1=? group by id','1');
+        $tablicaKlaster= $dbLink->queryReturnValue();
+
+        $dbLink->query('SELECT id,nazwa FROM pracownia WHERE WSK_U=? ORDER BY id','0');
+        $tablicaPrac=$dbLink->queryReturnValue();
 	foreach($tablicaPrac as $klucz=> $wartoscPrac)
 	{
 		echo "<tr>";

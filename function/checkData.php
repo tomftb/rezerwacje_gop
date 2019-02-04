@@ -8,25 +8,17 @@ foreach($_POST as $id => $wartosc)
 };
 $dataNod0=(array)explode('|',$_POST["nod0"]);
 $dataNod1=(array)explode('|',$_POST["nod1"]);
-$dataPrac=(array)explode('|',$_POST["pracownia"]);		
+$dataPrac=(array)explode('|',$_POST["pracownia"]);
+$updateNodValue="";
 if($dataNod0[0] <= $dataNod1[0])
 {
-	$updateNod="UPDATE `klaster` SET `pracownia`='".$dataPrac[0]."' WHERE `id`>='".$dataNod0[0]."' AND `id`<='".$dataNod1[0]."' ";
-	//echo "nod0 <= nod1 </br>";
+    $updateNodValue=$dataPrac[0].",".$dataNod0[0].",".$dataNod1[0];
 }
-else //$_POST["nod0"] > $_POST["nod1"]
+else
 {
-	$updateNod="UPDATE `klaster` SET `pracownia`='".$dataPrac[0]."' WHERE `id`>='".$dataNod1[0]."' AND `id`<='".$dataNod0[0]."' "; 
-	//echo "nod0 > nod1 </br>";
+        $updateNodValue=$dataPrac[0].",".$dataNod1[0].",".$dataNod0[0];
 };
-
-if($_SESSION["PHPV"]<7.0)
-	{	
-		$result = mysqli_query($connection,$updateNod) or die ('Zapytanie zakończone niepowodzeniem: ' . mysql_error($connection));
-	}
-	else
-	{
-		$result = mysqli_query($connection,$updateNod) or die ('Zapytanie zakończone niepowodzeniem: ' . mysqli_error($connection));
-	};
+    $updateNod="UPDATE klaster SET pracownia=? WHERE id>=? AND id<=? ";
+    $dbLink->query($updateNod,$updateNodValue);
 };
 ?>

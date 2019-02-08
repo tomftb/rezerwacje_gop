@@ -43,11 +43,11 @@
         array('d','Kierującego zobowiązuję do przedstawienia harmonogramu prac do dnia','harm_data'),
         array('d','Kierującego zobowiązuję do zakończenia prac i napisania raportu z realizacji zadania do dnia)','koniec_proj'),
         array('s-prac','Nadzór nad realizacją <span id="pdfTypUmowy">umowy</span> powierzam','nadzor'),
-        array('l-dok','Wykaz dokumentów związanych:','','dokPowiazane')
+        array('l-dok','Wykaz powiązanych dokumentów :','','dokPowiazane')
         );
 ?>
 <div class="modal fade " id="addProjectModal" tabindex="-1" role="dialog" aria-labelledby="addProjectModalContent" aria-hidden="true">
-<div class="modal-dialog modal-lg mb-0" role="document">
+<div class="modal-dialog modal-lg mb-0" role="document" >
     <div class="modal-content mb-0">
       <div class="modal-header bg-info">
           <!-- <h2 class="modal-title" id="fieldModalLabel"><p class="text-center">Create PDF FILE FROM input from</p></h2>-->
@@ -58,7 +58,6 @@
       </div>
         <div class="modal-body mb-0 pb-1 pt-1">
         <form class="form-horizontal"  autocomplete="off" method="POST"  ENCTYPE="multipart/form-data" action="javascript:void(0);" name="createPdfForm">
- 
     <?php
     foreach($inputFileds as $id => $value)
     {
@@ -93,15 +92,10 @@
                         </div>
                     </div>';
                 }
-               
                 else
                 {
-                    
                 };
-               
-                ?>
-             
-            
+                ?>       
         </div>
      </div>
     <?php
@@ -190,6 +184,7 @@
                 <div class="text-left w-100">
                     <div class=" row" style="border:0px solid black">
                         <small class="modal-title text-left ml-1 text-secondary" id="fieldModalLabel">Project id: <span id="projectId"></span></small> 
+                        <small class="modal-title text-left ml-1 text-secondary" id="fieldModalLabel2"><span id="projectId2"></span></small> 
                     </div>
                     <div class="alert alert-danger row" id="errDiv-Adapted-overall" style="display: none;" style="border:0px solid red">
                         <span id="errText-Adapted-overall"></span>
@@ -215,7 +210,25 @@
         </div>
     </div>  
 </div>
+<!-- PROJECT DETAIL TEMPLATE -->
+<div class="modal fade" tabindex="-1" role="dialog" class="modal-content mb-0" id="addProjectModalDetail" aria-hidden="true">
+<div class="modal-body mb-0 pb-1 pt-1">
+<form class="form-horizontal"  autocomplete="off" method="POST"  ENCTYPE="multipart/form-data" action="javascript:void(0);" name="createPdfForm">
+    <div class="form-group row mt-2 mb-1" id="addProjectModalDetailFields">		
+    </div>
+    <div class="form-group row mb-0" id="addProjectModalDetailButtons">
+       <div class=" col-sm-12" >
+           <div class="btn-group pull-right">
+                <button class="btn btn-dark" data-dismiss="modal">Anuluj</button>
+                <button id="postDataSubmit" class="btn btn-info" >Edytuj</button>
+           </div>
+       </div>
+     </div>	   
+</form>
+</div>
 
+</div>
+<!-- END PROJECT DETAIL TEMPLATE -->
 <div id="div-inputPdf7a" style="display:block; border:0px solid black;"></div>
 <script>
 window.onload=setDefault();

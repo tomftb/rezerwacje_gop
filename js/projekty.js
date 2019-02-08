@@ -2,7 +2,9 @@ var err = new Array();
 // origin
 var memberProjTab=new Array();
 var countOfMemberProjTab=0;
+var countOfAvaliableMemberProjTab=0;
 var memberProjTabSumPerc=new Array();
+var currentProjectDetails=new Array();
 // for manipulate
 var actUsedMemberProjTab=new Array();
 var actMemberProjPers=0;
@@ -20,9 +22,45 @@ var teamElementCounter=0;
 var lastTeamMemberId=-1;
 var idProject=0;
 var teamEditPers=new Array();
+var currentTeamPers=new Array();
+var currentTeamPersLength=0;
 var teamPers= new Array();
+var teamAvaliablePers= new Array();
+var teamAvaliablePersCount=0;
 var teamBodyDataLengthContent=0;
+var numberOfMemebersInProject=0;
+var currentProjMemberTeam=new Array();
+var legendExtraLabels = new Array(
+        ', Actual number of members : '
+        );
+var currentProjectDoc=new Array();
+var projectFileds=new Array(
+        new Array('hidden',"",'idProject'),
+        new Array('s-umowa',"Do realizacji :",'typ_umowy'),
+        new Array('t','Numer:','numer_umowy'),
+        new Array('t','Temat:','temat_umowy'),
+        new Array('s-prac','Do kierowania grupa powołuje:','kier_grupy'),
+        new Array('d','Termin realizacji','term_realizacji'),
+        new Array('d','Kierującego zobowiązuję do przedstawienia harmonogramu prac do dnia','harm_data'),
+        new Array('d','Kierującego zobowiązuję do zakończenia prac i napisania raportu z realizacji zadania do dnia:','koniec_proj'),
+        new Array('s-prac','Nadzór nad realizacją | powierzam','nadzor'),
+        new Array('l-dok','Wykaz powiązanych dokumentów:','proj_dok','dokPowiazane')
+    );
+    
+    var inputAttribute= new Array(
+        Array('type','text'),
+        Array('class','form-control'),
+        Array('name','inputProject'),
+        Array('id','inputProject'),
+        Array('value',''),
+        Array('placeholder',''),
+        Array('readOnly','true')     
+        )
+    var inputClass=new Array(
+	'mb-1'
+	);
 
+//<span id="pdfTypUmowy">umowy</span> 
 $.fn.datepicker.defaults.format = "dd.mm.yyyy";
 $.fn.datepicker.defaults.todayHighlight = true;
 $.fn.datepicker.defaults.language = 'pl';
@@ -337,6 +375,7 @@ function getAjaxData(task,idToSetup,nameToSetup,addon)
 function manageTask(taskToRun,data,id,name)
 {
     console.log('---manageTask---\ntak to run - '+taskToRun);
+    var fields=new Array();
     //console.log('data - '+data+'\nid - '+id+'\nname - '+name);
     switch(taskToRun)
     {
@@ -351,13 +390,14 @@ function manageTask(taskToRun,data,id,name)
             break;
         case 'getprojectsmember':
             // SET GLOBAL 
-            var fields=new Array('id','ImieNazwisko');
+            fields.push('id','ImieNazwisko');
             memberProjTab=getDataFromJson(data,fields);
             //console.log(memberProjTab);
             countOfMemberProjTab=memberProjTab.length;
             MemberProj=createTagWithData('select',data,id,name);
             //console.log('Member Array:');
             //console.log(MemberProj);
+            //console.log(memberProjTab);
             break;
         case 'getprojectsmanager':
             // SET GLOBAL liderProj
@@ -378,56 +418,354 @@ function manageTask(taskToRun,data,id,name)
             //console.log(AddDictDoc);
             break;
         case 'getprojectteam':
-                createTeamBodyContent(id,data);
+                teamBodyDataLengthContent=data.length;
+                fields.push('idPracownik','ImieNazwisko','procentUdzial','datOd','datDo');
+                currentProjMemberTeam=getDataFromJson(data,fields);
+                numberOfMemebersInProject=teamBodyDataLengthContent;
+                document.getElementById("projectId2").innerHTML = legendExtraLabels+numberOfMemebersInProject;
+                createTeamBodyContent(id,currentProjMemberTeam); // data
+                break;
+        case 'getallavaliableemployeeprojsumperc':
                 break;
         case 'getallemployeeprojsumperc':
-                console.log('Member proj v2');
-                var fields=new Array('idPracownik','sumProcentowyUdzial');
+                fields.push('idPracownik','sumProcentowyUdzial');
                 memberProjTabSumPerc=getDataFromJson(data,fields);
-                // CHECK EXIST ID AND THEN PUSH PERCENT VALUE
-                var found=false;
-                for(var i=0;i<memberProjTab.length;i++)
-                {
-                    //console.log('Member - '+memberProjTab[i][0]);
-                    for(j=0;j<memberProjTabSumPerc.length;j++)
-                    {
-                        //console.log('Member Sum - '+memberProjTabSumPerc[j][0]);
-                        if(memberProjTab[i][0]==memberProjTabSumPerc[j][0])
-                        {
-                            console.log('[SUM PERCENT '+memberProjTab[i][1]+'] FOUND : '+memberProjTabSumPerc[j][1]);
-                            // check key exists
-                            if(memberProjTab[i][2]!=undefined)
-                            {
-                                //console.log('UPDATE');
-                                memberProjTab[i][2]=parseInt(memberProjTabSumPerc[j][1]);
-                            }
-                            else
-                            {
-                                //console.log('PUSH');
-                                memberProjTab[i].push(parseInt(memberProjTabSumPerc[j][1]));
-                            }
-                            found=true;
-                            break;
-                        }
-                    }
-                    if(found!==true)
-                    {
-                        if(memberProjTab[i][2]==undefined)
-                        {
-                            //console.log(memberProjTab[i][2]);
-                            memberProjTab[i].push(0);
-                        };
-                    }
-                    found=false;
-                };
-                //console.log(memberProjTab);
+                createAvaliableTeam();
                 createAddTeamBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'addTeamToProject',idProject);
-                
+                break;
+            case 'getprojectdetail':
+                currentProjectDetails=[];
+                inputAttribute[6][0]='readOnly';
+                fields.push('id','create_date','typ_umowy','typ_umowy_alt','numer_umowy','temat_umowy','kier_grupy','kier_grupy_id','term_realizacji','harm_data','koniec_proj','nadzor','nadzor_id');
+                console.log(data[0]);
+                console.log(data[1]);
+                currentProjectDetails=getDataFromJson(data[0],fields);
+                fields=[];
+                fields.push('ID','NAZWA');
+                currentProjectDetails.push(getDataFromJson(data[1],fields));
+                console.log(currentProjectDetails);
+                createProjectDetailView(document.getElementById('ProjectAdaptedDynamicData'),taskToRun);
+                break;
+        case 'getprojectdocuments':
+                inputAttribute[6][0]='readOnly';
+                currentProjectDoc=[];
+                fields.push('ID','NAZWA');
+                currentProjectDoc=getDataFromJson(data,fields);
+                //console.log(currentProjectDoc);
+                createProjectDocView(document.getElementById('ProjectAdaptedDynamicData'),taskToRun);
                 break;
         default:
             alert('[manageTask]ERROR - wrong task');
             break;
     }
+}
+function createProjectDocView(elementWhereAdd,taskData)
+{
+    console.log('---createProjectDocView---');
+    var mainTemplate=document.getElementById('addProjectModalDetail').cloneNode(true);
+    mainTemplate.classList.remove("modal");
+    mainTemplate.classList.remove("fade");
+    createProjectDocViewFields(mainTemplate.childNodes[1].childNodes[1].childNodes[1])
+    
+    var confirmButton=mainTemplate.childNodes[1].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[3];
+    
+    confirmButton.onclick=function()
+    {
+        confirmButton.innerText='Zatwierdź';
+        editForm(mainTemplate.childNodes[1].childNodes[1].childNodes[1],taskData,confirmButton);
+    };
+    elementWhereAdd.append(mainTemplate);
+    console.log(elementWhereAdd);
+}
+function createProjectDocViewFields(elementWhereAppend)
+{
+    console.log('---createProjectDocViewFields---');
+    removeNodeChilds(elementWhereAppend);
+    var labelAttribute=new Array(
+	Array('for','inputProject'),
+	Array('class','col-sm-6')
+	);
+    var labelClass=new Array(
+	'control-label',
+        'text-right',
+        'font-weight-bold'
+	);
+    var div1=new Array(
+	Array('class','col-sm-6')
+	);
+    labelAttribute[0][1]='inputProject'+i;
+    labelElement=createHtmlElement('label',labelAttribute,labelClass,null);  
+    labelElement.innerText=projectFileds[9][1];
+    div1Element=createHtmlElement('div',div1,null,null);
+   
+    elementWhereAppend.appendChild(labelElement);
+    console.log(currentProjectDoc);
+    createProjectDocList(currentProjectDoc,div1Element,'inputProjectDoc',1);
+    elementWhereAppend.appendChild(div1Element);
+    console.log(elementWhereAppend);
+}
+function createProjectDetailView(elementWhereAdd,taskData)
+{
+    console.log('---createProjectDetailView---');
+    console.log(elementWhereAdd);
+    var mainTemplate=document.getElementById('addProjectModalDetail').cloneNode(true);
+    var confirmButton=mainTemplate.childNodes[1].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[3];
+    
+    console.log(mainTemplate.childNodes[1].childNodes[1].childNodes[1]);
+    console.log(mainTemplate.childNodes[1].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[3]);
+    //createProjectDetailViewFields(document.getElementById("addProjectModalDetailFields"));
+    createProjectDetailViewFields(mainTemplate.childNodes[1].childNodes[1].childNodes[1]);
+    
+    confirmButton.onclick=function(){
+        //console.log(confirmButton);
+        confirmButton.innerText='Zatwierdź';
+        //console.log(confirmButton);
+        editForm(mainTemplate.childNodes[1].childNodes[1].childNodes[1],taskData,confirmButton);
+    };
+    
+    mainTemplate.classList.remove("modal");
+    mainTemplate.classList.remove("fade");
+    
+    console.log(mainTemplate);
+    elementWhereAdd.append(mainTemplate);
+}
+function createProjectDetailViewFields(elementWhereAppend)
+{
+    console.log('---createProjectDetailViewFields---');
+    //console.log(elementWhereAppend);
+    removeNodeChilds(elementWhereAppend);
+    // HTML TAGS
+    var labelAttribute=new Array(
+	Array('for','inputProject'),
+	Array('class','col-sm-8')
+	);
+    var labelClass=new Array(
+	'control-label',
+        'text-right',
+        'font-weight-bold'
+	);
+    var div1=new Array(
+	Array('class','col-sm-4')
+	);
+
+    //
+    for(var i=0;i<projectFileds.length;i++)
+    {
+        //console.log(projectFileds[i]);
+        labelAttribute[0][1]='inputProject'+i;
+        labelElement=createHtmlElement('label',labelAttribute,labelClass,null);
+        div1Element=createHtmlElement('div',div1,null,null);
+        var tmpArray=new Array();
+        if(projectFileds[i][0]=='hidden')
+        {
+            inputAttribute[0][1]='hidden';  
+        }
+        else
+        {
+            inputAttribute[0][1]='text'; 
+        };
+        //console.log(projectFileds[i][2]);
+        inputAttribute[2][1]='inputProject'+i;
+        inputAttribute[3][1]='inputProject'+i;
+        if(projectFileds[i][2]==='nadzor')
+        {
+            tmpArray=splitValue(projectFileds[i][1],"|");
+            labelElement.innerText=tmpArray[0]+currentProjectDetails[0][2]+tmpArray[1];
+        }
+        else
+        {
+             labelElement.innerText=projectFileds[i][1];
+        }
+       
+        elementWhereAppend.appendChild(labelElement);
+        
+        if(projectFileds[i][2]!='proj_dok')
+        {
+            inputAttribute[4][1]=assignProjectDataToField(projectFileds[i][2]);
+            inputElement=createHtmlElement('input',inputAttribute,inputClass,null);
+            div1Element.appendChild(inputElement);
+            
+        }
+        else
+        {
+            createProjectDocList(currentProjectDetails[1],div1Element,'inputProjectDoc',1);
+        };
+
+        elementWhereAppend.appendChild(div1Element);
+        
+       
+    };
+}
+function createProjectDocList(docArray,elementWhereAppend,inpName,nrColWithData)
+{
+    var dokCount=0;
+    var inputElement;
+    
+    for(var d=0;d<docArray.length;d++)
+    {
+        //console.log(docArray[d][nrColWithData]);
+        inputAttribute[2][1]=inpName+dokCount;
+        inputAttribute[3][1]=inpName+dokCount;
+        inputAttribute[4][1]=docArray[d][nrColWithData];
+        inputElement=createHtmlElement('input',inputAttribute,inputClass,null);
+        elementWhereAppend.appendChild(inputElement);
+        dokCount++
+    };
+}
+function assignProjectDataToField(fieldId)
+{
+    console.log('---assignProjectDataToField---');
+    var valueToReturn='';
+    switch(fieldId)
+    {
+        case 'idProject':
+            valueToReturn=currentProjectDetails[0][0];
+            break;
+        case 'typ_umowy':
+            valueToReturn=currentProjectDetails[0][2];
+            break;
+        case 'numer_umowy':
+            valueToReturn=currentProjectDetails[0][4];
+            break;
+        case 'temat_umowy':
+            valueToReturn=currentProjectDetails[0][5];
+            break;
+        case 'kier_grupy':
+            valueToReturn=currentProjectDetails[0][6];
+            break;
+        case 'term_realizacji':
+            valueToReturn=currentProjectDetails[0][8];
+            break;
+        case 'harm_data':
+            valueToReturn=currentProjectDetails[0][9];
+            break;
+        case 'koniec_proj':
+            valueToReturn=currentProjectDetails[0][10];
+            break;
+        case 'nadzor':
+             valueToReturn=currentProjectDetails[0][11];
+            break;
+        default:
+            break;
+    };
+                
+    return (valueToReturn);            
+}
+function removeNodeChilds(elementWhereRemove)
+{
+    console.log('---removeNodeChilds---');
+    while (elementWhereRemove.firstChild) 
+    {
+        elementWhereRemove.removeChild(elementWhereRemove.firstChild);
+    };
+}
+function createAvaliableTeam()
+{
+    console.log('---createAvaliableTeam---');
+    console.log('[memberProjTab]L : '+countOfMemberProjTab);
+    console.log('[getprojectteam]L :'+teamBodyDataLengthContent);
+    console.log('[memberProjTabSumPerc]L : '+memberProjTabSumPerc.length);
+    //console.log('memberProjTab:');
+    //console.log(memberProjTab);
+    //console.log('currentProjMemberTeam:');
+    //console.log(currentProjMemberTeam);
+    //console.log('memberProjTabSumPerc:');
+    //console.log(memberProjTabSumPerc);
+    var tmpArray=new Array();
+    var found=false;
+    var currentUsed=0;
+    var avaliableUsed=0;
+    for(var i=0;i<memberProjTab.length;i++)
+    {
+        //CHECK IN CURRENT PROJECT
+        for(j=0;j<currentProjMemberTeam.length;j++)
+        {
+            if(memberProjTab[i][0]===currentProjMemberTeam[j][0])
+            {
+                //console.log('FOUND IN CURRENT PROJECT '+memberProjTab[i][1]);
+                //console.log(memberProjTab[i][0]+' - '+memberProjTab[i][0]);
+                /*
+                 * [id]
+                 * [Imie i Nazwisko]
+                 * [Used Percent]
+                 * [Data Start]
+                 * [Data End]
+                 * [NOT AVALIABLE]
+                 */ 
+                currentUsed=parseInt(currentProjMemberTeam[j][2]);
+                //CHECK OVERALL USED
+                for(k=0;k<memberProjTabSumPerc.length;k++)
+                {
+                    if(memberProjTab[i][0]===memberProjTabSumPerc[k][0])
+                    {
+                        avaliableUsed=parseInt(memberProjTabSumPerc[k][1]);
+                        avaliableUsed=100-avaliableUsed+currentUsed;
+                        break;
+                    }
+                }
+                tmpArray=createArray(memberProjTab[i][0],currentProjMemberTeam[j][1],currentUsed,currentProjMemberTeam[j][3],currentProjMemberTeam[j][4],avaliableUsed);
+                currentTeamPers.push(tmpArray);
+                found=true;
+                tmpArray=[];
+                tmpArray=createArray(memberProjTab[i][0],currentProjMemberTeam[j][1],1,currentProjMemberTeam[j][3],currentProjMemberTeam[j][4],avaliableUsed);
+                teamAvaliablePers.push(tmpArray);
+                break;
+            }
+        }
+        // IF NOT FOUND
+        if(!found)
+        {
+            //console.log('NOT FOUND '+memberProjTab[i][1]);
+            //CHECK OVERALL USED
+            for(k=0;k<memberProjTabSumPerc.length;k++)
+            {
+                if(memberProjTab[i][0]===memberProjTabSumPerc[k][0])
+                {
+                    if(memberProjTabSumPerc[k][1]<100)
+                    {
+                        // ONLY LESS THAN 100% USED PERCENT
+                        currentUsed=parseInt(memberProjTabSumPerc[k][1]);
+                        avaliableUsed=100-currentUsed;
+                        teamAvaliablePers.push(createArray(memberProjTab[i][0],memberProjTab[i][1],1,'00.00.0000','00.00.0000',avaliableUsed)); 
+                    }
+                    else
+                    {
+                        //
+                        console.log('100 % USED - NOT ADD');
+                    }
+                    found=true;
+                    break;
+                }
+            }
+            if(!found)
+            {
+                // ADD WITH ZEROS
+                teamAvaliablePers.push(createArray(memberProjTab[i][0],memberProjTab[i][1],1,'00.00.0000','00.00.0000',100)); 
+            }
+        }
+        tmpArray=[];
+        found=false;
+    }    
+    teamAvaliablePersCount=teamAvaliablePers.length;
+    currentTeamPersLength=currentTeamPers.length;
+    console.log('[COUNT] AVALIABLE PERS : '+teamAvaliablePersCount);
+    console.log('[COUNT] CURRENT TEAM PERS : '+currentTeamPersLength);
+    console.log('TEAM AVALIABLE PERS:');
+    console.log(teamAvaliablePers);
+    console.log('CURRENT TEAM:');
+    console.log(currentTeamPers);
+    
+}
+function createArray()
+{
+    //console.log('--createArray---');
+    var tmpArray=new Array();
+    for (var i = 0; i < arguments.length; i++)
+    {
+      tmpArray.push(arguments[i]);
+    }
+    //console.log(tmpArray);
+    return tmpArray;
 }
 function getDataFromJson(dataJson,fieldsToSetup)
 {
@@ -453,17 +791,16 @@ function createTagWithData(tag,data,id,name)
     {
         case 'select':
             createdTag=createSelect(data,id,name);
-            //console.log(createdTag);
             break;
         case 'ol':
             createdTag=createOl(data,id,name);
-            //console.log(createdTag);
             break;
         default:
             alert('wrong tag to create');
             return "";
             break;
     }
+    //console.log(createdTag);
     return createdTag;
 }
 function manageTagFileds(name)
@@ -475,18 +812,13 @@ function manageTagFileds(name)
         case 'nadzor':
         case 'czlonek_grupy':
         case 'kier_grupy':
-                fields[0]='id';
-                fields[1]='ImieNazwisko';
+                fields.push('id','ImieNazwisko');
             break;
         case 'typ_umowy':
-                fields[0]='ID';
-                fields[1]='Nazwa';
-                fields[2]='NazwaAlt';
+                fields.push('ID','Nazwa','NazwaAlt');
             break;
         case 'dodatkowe_dokumenty':
-                fields[0]='ID';
-                fields[1]='Nazwa';
-                fields[2]='SpecificId';
+                fields.push('ID','Nazwa','SpecificId');
             break;
         default:
             alert('ERROR - wrong name to setup');
@@ -652,11 +984,10 @@ function createRemoveButton()
 }
 function createTeamRow(whereAppend,rowName,type)
 {
-    console.log('---createTeamRow---');
-    console.log(whereAppend);
-    console.log(rowName);
-    var teamPersLength=teamEditPers.length;
-    // div-row
+    console.log('---createTeamRow---\n'+type);
+    //console.log(whereAppend);
+    //console.log(rowName);
+    
     var i=0;
     var z;
     var divRowAttribute=new Array(
@@ -753,82 +1084,44 @@ function createTeamRow(whereAppend,rowName,type)
         //dodac check used perent in rest project
     var selectTeamWorkerPercentElement=createHtmlElement('select',selectTeamWorkerPercentAttribute,selectTeamWorkerPercentClass,selectTeamWorkerPercentStyle);
 
-    // CREATE SELECT WITH OPTION percent of usage
-    var usedPercent=0;
-
     // CREATE SELECT WITH OPTION czlonek_grupy
     var tmpPers=new Array();
     var dateStart=null;
     var dateEnd=null;  
-    var maxPercent=101;
-    if(teamPersLength>0)
+    if(type==='exist')
     {
-        console.log(teamEditPers[0]);
-        console.log('ADD EXIST PERS');
-        tmpPers[0]=teamEditPers[0][0];
-        tmpPers[1]=teamEditPers[0][1];
-        actUsedMemberProjTab.push(teamEditPers[0][0]);   
-        dateStart=teamEditPers[0][3];
-        dateEnd=teamEditPers[0][4];
-        
-        usedPercent=parseInt(teamEditPers[0][2]); 
-       
-        selectTeamWorkerPercentElement.appendChild(createTeamRowOption(usedPercent));
-    }
-   
-    else if(type==='new')
-    {
-        for(z=i;z<memberProjTab.length;z++)
-        {
-            console.log('ADD NEW PERS');
-            console.log(memberProjTab[z][0]);
-            if(actUsedMemberProjTab.indexOf(memberProjTab[z][0])===-1)
-            {
-                // check overall used percent
-                console.log(memberProjTab[z][2]);
-                if(memberProjTab[z][2]<100)
-                {
-                    actUsedMemberProjTab.push(memberProjTab[z][0]);
-                    tmpPers[0]=memberProjTab[z][0];
-                    tmpPers[1]=memberProjTab[z][1];
-                    // check used percent
-                    usedPercent=checkAvaliableProjPercent(tmpPers[0]);
-                    if(usedPercent!=0)
-                    {
-                        selectTeamWorkerPercentElement.appendChild(createTeamRowOption(usedPercent));
-                    }
-                    break;
-                }
-                else
-                {
-                    console.log('100% usage : '+memberProjTab[z][1]);
-                };
-            }; 
-        };
+        //console.log(teamEditPers[0]);
+        tmpPers.push(currentTeamPers[0][0],currentTeamPers[0][1],currentTeamPers[0][2],currentTeamPers[0][5]);
+        dateStart=currentTeamPers[0][3];
+        dateEnd=currentTeamPers[0][4];
+        actUsedMemberProjTab.push(currentTeamPers[0][0]); 
+        selectTeamWorkerPercentElement.appendChild(createTeamRowOption(tmpPers[2]));
+        currentTeamPers.shift();
     }
     else
     {
-        // NOTHIN TO DO
-    };
-   
-    for(var ii=0;ii<memberProjTab.length;ii++)
-    {
-        if(memberProjTab[ii][0]==tmpPers[0])
+        changeNumberOfMembers(1);
+        for(z=i;z<teamAvaliablePers.length;z++)
         {
-            console.log('['+ii+'] Max percent : '+maxPercent+'\nMember overall proj percent used : '+memberProjTab[ii][2]+'\nIn this project used percent : '+usedPercent)
-            maxPercent=maxPercent-memberProjTab[ii][2]+usedPercent;
-            console.log('[MAX PERCENT] : '+maxPercent);
-            break;
-        }
-    };
-    for(z=i+1;z<maxPercent;z++)
+            //console.log('ADD NEW PERS');
+            if(actUsedMemberProjTab.indexOf(teamAvaliablePers[z][0])===-1)
+            {
+                actUsedMemberProjTab.push(teamAvaliablePers[z][0]);
+                tmpPers.push(teamAvaliablePers[z][0],teamAvaliablePers[z][1],teamAvaliablePers[z][2],teamAvaliablePers[z][5]);
+                selectTeamWorkerPercentElement.appendChild(createTeamRowOption(tmpPers[2]));
+                break;
+            }; 
+        };
+    }
+   
+    for(z=i+1;z<tmpPers[3]+1;z++)
     {
-        if(z!=usedPercent)
+        if(z!=tmpPers[2])
         {
             selectTeamWorkerPercentElement.appendChild(createTeamRowOption(z));
         }
     };
-    
+    selectTeamWorkerPercentElement.onfocus=function(){ manageActMemberProjUsedPercent(tmpPers[0],selectTeamWorkerPercentElement,rowName,teamElementCounter);};
     optionTeamWorkerAttribute[0][1]=tmpPers[0];
     optionTeamWorkerElement=createHtmlElement('option',optionTeamWorkerAttribute,null,null);
     optionTeamWorkerElement.textContent= tmpPers[1];
@@ -849,40 +1142,51 @@ function createTeamRow(whereAppend,rowName,type)
     divRowElement.appendChild(divColSmElement2);
     divRowElement.appendChild(divColMdAutoElement);
     
-    //console.log(document.getElementById(whereAppend));
     teamElementCounter++;
-    console.log('MEMBER DATA LENGTH : '+countOfMemberProjTab);
-    console.log('TEAM ELEMENT COUNTER :'+teamElementCounter);
     controlAddTeamButton();
-    // REKURENCCJA
-    
-    if(teamPersLength>0)
-    {
-        document.getElementById(whereAppend).append(divRowElement);
-        teamEditPers.shift();
-        createTeamRow(whereAppend,rowName,'exist');
-    }
-    if(type==='new')
-    {
-        document.getElementById(whereAppend).append(divRowElement);
-    }
-    // KONIEC REKURENCCJA
+    document.getElementById(whereAppend).append(divRowElement);
 }
 function controlAddTeamButton()
 {
     console.log('---controlAddTeamButton---');
-    console.log(' '+countOfMemberProjTab);
-    console.log(' '+teamElementCounter);
+    console.log('Avaliable pers : '+teamAvaliablePersCount);
+    console.log('Current used pers : '+teamElementCounter);
     var buttonAdd=document.getElementById('addNewTeamRecord');
     
-    if(countOfMemberProjTab==teamElementCounter && buttonAdd!=null)
+    if(teamAvaliablePersCount==teamElementCounter && buttonAdd!=null)
     {
         console.log('FINISH');
-        
-        buttonAdd.setAttribute("disabled", "true");
-        
+        buttonAdd.setAttribute("disabled", "true"); 
     }
-
+}
+function manageActMemberProjUsedPercent(idPers,elementWhereUpdate,rowName,teamElementCounter)
+{
+    console.log('---manageActMemberProjUsedPercent---\n'+idPers);
+    //console.log('Last Team Member id : '+lastTeamMemberId);
+    if(lastTeamMemberId!=-1 && lastTeamMemberId!=idPers)
+    {
+        //console.log(elementWhereUpdate.firstChild);
+        while (elementWhereUpdate.firstChild) 
+        {
+            elementWhereUpdate.removeChild(elementWhereUpdate.firstChild);
+        };
+        //console.log(elementWhereUpdate);
+        elementWhereUpdate.onfocus=function(){ manageActMemberProjUsedPercent(idPers,elementWhereUpdate,rowName,teamElementCounter);};
+        console.log('UPDATE AVALIABLE USED VALUE');
+        for(var z=0;z<teamAvaliablePersCount;z++)
+        {
+            if(teamAvaliablePers[z][0]==lastTeamMemberId)
+            {
+                //console.log(teamAvaliablePers[z][1]);
+                //console.log(teamAvaliablePers[z][5]+1);
+                for(var y=1;y<teamAvaliablePers[z][5]+1;y++)
+                {
+                    elementWhereUpdate.appendChild(createTeamRowOption(y));
+                };
+                break;
+            }
+        }
+    }
 }
 function createTeamRowOption(usedPercent)
 {
@@ -895,21 +1199,7 @@ function createTeamRowOption(usedPercent)
         optionTeamWorkerPercentElement.textContent=usedPercent+'%';
         return (optionTeamWorkerPercentElement);
 }
-function checkAvaliableProjPercent(idUser)
-{
-    var intPercent=0;
-    for(ww=0;ww<teamPers.length;ww++)
-    {
-        if(teamPers[ww][0]==idUser)
-        {
-            console.log('FOUND '+teamPers[ww][1]);
-            intPercent=parseInt(teamPers[ww][2]); 
-            console.log('PERCENT - '+intPercent);             
-            break;
-        };
-    };
-    return intPercent;
-}
+
 function manageActMemberProjTab(idToSetup,elementWhereAppend)
 {
     console.log('---manageActMemberProjTab---\nValue: '+idToSetup);
@@ -934,18 +1224,17 @@ function manageActMemberProjTab(idToSetup,elementWhereAppend)
     console.log('true name to setup - '+nameToSetup);
     optionTeamWorkerElement.textContent=nameToSetup;
     elementWhereAppend.appendChild(optionTeamWorkerElement);
-    for(var z=0;z<memberProjTab.length;z++)
+    for(var z=0;z<teamAvaliablePers.length;z++)
     {
         
-        if(actUsedMemberProjTab.indexOf(memberProjTab[z][0])===-1 && memberProjTab[z][0]!==idToSetup && memberProjTab[z][2]<100)
+        if(actUsedMemberProjTab.indexOf(teamAvaliablePers[z][0])===-1 && teamAvaliablePers[z][0]!==idToSetup)
         {
-            optionTeamWorkerAttribute[0][1]=memberProjTab[z][0];
+            optionTeamWorkerAttribute[0][1]=teamAvaliablePers[z][0];
             optionTeamWorkerElement=createHtmlElement('option',optionTeamWorkerAttribute,null,null);
-            optionTeamWorkerElement.textContent=memberProjTab[z][1];
+            optionTeamWorkerElement.textContent=teamAvaliablePers[z][1];
             elementWhereAppend.appendChild(optionTeamWorkerElement);
         }
     }
-    
     setLastTeamMember(idToSetup);
 }
 function returnRowIdInArray(array,colToCheck,searchId)
@@ -954,6 +1243,7 @@ function returnRowIdInArray(array,colToCheck,searchId)
     var returnedId=-1;
     for(var z=0;z<array.length;z++)
     {
+        //console.log(array[z]);
         if(array[z][colToCheck]===searchId)
         {
             returnedId=z;
@@ -1000,15 +1290,7 @@ function createTeamBodyContent(elementWhereAdd,data)
     console.log('---createTeamtBodyContent---');
     //console.log('elementWhereAdd - '+elementWhereAdd);
     //console.log(data);
-    
-    var tmpArray=new Array();
-    //console.log('data length - '+dataLength);
-    teamBodyDataLengthContent=data.length;
-    //data[]['idPracownik'];
-    //data[]['NazwiskoImie'];
-    //data[]['procentUdzial'];
-    //data[]['datOd'];
-    //data[]['datDo'];
+ 
     var divElement=createHtmlElement('div',null,null,null);
     var theadLabels=new Array(
             'ID',
@@ -1054,28 +1336,25 @@ function createTeamBodyContent(elementWhereAdd,data)
     for(i=0;i<data.length;i++)
     {
         trTbody=document.createElement('tr');
-        Object.keys(data[i]).forEach(function(key,index) {
-            tmpArray.push(data[i][key]);
-            //console.log(key);
-            if(key==='datOd' || key==='datDo')
-            {
-                // parse data value;
-                //var tmp=splitValue(data[i][key],'-');
-                //tmp=createValidData(tmp);
-                //data[i][key]=tmp;
-            }
-            //console.log(data[i][key]);
+        //console.log(data[i].length);
+        for(j=0;j<data[i].length;j++)
+        {
+            //console.log(data[i][j]);
             th=document.createElement("th");
             th.setAttribute("scope","col");
-            th.textContent = data[i][key];
+            if(j==2)
+            {
+                 th.textContent = data[i][j]+'%';
+            }
+            else
+            {
+                th.textContent = data[i][j];
+            }
+            
             trTbody.appendChild(th);
-        });
-        teamEditPers.push(tmpArray);
-        teamPers.push(tmpArray);
-        tmpArray=[];
+        }
         tbody.appendChild(trTbody);
     };
-    
     //console.log(teamEditPers);
     thead.appendChild(trThead);
     table.appendChild(thead);
@@ -1109,6 +1388,40 @@ function createValidData(value)
         return value[2]+"."+value[1]+"."+value[0];
     };
 }
+function createProjectRemoveBodyContent(elementWhereAdd,formName,idData)
+{ 
+    console.log('---createProjectRemoveBodyContent---');
+    console.log('elementWhereAdd :');
+    console.log(elementWhereAdd);
+   
+    removeHtmlChilds(elementWhereAdd);
+    removeHtmlChilds(document.getElementById('ProjectAdaptedButtonsBottom'));
+
+    // add-team FORM
+    var formAttribute=new Array(
+        Array('name',formName),
+        Array('id',formName),
+        Array('class','form-horizontal'),
+        Array('autocomplete','off'),
+        Array('method','POST'),
+        Array('ENCTYPE','multipart/form-data'),
+        Array('action','javascript:void(0);')
+	);
+    var formElement=createHtmlElement('form',formAttribute,null,null); 
+    // END add-team FORM
+    // input hidden with id FORM
+    var inputIdAttribute=new Array(
+        Array('name',formName+'id'),
+        Array('type','hidden'),
+        Array('value',idData)
+	);
+    var inputIdElement=createHtmlElement('input',inputIdAttribute,null,null);
+    formElement.appendChild(inputIdElement);
+    elementWhereAdd.appendChild(formElement);
+
+    console.log(elementWhereAdd);
+}
+//##################################### createAddTeamBodyContent END ######################################
 function createAddTeamBodyContent(elementWhereAdd,formName,idData)
 { 
     console.log('---createAddTeamBodyContent---');
@@ -1166,20 +1479,24 @@ function createAddTeamBodyContent(elementWhereAdd,formName,idData)
     divAdd.appendChild(button);
     formElement.appendChild(inputIdElement);
     elementWhereAdd.appendChild(formElement);
-    var typeOfRow='new';
-    if(teamEditPers.length>0)
+  
+    if(currentTeamPersLength>0)
     {
-        typeOfRow='exist';
+        for(var tt=0;tt<currentTeamPersLength;tt++)
+        {
+            createTeamRow(formName,'team_czlonek_grupy','exist');
+        }
+    }
+    else
+    {
+        createTeamRow(formName,'team_czlonek_grupy','new');
     };
-    createTeamRow(formName,'team_czlonek_grupy',typeOfRow);
-    
     elementWhereAdd.appendChild(divAdd);
     console.log(elementWhereAdd);
     createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'addTeamToProject',idData);
     controlAddTeamButton();
 }
 //##################################### createAddTeamBodyContent END ######################################
-//function createBodyButtonContent(elementWhereAdd,formName)
 function createBodyButtonContent(elementWhereAdd,task,formName)
 {
     console.log('---createBodyButtonContent---');
@@ -1189,10 +1506,20 @@ function createBodyButtonContent(elementWhereAdd,task,formName)
     var divButtonAttribute=new Array(
                 Array('class','btn-group')
                 );
-            var divButtonClass=new Array(
+    var divButtonClass=new Array(
                 'pull-right'
                 );
-            var divButtonElement=createHtmlElement('div',divButtonAttribute,divButtonClass,null);
+    var divButtonElement=createHtmlElement('div',divButtonAttribute,divButtonClass,null);
+    var cancelButtonAttribute=new Array(
+                Array('class','btn')
+                );
+    var canceButtonClass=new Array(
+                'btn-dark',
+                'pull-right'
+                );
+    var cancelButtonElement=createHtmlElement('button',cancelButtonAttribute,canceButtonClass,null);
+    cancelButtonElement.innerText = "Anuluj";
+    cancelButtonElement.onclick = function() { closeModal('ProjectAdaptedModal'); };
     // END GROUP DIV BUTTON
     switch(task)
     {
@@ -1207,7 +1534,7 @@ function createBodyButtonContent(elementWhereAdd,task,formName)
             var addButtonElement=createHtmlElement('button',addButtonAttribute,addButtonClass,null);
             addButtonElement.innerText = "Dodaj zespół";
             addButtonElement.onclick = function() {
-                getAjaxData('getallemployeeprojsumperc','','','');
+                getAjaxData('getallemployeeprojsumperc','','',''); //getallemployeeprojsumperc
                 
             };
             var editButtonAttribute=new Array(
@@ -1221,19 +1548,12 @@ function createBodyButtonContent(elementWhereAdd,task,formName)
             editButtonElement.innerText = "Edytuj zespół";
             editButtonElement.onclick = function()
             {
-                getAjaxData('getallemployeeprojsumperc','','','');
+                getAjaxData('getallemployeeprojsumperc','','',''); //getallemployeeprojsumperc
                 
             };
-            var cancelButtonAttribute=new Array(
-                Array('class','btn')
-                );
-            var canceButtonClass=new Array(
-                'btn-dark',
-                'pull-right'
-                );
-            var cancelButtonElement=createHtmlElement('button',cancelButtonAttribute,canceButtonClass,null);
+            
             cancelButtonElement.innerText = "Zamknij";
-            cancelButtonElement.onclick = function() { closeModal('ProjectAdaptedModal'); };
+            
             divButtonElement.appendChild(cancelButtonElement);
             if(teamBodyDataLengthContent>0)
             {
@@ -1246,20 +1566,6 @@ function createBodyButtonContent(elementWhereAdd,task,formName)
             elementWhereAdd.appendChild(divButtonElement);
             break;
         case 'addTeamToProject':
-            
-             // cancel BUTTON
-            var cancelButtonAttribute=new Array(
-                Array('class','btn')
-                );
-            var canceButtonClass=new Array(
-                'btn-warning',
-                'pull-right'
-                );
-            var cancelButtonElement=createHtmlElement('button',cancelButtonAttribute,canceButtonClass,null);
-            cancelButtonElement.innerText = "Anuluj";
-            cancelButtonElement.onclick = function() { closeModal('ProjectAdaptedModal'); };
-            // END cancel BUTTON
-            // confirm BUTTON
             var confirmButtonAttribute=new Array(
                 Array('class','btn')
                 );
@@ -1271,6 +1577,28 @@ function createBodyButtonContent(elementWhereAdd,task,formName)
             confirmButtonElement.innerText = "Zatwierdź";
             confirmButtonElement.onclick = function() { postDataToUrl(task); };
             // END confirm BUTTON
+            divButtonElement.appendChild(cancelButtonElement);
+            divButtonElement.appendChild(confirmButtonElement);
+            elementWhereAdd.appendChild(divButtonElement);
+            break;
+        case 'closeProject':   
+        case 'removeProject':
+            var confirmButtonAttribute=new Array(
+                Array('class','btn')
+                );
+            var confirmButtonClass=new Array(
+                'btn-secondary',
+                'pull-right'
+                ); 
+            var label='Zamknij';
+            if(task==='removeProject')
+            {
+                label= "Usuń";
+                confirmButtonClass[0]='btn-danger';
+            }
+            var confirmButtonElement=createHtmlElement('button',confirmButtonAttribute,confirmButtonClass,null);
+            confirmButtonElement.innerText = label;
+            confirmButtonElement.onclick = function() { postDataToUrl(task); };
             divButtonElement.appendChild(cancelButtonElement);
             divButtonElement.appendChild(confirmButtonElement);
             elementWhereAdd.appendChild(divButtonElement);
@@ -1347,12 +1675,13 @@ function setAllProjects(data)
     myFunction(data);
     function myFunction(arr)
     {
+            //new Array('btn-info','edit',"Edytuj"),
+            //new Array('btn-info','show','Podgląd'),
         var buttonConfig=new Array(
-            new Array('btn-info','edit',"Edytuj"),
-            new Array('btn-info','show','Podgląd'),
+            new Array('btn-info','details','Szczegóły'),
             new Array('btn-info','documents','Dokumenty'),
             new Array('btn-warning','team','Zespół'),
-            new Array('btn-danger','delete','Usuń') 
+            
          );
         var button='';
         var out = "";
@@ -1362,13 +1691,35 @@ function setAllProjects(data)
 
         for(i = 0; i < arr.length; i++)
         {    
+            buttonConfig=[];
+            buttonConfig.push(new Array('btn-info','details','Szczegóły'));
+            buttonConfig.push(new Array('btn-info','documents','Dokumenty'));
+            buttonConfig.push(new Array('btn-warning','team','Zespół'));
+            switch(arr[i].status)
+            {
+                case 'n':
+                    statusProj='Nowy';
+                case 'm':
+                    
+                    if(arr[i].status==='m')
+                    {
+                        statusProj='W trakcie';
+                    }
+                    buttonConfig.push(new Array('btn-secondary','close','Zamknij'));
+                    buttonConfig.push(new Array('btn-danger','delete','Usuń'));
+                    break;
+                case 'd':
+                    statusProj='Usunięty';
+                case 'c':
+                    statusProj='Zamknięty';
+                    break;
+                default:
+                    break;
+            };
+            
             for(j = 0; j <buttonConfig.length; j++)
             {
                 button+="<button class=\"btn "+buttonConfig[j][0]+" mr-0 mb-0 mt-0 ml-0\" data-toggle=\"modal\" data-target=\"#ProjectAdaptedModal\" onclick=\"createAdaptedModal('"+buttonConfig[j][1]+"',"+arr[i].id+",'"+arr[i].temat_umowy+"')\">"+buttonConfig[j][2]+"</button>";
-            }
-            if(arr[i].status=='n')
-            {
-                statusProj='Nowy';
             }
             out+="<tr id=\"project"+arr[i].id+"\"><th scope=\"row\">"+arr[i].id+"</th><td>"+arr[i].numer_umowy+"</td><td>"+arr[i].temat_umowy+"</td><td>"+arr[i].create_date+"</td><td>"+arr[i].kier_grupy+"</td><td>"+arr[i].nadzor+"</td><td>"+arr[i].term_realizacji+"</td><td>"+arr[i].harm_data+"</td><td>"+arr[i].koniec_proj+"</td><td>"+statusProj+"</td><td><div class=\"btn-group\">"+button+"</div></td></tr>";
             button='';
@@ -1381,10 +1732,10 @@ function createAdaptedModal(modalType,idData,titleData)
 {
     console.log('---createAdaptedModal---');
     console.log("TASK "+modalType+" - "+idData+" - "+titleData);
-    setAdaptedModalProperties(modalType,idData);
+    setAdaptedModalProperties(modalType,idData,titleData);
     idRecord=idData;
     //console.log("record to deleted - "+id);
-    document.getElementById("projectTitle").innerHTML = titleData;
+    
     document.getElementById("projectId").innerHTML = idData;
 }
 function removeHtmlChilds(htmlElement)
@@ -1394,7 +1745,7 @@ function removeHtmlChilds(htmlElement)
         htmlElement.firstChild.remove(); 
     };
 };
-function setAdaptedModalProperties(modalType,idData)
+function setAdaptedModalProperties(modalType,idData,titleData)
 {
     console.log('---setAdaptedModalProperties---');
     var bgTitle = document.getElementById("ProjectAdaptedBgTitle");
@@ -1410,40 +1761,59 @@ function setAdaptedModalProperties(modalType,idData)
         case 'edit':
             bgTitle.classList.add("bg-info");
             title.innerHTML="EDYCJA PROJEKTU:";
-
             break;
         case 'show':
             bgTitle.classList.add("bg-info");
             title.innerHTML="PODGLĄD PROJEKTU:";
-
             break;
         case 'documents':
+            document.getElementById("projectTitle").innerHTML = titleData;
             bgTitle.classList.add("bg-info");
             title.innerHTML="DOKUMENTY PROJEKTU:";
+            getAjaxData('getprojectdocuments','ProjectAdaptedDynamicData','project_documents','&id='+idData);
+            break;
+        case 'details':
+            document.getElementById("projectTitle").innerHTML = '';
+            bgTitle.classList.add("bg-info");
+            title.innerHTML="SZCZEGÓŁY PROJEKTU:";
+            getAjaxData('getprojectdetail','ProjectAdaptedDynamicData','project_details','&id='+idData);
             break;
         case 'team':
+            document.getElementById("projectTitle").innerHTML = titleData;
             actUsedMemberProjTab=[];
             teamElementCounter=0;
             teamEditPers=[];
+            currentTeamPers=[];
+            teamAvaliablePers=[];
             idProject=idData;
             document.getElementById("errDiv-Adapted-overall").style.display = "none";
             document.getElementById("errText-Adapted-overall").innerHTML = "";
             bgTitle.classList.add("bg-warning");
             title.innerHTML="ZESPÓŁ PROJEKTU:";
             getAjaxData('getprojectteam','ProjectAdaptedDynamicData','zespol_projektu','&id='+idData);
-            
             break;
         case 'delete':
+            document.getElementById("projectTitle").innerHTML = titleData;
             bgTitle.classList.add("bg-danger");
             title.innerHTML="USUWANIE PROJEKTU:";
+            createProjectRemoveBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'removeProject',idData);
+            createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'removeProject',idData);
             break;
         case 'team_edit':
+            document.getElementById("projectTitle").innerHTML = titleData;
             actUsedMemberProjTab=[];
             teamElementCounter=0;
             createAddTeamBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'addTeamToProject',idData);
             createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'addTeamToProject',idData);
+        case 'close':
+            document.getElementById("projectTitle").innerHTML = titleData;
+            bgTitle.classList.add("bg-secondary");
+            title.innerHTML="ZAMYKANIE PROJEKTU:";
+            createProjectRemoveBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'closeProject',idData);
+            createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'closeProject',idData);
+            break;
         default:
-            alert('[ModalCreate]ERROR - wrong type');
+            alert('[setAdaptedModalProperties]ERROR - wrong type');
             break;
     };
 }
@@ -1470,61 +1840,6 @@ function checkErr()
     }
     return (errExists);
 }
-function deleteData()
-{
-    //console.log('deleteData()');
-    //CHECK document wsk_b == buffor , somebody works on this document??
-    //confirm("Potwierdź usunięcie");
-    var r = confirm("Potwierdź usunięcie");
-    if (r === true)
-    {
-        var xmlhttp = new XMLHttpRequest();
-        var host =  getUrl();
-        var response="";
-        var url =  host+'modul/manageProject.php?task=del';
-        document.getElementById("errDiv-Adapted-overall").style.display = "none";
-
-        xmlhttp.onreadystatechange = function()
-        {
-          if (this.readyState === 4 && this.status === 200)
-          {
-            //var myArr = JSON.parse(this.responseText);
-            console.log(this.responseText);
-            //myFunction(myArr);
-             var response = JSON.parse(this.responseText);
-            //response=this.responseText;
-            //console.log("id0 - "+response[0]);
-            //console.log("id1 - "+response[1]);
-            if(response[0]==='1')
-            {
-                //err.push(typeOfValueToParse); 
-                //console.log("response not null - "+response);
-                document.getElementById("errText-Adapted-overall").innerHTML=response[1];
-                document.getElementById("errDiv-Adapted-overall").style.display = "block";
-            }
-            else
-            {
-                idRecord="";
-                getAjaxData('getprojects','test','test');
-                $('#ProjectAdaptedModal').modal('hide');
-            }
-            //console.log("respones text - "+this.responseText);
-
-          }
-          else
-          {
-              //console.log("error ajax"+this.status+" state - "+this.readyState);
-          }
-        };
-        xmlhttp.open("POST", url, true);
-        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xmlhttp.send("id="+idRecord);
-    }
-    else
-    {
-        //;
-    }
-}
 function postDataToUrl(nameOfForm)
 {
     console.log('---postDataToUrl---');
@@ -1532,12 +1847,15 @@ function postDataToUrl(nameOfForm)
     var taskUrl;
     var errTextAjax='';
     var errDivAjax='';
+    var confirmTask=false;
+    var label;
     switch(nameOfForm)
     {
         case 'addTeamToProject':
             taskUrl='modul/manageProject.php?task=addteam';
             errTextAjax='errText-Adapted-overall';
             errDivAjax='errDiv-Adapted-overall';
+            confirmTask=true;
             break;
         case 'createPdfForm':
             parseValue( document.getElementById('temat_umowy').value,"temat_umowy");
@@ -1551,6 +1869,17 @@ function postDataToUrl(nameOfForm)
             document.getElementById("errDiv-overall").style.display = "none";
             errTextAjax='errText-overall';
             errDivAjax='errDiv-overall';
+            confirmTask=true;
+            break;
+        case 'removeProject':
+            label='usunięcie'
+        case 'closeProject':
+            if(nameOfForm==='closeProject')
+            {
+                label='zamknięcie'
+            }
+            taskUrl='modul/manageProject.php?task='+nameOfForm;
+            confirmTask = confirm("Potwierdź "+label);
             break;
         default:
             break;
@@ -1560,34 +1889,36 @@ function postDataToUrl(nameOfForm)
     var host =  getUrl();
     var response="";
     var url =  host+taskUrl;
-   
-    xmlhttp.onreadystatechange = function()
+    if (confirmTask === true)
     {
-      if (this.readyState === 4 && this.status === 200)
-      {
-        response = JSON.parse(this.responseText);
-        console.log("id0 - "+response[0]);
-        console.log("id1 - "+response[1]);
-        if(response[0]==='1')
+        xmlhttp.onreadystatechange = function()
         {
-            //err.push(typeOfValueToParse); 
-            //console.log("response not null - "+response);
-            document.getElementById(errTextAjax).innerHTML=response[1];
-            document.getElementById(errDivAjax).style.display = "block";
-        }
-        else
-        {
-            runTaskAfterAjax(nameOfForm);
-        }
-      }
-      else
-      {
-          //console.log("error ajax"+this.status+" state - "+this.readyState);
-      }
+          if (this.readyState === 4 && this.status === 200)
+          {
+            response = JSON.parse(this.responseText);
+            console.log("id0 - "+response[0]);
+            console.log("id1 - "+response[1]);
+            if(response[0]==='1')
+            {
+                //err.push(typeOfValueToParse); 
+                //console.log("response not null - "+response);
+                document.getElementById(errTextAjax).innerHTML=response[1];
+                document.getElementById(errDivAjax).style.display = "block";
+            }
+            else
+            {
+                runTaskAfterAjax(nameOfForm);
+            }
+          }
+          else
+          {
+              //console.log("error ajax"+this.status+" state - "+this.readyState);
+          }
+        };
+        xmlhttp.open("POST", url, true);
+        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xmlhttp.send(getDataForm(nameOfForm));
     };
-    xmlhttp.open("POST", url, true);
-    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xmlhttp.send(getDataForm(nameOfForm));
 }
 function runTaskAfterAjax(nameOfForm)
 {
@@ -1596,8 +1927,11 @@ function runTaskAfterAjax(nameOfForm)
     {
         case 'addTeamToProject':
             // CLEAR
-           
-            alert('ok');
+            alert('Team updated');
+            $('#ProjectAdaptedModal').modal('hide'); 
+            break;
+        case 'removeProject':
+            getAjaxData('getprojects','test','test');
             $('#ProjectAdaptedModal').modal('hide'); 
             break;
         case 'createPdfForm':
@@ -1605,7 +1939,7 @@ function runTaskAfterAjax(nameOfForm)
             $('#addProjectModal').modal('hide'); 
             break;
         default:
-            alert('ok'+nameOfForm);
+            alert('[runTaskAfterAjax]WRONG TASK - '+nameOfForm);
             break;
     };
 };
@@ -1644,21 +1978,7 @@ $(document).keyup(function(e)
 });
 function setDefault()
 {
-    console.log("setDefault()");
- 
-    
-    var inputFileds=new Array(
-        new Array('s-umowa',"Do realizacji :",'typ_umowy'),
-        new Array('t','Numer:','numer_umowy'),
-        new Array('t','Temat:','temat_umowy'),
-        new Array('s-prac','Do kierowania grupa powołuje:','kier_grupy'),
-        new Array('d','Termin realizacji','term_realizacji'),
-        new Array('d','Kierującego zobowiązuję do przedstawienia harmonogramu prac do dnia','harm_data'),
-        new Array('d','Kierującego zobowiązuję do zakończenia prac i napisania raportu z realizacji zadania do dnia)','koniec_proj'),
-        new Array('s-prac','Nadzór nad realizacją <span id="pdfTypUmowy">umowy</span> powierzam','nadzor'),
-        new Array('l-dok','Wykaz dokumentów związanych:','dokList','dokPowiazane')
-    );
-    console.log(inputFileds[0][1]);
+    console.log("---setDefault()---");
     var element = document.getElementById("postData");
     element.classList.remove("disabled"); 
     document.getElementById('div-inputPdf0').append(TypeOfAgreement);
@@ -1686,9 +2006,7 @@ function setDefault()
          err.splice( err.indexOf(indexToRemove), 1 );
         extraFormDoc.firstChild.remove();
         console.log('remove');
-        
     }
-    
     counter=0;
     addFormField();
 }
@@ -1703,6 +2021,7 @@ function closeNode(nodeToClose,clearErr)
 }
 function removeTeamPersRow(nodeToClose,clearErr)
 {
+    changeNumberOfMembers(-1);
     console.log("---removeTeamPersRow---\n");
     var idToRemove=nodeToClose.childNodes[0].childNodes[0].firstChild.value;
 
@@ -1719,12 +2038,36 @@ function removeTeamPersRow(nodeToClose,clearErr)
     closeNode(nodeToClose,clearErr);
     
 }
-//getAllProjects();
+function changeNumberOfMembers(value)
+{
+    numberOfMemebersInProject=numberOfMemebersInProject+value;
+    document.getElementById("projectId2").innerHTML = legendExtraLabels+numberOfMemebersInProject;
+}
+function editForm(elementWhereChange,taskData,editButton)
+{ 
+    switch(taskData)
+    {
+        case 'getprojectdocuments':
+            editButton.onclick=function(){ postDataToUrl();};
+            inputAttribute[6][0]='noreadOnly';
+            createProjectDocViewFields(elementWhereChange);
+            break;
+        case 'getprojectdetail':
+            inputAttribute[6][0]='noreadOnly';
+            createProjectDetailViewFields(elementWhereChange);
+            break;
+        default:
+            break;
+    };
+    console.log(elementWhereChange);
+}
+function testNothing()
+{
+    console.log('---testNothing---');
+}
 getAjaxData('getprojects','test','test','');
 getAjaxData('getprojectsleader','inputPdf7','nadzor','');
 getAjaxData('getprojectsmanager','inputPdf3','kier_grupy','');
 getAjaxData('gettypeofagreement','inputPdf0','typ_umowy','');
 getAjaxData('getprojectsmember','projectsmember','czlonek_grupy','');
 getAjaxData('getadditionaldictdoc','inputPdf8','dodatkowe_dokumenty','');
-
-

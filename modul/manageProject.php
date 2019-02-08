@@ -53,9 +53,9 @@ class manageProject extends initialDb
                 }
                 else
                 {
-                   $this->inpArray[$key]='0000-00-00';
+                    $this->inpArray[$key]='0000-00-00';
                 };
-           };
+            };
         }
     }
     public function setUser($user)
@@ -111,7 +111,7 @@ class manageProject extends initialDb
             }
         }
     }
-    protected function getTeam()
+    protected function getSendedTeam()
     {
         $teamValueToFind=$this->getTeamValueToFind();
         $teamValueToFindLength=count($teamValueToFind);
@@ -197,11 +197,11 @@ class manageProject extends initialDb
          * team[][3] - data end
          */
         $this->parsePostData($valueToAdd);
-        $team=$this->getTeam();
+        $team=$this->getSendedTeam();
         $persData=array();
-        $count=0;
         if(!$this->err)
         {
+            // PARSE SENDED TEAM
             foreach($team as $id => $value)
             {
                 //echo "${id} - ${value[0]}\n";
@@ -210,7 +210,9 @@ class manageProject extends initialDb
                 $team[$id]['nazwisko']=$persData[0]['nazwisko'];
                 //$this->manageTeamPersActionIdDb($id,$team);
                 $this->manageTeamPersActionIdDb($team[$id]);
+                //array_splice($team, $id, 1);
             }
+            $this->removeNotSendedTeamMembers($team);
             if(!$this->err)
             {
                 foreach($team as $value)
@@ -218,7 +220,47 @@ class manageProject extends initialDb
                     $this->updateTeamInDb($value);
                 }
             }
+            
         }
+    }
+    protected function removeNotSendedTeamMembers(&$team)
+    {
+        // GET TEAM FROM DB
+        $this->getProjectTeam($this->idProject);
+        $this->valueToReturn;
+        $curretDateTime=date('Y-m-d H:i:s');
+        $found=false;
+        //print_r($this->valueToReturn);
+        // PARSE REMAIN TEAM
+        foreach($this->valueToReturn as $key)
+        {
+                /*  [idPracownik]
+                 *  [procentUdzial]
+                 *  [datOd]
+                 *  [datDo]
+                 */
+                //echo $key['idPracownik']."\n";
+                foreach($team as $id)
+                {
+                   //echo $id[0]."\n";
+                   if($id[0]==$key['idPracownik'])
+                   {
+                       //echo "FOUND\n";
+                       $found=true;
+                       break;
+                   }
+                }
+                if(!$found)
+                {
+                    //echo "REMOVE FROM DB.\n";
+                    $this->query(
+                     'UPDATE projekt_pracownik SET udzial_procent=?,dat_od=?,dat_do=?,mod_dat=?,mod_user_id=?,mod_user_name=?,wsk_u=? WHERE id_projekt=? AND id_pracownik=?',
+                     '0,0000-00-00,0000-00-00,'.$curretDateTime.',1,'.$this->user.',1,'.$this->idProject.','.$key['idPracownik']); 
+                    // REMOVE FROM DB
+                }
+                $found=false;
+        }
+        $this->valueToReturn=null;
     }
     protected function manageTeamPersActionIdDb(&$teamRow)
     //protected function manageTeamPersActionIdDb($id,&$team)
@@ -342,7 +384,9 @@ class manageProject extends initialDb
                         $tmp[1]=$tmp[0];
                         $tmp[0]=$docCounter;
                     }
-                    $this->query('INSERT INTO projekt_dok (id_projekt,nazwa,external_id,external_type) VALUES (?,?,?,?)',$id.",".$tmp[1].",".$tmp[0].",".$key);    
+                    //$this->query('INSERT INTO projekt_dok (id_projekt,nazwa,external_id,external_type) VALUES (?,?,?,?)',$id.",".$tmp[1].",".$tmp[0].",".$key);    
+                    $this->query('INSERT INTO projekt_dok (id_projekt,nazwa) VALUES (?,?)',$id.",".$tmp[1]);    
+                    
                     if($this->getError()!=='')
                     {
                         $this->err.=$this->getError()."<br/>";
@@ -355,8 +399,26 @@ class manageProject extends initialDb
     # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getAllProjects()
     {
-        $this->query('SELECT * FROM projekt_nowy WHERE wsk_u=? ORDER BY id desc',0);
+        $this->query('SELECT * FROM v_all_proj WHERE 1=? ORDER BY id desc',1);
         $this->valueToReturn=$this->queryReturnValue();
+    }
+     # RETURN ALL NOT DELETED PROJECT FROM DB
+    public function getProjectDocuments($idProject)
+    {
+        $this->query('SELECT ID,NAZWA FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$idProject);
+        $this->valueToReturn=$this->queryReturnValue();
+    }
+    # RETURN CURRENT PROJECT DETAILS
+    public function getProjectDetails()
+    {
+        $valueToReturn=array();
+        $this->query('SELECT * FROM v_all_proj WHERE id=?',$this->idProject);
+       
+        array_push($valueToReturn,$this->queryReturnValue());
+        $this->query('SELECT ID,NAZWA FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$this->idProject);
+
+        array_push($valueToReturn,$this->queryReturnValue());
+        $this->valueToReturn=$valueToReturn;
     }
     # RETURN ALL NOT DELETED PROJECTs Members,LEADERs,SLO and other FROM DB
     public function getProjectPers($tableToSelect)
@@ -365,21 +427,39 @@ class manageProject extends initialDb
         $this->valueToReturn=$this->queryReturnValue();
     }
      # RETURN ALL NOT DELETED DICTIONARY and other FROM DB
-    public function getProjectSlo($tableToSelect)
+    public function getProjectSlo($tableToSelect,$order='ID')
     {
-        $this->query('SELECT * FROM '.$tableToSelect.' WHERE 1=? ORDER BY ID ASC ',1);
+        $this->query('SELECT * FROM '.$tableToSelect.' WHERE 1=? ORDER BY '.$order.' ASC ',1);
+        $this->valueToReturn=$this->queryReturnValue();
+    }
+     # RETURN ALL AVALIABLE MEMBERS
+    public function getAllavaliableEmployee()
+    {
+        $this->query('SELECT * FROM v_udzial_sum_procent_prac WHERE sumProcentowyUdzial<? ORDER BY idPracownik ASC ',100);
         $this->valueToReturn=$this->queryReturnValue();
     }
     # DELETED PROJECT IN DB
     function deleteProject($valueToDelete)
     {
         $this->parsePostData($valueToDelete);
-        $this->query('UPDATE projekt_nowy SET wsk_u=? WHERE id=?',"1,".$this->inpArray['id']);
+        $this->query('UPDATE projekt_nowy SET wsk_u=? WHERE id=?',"1,".$this->inpArray['removeProjectid']);
+        $team=array();
+        $this->idProject=$this->inpArray['removeProjectid'];
+        $this->removeNotSendedTeamMembers($team);
+    }
+    # CLOSE PROJECT IN DB
+    function closeProject($valueToDelete)
+    {
+        $this->parsePostData($valueToDelete);
+        $this->query('UPDATE projekt_nowy SET status=? WHERE id=?',"c,".$this->inpArray['closeProjectid']);
+        $team=array();
+        $this->idProject=$this->inpArray['closeProjectid'];
+        $this->removeNotSendedTeamMembers($team);
     }
     # DELETED PROJECT IN DB
     function getProjectTeam($idProject)
     {
-        $this->query('SELECT idPracownik,ImieNazwisko,procentUdzial,datOd,datDo FROM v_proj_prac WHERE idProjekt=?',$idProject);
+        $this->query('SELECT idPracownik,ImieNazwisko,procentUdzial,datOd,datDo FROM v_proj_prac_v2 WHERE idProjekt=?',$idProject);
         $this->valueToReturn=$this->queryReturnValue();
     }
     public function getReturnedValue()
@@ -415,9 +495,14 @@ class checkGetData extends manageProject
         "getprojectsleader",
         "getprojectsmanager",
         "getprojectteam",
+        'getprojectdetail',
         "gettypeofagreement",
         "getadditionaldictdoc",
-        "addteam"
+        "getallemployeeprojsumperc",
+        "getallavaliableemployeeprojsumperc",
+        "addteam",
+        'getprojectdocuments',
+        'closeProject'
     );
     function __construct()
     {
@@ -488,11 +573,22 @@ class checkGetData extends manageProject
             break;
         case "edit":
             break;
-        case "del":
+        case "removeProject":
             $this->deleteProject($_POST);
+            break;
+        case "closeProject":
+            $this->closeProject($_POST);
             break;
         case "getprojects":
             $this->getAllProjects();
+            break;
+        case "getprojectdetail":
+            $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+            $this->getProjectDetails();
+            break;
+        case 'getprojectdocuments':
+            $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+            $this->getProjectDocuments($this->idProject);
             break;
         case "getprojectsmember":
             $this->getProjectPers('v_slo_czlonek_proj');
@@ -512,6 +608,12 @@ class checkGetData extends manageProject
         case  "getprojectteam":
             $idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
             $this->getProjectTeam($idProject);
+            break;
+        case  "getallemployeeprojsumperc":
+            $this->getProjectSlo('v_udzial_sum_procent_prac','idPracownik');
+            break;
+        case  "getallavaliableemployeeprojsumperc":
+            $this->getAllavaliableEmployee();
             break;
         default:
             //no task

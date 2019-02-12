@@ -27,6 +27,12 @@ class manageProject extends initialDb
                 (
                     "Musisz wskazać co najmniej jedną osobę do projektu",
                     "Pracownik jest już przypisany do projektu"
+                ),
+                "input"=>array
+                (
+                    "Nie uzupełniono pola.",
+                    "Wprowadzona wartość jest za długa",
+                    "Wprowadzona wartość jest za krótka"
                 )
             );
     
@@ -35,7 +41,7 @@ class manageProject extends initialDb
         parent::__construct();
     }
     
-    private function parsePostData($postData)
+    private function parsePostData($postData=array())
     {
         $tmpArray=array();
         foreach($postData as $key =>$value)
@@ -134,6 +140,46 @@ class manageProject extends initialDb
         }
         return($allPers);
     }
+    protected function getSendedDoc()
+    {
+        $documentList=array();
+        $tmpArray=array();
+        $tmpId=array();
+        $isDoc=false;
+        $err=false;
+        $inputCounter=1;
+        if(!$this->err)
+        {
+            foreach($this->inpArray as $key =>$value)
+            {
+                $this->isEmpty("Pole - ".$inputCounter,$value);
+                    if(substr($key,0,7)==='orgDok-')
+                    {
+                        //echo "UPDATE";
+                        $tmpId=explode('-',$key);
+                        array_push($tmpArray,'org',$tmpId[1],$value);
+                        $isDoc=true;
+                        
+                    }
+                    else if(substr($key,0,7)==='newDok-')
+                    {
+                        //echo "INSERT";
+                        array_push($tmpArray,'new','n',$value);
+                        $isDoc=true;
+                    }
+                    else {};
+                    if($isDoc)
+                    {
+                       array_push($documentList,$tmpArray); 
+                    }
+                    $tmpArray=[];
+                    $tmpId=[];
+                    $isDoc=false;
+                    $inputCounter++;
+            }
+        }
+        return($documentList);
+    }
     protected function checkPersPercent($dataArray)
     {
         $id=$dataArray[0];
@@ -220,9 +266,100 @@ class manageProject extends initialDb
                     $this->updateTeamInDb($value);
                 }
             }
-            
         }
     }
+    //
+    protected function updateProjectDoc($data,$idProject)
+    {
+        $this->parsePostData($data);
+        $documents=$this->getSendedDoc();
+        $this->getProjectDocuments($this->idProject);
+        $documentsInDb=$this->valueToReturn;
+        $this->valueToReturn=[];
+        //print_r($documents);
+        if(!$this->err)
+        {
+            // PARSE SENDED TEAM
+            foreach($documents as $key => $value)
+            {
+                $this->manageSendedDocActionInDb($documentsInDb,$value,$idProject);
+                //print_r($value);
+            }
+            $this->removeNotSendedDoc($documentsInDb,$documents,$idProject);
+        }
+    }
+    protected function manageSendedDocActionInDb(&$documentsInDb,&$doc,$idProject)
+    {
+        $insTask=true;
+        //print_r($documentsInDb);
+        if($doc[1]!=='n')
+        {
+            foreach($documentsInDb as $key => $value)
+            {
+                if($value['ID']===$doc[1])
+                {   // UPDATE
+                    if(trim($value['NAZWA'])!==trim($doc[2]))
+                    {
+                        //echo "[".$doc[1]."]UPDATE DOC NAME IN DB - different name\n";
+                        $this->query(
+                                   'UPDATE projekt_dok SET nazwa=?, wsk_u=? WHERE id_projekt=? AND id=?',
+                                 $doc[2].',0,'.$idProject.','.$doc[1]);
+                                }
+                        $insTask=false;
+                        break;
+                    }
+                }  
+        }
+        if($insTask)
+        {
+            // INSERT
+            //echo "[]INSERT INTO DB NEW DOC\n";
+            $this->query('INSERT INTO projekt_dok (id_projekt,nazwa) VALUES (?,?)',$idProject.','.$doc[2]);     
+        }
+    }
+    protected function isEmpty($key,$data)
+    {
+        if(trim($data)==='')
+        {
+            $this->err.="[".$key."]".$this->infoArray['input'][0]."<br/>";
+        };
+    }
+    protected function removeNotSendedDoc(&$documentsInDb,$sendedDoc,$idProject)
+    {
+        $found=false;
+        $idInDb='';
+        $idInDoc='';
+        //echo "Sended documents:\n";
+        //print_r($sendedDoc);
+        //echo "Documents in database:\n";
+        //print_r($documentsInDb);
+        
+        foreach($documentsInDb as $key => $value)
+        {
+            foreach($sendedDoc as $id => $data)
+            {
+                $idInDb=(string)$value['ID'];
+                $idInDoc=(string)$data[1];
+                if($idInDb===$idInDoc)
+                {
+                    //echo "[DB=${idInDb}]FOUND IN SENDED DOC\n";
+                    $found=true;
+                    break;
+                }
+            }
+            if(!$found)
+            {
+                // UPDATE - DELETE WSK_U=0
+                //echo "[DB=${idInDb}]NOT FOUND SET WSK_U=0\n";
+                $this->query(
+                     'UPDATE projekt_dok SET wsk_u=? WHERE id_projekt=? AND id=?',
+                     '1,'.$idProject.','.$idInDb); 
+            }
+            $found=false;
+            //print_r($value);
+        }
+    }
+    //
     protected function removeNotSendedTeamMembers(&$team)
     {
         // GET TEAM FROM DB
@@ -263,25 +400,20 @@ class manageProject extends initialDb
         $this->valueToReturn=null;
     }
     protected function manageTeamPersActionIdDb(&$teamRow)
-    //protected function manageTeamPersActionIdDb($id,&$team)
     {
         // CHECK PERCENT
         if($this->checkPersPercent($teamRow))
-        //if($this->checkPersPercent($team[$id]))
         {
             $count=$this->checkExistInDb('projekt_pracownik','id_projekt=? AND id_pracownik=? ',$this->idProject.','.$teamRow[0]);
-            //$count=$this->checkExistInDb('projekt_pracownik','id_projekt=? AND id_uzytkownik=? ',$this->idProject.','.$team[$id][0]);
             if($count>0)
             {
                 // UPDATE
                 array_push($teamRow,'UPDATE');
-                //array_push($team[$id],'UPDATE');
             }
             else
             {
                 // INSERT
                 array_push($teamRow,'INSERT');
-                //array_push($team[$id],'INSERT');
             }
         }
     }
@@ -502,7 +634,9 @@ class checkGetData extends manageProject
         "getallavaliableemployeeprojsumperc",
         "addteam",
         'getprojectdocuments',
-        'closeProject'
+        'closeProject',
+        'setprojectdocuments',
+        'setprojectdetails'
     );
     function __construct()
     {
@@ -555,9 +689,6 @@ class checkGetData extends manageProject
             return 0;
         }
         return 0;
-    }
-    protected function parsePostData()
-    {
     }
     private function runTask()
     {
@@ -614,6 +745,17 @@ class checkGetData extends manageProject
             break;
         case  "getallavaliableemployeeprojsumperc":
             $this->getAllavaliableEmployee();
+            break;
+        case "setprojectdocuments":
+            //echo "setprojectdocuments\n";
+            $this->setUser($_SESSION["username"]);
+            $this->idProject=filter_input(INPUT_POST,'idProject',FILTER_VALIDATE_INT);
+            $this->updateProjectDoc($_POST,$this->idProject);
+            //print_r($_POST);
+            break;
+        case "setprojectdetails":
+            $this->setUser($_SESSION["username"]);
+            print_r($_POST);
             break;
         default:
             //no task

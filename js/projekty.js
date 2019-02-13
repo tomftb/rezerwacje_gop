@@ -1,5 +1,5 @@
-var err = new Array();
 // origin
+var errInputValue= new Array();
 var memberProjTab=new Array();
 var countOfMemberProjTab=0;
 var countOfAvaliableMemberProjTab=0;
@@ -208,59 +208,63 @@ function addStyleToHtmlTag(htmlElement,styleName,styleValue)
         case 'borderBottomLeftRadius':
             htmlElement.style.borderBottomLeftRadius=styleValue;
             break;
+        case 'display':
+            htmlElement.style.display=styleValue;
+            break;
         default:
             break;
     };
     return(htmlElement);
 }
-function parseValue(data,field)
+function parseFieldValue(data,fieldType,errDivAlt)
 {
-    var valueToParse="";
-    var typeOfValueToParse="";
+    console.log('---parseFieldValue---');
+    console.log(data);
+    console.log(fieldType);
+    console.log(errDivAlt);
+    var errDiv;
 
-    //console.log(typeof(data));
+    var plChars='ąĄćĆęĘłŁńŃóÓśŚżŻźŹ';
+    var valueToParse;
+    var typeOfValueToParse;
+    console.log(typeof(data));
     if(typeof(data)==='object')
     {
-        //console.log("object");
         valueToParse=data.value;
         typeOfValueToParse=data.name;
+        errDiv=data.parentNode.childNodes[1];   
+        console.log(data.parentNode.childNodes[1]);
     }
     else
     {
-         valueToParse=data;
-         typeOfValueToParse=field;
+        valueToParse=data;
+        typeOfValueToParse=fieldType;
+        errDiv=document.getElementById(errDivAlt);
     };
-    //console.log(valueToParse);
-    //console.log('parseValue - '+ valueToParse+' - '+typeOfValueToParse);
-
-    //console.log('name: '+typeOfValueToParse);
-    var plChars='ąĄćĆęĘłŁńŃóÓśŚżŻźŹ';
-
-    valueToParse=myTrim( valueToParse);
+    valueToParse=myTrim(valueToParse);
    
     var thisRegex = new RegExp("^[\\da-zA-Z'"+plChars+"][\\/\\-\\_\\s\\da-zA-Z"+plChars+"]*[\\.\\s\\da-zA-Z"+plChars+"]{1}$");
-
     if(!thisRegex.test(valueToParse))
-    {  
-        //console.log('faile');
-        // check exist 
-        if(err.indexOf(typeOfValueToParse)===-1)
+    {
+        console.log('[err]['+typeOfValueToParse+'] '+valueToParse);
+        if(errInputValue.indexOf(typeOfValueToParse)===-1)
         {
-            //console.log("index "+typeOfValueToParse+" not exists ");
-            err.push(typeOfValueToParse); 
-        }
-        document.getElementById("errText-"+typeOfValueToParse).innerHTML="Błąd składni";
-        document.getElementById("errDiv-"+typeOfValueToParse).style.display = "block";
+            errInputValue.push(typeOfValueToParse); 
+        };
+        errDiv.innerText = "Błąd składni";
+        errDiv.style.display = "block";
     }
     else
     {
-        err.splice( err.indexOf(typeOfValueToParse), 1 );
-        //console.log('ok');
-        document.getElementById("errText-"+typeOfValueToParse).innerHTML="";
-        document.getElementById("errDiv-"+typeOfValueToParse).style.display = "none";
+        if(errInputValue.indexOf(typeOfValueToParse)!==-1)
+        {
+            errInputValue.splice(errInputValue.indexOf(typeOfValueToParse), 1 );
+        };
+        console.log('[ok]['+typeOfValueToParse+'] '+valueToParse);
+        errDiv.innerText = "";
+        errDiv.style.display = "none";
     }
-    checkErr();
-
+    checkIsErr();
 }
 function setSubmitButton(err)
 {
@@ -291,97 +295,9 @@ function setTypOfAgreement(valueToSetup)
     document.getElementById("pdfDokListTypUmowy").innerHTML =splitValue[2];
     
 }
-function addFormField2(elementWhereAdd)
-{
-    // CONTAINER FORM FIELD
-    var newFieldContainer=document.createElement("div");
-    newFieldContainer.setAttribute('class','input-group-addon');
-    newFieldContainer.setAttribute('name','newFieldContainer');
-   
-    // REMOVE BUTTON
-    var removeButtonContainer=document.createElement("div");
-    removeButtonContainer.setAttribute('class','input-group-addon');
-    removeButtonContainer.classList.add("input-group-append");
-
-    var removeButton=document.createElement("div");
-    removeButton.setAttribute('class','btn');
-    removeButton.classList.add("btn-danger");
-    removeButton.classList.add("rounded-right");
-    removeButton.onclick = function() { closeNode(this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode),this.parentNode.parentNode); };
-    var removeIco=document.createElement("i");
-    removeIco.setAttribute('class','fa');
-    removeIco.classList.add("fa-minus");
-    removeIco.setAttribute('aria-hidden','true');
-    removeButton.appendChild(removeIco);
-    removeButtonContainer.appendChild(removeButton);
-    //
-    console.log('addFormField - '+extraDivCounter);
-    console.log('element where to add : ');
-    console.log(elementWhereAdd);
-    console.log(document.getElementById('projectsMemberAll'));
-    var newFields = document.getElementById('projectsMemberAll').cloneNode(true);
-    //newFields.id = 'dynamicField'+extraDivCounter;
-    newFields.id = 'extraDiv'+extraDivCounter;
-    console.log('newFields:');
-    console.log(newFields);
-    newFields.style.display = 'block';
-    var newField = newFields.childNodes;
-    var finallyField=newField[1].childNodes;
-    for (var i=0;i<finallyField.length;i++)
-    {
-        var theName = finallyField[i].name;
-        console.log(finallyField[i]);    
-        console.log('theName - '+theName);
-        if (theName)
-        {
-            newField[1].childNodes[i].name = "newField"+extraDivCounter;
-            newField[1].childNodes[5].id="errDiv-newField"+extraDivCounter;
-            newField[1].childNodes[5].childNodes[1].childNodes[1].id="errText-newField"+extraDivCounter;
-            }
-    }
-    //var insertHere = document.getElementById('extraFormDoc');
-    var insertHere = document.getElementById(elementWhereAdd);
-    //insertHere.parentNode.insertBefore(newFields,insertHere);
-    newFields.appendChild(removeButtonContainer);
-    //newFieldContainer.appendChild(newFields);
-    insertHere.appendChild(newFields);
-    
-    //insertHere(newFields,insertHere);
-    console.log(document.getElementById(elementWhereAdd)); 
-    extraDivCounter++;
-}
-function addFormField3(elementWhereAdd)
-{
-    //console.log('addFormField - '+counter);
-    var newFields = document.getElementById('projectsMemberAll-TEST').cloneNode(true);
-    newFields.id = '';
-
-	newFields.style.display = 'block';
-	var newField = newFields.childNodes;
-        var finallyField=newField[1].childNodes;
-	for (var i=0;i<finallyField.length;i++)
-        {
-            var theName = finallyField[i].name;
-            //console.log(finallyField[i]);    
-            //console.log('theName - '+theName);
-		if (theName)
-                {
-                        newField[1].childNodes[i].name = "pdfExtra"+counter;
-                        newField[1].childNodes[5].id="errDiv-pdfExtra"+counter;
-                        newField[1].childNodes[5].childNodes[1].childNodes[1].id="errText-pdfExtra"+counter;
-                }
-	}
-        //var insertHere = document.getElementById('extraFormDoc');
-	var insertHere = document.getElementById(elementWhereAdd);
-	//insertHere.parentNode.insertBefore(newFields,insertHere);
-        insertHere.appendChild(newFields);
-        //insertHere(newFields,insertHere);
-        //console.log(insertHere.childNodes); 
-        counter++;
-}
 function addFormField()
 {
-    //console.log('addFormField - '+counter);
+    console.log('---addFormField()---\ncounter :'+counter);
     var newFields = document.getElementById('readroot').cloneNode(true);
     newFields.id = '';
 
@@ -391,8 +307,6 @@ function addFormField()
 	for (var i=0;i<finallyField.length;i++)
         {
             var theName = finallyField[i].name;
-            //console.log(finallyField[i]);    
-            //console.log('theName - '+theName);
 		if (theName)
                 {
                         newField[1].childNodes[i].name = "pdfExtra"+counter;
@@ -400,12 +314,8 @@ function addFormField()
                         newField[1].childNodes[5].childNodes[1].childNodes[1].id="errText-pdfExtra"+counter;
                 }
 	}
-        //var insertHere = document.getElementById('extraFormDoc');
 	var insertHere = document.getElementById('writeroot');
-	//insertHere.parentNode.insertBefore(newFields,insertHere);
-        insertHere.appendChild(newFields);
-        //insertHere(newFields,insertHere);
-        //console.log(insertHere.childNodes); 
+        insertHere.appendChild(newFields); 
         counter++;
 }
 //function getAjaxData(modul,task)
@@ -421,22 +331,31 @@ function getAjaxData(task,idToSetup,nameToSetup,addon,projectStatus)
     // example of url host + modul/manageProject.php?task+ task getprojects
     var url =  host+'modul/manageProject.php?task='+task+addon;
     var xmlhttp = new XMLHttpRequest();
-    var ajaxData;
+    var ajaxData = new Array();
     xmlhttp.onreadystatechange = function()
     {
       if (this.readyState === 4 && this.status === 200)
       {
-        ajaxData = JSON.parse(this.responseText);
-        //console.log(ajaxData);
-        //console.log(ajaxData[0][0]);
-        if(ajaxData[0][0]==='0')
+        if(task==='getpdf')
         {
-            manageTask(task,ajaxData[1],idToSetup,nameToSetup,projectStatus);
+            ajaxData=this.getAllResponseHeaders();
+            //ajaxData=this.responseText;
+            console.log(ajaxData);
         }
         else
         {
-            alert("[getAJaxData]ERROR: "+ajaxData[1]);
-        };
+            ajaxData = JSON.parse(this.responseText);
+            if(ajaxData[0][0]==='0')
+            {
+                manageTask(task,ajaxData[1],idToSetup,nameToSetup,projectStatus);
+            }
+            else
+            {
+                alert("[getAJaxData]ERROR: "+ajaxData[1]);
+            };
+        }
+        //console.log(ajaxData);
+        //console.log(ajaxData[0][0]);
       }
       else
       {
@@ -509,13 +428,13 @@ function manageTask(taskToRun,data,id,name,projectStatus)
                 currentProjectDetails=[];
                 setDisabledFields(taskToRun);
                 fields.push('id','create_date','typ_umowy','typ_umowy_alt','numer_umowy','temat_umowy','kier_grupy','kier_grupy_id','term_realizacji','harm_data','koniec_proj','nadzor','nadzor_id');
-                console.log(data[0]);
-                console.log(data[1]);
+                //console.log(data[0]);
+                //console.log(data[1]);
                 currentProjectDetails=getDataFromJson(data[0],fields);
                 fields=[];
                 fields.push('ID','NAZWA');
                 currentProjectDetails.push(getDataFromJson(data[1],fields));
-                console.log(currentProjectDetails);
+                //console.log(currentProjectDetails);
                 createProjectDetailView(document.getElementById('ProjectAdaptedDynamicData'),taskToRun,projectStatus);
                 break;
         case 'getprojectdocuments':
@@ -528,6 +447,9 @@ function manageTask(taskToRun,data,id,name,projectStatus)
                 //console.log(currentProjectDoc);
                 createProjectDocView(document.getElementById('ProjectAdaptedDynamicData'),taskToRun,projectStatus);
                 break;
+        case 'getpdf':
+            alert(data);
+            break;
         default:
             alert('[manageTask]ERROR - wrong task');
             break;
@@ -541,30 +463,24 @@ function setDisabledFields(task)
         case 'getprojectdocuments':
                 inputAttribute[6][0]='readOnly';
                 inputAttribute[7][0]='disabled';
-                removeButtonDivButtonClass[2]='disabled'
+                removeButtonDivButtonClass[2]='disabled';
             break;
         case 'getprojectdetail':
             datePickerAttribute[6][0]='readOnly';
             datePickerAttribute[7][0]='disabled';
             datePickerSpanAttribute[1][0]='readOnly';
             datePickerSpanAttribute[3][0]='disabled';
-           
             datePickerDivGroupAttribute[2][0]='disabled';
             datePickerDivGroupAttribute[1][0]='no-data-provide';
-            
             selectAttribute[3][0]='readolny';
             selectAttribute[4][0]='disabled';
-            
             inputAttribute[6][0]='readOnly';
             inputAttribute[7][0]='disabled';
-            
-            removeButtonDivButtonClass[2]='disabled'
-            
+            removeButtonDivButtonClass[2]='disabled';
             break;
         default:
             break;  
     }
-   
 }
 function setEnabledFields(task)
 {
@@ -695,14 +611,13 @@ function createProjectDetailView(elementWhereAdd,taskToRun,projectStatus)
     inputStyle=[];
     datePickerDivGroupClass[1]='mb-1';
     
-    
     var mainTemplate=document.getElementById('addProjectModalDetail').cloneNode(true);
     var formName=mainTemplate.childNodes[1].childNodes[1];
     formName.name='setprojectdetails';
     var confirmButton=mainTemplate.childNodes[1].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[3];
     
-    console.log(mainTemplate.childNodes[1].childNodes[1].childNodes[1]);
-    console.log(mainTemplate.childNodes[1].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[3]);
+    //console.log(mainTemplate.childNodes[1].childNodes[1].childNodes[1]);
+    //console.log(mainTemplate.childNodes[1].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[3]);
 
     createProjectDetailViewFields(mainTemplate.childNodes[1].childNodes[1].childNodes[1],taskToRun);
     
@@ -746,6 +661,17 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
     var div1=new Array(
 	Array('class','col-sm-4')
 	);
+    var divErrAtr=new Array(
+            Array('class','col-sm-auto'),
+            Array('id','')
+            );
+    var divErrClass=new Array(
+            'alert',
+            'alert-danger'
+            );
+    var divErrStyle=new Array(
+            Array('display','none')
+            );
     //
     var currentDataArray=new Array();
     var rebuildedArray=new Array();
@@ -763,10 +689,9 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
         else
         {
             inputAttribute[0][1]='text'; 
-        };
-        //console.log(projectFileds[i][2]);
-        inputAttribute[2][1]='inputProject'+i;
-        inputAttribute[3][1]='inputProject'+i;
+        };   
+        inputAttribute[2][1]=projectFileds[i][2];
+        inputAttribute[3][1]=projectFileds[i][2];
         if(projectFileds[i][2]==='nadzor')
         {
             tmpArray=splitValue(projectFileds[i][1],"|");
@@ -775,19 +700,25 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
         else
         {
              labelElement.innerText=projectFileds[i][1];
-        }
-       
+        }  
         elementWhereAppend.appendChild(labelElement);
         
         if(projectFileds[i][2]!=='proj_dok')
         {
-            //console.log(projectFileds[i][0]);
-            //console.log(projectFileds[i][2]);
             if(projectFileds[i][0]==='t' || projectFileds[i][0]==='hidden')
             {
                 inputAttribute[4][1]=assignProjectDataToField(projectFileds[i][2]);
                 inputElement=createHtmlElement('input',inputAttribute,inputClass,inputStyle);
+                
+                divErrAtr[1][1]='errDiv-'+projectFileds[i][2];
+                divErr=createHtmlElement('div',divErrAtr,divErrClass,divErrStyle);
+                
+                inputElement.onblur=function()
+                {
+                    parseFieldValue(this,null,null);
+                };
                 div1Element.appendChild(inputElement);
+                div1Element.appendChild(divErr);
             }
             else if(projectFileds[i][0]==='d')
             {
@@ -795,8 +726,7 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
             }
             else if(projectFileds[i][0].substring(0, 2)==='s-')
             {
-                console.log('ADD SELECT');
-                
+                //console.log('ADD SELECT');
                 if(projectFileds[i][0]==='s-umowa')
                 {
                     // create select with umowa
@@ -823,7 +753,6 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
                     else
                 {}
             }
-            
         }
         else
         {
@@ -831,6 +760,7 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
         };
         currentDataArray=[];
         rebuildedArray=[];
+        
         elementWhereAppend.appendChild(div1Element);
     };
 }
@@ -843,7 +773,7 @@ function rebuildDataInArray(mainArray,mainColToCompare,swapRecord,swapColToCompa
     {
         if(mainArray[a][mainColToCompare]===swapRecord[swapColToCompare])
         {
-            console.log('FOUND - '+mainArray[a][mainColToCompare]); // assign id = 0
+            //console.log('FOUND - '+mainArray[a][mainColToCompare]); // assign id = 0
         }
         else
         {
@@ -855,12 +785,12 @@ function rebuildDataInArray(mainArray,mainColToCompare,swapRecord,swapColToCompa
 function createProjectDocList(docArray,elementWhereAppend,nrColWithData,taskToRun)
 {
     console.log('---createProjectDocList---');
-    console.log(docArray);
-    console.log(nrColWithData);
+    //console.log(docArray);
+    //console.log(nrColWithData);
     inputStyle.push(Array('borderTopRightRadius','0px'));
     inputStyle.push(Array('borderBottomRightRadius','0px'));
     inputClass[0]='mb-0';
-    console.log(inputStyle);
+    //console.log(inputStyle);
     var divDynamicAttribute=new Array(
             Array('id','dynamicDocList'),
             );
@@ -888,7 +818,7 @@ function createProjectDocList(docArray,elementWhereAppend,nrColWithData,taskToRu
     
     for(var d=0;d<docArray.length;d++)
     {
-        console.log(docArray[d]);
+        //console.log(docArray[d]);
         inputAttribute[2][1]='orgDok-'+docArray[d][0];
         inputAttribute[3][1]='orgDok-'+docArray[d][0];
         inputAttribute[4][1]=docArray[d][nrColWithData];
@@ -1970,13 +1900,11 @@ function addHiddenInput(name,value)
 }
 function createSelect(dataArray,fieldId,fieldName)
 {
-    console.log('---createSelect---\n'+fieldId);
+    //console.log('---createSelect---\n'+fieldId);
     //console.log('data - '+dataArray+'\n id - '+fieldId+'\n name - '+fieldName);
-    
     selectAttribute[1][1]=fieldId; // id 
     selectAttribute[2][1]=fieldName; // id 
 
-    
     var option=document.createElement("OPTION");
     var optionText = document.createTextNode("");
     
@@ -1997,7 +1925,7 @@ function createSelect(dataArray,fieldId,fieldName)
         option=document.createElement("OPTION");
         if(fieldName==='typ_umowy')
         {
-            console.log(dataArray[i][2]);
+            //console.log(dataArray[i][2]);
             option.setAttribute("value",dataArray[i][0]+'|'+dataArray[i][1]+"|"+dataArray[i][2]);
         }
         else
@@ -2016,8 +1944,6 @@ function setAllProjects(data)
     myFunction(data);
     function myFunction(arr)
     {
-            //new Array('btn-info','edit',"Edytuj"),
-            //new Array('btn-info','show','Podgląd'),
         var buttonConfig=new Array(
             new Array('btn-info','details','Szczegóły'),
             new Array('btn-info','documents','Dokumenty'),
@@ -2025,6 +1951,7 @@ function setAllProjects(data)
             
          );
         var button='';
+        var buttonpdf='';
         var out = "";
         var i;
         var j;
@@ -2046,8 +1973,12 @@ function setAllProjects(data)
                     {
                         statusProj='W trakcie';
                     }
+                    //buttonConfig.push(new Array('btn-danger','getpdf','PDF'));//btn-outline-danger
                     buttonConfig.push(new Array('btn-secondary','close','Zamknij'));
-                    buttonConfig.push(new Array('btn-danger','delete','Usuń'));
+                    buttonConfig.push(new Array('btn-danger ','delete','Usuń'));
+                    //buttonpdf="<button class=\"btn  btn-outline-danger btn-danger mr-0 mb-0 mt-0 ml-0\" data-toggle=\"modal\" ><a href=\"http://rezerwacje-gop.local:8080/modul/manageProject.php?task=getpdf&id=36\">PDF</a></button>";
+                    buttonpdf="<a href=\"http://rezerwacje-gop.local:8080/modul/manageProject.php?task=getpdf&id="+arr[i].id+"\" class=\"btn btn-danger btn-outline-danger mr-0 mb-0 mt-0 ml-0\" role=\"button\" aria-disabled=\"true\" target=\"_blank\">PDF</a>";
+                    //onclick=\"getPDF('"+arr[i].id+"','"+arr[i].status+"')\"
                     break;
                 case 'd':
                     statusProj='Usunięty';
@@ -2062,22 +1993,29 @@ function setAllProjects(data)
             {
                 button+="<button class=\"btn "+buttonConfig[j][0]+" mr-0 mb-0 mt-0 ml-0\" data-toggle=\"modal\" data-target=\"#ProjectAdaptedModal\" onclick=\"createAdaptedModal('"+buttonConfig[j][1]+"',"+arr[i].id+",'"+arr[i].temat_umowy+"','"+arr[i].status+"')\">"+buttonConfig[j][2]+"</button>";
             }
+            button+=buttonpdf;
             out+="<tr id=\"project"+arr[i].id+"\"><th scope=\"row\">"+arr[i].id+"</th><td>"+arr[i].numer_umowy+"</td><td>"+arr[i].temat_umowy+"</td><td>"+arr[i].create_date+"</td><td>"+arr[i].kier_grupy+"</td><td>"+arr[i].nadzor+"</td><td>"+arr[i].term_realizacji+"</td><td>"+arr[i].harm_data+"</td><td>"+arr[i].koniec_proj+"</td><td>"+statusProj+"</td><td><div class=\"btn-group\">"+button+"</div></td></tr>";
             button='';
         }
         document.getElementById("projectData").innerHTML = out;
     }
 }
-
+function getPDF(idProject,projectStatus)
+{
+    // NOT NEEDED
+   console.log('---getPDF---'); 
+   console.log(idProject); 
+   console.log(projectStatus); 
+   getAjaxData('getpdf','test','test','&id='+idProject,projectStatus);
+}
 function createAdaptedModal(modalType,idData,titleData,projectStatus)
 {
     console.log('---createAdaptedModal---');
     console.log("TASK "+modalType+" - "+idData+" - "+titleData);
     setAdaptedModalProperties(modalType,idData,titleData,projectStatus);
-    idRecord=idData;
-    //console.log("record to deleted - "+id);
-    
+    idRecord=idData;    
     document.getElementById("projectId").innerHTML = idData;
+   
 }
 function removeHtmlChilds(htmlElement)
 {
@@ -2108,6 +2046,8 @@ function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
             title.innerHTML="PODGLĄD PROJEKTU:";
             break;
         case 'documents':
+            document.getElementById("errDiv-Adapted-overall").style.display = "none";
+            document.getElementById("errDiv-Adapted-overall").innerText = "";
             document.getElementById("projectTitle").innerHTML = titleData;
             document.getElementById("projectId2").innerHTML ='';
             bgTitle.classList.add("bg-info");
@@ -2115,6 +2055,8 @@ function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
             getAjaxData('getprojectdocuments','ProjectAdaptedDynamicData','project_documents','&id='+idData,projectStatus);
             break;
         case 'details':
+            document.getElementById("errDiv-Adapted-overall").style.display = "none";
+            document.getElementById("errDiv-Adapted-overall").innerText = "";
             document.getElementById("projectTitle").innerHTML = '';
             document.getElementById("projectId2").innerHTML ='';
             bgTitle.classList.add("bg-info");
@@ -2130,12 +2072,14 @@ function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
             teamAvaliablePers=[];
             idProject=idData;
             document.getElementById("errDiv-Adapted-overall").style.display = "none";
-            document.getElementById("errText-Adapted-overall").innerHTML = "";
+            document.getElementById("errDiv-Adapted-overall").innerHTML = "";
             bgTitle.classList.add("bg-warning");
             title.innerHTML="ZESPÓŁ PROJEKTU:";
             getAjaxData('getprojectteam','ProjectAdaptedDynamicData','zespol_projektu','&id='+idData,projectStatus);
             break;
         case 'delete':
+            document.getElementById("errDiv-Adapted-overall").style.display = "none";
+            document.getElementById("errDiv-Adapted-overall").innerHTML = "";
             document.getElementById("projectTitle").innerHTML = titleData;
             document.getElementById("projectId2").innerHTML ='';
             bgTitle.classList.add("bg-danger");
@@ -2150,6 +2094,8 @@ function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
             createAddTeamBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'addTeamToProject',idData,projectStatus);
             createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'addTeamToProject',idData,projectStatus);
         case 'close':
+            document.getElementById("errDiv-Adapted-overall").style.display = "none";
+            document.getElementById("errDiv-Adapted-overall").innerHTML = "";
             document.getElementById("projectTitle").innerHTML = titleData;
             document.getElementById("projectId2").innerHTML ='';
             bgTitle.classList.add("bg-secondary");
@@ -2167,21 +2113,14 @@ function closeModal(modalId)
 {
     $('#'+modalId).modal('hide');
 }
-function checkErr()
+function checkIsErr()
 {
+    console.log('---checkIsErr()---');
     var errExists=false;
-    for(i=0;i<err.length;i++)
+    for(i=0;i<errInputValue.length;i++)
     {
         errExists=true;
-        //console.log(i+" - "+err[i]);
-    }
-    if(errExists)
-    {
-         setSubmitButton(true);
-    }
-    else
-    {
-         setSubmitButton(false);
+        //console.log(i+" - "+errInputValue[i]);
     }
     return (errExists);
 }
@@ -2190,34 +2129,33 @@ function postDataToUrl(nameOfForm)
     console.log('---postDataToUrl---');
     console.log(nameOfForm);
     var taskUrl;
-    var errTextAjax='';
-    var errDivAjax='';
+    var errDivAjax='errDiv-Adapted-overall';
     var confirmTask=false;
     var label;
+    var dataForm;
     switch(nameOfForm)
     {
         case 'addTeamToProject':
             taskUrl='modul/manageProject.php?task=addteam';
-            errTextAjax='errText-Adapted-overall';
-            errDivAjax='errDiv-Adapted-overall';
             confirmTask=true;
             break;
         case 'createPdfForm':
-            parseValue( document.getElementById('temat_umowy').value,"temat_umowy");
-            parseValue( document.getElementById('numer_umowy').value,"numer_umowy");
-            if(checkErr())
+            parseFieldValue( document.getElementById('temat_umowy').value,"temat_umowy","errDiv-temat_umowy");
+            parseFieldValue( document.getElementById('numer_umowy').value,"numer_umowy","errDiv-numer_umowy");
+            if(checkIsErr())
             {
                 console.log("err is true");
+                setSubmitButton(true);
                 return(0);
             };
+            setSubmitButton(false);
             taskUrl='modul/manageProject.php?task=add';
             document.getElementById("errDiv-overall").style.display = "none";
-            errTextAjax='errText-overall';
             errDivAjax='errDiv-overall';
             confirmTask=true;
             break;
         case 'removeProject':
-            label='usunięcie'
+            label='usunięcie';
         case 'closeProject':
             if(nameOfForm==='closeProject')
             {
@@ -2227,23 +2165,36 @@ function postDataToUrl(nameOfForm)
             confirmTask = confirm("Potwierdź "+label);
             break;
         case 'setprojectdetails':
+            parseFieldValue(dataForm[2][1],dataForm[2][0],errDivAjax);
+            parseFieldValue(dataForm[3][1],dataForm[3][0],errDivAjax);
         case 'setprojectdocuments':
+            dataForm=getFormData(nameOfForm);
+            //console.log(dataForm);
+            if(checkIsErr())
+            {
+                console.log("err is true");
+                return(0);
+            };
             confirmTask=true;
-            errTextAjax='addProjectModalDetail-errText';
-            errDivAjax='addProjectModalDetail-errDiv';
             taskUrl='modul/manageProject.php?task='+nameOfForm;
             break;
         default:
             break;
     };
-    //console.log('postDataToUrl()');
+    
+    if (confirmTask === true)
+    {
+        sendData(nameOfForm,taskUrl,errDivAjax);
+    };
+}
+function sendData(nameOfForm,taskUrl,errDivAjax)
+{
+    var errDiv=document.getElementById(errDivAjax);
     var xmlhttp = new XMLHttpRequest();
     var host =  getUrl();
     var response="";
     var url =  host+taskUrl;
-    if (confirmTask === true)
-    {
-        xmlhttp.onreadystatechange = function()
+    xmlhttp.onreadystatechange = function()
         {
           if (this.readyState === 4 && this.status === 200)
           {
@@ -2252,14 +2203,12 @@ function postDataToUrl(nameOfForm)
             console.log("id1 - "+response[1]);
             if(response[0]==='1')
             {
-                //err.push(typeOfValueToParse); 
-                //console.log("response not null - "+response);
-                document.getElementById(errTextAjax).innerHTML=response[1];
-                document.getElementById(errDivAjax).style.display = "block";
+                errDiv.innerHTML=response[1];
+                errDiv.style.display = "block";
             }
             else
             {
-                runTaskAfterAjax(nameOfForm);
+                runTaskAfterAjax(nameOfForm,errDiv);
             }
           }
           else
@@ -2269,12 +2218,13 @@ function postDataToUrl(nameOfForm)
         };
         xmlhttp.open("POST", url, true);
         xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xmlhttp.send(getDataForm(nameOfForm));
-    };
+        xmlhttp.send(createDataToSend(nameOfForm));
 }
-function runTaskAfterAjax(nameOfForm)
+function runTaskAfterAjax(nameOfForm,errDivAjax)
 {
-    
+    console.log('---runTaskAfterAjax---');
+    errDivAjax.innerHTML='';
+    errDivAjax.style.display = "none";
     switch(nameOfForm)
     {
         case 'addTeamToProject':
@@ -2290,23 +2240,27 @@ function runTaskAfterAjax(nameOfForm)
             getAjaxData('getprojects','test','test');
             $('#addProjectModal').modal('hide'); 
             break;
+        case 'setprojectdetails':
+            getAjaxData('getprojects','test','test');
+            $('#ProjectAdaptedModal').modal('hide'); 
+            break;
         case 'setprojectdocuments':
-            $('#ProjectAdaptedDynamic').modal('hide'); 
-            document.getElementById('addProjectModalDetail-errText').innerHTML='';
-            document.getElementById('addProjectModalDetail-errDiv').style.display = "none";
-        break;
+            $('#ProjectAdaptedModal').modal('hide'); 
+            break;
         default:
             alert('[runTaskAfterAjax]WRONG TASK - '+nameOfForm);
             break;
     };
 };
-function getDataForm(nameOfForm)
+function getFormData(formName)
 {
-    console.log('---getDataForm---\nName of form - '+nameOfForm);
-    var formToCheck=document.getElementsByName(nameOfForm);
+    console.log('---getFormData---\nName of form - '+formName);
+
+    var formToCheck=document.getElementsByName(formName);
     var fieldName;
     var fieldValue;
-    var params = '';
+    var tmpArray = new Array();
+    var params = new Array();
 
     for( var i=0; i<formToCheck[0].elements.length; i++ )
     {
@@ -2316,9 +2270,38 @@ function getDataForm(nameOfForm)
         {
            fieldValue=document.getElementById("pdfTypUmowy").innerHTML;
         };
-        console.log(fieldName+" - "+fieldValue);
-        params += fieldName + '=' + fieldValue + '&';
+
+        tmpArray.push(fieldName,fieldValue);
+        params.push(tmpArray);
+        tmpArray=[];
     }
+    return params;
+}
+function createDataToSend(nameOfForm)
+{
+    console.log('---createDataToSend---\nName of form - '+nameOfForm);
+    var formToCheck=document.getElementsByName(nameOfForm);
+    var fieldName;
+    var fieldValue;
+    var params = '';
+    
+    for( var i=0; i<formToCheck[0].elements.length; i++ )
+    {
+        
+        fieldName =formToCheck[0].elements[i].name;
+        fieldValue =formToCheck[0].elements[i].value;
+        //console.log(i+'| form name: '+fieldName+" form value: "+fieldValue);
+        if(fieldName!=='')
+        {
+           if(fieldName==='inputPdfDok3')
+            {
+               fieldValue=document.getElementById("pdfTypUmowy").innerHTML;
+            };
+            //console.log(fieldName+" - "+fieldValue);
+            params += fieldName + '=' + fieldValue + '&'; 
+        } 
+    }
+    //console.log(params);
     return params;
 }
 function getUrl()
@@ -2362,7 +2345,7 @@ function setDefault()
         console.log(extraFormDoc.firstChild);
         console.log(extraFormDoc.firstChild.childNodes[1].childNodes[1].name);
         indexToRemove=extraFormDoc.firstChild.childNodes[1].childNodes[1].name;
-         err.splice( err.indexOf(indexToRemove), 1 );
+        errInputValue.splice( errInputValue.indexOf(indexToRemove), 1 );
         extraFormDoc.firstChild.remove();
         console.log('remove');
     }
@@ -2375,7 +2358,7 @@ function closeNode(nodeToClose,clearErr)
     indexToRemove=clearErr.childNodes[1].name;
     console.log(clearErr.childNodes[1].name);
     console.log(nodeToClose);
-    err.splice( err.indexOf(indexToRemove), 1 );
+    errInputValue.splice( errInputValue.indexOf(indexToRemove), 1 );
     checkErr();
 }
 function removeTeamPersRow(nodeToClose,clearErr)
@@ -2415,10 +2398,6 @@ function editForm(elementWhereChange,taskToRun,editButton,formName)
             break;
     };
     console.log(elementWhereChange);
-}
-function testNothing()
-{
-    console.log('---testNothing---');
 }
 getAjaxData('getprojects','test','test','','');
 getAjaxData('getprojectsleader','inputPdf7','nadzor','','');

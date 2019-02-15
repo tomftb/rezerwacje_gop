@@ -4,7 +4,7 @@
 <body>
 <div class="w-100 " style="margin-top:-55px; border:0px solid red; position:fixed;">
     <div class="btn pull-left mt-0" > 
-        <button class="btn btn-info pull-right mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#addProjectModal" onclick="setDefault()">Dodaj projekt</button>
+        <button class="btn btn-info pull-right mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#ProjectAdaptedModal" onclick="createAdaptedModal('createProject','','','n')">Dodaj projekt</button>
     </div> 
 </div>
 <div class="w-100 " style="margin-top:150px; border:0px solid red;" >
@@ -33,121 +33,6 @@
     </div>
 </div>
 </div>
-<?php
-    $inputFileds=array(
-        array('s-umowa',"Do realizacji :",'typ_umowy'),
-        array('t','Numer:','numer_umowy'),
-        array('t','Temat:','temat_umowy'),
-        array('s-prac','Do kierowania grupa powołuje:','kier_grupy'),
-        array('d','Termin realizacji','term_realizacji'),
-        array('d','Kierującego zobowiązuję do przedstawienia harmonogramu prac do dnia','harm_data'),
-        array('d','Kierującego zobowiązuję do zakończenia prac i napisania raportu z realizacji zadania do dnia)','koniec_proj'),
-        array('s-prac','Nadzór nad realizacją <span id="pdfTypUmowy">umowy</span> powierzam','nadzor'),
-        array('l-dok','Wykaz powiązanych dokumentów :','','dokPowiazane')
-        );
-?>
-<div class="modal fade " id="addProjectModal" tabindex="-1" role="dialog" aria-labelledby="addProjectModalContent" aria-hidden="true">
-<div class="modal-dialog modal-lg mb-0" role="document" >
-    <div class="modal-content mb-0">
-      <div class="modal-header bg-info">
-          <!-- <h2 class="modal-title" id="fieldModalLabel"><p class="text-center">Create PDF FILE FROM input from</p></h2>-->
-      <h2 class="modal-title" id="fieldModalLabel"><span class="text-center text-white">POWOŁANIE GRUPY REALIZUJĄCEJ</span></h2> 
-      <button type="button" class="close mr-0" data-dismiss="modal" aria-label="Close" onclick="setDefault()">
-          <i class="fa fa-times" aria-hidden="true"></i>
-        </button>
-      </div>
-        <div class="modal-body mb-0 pb-1 pt-1">
-        <form class="form-horizontal"  autocomplete="off" method="POST"  ENCTYPE="multipart/form-data" action="javascript:void(0);" name="createPdfForm">
-    <?php
-    foreach($inputFileds as $id => $value)
-    {
-       ?>
-     <div class="form-group row mt-2 mb-1" style="border:0px solid blue;">
-        <label for="inputPdf<?php echo $id; ?>" class="col-sm-8 control-label text-right font-weight-bold"><?php echo $value[1]; ?></label>
-            <div class="col-sm-4" id="div-inputPdf<?php echo $id;?>">
-                
-                <?php
-                // check data type
-                $tmpSelect=array();
-                $condition=explode('-',$value[0]);
-                $onChange="";
-                $lastIdExtraDoc=0;
-                if($condition[0]==='t')
-                {
-                    echo '<input type="text" class="form-control" name="'.$value[2].'" id="'.$value[2].'" placeholder="Pole wymagane" onblur="parseFieldValue(this,\''.$value[2].'\')"/>';
-                     echo '<div class="text-left w-100 mb-0 mt-1">
-                <div class="alert alert-danger mb-0" id="errDiv-'.$value[2].'" style="display: none;"></div>  
-            </div>';
-                }
-                else if($condition[0]==='d')
-                {
-                    echo '<div class="input-group date" data-provide="datepicker"">
-                        <input type="text" class="form-control" name="d-'.$value[2].'" id="d-'.$value[2].'" placeholder="DD.MM.YYYY">
-                        <div class="input-group-addon input-group-append">
-                            <div class="input-group-append ">
-                                <span class="input-group-text" id="basic-addon2"><i class="fa fa-calendar" aria-hidden="true"></i></span>
-                            </div>
-                        </div>
-                    </div>';
-                }
-                else
-                {
-                };
-                ?>       
-        </div>
-     </div>
-    <?php
-     };
-     ?>
-            <div class="form-group row mt-0" style="border:0px solid red;">
-                <div class="col-sm-12" id="additionalDoc">
-                </div>
-            </div>
-       <div class="form-group row mt-0" style="border:0px solid red;">
-            <label for="inputPdf<?php echo $id; ?>" class="col-sm-8 control-label text-right font-weight-bold ">Dodatkowe dokumenty:</label>
-            <div class="col-sm-4" id="extraFormDoc">
-                <div id="writeroot" ></div>
-                <div class="entry input-group " >
-                    <button class="btn btn-success btn-add" type="button" onclick="addFormField()">
-                                    <i class="fa fa-plus" aria-hidden="true"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="col-sm-4" id="extraFormDocButton">
-                </div>
-       </div> 
-    <div class="form-group row mb-0" >
-       <div class=" col-sm-12" >
-         <button  id="postData" class="btn btn-info pull-right" onclick="postDataToUrl('createPdfForm')">Utwórz</button>
-       </div>
-     </div>
-    </form>
-    </div>
-        <div class="modal-footer w-100 mt-0 mb-0 pb-0 pl-0 pr-0">
-            <div class=" w-100 mb-0">
-                <div class="mb-1">
-                        <small class="modal-title text-left text-secondary pl-1 pb-2" id="fieldModalLabel">Legenda: </small> 
-                        <ul class="text-secondary font-weight-normal small" style="list-style-type:square;">
-                            <li>A - litera alfabetu, C - cyfra</li>
-                            <li>Numer,Temat,Dodatkowe dokumenty:</li>
-                                <ul style="list-style-type:disc;">
-                                <li>może się zaczą A|C</li>
-                                <li>może zawierać A,C,/,_,- i spacje</li>
-                                <li>może się zakończyć .</li>
-                                </ul>
-                            <li>Numer - max 20 znaków.</li>
-                            <li>Temat - max 100 znaków.</li>
-                            <li>Dodatkowe dokumenty - max 50 znaków</li>
-                        </ul>
-                </div>
-                <div class="alert alert-danger mb-0" id="errDiv-overall" style="display: none;">
-                    <span id="errText-overall"></span>
-                </div>
-            </div>
-        </div>
-    </div>
-    </div>
-</div>
 <!-- ADAPTED MODAL PROJECT -->
 <div class="modal fade " id="ProjectAdaptedModal" tabindex="-1" role="dialog" aria-labelledby="ProjectAdaptedModalContent" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -168,20 +53,21 @@
                     <div class="col-sm-12"  id="ProjectAdaptedDynamicData">
                     </div>
                 </div>
-                <div class="form-group row mb-0" style="border:1px solid black" >
+                <div class="form-group row mb-0" style="border:0px solid black" >
                     <div class=" col-sm-12" id="ProjectAdaptedButtonsBottom">
                     </div>
                 </div>
+                <div class="alert alert-danger row" id="errDiv-Adapted-overall" style="border:0px solid blue">
+                        <span id="errText-Adapted-overall"></span>
+                </div>
+                <div class="form-group row" id="ProjectAdaptedBodyExtra" style="border:0px solid blue"></div>
             </div>
             <div class="modal-footer w-100 mt-1" >
                 <div class="w-100 mr-0 ml-0 pr-0 pl-0" style="border:0px solid purple">
                      <div class="row w-100" style="border:0px solid black">
                         <small class="text-left text-secondary" id="fieldModalLabel">Project id: <span id="projectId"></span></small> 
                         <small class="text-left text-secondary" id="fieldModalLabel2"><span id="projectId2"></span></small> 
-                    </div>
-                    <div class="alert alert-danger row" id="errDiv-Adapted-overall" style="border:0px solid blue">
-                        <span id="errText-Adapted-overall"></span>
-                    </div>
+                     </div>
                 </div>
             </div>
         </div>
@@ -210,7 +96,7 @@
     <div class="form-group row mt-2 mb-1" id="addProjectModalDetailFields">		
     </div>
     <div class="form-group row mb-0" id="addProjectModalDetailButtons">
-       <div class=" col-sm-12" style="border:1px solid green;" >
+       <div class=" col-sm-12" style="border:0px solid green;" >
            <div class="btn-group pull-right">
                 <button class="btn btn-dark" data-dismiss="modal">Anuluj</button>
                 <button id="postDataSubmit" class="btn btn-info" >Edytuj</button>
@@ -219,28 +105,27 @@
      </div>
 </form>
 </div>
-<!-- LEGEND -->
-<div class="modal fade mb-0 pb-0" id="legendDiv" style="border:0px solid green;">
-        <hr class="w-100"></hr>
-                        <small class="modal-title text-left text-secondary pl-1 pb-2" id="fieldModalLabel">Legenda: </small> 
-                        <ul class="text-secondary font-weight-normal small" style="list-style-type:square;">
-                            <li>A - litera alfabetu, C - cyfra</li>
-                            <li>Numer,Temat,Dodatkowe dokumenty:</li>
-                                <ul style="list-style-type:disc;">
-                                <li>może się zaczą A|C</li>
-                                <li>może zawierać A,C,/,_,- i spacje</li>
-                                <li>może się zakończyć .</li>
-                                </ul>
-                            <li>Numer - max 20 znaków.</li>
-                            <li>Temat - max 100 znaków.</li>
-                            <li>Dodatkowe dokumenty - max 50 znaków</li>
-                        </ul>
-</div>    
-<!-- END LEGEND -->
-           
 </div>
 <!-- END PROJECT DETAIL TEMPLATE -->
+<!-- LEGEND -->
+<div class="modal fade mb-0 pb-0 col-sm-12" id="legendDiv" style="border:0px solid green;">
+    <hr class="w-100"></hr>
+        <small class="modal-title text-left text-secondary pl-1 pb-2" id="fieldModalLabel">Legenda:</small> 
+            <ul class="text-secondary font-weight-normal small" style="list-style-type:square;">
+                <li>A - litera alfabetu, C - cyfra</li>
+                <li>Numer,Temat,Dodatkowe dokumenty:</li>
+                    <ul style="list-style-type:disc;">
+                        <li>może się zaczą A|C</li>
+                        <li>może zawierać A,C,/,_,- i spacje</li>
+                        <li>może się zakończyć .</li>
+                    </ul>
+                <li>Numer - max 20 znaków.</li>
+                <li>Temat - max 100 znaków.</li>
+                <li>Dodatkowe dokumenty - max 50 znaków</li>
+            </ul>
+</div>    
+<!-- END LEGEND -->
 <div id="div-inputPdf7a" style="display:block; border:0px solid black;"></div>
 <script>
-window.onload=setDefault();
+window.onload=getAjaxData('getProjectDefaultValues','','','','');
 </script>

@@ -101,6 +101,7 @@ class manageProject extends initialDb
             return($teamValueToFind);
         }
     }
+    
     protected function checkAndAddignTeamValue($key,$value,&$teamValueToFind,&$persAttributes,&$allPers,&$counter,$teamValueToFindLength)
     {
         $found=strpos($key,$teamValueToFind);
@@ -272,9 +273,13 @@ class manageProject extends initialDb
     protected function updateProjectDoc($data,$idProject)
     {
         $this->parsePostData($data);
+       
         $documents=$this->getSendedDoc();
+        //print_r($documents);
         $this->getProjectDocuments($this->idProject);
+        
         $documentsInDb=$this->valueToReturn;
+        //print_r($documentsInDb);
         $this->valueToReturn=[];
         //print_r($documents);
         if(!$this->err)
@@ -324,6 +329,41 @@ class manageProject extends initialDb
             $this->err.="[".$key."]".$this->infoArray['input'][0]."<br/>";
         };
     }
+    protected function getPdf($idProject)
+    {
+        $this->getProjectDetails($idProject);
+        
+        /*
+         * [0] Project details
+         * [1] Documents
+         */
+        $projectDetails=array();
+        $projectDoc=array();
+        $projectTeam=array();
+        $projectMainManager=array();
+        $projectMainTech=array();
+        
+        $projectDetails=$this->valueToReturn[0][0];
+        //print_r($projectDetails);
+        $projectDoc=$this->valueToReturn[1];
+        
+        $this->getProjectTeamPdf($idProject);
+        
+        if(count($this->valueToReturn)>0)
+        {
+            $projectTeam=$this->valueToReturn;
+            
+        }
+        //print_r($projectTeam);
+        $this->getProjectPers('v_slo_kier_osr_proj');
+        
+        $projectMainManager=$this->valueToReturn[0];
+        //print_r($projectMainManager);
+        $this->getProjectPers('v_slo_glow_tech_proj');
+        $projectMainTech=$this->valueToReturn[0];
+        //print_r($projectMainTech);
+        require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/modul/createPdf.php');
+    }
     protected function removeNotSendedDoc(&$documentsInDb,$sendedDoc,$idProject)
     {
         $found=false;
@@ -336,9 +376,9 @@ class manageProject extends initialDb
         
         foreach($documentsInDb as $key => $value)
         {
+            $idInDb=(string)$value['ID'];
             foreach($sendedDoc as $id => $data)
             {
-                $idInDb=(string)$value['ID'];
                 $idInDoc=(string)$data[1];
                 if($idInDb===$idInDoc)
                 {
@@ -349,8 +389,8 @@ class manageProject extends initialDb
             }
             if(!$found)
             {
-                // UPDATE - DELETE WSK_U=0
-                //echo "[DB=${idInDb}]NOT FOUND SET WSK_U=0\n";
+                // UPDATE - DELETE WSK_U=1
+                //echo "[DB=${idInDb}]NOT FOUND SET WSK_U=1\n";
                 $this->query(
                      'UPDATE projekt_dok SET wsk_u=? WHERE id_projekt=? AND id=?',
                      '1,'.$idProject.','.$idInDb); 
@@ -448,6 +488,23 @@ class manageProject extends initialDb
             $this->err.="[${id}] NO DATA ABOUT PERSON IN DB!<br/>";
         };
     }
+    protected function getProjectDefaultValues()
+    {
+        $valueToReturn=array();
+        $this->getProjectSlo('v_slo_um_proj');	
+        array_push($valueToReturn,$this->valueToReturn);
+        $this->getProjectPers('v_slo_lider_proj');
+        array_push($valueToReturn,$this->valueToReturn);
+        $this->getProjectPers('v_slo_kier_proj');
+        array_push($valueToReturn,$this->valueToReturn);
+        $this->getProjectSlo('v_slo_dok');
+        array_push($valueToReturn,$this->valueToReturn);
+        $this->getProjectPers('v_slo_glow_tech_proj');
+        array_push($valueToReturn,$this->valueToReturn);
+	$this->getProjectPers('v_slo_kier_osr_proj');
+        array_push($valueToReturn,$this->valueToReturn);
+        $this->valueToReturn=$valueToReturn;
+    }
     protected function checkValuesOfProject()
     {
         $valueToCheck=array(
@@ -469,24 +526,25 @@ class manageProject extends initialDb
             }
         } 
     }
-    protected function addNewProject($valueToAdd)
+    protected function addProject($valueToAdd)
     {
         $this->parsePostData($valueToAdd);
         $this->checkValuesOfProject();
-        
         if(!$this->err)
         {
             // EXPLODE FIELDS:
             $typ_umowy=explode('|',$this->inpArray['typ_umowy']);
             $kier_grupy=explode('|',$this->inpArray['kier_grupy']);
             $nadzor=explode('|',$this->inpArray['nadzor']);
+            $technolog=explode('|',$this->inpArray['gl_tech']);
+            $kier_osr=explode('|',$this->inpArray['gl_kier']);
             $curretDateTime=date('Y-m-d H:i:s');
             
             $this->query('INSERT INTO projekt_nowy 
-            (create_user,create_date,typ_umowy,typ_umowy_alt,numer_umowy,temat_umowy,kier_grupy,kier_grupy_id,term_realizacji,harm_data,koniec_proj,nadzor,nadzor_id,mod_user,mod_user_id) 
+            (create_user,create_date,typ_umowy,typ_umowy_alt,numer_umowy,temat_umowy,kier_grupy,kier_grupy_id,term_realizacji,harm_data,koniec_proj,nadzor,nadzor_id,mod_user,mod_user_id,kier_osr,kier_osr_id,technolog,technolog_id) 
 		VALUES
-		(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-        ,$this->user.",${curretDateTime},".$typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$kier_grupy[1].",".$kier_grupy[0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$nadzor[1].",".$nadzor[0].",".$this->user.",1");
+		(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+        ,$this->user.",${curretDateTime},".$typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$kier_grupy[1].",".$kier_grupy[0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$nadzor[1].",".$nadzor[0].",".$this->user.",1,".$kier_osr[1].','.$kier_osr[0].','.$technolog[1].','.$technolog[0]);
                  
             if($this->getError()!=='')
             {
@@ -494,11 +552,11 @@ class manageProject extends initialDb
             }
             else
             {
-                $this->addNewProjectDok($this->queryLastId());  
+                $this->addProjectDok($this->queryLastId());  
             }    
         }     
     }
-    protected function addNewProjectDok($id)
+    protected function addProjectDok($id)
     {
         //echo __METHOD__."\n";
         $docCounter=1;
@@ -507,7 +565,7 @@ class manageProject extends initialDb
             foreach($this->inpArray as $key => $value)
             {
                 //echo $key." - ".$value."\n";
-                if((strpos($key,'addDoc')!==false || strpos($key,'pdfExtra')!==false) && $value!=='') 
+                if((strpos($key,'addDoc')!==false || strpos($key,'newDok-')!==false) && $value!=='') 
                 {
                     // echo "FOUND\n";
                     $tmp=explode('|',$value);
@@ -515,8 +573,7 @@ class manageProject extends initialDb
                     {
                         $tmp[1]=$tmp[0];
                         $tmp[0]=$docCounter;
-                    }
-                    //$this->query('INSERT INTO projekt_dok (id_projekt,nazwa,external_id,external_type) VALUES (?,?,?,?)',$id.",".$tmp[1].",".$tmp[0].",".$key);    
+                    }   
                     $this->query('INSERT INTO projekt_dok (id_projekt,nazwa) VALUES (?,?)',$id.",".$tmp[1]);    
                     
                     if($this->getError()!=='')
@@ -527,6 +584,50 @@ class manageProject extends initialDb
                 };
             }
         };
+    }
+    protected function updateProject($projectPost,$idProject)
+    {
+        $this->parsePostData($projectPost);
+
+        $this->isEmpty('Numer',$this->inpArray['numer_umowy']);
+        $this->isEmpty('Temat',$this->inpArray['temat_umowy']);
+        /*
+         * echo "ID PROJECT: ".$idProject."\n";
+         * echo "NUMER: ".$this->inpArray['numer_umowy']."\n";
+         * echo "NUMER: ".$this->inpArray['temat_umowy']."\n";
+         */
+        if($this->checkExistInDb('projekt_nowy','numer_umowy=? AND id!=? AND wsk_u=? ',$this->inpArray['numer_umowy'].','.$idProject.",0")>0)
+        {
+            $this->err.=$this->infoArray['numer_umowy'][1]."<br/>";
+        }
+        if($this->checkExistInDb('projekt_nowy','temat_umowy=? AND id!=? AND wsk_u=? ',$this->inpArray['temat_umowy'].','.$idProject.",0")>0)
+        {
+            $this->err.=$this->infoArray['temat_umowy'][1]."<br/>";
+        }
+        
+        if(!$this->err)
+        {
+            // EXPLODE FIELDS:
+            $typ_umowy=explode('|',$this->inpArray['typ_umowy']);
+            $kier_grupy=explode('|',$this->inpArray['kier_grupy']);
+            $nadzor=explode('|',$this->inpArray['nadzor']);
+            $technolog=explode('|',$this->inpArray['gl_tech']);
+            $kier_osr=explode('|',$this->inpArray['gl_kier']);
+            
+            $curretDateTime=date('Y-m-d H:i:s');
+            
+            $this->query('UPDATE projekt_nowy SET typ_umowy=?,typ_umowy_alt=?,numer_umowy=?,temat_umowy=?,kier_grupy=?,kier_grupy_id=?,term_realizacji=?, harm_data=?, koniec_proj=?, nadzor=?,nadzor_id=?,mod_user=?,mod_user_id=?, dat_kor=?,kier_osr=?,kier_osr_id=?,technolog=?,technolog_id=? WHERE id=?',
+            $typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$kier_grupy[1].",".$kier_grupy[0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$nadzor[1].",".$nadzor[0].",".$this->user.",1,${curretDateTime},".$kier_osr[1].','.$kier_osr[0].','.$technolog[1].','.$technolog[0].",${idProject}");
+                 
+            if($this->getError()!=='')
+            {
+                $this->err.=$this->getError()."<br/>";
+            }
+            else
+            {
+                $this->updateProjectDoc($projectPost,$idProject);  
+            }    
+        }     
     }
     # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getAllProjects()
@@ -541,13 +642,13 @@ class manageProject extends initialDb
         $this->valueToReturn=$this->queryReturnValue();
     }
     # RETURN CURRENT PROJECT DETAILS
-    public function getProjectDetails()
+    public function getProjectDetails($idProject)
     {
         $valueToReturn=array();
-        $this->query('SELECT * FROM v_all_proj WHERE id=?',$this->idProject);
+        $this->query('SELECT * FROM v_all_proj_v2 WHERE id=?',$idProject);
        
         array_push($valueToReturn,$this->queryReturnValue());
-        $this->query('SELECT ID,NAZWA FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$this->idProject);
+        $this->query('SELECT ID,NAZWA FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$idProject);
 
         array_push($valueToReturn,$this->queryReturnValue());
         $this->valueToReturn=$valueToReturn;
@@ -594,6 +695,11 @@ class manageProject extends initialDb
         $this->query('SELECT idPracownik,ImieNazwisko,procentUdzial,datOd,datDo FROM v_proj_prac_v2 WHERE idProjekt=?',$idProject);
         $this->valueToReturn=$this->queryReturnValue();
     }
+    function getProjectTeamPdf($idProject)
+    {
+        $this->query('SELECT NazwiskoImie,DataOd,DataDo FROM v_proj_prac_v_pdf WHERE idProjekt=?',$idProject);
+        $this->valueToReturn=$this->queryReturnValue();
+    }
     public function getReturnedValue()
     {
         echo json_encode($this->valueToReturn);
@@ -621,13 +727,15 @@ class checkGetData extends manageProject
     private $avaliableTask=array(
         "add",
         "edit",
-        "del",
+        "removeProject",
         "getprojects",
         "getprojectsmember",
         "getprojectsleader",
         "getprojectsmanager",
+        "getprojectgltech",
+        "getprojectglkier",
         "getprojectteam",
-        'getprojectdetail',
+        'getprojectdetails',
         "gettypeofagreement",
         "getadditionaldictdoc",
         "getallemployeeprojsumperc",
@@ -636,13 +744,16 @@ class checkGetData extends manageProject
         'getprojectdocuments',
         'closeProject',
         'setprojectdocuments',
-        'setprojectdetails'
+        'setprojectdetails',
+        'getpdf',
+        'getProjectDefaultValues'
     );
     function __construct()
     {
         parent::__construct();
         $this->addNewTypOfErr();
         $this->getUrlData();
+        
         if($this->checkUrlTask())
         {
             if($this->checkTask())
@@ -692,14 +803,13 @@ class checkGetData extends manageProject
     }
     private function runTask()
     {
+        $this->setUser($_SESSION["username"]);
         switch($this->urlGetData['task']):
         
         case "add" :
-            $this->setUser($_SESSION["username"]);
-            $this->addNewProject($_POST);
+            $this->addProject($_POST);
             break;
         case "addteam":
-            $this->setUser($_SESSION["username"]);
             $this->addTeamToProject($_POST);
             break;
         case "edit":
@@ -713,9 +823,9 @@ class checkGetData extends manageProject
         case "getprojects":
             $this->getAllProjects();
             break;
-        case "getprojectdetail":
+        case "getprojectdetails":
             $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-            $this->getProjectDetails();
+            $this->getProjectDetails($this->idProject);
             break;
         case 'getprojectdocuments':
             $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
@@ -733,6 +843,12 @@ class checkGetData extends manageProject
         case "gettypeofagreement":
             $this->getProjectSlo('v_slo_um_proj');
             break;
+        case "getprojectgltech":
+            $this->getProjectPers('v_slo_glow_tech_proj');
+            break;
+        case "getprojectglkier":
+            $this->getProjectPers('v_slo_kier_osr_proj');
+            break;
         case "getadditionaldictdoc":
             $this->getProjectSlo('v_slo_dok');
             break;
@@ -747,15 +863,22 @@ class checkGetData extends manageProject
             $this->getAllavaliableEmployee();
             break;
         case "setprojectdocuments":
-            //echo "setprojectdocuments\n";
-            $this->setUser($_SESSION["username"]);
             $this->idProject=filter_input(INPUT_POST,'idProject',FILTER_VALIDATE_INT);
             $this->updateProjectDoc($_POST,$this->idProject);
             //print_r($_POST);
             break;
         case "setprojectdetails":
-            $this->setUser($_SESSION["username"]);
-            print_r($_POST);
+            $this->idProject=filter_input(INPUT_POST,'idProject',FILTER_VALIDATE_INT);
+            $this->updateProject($_POST,$this->idProject);
+            //print_r($_POST);
+            break;
+        case 'getpdf':
+            $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+            //echo ($this->idProject);
+            $this->getPdf($this->idProject);
+            break;
+        case 'getProjectDefaultValues':
+            $this->getProjectDefaultValues();
             break;
         default:
             //no task

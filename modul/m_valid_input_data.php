@@ -8,7 +8,6 @@ if(isset($_GET['dataToCheck']) && isset($_GET['type']))
 	$dataToCheck = trim($_GET['dataToCheck']); //id to check
 	$type=$_GET['type'];
 	//echo "type - ".$type."\ndata to check - ".$dataToCheck."\n";
-	
 }
 else
 {
@@ -104,47 +103,14 @@ if($user_logged_in)
 							$dataToCheck=preg_replace($tabPL,$tabANG,$dataToCheck);
 							if(preg_match("/^([a-zA-Z]|(\d))([a-zA-Z]*(\d)*(\_)*(\-)*)*([a-zA-Z]|\d)$/",$dataToCheck))
 							{
+                                                            $dbLink->query('SELECT * FROM projekt WHERE UPPER(NAZWA)=UPPER(TRIM(?)) ',$dataToCheck);
+                                                            
+                                                            if(count($dbLink->queryReturnValue())>0)
+                                                            {
+                                                                echo "<span style=\"color:red\">W bazie danych istnieje już rekord o podanej nazwie - </span>".$dataToCheck;
+                                                            };
 								// CHECK IN DB
-								if($_SESSION["PHPV"]<7.0)
-								{
-								// PHP 5
 								
-									$dataToCheck=trim($dataToCheck);
-									$dataToCheck = stripslashes($dataToCheck);
-									$zapytanie = 
-										"
-										SELECT 
-										*
-										FROM 
-										`projekt`
-										WHERE
-										UPPER(`NAZWA`)=UPPER(TRIM('".$dataToCheck."'))
-										";
-									//kwerenda po zapytaniu....
-									$result =  mysqli_query($connection,$zapytanie) or die ('<p class="SQL_ERR">Zapytanie zakończone niepowodzeniem: <span class="SQL_INFO">' .  mysqli_error($connection).'</span></p>');	
-									$znaleziono =  mysqli_num_rows($result); 	
-								
-								
-								}
-								else
-								{
-									$stmt = $connection->prepare("SELECT * FROM `projekt` WHERE UPPER(`NAZWA`)=UPPER(TRIM(?))");
-																$stmt->bind_param(
-																					's',
-																					$dataToCheck
-																				);
-									$stmt->execute();
-									$znaleziono = count($stmt->get_result()->fetch_all(MYSQLI_ASSOC));
-									$stmt->close();
-								};
-								if($znaleziono>0)
-								{
-									echo "<span style=\"color:red\">W bazie danych istnieje już rekord o podanej nazwie - </span>".$dataToCheck;
-								}
-								else
-								{
-									//echo "NIE ZNALEZIONO";
-								};
 							}
 							else
 							{

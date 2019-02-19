@@ -2579,6 +2579,7 @@ function runTaskAfterAjax(nameOfForm,errDivAjax)
             alert('Team updated');
             $('#ProjectAdaptedModal').modal('hide'); 
             break;
+        case 'closeProject':
         case 'addNewProject':   
         case 'removeProject':
         case 'setprojectdetails':   
@@ -2587,7 +2588,7 @@ function runTaskAfterAjax(nameOfForm,errDivAjax)
             break;
         case 'setprojectdocuments':
             alert('Documents updated');
-        case 'closeProject':
+        
             $('#ProjectAdaptedModal').modal('hide'); 
             break;
         default:

@@ -49,6 +49,13 @@ else
                                 if(checkFile($DOC_ROOT.'/view/vProjekty.php')) include($DOC_ROOT.'/view/vProjekty.php');
                                 if(checkFile($DOC_ROOT.'/view/footer.php')) include ($DOC_ROOT.'/view/footer.php'); 
                             break;
+                        // PRACOWNICY
+                        case 4:
+                                if(checkFile($DOC_ROOT.'/view/header.php')) include ($DOC_ROOT.'/view/header.php'); 
+                                if(checkFile($DOC_ROOT.'/view/infoHeader.php')) include($DOC_ROOT.'/view/infoHeader.php');
+                                if(checkFile($DOC_ROOT.'/view/vPracownicy.php')) include($DOC_ROOT.'/view/vPracownicy.php');
+                                if(checkFile($DOC_ROOT.'/view/footer.php')) include ($DOC_ROOT.'/view/footer.php'); 
+                            break;
 	endswitch;
 };
 ?>

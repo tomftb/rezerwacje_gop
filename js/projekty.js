@@ -2569,11 +2569,12 @@ function sendData(nameOfForm,taskUrl,errDivAjax)
 }
 function runTaskAfterAjax(nameOfForm,errDivAjax)
 {
-    console.log('---runTaskAfterAjax---');
+    console.log('---runTaskAfterAjax()---');
     errDivAjax.innerHTML='';
     errDivAjax.style.display = "none";
     switch(nameOfForm)
     {
+        
         case 'addTeamToProject':
             alert('Team updated');
             $('#ProjectAdaptedModal').modal('hide'); 
@@ -2586,10 +2587,11 @@ function runTaskAfterAjax(nameOfForm,errDivAjax)
             break;
         case 'setprojectdocuments':
             alert('Documents updated');
+        case 'closeProject':
             $('#ProjectAdaptedModal').modal('hide'); 
             break;
         default:
-            alert('[runTaskAfterAjax]WRONG TASK - '+nameOfForm);
+            alert('[runTaskAfterAjax()]WRONG TASK - '+nameOfForm);
             break;
     };
 };

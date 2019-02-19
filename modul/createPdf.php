@@ -17,6 +17,7 @@ class PDF extends tFPDF
     protected $prTeam=array();
     protected $prMainManager=array();
     protected $prMainTech=array();
+    protected $DOC_ROOT='';
     /*
      * I -> OPEN
      * D -> DOWNLOAD
@@ -26,6 +27,7 @@ class PDF extends tFPDF
     function __construct($projectDetails,$projectDoc,$projectTeam,$projectMainManager,$projectMainTech)
     {
         parent::__construct();
+        $this->DOC_ROOT=filter_input(INPUT_SERVER,"DOCUMENT_ROOT");
         $this->prDetails=$projectDetails;
         $this->prDocs=$projectDoc;
         $this->prTeam=$projectTeam;
@@ -51,7 +53,7 @@ class PDF extends tFPDF
         $this->Cell(0,3,'',0,1,'C');
         $this->Cell(0,0,'WYDANIE: 6',0,0,'R');
         $this->Cell(0,3,'',0,1,'C');
-        $this->Image('..\\lib\\fpdf181\\gt_line_header.png',20,22,0);
+        $this->Image($this->DOC_ROOT.'/lib/fpdf181/gt_line_header.png',20,22,0);
         $this->Ln(5);
     }
     // Page footer

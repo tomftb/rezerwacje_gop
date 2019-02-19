@@ -8,9 +8,8 @@ var currentProjectDetails=new Array();
 // for manipulate
 var actUsedMemberProjTab=new Array();
 var actMemberProjPers=0;
-var idRecord;
 var counter = 0;
-var liderProj="";
+
 var MemberProj="";
 var ManagerProj="";
 var TypeOfAgreement="";
@@ -34,6 +33,11 @@ var TypeOfAgreementTab=new Array();
 var AddDictDocTab= new Array();
 var ManagerProjTab= new Array();
 var liderProjTab = new Array();
+var liderProj="";
+var gltechProjTab = new Array();
+var gltechProj="";
+var glkierProjTab = new Array();
+var glkierProj="";
 var projectEditMode=false;
 var projectDocEditMode=false;
 var dokCount=0;
@@ -51,6 +55,8 @@ var projectFileds=new Array(
         new Array('d','Kierującego zobowiązuję do przedstawienia harmonogramu prac do dnia','harm_data'),
         new Array('d','Kierującego zobowiązuję do zakończenia prac i napisania raportu z realizacji zadania do dnia:','koniec_proj'),
         new Array('s-nadzor','Nadzór nad realizacją | powierzam','nadzor'),
+        new Array('s-gltech','Główny technolog: ','gl_tech'),
+        new Array('s-glkier','Kierownik Ośrodka: ','gl_kier'),
         new Array('l-dok','Wykaz powiązanych dokumentów:','proj_dok','dokPowiazane')
     );
 // GLOBAL INPUT PROPERTIES
@@ -218,16 +224,15 @@ function addStyleToHtmlTag(htmlElement,styleName,styleValue)
 }
 function parseFieldValue(data,fieldType,errDivAlt)
 {
-    console.log('---parseFieldValue---');
+    console.log('---parseFieldValue()---');
     console.log(data);
-    console.log(fieldType);
-    console.log(errDivAlt);
-    var errDiv;
-
+    console.log('FIELD TYPE: '+fieldType+'\nERR DIV ALT: '+errDivAlt);
+    console.log("DATA TYPE: "+typeof(data));
+    var errDiv='';
     var plChars='ąĄćĆęĘłŁńŃóÓśŚżŻźŹ';
     var valueToParse;
     var typeOfValueToParse;
-    console.log(typeof(data));
+    
     if(typeof(data)==='object')
     {
         valueToParse=data.value;
@@ -242,7 +247,6 @@ function parseFieldValue(data,fieldType,errDivAlt)
         errDiv=document.getElementById(errDivAlt);
     };
     valueToParse=myTrim(valueToParse);
-   
     var thisRegex = new RegExp("^[\\da-zA-Z'"+plChars+"][\\/\\-\\_\\s\\da-zA-Z"+plChars+"]*[\\.\\s\\da-zA-Z"+plChars+"]{1}$");
     if(!thisRegex.test(valueToParse))
     {
@@ -285,15 +289,14 @@ function myTrim(x)
     return x.replace(/^\s+|\s+$/gm,'');
 }
 
-function setTypOfAgreement(valueToSetup)
+function setTypOfAgreement(valueToSetup,idLabel,idListDok)
 {
     console.log('---setTypeOfAgreement---');
-    console.log(valueToSetup);
+    console.log("VALUE: "+valueToSetup+"\nID ELEMENT LABEL: "+idLabel+"\nID ELEMENT IN DOK LIST: "+idListDok);
     var splitValue=valueToSetup.split("|");
     
-    document.getElementById("pdfTypUmowy").innerHTML =splitValue[1];
-    document.getElementById("pdfDokListTypUmowy").innerHTML =splitValue[2];
-    
+    document.getElementById(idLabel).innerText =splitValue[1];
+    //document.getElementById("pdfDokListTypUmowy").innerHTML =splitValue[2];
 }
 function addFormField()
 {
@@ -319,10 +322,11 @@ function addFormField()
         counter++;
 }
 //function getAjaxData(modul,task)
-function getAjaxData(task,idToSetup,nameToSetup,addon,projectStatus)
+function getAjaxData(task,fieldIdToSetup,nameToSetup,addon,projectStatus)
 {
-    console.log("getAjaxData - task="+task);
-    console.log("getAjaxData - addon="+addon);
+    console.log('---getAjaxData()---');
+    console.log("TASK : "+task+"\nID FIELD TO SETUP : "+fieldIdToSetup+"\nADDON : "+addon);
+
     if(typeof addon === 'undefined')
     {
         addon='';
@@ -347,7 +351,7 @@ function getAjaxData(task,idToSetup,nameToSetup,addon,projectStatus)
             ajaxData = JSON.parse(this.responseText);
             if(ajaxData[0][0]==='0')
             {
-                manageTask(task,ajaxData[1],idToSetup,nameToSetup,projectStatus);
+                manageTaskAfterAjaxGet(task,ajaxData[1],fieldIdToSetup,nameToSetup,projectStatus);
             }
             else
             {
@@ -365,10 +369,10 @@ function getAjaxData(task,idToSetup,nameToSetup,addon,projectStatus)
     xmlhttp.open("GET", url, true);
     xmlhttp.send(); 
 }
-function manageTask(taskToRun,data,id,name,projectStatus)
+function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
 {
-    console.log('---manageTask---\ntak to run - '+taskToRun);
-    
+    console.log('---manageTaskAfterAjaxGet()---');
+    //console.log('TASK TO RUN - '+taskToRun+'\nDATA - '+data+'\nID - '+fieldId+'\nNAME - '+name+'\nPROJECT STATUS - '+projectStatus);
     var fields=new Array();
     //console.log('data - '+data+'\nid - '+id+'\nname - '+name);
     switch(taskToRun)
@@ -376,34 +380,44 @@ function manageTask(taskToRun,data,id,name,projectStatus)
         case 'getprojects':
             setAllProjects(data);
             break;
+        case 'getprojectgltech': // SET GLOBAL liderProj
+            fields.push('id','ImieNazwisko');
+            gltechProjTab=getDataFromJson(data,fields);
+            gltechProj=createTagWithData('select',gltechProjTab,fieldId,name);
+            break;
+        case 'getprojectglkier': // SET GLOBAL liderProj
+            fields.push('id','ImieNazwisko');
+            glkierProjTab=getDataFromJson(data,fields);
+            glkierProj=createTagWithData('select',glkierProjTab,fieldId,name);
+            break;
         case 'getprojectsleader': // SET GLOBAL liderProj
             fields.push('id','ImieNazwisko');
             liderProjTab=getDataFromJson(data,fields);
-            liderProj=createTagWithData('select',liderProjTab,id,name);
+            liderProj=createTagWithData('select',liderProjTab,fieldId,name);
             break;
         case 'getprojectsmember': // SET GLOBAL PROJECT Members
             fields.push('id','ImieNazwisko');
             memberProjTab=getDataFromJson(data,fields);
             countOfMemberProjTab=memberProjTab.length;
-            MemberProj=createTagWithData('select',memberProjTab,id,name);
+            MemberProj=createTagWithData('select',memberProjTab,fieldId,name);
             break;
         case 'getprojectsmanager': // SET GLOBAL liderProj
             fields.push('id','ImieNazwisko');
             ManagerProjTab=getDataFromJson(data,fields);
-            ManagerProj=createTagWithData('select',ManagerProjTab,id,name);
+            ManagerProj=createTagWithData('select',ManagerProjTab,fieldId,name);
             break;
         case 'gettypeofagreement': // SET GLOBAL Type Of Agreement
             fields.push('ID','Nazwa','NazwaAlt');
             TypeOfAgreementTab=getDataFromJson(data,fields);
             TypeOfAgreementTabJson=data;
             //TypeOfAgreement=createTagWithData('select',data,id,name);
-            TypeOfAgreement=createTagWithData('select',TypeOfAgreementTab,id,name);
+            TypeOfAgreement=createTagWithData('select',TypeOfAgreementTab,fieldId,name);
             console.log('Type Of Agreement Array:');
             break;
         case 'getadditionaldictdoc': // SET GLOBAL DICTIONARY OF ADDITIONAL DOCUMENTS
             fields.push('ID','Nazwa','SpecificId');
             AddDictDocTab=getDataFromJson(data,fields);
-            AddDictDoc=createTagWithData('ol',AddDictDocTab,id,name);
+            AddDictDoc=createTagWithData('ol',AddDictDocTab,fieldId,name);
             break;
         case 'getprojectteam':
             teamBodyDataLengthContent=data.length;
@@ -411,7 +425,7 @@ function manageTask(taskToRun,data,id,name,projectStatus)
             currentProjMemberTeam=getDataFromJson(data,fields);
             numberOfMemebersInProject=teamBodyDataLengthContent;
             document.getElementById("projectId2").innerHTML = legendExtraLabels+numberOfMemebersInProject;
-            createTeamBodyContent(id,currentProjMemberTeam,projectStatus); // data
+            createTeamBodyContent(fieldId,currentProjMemberTeam,projectStatus); // data
             break;
         case 'getallavaliableemployeeprojsumperc':
                 break;
@@ -422,14 +436,12 @@ function manageTask(taskToRun,data,id,name,projectStatus)
                 createAvaliableTeam();
                 createAddTeamBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'addTeamToProject',idProject,projectStatus);
                 break;
-            case 'getprojectdetail':
+            case 'getprojectdetails':
                 projectEditMode=false;
                 dokCount=0;
                 currentProjectDetails=[];
                 setDisabledFields(taskToRun);
-                fields.push('id','create_date','typ_umowy','typ_umowy_alt','numer_umowy','temat_umowy','kier_grupy','kier_grupy_id','term_realizacji','harm_data','koniec_proj','nadzor','nadzor_id');
-                //console.log(data[0]);
-                //console.log(data[1]);
+                fields.push('id','create_date','typ_umowy','typ_umowy_alt','numer_umowy','temat_umowy','kier_grupy','kier_grupy_id','term_realizacji','harm_data','koniec_proj','nadzor','nadzor_id','kier_osr','kier_osr_id','technolog','technolog_id');
                 currentProjectDetails=getDataFromJson(data[0],fields);
                 fields=[];
                 fields.push('ID','NAZWA');
@@ -447,6 +459,30 @@ function manageTask(taskToRun,data,id,name,projectStatus)
                 //console.log(currentProjectDoc);
                 createProjectDocView(document.getElementById('ProjectAdaptedDynamicData'),taskToRun,projectStatus);
                 break;
+        case 'getProjectDefaultValues':
+            setFieldsAtr(taskToRun);
+            setEnabledFields(taskToRun);
+            /*
+             * SLOWNIKI:
+             * data[0] = UMOWY
+             * data[1] = LIDER
+             * data[2] = KIEROWNIK
+             * data[3] = DODATKOWE DOKUMENTY 
+             * data[4] = GLOWNY TECHNOLOG
+             * data[5] = KIEROWNIK OSRODKA
+             */
+            //console.log(data[0]);
+            manageTaskAfterAjaxGet('gettypeofagreement',data[0],'typ_umowy','typ_umowy','n');
+            //console.log(data[1]);
+            manageTaskAfterAjaxGet('getprojectsleader',data[1],'kier_grupy','kier_grupy','n');
+            //console.log(data[2]);
+            manageTaskAfterAjaxGet('getprojectsmanager',data[2],'nadzor','nadzor','n');
+            //console.log(data[3]);
+            manageTaskAfterAjaxGet('getadditionaldictdoc',data[3],'dokPowiazane','dokPowiazane','n');
+            manageTaskAfterAjaxGet('getprojectgltech',data[4],'gl_tech','gl_tech','n');
+            manageTaskAfterAjaxGet('getprojectglkier',data[5],'gl_kier','gl_kier','n');
+            createNewProjectView(document.getElementById('ProjectAdaptedDynamicData'),'addNewProject');
+            break;
         case 'getpdf':
             alert(data);
             break;
@@ -454,6 +490,36 @@ function manageTask(taskToRun,data,id,name,projectStatus)
             alert('[manageTask]ERROR - wrong task');
             break;
     }
+}
+function setFieldsAtr(task)
+{
+    console.log('---setFieldsAtr---\n'+task);
+    switch (task)
+    {
+        case 'getProjectDefaultValues':
+        case 'getprojectdetails':
+            selectClass=[];
+            selectStyle=[];
+            datePickerSpanStyle=[];
+            datePickerSpanClass=[];
+            datePickerIstyle=[];
+            datePickerClass=[];
+            datePickerStyle=[];
+            selectClass.push('mb-1');
+            inputClass[0]='mb-1';
+            inputStyle=[];
+            datePickerDivGroupClass[1]='mb-1';
+            break;
+        case 'getprojectdocuments':
+            inputAttribute[0][1]='hidden'; 
+            inputAttribute[2][1]='idProject';
+            inputAttribute[3][1]='idProject';
+            inputAttribute[4][1]=idProject;
+            break;
+            
+        default:
+            break;
+    };  
 }
 function setDisabledFields(task)
 {
@@ -465,7 +531,7 @@ function setDisabledFields(task)
                 inputAttribute[7][0]='disabled';
                 removeButtonDivButtonClass[2]='disabled';
             break;
-        case 'getprojectdetail':
+        case 'getprojectdetails':
             datePickerAttribute[6][0]='readOnly';
             datePickerAttribute[7][0]='disabled';
             datePickerSpanAttribute[1][0]='readOnly';
@@ -484,6 +550,8 @@ function setDisabledFields(task)
 }
 function setEnabledFields(task)
 {
+    console.log('---setEnabledFields()---');
+    console.log('TASK: '+task);
     addButtonClass[2]='no-disabled';
     removeButtonDivButtonClass[2]='no-disabled';
     console.log('---setEnabledFields---');
@@ -492,24 +560,19 @@ function setEnabledFields(task)
         case 'getprojectdocuments':
                 inputAttribute[6][0]='no-readOnly';
                 inputAttribute[7][0]='no-disabled';
-                
             break;
-        case 'getprojectdetail':
+        case 'getProjectDefaultValues':
+        case 'getprojectdetails':
                 datePickerAttribute[6][0]='no-readOnly';
                 datePickerAttribute[7][0]='no-disabled';
                 datePickerSpanAttribute[1][0]='no-readOnly';
                 datePickerSpanAttribute[3][0]='no-disabled'
-
                 datePickerDivGroupAttribute[1][0]='data-provide';
                 datePickerDivGroupAttribute[2][0]='no-disabled';
-
                 selectAttribute[3][0]='no-readolny';
                 selectAttribute[4][0]='no-disabled';
-
                 inputAttribute[6][0]='no-readOnly';
                 inputAttribute[7][0]='no-disabled';
-                
- 
             break;
         case 'getallemployeeprojsumperc':
                 datePickerAttribute[6][0]='no-readOnly';
@@ -523,28 +586,17 @@ function setEnabledFields(task)
 }
 function createProjectDocView(elementWhereAdd,taskToRun,projectStatus)
 {
-    console.log('---createProjectDocView---');
-    var mainTemplate=document.getElementById('addProjectModalDetail').cloneNode(true);
-    mainTemplate.classList.remove("modal");
-    mainTemplate.classList.remove("fade");
+    console.log('---createProjectDocView()---\n'+taskToRun);
+    setFieldsAtr(taskToRun);
+    var mainTemplate=getProjectModalDetail();
     var formName=mainTemplate.childNodes[1].childNodes[1];
-    console.log(formName.name);
     formName.name='setprojectdocuments';
-    console.log(formName.name);
-    inputAttribute[0][1]='hidden'; 
-    inputAttribute[2][1]='idProject';
-    inputAttribute[3][1]='idProject';
-    inputAttribute[4][1]=idRecord;
+
     var inputElement=createHtmlElement('input',inputAttribute,inputClass,inputStyle);
     formName.append(inputElement);
-   
-    //mainTemplate.append(inputElement);
-    console.log(mainTemplate);
-    console.log(inputElement);
     inputAttribute[0][1]='text'; 
     createProjectDocViewFields(mainTemplate.childNodes[1].childNodes[1].childNodes[1],taskToRun);
-    
-   
+    //console.log(elementWhereAdd.parentNode.parentNode.parentNode.childNodes[3].childNodes[]]);
     var confirmButton=mainTemplate.childNodes[1].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[3];
     
     console.log(confirmButton);
@@ -594,54 +646,198 @@ function createProjectDocViewFields(elementWhereAppend,taskToRun)
     elementWhereAppend.appendChild(div1Element);
     console.log(elementWhereAppend);
 }
-function createProjectDetailView(elementWhereAdd,taskToRun,projectStatus)
+function getProjectModalDetail()
 {
-    console.log('---createProjectDetailView---');
+    console.log('---getProjectModalDetail()---');
+    var mainTemplate=document.getElementById('addProjectModalDetail').cloneNode(true);
+    mainTemplate.classList.remove("modal");
+    mainTemplate.classList.remove("fade");
+    return(mainTemplate);
+}
+function getLegendDiv()
+{
+    console.log('---getLegendDiv()---');
+    var legendDiv=document.getElementById('legendDiv').cloneNode(true);
+    legendDiv.classList.remove("modal");
+    legendDiv.classList.remove("fade"); 
+    return(legendDiv);
+}
+function createNewProjectView(elementWhereAdd,formNameToSetup)
+{
+    console.log('---createNewProjectView()---\n'+formNameToSetup);
     console.log(elementWhereAdd);
     // SET PROPERTIES OF ELEMENT ATRIBUTES
-    selectClass=[];
-    selectStyle=[];
-    datePickerSpanStyle=[];
-    datePickerSpanClass=[];
-    datePickerIstyle=[];
-    datePickerClass=[];
-    datePickerStyle=[];
-    selectClass.push('mb-1');
-    inputClass[0]='mb-1';
-    inputStyle=[];
-    datePickerDivGroupClass[1]='mb-1';
-    
-    var mainTemplate=document.getElementById('addProjectModalDetail').cloneNode(true);
+
+    var mainTemplate=getProjectModalDetail();
+    var formName=mainTemplate.childNodes[1].childNodes[1];
+    formName.name=formNameToSetup;
+    var confirmButton=mainTemplate.childNodes[1].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[3];
+    confirmButton.innerText='Dodaj';
+    confirmButton.onclick=function()
+    {
+            postDataToUrl(formNameToSetup);
+    };
+    createNewProjectViewFields(mainTemplate.childNodes[1].childNodes[1].childNodes[1],formNameToSetup);
+    elementWhereAdd.append(mainTemplate);
+       
+}
+function createNewProjectViewFields(elementWhereAppend,formName)
+{
+    console.log('---createNewProjectViewFields()---\n'+formName);
+    console.log(elementWhereAppend);
+    removeNodeChilds(elementWhereAppend);
+     // HTML TAGS
+    var labelAttribute=new Array(
+	Array('for','inputProject'),
+	Array('class','col-sm-8')
+	);
+    var labelClass=new Array(
+	'control-label',
+        'text-right',
+        'font-weight-bold'
+	);
+    var div1=new Array(
+	Array('class','col-sm-4')
+	);
+    var divErrAtr=new Array(
+            Array('class','col-sm-auto'),
+            Array('id','')
+            );
+    var divErrClass=new Array(
+            'alert',
+            'alert-danger'
+            );
+    var divErrStyle=new Array(
+            Array('display','none')
+            );
+    var spanAgreementAtr=new Array(
+            Array('id','')
+            );
+    var text='';
+    for(var i=0;i<projectFileds.length;i++)
+    {
+        var tmpArray=new Array();
+        inputAttribute[0][1]='text';
+        inputAttribute[2][1]=projectFileds[i][2];
+        inputAttribute[3][1]=projectFileds[i][2];
+        inputAttribute[4][1]='';
+        labelAttribute[0][1]='inputProject'+i;
+        labelElement=createHtmlElement('label',labelAttribute,labelClass,null);
+        div1Element=createHtmlElement('div',div1,null,null);
+        labelElement.innerText=projectFileds[i][1];
+        switch(projectFileds[i][0])
+        {
+            case 'hidden':
+                console.log('HIDDEN');
+                inputAttribute[0][1]='hidden'; 
+                break;
+            case 's-umowa':
+                TypeOfAgreement.onchange = function() { setTypOfAgreement(this.value,projectFileds[8][0],projectFileds[9][0]); };
+                div1Element.appendChild(TypeOfAgreement);
+                break;
+            case't':
+                inputElement=createHtmlElement('input',inputAttribute,inputClass,inputStyle);
+                divErrAtr[1][1]='errDiv-'+projectFileds[i][2];
+                divErr=createHtmlElement('div',divErrAtr,divErrClass,divErrStyle);
+                inputElement.onblur=function()
+                {
+                    parseFieldValue(this,null,null);
+                };
+                div1Element.appendChild(inputElement);
+                div1Element.appendChild(divErr);
+                break;
+            case 's-kier':
+                 div1Element.appendChild(ManagerProj);
+                break;
+            case 's-gltech':
+                 div1Element.appendChild(gltechProj);
+                break;
+            case 's-glkier':
+                 div1Element.appendChild(glkierProj);
+                break;
+            case 'd':
+                div1Element.appendChild(createDatePicker('inputProject'+i,'d-'+projectFileds[i][2],''));
+                break;
+            case 's-nadzor':
+                // ADD EXTRA SPAN WITH ID
+                labelElement=createHtmlElement('label',labelAttribute,labelClass,null);
+                //console.log('S-NADZÓR');
+                spanAgreementAtr[0][1]=projectFileds[i][0];
+                spanAgreement=createHtmlElement('span',spanAgreementAtr,null,null);
+                //console.log(TypeOfAgreementTab);
+                spanAgreement.innerText=TypeOfAgreementTab[0][1];
+                tmpArray=splitValue(projectFileds[i][1],"|");
+                //console.log(tmpArray);
+                text = document.createTextNode(tmpArray[0]);
+                labelElement.appendChild(text);
+                labelElement.appendChild(spanAgreement);
+                text = document.createTextNode(tmpArray[1]);
+                labelElement.appendChild(text);
+                div1Element.appendChild(liderProj);
+                break;
+            case 'l-dok':
+                div1Element.appendChild(AddDictDoc);
+                createHiddenInputs(AddDictDocTab,div1Element,'addDoc');
+                AddDictDocTab=[];
+                createProjectDocList(AddDictDocTab,div1Element,1,formName);
+                
+                break;
+            default:
+                break;
+        };
+        elementWhereAppend.appendChild(labelElement);
+        elementWhereAppend.appendChild(div1Element);
+    };
+}
+function createHiddenInputs(dataArray,elementWhereAppend,name)
+{
+    console.log('---createHiddenInputs()---');
+    var inpAtr= new Array(
+            Array('name',''),
+            Array('type','hidden'),
+            Array('value','')
+            );
+    var input='';
+    for(var i=0; i<dataArray.length;i++)
+    {
+        inpAtr[0][1]=name+i;
+        inpAtr[2][1]=i+"|"+dataArray[i][1];
+        input=createHtmlElement('input',inpAtr,null,null);
+        elementWhereAppend.appendChild(input);
+    };
+}
+function createProjectDetailView(elementWhereAdd,taskToRun,projectStatus)
+{
+    console.log('---createProjectDetailView()---\n'+taskToRun);
+    console.log(elementWhereAdd);
+    // SET PROPERTIES OF ELEMENT ATRIBUTES
+    setFieldsAtr(taskToRun);
+    var mainTemplate=getProjectModalDetail();
     var formName=mainTemplate.childNodes[1].childNodes[1];
     formName.name='setprojectdetails';
     var confirmButton=mainTemplate.childNodes[1].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[3];
-    
-    //console.log(mainTemplate.childNodes[1].childNodes[1].childNodes[1]);
-    //console.log(mainTemplate.childNodes[1].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[3]);
-
+    // SET FIELDS
     createProjectDetailViewFields(mainTemplate.childNodes[1].childNodes[1].childNodes[1],taskToRun);
     
     if(projectStatus==='m' || projectStatus==='n')
     {
         confirmButton.onclick=function()
         {
+            document.getElementById('ProjectAdaptedBodyExtra').appendChild(getLegendDiv());
+            
             confirmButton.innerText='Zatwierdź';
-            setEnabledFields('getprojectdetail');
+            setEnabledFields('getprojectdetails');
             editForm(mainTemplate.childNodes[1].childNodes[1].childNodes[1],taskToRun,confirmButton,formName);
         };
     }
     else
     {
         confirmButton.classList.add("disabled");
-        //confirmButton.setAttribute("hidden",'true');
-        //confirmButton.addClass='disabled';
     };
-    mainTemplate.classList.remove("modal");
-    mainTemplate.classList.remove("fade");
     
-    console.log(mainTemplate);
     elementWhereAdd.append(mainTemplate);
 }
+
 function createProjectDetailViewFields(elementWhereAppend,taskToRun)
 {
     console.log('---createProjectDetailViewFields---');
@@ -672,101 +868,105 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
     var divErrStyle=new Array(
             Array('display','none')
             );
-    //
+     var spanAgreementAtr=new Array(
+            Array('id','')
+            );
     var currentDataArray=new Array();
     var rebuildedArray=new Array();
+    var tmpArray=new Array();
+    var newSelect='';
     for(var i=0;i<projectFileds.length;i++)
     {
-        //console.log(projectFileds[i]);
+        inputAttribute[0][1]='text';
+        inputAttribute[2][1]=projectFileds[i][2];
+        inputAttribute[3][1]=projectFileds[i][2];
+        inputAttribute[4][1]='';
         labelAttribute[0][1]='inputProject'+i;
         labelElement=createHtmlElement('label',labelAttribute,labelClass,null);
         div1Element=createHtmlElement('div',div1,null,null);
-        var tmpArray=new Array();
-        if(projectFileds[i][0]==='hidden')
+        labelElement.innerText=projectFileds[i][1];
+        switch(projectFileds[i][0])
         {
-            inputAttribute[0][1]='hidden'; 
-        }
-        else
-        {
-            inputAttribute[0][1]='text'; 
-        };   
-        inputAttribute[2][1]=projectFileds[i][2];
-        inputAttribute[3][1]=projectFileds[i][2];
-        if(projectFileds[i][2]==='nadzor')
-        {
-            tmpArray=splitValue(projectFileds[i][1],"|");
-            labelElement.innerText=tmpArray[0]+currentProjectDetails[0][2]+tmpArray[1];
-        }
-        else
-        {
-             labelElement.innerText=projectFileds[i][1];
-        }  
-        elementWhereAppend.appendChild(labelElement);
-        
-        if(projectFileds[i][2]!=='proj_dok')
-        {
-            if(projectFileds[i][0]==='t' || projectFileds[i][0]==='hidden')
-            {
+            case 'hidden':
+                console.log('HIDDEN\n'+currentProjectDetails[0][0]);
+                inputAttribute[0][1]='hidden';
+                inputAttribute[4][1]=currentProjectDetails[0][0];
+                inputElement=createHtmlElement('input',inputAttribute,inputClass,inputStyle);
+                div1Element.appendChild(inputElement);
+                break;
+            case 's-umowa':
+                currentDataArray=Array (0,currentProjectDetails[0][2],currentProjectDetails[0][3]);
+                rebuildedArray=(rebuildDataInArray(TypeOfAgreementTab,1,currentDataArray,1));
+                newSelect=createSelect(rebuildedArray,projectFileds[i][2],projectFileds[i][2]);
+                newSelect.onchange = function() { setTypOfAgreement(this.value,projectFileds[8][0],projectFileds[9][0]); };
+                div1Element.appendChild(newSelect);
+                break;
+            case 's-glkier':// CREATE REBUILD TASK
+                currentDataArray=Array (currentProjectDetails[0][14],currentProjectDetails[0][13]);
+                rebuildedArray=(rebuildDataInArray(glkierProjTab,0,currentDataArray,0));
+                div1Element.appendChild(createSelect(rebuildedArray,projectFileds[i][2],projectFileds[i][2]));
+                break;
+            case 's-gltech':// CREATE REBUILD TASK
+                currentDataArray=Array (currentProjectDetails[0][16],currentProjectDetails[0][15]);
+                rebuildedArray=(rebuildDataInArray(gltechProjTab,0,currentDataArray,0));
+                div1Element.appendChild(createSelect(rebuildedArray,projectFileds[i][2],projectFileds[i][2]));
+                break;
+            case't':
                 inputAttribute[4][1]=assignProjectDataToField(projectFileds[i][2]);
                 inputElement=createHtmlElement('input',inputAttribute,inputClass,inputStyle);
-                
                 divErrAtr[1][1]='errDiv-'+projectFileds[i][2];
                 divErr=createHtmlElement('div',divErrAtr,divErrClass,divErrStyle);
-                
                 inputElement.onblur=function()
                 {
                     parseFieldValue(this,null,null);
                 };
                 div1Element.appendChild(inputElement);
                 div1Element.appendChild(divErr);
-            }
-            else if(projectFileds[i][0]==='d')
-            {
+                break;
+            case 's-kier':
+                currentDataArray=Array (currentProjectDetails[0][7],currentProjectDetails[0][6]);
+                rebuildedArray=(rebuildDataInArray(ManagerProjTab,0,currentDataArray,0));
+                div1Element.appendChild(createSelect(rebuildedArray,projectFileds[i][2],projectFileds[i][2]));
+                //div1Element.appendChild(ManagerProj);
+                break;
+            case 'd':
                 div1Element.appendChild(createDatePicker('inputProject'+i,'d-'+projectFileds[i][2],assignProjectDataToField(projectFileds[i][2])));
-            }
-            else if(projectFileds[i][0].substring(0, 2)==='s-')
-            {
-                //console.log('ADD SELECT');
-                if(projectFileds[i][0]==='s-umowa')
-                {
-                    // create select with umowa
-                    currentDataArray=Array (0,currentProjectDetails[0][2],currentProjectDetails[0][3]);
-                    rebuildedArray=(rebuildDataInArray(TypeOfAgreementTab,1,currentDataArray,1));
-                    div1Element.appendChild(createSelect(rebuildedArray,projectFileds[i][0],projectFileds[i][2]));
-                }
-                else if (projectFileds[i][0]==='s-kier')
-                {
-                    // create select with kier pers
-                    currentDataArray=Array (currentProjectDetails[0][7],currentProjectDetails[0][6]);
-                    rebuildedArray=(rebuildDataInArray(ManagerProjTab,0,currentDataArray,0));
-                    div1Element.appendChild(createSelect(rebuildedArray,projectFileds[i][0],projectFileds[i][2]));
-                    //div1Element.appendChild(createSelect(ManagerProjTab,projectFileds[i][0],projectFileds[i][2]));
-                }
-                else if(projectFileds[i][0]==='s-nadzor')
-                {
-                    // create select with nadzor pers
-                    currentDataArray=Array (currentProjectDetails[0][12],currentProjectDetails[0][11]);
-                    rebuildedArray=(rebuildDataInArray(liderProjTab,0,currentDataArray,0));
-                    div1Element.appendChild(createSelect(rebuildedArray,projectFileds[i][0],projectFileds[i][2]));
-                    //div1Element.appendChild(createSelect(liderProjTab,projectFileds[i][0],projectFileds[i][2]));
-                }
-                    else
-                {}
-            }
-        }
-        else
-        {
-            createProjectDocList(currentProjectDetails[1],div1Element,1,taskToRun);
+                //div1Element.appendChild(createDatePicker('inputProject'+i,'d-'+projectFileds[i][2],''));
+                break;
+            case 's-nadzor':
+                // ADD EXTRA SPAN WITH ID
+                labelElement=createHtmlElement('label',labelAttribute,labelClass,null);
+                spanAgreementAtr[0][1]='s-nadzor';
+                spanAgreement=createHtmlElement('span',spanAgreementAtr,null,null);
+                spanAgreement.innerText=currentProjectDetails[0][2];
+                tmpArray=splitValue(projectFileds[i][1],"|");
+                text = document.createTextNode(tmpArray[0]);
+                labelElement.appendChild(text);
+                labelElement.appendChild(spanAgreement);
+                text = document.createTextNode(tmpArray[1]);
+                labelElement.appendChild(text);
+                currentDataArray=Array (currentProjectDetails[0][12],currentProjectDetails[0][11]);
+                rebuildedArray=(rebuildDataInArray(liderProjTab,0,currentDataArray,0));
+                newSelect=createSelect(rebuildedArray,projectFileds[i][2],projectFileds[i][2]);
+                div1Element.appendChild(newSelect);
+                break;
+            case 'l-dok':
+                createProjectDocList(currentProjectDetails[1],div1Element,1,taskToRun);
+                break;
+            default:
+                break;
         };
         currentDataArray=[];
         rebuildedArray=[];
-        
+        newSelect='';
+        elementWhereAppend.appendChild(labelElement);
         elementWhereAppend.appendChild(div1Element);
     };
 }
 function rebuildDataInArray(mainArray,mainColToCompare,swapRecord,swapColToCompare)
 {
     console.log('---rebuildDataInArray---');
+    //console.log('MAIN ARRAY: '+mainArray+'\nMAIN COL: '+mainColToCompare+'SWAP RECORD: '+swapRecord+'SWAP COL: '+swapColToCompare);
     var selectArray= new Array();
     selectArray.push(swapRecord);
     for(var a=0;a<mainArray.length;a++)
@@ -784,7 +984,8 @@ function rebuildDataInArray(mainArray,mainColToCompare,swapRecord,swapColToCompa
 }
 function createProjectDocList(docArray,elementWhereAppend,nrColWithData,taskToRun)
 {
-    console.log('---createProjectDocList---');
+    console.log('---createProjectDocList()---');
+    console.log('TASK TO RUN: '+taskToRun);
     //console.log(docArray);
     //console.log(nrColWithData);
     inputStyle.push(Array('borderTopRightRadius','0px'));
@@ -808,7 +1009,7 @@ function createProjectDocList(docArray,elementWhereAppend,nrColWithData,taskToRu
      var divAddInsideClass=new Array(
             'mt-0',
             'mb-0'
-            );    
+            );   
     var divAddButton=createHtmlElement('div',divAddAttribute,divAddClass,null);
     var divAddButtonInside=createHtmlElement('div',divAddInsideAttribute,divAddInsideClass,null);
     var newInputElement;
@@ -818,25 +1019,35 @@ function createProjectDocList(docArray,elementWhereAppend,nrColWithData,taskToRu
     
     for(var d=0;d<docArray.length;d++)
     {
-        //console.log(docArray[d]);
+        //console.log(docArray[d][0]);
         inputAttribute[2][1]='orgDok-'+docArray[d][0];
         inputAttribute[3][1]='orgDok-'+docArray[d][0];
         inputAttribute[4][1]=docArray[d][nrColWithData];
-        
+
         inputElement=createHtmlElement('input',inputAttribute,inputClass,inputStyle);
-        
+        inputElement.onblur=function()
+        {
+            
+            checkLength(this,'doc');
+        };
         createDocListRow(elementWhereAppend,inputElement,taskToRun);
-        
     };
     // CHECK SWITCH THAT ENABLE RUN IN EDIT MODE
     switch (taskToRun)
     {
         case 'getprojectdocuments':
-                if(projectDocEditMode) addButtonAvaliable=true;
+                if(projectDocEditMode)
+                {
+                    document.getElementById('ProjectAdaptedBodyExtra').appendChild(getLegendDiv());
+                    addButtonAvaliable=true;
+                }
                 break;
-            case 'getprojectdetail':
-                    if(projectEditMode) addButtonAvaliable=true;
+            case 'getprojectdetails':
+                
+                if(projectEditMode) addButtonAvaliable=true;
                 break;
+            case 'addNewProject':
+                addButtonAvaliable=true;
             default:
                 break;
     };      
@@ -848,6 +1059,10 @@ function createProjectDocList(docArray,elementWhereAppend,nrColWithData,taskToRu
             inputAttribute[3][1]='newDok-'+dokCount;
             inputAttribute[4][1]='';
             newInputElement=createHtmlElement('input',inputAttribute,inputClass,inputStyle);
+            newInputElement.onblur=function()
+            {
+                checkLength(this,'doc');
+            };
             createDocListRow(divDynamic,newInputElement,taskToRun);
         };
     }
@@ -858,13 +1073,94 @@ function createProjectDocList(docArray,elementWhereAppend,nrColWithData,taskToRu
     //divOverAll.appendChild(divAddButton);
     elementWhereAppend.appendChild(divDynamic);
     elementWhereAppend.appendChild(divAddButton);
-
     // END ADD BUTTON
-    
+}
+function checkLength(field,type)
+{
+    console.log('---checkLength()---');
+    console.log('TYPE: '+type);
+    console.log('NAME: '+field.name);
+    var max=30;
+    var min=0;
+    var fValue=field.value;
+    var fName=field.name;
+    var divId='';
+    var divErr='';
+    fValue=fValue.trim();
+    var fLength=fValue.length;
+    console.log(fValue.length);
+    switch(type)
+    {
+       case 'doc':
+            // GET DIV ERR
+            // SET ARRAY OF ERRORS
+            //console.log(field.parentNode.parentNode.childNodes[2].getAttribute('id'));
+            //divErr=field.parentNode.parentNode.childNodes[2];
+            //divId=field.parentNode.parentNode.childNodes[2].getAttribute('id');
+            divErr=document.getElementById('errDiv-'+field.name);
+            divId='errDiv-'+field.name;
+            if(fLength>min)
+            {
+                if(fLength>max)
+                {
+                    setErrTab(fName);
+                    showDivErr(divErr,'[L:'+fLength+']FIELD VALUE TOO LONG');
+                }
+                else
+                {
+                    parseFieldValue(fValue,fName,divId);
+                };
+            }
+            else
+            {
+                removeErrTab(fName);
+                hideDivErr(divErr);
+            };
+            break;
+        case 'umowa':
+            break;
+        case 'temat':
+            break;
+        default:
+            break;
+    };
+}
+function setErrTab(fName)
+{
+    console.log('---setErrTab()---');
+    console.log('FNAME: '+fName);
+    if(errInputValue.indexOf(fName)===-1)
+    {
+        errInputValue.push(fName); 
+    };
+}
+function removeErrTab(fName)
+{
+    console.log('---removeErrTab()---');
+    console.log('FNAME: '+fName);
+    if(errInputValue.indexOf(fName)!==-1)
+    {
+        errInputValue.splice(errInputValue.indexOf(fName), 1 );
+    };
+}
+function showDivErr(div,value)
+{
+    console.log('---showDivErr()---');
+    div.innerHTML=value;
+    div.style.display = "block";
+}
+function hideDivErr(div)
+{
+    console.log('---hideDivErr()---');
+    div.innerText='';
+    div.style.display = "none";
 }
 function createDocListRow(elementWhereAppend,inputElement,taskToRun)
 {
-    //console.log('---createDocListRow---');
+    console.log('---createDocListRow()---');
+    //console.log(inputElement);
+    //console.log(inputElement.name);
+    
     var removeMode=false;
     var divColButtonAttribute=new Array(
 	Array('class','col-sm-auto')
@@ -889,12 +1185,26 @@ function createDocListRow(elementWhereAppend,inputElement,taskToRun)
             'mt-0',
             'mb-0'
             );
+    var divErrAtr=new Array(
+            Array('class','col mt-1 mb-1'),
+            Array('id','')
+            );
+    var divErrClass=new Array(
+            'alert',
+            'alert-danger'
+            );
+    var divErrStyle=new Array(
+            Array('display','none')
+            );
+    divErrAtr[1][1]='errDiv-'+inputElement.name; //+projectFileds[i][2];
+    var divErr=createHtmlElement('div',divErrAtr,divErrClass,divErrStyle);
+    
     divOverAll=createHtmlElement('div',divOverAllAttribute,divOverAllClass,null);
     var removeButtonElement=createRemoveButton();
     //console.log(taskToRun);
     switch(taskToRun)
     {
-        case 'getprojectdetail': 
+        case 'getprojectdetails': 
             if(projectEditMode)
             {
                 removeMode=true; 
@@ -906,12 +1216,15 @@ function createDocListRow(elementWhereAppend,inputElement,taskToRun)
                 removeMode=true;
             };
             break;
+        case 'addNewProject':
+                removeMode=true;
+            break;
         default:
             break;
     };
     if(removeMode)
     {
-       removeButtonElement.onclick=function(){removeRow(this,taskToRun);}; 
+       removeButtonElement.onclick=function(){removeRow(this,divErr,inputElement.name);}; 
     };
   
     divColInputElement.appendChild(inputElement);
@@ -919,13 +1232,17 @@ function createDocListRow(elementWhereAppend,inputElement,taskToRun)
     divOverAll.appendChild(divColInputElement);
     divOverAll.appendChild(divColButtonElement);
     elementWhereAppend.appendChild(divOverAll);
+    elementWhereAppend.appendChild(divErr);
     dokCount++;
     //console.log(elementWhereAppend);
 }
-function removeRow(element)
+function removeRow(element,divErr,inputName)
 {
-    console.log('---removeRow---');
-    element.parentNode.parentNode.parentNode.removeChild(element.parentNode.parentNode); 
+    console.log('---removeRow()---');
+    console.log(divErr);
+    removeErrTab(inputName);
+    hideDivErr(divErr);  
+    element.parentNode.parentNode.parentNode.removeChild(element.parentNode.parentNode);
 }
 function assignProjectDataToField(fieldId)
 {
@@ -1132,9 +1449,9 @@ function createTagWithData(tag,data,id,name)
 
 function createOl(dataArray,fieldId,fieldName)
 {
-    console.log('---createOl---');
+    console.log('---createOl()---');
     console.log(dataArray);
-    console.log(dataArray.length);
+    console.log('DATA LENGTH : '+dataArray.length);
     var ol=document.createElement("OL");
     var li=document.createElement("LI");
     var optionText = document.createTextNode("");
@@ -1159,14 +1476,14 @@ function createOl(dataArray,fieldId,fieldName)
         
         li.appendChild(optionText);
         ol.appendChild(li);
-        addHiddenInput("addDoc"+i,dataArray[i][0]+"|"+dataArray[i][1]);
+        //addHiddenInput("addDoc"+i,dataArray[i][0]+"|"+dataArray[i][1]);
     };
     return ol;
 }
 // NOT USED
 function createDiv(elementWhereAdd)
 {
-    console.log('createDIV');
+    console.log('---createDIV()---');
     var divName='divBodyData';
     var div=document.createElement("DIV");
     div.setAttribute("id",divName);
@@ -1386,7 +1703,7 @@ function createTeamRow(whereAppend,rowName,type)
             selectTeamWorkerPercentElement.appendChild(createTeamRowOption(z));
         }
     };
-    selectTeamWorkerPercentElement.onfocus=function(){ manageActMemberProjUsedPercent(tmpPers[0],selectTeamWorkerPercentElement,rowName,teamElementCounter);};
+    selectTeamWorkerPercentElement.onfocus=function(){ manageActMemberProjUsedPercent(selectTeamWorkerPercentElement);};
     optionTeamWorkerAttribute[0][1]=tmpPers[0];
     optionTeamWorkerElement=createHtmlElement('option',optionTeamWorkerAttribute,null,null);
     optionTeamWorkerElement.textContent= tmpPers[1];
@@ -1424,25 +1741,25 @@ function controlAddTeamButton()
         buttonAdd.setAttribute("disabled", "true"); 
     }
 }
-function manageActMemberProjUsedPercent(idPers,elementWhereUpdate,rowName,teamElementCounter)
+function manageActMemberProjUsedPercent(elementWhereUpdate)
 {
-    console.log('---manageActMemberProjUsedPercent---\n'+idPers);
-    //console.log('Last Team Member id : '+lastTeamMemberId);
-    if(lastTeamMemberId!=-1 && lastTeamMemberId!=idPers)
-    {
+    console.log('---manageActMemberProjUsedPercent---\n');
+    var currentPersId=elementWhereUpdate.parentNode.parentNode.childNodes[0].childNodes[0].value;
+    console.log("Current id user - "+currentPersId);
+ 
         //console.log(elementWhereUpdate.firstChild);
         while (elementWhereUpdate.firstChild) 
         {
             elementWhereUpdate.removeChild(elementWhereUpdate.firstChild);
         };
         //console.log(elementWhereUpdate);
-        elementWhereUpdate.onfocus=function(){ manageActMemberProjUsedPercent(idPers,elementWhereUpdate,rowName,teamElementCounter);};
+        elementWhereUpdate.onfocus=function(){ manageActMemberProjUsedPercent(elementWhereUpdate);};
         console.log('UPDATE AVALIABLE USED VALUE');
         for(var z=0;z<teamAvaliablePersCount;z++)
         {
-            if(teamAvaliablePers[z][0]==lastTeamMemberId)
+            if(teamAvaliablePers[z][0]==currentPersId)
             {
-                //console.log(teamAvaliablePers[z][1]);
+                console.log(teamAvaliablePers[z][1]);
                 //console.log(teamAvaliablePers[z][5]+1);
                 for(var y=1;y<teamAvaliablePers[z][5]+1;y++)
                 {
@@ -1451,7 +1768,6 @@ function manageActMemberProjUsedPercent(idPers,elementWhereUpdate,rowName,teamEl
                 break;
             }
         }
-    }
 }
 function createTeamRowOption(usedPercent)
 {
@@ -1655,16 +1971,9 @@ function createValidData(value)
         return value[2]+"."+value[1]+"."+value[0];
     };
 }
-function createProjectRemoveBodyContent(elementWhereAdd,formName,idData)
-{ 
-    console.log('---createProjectRemoveBodyContent---');
-    console.log('elementWhereAdd :');
-    console.log(elementWhereAdd);
-   
-    removeHtmlChilds(elementWhereAdd);
-    removeHtmlChilds(document.getElementById('ProjectAdaptedButtonsBottom'));
-
-    // add-team FORM
+function getFormHeader(formName)
+{
+    console.log('---getFormHeader---');
     var formAttribute=new Array(
         Array('name',formName),
         Array('id',formName),
@@ -1672,10 +1981,29 @@ function createProjectRemoveBodyContent(elementWhereAdd,formName,idData)
         Array('autocomplete','off'),
         Array('method','POST'),
         Array('ENCTYPE','multipart/form-data'),
-        Array('action','javascript:void(0);')
+        Array('action','javascript:void(0);')        
 	);
-    var formElement=createHtmlElement('form',formAttribute,null,null); 
-    // END add-team FORM
+    return(createHtmlElement('form',formAttribute,null,null));
+}
+function createDivCol(divName,colNumbers)
+{
+    var divAtr=new Array(
+        Array('name',divName),
+        Array('id',divName),
+        Array('class','col-sm-'+colNumbers)      
+	);
+     return(createHtmlElement('div',divAtr,null,null));   
+}
+function createProjectRemoveBodyContent(elementWhereAdd,formName,idData)
+{ 
+    console.log('---createProjectRemoveBodyContent---');
+    console.log('elementWhereAdd :');
+    console.log(elementWhereAdd);
+    removeHtmlChilds(elementWhereAdd);
+    removeHtmlChilds(document.getElementById('ProjectAdaptedButtonsBottom'));
+    var formElement=getFormHeader(formName);
+    var div=createDivCol('closeProject',12);
+    div.innerText='Podaj powód :';
     // input hidden with id FORM
     var inputIdAttribute=new Array(
         Array('name',formName+'id'),
@@ -1683,9 +2011,10 @@ function createProjectRemoveBodyContent(elementWhereAdd,formName,idData)
         Array('value',idData)
 	);
     var inputIdElement=createHtmlElement('input',inputIdAttribute,null,null);
+    formElement.appendChild(div);
     formElement.appendChild(inputIdElement);
+    
     elementWhereAdd.appendChild(formElement);
-
     console.log(elementWhereAdd);
 }
 //##################################### createAddTeamBodyContent END ######################################
@@ -1792,8 +2121,7 @@ function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
             
             var addButtonElement=createHtmlElement('button',addButtonAttribute,addButtonClass,null);
             addButtonElement.innerText = "Dodaj zespół";
-            
-            
+
             var editButtonAttribute=new Array(
                 Array('class','btn')
                 );
@@ -1903,7 +2231,7 @@ function createSelect(dataArray,fieldId,fieldName)
     //console.log('---createSelect---\n'+fieldId);
     //console.log('data - '+dataArray+'\n id - '+fieldId+'\n name - '+fieldName);
     selectAttribute[1][1]=fieldId; // id 
-    selectAttribute[2][1]=fieldName; // id 
+    selectAttribute[2][1]=fieldName; // name
 
     var option=document.createElement("OPTION");
     var optionText = document.createTextNode("");
@@ -1913,12 +2241,7 @@ function createSelect(dataArray,fieldId,fieldName)
         selectClass.push("gt-border-light-blue","gt-no-rounded-right");
         selectStyle.push(Array('borderColor',"#80bfff"),Array('borderTopRightRadius','0px'),Array('borderBottomRightRadius','0px'));
     }
-    var select=createHtmlElement('select',selectAttribute,selectClass,selectStyle);
-    if(fieldName==='typ_umowy')
-    {
-       select.onchange = function() { setTypOfAgreement(this.value); };
-    };
-    
+    var select=createHtmlElement('select',selectAttribute,selectClass,selectStyle);    
     for(var i=0;i<dataArray.length;i++)
     {
         //console.log(dataArray[i][fieldsToSetup[0]]+" - "+dataArray[i][fieldsToSetup[1]]);
@@ -1977,7 +2300,7 @@ function setAllProjects(data)
                     buttonConfig.push(new Array('btn-secondary','close','Zamknij'));
                     buttonConfig.push(new Array('btn-danger ','delete','Usuń'));
                     //buttonpdf="<button class=\"btn  btn-outline-danger btn-danger mr-0 mb-0 mt-0 ml-0\" data-toggle=\"modal\" ><a href=\"http://rezerwacje-gop.local:8080/modul/manageProject.php?task=getpdf&id=36\">PDF</a></button>";
-                    buttonpdf="<a href=\"http://rezerwacje-gop.local:8080/modul/manageProject.php?task=getpdf&id="+arr[i].id+"\" class=\"btn btn-danger btn-outline-danger mr-0 mb-0 mt-0 ml-0\" role=\"button\" aria-disabled=\"true\" target=\"_blank\">PDF</a>";
+                    buttonpdf="<a href=\""+getUrl()+"modul/manageProject.php?task=getpdf&id="+arr[i].id+"\" class=\"btn btn-danger btn-outline-danger mr-0 mb-0 mt-0 ml-0\" role=\"button\" aria-disabled=\"true\" target=\"_blank\">PDF</a>";
                     //onclick=\"getPDF('"+arr[i].id+"','"+arr[i].status+"')\"
                     break;
                 case 'd':
@@ -1993,7 +2316,11 @@ function setAllProjects(data)
             {
                 button+="<button class=\"btn "+buttonConfig[j][0]+" mr-0 mb-0 mt-0 ml-0\" data-toggle=\"modal\" data-target=\"#ProjectAdaptedModal\" onclick=\"createAdaptedModal('"+buttonConfig[j][1]+"',"+arr[i].id+",'"+arr[i].temat_umowy+"','"+arr[i].status+"')\">"+buttonConfig[j][2]+"</button>";
             }
-            button+=buttonpdf;
+            if(arr[i].status==='m' || arr[i].status==='n')
+            {
+                button+=buttonpdf;
+            }
+            
             out+="<tr id=\"project"+arr[i].id+"\"><th scope=\"row\">"+arr[i].id+"</th><td>"+arr[i].numer_umowy+"</td><td>"+arr[i].temat_umowy+"</td><td>"+arr[i].create_date+"</td><td>"+arr[i].kier_grupy+"</td><td>"+arr[i].nadzor+"</td><td>"+arr[i].term_realizacji+"</td><td>"+arr[i].harm_data+"</td><td>"+arr[i].koniec_proj+"</td><td>"+statusProj+"</td><td><div class=\"btn-group\">"+button+"</div></td></tr>";
             button='';
         }
@@ -2010,12 +2337,10 @@ function getPDF(idProject,projectStatus)
 }
 function createAdaptedModal(modalType,idData,titleData,projectStatus)
 {
-    console.log('---createAdaptedModal---');
-    console.log("TASK "+modalType+" - "+idData+" - "+titleData);
-    setAdaptedModalProperties(modalType,idData,titleData,projectStatus);
-    idRecord=idData;    
+    console.log('---createAdaptedModal()---');
+    console.log("TASK - "+modalType+"\nID PROJECT - "+idData+"\nTITLE - "+titleData);
+    setAdaptedModalProperties(modalType,idData,titleData,projectStatus);  
     document.getElementById("projectId").innerHTML = idData;
-   
 }
 function removeHtmlChilds(htmlElement)
 {
@@ -2026,62 +2351,66 @@ function removeHtmlChilds(htmlElement)
 };
 function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
 {
-    console.log('---setAdaptedModalProperties---');
-    var bgTitle = document.getElementById("ProjectAdaptedBgTitle");
+    console.log('---setAdaptedModalProperties()---');
+    console.log("MODAL TYPE - "+modalType+"\nID PROJECT - "+idData+"\nTITLE DATA - "+titleData);
+    var bgTitle =document.getElementById("ProjectAdaptedBgTitle");
     var title=document.getElementById("ProjectAdaptedTextTitle");
+    var divBodyExtra=document.getElementById('ProjectAdaptedBodyExtra');
     bgTitle.classList.value="";
     bgTitle.classList.add("modal-header");
 
     removeHtmlChilds(document.getElementById('ProjectAdaptedDynamicData'));
     removeHtmlChilds(document.getElementById('ProjectAdaptedButtonsBottom'));
+    removeHtmlChilds(divBodyExtra);
     
     switch(modalType)
     {
-        case 'edit':
+        case 'createProject':
+            bgTitle.classList.add("bg-info");
+            title.innerHTML="POWOŁANIE GRUPY REALIZUJĄCEJ:";
+            setDataDiv('');
+            getAjaxData('getProjectDefaultValues','','','','');
+            divBodyExtra.appendChild(getLegendDiv());
+            break;
+        case 'edit': // NOT USED
             bgTitle.classList.add("bg-info");
             title.innerHTML="EDYCJA PROJEKTU:";
             break;
-        case 'show':
+        case 'show': // NOT USED
             bgTitle.classList.add("bg-info");
             title.innerHTML="PODGLĄD PROJEKTU:";
             break;
         case 'documents':
-            document.getElementById("errDiv-Adapted-overall").style.display = "none";
-            document.getElementById("errDiv-Adapted-overall").innerText = "";
-            document.getElementById("projectTitle").innerHTML = titleData;
-            document.getElementById("projectId2").innerHTML ='';
+            idProject=idData;
+            setDataDiv(titleData)
             bgTitle.classList.add("bg-info");
             title.innerHTML="DOKUMENTY PROJEKTU:";
             getAjaxData('getprojectdocuments','ProjectAdaptedDynamicData','project_documents','&id='+idData,projectStatus);
             break;
         case 'details':
-            document.getElementById("errDiv-Adapted-overall").style.display = "none";
-            document.getElementById("errDiv-Adapted-overall").innerText = "";
-            document.getElementById("projectTitle").innerHTML = '';
-            document.getElementById("projectId2").innerHTML ='';
+            setDataDiv('')
             bgTitle.classList.add("bg-info");
             title.innerHTML="SZCZEGÓŁY PROJEKTU:";
-            getAjaxData('getprojectdetail','ProjectAdaptedDynamicData','project_details','&id='+idData,projectStatus);
+            getAjaxData('getprojectdetails','ProjectAdaptedDynamicData','project_details','&id='+idData,projectStatus);
             break;
         case 'team':
+            document.getElementById("errDiv-Adapted-overall").style.display = "none";
+            document.getElementById("errDiv-Adapted-overall").innerHTML = "";
             document.getElementById("projectTitle").innerHTML = titleData;
+            document.getElementById("projectId2").innerHTML ='';
             actUsedMemberProjTab=[];
             teamElementCounter=0;
             teamEditPers=[];
             currentTeamPers=[];
             teamAvaliablePers=[];
             idProject=idData;
-            document.getElementById("errDiv-Adapted-overall").style.display = "none";
-            document.getElementById("errDiv-Adapted-overall").innerHTML = "";
+            
             bgTitle.classList.add("bg-warning");
             title.innerHTML="ZESPÓŁ PROJEKTU:";
             getAjaxData('getprojectteam','ProjectAdaptedDynamicData','zespol_projektu','&id='+idData,projectStatus);
             break;
         case 'delete':
-            document.getElementById("errDiv-Adapted-overall").style.display = "none";
-            document.getElementById("errDiv-Adapted-overall").innerHTML = "";
-            document.getElementById("projectTitle").innerHTML = titleData;
-            document.getElementById("projectId2").innerHTML ='';
+            setDataDiv(titleData)
             bgTitle.classList.add("bg-danger");
             title.innerHTML="USUWANIE PROJEKTU:";
             createProjectRemoveBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'removeProject',idData);
@@ -2094,10 +2423,7 @@ function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
             createAddTeamBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'addTeamToProject',idData,projectStatus);
             createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'addTeamToProject',idData,projectStatus);
         case 'close':
-            document.getElementById("errDiv-Adapted-overall").style.display = "none";
-            document.getElementById("errDiv-Adapted-overall").innerHTML = "";
-            document.getElementById("projectTitle").innerHTML = titleData;
-            document.getElementById("projectId2").innerHTML ='';
+             setDataDiv(titleData)
             bgTitle.classList.add("bg-secondary");
             title.innerHTML="ZAMYKANIE PROJEKTU:";
             createProjectRemoveBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'closeProject',idData,projectStatus);
@@ -2108,7 +2434,13 @@ function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
             break;
     };
 }
-
+function setDataDiv(titleData)
+{
+    document.getElementById("errDiv-Adapted-overall").style.display = "none";
+    document.getElementById("errDiv-Adapted-overall").innerHTML = "";
+    document.getElementById("projectTitle").innerHTML = titleData;
+    document.getElementById("projectId2").innerHTML ='';
+}
 function closeModal(modalId)
 {
     $('#'+modalId).modal('hide');
@@ -2120,7 +2452,7 @@ function checkIsErr()
     for(i=0;i<errInputValue.length;i++)
     {
         errExists=true;
-        //console.log(i+" - "+errInputValue[i]);
+        console.log(i+" - "+errInputValue[i]);
     }
     return (errExists);
 }
@@ -2165,10 +2497,11 @@ function postDataToUrl(nameOfForm)
             confirmTask = confirm("Potwierdź "+label);
             break;
         case 'setprojectdetails':
-            parseFieldValue(dataForm[2][1],dataForm[2][0],errDivAjax);
-            parseFieldValue(dataForm[3][1],dataForm[3][0],errDivAjax);
+            console.log('NUMER UMOWY: '+document.getElementById('numer_umowy').value);
+            console.log('TEMAT UMOWY: '+document.getElementById('temat_umowy').value);
+            parseFieldValue( document.getElementById('temat_umowy').value,"temat_umowy","errDiv-temat_umowy");
+            parseFieldValue( document.getElementById('numer_umowy').value,"numer_umowy","errDiv-numer_umowy");
         case 'setprojectdocuments':
-            dataForm=getFormData(nameOfForm);
             //console.log(dataForm);
             if(checkIsErr())
             {
@@ -2178,11 +2511,25 @@ function postDataToUrl(nameOfForm)
             confirmTask=true;
             taskUrl='modul/manageProject.php?task='+nameOfForm;
             break;
+        case 'addNewProject':
+            parseFieldValue( document.getElementById('temat_umowy').value,"temat_umowy","errDiv-temat_umowy");
+            parseFieldValue( document.getElementById('numer_umowy').value,"numer_umowy","errDiv-numer_umowy");
+            if(checkIsErr())
+            {
+                console.log("err is true");
+                //setSubmitButton(true);
+                return(0);
+            };
+            //setSubmitButton(false);
+            taskUrl='modul/manageProject.php?task=add';
+            //document.getElementById("errDiv-overall").style.display = "none";
+            //errDivAjax='errDiv-overall';
+            confirmTask=true;
+            break;
         default:
             break;
-    };
-    
-    if (confirmTask === true)
+    }; 
+    if (confirmTask)
     {
         sendData(nameOfForm,taskUrl,errDivAjax);
     };
@@ -2228,23 +2575,17 @@ function runTaskAfterAjax(nameOfForm,errDivAjax)
     switch(nameOfForm)
     {
         case 'addTeamToProject':
-            // CLEAR
             alert('Team updated');
             $('#ProjectAdaptedModal').modal('hide'); 
             break;
+        case 'addNewProject':   
         case 'removeProject':
-            getAjaxData('getprojects','test','test');
-            $('#ProjectAdaptedModal').modal('hide'); 
-            break;
-        case 'createPdfForm':
-            getAjaxData('getprojects','test','test');
-            $('#addProjectModal').modal('hide'); 
-            break;
-        case 'setprojectdetails':
+        case 'setprojectdetails':   
             getAjaxData('getprojects','test','test');
             $('#ProjectAdaptedModal').modal('hide'); 
             break;
         case 'setprojectdocuments':
+            alert('Documents updated');
             $('#ProjectAdaptedModal').modal('hide'); 
             break;
         default:
@@ -2297,7 +2638,7 @@ function createDataToSend(nameOfForm)
             {
                fieldValue=document.getElementById("pdfTypUmowy").innerHTML;
             };
-            //console.log(fieldName+" - "+fieldValue);
+            console.log(fieldName+" - "+fieldValue);
             params += fieldName + '=' + fieldValue + '&'; 
         } 
     }
@@ -2313,45 +2654,9 @@ $(document).keyup(function(e)
 {
     if (e.key === "Escape")
     { // escape key maps to keycode `27`
-        setDefault();
+        //setDefault(); NO MORE AVALIABLE
     }
 });
-function setDefault()
-{
-    selectAttribute[3][0]='no-readolny';
-    selectAttribute[4][0]='no-disabled';
-    console.log("---setDefault()---");
-    var element = document.getElementById("postData");
-    element.classList.remove("disabled"); 
-    document.getElementById('div-inputPdf0').append(TypeOfAgreement);
-    document.getElementById('div-inputPdf3').append(ManagerProj);
-    document.getElementById('div-inputPdf7').append(liderProj);
-    document.getElementById('div-inputPdf8').append(AddDictDoc);
-
-    document.getElementById('temat_umowy').value="";
-    document.getElementById('numer_umowy').value="";
-    document.getElementById('d-term_realizacji').value="";
-    document.getElementById('d-harm_data').value="";
-    document.getElementById('d-koniec_proj').value="";
-    document.getElementById("errDiv-overall").style.display = "none";
-    document.getElementById("errDiv-temat_umowy").style.display = "none";
-    document.getElementById("errDiv-numer_umowy").style.display = "none";
-  
-    var extraFormDoc = document.getElementById('writeroot');
-    console.log(extraFormDoc.childNodes);
-    var indexToRemove;
-    while (extraFormDoc.firstChild)
-    {
-        console.log(extraFormDoc.firstChild);
-        console.log(extraFormDoc.firstChild.childNodes[1].childNodes[1].name);
-        indexToRemove=extraFormDoc.firstChild.childNodes[1].childNodes[1].name;
-        errInputValue.splice( errInputValue.indexOf(indexToRemove), 1 );
-        extraFormDoc.firstChild.remove();
-        console.log('remove');
-    }
-    counter=0;
-    addFormField();
-}
 function closeNode(nodeToClose,clearErr)
 {
     console.log("---closeNode---");
@@ -2359,7 +2664,7 @@ function closeNode(nodeToClose,clearErr)
     console.log(clearErr.childNodes[1].name);
     console.log(nodeToClose);
     errInputValue.splice( errInputValue.indexOf(indexToRemove), 1 );
-    checkErr();
+    checkIsErr();
 }
 function removeTeamPersRow(nodeToClose,clearErr)
 {
@@ -2384,7 +2689,7 @@ function editForm(elementWhereChange,taskToRun,editButton,formName)
 { 
     switch(taskToRun)
     {
-        case 'getprojectdetail':
+        case 'getprojectdetails':
             projectEditMode=true;
             editButton.onclick=function(){ postDataToUrl(formName.name);};
             createProjectDetailViewFields(elementWhereChange,taskToRun);
@@ -2399,9 +2704,11 @@ function editForm(elementWhereChange,taskToRun,editButton,formName)
     };
     console.log(elementWhereChange);
 }
-getAjaxData('getprojects','test','test','','');
-getAjaxData('getprojectsleader','inputPdf7','nadzor','','');
-getAjaxData('getprojectsmanager','inputPdf3','kier_grupy','','');
-getAjaxData('gettypeofagreement','inputPdf0','typ_umowy','','');
-getAjaxData('getprojectsmember','projectsmember','czlonek_grupy','','');
-getAjaxData('getadditionaldictdoc','inputPdf8','dodatkowe_dokumenty','','');
+getAjaxData('getprojects','','','','');
+getAjaxData('getprojectgltech','','nadzor','','');
+getAjaxData('getprojectglkier','','kier_grupy','','');
+getAjaxData('getprojectsleader','','nadzor','','');
+getAjaxData('getprojectsmanager','','kier_grupy','','');
+getAjaxData('gettypeofagreement','','typ_umowy','','');
+getAjaxData('getprojectsmember','','czlonek_grupy','','');//projectsmember
+getAjaxData('getadditionaldictdoc','','dodatkowe_dokumenty','','');//inputPdf8

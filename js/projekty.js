@@ -50,11 +50,11 @@ var projectFileds=new Array(
         new Array('s-umowa',"Do realizacji :",'typ_umowy'),
         new Array('t','Numer:','numer_umowy'),
         new Array('t','Temat:','temat_umowy'),
-        new Array('s-kier','Do kierowania grupa powołuje:','kier_grupy'),
+        new Array('s-nadzor','Do kierowania grupa powołuje:','nadzor'),
         new Array('d','Termin realizacji','term_realizacji'),
         new Array('d','Kierującego zobowiązuję do przedstawienia harmonogramu prac do dnia','harm_data'),
         new Array('d','Kierującego zobowiązuję do zakończenia prac i napisania raportu z realizacji zadania do dnia:','koniec_proj'),
-        new Array('s-nadzor','Nadzór nad realizacją | powierzam','nadzor'),
+        new Array('s-kier','Nadzór nad realizacją | powierzam','kier_grupy'),
         new Array('s-gltech','Główny technolog: ','gl_tech'),
         new Array('s-glkier','Kierownik Ośrodka: ','gl_kier'),
         new Array('l-dok','Wykaz powiązanych dokumentów:','proj_dok','dokPowiazane')
@@ -474,9 +474,9 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
             //console.log(data[0]);
             manageTaskAfterAjaxGet('gettypeofagreement',data[0],'typ_umowy','typ_umowy','n');
             //console.log(data[1]);
-            manageTaskAfterAjaxGet('getprojectsleader',data[1],'kier_grupy','kier_grupy','n');
+            manageTaskAfterAjaxGet('getprojectsleader',data[1],'nadzor','nadzor','n');
             //console.log(data[2]);
-            manageTaskAfterAjaxGet('getprojectsmanager',data[2],'nadzor','nadzor','n');
+            manageTaskAfterAjaxGet('getprojectsmanager',data[2],'kier_grupy','kier_grupy','n');
             //console.log(data[3]);
             manageTaskAfterAjaxGet('getadditionaldictdoc',data[3],'dokPowiazane','dokPowiazane','n');
             manageTaskAfterAjaxGet('getprojectgltech',data[4],'gl_tech','gl_tech','n');
@@ -1542,7 +1542,6 @@ function createRemoveButton()
     var removeButtonIattribute=new Array(
 	Array('class','fa'),
 	Array('aria-hidden','true')
-        
 	);
     var removeButtonIclass=new Array(
 	'fa-minus'

@@ -19,16 +19,6 @@ class manageProject extends initialDb
                     "Istnieje już pracownik o podanym Imieniu i Nazwisku",
                     "Podane Imię lub Nazwisko jest za długie"
                 ),
-                "temat_umowy"=>array
-                (
-                    "Nie podano tematu projektu",
-                    "Istnieje już projekt o podanym temacie"
-                ),
-                "id_projekt"=>array
-                (
-                    "Musisz wskazać co najmniej jedną osobę do projektu",
-                    "Pracownik jest już przypisany do projektu"
-                ),
                 "input"=>array
                 (
                     "Nie uzupełniono pola.",

@@ -6,7 +6,6 @@ require(filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/.cfg/config.php');
 class manageProject extends initialDb
 {
     private $inpArray=array();
-    private $user="";
     protected $err="";
     protected $valueToReturn=null;
     protected $idProject=null;
@@ -53,24 +52,23 @@ class manageProject extends initialDb
             {
                 if($value!=='')
                 {
+                    //echo 'NOT EMPTY'.$value."\n";
                     $tmpArray=explode('.',$value);
                     $this->inpArray[$key]=$tmpArray[2]."-".$tmpArray[1]."-".$tmpArray[0];
                     //echo $key." - ".$this->inpArray[$key];
                 }
                 else
                 {
+                    //echo 'EMPTY'.$value."\n";
+                    //$this->inpArray[$key]=NULL;
                     $this->inpArray[$key]='0000-00-00';
+                   // echo $key.' - '.$this->inpArray[$key]."\n";
                 };
             };
         }
     }
-    public function setUser($user)
-    {
-        $this->user=$user;
-    }
     private function checkExistInDb($tableName,$whereCondition,$valueToCheck)
     {
-        $arrayOfWhere=$this->explodeValue($whereCondition,'=');
         //print_r($arrayOfWhere);
         //echo $valueToCheck;
         if(trim($valueToCheck)!='')
@@ -82,7 +80,7 @@ class manageProject extends initialDb
         {
             $this->err.="NO VALUE TO CHECK<br/>";
             return(0);
-        };
+        }
     }
     private function explodeValue($valueToExplode,$delimiter)
     {
@@ -432,7 +430,7 @@ class manageProject extends initialDb
                     //echo "REMOVE FROM DB.\n";
                     $this->query(
                      'UPDATE projekt_pracownik SET udzial_procent=?,dat_od=?,dat_do=?,mod_dat=?,mod_user_id=?,mod_user_name=?,wsk_u=? WHERE id_projekt=? AND id_pracownik=?',
-                     '0,0000-00-00,0000-00-00,'.$curretDateTime.',1,'.$this->user.',1,'.$this->idProject.','.$key['idPracownik']); 
+                     '0,0000-00-00,0000-00-00,'.$curretDateTime.','.$_SESSION["userid"].','.$_SESSION["username"].',1,'.$this->idProject.','.$key['idPracownik']); 
                     // REMOVE FROM DB
                 }
                 $found=false;
@@ -464,7 +462,7 @@ class manageProject extends initialDb
         {
              $this->query(
                      'UPDATE projekt_pracownik SET imie=?,nazwisko=?,udzial_procent=?,dat_od=?,dat_do=?,mod_dat=?,mod_user_id=?,mod_user_name=?,wsk_u=? WHERE id_projekt=? AND id_pracownik=?',
-                     $dataArray['imie'].','.$dataArray['nazwisko'].','.$dataArray[1].','.$dataArray[2].','.$dataArray[3].','.$curretDateTime.',1,'.$this->user.',0,'.$this->idProject.','.$dataArray[0]);            
+                     $dataArray['imie'].','.$dataArray['nazwisko'].','.$dataArray[1].','.$dataArray[2].','.$dataArray[3].','.$curretDateTime.','.$_SESSION["userid"].','.$_SESSION["username"].',0,'.$this->idProject.','.$dataArray[0]);            
         }
         else
         {
@@ -472,7 +470,7 @@ class manageProject extends initialDb
             (id_projekt,id_pracownik,imie,nazwisko,udzial_procent,dat_od,dat_do,mod_dat,mod_user_id,mod_user_name) 
 		VALUES
 		(?,?,?,?,?,?,?,?,?,?)'
-        ,$this->idProject.','.$dataArray[0].','.$dataArray['imie'].','.$dataArray['nazwisko'].','.$dataArray[1].','.$dataArray[2].','.$dataArray[3].','.$curretDateTime.',1,'.$this->user);        
+        ,$this->idProject.','.$dataArray[0].','.$dataArray['imie'].','.$dataArray['nazwisko'].','.$dataArray[1].','.$dataArray[2].','.$dataArray[3].','.$curretDateTime.','.$_SESSION["userid"].','.$_SESSION["username"]);        
         }            
     }
     protected function getPersonData($id)
@@ -544,7 +542,7 @@ class manageProject extends initialDb
             (create_user,create_date,typ_umowy,typ_umowy_alt,numer_umowy,temat_umowy,kier_grupy,kier_grupy_id,term_realizacji,harm_data,koniec_proj,nadzor,nadzor_id,mod_user,mod_user_id,kier_osr,kier_osr_id,technolog,technolog_id) 
 		VALUES
 		(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-        ,$this->user.",${curretDateTime},".$typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$kier_grupy[1].",".$kier_grupy[0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$nadzor[1].",".$nadzor[0].",".$this->user.",1,".$kier_osr[1].','.$kier_osr[0].','.$technolog[1].','.$technolog[0]);
+        ,$_SESSION["username"].",${curretDateTime},".$typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$kier_grupy[1].",".$kier_grupy[0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$nadzor[1].",".$nadzor[0].",".$_SESSION["username"].",".$_SESSION["userid"].",".$kier_osr[1].','.$kier_osr[0].','.$technolog[1].','.$technolog[0]);
                  
             if($this->getError()!=='')
             {
@@ -617,7 +615,7 @@ class manageProject extends initialDb
             $curretDateTime=date('Y-m-d H:i:s');
             
             $this->query('UPDATE projekt_nowy SET typ_umowy=?,typ_umowy_alt=?,numer_umowy=?,temat_umowy=?,kier_grupy=?,kier_grupy_id=?,term_realizacji=?, harm_data=?, koniec_proj=?, nadzor=?,nadzor_id=?,mod_user=?,mod_user_id=?, dat_kor=?,kier_osr=?,kier_osr_id=?,technolog=?,technolog_id=? WHERE id=?',
-            $typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$kier_grupy[1].",".$kier_grupy[0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$nadzor[1].",".$nadzor[0].",".$this->user.",1,${curretDateTime},".$kier_osr[1].','.$kier_osr[0].','.$technolog[1].','.$technolog[0].",${idProject}");
+            $typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$kier_grupy[1].",".$kier_grupy[0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$nadzor[1].",".$nadzor[0].",".$_SESSION["username"].",".$_SESSION["userid"].",${curretDateTime},".$kier_osr[1].','.$kier_osr[0].','.$technolog[1].','.$technolog[0].",${idProject}");
                  
             if($this->getError()!=='')
             {
@@ -803,7 +801,6 @@ class checkGetData extends manageProject
     }
     private function runTask()
     {
-        $this->setUser($_SESSION["username"]);
         switch($this->urlGetData['task']):
         
         case "add" :

@@ -3,35 +3,30 @@ session_start();
 require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/redirectToLoginPage.php");
 require(filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/.cfg/config.php');
 
-class manageProject extends initialDb
+class manageUser extends initialDb
 {
     private $inpArray=array();
-    private $user="";
     protected $err="";
     protected $valueToReturn=null;
-    protected $idEmployee=null;
+    protected $idUser=null;
     const maxPercentPersToProj=100;
     protected $infoArray=array
             (
                 "imie_nazwisko"=>array
                 (
-                    "Podane Imię lub Nazwisko jest za krótkie",
-                    "Istnieje już pracownik o podanym Imieniu i Nazwisku",
-                    "Podane Imię lub Nazwisko jest za długie"
+                    "Podane Imię, Nazwisko lub Login jest za krótkie",
+                    "Podane Imię, Nazwisko lub Login jest za długi",
+                    "Istnieje już użytkownik o podanym Imieniu i Nazwisku",
                 ),
-                "input"=>array
+                "login"=>array
                 (
-                    "Nie uzupełniono pola.",
-                    "Wprowadzona wartość jest za długa",
-                    "Wprowadzona wartość jest za krótka"
+                    "Istnieje już użytkownik o podanym Loginie"
                 )
             );
-    
     function __construct()
     {
         parent::__construct();
     }
-    
     private function getPostData($postData=array())
     {
         $tmpArray=array();
@@ -55,165 +50,190 @@ class manageProject extends initialDb
             }
         }
     }
-    public function setUser($user)
-    {
-        $this->user=$user;
-    }
-    protected function cEmployee($POSTDATA)
+    protected function cUser($POSTDATA)
     {
         $this->getPostData($POSTDATA);
-        $this->checkEmployeeValueLength($this->inpArray);
-        if($this->checkExistInDb('pracownik','imie=? AND nazwisko=?',$this->inpArray['imie'].','.$this->inpArray['nazwisko']))
+        $this->checkUserValueLength($this->inpArray);
+        if($this->checkExistInDb('uzytkownik','login=?',$this->inpArray['login']))
         {
-            $this->err.=$this->infoArray['imie_nazwisko'][1]."<br/>";
+            $this->err.=$this->infoArray['login'][0]."<br/>";
         }
-        // CHECK AVALIABLE DICTIONARY
-        $specArray=$this->returnSpecTabFromPost($this->inpArray);
-        $this->checkExistSloSpec($specArray);
+        if($this->checkExistInDb('uzytkownik','imie=? AND nazwisko=?',$this->inpArray['imie'].','.$this->inpArray['nazwisko']))
+        {
+            $this->err.=$this->infoArray['imie_nazwisko'][2]."<br/>";
+        }
+        // CHECK PASSWORD INP EXIST
+        if(!$this->checkSpecField("haslo"))
+        {
+            $this->inpArray['haslo']='';
+        }
+        // CHECK AVALIABLE ROLE
+        $permArray=$this->returnPermTabFromPost($this->inpArray);
+        $this->checkExistSloPerm($permArray);
         if(!$this->err)
         {
-            $this->addEmployee($this->inpArray);
+            $this->addUser($this->inpArray);
             if($this->getError()!=='')
             {
                 $this->err.=$this->getError()."<br/>";
             }
             else
             {
-                $this->editEmployeeSpec($specArray,$this->queryLastId());
+                // EDIT USER PERMISSION
+                $this->editUserPerm($permArray,$this->queryLastId());
             }    
         }
     }
-    protected function editEmployee($POSTDATA)
+    protected function editUser($POSTDATA)
     {
         $this->getPostData($POSTDATA);
-        $this->checkEmployeeValueLength($this->inpArray);
-        
-        $this->getIdEmployee();
+        $this->checkUserValueLength($this->inpArray);
+        $this->getSpecField("idUser");
      
-        if(!$this->err)
+        if($this->checkExistInDb('uzytkownik','login=? AND id!=?',$this->inpArray['login'].','.$this->inpArray['idUser']))
         {
-            if($this->checkExistInDb('pracownik','imie=? AND nazwisko=? AND id!=?',$this->inpArray['imie'].','.$this->inpArray['nazwisko'].','.$this->inpArray['idEmployee']))
-            {
-                $this->err.=$this->infoArray['imie_nazwisko'][1]."<br/>";
-            }
+            $this->err.=$this->infoArray['login'][0]."<br/>";
         }
+        if($this->checkExistInDb('uzytkownik','imie=? AND nazwisko=? AND id!=?',$this->inpArray['imie'].','.$this->inpArray['nazwisko'].','.$this->inpArray['idUser']))
+        {
+            $this->err.=$this->infoArray['imie_nazwisko'][2]."<br/>";
+        }
+        // CHECK PASSWORD INP EXIST
+        if(!$this->checkSpecField("haslo"))
+        {
+            $this->inpArray['haslo']='';
+        }
+        
         // CHECK AVALIABLE DICTIONARY
-        $specArray=$this->returnSpecTabFromPost($this->inpArray);
-        $this->checkExistSloSpec($specArray);
+        $permArray=$this->returnPermTabFromPost($this->inpArray);
+        $this->checkExistSloPerm($permArray);
         if(!$this->err)
         {
-            $this->updateEmployee($this->inpArray);
+            $this->updateUser($this->inpArray);
             if($this->getError()!=='')
             {
                 $this->err.=$this->getError()."<br/>";
             }
             else
             {
-                $this->editEmployeeSpec($specArray,$this->inpArray['idEmployee']);
+                $this->editUserPerm($permArray,$this->inpArray['idUser']);
             }    
         }
     }
-    protected function editEmployeeSpec($specArray,$employeeId)
+    protected function editUserPerm($permArray,$userId)
     {
-        // print_r($specArray);
+        // print_r($permArray);
         if(!$this->err)
         {
-            foreach($specArray as $value)
+            foreach($permArray as $value)
             {
                 //echo $value[0].' - '.$value[1];
                 if($value[2]>0)
                 {
-                    $this->addEmployeeSpec($employeeId,$value[0]);
+                    $this->addUserPerm($userId,$value[0]);
                 }
                 else
                 {
-                    $this->removeEmployeeSpec($employeeId,$value[0]);
+                    $this->removeUserPerm($userId,$value[0]);
                 }
             }
         }
     }
-    protected function updateEmployeeSpec($POSTDATA)
+    protected function updateUserPerm($POSTDATA)
     {
+        // GET SENDED DATA VIA POST
         $this->getPostData($POSTDATA);
+        $permArray=$this->returnPermTabFromPost($this->inpArray);
         // CHECK AVALIABLE DICTIONARY
-        $specArray=$this->returnSpecTabFromPost($this->inpArray);
-        $this->checkExistSloSpec($specArray);
-        // GET ID
-        $id=$this->getIdEmployee();
-        
+        $this->checkExistSloPerm($permArray);
+        // GET AND CHECK USER ID
+        $id=$this->getSpecField("idUser");
+
         if(!$this->err)
         {
-            $this->editEmployeeSpec($specArray,$id);
+            $this->editUserPerm($permArray,$id);
         }
     }
-    protected function getIdEmployee()
+    protected function getSpecField($field)
     {
-        if (array_key_exists("idEmployee",$this->inpArray))
+        if (array_key_exists($field,$this->inpArray))
         {
-            return $this->inpArray['idEmployee'];
+            return $this->inpArray[$field];
         }
         else
         {
-            $this->err.= '[idEmployee]FORM KEY NOT EXIST';
-            return(0);
+            $this->err.= '['.$field.']FORM KEY NOT EXIST';
+            return (0);
         } 
     }
-    protected function checkExistSloSpec($specTab)
+     protected function checkSpecField($field)
+    {
+        if (array_key_exists($field,$this->inpArray))
+        {
+            return (true);
+        }
+        else
+        {
+            return (false);
+        } 
+    }
+    protected function checkExistSloPerm($permTab)
     {
        // CHECK SLO IS AVALIABLE
-        foreach($specTab as $value)
+        foreach($permTab as $value)
         {
-            if(!$this->checkExistInDb('v_slo_u_spec','ID=?',$value[0]))
+            if(!$this->checkExistInDb('v_slo_upr','ID=?',$value[0]))
             { 
                 $value[1]=preg_replace('/_/', ' ', $value[1]);
-                $this->err.="[".$value[1]."]DICTIONARY WAS DELETED<br/>";
+                $this->err.="[".$value[1]."]PERMISSION DICTIONARY WAS DELETED<br/>";
             }
         }
     }
-    protected function checkEmployeeValueLength($employeeData)
+    protected function checkUserValueLength($employeeData)
     {
-        if(strlen($employeeData['imie'])<3 || strlen($employeeData['nazwisko'])<3)
+        if(strlen($employeeData['imie'])<3 || strlen($employeeData['nazwisko'])<3 || strlen($employeeData['login'])<3)
         {
             $this->err.=$this->infoArray['imie_nazwisko'][0]."<br/>";
         }
-        if(strlen($employeeData['imie'])>30 || strlen($employeeData['nazwisko'])>30)
+        if(strlen($employeeData['imie'])>30 || strlen($employeeData['nazwisko'])>30 || strlen($employeeData['login'])>30)
         {
-            $this->err.=$this->infoArray['imie_nazwisko'][2]."<br/>";
+            $this->err.=$this->infoArray['imie_nazwisko'][1]."<br/>";
         }
     }
-    protected function addEmployee($employeeData)
-    {
-        $this->query('INSERT INTO pracownik 
-            (imie,nazwisko,stanowisko,mod_user,mod_user_id) 
-		VALUES
-		(?,?,?,?,?)'
-            ,$employeeData['imie'].",".$employeeData['nazwisko'].",".$employeeData['stanowisko'].",".$this->user.',1');
-    }
-    protected function updateEmployee($employeeData)
+    protected function addUser($uData)
     {
         $curretDateTime=date('Y-m-d H:i:s');
-        $this->query('UPDATE pracownik SET imie=?, nazwisko=?, stanowisko=?, dat_mod=?, mod_user=?,mod_user_id=? WHERE id=?'
-            ,$employeeData['imie'].",".$employeeData['nazwisko'].",".$employeeData['stanowisko'].','.$curretDateTime.",".$this->user.',1,'.$employeeData['idEmployee']);
+        $this->query('INSERT INTO uzytkownik 
+            (imie,nazwisko,login,haslo,email,typ,id_rola,mod_dat,mod_user,mod_user_id) 
+		VALUES
+		(?,?,?,?,?,?,?,?,?,?)'
+            ,$uData['imie'].",".$uData['nazwisko'].",".$uData['login'].",".$uData['haslo'].",".$uData['email'].",".$uData['typkonta'].",".$uData['rola'].",".$curretDateTime.",".$_SESSION["username"].','.$_SESSION["userid"]);
     }
-    protected function addEmployeeSpec($employeeId,$value)
+    protected function updateUser($userData)
+    {
+        $curretDateTime=date('Y-m-d H:i:s');
+        $this->query('UPDATE uzytkownik SET imie=?, nazwisko=?, login=?,email=?,haslo=?,typ=?,id_rola=?, mod_dat=?, mod_user=?,mod_user_id=? WHERE id=?'
+            ,$userData['imie'].",".$userData['nazwisko'].",".$userData['login'].",".$userData['email'].",".$userData['haslo'].",".$userData['typkonta'].",".$userData['rola'].','.$curretDateTime.",".$_SESSION["username"].','.$_SESSION["userid"].','.$userData['idUser']);
+    }
+    protected function addUserPerm($userId,$value)
     {
         //echo $employeeId.' - '.$value;
         // CHECK IS EXIST
-        if(!$this->checkExistInDb('prac_i_slo_u_spec','id_prac=? AND id_slo_u_spec=?',$employeeId.','.$value))
+        if(!$this->checkExistInDb('v_uzyt_i_upr','idUzytkownik=? AND idUprawnienie=?',$userId.','.$value))
         {
             // NOT EXIST -> ADD
-            $this->query('INSERT INTO prac_i_slo_u_spec (id_prac,id_slo_u_spec) VALUES (?,?)',$employeeId.",".$value); 
+            $this->query('INSERT INTO uzyt_i_upr (id_uzytkownik,id_uprawnienie) VALUES (?,?)',$userId.",".$value); 
         }
     }
-    protected function removeEmployeeSpec($employeeId,$value)
+    protected function removeUserPerm($userId,$value)
     {
-        if($this->checkExistInDb('prac_i_slo_u_spec','id_prac=? AND id_slo_u_spec=?',$employeeId.','.$value))
+        if($this->checkExistInDb('v_uzyt_i_upr','idUzytkownik=? AND idUprawnienie=?',$userId.','.$value))
         {
             // EXIST -> DELETE
-            $this->query('DELETE FROM prac_i_slo_u_spec WHERE id_prac=? AND id_slo_u_spec=?',$employeeId.",".$value); 
+            $this->query('DELETE FROM uzyt_i_upr WHERE id_uzytkownik=? AND id_uprawnienie=?',$userId.",".$value); 
         }   
     }
-    protected function returnSpecTabFromPost($DATA)
+    protected function returnPermTabFromPost($DATA)
     {
         $tmpArray=array();
         $tmpRec=array();
@@ -258,36 +278,6 @@ class manageProject extends initialDb
     {
         return $arrayOfValue=explode($delimiter,$valueToExplode);
     }
-    protected function getTeamValueToFind()
-    {
-        if(!$this->err)
-        {
-            $teamValueToFind=array(
-                                    'team_czlonek_grupy_pers', 
-                                    'team_czlonek_grupy_percent',
-                                    'd-start_team_czlonek_grupy',
-                                    'd-end_team_czlonek_grupy'
-            );
-            return($teamValueToFind);
-        }
-    }
-    
-    protected function checkAndAddignTeamValue($key,$value,&$teamValueToFind,&$persAttributes,&$allPers,&$counter,$teamValueToFindLength)
-    {
-        $found=strpos($key,$teamValueToFind);
-        if($found!==null && trim($found)!=='')
-        {    
-            //echo 'str pos - '.$found."\n";
-            $persAttributes[$counter]=$value;
-            $counter++;
-            if($counter===$teamValueToFindLength)
-            {
-                // LAST ELEMENT OF PERS
-                array_push($allPers,$persAttributes);
-                $counter=0;
-            }
-        }
-    }
     protected function isEmpty($key,$data)
     {
         if(trim($data)==='')
@@ -306,37 +296,22 @@ class manageProject extends initialDb
         else
         {
             $this->err.="[${id}] NO DATA ABOUT PERSON IN DB!<br/>";
-        };
+        }
     }
     # DELETED PROJECT IN DB
-    protected function deleteEmployee($postData)
+    protected function deleteUser($postData)
     {
         $this->getPostData($postData);
-        if (array_key_exists("idEmployee",$this->inpArray))
+        $this->getSpecField("idUser");
+        if (!$this->err)
         {
-            $this->query('UPDATE pracownik SET wsk_u=? WHERE id=?',"1,".$this->inpArray['idEmployee']);
-        }
-        else
-        {
-            $this->err.= '[idEmployee]FORM KEY NOT EXIST';
-        }    
+            $this->query('UPDATE uzytkownik SET wsk_u=? WHERE id=?',"1,".$this->inpArray['idUser']);
+        }  
     }
     # RETURN ALL NOT DELETED PROJECT FROM DB
-    public function getEmployees()
+    public function getUsers($wsku)
     {
-        $this->query('SELECT * FROM v_all_prac WHERE 1=? ORDER BY id asc',1);
-        $this->valueToReturn=$this->queryReturnValue();
-    }
-     # RETURN ALL NOT DELETED PROJECT FROM DB
-    public function getEmployeeProjects($idEmployee)
-    {
-        $this->query('SELECT * FROM v_proj_prac_v3 WHERE idPracownik=? ORDER BY idProjekt ASC',$idEmployee);
-        $this->valueToReturn=$this->queryReturnValue();
-    }
-    # RETURN ALL NOT DELETED PROJECTs Members,LEADERs,SLO and other FROM DB
-    public function getProjectPers($tableToSelect)
-    {
-        $this->query('SELECT * FROM '.$tableToSelect.' WHERE 1=? ORDER BY ImieNazwisko ASC ',1);
+        $this->query('SELECT ID,Imie,Nazwisko,Login,Email,TypKonta,Rola FROM v_all_user WHERE wskU=? ORDER BY id asc',"${wsku}");
         $this->valueToReturn=$this->queryReturnValue();
     }
     # RETURN ALL NOT DELETED DICTIONARY and other FROM DB
@@ -346,45 +321,103 @@ class manageProject extends initialDb
         $this->valueToReturn=$this->queryReturnValue();
     }
     # RETURN ALL EMPLOYEE SPEC DICTIONARY and other FROM DB
-    public function getEmployeeAllocation($idEmployee)
+    public function getUserPerm($idUser)
     {
         // GET DICTIONARY
-        $this->getSlo('v_slo_u_spec');
+        $this->getSlo('v_slo_upr');
         // $this->valueToReturn act slo
         // GET EMPLOYEE DICTIONARY 
-        $this->query('SELECT * FROM v_all_prac_spec WHERE idPracownik=? ORDER BY idSlownik ASC ',$idEmployee);
+        $this->query('SELECT * FROM v_uzyt_i_upr WHERE idUzytkownik=? ORDER BY idUprawnienie ASC ',$idUser);
         $emplSlo=$this->queryReturnValue();
 
         // COMBINE
-        $this->combineSloEmployeeAllocation($this->valueToReturn,$emplSlo);
+        $this->valueToReturn=$this->combineSlo($this->valueToReturn,'ID',$emplSlo,'idUprawnienie');
+        
     }
-    protected function combineSloEmployeeAllocation($slo,$empSol)
+    public function getNewUserSlo()
     {
+        $arrToReturn=array();
+        // SLO UPR
+        $this->getSlo('v_slo_upr');
+        array_push($arrToReturn,$this->valueToReturn);
+        
+        // SLO ROLA
+        $this->getSlo('v_slo_rola');
+        $allSlo=$this->valueToReturn;
+        $emptArr=array(array('ID'=>0,'NAZWA'=>'','DEFAULT'=>'t'));
+        $userRoleSlo=array_merge($emptArr,$allSlo);
+        array_push($arrToReturn,$userRoleSlo);
+        $this->valueToReturn=$arrToReturn;
+    }
+    protected function combineSlo($slo,$sloKey,$usrSol,$sloUserKey)
+    {
+        // $sloKey = ID
+        // $sloUserKey = idUprawnienie
         foreach($slo as $id => $value)
         {
-            foreach($empSol as $key => $valueEmpl)
+            foreach($usrSol as $key => $valueEmpl)
             {
-                if($value['ID']===$valueEmpl['idSlownik'])
+                if($value[$sloKey]===$valueEmpl[$sloUserKey])
                 {
                     $slo[$id]['DEFAULT']='t';
-                    unset($empSol[$key]);
+                    unset($usrSol[$key]);
                     break;
                 }
             }
         }
-        $this->valueToReturn=$slo;
+        return($slo);
     }
     # RETURN CURRENT PROJECT DETAILS
-    public function getEmployeeDetails($idEmployee)
+    public function getUserDetails($idUser)
     {
-        // CHECK GET
-	$valueToReturn=array();
-	$this->query('SELECT * FROM v_all_prac_v2 WHERE ID=?',$idEmployee);   
-        array_push($valueToReturn,$this->queryReturnValue());
-        
-	$this->getEmployeeAllocation($idEmployee);
-        array_push($valueToReturn,$this->valueToReturn);
-	$this->valueToReturn=$valueToReturn;
+        if(!$this->err)
+        {
+            // GET USER
+            $valueToReturn=array();
+            $this->query('SELECT * FROM v_all_user WHERE ID=?',$idUser);
+            
+            array_push($valueToReturn,$this->queryReturnValue());
+            //print_r($valueToReturn[0][0]);
+            //echo $valueToReturn[0][0]['IdRola']."\n";
+            //GET USER PERM
+            $this->getUserPerm($idUser);
+            array_push($valueToReturn,$this->valueToReturn);
+            //GET USER ROLE
+            array_push($valueToReturn,$this->getUserRole($valueToReturn[0][0]['IdRola']));
+            $this->valueToReturn=$valueToReturn;
+        }
+    }
+    public function getUserRole($idUserRole='')
+    {
+        $userRoleSlo=array();
+        // GET ALL ROLE
+        $this->query('SELECT * FROM v_slo_rola WHERE 1=?',1);  
+        $allRole=$this->queryReturnValue();
+        if($idUserRole!='')
+        {
+                // COMBINE USER DICT
+                $emptArr=array('ID'=>0,'NAZWA'=>'');
+                $this->query('SELECT * FROM v_slo_rola WHERE ID=?',$idUserRole);  
+                $userRole=$this->queryReturnValue();
+                array_push($userRole,$emptArr);
+                foreach($allRole as $key => $value)
+                {
+                    if($value['ID']===$userRole[0]['ID'])
+                    {
+                        unset($allRole[$key]);
+                        break;
+                    }
+                }
+                $userRoleSlo=array_merge($userRole,$allRole);
+        }
+        else
+        {
+            $emptArr=array(array('ID'=>0,'NAZWA'=>'','DEFAULT'=>'t'));
+            //echo 'NO USER ROLE\n';
+            $userRoleSlo=array_merge($emptArr,$allRole);
+        }
+        //print_r($userRoleSlo);
+        return ($userRoleSlo);
     }
     public function getReturnedValue()
     {
@@ -404,22 +437,23 @@ class manageProject extends initialDb
     function __destruct()
     {}
 }
-class checkGetData extends manageProject
+class checkGetData extends manageUser
 {
     private $avaliableFunction=array(
         "task"=>"task"
     );
     private $urlGetData=array();
     private $avaliableTask=array(
-        "getemployees",
-        "getemployeesspecslo",
-        "cEmployee",
-        "getEmployeeProj",
-        'deleteEmployee',
-        'getEmployeeAllocation',
-        'employeeAllocation',
-        'getEmployeeDetails',
-        'editEmployee'
+        "getusers",
+        "getNewUserSlo",
+        "getPermSlo",
+        "cUser",
+        'deleteUser',
+        'getUserPerm',
+        'userPermissions',
+        'getUserDetails',
+        'getRoleSlo',
+        'editUser'
     );
     function __construct()
     {
@@ -444,8 +478,8 @@ class checkGetData extends manageProject
     }
     private function addNewTypOfErr()
     {
-        $this->infoArray['urlTask'][0]='[manageEmployee]Wrong function to execute';
-        $this->infoArray['urlTask'][1]='[manageEmployee]Task not exists';
+        $this->infoArray['urlTask'][0]='[manageUser]Wrong function to execute';
+        $this->infoArray['urlTask'][1]='[manageUser]Task not exists';
     }
     private function checkUrlTask()
     {
@@ -476,39 +510,39 @@ class checkGetData extends manageProject
     }
     private function runTask()
     {
-        $this->setUser($_SESSION["username"]);
         switch($this->urlGetData['task']):
         
-        case "getemployees" :
-            $this->getEmployees($_POST);
+        case "getusers" : // ENUM 0,1
+            $this->getUsers('0');
             break;
-        case "getemployeesspecslo" :
-            $this->getSlo('v_slo_u_spec');
+        case "getNewUserSlo":
+            $this->getNewUserSlo();
             break;
-        case "cEmployee":
+        case "getPermSlo" :
+            $this->getSlo('v_slo_upr');
+            break;
+        case "getRoleSlo" :
+            $this->getSlo('v_slo_rola');
+            break;
+        case "cUser":
             //print_r($_POST);
-            $this->cEmployee($_POST);
+            $this->cUser($_POST);
             break;
-        case 'editEmployee':
-            $this->editEmployee($_POST);
+        case 'editUser':
+            $this->editUser($_POST);
             break;
-        case 'getEmployeeProj':
-            $this->idEmployee=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-            $this->getEmployeeProjects($this->idEmployee);
-            // v_udzial_count_projekt_prac
+        case 'getUserPerm':
+            $this->idUser=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+            $this->getUserPerm($this->idUser);
             break;
-        case 'getEmployeeAllocation':
-            $this->idEmployee=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-            $this->getEmployeeAllocation($this->idEmployee);
+        case 'deleteUser':
+            $this->deleteUser($_POST);
+        case 'userPermissions':
+            $this->updateUserPerm($_POST);
             break;
-        case 'deleteEmployee':
-            $this->deleteEmployee($_POST);
-        case 'employeeAllocation':
-            $this->updateEmployeeSpec($_POST);
-            break;
-        case 'getEmployeeDetails':
-            $this->idEmployee=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-            $this->getEmployeeDetails($this->idEmployee);
+        case 'getUserDetails':
+            $this->idUser=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+            $this->getUserDetails($this->idUser);
         default:
             //no task
             break;

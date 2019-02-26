@@ -6,7 +6,6 @@ require(filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/.cfg/config.php');
 class manageProject extends initialDb
 {
     private $inpArray=array();
-    private $user="";
     protected $err="";
     protected $valueToReturn=null;
     protected $idEmployee=null;
@@ -54,10 +53,6 @@ class manageProject extends initialDb
                 };
             }
         }
-    }
-    public function setUser($user)
-    {
-        $this->user=$user;
     }
     protected function cEmployee($POSTDATA)
     {
@@ -187,13 +182,13 @@ class manageProject extends initialDb
             (imie,nazwisko,stanowisko,mod_user,mod_user_id) 
 		VALUES
 		(?,?,?,?,?)'
-            ,$employeeData['imie'].",".$employeeData['nazwisko'].",".$employeeData['stanowisko'].",".$this->user.',1');
+            ,$employeeData['imie'].",".$employeeData['nazwisko'].",".$employeeData['stanowisko'].",".$_SESSION["username"].','.$_SESSION["userid"]);
     }
     protected function updateEmployee($employeeData)
     {
         $curretDateTime=date('Y-m-d H:i:s');
         $this->query('UPDATE pracownik SET imie=?, nazwisko=?, stanowisko=?, dat_mod=?, mod_user=?,mod_user_id=? WHERE id=?'
-            ,$employeeData['imie'].",".$employeeData['nazwisko'].",".$employeeData['stanowisko'].','.$curretDateTime.",".$this->user.',1,'.$employeeData['idEmployee']);
+            ,$employeeData['imie'].",".$employeeData['nazwisko'].",".$employeeData['stanowisko'].','.$curretDateTime.",".$_SESSION["username"].','.$_SESSION["userid"].','.$employeeData['idEmployee']);
     }
     protected function addEmployeeSpec($employeeId,$value)
     {
@@ -476,7 +471,7 @@ class checkGetData extends manageProject
     }
     private function runTask()
     {
-        $this->setUser($_SESSION["username"]);
+
         switch($this->urlGetData['task']):
         
         case "getemployees" :

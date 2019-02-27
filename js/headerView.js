@@ -16,8 +16,10 @@ function parseUrlId()
 }
 function addClass(id)
 {
-    //console.log("addClass - "+id);
-    //$('#li-'+id).addClass("menu-active");
+    if(id==null)
+    {
+        id=1;   
+    }
     document.getElementById("li-"+id).setAttribute("class", "menu-active"); 
 }
 function removeClass()

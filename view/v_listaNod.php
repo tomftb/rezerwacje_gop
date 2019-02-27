@@ -1,15 +1,19 @@
 <?php require_once($_SERVER["DOCUMENT_ROOT"]."/function/redirectToLoginPage.php"); ?>
-
-<center><table class="t_main" style="margin-top:0px;">	
+<center>
+    <table class="t_main" style="margin-top:0px;">	
 	<tr>
-	<th colspan="2"><h2 class="text-center pt-1">Aktualny przydział nodów:</h2>
-	</th>
+            <th colspan="2">
+                <h2 class="text-center pt-1">Aktualny przydział nodów:</h2>
+            </th>
 	</tr>
 	<tr>
-            <th class="th_main" width="200px"><h5 class="text-center pt-1">Pracownia :</h5></th>
-	<th class="th_main" width="600px"><h5 class="text-center pt-1">Przypisane nody :</h5></th>
-        </tr>
-		
+            <th class="th_main" width="200px">
+                <h5 class="text-center pt-1">Pracownia :</h5>
+            </th>
+            <th class="th_main" width="600px">
+                <h5 class="text-center pt-1">Przypisane nody :</h5>
+            </th>
+        </tr>	
 <?php
 	/* PONOWNE WYWOLANIE W CELU AKTUALIZACJI DANYCH */	
        
@@ -27,11 +31,11 @@
 		echo "<td class=\"td_main\" width=\"600px\">";
 		foreach($tablicaKlaster as $wartoscKlastr)
 		{
-			if($wartoscPrac['id']==$wartoscKlastr['pracownia']) echo $wartoscKlastr['nod'].", ";
-			
-		};
+                        if($wartoscPrac['id']==$wartoscKlastr['pracownia']) {echo $wartoscKlastr['nod'].", ";}
+		}
 		echo "</td>";
 		echo "</tr>";
-	};
+	}
 ?>
 	</table>
+</center>

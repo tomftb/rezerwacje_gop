@@ -1,33 +1,45 @@
 <?php 
 require_once($_SERVER["DOCUMENT_ROOT"]."/function/redirectToLoginPage.php");
-$optionWartosc=array("GB","TB"); ?>
-
-<div class="mt-5"><center><p class="P_MAIN">
-<?php //echo  $_GET["id"]." - ".$_SERVER['HTTP_HOST']."<br/>".$_SERVER['REQUEST_URI']."</br>";?>
-	
-GOP - zgłaszanie Projektu:</p>
+    
+    $optionWartosc=array("GB","TB"); 
+    $disabled='';
+    $info='';
+    $border='border-info';
+    if(!checkPerm('LOG_INTO_ZGL_PROJ',$_SESSION['perm'],0))
+    {
+        $border='border-white';
+        $disabled='disabled';
+        $info='<small class="text-secondary">[LOG_INTO_ZGL_PROJ] BRAK UPRAWNIENIA</small>';
+    }
+?>
+<div style="margin-top:100px;">
+    <center>
+        <h3>
+        <?php //echo  $_GET["id"]." - ".$_SERVER['HTTP_HOST']."<br/>".$_SERVER['REQUEST_URI']."</br>";?>
+	GOP - zgłaszanie Projektu:
+        </h4>
 <!-- <form method="POST" action=""> -->
 <form action="" method="POST" id="addFormProject">
-    <table style="width:1024px; border:0px solid red">
-        <tr  style="border:0px solid black">
-            <td class="width:100px;" rowspan="6" style="border:0px solid red">
+    <table style="width:1024px;">
+        <tr>
+            <td class="width:100px;" rowspan="7">
                 <img src="gt_utilities/gt_logo_przez_160x100.png" alt="Logo_Geofizyka_Torun"></br>
             </td>
-            <td class="" style="border:0px solid blue"></td>
-            <td class="w-50"style="border:0px solid green"></td>
+            <td></td>
+            <td class="w-50"></td>
         </tr>
-        <tr style="border:0px solid black">
-            <td style="border:0px solid blue">
+        <tr>
+            <td>
                 <p class="p_inp_20"><span class="S_LEGENDA">*</span>Nazwa projektu :</p>
             </td>
-            <td style="border:0px solid green">
+            <td>
                 <div class="container">
-                    <div class="form-group row mb-0 " style="border:0px solid black" >
+                    <div class="form-group row mb-0 ">
                         <div class="col pr-0 pl-0">
-                            <input class="form-control w-100 border border-info  validate[required, maxSize[100]]" type="text" name="nazwaProjektu" id="nazwaProjektu" value=""/>
+                            <input class="form-control w-100 border <?php echo $border;?>  validate[required, maxSize[100]]" type="text" name="nazwaProjektu" id="nazwaProjektu" value="" <?php echo $disabled; ?>/>
                         </div>
                     </div>
-                    <div class="form-group row mb-1 mt-1" style="border:0px solid red" >
+                    <div class="form-group row mb-1 mt-1">
                         <div class="col-sm-auto">
                             <?php 
                             if(isset($_POST["nazwaProjektu"]) && $_POST["nazwaProjektu"]!=trim('') ) 
@@ -37,7 +49,7 @@ GOP - zgłaszanie Projektu:</p>
                             ?>
                         </div>
                     </div> 
-                    <div class="form-group row mb-0" style="border:0px solid black" >
+                    <div class="form-group row mb-0">
                         <!-- DIV WARNING -->
                         <div id="divErr">
                             <span class="S_LOAD_ERR" id="nowy_projekt_warn"></span><span id="nowy_projekt_name"></span>
@@ -47,18 +59,18 @@ GOP - zgłaszanie Projektu:</p>
                 </div>
             </td>
         </tr>
-        <tr style="border:0px solid black">
-            <td style="border:0px solid blue">
+        <tr>
+            <td>
                 <p class="p_inp_20"><span class="S_LEGENDA">*</span>Rozmiar pliku bazowego :</p>
             </td>
-            <td style="border:0px solid green">
+            <td>
                 <div class="container">
-                    <div class="form-group row mb-0 " style="border:0px solid black" >
+                    <div class="form-group row mb-0">
                         <div class="col-sm mr-0 pr-0 pl-0">
-                            <input class="form-control border border-info  validate[custom[integer], required, maxSize[20]]" type="text" name="rozmiarPlik" id="rozmiarPlik" maxlength="20" value=""/>
+                            <input class="form-control border <?php echo $border;?>  validate[custom[integer], required, maxSize[20]]" type="text" name="rozmiarPlik" id="rozmiarPlik" maxlength="20" value="" <?php echo $disabled; ?>/>
                         </div>
                         <div class="col-sm-auto ml-0 pl-0 pr-0">
-                            <select class="form-control border border-info" name="rozmiarJednostka"><!-- SEL_JED -->
+                            <select class="form-control border <?php echo $border;?>" name="rozmiarJednostka" <?php echo $disabled; ?>><!-- SEL_JED -->
                             <?php
                                 if(isset($_POST['rozmiarJednostka']))
                                 {					
@@ -98,19 +110,18 @@ GOP - zgłaszanie Projektu:</p>
                 </div>
             </td>
         </tr>
-        <tr style="border:0px solid black">
-            
-            <td style="border:0px solid blue">
+        <tr>
+            <td>
                 <p class="p_inp_20"><span class="S_LEGENDA">*</span>Lista przypisanych pracowników :</p>
             </td>
-            <td style="border:0px solid green">
+            <td>
                 <div class="container">
-                    <div class="form-group row mb-1 mt-1" style="border:0px solid black" >
+                    <div class="form-group row mb-1 mt-1">
                         <div class="col-sm pr-0 pl-0">
-                            <textarea name="przypisaniPracownicy" id="przypisaniPracownicy" class="form-control w-100 border border-info  validate[required, maxSize[1024]]"></textarea> <!-- validate[required, maxSize[1024]] -->
+                            <textarea name="przypisaniPracownicy" id="przypisaniPracownicy" class="form-control w-100 border <?php echo $border;?>  validate[required, maxSize[1024]]" <?php echo $disabled; ?>></textarea> <!-- validate[required, maxSize[1024]] -->
                         </div>
                     </div>
-                    <div class="form-group row mb-1 mt-1" style="border:0px solid black" >
+                    <div class="form-group row mb-1 mt-1">
                         <div class="col-sm-auto">
                             <?php
                             if(isset($_POST["przypisaniPracownicy"]) && $_POST["przypisaniPracownicy"]!=trim('') )
@@ -121,7 +132,7 @@ GOP - zgłaszanie Projektu:</p>
                         </div>
                     </div>
                     <!-- DIV WARNING -->
-                    <div class="form-group row mb-1 mt-1" style="border:0px solid black" >
+                    <div class="form-group row mb-1 mt-1">
                         <div class="col-sm">
                             <div id="divErr2">
                                 <span class="S_LOAD_ERR" id="przypisaniPracownicy_warn"></span><span id="przypisaniPracownicy_name"></span>
@@ -132,15 +143,20 @@ GOP - zgłaszanie Projektu:</p>
                 </div>
             </td>
         </tr>
-        <tr style="border:0px solid black">
-            <td colspan="2" style="border:0px solid blue">
+        <tr>
+            <td colspan="2">
                 <input type="hidden" name="host" id="host" value="HTTP://<?php echo $_SERVER['HTTP_HOST']; ?>"></input>
                 <input type="hidden" name="username" id="username" value="<?php echo $_SESSION['username']; ?>"/>
-                <input class="btn btn-success w-100" type="Submit" value="Zgłoś" name="zglos">
+                <input class="btn btn-success w-100" type="Submit" value="Zgłoś" name="zglos" <?php echo $disabled; ?>>
             </td>
         </tr>
-        <tr style="border:0px solid black">
-            <td colspan="2" style="border:0px solid blue">
+        <tr>
+            <td colspan="2">
+                <?php echo $info; ?>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
                 <p class="P_LEGENDA">Legenda:
                 </br><span class="S_LEGENDA">-</span> Pola z sumbolem (<span class="S_LEGENDA">*</span>) wymagane;
                 <br/><span class="S_LEGENDA">-</span> Przykładowa nazwa projektu - <span class="S_LEGENDA">PGNIG_Test-Torun_3D_2018</span>;

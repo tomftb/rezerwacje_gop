@@ -80,9 +80,32 @@ class manageUser extends initialDb
             else
             {
                 // EDIT USER PERMISSION
-                $this->editUserPerm($permArray,$this->queryLastId());
+                $this->editUserPerm($permArray,$this->queryLastId()); 
+                
             }    
         }
+    }
+    protected function setActSessionPerm($idUser)
+    {
+        //echo "ID USER - ".$idUser."\n";
+        //print_r($_SESSION);
+        if($_SESSION['userid']==$idUser)
+        {
+            // UPDATE CURRENT USER SESSION PERM;
+            //echo "UPDATE PERM<br/>";
+            $this->query('SELECT SKROT FROM v_uzyt_i_upr_v2 WHERE idUzytkownik=?',$idUser);
+            $_SESSION['perm']=$this->parsePerm($this->queryReturnValue());
+            //print_r($_SESSION);
+        }
+    }
+    private function parsePerm($perm)
+    {
+        $arrToReturn=array();
+        foreach($perm as $value)
+        {
+            array_push($arrToReturn,$value['SKROT']);
+        }
+        return ($arrToReturn);
     }
     protected function editUser($POSTDATA)
     {
@@ -117,6 +140,7 @@ class manageUser extends initialDb
             else
             {
                 $this->editUserPerm($permArray,$this->inpArray['idUser']);
+                $this->setActSessionPerm($this->inpArray['idUser']);
             }    
         }
     }
@@ -152,6 +176,7 @@ class manageUser extends initialDb
         if(!$this->err)
         {
             $this->editUserPerm($permArray,$id);
+            $this->setActSessionPerm($this->inpArray['idUser']);
         }
     }
     protected function getSpecField($field)

@@ -1,6 +1,5 @@
 <?php
 require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/databaseManagement.php");
-
 class initialDb extends dbManage
 {
     private $dbParm=array
@@ -12,11 +11,10 @@ class initialDb extends dbManage
                 'pass'=>'5DPbvuNiRbyoUBTN',
                 'logLvl'=>0
             );
-    private $dbLink=""; // protected = visible from another class
+    private $dbLink="";
 
     function __construct()
     {
-        //echo "konstruktor";
         $this->dbLink=parent::__construct($this->dbParm['host'],$this->dbParm['db'],$this->dbParm['port'],$this->dbParm['user'],$this->dbParm['pass'],$this->dbParm['logLvl']);
     }		
     public function getDbLink()
@@ -27,5 +25,4 @@ class initialDb extends dbManage
     {}
 }
 $dbLink=NEW initialDb();
-$dbLink->getDbLink();	
-?>
+$dbLink->getDbLink();

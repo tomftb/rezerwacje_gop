@@ -1,7 +1,15 @@
 <?php require_once($_SERVER["DOCUMENT_ROOT"]."/function/redirectToLoginPage.php");   ?>
 <?php
-    if(checkPerm('EDIT_KLAST',$_SESSION['perm'],0))
+    $disabled='';
+    $info='';
+    $border='border-info';
+    if(!checkPerm('EDIT_KLAST',$_SESSION['perm'],0))
     {
+        $border='border-white';
+        $disabled='disabled';
+        $info='<small class="text-secondary">[EDIT_KLAST] BRAK UPRAWNIENIA</small>';
+    }
+    
 ?>
 <div class="mt-5 w-100">
     <center>               
@@ -17,7 +25,7 @@
                 for($i=0;$i<2;$i++)
                 {
                     echo '<td>';
-                    echo "<select class=\"form-control w-100 border border-info\" name=\"nod".$i."\">"; //class=\"SEL_NOD\"
+                echo "<select class=\"form-control w-100 border ${border}\" name=\"nod".$i."\" ${disabled}>"; //class=\"SEL_NOD\"
                     if(ISSET($_POST['nod'.$i]))
                     {
                         echo "<optgroup label=\"Aktualny :\" class=\"OPTGROUP\">";
@@ -36,7 +44,7 @@
                     <h4 class="text-right mr-1">Wskaż pracownie :</h4>
                 </td>
                 <td colspan="2">
-                    <select class="form-control w-100 border border-info" name="pracownia"> <!-- class="SEL_PRAC" -->
+                    <select class="form-control w-100 border <?php echo $border; ?>" name="pracownia" <?php echo $disabled;?>> <!-- class="SEL_PRAC" -->
                     <?php
                     if(ISSET($_POST['pracownia']))
                     {
@@ -52,12 +60,16 @@
             </tr>
             <tr height="40px;">
                 <td>&nbsp;</td>
-                <td colspan="2"><input  class="btn btn-success w-100"  type="Submit" value="Rezerwuj" name="rezerwuj"></td>
+                <td colspan="2"><input  class="btn btn-success w-100"  type="Submit" value="Rezerwuj" name="rezerwuj" <?php echo $disabled;?>></td>
+                
+                <!-- class="inp_szukaj"-->
+            </tr>
+            <tr height="40px;">
+                <td>&nbsp;</td>
+                <td colspan="2"><?php echo$info;?></td>
                 <!-- class="inp_szukaj"-->
             </tr>
     </table>
     </form>
     </center>
 </div>
-<?php
-}

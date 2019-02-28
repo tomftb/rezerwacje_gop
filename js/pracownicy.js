@@ -1,6 +1,6 @@
 var currentIdEmployee=0;
 var currentEmployeeData=new Array();
-
+var loggedUserPerm=new Array();
 var errInputValue= new Array();
 var employeeTab=new Array();
 var employeeSloSPecTab=new Array();
@@ -90,7 +90,8 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
              * [].Stanowisko
              * [].Procent
              */
-            employeeTab=data;
+            employeeTab=data[0];
+            loggedUserPerm=data[1];
             break;
         case 'getEmployeeAllocation':
         case 'getemployeesspecslo':
@@ -119,7 +120,8 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
     switch(functionStart)
     {
         case 'sEmployees':
-                setAllEmployees(data);
+                setButtonDisplay(document.getElementById('addNewEmployeeButton'),'ADD_PROJ',loggedUserPerm);
+                setAllEmployees(data[0]);
             break;
         case 'cEmployee':
                 setEmployeeBodyContent(functionStart,1);
@@ -149,7 +151,7 @@ function setAllEmployees(data)
     console.log('---setAllEmployees()---');
     var dataL=data.length;
     var rowL=Object.keys(data[0]).length;
-    var docElement=document.getElementById("allEmployeeData");
+    var docElement=document.getElementById("allEmployeesData");
     removeHtmlChilds(docElement);
     console.log('DATA LENGTH: '+dataL);
     console.log('DATA ROW LENGTH: '+rowL);
@@ -162,19 +164,20 @@ function setAllEmployees(data)
                 Array('name',''),
                 Array('id',''),
                 Array('data-toggle',"modal"),
-                Array('data-target','#ProjectAdaptedModal')
-                        
+                Array('data-target','#ProjectAdaptedModal'),
+                Array('no-disabled','')     
                 );
     var btnConfig=new Array(
-            new Array('btn-info','details','Dane'),
-            new Array('btn-info','allocation','Przydział'),
-            new Array('btn-warning','projects','Projekty'),
-            new Array('btn-danger','dEmployee','Usuń')
+            new Array('btn-info','details','Dane','SHOW_EMPL'),
+            new Array('btn-info','allocation','Przydział','SHOW_ALLOC_EMPL'),
+            new Array('btn-warning','projects','Projekty','SHOW_PROJ_EMPL'),
+            new Array('btn-danger','dEmployee','Usuń','DEL_EMPL')
          );
     var btn='';
     var tr='';
     var td='';
     var tdOption='';
+    var disabled='no-disabled';
     for(var i = 0; i < dataL; i++)
     {    
         tr=createHtmlElement('tr',null,null);
@@ -189,15 +192,22 @@ function setAllEmployees(data)
         }
         
         divBtnGroup=createHtmlElement('div',divBtnGroupAtr,null);
+        
         for(var z=0;z<btnConfig.length;z++)
         {
-            btnAtr[0][1]='btn '+btnConfig[z][0];
+            if(loggedUserPerm.indexOf(btnConfig[z][3])===-1)
+            {
+                disabled='disabled';
+            }
+            btnAtr[0][1]='btn '+btnConfig[z][0]+' '+disabled;
             btnAtr[1][1]=btnConfig[z][1];
             btnAtr[2][1]='idEmployee:'+data[i].ID;
+            btnAtr[5][0]=disabled;
             btn=createHtmlElement('button',btnAtr,null);
             btn.innerText=btnConfig[z][2];
             btn.onclick=function(){ createAdaptedModal(this.name,this.id);};
             divBtnGroup.appendChild(btn);
+            disabled='no-disabled';
         }
         tdOption=createHtmlElement('td',null,null);
         tdOption.appendChild(divBtnGroup);
@@ -326,7 +336,16 @@ function createAdaptedModal(modalType,idEmployee)
             currentIdEmployee=employeeData[1];
             document.getElementById('div-inputPdf7a').innerText='Current Employee Id : '+currentIdEmployee;
             // GET FULL DATA ABOUT EMPLOYEE PROJECTS
-            getAjaxData('getEmployeeProj','&id='+employeeData[1],modalType,employeeData[1]);
+            if(loggedUserPerm.indexOf('SHOW_PROJ_EMPL')!==-1)
+            {
+                console.log('SHOW_PROJ_EMPL : '+loggedUserPerm.indexOf('SHOW_PROJ_EMPL'));
+                getAjaxData('getEmployeeProj','&id='+employeeData[1],modalType,employeeData[1]);
+            }
+            else
+            {
+                employeeProj=[];
+                setDeleteEmployeeBodyContent(modalType,employeeProj,employeeData[1]);
+            }
             // v_udzial_count_projekt_prac
             
             break;
@@ -564,7 +583,7 @@ function addLegendDiv()
 }
 function createEditedEmployeeRowContent(whereAppend,status)
 {
-    console.log('---createNewEmployeeRowContent()---');
+    console.log('---createEditedEmployeeRowContent()---');
     console.log(whereAppend);
     console.log(currentEmployeeData);
     // currentEmployeeData -> EMPLOYEE DATA
@@ -575,8 +594,7 @@ function createEditedEmployeeRowContent(whereAppend,status)
     if(status)
     {
         inputAttribute[6][0]='no-readonly';
-        inputAttribute[7][0]='no-disabled';
-        
+        inputAttribute[7][0]='no-disabled'; 
     }
     else
     {
@@ -658,6 +676,9 @@ function createNewEmployeeRowContent(whereAppend)
     var divErrStyle=new Array(
             Array('display','none')
             );
+    inputAttribute[6][0]='no-readonly';
+    inputAttribute[7][0]='no-disabled';
+    
     for(var i=0;i<employeeFields.length;i++)
     {
         inputAttribute[0][1]='text';
@@ -1157,4 +1178,18 @@ function createDataToSend(nameOfForm)
     }
     //console.log(params);
     return params;
+}
+function setButtonDisplay(element,perm,userPerm)
+{
+    //console.log('---setButtonDisplay()---');
+    if(userPerm.indexOf(perm)===-1)
+    {
+        element.classList.add('disabled');
+        element.setAttribute("disabled", "");
+    }
+    else
+    {
+        element.classList.remove("disabled");
+        element.removeAttribute("disabled");
+    }
 }

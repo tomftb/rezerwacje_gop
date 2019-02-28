@@ -1,3 +1,4 @@
+var loggedUserPerm=new Array();
 var currentIdUser=0;
 var currentUserData=new Array();
 var errInputValue= new Array();
@@ -116,7 +117,8 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
              * [].mod_user
              * [].mod_user_id
              */
-            usersTab=data;
+            usersTab=data[0];
+            loggedUserPerm=data[1];
             break;
         case 'getNewUserSlo':
             userPermSlo=data[0];
@@ -147,6 +149,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
     switch(functionStart)
     {
         case 'sUsers':
+                setButtonDisplay(document.getElementById('addNewUserButton'),'ADD_USER',loggedUserPerm);
                 setAllUsers();
             break;
         case 'cUser':
@@ -167,13 +170,27 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
             break;
     }
 }
+function setButtonDisplay(element,perm,userPerm)
+{
+    //console.log('---setButtonDisplay()---');
+    if(userPerm.indexOf(perm)===-1)
+    {
+        element.classList.add('disabled');
+        element.setAttribute("disabled", "");
+    }
+    else
+    {
+        element.classList.remove("disabled");
+        element.removeAttribute("disabled");
+    }
+}
 function setAllUsers()
 {
     console.log('---setAllUsers()---');
     // USER TABLE
     // usersTab
     var dataL=usersTab.length;
-    var rowL=Object.keys(usersTab[0]).length;
+    var rowL=Object.keys(usersTab).length;
     var allUsersData=document.getElementById("allUsersData");
     removeHtmlChilds(allUsersData);
     console.log('DATA LENGTH: '+dataL);
@@ -187,17 +204,19 @@ function setAllUsers()
                 Array('name',''),
                 Array('id',''),
                 Array('data-toggle',"modal"),
-                Array('data-target','#AdaptedModal')  
+                Array('data-target','#AdaptedModal'),
+                Array('no-disabled','') 
                 );
     var btnConfig=new Array(
-            new Array('btn-info','details','Dane'),
-            new Array('btn-warning','permissions','Uprawnienia'),
-            new Array('btn-danger','dUser','Usuń')
+            new Array('btn-info','details','Dane','SHOW_USER'),
+            new Array('btn-warning','permissions','Uprawnienia','SHOW_PERM_USER'),
+            new Array('btn-danger','dUser','Usuń','DEL_USER')
          );
     var btn='';
     var tr='';
     var td='';
     var tdOption='';
+    var disabled='no-disabled';
     for(var i = 0; i < dataL; i++)
     {    
         tr=createHtmlElement('tr',null,null);
@@ -213,13 +232,19 @@ function setAllUsers()
         divBtnGroup=createHtmlElement('div',divBtnGroupAtr,null);
         for(var z=0;z<btnConfig.length;z++)
         {
-            btnAtr[0][1]='btn '+btnConfig[z][0];
+            if(loggedUserPerm.indexOf(btnConfig[z][3])===-1)
+            {
+                disabled='disabled';
+            }
+            btnAtr[0][1]='btn '+btnConfig[z][0]+' '+disabled;
             btnAtr[1][1]=btnConfig[z][1];
             btnAtr[2][1]='idUser:'+usersTab[i].ID;
+            btnAtr[5][0]=disabled;
             btn=createHtmlElement('button',btnAtr,null);
             btn.innerText=btnConfig[z][2];
             btn.onclick=function(){ createAdaptedModal(this.name,this.id);};
             divBtnGroup.appendChild(btn);
+            disabled='no-disabled';
         }
         tdOption=createHtmlElement('td',null,null);
         tdOption.appendChild(divBtnGroup);

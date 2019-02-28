@@ -1,4 +1,5 @@
 // origin
+var loggedUserPerm=new Array();
 var errInputValue= new Array();
 var memberProjTab=new Array();
 var countOfMemberProjTab=0;
@@ -378,7 +379,12 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
     switch(taskToRun)
     {
         case 'getprojects':
-            setAllProjects(data);
+            // ADD PERM
+            loggedUserPerm=data[1];
+            console.log(loggedUserPerm);
+            console.log(loggedUserPerm[1]);
+            setButtonDisplay(document.getElementById('addNewProjectButton'),'ADD_PROJ',loggedUserPerm);
+            setAllProjects(data[0]);
             break;
         case 'getprojectgltech': // SET GLOBAL liderProj
             fields.push('id','ImieNazwisko');
@@ -472,12 +478,13 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
              * data[5] = KIEROWNIK OSRODKA
              */
             //console.log(data[0]);
-            manageTaskAfterAjaxGet('gettypeofagreement',data[0],'typ_umowy','typ_umowy','n');
             //console.log(data[1]);
-            manageTaskAfterAjaxGet('getprojectsleader',data[1],'nadzor','nadzor','n');
+            manageTaskAfterAjaxGet('gettypeofagreement',data[0],'typ_umowy','typ_umowy','n');
             //console.log(data[2]);
-            manageTaskAfterAjaxGet('getprojectsmanager',data[2],'kier_grupy','kier_grupy','n');
+            manageTaskAfterAjaxGet('getprojectsleader',data[1],'nadzor','nadzor','n');
             //console.log(data[3]);
+            manageTaskAfterAjaxGet('getprojectsmanager',data[2],'kier_grupy','kier_grupy','n');
+            //console.log(data[4]);
             manageTaskAfterAjaxGet('getadditionaldictdoc',data[3],'dokPowiazane','dokPowiazane','n');
             manageTaskAfterAjaxGet('getprojectgltech',data[4],'gl_tech','gl_tech','n');
             manageTaskAfterAjaxGet('getprojectglkier',data[5],'gl_kier','gl_kier','n');
@@ -490,6 +497,26 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
             alert('[manageTask]ERROR - wrong task');
             break;
     }
+}
+function setButtonDisplay(element,perm,userPerm)
+{
+    //console.log('---setButtonDisplay()---');
+    //console.log(element);
+    //console.log(perm);
+    //console.log(userPerm);
+    if(userPerm.indexOf(perm)===-1)
+    {
+        //console.log('not found');
+        element.classList.add('disabled');
+        element.setAttribute("disabled", "");
+    }
+    else
+    {
+        //console.log('found');
+        element.classList.remove("disabled");
+        element.removeAttribute("disabled");
+    }
+    //console.log(element);
 }
 function setFieldsAtr(task)
 {
@@ -2273,7 +2300,8 @@ function setAllProjects(data)
             
          );
         var button='';
-        var buttonpdf='';
+        var buttonpdfOn='';
+        var buttonpdfOff='';
         var out = "";
         var i;
         var j;
@@ -2282,9 +2310,9 @@ function setAllProjects(data)
         for(i = 0; i < arr.length; i++)
         {    
             buttonConfig=[];
-            buttonConfig.push(new Array('btn-info','details','Szczegóły'));
-            buttonConfig.push(new Array('btn-info','documents','Dokumenty'));
-            buttonConfig.push(new Array('btn-warning','team','Zespół'));
+            buttonConfig.push(new Array('btn-info','details','Szczegóły','SHOW_PROJ'));
+            buttonConfig.push(new Array('btn-info','documents','Dokumenty','SHOW_DOK_PROJ'));
+            buttonConfig.push(new Array('btn-warning','team','Zespół','SHOW_TEAM_PROJ'));
             switch(arr[i].status)
             {
                 case 'n':
@@ -2296,10 +2324,10 @@ function setAllProjects(data)
                         statusProj='W trakcie';
                     }
                     //buttonConfig.push(new Array('btn-danger','getpdf','PDF'));//btn-outline-danger
-                    buttonConfig.push(new Array('btn-secondary','close','Zamknij'));
-                    buttonConfig.push(new Array('btn-danger ','delete','Usuń'));
-                    //buttonpdf="<button class=\"btn  btn-outline-danger btn-danger mr-0 mb-0 mt-0 ml-0\" data-toggle=\"modal\" ><a href=\"http://rezerwacje-gop.local:8080/modul/manageProject.php?task=getpdf&id=36\">PDF</a></button>";
-                    buttonpdf="<a href=\""+getUrl()+"modul/manageProject.php?task=getpdf&id="+arr[i].id+"\" class=\"btn btn-danger btn-outline-danger mr-0 mb-0 mt-0 ml-0\" role=\"button\" aria-disabled=\"true\" target=\"_blank\">PDF</a>";
+                    buttonConfig.push(new Array('btn-secondary','close','Zamknij','CLOSE_PROJ'));
+                    buttonConfig.push(new Array('btn-danger ','delete','Usuń','DEL_PROJ'));
+                    buttonpdfOff="<button class=\"btn  btn-outline-danger btn-danger mr-0 mb-0 mt-0 ml-0\" disabled>PDF</button>";
+                    buttonpdfOn="<a href=\""+getUrl()+"modul/manageProject.php?task=getpdf&id="+arr[i].id+"\" class=\"btn btn-danger btn-outline-danger mr-0 mb-0 mt-0 ml-0\" role=\"button\" aria-disabled=\"true\" target=\"_blank\">PDF</a>";
                     //onclick=\"getPDF('"+arr[i].id+"','"+arr[i].status+"')\"
                     break;
                 case 'd':
@@ -2310,14 +2338,27 @@ function setAllProjects(data)
                 default:
                     break;
             };
+            var disabled='';
             
             for(j = 0; j <buttonConfig.length; j++)
             {
-                button+="<button class=\"btn "+buttonConfig[j][0]+" mr-0 mb-0 mt-0 ml-0\" data-toggle=\"modal\" data-target=\"#ProjectAdaptedModal\" onclick=\"createAdaptedModal('"+buttonConfig[j][1]+"',"+arr[i].id+",'"+arr[i].temat_umowy+"','"+arr[i].status+"')\">"+buttonConfig[j][2]+"</button>";
+                if(loggedUserPerm.indexOf(buttonConfig[j][3])===-1)
+                {
+                    disabled='disabled';
+                }
+                button+="<button class=\"btn "+buttonConfig[j][0]+" mr-0 mb-0 mt-0 ml-0 "+disabled+" \" "+disabled+" data-toggle=\"modal\" data-target=\"#ProjectAdaptedModal\" onclick=\"createAdaptedModal('"+buttonConfig[j][1]+"',"+arr[i].id+",'"+arr[i].temat_umowy+"','"+arr[i].status+"')\">"+buttonConfig[j][2]+"</button>";
+                disabled='';
             }
             if(arr[i].status==='m' || arr[i].status==='n')
             {
-                button+=buttonpdf;
+                if(loggedUserPerm.indexOf('GEN_PDF_PROJ')===-1)
+                {
+                    button+=buttonpdfOff;  
+                }
+                else
+                {
+                    button+=buttonpdfOn;
+                }
             }
             
             out+="<tr id=\"project"+arr[i].id+"\"><th scope=\"row\">"+arr[i].id+"</th><td>"+arr[i].numer_umowy+"</td><td>"+arr[i].temat_umowy+"</td><td>"+arr[i].create_date+"</td><td>"+arr[i].kier_grupy+"</td><td>"+arr[i].nadzor+"</td><td>"+arr[i].term_realizacji+"</td><td>"+arr[i].harm_data+"</td><td>"+arr[i].koniec_proj+"</td><td>"+statusProj+"</td><td><div class=\"btn-group\">"+button+"</div></td></tr>";
@@ -2381,13 +2422,13 @@ function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
             break;
         case 'documents':
             idProject=idData;
-            setDataDiv(titleData)
+            setDataDiv(titleData);
             bgTitle.classList.add("bg-info");
             title.innerHTML="DOKUMENTY PROJEKTU:";
             getAjaxData('getprojectdocuments','ProjectAdaptedDynamicData','project_documents','&id='+idData,projectStatus);
             break;
         case 'details':
-            setDataDiv('')
+            setDataDiv('');
             bgTitle.classList.add("bg-info");
             title.innerHTML="SZCZEGÓŁY PROJEKTU:";
             getAjaxData('getprojectdetails','ProjectAdaptedDynamicData','project_details','&id='+idData,projectStatus);
@@ -2409,7 +2450,7 @@ function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
             getAjaxData('getprojectteam','ProjectAdaptedDynamicData','zespol_projektu','&id='+idData,projectStatus);
             break;
         case 'delete':
-            setDataDiv(titleData)
+            setDataDiv(titleData);
             bgTitle.classList.add("bg-danger");
             title.innerHTML="USUWANIE PROJEKTU:";
             createProjectRemoveBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'removeProject',idData);
@@ -2422,7 +2463,7 @@ function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
             createAddTeamBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'addTeamToProject',idData,projectStatus);
             createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'addTeamToProject',idData,projectStatus);
         case 'close':
-             setDataDiv(titleData)
+            setDataDiv(titleData);
             bgTitle.classList.add("bg-secondary");
             title.innerHTML="ZAMYKANIE PROJEKTU:";
             createProjectRemoveBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'closeProject',idData,projectStatus);

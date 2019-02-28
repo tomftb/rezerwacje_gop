@@ -9,6 +9,7 @@ class manageUser extends initialDb
     protected $err="";
     protected $valueToReturn=null;
     protected $idUser=null;
+    private $taskPerm= ['perm'=>'','type'=>''];
     const maxPercentPersToProj=100;
     protected $infoArray=array
             (
@@ -336,8 +337,11 @@ class manageUser extends initialDb
     # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getUsers($wsku)
     {
+        $valueToReturn=array();
         $this->query('SELECT ID,Imie,Nazwisko,Login,Email,TypKonta,Rola FROM v_all_user WHERE wskU=? ORDER BY id asc',"${wsku}");
-        $this->valueToReturn=$this->queryReturnValue();
+        array_push($valueToReturn,$this->queryReturnValue());
+        array_push($valueToReturn,$_SESSION['perm']);
+        $this->valueToReturn=$valueToReturn;
     }
     # RETURN ALL NOT DELETED DICTIONARY and other FROM DB
     public function getSlo($tableToSelect,$order='ID')
@@ -469,16 +473,16 @@ class checkGetData extends manageUser
     );
     private $urlGetData=array();
     private $avaliableTask=array(
-        "getusers",
-        "getNewUserSlo",
-        "getPermSlo",
-        "cUser",
-        'deleteUser',
-        'getUserPerm',
-        'userPermissions',
-        'getUserDetails',
-        'getRoleSlo',
-        'editUser'
+        array("getusers",'LOG_INTO_UZYT','user'),
+        array("getNewUserSlo",'ADD_USER','user'),
+        array("getPermSlo",'','user'),
+        array("cUser",'ADD_USER','user'),
+        array('deleteUser','DEL_USER','user'),
+        array('getUserPerm','SHOW_PERM_USER','user'),
+        array('userPermissions','EDIT_PERM_USER','sys'),
+        array('getUserDetails','SHOW_USER','user'),
+        array('getRoleSlo','','user'),
+        array('editUser','EDIT_USER','user')
     );
     function __construct()
     {
@@ -488,7 +492,13 @@ class checkGetData extends manageUser
         
         if($this->checkUrlTask())
         {
-            if($this->checkTask())
+            // CHECK PERM
+            $this->checkTask();
+            if($this->taskPerm['type']==='user')
+            {
+                $this->checkLoggedUserPerm($this->taskPerm['name']);
+            }
+            if(!$this->err)
             {
                 $this->runTask();
             }
@@ -522,16 +532,33 @@ class checkGetData extends manageUser
    
     private function checkTask()
     {
-        if (in_array($this->urlGetData['task'],$this->avaliableTask))
+        foreach($this->avaliableTask as $id =>$task)
         {
-            return 1;
+            if($task[0]==$this->urlGetData['task'])
+            {
+                $this->setTaskPerm($this->avaliableTask[$id][1],$this->avaliableTask[$id][2]);
+                return 1;
+            }
+        }
+        $this->err.= $this->infoArray['urlTask'][1];
+        return 0;
+    }
+    private function setTaskPerm($permName='',$permType='')
+    {
+        $this->taskPerm['name']=$permName;
+        $this->taskPerm['type']=$permType;
+    }
+    protected function checkLoggedUserPerm($perm)
+    {
+        if(!in_array($perm,$_SESSION['perm']))
+        {
+           $this->err.="[${perm}] Brak uprawnienia";
+           return 0;
         }
         else
         {
-            $this->err.= $this->infoArray['urlTask'][1];
-            return 0;
+            return 1;
         }
-        return 0;
     }
     private function runTask()
     {

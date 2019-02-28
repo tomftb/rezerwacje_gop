@@ -10,6 +10,7 @@ class manageProject extends initialDb
     protected $valueToReturn=null;
     protected $idProject=null;
     const maxPercentPersToProj=100;
+    private $taskPerm= ['perm'=>'','type'=>''];
     protected $infoArray=array
             (
                 "numer_umowy"=>array
@@ -241,9 +242,11 @@ class manageProject extends initialDb
          * team[][2] - data start
          * team[][3] - data end
          */
+        
         $this->parsePostData($valueToAdd);
         $team=$this->getSendedTeam();
         $persData=array();
+        
         if(!$this->err)
         {
             // PARSE SENDED TEAM
@@ -270,16 +273,15 @@ class manageProject extends initialDb
     //
     protected function updateProjectDoc($data,$idProject)
     {
-        $this->parsePostData($data);
-       
-        $documents=$this->getSendedDoc();
-        //print_r($documents);
-        $this->getProjectDocuments($this->idProject);
-        
-        $documentsInDb=$this->valueToReturn;
-        //print_r($documentsInDb);
-        $this->valueToReturn=[];
-        //print_r($documents);
+            $this->parsePostData($data);
+            $documents=$this->getSendedDoc();
+            //print_r($documents);
+            $this->getProjectDocuments($this->idProject);
+
+            $documentsInDb=$this->valueToReturn;
+            //print_r($documentsInDb);
+            $this->valueToReturn=[];
+            //print_r($documents);
         if(!$this->err)
         {
             // PARSE SENDED TEAM
@@ -329,38 +331,38 @@ class manageProject extends initialDb
     }
     protected function getPdf($idProject)
     {
-        $this->getProjectDetails($idProject);
+           $this->getProjectDetails($idProject);
         
-        /*
-         * [0] Project details
-         * [1] Documents
-         */
-        $projectDetails=array();
-        $projectDoc=array();
-        $projectTeam=array();
-        $projectMainManager=array();
-        $projectMainTech=array();
-        
-        $projectDetails=$this->valueToReturn[0][0];
-        //print_r($projectDetails);
-        $projectDoc=$this->valueToReturn[1];
-        
-        $this->getProjectTeamPdf($idProject);
-        
-        if(count($this->valueToReturn)>0)
-        {
-            $projectTeam=$this->valueToReturn;
-            
-        }
-        //print_r($projectTeam);
-        $this->getProjectPers('v_slo_kier_osr_proj');
-        
-        $projectMainManager=$this->valueToReturn[0];
-        //print_r($projectMainManager);
-        $this->getProjectPers('v_slo_glow_tech_proj');
-        $projectMainTech=$this->valueToReturn[0];
-        //print_r($projectMainTech);
-        require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/modul/createPdf.php');
+            /*
+             * [0] Project details
+             * [1] Documents
+             */
+            $projectDetails=array();
+            $projectDoc=array();
+            $projectTeam=array();
+            $projectMainManager=array();
+            $projectMainTech=array();
+
+            $projectDetails=$this->valueToReturn[0][0];
+            //print_r($projectDetails);
+            $projectDoc=$this->valueToReturn[1];
+
+            $this->getProjectTeamPdf($idProject);
+
+            if(count($this->valueToReturn)>0)
+            {
+                $projectTeam=$this->valueToReturn;
+
+            }
+            //print_r($projectTeam);
+            $this->getProjectPers('v_slo_kier_osr_proj');
+
+            $projectMainManager=$this->valueToReturn[0];
+            //print_r($projectMainManager);
+            $this->getProjectPers('v_slo_glow_tech_proj');
+            $projectMainTech=$this->valueToReturn[0];
+            //print_r($projectMainTech);
+            require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/modul/createPdf.php'); 
     }
     protected function removeNotSendedDoc(&$documentsInDb,$sendedDoc,$idProject)
     {
@@ -489,6 +491,7 @@ class manageProject extends initialDb
     protected function getProjectDefaultValues()
     {
         $valueToReturn=array();
+        
         $this->getProjectSlo('v_slo_um_proj');	
         array_push($valueToReturn,$this->valueToReturn);
         $this->getProjectPers('v_slo_lider_proj');
@@ -554,6 +557,18 @@ class manageProject extends initialDb
             }    
         }     
     }
+    protected function checkLoggedUserPerm($perm)
+    {
+        if(!in_array($perm,$_SESSION['perm']))
+        {
+           $this->err.="[${perm}] Brak uprawnienia";
+           return 0;
+        }
+        else
+        {
+            return 1;
+        }
+    }
     protected function addProjectDok($id)
     {
         //echo __METHOD__."\n";
@@ -586,22 +601,21 @@ class manageProject extends initialDb
     protected function updateProject($projectPost,$idProject)
     {
         $this->parsePostData($projectPost);
-
         $this->isEmpty('Numer',$this->inpArray['numer_umowy']);
         $this->isEmpty('Temat',$this->inpArray['temat_umowy']);
-        /*
-         * echo "ID PROJECT: ".$idProject."\n";
-         * echo "NUMER: ".$this->inpArray['numer_umowy']."\n";
-         * echo "NUMER: ".$this->inpArray['temat_umowy']."\n";
-         */
-        if($this->checkExistInDb('projekt_nowy','numer_umowy=? AND id!=? AND wsk_u=? ',$this->inpArray['numer_umowy'].','.$idProject.",0")>0)
-        {
-            $this->err.=$this->infoArray['numer_umowy'][1]."<br/>";
-        }
-        if($this->checkExistInDb('projekt_nowy','temat_umowy=? AND id!=? AND wsk_u=? ',$this->inpArray['temat_umowy'].','.$idProject.",0")>0)
-        {
-            $this->err.=$this->infoArray['temat_umowy'][1]."<br/>";
-        }
+            /*
+             * echo "ID PROJECT: ".$idProject."\n";
+             * echo "NUMER: ".$this->inpArray['numer_umowy']."\n";
+             * echo "NUMER: ".$this->inpArray['temat_umowy']."\n";
+             */
+            if($this->checkExistInDb('projekt_nowy','numer_umowy=? AND id!=? AND wsk_u=? ',$this->inpArray['numer_umowy'].','.$idProject.",0")>0)
+            {
+                $this->err.=$this->infoArray['numer_umowy'][1]."<br/>";
+            }
+            if($this->checkExistInDb('projekt_nowy','temat_umowy=? AND id!=? AND wsk_u=? ',$this->inpArray['temat_umowy'].','.$idProject.",0")>0)
+            {
+                $this->err.=$this->infoArray['temat_umowy'][1]."<br/>";
+            }
         
         if(!$this->err)
         {
@@ -630,8 +644,11 @@ class manageProject extends initialDb
     # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getAllProjects()
     {
+        $valueToReturn=array();
         $this->query('SELECT * FROM v_all_proj WHERE 1=? ORDER BY id desc',1);
-        $this->valueToReturn=$this->queryReturnValue();
+        array_push($valueToReturn,$this->queryReturnValue());
+        array_push($valueToReturn,$_SESSION['perm']);
+        $this->valueToReturn=$valueToReturn;
     }
      # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getProjectDocuments($idProject)
@@ -723,28 +740,28 @@ class checkGetData extends manageProject
     );
     private $urlGetData=array();
     private $avaliableTask=array(
-        "add",
-        "edit",
-        "removeProject",
-        "getprojects",
-        "getprojectsmember",
-        "getprojectsleader",
-        "getprojectsmanager",
-        "getprojectgltech",
-        "getprojectglkier",
-        "getprojectteam",
-        'getprojectdetails',
-        "gettypeofagreement",
-        "getadditionaldictdoc",
-        "getallemployeeprojsumperc",
-        "getallavaliableemployeeprojsumperc",
-        "addteam",
-        'getprojectdocuments',
-        'closeProject',
-        'setprojectdocuments',
-        'setprojectdetails',
-        'getpdf',
-        'getProjectDefaultValues'
+        array("add",'ADD_PROJ','user'),
+        array("edit",'','user'),
+        array("removeProject",'DEL_PROJ','user'),
+        array("getprojects",'LOG_INTO_PROJ','user'),
+        array("getprojectsmember",'','sys'),
+        array("getprojectsleader",'','sys'),
+        array("getprojectsmanager",'','sys'),
+        array("getprojectgltech",'','sys'),
+        array("getprojectglkier",'','sys'),
+        array("getprojectteam",'SHOW_TEAM_PROJ','user'),
+        array('getprojectdetails','SHOW_PROJ','user'),
+        array("gettypeofagreement",'','sys'),
+        array("getadditionaldictdoc",'','sys'),
+        array("getallemployeeprojsumperc",'EDIT_TEAM_PROJ','user'),
+        array("getallavaliableemployeeprojsumperc",'','user'),
+        array("addteam",'EDIT_TEAM_PROJ','user'),
+        array('getprojectdocuments','SHOW_DOK_PROJ','user'),
+        array('closeProject','CLOSE_PROJ','user'),
+        array('setprojectdocuments','EDIT_DOK_PROJ','user'),
+        array('setprojectdetails','EDIT_PROJ','user'),
+        array('getpdf','GEN_PDF_PROJ','user'),
+        array('getProjectDefaultValues','','sys')
     );
     function __construct()
     {
@@ -754,7 +771,13 @@ class checkGetData extends manageProject
         
         if($this->checkUrlTask())
         {
-            if($this->checkTask())
+            // CHECK PERM
+            $this->checkTask();
+            if($this->taskPerm['type']==='user')
+            {
+                $this->checkLoggedUserPerm($this->taskPerm['name']);
+            }
+            if(!$this->err)
             {
                 $this->runTask();
             }
@@ -788,16 +811,21 @@ class checkGetData extends manageProject
    
     private function checkTask()
     {
-        if (in_array($this->urlGetData['task'],$this->avaliableTask))
+        foreach($this->avaliableTask as $id =>$task)
         {
-            return 1;
+            if($task[0]==$this->urlGetData['task'])
+            {
+                $this->setTaskPerm($this->avaliableTask[$id][1],$this->avaliableTask[$id][2]);
+                return 1;
+            }
         }
-        else
-        {
-            $this->err.= $this->infoArray['urlTask'][1];
-            return 0;
-        }
+        $this->err.= $this->infoArray['urlTask'][1];
         return 0;
+    }
+    private function setTaskPerm($permName='',$permType='')
+    {
+        $this->taskPerm['name']=$permName;
+        $this->taskPerm['type']=$permType;
     }
     private function runTask()
     {

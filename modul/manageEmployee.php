@@ -9,6 +9,7 @@ class manageProject extends initialDb
     protected $err="";
     protected $valueToReturn=null;
     protected $idEmployee=null;
+    private $taskPerm= ['perm'=>'','type'=>''];
     const maxPercentPersToProj=100;
     protected $infoArray=array
             (
@@ -309,7 +310,20 @@ class manageProject extends initialDb
         $this->getPostData($postData);
         if (array_key_exists("idEmployee",$this->inpArray))
         {
-            $this->query('UPDATE pracownik SET wsk_u=? WHERE id=?',"1,".$this->inpArray['idEmployee']);
+            $this->getEmployeeProjects($this->inpArray['idEmployee']);
+            //print_r($this->valueToReturn);
+            //echo (count($this->valueToReturn));
+            
+            if(count($this->valueToReturn)>0)
+            {
+                $this->valueToReturn='';
+                $this->err.= 'Employee can\'t be deleted. This employee appears in projects.';
+            }
+            else
+            {
+                $this->query('UPDATE pracownik SET wsk_u=? WHERE id=?',"1,".$this->inpArray['idEmployee']);
+            }
+            
         }
         else
         {
@@ -319,13 +333,16 @@ class manageProject extends initialDb
     # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getEmployees()
     {
+        $valueToReturn=array();
         $this->query('SELECT * FROM v_all_prac WHERE 1=? ORDER BY id asc',1);
-        $this->valueToReturn=$this->queryReturnValue();
+        array_push($valueToReturn,$this->queryReturnValue());
+        array_push($valueToReturn,$_SESSION['perm']);
+        $this->valueToReturn=$valueToReturn;
     }
      # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getEmployeeProjects($idEmployee)
     {
-        $this->query('SELECT * FROM v_proj_prac_v3 WHERE idPracownik=? ORDER BY idProjekt ASC',$idEmployee);
+        $this->query('SELECT idProjekt,numerUmowy,tematUmowy,procentUdzial,datOd,datDo FROM v_proj_prac_v3 WHERE idPracownik=? ORDER BY idProjekt ASC',$idEmployee);
         $this->valueToReturn=$this->queryReturnValue();
     }
     # RETURN ALL NOT DELETED PROJECTs Members,LEADERs,SLO and other FROM DB
@@ -406,28 +423,51 @@ class checkGetData extends manageProject
     );
     private $urlGetData=array();
     private $avaliableTask=array(
-        "getemployees",
-        "getemployeesspecslo",
-        "cEmployee",
-        "getEmployeeProj",
-        'deleteEmployee',
-        'getEmployeeAllocation',
-        'employeeAllocation',
-        'getEmployeeDetails',
-        'editEmployee'
+        array("getemployees",'LOG_INTO_PRAC','user'),
+        array("getemployeesspecslo",'','user'),
+        array("cEmployee",'','user'),
+        array("getEmployeeProj",'SHOW_PROJ_EMPL','user'),
+        array('deleteEmployee','DEL_EMPL','user'),
+        array('getEmployeeAllocation','SHOW_ALLOC_EMPL','user'),
+        array('employeeAllocation','EDIT_ALLOC_EMPL','user'),
+        array('getEmployeeDetails','SHOW_EMPL','user'),
+        array('editEmployee','EDIT_EMPL','user')
     );
     function __construct()
     {
         parent::__construct();
         $this->addNewTypOfErr();
         $this->getUrlData();
-        
+
         if($this->checkUrlTask())
         {
-            if($this->checkTask())
+            // CHECK PERM
+            $this->checkTask();
+            if($this->taskPerm['type']==='user')
+            {
+                $this->checkLoggedUserPerm($this->taskPerm['name']);
+            }
+            if(!$this->err)
             {
                 $this->runTask();
             }
+        }
+    }
+    private function setTaskPerm($permName='',$permType='')
+    {
+        $this->taskPerm['name']=$permName;
+        $this->taskPerm['type']=$permType;
+    }
+    protected function checkLoggedUserPerm($perm)
+    {
+        if(!in_array($perm,$_SESSION['perm']))
+        {
+           $this->err.="[${perm}] Brak uprawnienia";
+           return 0;
+        }
+        else
+        {
+            return 1;
         }
     }
     private function getUrlData()
@@ -455,18 +495,17 @@ class checkGetData extends manageProject
         }
         return 0;
     }
-   
     private function checkTask()
     {
-        if (in_array($this->urlGetData['task'],$this->avaliableTask))
+        foreach($this->avaliableTask as $id =>$task)
         {
-            return 1;
+            if($task[0]==$this->urlGetData['task'])
+            {
+                $this->setTaskPerm($this->avaliableTask[$id][1],$this->avaliableTask[$id][2]);
+                return 1;
+            }
         }
-        else
-        {
-            $this->err.= $this->infoArray['urlTask'][1];
-            return 0;
-        }
+        $this->err.= $this->infoArray['urlTask'][1];
         return 0;
     }
     private function runTask()

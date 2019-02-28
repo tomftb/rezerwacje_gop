@@ -16,12 +16,12 @@
                       <li id="li-2"><i class="fa fa-address-card-o" aria-hidden="true"></i><a href="<?php echo $URL."?id=2"; ?>">Zgłoś projekt</a></li>
                       <li id="li-3"><i class="fa fa-address-card-o" aria-hidden="true"></i><a href="<?php echo $URL."?id=3"; ?>">Projekty</a></li>
                       <li id="li-4"><i class="fa fa-user-circle-o" aria-hidden="true"></i><a href="<?php echo $URL."?id=4"; ?>">Pracownicy</a></li>
-                      <li ><i class="fa fa-cog" aria-hidden="true"></i><a href=""> Administrator</a>
+                      <li id="li-5"><i class="fa fa-cog" aria-hidden="true"></i><a href=""> Administrator</a>
                           <ul class="mt-0 ml-0">
-                            <li><a href="#">Użytkownicy</a></li>
-                            <li><a href="#">Uprawnienia</a></li>
-                            <li><a href="#">Parametry</a></li>
-                            <li><a href="#">Opcje</a></li>
+                            <li><a href="<?php echo $URL."?id=5"; ?>">Użytkownicy</a></li>
+                            <li><a href="<?php echo $URL."?id=6"; ?>">Uprawnienia</a></li>
+                            <li><a href="<?php echo $URL."?id=7"; ?>">Parametry</a></li>
+                            <li><a href="<?php echo $URL."?id=8"; ?>">Opcje</a></li>
                           </ul>
                         </li>
                     <li><i class="fa fa-sign-out" aria-hidden="true"></i><a href="<?php echo $URL."?logout=t"; ?>"> Wyloguj</a></li>

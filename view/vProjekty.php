@@ -4,7 +4,7 @@
 <body>
 <div class="w-100 " style="margin-top:-55px; border:0px solid red; position:fixed;">
     <div class="btn pull-left mt-0" > 
-        <button class="btn btn-info pull-right mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#ProjectAdaptedModal" onclick="createAdaptedModal('createProject','','','n')">Dodaj projekt</button>
+        <button id='addNewProjectButton' class="btn btn-info pull-right mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#ProjectAdaptedModal" onclick="createAdaptedModal('createProject','','','n')">Dodaj projekt</button>
     </div> 
 </div>
 <div class="w-100 " style="margin-top:150px; border:0px solid red;" >

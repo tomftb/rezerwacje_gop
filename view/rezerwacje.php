@@ -13,7 +13,7 @@
 ?>
 <div class="mt-5 w-100">
     <center>               
-        <h2 class="text-center pt-5">Rezerwacje klastra :</h2>
+        <h2 class="text-center pt-5">Rezerwuj klaster :</h2>
 	<form method="POST" action="">
     	<table style="width:800px;" class="mb-5">
             <tr>

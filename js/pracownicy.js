@@ -482,6 +482,7 @@ function createEmployeeProjectsRowContent(whereAppend,employeeProj,titleElement)
             if(employeeProj[0].hasOwnProperty(prop))
             {
                 td=createHtmlElement('td',null,null);
+                prop=prop.replace("_", " ");
                 td.innerText=prop;
                 tr.appendChild(td);
             }

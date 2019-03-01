@@ -342,7 +342,8 @@ class manageProject extends initialDb
      # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getEmployeeProjects($idEmployee)
     {
-        $this->query('SELECT idProjekt,numerUmowy,tematUmowy,procentUdzial,datOd,datDo FROM v_proj_prac_v3 WHERE idPracownik=? ORDER BY idProjekt ASC',$idEmployee);
+        $this->query('SELECT ID_Projekt,Numer_umowy,Temat_umowy,Procent_udziału,Data_od,Data_do FROM v_proj_prac_v4 WHERE ID_Pracownik=? ORDER BY ID_Projekt ASC',$idEmployee);
+        //$this->query('SELECT idProjekt,numerUmowy,tematUmowy,procentUdzial,datOd,datDo FROM v_proj_prac_v3 WHERE idPracownik=? ORDER BY idProjekt ASC',$idEmployee);
         $this->valueToReturn=$this->queryReturnValue();
     }
     # RETURN ALL NOT DELETED PROJECTs Members,LEADERs,SLO and other FROM DB

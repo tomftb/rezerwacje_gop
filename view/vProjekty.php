@@ -2,10 +2,19 @@
 <?php require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/modul/mValidUrl.php");?>
 <script type="text/javascript" src="<?php echo $URL;?>/js/projekty.js"></script>
 <body>
-<div class="w-100 " style="margin-top:-55px; border:0px solid red; position:fixed;">
-    <div class="btn pull-left mt-0" > 
-        <button id='addNewProjectButton' class="btn btn-info pull-right mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#ProjectAdaptedModal" onclick="createAdaptedModal('createProject','','','n')">Dodaj projekt</button>
-    </div> 
+<div class="w-100 " style="margin-top:-55px;position:fixed;">
+    <div class="row">
+        <div class=" col-sm-2" >
+            <div class="btn pull-left mt-0" > 
+                 <button id='addNewProjectButton' class="btn btn-info pull-right mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#ProjectAdaptedModal" onclick="createAdaptedModal('createProject','','','n')">Dodaj projekt</button>
+            </div> 
+        </div>
+        <div class=" col-sm-8" >
+            <h2 class="text-center mb-3 mt-1 text-info">Projekty :</h2>
+        </div>
+        <div class=" col-sm-2" >
+        </div>
+    </div>
 </div>
 <div class="w-100 " style="margin-top:150px; border:0px solid red;" >
 

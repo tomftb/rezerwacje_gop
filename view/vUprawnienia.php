@@ -1,10 +1,20 @@
 <?php require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/redirectToLoginPage.php"); ?>
 <?php require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/modul/mValidUrl.php");?>
 <body>
-<div class="w-100 " style="margin-top:100px;" >
+<div class="w-100 " style="margin-top:-55px;position:fixed;">
+    <div class="row">
+        <div class=" col-sm-2" >
+        </div>
+        <div class=" col-sm-8" >
+            <h2 class="text-center mb-3 mt-1 text-info">Uprawnienia :</h2>
+        </div>
+        <div class=" col-sm-2" >
+        </div>
+    </div>
+</div>
+<div class="w-100 " style="margin-top:150px;" >
 <div class="mr-3 ml-3">
     <div>
-        <h2 class="text-center mt-3 mb-3 text-info">Uprawnienia :</h2>
         <table class="table table-striped table-condensed">
           <thead class="thead-dark" id="allDataHeader">
             

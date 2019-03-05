@@ -1,6 +1,5 @@
 <?php
 session_start();
-require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/redirectToLoginPage.php");
 require(filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/.cfg/config.php');
 
 class manageUser extends initialDb
@@ -479,7 +478,7 @@ class checkGetData extends manageUser
         array("cUser",'ADD_USER','user'),
         array('deleteUser','DEL_USER','user'),
         array('getUserPerm','SHOW_PERM_USER','user'),
-        array('userPermissions','EDIT_PERM_USER','sys'),
+        array('userPermissions','EDIT_PERM_USER','user'),
         array('getUserDetails','SHOW_USER','user'),
         array('getRoleSlo','','user'),
         array('editUser','EDIT_USER','user')
@@ -496,6 +495,7 @@ class checkGetData extends manageUser
             $this->checkTask();
             if($this->taskPerm['type']==='user')
             {
+                $this->checkLoggedUserPerm('LOG_INTO_APP');
                 $this->checkLoggedUserPerm($this->taskPerm['name']);
             }
             if(!$this->err)

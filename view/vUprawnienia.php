@@ -36,11 +36,9 @@
                 </button>
             </div>
             <div class="modal-body mb-0 pb-0 pt-0 mt-0" id="AdaptedBodyContent">
-                <div class="form-group row mb-1 pb-0  pt-0 mt-0" id="AdaptedBodyContentTitle">
+                <div class="form-group row mb-1 pb-0  pt-0 mt-0">
                     <div class=" col-sm-12 mt-4" >
-                        <h5 class="modal-title text-center" id="fieldModalLabel">
-                            <span id="projectTitle">
-                            </span>
+                        <h5 class="modal-title text-center" id="AdaptedBodyContentTitle">
                         </h5> 
                     </div>
                 </div>

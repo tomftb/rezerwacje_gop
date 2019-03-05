@@ -995,7 +995,7 @@ function createCheckBoxList(data,status)
     console.log("LENGTH: "+data.length);
     /*
      * data - array of objects
-     */
+     *///hiddend checkbox
     var cboxAtr= new Array(
             Array('class','custom-control-input'),
             Array('type','checkbox'),
@@ -1020,40 +1020,68 @@ function createCheckBoxList(data,status)
             );
     var divR='';;
     var divOverAll=createHtmlElement('div',divOverAllAtr,null);
+    if(loggedUserPerm.indexOf('SHOW_PERM_USER')===-1)
+        {
+            var divErrAtr=new Array(
+                Array('class','alert alert-danger ml-3 col-sm-auto')    
+                )
+                var divErr=createHtmlElement('div',divErrAtr,null);
+                divErr.innerText="[SHOW_PERM_USER]Brak uprawnienia";
+            
+            
+            
+            divOverAll.appendChild(divErr);
+        }
     for(var i = 0; i < data.length; i++)
     {    
-        
-        //console.log(data[i].ID+' '+data[i].NAZWA+' '+data[i].DEFAULT);
-        divR=createHtmlElement('div',divRAtr,null);
-        labelAtr[1][1]='cbox-'+data[i].ID;
-        label=createHtmlElement('label',labelAtr,null);
-        label.innerText=data[i].NAZWA;
-        cboxAtr[2][1]='cbox-ID:'+data[i].ID+'-NAME:'+data[i].NAZWA;
-        cboxAtr[3][1]='cbox-'+data[i].ID;
-        // VALUE = 0 not send
-        // VALUE = 1 ok
-        if(data[i].DEFAULT==='t')
+        if(loggedUserPerm.indexOf('SHOW_PERM_USER')===-1)
         {
-            cboxAtr[4][1]=1;
-            cboxAtr[5][0]='checked';
-        }
+            divOverAll.appendChild(addHiddenInput(data[i].NAZWA,data[i].ID));
+	}
         else
         {
-            cboxAtr[4][1]=0;
-            cboxAtr[5][0]='no-checked';
-        };
-        if(status)
-        {
-           cboxAtr[6][0]='no-disabled'; 
-        };
-        cbox=createHtmlElement('input',cboxAtr,null);
-        cbox.onclick=function(){ changeBoxValue(this); };
-        divR.appendChild(cbox);
-        divR.appendChild(label);
-        divOverAll.appendChild(divR);
+           //console.log(data[i].ID+' '+data[i].NAZWA+' '+data[i].DEFAULT);
+            divR=createHtmlElement('div',divRAtr,null);
+            labelAtr[1][1]='cbox-'+data[i].ID;
+            label=createHtmlElement('label',labelAtr,null);
+            label.innerText=data[i].NAZWA;
+            cboxAtr[2][1]='cbox-ID:'+data[i].ID+'-NAME:'+data[i].NAZWA;
+            cboxAtr[3][1]='cbox-'+data[i].ID;
+            // VALUE = 0 not send
+            // VALUE = 1 ok
+            if(data[i].DEFAULT==='t')
+            {
+                cboxAtr[4][1]=1;
+                cboxAtr[5][0]='checked';
+            }
+            else
+            {
+                cboxAtr[4][1]=0;
+                cboxAtr[5][0]='no-checked';
+            };
+            if(status)
+            {
+               cboxAtr[6][0]='no-disabled'; 
+            };
+            cbox=createHtmlElement('input',cboxAtr,null);
+            cbox.onclick=function(){ changeBoxValue(this); };
+            divR.appendChild(cbox);
+            divR.appendChild(label);
+            divOverAll.appendChild(divR); 
+        }
+        
     };
     console.log(divOverAll);
     return(divOverAll);
+}
+function addHiddenInput(name,value)
+{
+    console.log('---addHiddenInput()---');
+    var input=document.createElement("input");
+        input.setAttribute("type", "hidden");
+        input.setAttribute("value",value);
+        input.setAttribute("name",name);
+    return (input);
 }
 function changeBoxValue(input)
 {

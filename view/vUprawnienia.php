@@ -1,29 +1,15 @@
 <?php require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/redirectToLoginPage.php"); ?>
 <?php require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/modul/mValidUrl.php");?>
-<script type="text/javascript" src="<?php echo $URL;?>/js/uzytkownicy.js"></script>
 <body>
-<div class="w-100 " style="margin-top:-55px;position:fixed;">
-    <div class="btn pull-left mt-0" > 
-        <button id='addNewUserButton' class="btn btn-info pull-right mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#AdaptedModal" onclick="createAdaptedModal('cUser',null)">Dodaj użytkownika</button>
-    </div> 
-</div>
-<div class="w-100 " style="margin-top:150px;" >
+<div class="w-100 " style="margin-top:100px;" >
 <div class="mr-3 ml-3">
     <div>
+        <h2 class="text-center mt-3 mb-3 text-info">Uprawnienia :</h2>
         <table class="table table-striped table-condensed">
-          <thead class="thead-dark">
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Imię</th>
-              <th scope="col">Nazwisko</th>
-              <th scope="col">Login</th>
-              <th scope="col">Email</th>
-              <th scope="col">Typ</th>
-              <th scope="col">Rola</th>
-              <th scope="col">Opcje</th>
-            </tr>
+          <thead class="thead-dark" id="allDataHeader">
+            
           </thead>
-          <tbody id="allUsersData">
+          <tbody id="allDataBody">
           </tbody>
         </table>
     </div>
@@ -49,7 +35,7 @@
                     </div>
                 </div>
                 <div class="form-group row mb-0 pb-0">
-                    <div class="col-sm-12"  id="AdaptedDynamicData">
+                    <div class="col-sm-12 pr-0 mr-0 ml-0 pl-0"  id="AdaptedDynamicData">
                     </div>
                 </div>
                 <div class="form-group row mb-0">
@@ -73,9 +59,9 @@
 <!-- END ADAPTED MODAL PROJECT -->
 <!-- DETAIL TEMPLATE -->
 <div class="modal fade mb-0" tabindex="-1" role="dialog" id="formModalDetail" aria-hidden="true">
-    <div class="modal-body mb-0 pb-1 pt-1">
+    <div class="modal-body mb-0 pb-1 pt-1 pr-0">
         <form class="form-horizontal"  autocomplete="off" method="POST"  ENCTYPE="multipart/form-data" action="javascript:void(0);" name="newForm">
-            <div class="form-group row mt-2 mb-1" id="formModalDetailFields">
+            <div class="form-group mt-2 mb-0" id="formModalDetailFields">
             </div>
         </form>
     </div>
@@ -100,11 +86,4 @@
             </ul>
 </div>    
 <!-- END LEGEND -->
-<div id="div-inputPdf7a" style="display:block;margin-bottom:50px;">
-    
-    
-    
-</div>
-<script>
-window.onload=getAjaxData('getusers','','sUsers',null);
-</script>
+<div id="div-inputPdf7a" style="display:block;margin-bottom:50px;"></div>

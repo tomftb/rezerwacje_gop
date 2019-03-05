@@ -120,7 +120,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
     switch(functionStart)
     {
         case 'sEmployees':
-                setButtonDisplay(document.getElementById('addNewEmployeeButton'),'ADD_PROJ',loggedUserPerm);
+                setButtonDisplay(document.getElementById('addNewEmployeeButton'),'ADD_EMPL',loggedUserPerm);
                 setAllEmployees(data[0]);
             break;
         case 'cEmployee':

@@ -425,7 +425,7 @@ class checkGetData extends manageProject
     private $urlGetData=array();
     private $avaliableTask=array(
         array("getemployees",'LOG_INTO_PRAC','user'),
-        array("getemployeesspecslo",'','user'),
+        array("getemployeesspecslo",'','sys'),
         array("cEmployee",'','user'),
         array("getEmployeeProj",'SHOW_PROJ_EMPL','user'),
         array('deleteEmployee','DEL_EMPL','user'),

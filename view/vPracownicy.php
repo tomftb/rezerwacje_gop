@@ -3,9 +3,18 @@
 <script type="text/javascript" src="<?php echo $URL;?>/js/pracownicy.js"></script>
 <body>
 <div class="w-100 " style="margin-top:-55px;position:fixed;">
-    <div class="btn pull-left mt-0" > 
-        <button id="addNewEmployeeButton" class="btn btn-info pull-right mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#ProjectAdaptedModal" onclick="createAdaptedModal('cEmployee',null)">Dodaj pracownika</button>
-    </div> 
+    <div class="row">
+        <div class=" col-sm-2" >
+            <div class="btn pull-left mt-0" > 
+            <button id="addNewEmployeeButton" class="btn btn-info pull-right mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#ProjectAdaptedModal" onclick="createAdaptedModal('cEmployee',null)">Dodaj pracownika</button>
+            </div> 
+        </div>
+        <div class=" col-sm-8" >
+            <h2 class="text-center mb-3 mt-1 text-info">Pracownicy :</h2>
+        </div>
+        <div class=" col-sm-2" >
+        </div>
+    </div>
 </div>
 <div class="w-100 " style="margin-top:150px;" >
 <div class="mr-3 ml-3">

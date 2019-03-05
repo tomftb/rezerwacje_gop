@@ -3,13 +3,23 @@
 <script type="text/javascript" src="<?php echo $URL;?>/js/uzytkownicy.js"></script>
 <body>
 <div class="w-100 " style="margin-top:-55px;position:fixed;">
-    <div class="btn pull-left mt-0" > 
-        <button id='addNewUserButton' class="btn btn-info pull-right mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#AdaptedModal" onclick="createAdaptedModal('cUser',null)">Dodaj użytkownika</button>
+    <div class="row">
+        <div class=" col-sm-2" >
+            <div class="btn pull-left mt-0" > 
+        <button id='addNewUserButton' class="btn btn-info pull-left mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#AdaptedModal" onclick="createAdaptedModal('cUser',null)">Dodaj użytkownika</button>
     </div> 
+        </div>
+        <div class=" col-sm-8" >
+            <h2 class="text-center mb-3 mt-1 text-info">Użytkownicy :</h2>
+        </div>
+        <div class=" col-sm-2" >
+        </div>
+    </div>
 </div>
 <div class="w-100 " style="margin-top:150px;" >
 <div class="mr-3 ml-3">
     <div>
+        
         <table class="table table-striped table-condensed">
           <thead class="thead-dark">
             <tr>

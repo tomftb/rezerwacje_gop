@@ -85,27 +85,43 @@ class manageUser extends initialDb
             }    
         }
     }
-    protected function setActSessionPerm($idUser)
+    protected function setActSessionPermRole($idRole,$idUser)
     {
-        //echo "ID USER - ".$idUser."\n";
-        //print_r($_SESSION);
-        if($_SESSION['userid']==$idUser)
+        // UPDATE CURRENT USER SESSION PERM;
+        //echo "UPDATE PERM ROLE<br/>";
+        $permRole=array();
+        if($idRole)
         {
-            // UPDATE CURRENT USER SESSION PERM;
-            //echo "UPDATE PERM<br/>";
-            $this->query('SELECT SKROT FROM v_uzyt_i_upr_v2 WHERE idUzytkownik=?',$idUser);
-            $_SESSION['perm']=$this->parsePerm($this->queryReturnValue());
-            //print_r($_SESSION);
+            $this->query('SELECT SKROT FROM v_upr_i_slo_rola_v2 WHERE idRola=?',$idRole);
+            $permRole=$this->queryReturnValue();
+            print_r($permRole); 
         }
+        $this->query('SELECT SKROT FROM v_uzyt_i_upr_v2 WHERE idUzytkownik=?',$idUser);
+        $perm=$this->queryReturnValue();
+        $_SESSION['perm']=$this->parsePermRole($perm,$permRole);
+        echo "SESSION PERM ROLE CHANGED\n";
+        print_r($_SESSION);
     }
-    private function parsePerm($perm)
+    private function parsePermRole($perm,$permRole)
     {
-        $arrToReturn=array();
+        $array1=array();
+        $array2=array();
+        // FLATTEN 1
         foreach($perm as $value)
         {
-            array_push($arrToReturn,$value['SKROT']);
+            array_push($array1,$value['SKROT']);
         }
-        return ($arrToReturn);
+        //print_r($array1);
+        // FLATTEN 2
+        foreach($permRole as $value)
+        {
+            if(!in_array($value['SKROT'],$array1))
+            {
+                array_push($array2,$value['SKROT']);
+            }
+        } 
+        //print_r($array2);
+        return (array_merge($array1,$array2));
     }
     protected function editUser($POSTDATA)
     {
@@ -140,7 +156,10 @@ class manageUser extends initialDb
             else
             {
                 $this->editUserPerm($permArray,$this->inpArray['idUser']);
-                $this->setActSessionPerm($this->inpArray['idUser']);
+                if($_SESSION['userid']===$this->inpArray['idUser'])
+                {
+                    $this->setActSessionPermRole($this->inpArray['rola'],$this->inpArray['idUser']);
+                }
             }    
         }
     }
@@ -172,11 +191,17 @@ class manageUser extends initialDb
         $this->checkExistSloPerm($permArray);
         // GET AND CHECK USER ID
         $id=$this->getSpecField("idUser");
-
+        
         if(!$this->err)
         {
             $this->editUserPerm($permArray,$id);
-            $this->setActSessionPerm($this->inpArray['idUser']);
+            if($_SESSION['userid']===$this->inpArray['idUser'])
+            {
+                // GET USER ROLE
+                $this->query('SELECT idRola FROM v_all_user WHERE ID=?',$this->inpArray['idUser']);
+                $idRole=$this->queryReturnValue();
+                $this->setActSessionPermRole($idRole[0]['IdRola'],$this->inpArray['idUser']);
+            }
         }
     }
     protected function getSpecField($field)

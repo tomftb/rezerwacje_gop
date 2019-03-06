@@ -2,23 +2,20 @@
 session_start();
 require(filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/.cfg/config.php');
 
-class managePerm extends initialDb
+class manageRole extends initialDb
 {
+    protected $idRole=0;
     private $inpArray=array();
     protected $err="";
     protected $valueToReturn=null;
     protected $taskPerm= ['perm'=>'','type'=>''];
     protected $infoArray=array
             (
-                "imie_nazwisko"=>array
+                "nazwa"=>array
                 (
-                    "Podane Imię, Nazwisko lub Login jest za krótkie",
-                    "Podane Imię, Nazwisko lub Login jest za długi",
-                    "Istnieje już użytkownik o podanym Imieniu i Nazwisku",
-                ),
-                "login"=>array
-                (
-                    "Istnieje już użytkownik o podanym Loginie"
+                    "Podana Nazwa jest za krótka",
+                    "Podana Nazwa jest za długa",
+                    "Istnieje już rola o podanej nazwie",
                 )
             );
     function __construct()
@@ -48,27 +45,57 @@ class managePerm extends initialDb
             }
         }
     }
-    protected function setActSessionPerm($idUser)
+    protected function setActSessionPermRole($idRole,$idUser)
     {
         //echo "ID USER - ".$idUser."\n";
         //print_r($_SESSION);
-        if($_SESSION['userid']==$idUser)
+        // GET CURRENT LOGED IN USER ROLE IF ROLE IS THE SAME UPDATE PERM
+        $this->query('SELECT idRola FROM v_all_user WHERE IdRola=? AND ID=?',$idRole.','.$idUser);
+        $userRole=$this->queryReturnValue();
+        //print_r($userRole);
+        //GET CURRENT UPDATED ROLE
+        $this->query('SELECT ID FROM v_slo_rola WHERE ID=?',$idRole);
+        $role=$this->queryReturnValue();
+        //print_r($role);
+        if(count($userRole)>0 && count($role)>0)
         {
-            // UPDATE CURRENT USER SESSION PERM;
-            //echo "UPDATE PERM<br/>";
-            $this->query('SELECT SKROT FROM v_uzyt_i_upr_v2 WHERE idUzytkownik=?',$idUser);
-            $_SESSION['perm']=$this->parsePerm($this->queryReturnValue());
-            //print_r($_SESSION);
+            if($userRole[0]['IdRola']==$role[0]['ID'])
+            {
+                // UPDATE CURRENT USER SESSION PERM;
+                //echo "UPDATE PERM ROLE<br/>";
+                $this->query('SELECT SKROT FROM v_upr_i_slo_rola_v2 WHERE idRola=?',$role[0]['ID']);
+                $permRole=$this->queryReturnValue();
+                //print_r($permRole);
+                $this->query('SELECT SKROT FROM v_uzyt_i_upr_v2 WHERE idUzytkownik=?',$idUser);
+                $perm=$this->queryReturnValue();
+                //print_r($perm);
+                //print_r($this->parsePermRole($perm,$permRole));
+                $_SESSION['perm']=$this->parsePermRole($perm,$permRole);
+                //print_r($_SESSION);
+            }
         }
+        
     }
-    private function parsePerm($perm)
+    private function parsePermRole($perm,$permRole)
     {
-        $arrToReturn=array();
+        $array1=array();
+        $array2=array();
+        // FLATTEN 1
         foreach($perm as $value)
         {
-            array_push($arrToReturn,$value['SKROT']);
+            array_push($array1,$value['SKROT']);
         }
-        return ($arrToReturn);
+        //print_r($array1);
+        // FLATTEN 2
+        foreach($permRole as $value)
+        {
+            if(!in_array($value['SKROT'],$array1))
+            {
+                array_push($array2,$value['SKROT']);
+            }
+        }
+        //print_r($array2);
+        return (array_merge($array1,$array2));
     }
     protected function editPermUsers($sendedUsers,$allPermUsers,$permId)
     {
@@ -114,24 +141,6 @@ class managePerm extends initialDb
     protected function addUserPerm($userId,$idPerm)
     {
         $this->query('INSERT INTO uzyt_i_upr (id_uzytkownik,id_uprawnienie) VALUES (?,?)',$userId.",".$idPerm); 
-    }
-    protected function updatePermUser($POSTDATA)
-    {
-        // GET SENDED DATA VIA POST
-        $this->getPostData($POSTDATA);
-        // GET AND CHECK PERM ID
-        $id=$this->getSpecField("idPerm");
-        
-        $sendedUsers=$this->returnUsersTabFromPost($this->inpArray);
-
-        if(!$this->err)
-        {
-            // GET USERS WITH PERM
-            $this->query('SELECT id FROM v_upr_i_uzyt_v2 WHERE idUprawnienie=?',$this->inpArray['idPerm']);
-            $allPermUsers=$this->queryReturnValue();
-            $this->editPermUsers($sendedUsers,$allPermUsers,$id);
-            $this->setActSessionPerm($this->inpArray['idPerm']);
-        }
     }
     protected function getSpecField($field)
     {
@@ -199,10 +208,10 @@ class managePerm extends initialDb
         }
     }
     # RETURN ALL NOT DELETED PROJECT FROM DB
-    public function getAllPerm()
+    public function getAllRole($wsku)
     {
         $valueToReturn=array();
-        $this->query('SELECT * FROM v_upr WHERE 1=? ORDER BY ID asc',1);
+        $this->query('SELECT ID,Nazwa,Opcje FROM v_slo_rola_all WHERE WSK_U=? ORDER BY ID asc',$wsku);
         array_push($valueToReturn,$this->queryReturnValue());
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;
@@ -225,7 +234,216 @@ class managePerm extends initialDb
         array_push($valueToReturn,$this->queryReturnValue());
         $this->valueToReturn=$valueToReturn;
     }
+    public function getNewRoleSlo()
+    {
+        $arrToReturn=array();
+        // SLO ROLA
+        $this->getSlo('v_slo_rola');
+        array_push($arrToReturn,$this->valueToReturn);
+        // SLO UPR
+        $this->getSlo('v_slo_upr');
+        array_push($arrToReturn,$this->valueToReturn);
+        // USER UPR
+        
+        $this->valueToReturn=$arrToReturn;
+    }
+    protected function dRole($POSTDATA)
+    {
+        $this->getPostData($POSTDATA);
+        if($this->getSpecField("id"))
+        {
+             $this->query('UPDATE slo_rola SET WSK_U=? WHERE ID=?','1,'.$this->inpArray['id']);
+        }
+    }
+    protected function cRole($POSTDATA)
+    {
+        $this->getPostData($POSTDATA);
+        $this->checkRoleValueLength($this->inpArray);
+        if($this->checkExistInDb('v_slo_rola','NAZWA=?',$this->inpArray['nazwa']))
+        {
+            $this->err.=$this->infoArray['nazwa'][2]."<br/>";
+        }
+        // CHECK AVALIABLE ROLE
+        $permArray=$this->returnPermTabFromPost($this->inpArray);
+        $this->checkExistSloPerm($permArray);
+        if(!$this->err)
+        {
+            $this->addRole($this->inpArray);
+            if($this->getError()!=='')
+            {
+                $this->err.=$this->getError()."<br/>";
+            }
+            else
+            {
+                // EDIT ROLE PERMISSION
+                $this->editRolePerm($permArray,$this->queryLastId()); 
+            }    
+        }
+    }
+    protected function editRole($POSTDATA)
+    {
+        $this->getPostData($POSTDATA);
+        $this->checkRoleValueLength($this->inpArray);
+        $this->getSpecField("id");
+     
+        if($this->checkExistInDb('v_slo_rola','NAZWA=? AND ID!=?',$this->inpArray['nazwa'].','.$this->inpArray['id']))
+        {
+            $this->err.=$this->infoArray['nazwa'][2]."<br/>";
+        }
+    
+        // CHECK AVALIABLE DICTIONARY
+        $permArray=$this->returnPermTabFromPost($this->inpArray);
+        $this->checkExistSloPerm($permArray);
+        if(!$this->err)
+        {
+            $this->updateRole($this->inpArray);
+            if($this->getError()!=='')
+            {
+                $this->err.=$this->getError()."<br/>";
+            }
+            else
+            {
+                $this->editRolePerm($permArray,$this->inpArray['id']); 
+                $this->setActSessionPermRole($this->inpArray['id'],$_SESSION['userid']);
+            }    
+        }
+    }
+    protected function addRole($uData)
+    {
+        $this->query('INSERT INTO slo_rola (NAZWA) VALUES (?)',$uData['nazwa']);
+    }
+    protected function updateRole($uData)
+    {
+        $this->query('UPDATE slo_rola SET NAZWA=? WHERE ID=?',$uData['nazwa'].','.$uData['id']);
+    }
+    protected function editRolePerm($permArray,$id)
+    {
+        // print_r($permArray);
+        if(!$this->err)
+        {
+            foreach($permArray as $value)
+            {
+                //echo $value[0].' - '.$value[1];
+                if($value[2]>0)
+                {
+                    $this->addRolePerm($id,$value[0]);
+                }
+                else
+                {
+                    $this->removeRolePerm($id,$value[0]);
+                }
+            }
+        }
+    }
+    protected function addRolePerm($roleId,$value)
+    {
+        //echo $employeeId.' - '.$value;
+        // CHECK IS EXIST
+        if(!$this->checkExistInDb('upr_i_slo_rola','id_rola=? AND id_upr=?',$roleId.','.$value))
+        {
+            // NOT EXIST -> ADD
+            $this->query('INSERT INTO upr_i_slo_rola (id_rola,id_upr) VALUES (?,?)',$roleId.",".$value); 
+        }
+    }
+    protected function removeRolePerm($roleId,$value)
+    {
+        if($this->checkExistInDb('upr_i_slo_rola','id_rola=? AND id_upr=?',$roleId.','.$value))
+        {
+            // EXIST -> DELETE
+            $this->query('DELETE FROM upr_i_slo_rola WHERE id_rola=? AND id_upr=?',$roleId.",".$value); 
+        }   
+    }
+    public function getRoleDetails($id)
+    {
+        if(!$this->err)
+        {
+            $valueToReturn=array();
+            $this->query('SELECT ID,Nazwa,WSK_U FROM v_slo_rola_all WHERE ID=?',$id);
+            array_push($valueToReturn,$this->queryReturnValue());
+            $this->getSlo('v_slo_upr');
+            $this->query('SELECT * FROM v_upr_i_slo_rola WHERE idRola=? ORDER BY idUpr ASC ',$id);
+            $uprRole=$this->queryReturnValue();
 
+            // COMBINE
+            array_push($valueToReturn,$this->combineSlo($this->valueToReturn,'ID',$uprRole,'idUpr'));
+            $this->valueToReturn=$valueToReturn;
+        }
+    }
+
+    protected function combineSlo($slo,$sloKey,$uprRole,$sloUserKey)
+    {
+        // $sloKey = ID
+        // $sloUserKey = idUprawnienie
+        foreach($slo as $id => $value)
+        {
+            foreach($uprRole as $key => $valueEmpl)
+            {
+                if($value[$sloKey]===$valueEmpl[$sloUserKey])
+                {
+                    $slo[$id]['DEFAULT']='t';
+                    unset($uprRole[$key]);
+                    break;
+                }
+            }
+        }
+        return($slo);
+    }
+    protected function checkExistSloPerm($permTab)
+    {
+       // CHECK SLO IS AVALIABLE
+        foreach($permTab as $value)
+        {
+            if(!$this->checkExistInDb('v_slo_upr','ID=?',$value[0]))
+            { 
+                $value[1]=preg_replace('/_/', ' ', $value[1]);
+                $this->err.="[".$value[1]."]PERMISSION DICTIONARY WAS DELETED<br/>";
+            }
+        }
+    }
+    protected function checkRoleValueLength($data)
+    {
+        if(strlen($data['nazwa'])<3)
+        {
+            $this->err.=$this->infoArray['nazwa'][0]."<br/>";
+        }
+        if(strlen($data['nazwa'])>30)
+        {
+            $this->err.=$this->infoArray['nazwa'][1]."<br/>";
+        }
+    }
+     protected function returnPermTabFromPost($DATA)
+    {
+        $tmpArray=array();
+        $tmpRec=array();
+        $id='';
+        $name='';
+        foreach($DATA as $key => $value)
+        {
+            //echo $key." - ".$value."\n";
+            //echo "STRPOS - ".strpos($key,'cbox')."\n";
+            if(strpos($key,'cbox-')!==false) 
+            {
+                //echo "FOUND\n";
+                $tmpData=explode('-',$key);
+                //print_r($tmpData);
+                // GET ID $tmpData[1]
+                // GET NAME $tmpData[2]
+                $id=explode(':',$tmpData[1]);
+                $name=explode(':',$tmpData[2]);
+                array_push($tmpRec,$id[1],$name[1],$value);
+                array_push($tmpArray,$tmpRec);
+            }
+            $tmpRec=[];
+        }
+        
+        //print_r($tmpArray);
+        return $tmpArray;
+    }
+    public function getRoleUsers($id)
+    {
+        $this->query('SELECT Imie as "Imię", Nazwisko,Login,Email FROM v_all_user WHERE idRola=? AND wskU=? ORDER BY Nazwisko,Imie,ID ASC ',$id.',0');
+        $this->valueToReturn=$this->queryReturnValue();
+    }
     public function getReturnedValue()
     {
         echo json_encode($this->valueToReturn);
@@ -241,19 +459,25 @@ class managePerm extends initialDb
             echo json_encode(array("0",$this->valueToReturn));
         }
     }
+    
     function __destruct()
     {}
 }
-class checkGetData extends managePerm
+class checkGetData extends manageRole
 {
     private $avaliableFunction=array(
         "task"=>"task"
     );
     private $urlGetData=array();
     private $avaliableTask=array(
-        array("getAllPerm",'LOG_INTO_UPR','user'),
+        array("getAllRole",'LOG_INTO_ROLE','user'),
+        array("getNewRoleSlo",'ADD_ROLE','user'),
+        array("cRole",'ADD_ROLE','user'),
         array("getUsersWithPerm",'SHOW_PERM_USER','user'),
-        array('editPermUsers','EDIT_PERM_USER','user')
+        array('editRole','EDIT_ROLE','user'),
+        array('getRoleDetails','SHOW_ROLE','user'),
+        array('getRoleUsers','SHOW_ROLE_USERS','sys'),
+        array('dRole','DEL_ROLE','user')
     );
     function __construct()
     {
@@ -285,8 +509,8 @@ class checkGetData extends managePerm
     }
     private function addNewTypOfErr()
     {
-        $this->infoArray['urlTask'][0]='[managePerm]Wrong function to execute';
-        $this->infoArray['urlTask'][1]='[managePerm]Task not exists';
+        $this->infoArray['urlTask'][0]='[manageRole]Wrong function to execute';
+        $this->infoArray['urlTask'][1]='[manageRole]Task not exists';
     }
     private function checkUrlTask()
     {
@@ -336,17 +560,33 @@ class checkGetData extends managePerm
     {
         switch($this->urlGetData['task']):
         
-        case "getAllPerm" : // ENUM 0,1
-            $this->getAllPerm();
+           
+        case "getAllRole" : // ENUM 0,1
+            $this->getAllRole('0');
             break;
- 
+        case 'getNewRoleSlo':
+            $this->getNewRoleSlo();
+            break;
+        case 'cRole':
+            $this->cRole($_POST);
+            break;
         case "getUsersWithPerm" :
             $this->idData=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
             $this->getUsersWithPerm($this->idData);
             break;
-
-        case 'editPermUsers':
-            $this->updatePermUser($_POST);
+        case 'getRoleDetails':
+            $this->idRole=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+            $this->getRoleDetails($this->idRole);
+            break;
+        case 'editRole':
+            $this->editRole($_POST);
+            break;
+        case 'getRoleUsers':
+            $this->idRole=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+            $this->getRoleUsers($this->idRole);
+            break;
+        case 'dRole':
+            $this->dRole($_POST);
             break;
         default:
             //no task

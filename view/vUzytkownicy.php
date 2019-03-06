@@ -6,8 +6,8 @@
     <div class="row">
         <div class=" col-sm-2" >
             <div class="btn pull-left mt-0" > 
-        <button id='addNewUserButton' class="btn btn-info pull-left mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#AdaptedModal" onclick="createAdaptedModal('cUser',null)">Dodaj użytkownika</button>
-    </div> 
+                <button id='addNewUserButton' class="btn btn-info pull-left mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#AdaptedModal" onclick="createAdaptedModal('cUser',null)">Dodaj użytkownika</button>
+            </div> 
         </div>
         <div class=" col-sm-8" >
             <h2 class="text-center mb-3 mt-1 text-info">Użytkownicy :</h2>

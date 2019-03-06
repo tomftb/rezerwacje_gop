@@ -138,9 +138,11 @@ class validLogin extends ldapAuth
     }
     private function getUserPerm($idUser)
     {
-        $this->dbLink->query('SELECT SKROT FROM v_uzyt_i_upr_v2 WHERE idUzytkownik=?',$idUser);
-        $this->userData['perm']=$this->parsePerm($this->dbLink->queryReturnValue());
+        $this->dbLink->query('SELECT idRola FROM v_all_user WHERE ID=?',$idUser);
+        $idRole=$this->dbLink->queryReturnValue();
 
+        $this->userData['perm']=$this->setActSessionPermRole($idRole[0]['IdRola'],$idUser);
+                
         if(!in_array('LOG_INTO_APP',$this->userData['perm']))
         {
             $this->info='[LOG_INTO_APP] Brak uprawnienia do zalogowania się';
@@ -152,14 +154,44 @@ class validLogin extends ldapAuth
             return (1);
         }
     }
-    private function parsePerm($perm)
+
+    protected function setActSessionPermRole($idRole,$idUser)
     {
-        $arrToReturn=array();
+        // UPDATE CURRENT USER SESSION PERM;
+        //echo "UPDATE PERM ROLE<br/>";
+        $permRole=array();
+        if($idRole)
+        {
+            $this->dbLink->query('SELECT SKROT FROM v_upr_i_slo_rola_v2 WHERE idRola=?',$idRole);
+            $permRole=$this->dbLink->queryReturnValue();
+            //print_r($permRole); 
+        }
+        $this->dbLink->query('SELECT SKROT FROM v_uzyt_i_upr_v2 WHERE idUzytkownik=?',$idUser);
+        $perm=$this->dbLink->queryReturnValue();
+        return($this->parsePermRole($perm,$permRole));
+        //echo "SESSION PERM ROLE CHANGED\n";
+        //print_r($_SESSION);
+    }
+    private function parsePermRole($perm,$permRole)
+    {
+        $array1=array();
+        $array2=array();
+        // FLATTEN 1
         foreach($perm as $value)
         {
-            array_push($arrToReturn,$value['SKROT']);
+            array_push($array1,$value['SKROT']);
         }
-        return ($arrToReturn);
+        //print_r($array1);
+        // FLATTEN 2
+        foreach($permRole as $value)
+        {
+            if(!in_array($value['SKROT'],$array1))
+            {
+                array_push($array2,$value['SKROT']);
+            }
+        } 
+        //print_r($array2);
+        return (array_merge($array1,$array2));
     }
     private function getDbLink()
     {

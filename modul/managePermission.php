@@ -74,6 +74,7 @@ class managePerm extends initialDb
     {
         //print_r($sendedUsers);
         //print_r($allPermUsers);
+        $changeSessionPerm=false;
         if(!$this->err)
         {
             foreach($sendedUsers as $key=> $userid)
@@ -97,15 +98,71 @@ class managePerm extends initialDb
             foreach($allPermUsers as $suser)
             {
                 //$suser['id']
+                //echo "TO DELETE : ".$suser['id']."\n";
                 $this->deleteUserPerm($suser['id'],$permId);  
+                if($_SESSION['userid']===$suser['id'])
+                {
+                    $changeSessionPerm=$suser['id'];
+                }
             }
             // ADD
             foreach($sendedUsers as $userid)
             {
                 //$userid
+                //echo "TO ADD: ".$userid."\n";
                 $this->addUserPerm($userid,$permId);
+                if($_SESSION['userid']===$userid)
+                {
+                    $changeSessionPerm=$userid;
+                }
+            }
+            if($changeSessionPerm)
+            {
+                //echo "CHANGE USER LOGED PERM".$changeSessionPerm."\n";
+                // GET USER ROLE
+                $this->query('SELECT idRola FROM v_all_user WHERE ID=?',$changeSessionPerm);
+                $idRole=$this->queryReturnValue();
+                $this->setActSessionPermRole($idRole[0]['IdRola'],$changeSessionPerm);
             }
         }
+    }
+    protected function setActSessionPermRole($idRole,$idUser)
+    {
+        // UPDATE CURRENT USER SESSION PERM;
+        //echo "UPDATE PERM ROLE<br/>";
+        $permRole=array();
+        if($idRole)
+        {
+            $this->query('SELECT SKROT FROM v_upr_i_slo_rola_v2 WHERE idRola=?',$idRole);
+            $permRole=$this->queryReturnValue();
+            //print_r($permRole); 
+        }
+        $this->query('SELECT SKROT FROM v_uzyt_i_upr_v2 WHERE idUzytkownik=?',$idUser);
+        $perm=$this->queryReturnValue();
+        $_SESSION['perm']=$this->parsePermRole($perm,$permRole);
+        //echo "SESSION PERM ROLE CHANGED\n";
+        //print_r($_SESSION);
+    }
+    private function parsePermRole($perm,$permRole)
+    {
+        $array1=array();
+        $array2=array();
+        // FLATTEN 1
+        foreach($perm as $value)
+        {
+            array_push($array1,$value['SKROT']);
+        }
+        //print_r($array1);
+        // FLATTEN 2
+        foreach($permRole as $value)
+        {
+            if(!in_array($value['SKROT'],$array1))
+            {
+                array_push($array2,$value['SKROT']);
+            }
+        } 
+        //print_r($array2);
+        return (array_merge($array1,$array2));
     }
     protected function deleteUserPerm($userId,$idPerm)
     {

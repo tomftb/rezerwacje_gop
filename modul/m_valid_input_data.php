@@ -1,6 +1,10 @@
 <?php
+session_start();
+$DOC_ROOT=filter_input(INPUT_SERVER,"DOCUMENT_ROOT");
+require_once($DOC_ROOT."/function/redirectToLoginPage.php");
+require_once($DOC_ROOT.'/function/checkPerm.php');
 //date_default_timezone_set("Europe/Warsaw");
-require($_SERVER['DOCUMENT_ROOT'].'/function/checkFile.php');
+require($DOC_ROOT.'/function/checkFile.php');
 //echo $_GET['username']."\n";
 //die('STOP');
 if(isset($_GET['dataToCheck']) && isset($_GET['type'])) 
@@ -14,10 +18,10 @@ else
 	exit("No data to check or not isset type ");
 	//echo "NOT isset dataToCheck or type<br/>";
 }
-//die('STOP<br/>');
+//die('STOP2<br/>');
 /*############################################################################################## INCLUDE CONFIG DATABASE ##############################################################################################*/
 
-		if(checkFile($_SERVER['DOCUMENT_ROOT'].'/.cfg/config.php')) include($_SERVER['DOCUMENT_ROOT'].'/.cfg/config.php');
+if(checkFile($DOC_ROOT.'/.cfg/config.php')) include($DOC_ROOT.'/.cfg/config.php');
 		
 /*############################################################################################## END INCLUDE CONFIG DATABASE ##########################################################################################*/
 
@@ -75,8 +79,10 @@ else
 {
 	$user_logged_in = false;
 };		
-
-if($user_logged_in)
+//print_r($_SESSION);
+//die('STOP3<br/>');
+if(checkPerm('LOG_INTO_ZGL_PROJ',$_SESSION['perm'],0))  
+//if($user_logged_in)
 {
 		switch ($type):
 		
@@ -128,7 +134,7 @@ if($user_logged_in)
 else
 {
 	//brak uprawnien
-	echo "Brak uprawnien\n";
-};
-// rozdzielic REQUEST !!!
-?>
+        echo '<div class="alert alert-danger row">';
+	echo "[LOG_INTO_ZGL_PROJ] Brak uprawnien\n";
+        echo "</div>";
+}

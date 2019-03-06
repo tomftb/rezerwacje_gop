@@ -221,9 +221,10 @@ function setAllPermissions()
                         {
                             disabled='disabled';
                         }
+                        //console.log(permissionsTab[i]);
                         btnAtr[0][1]='btn '+btnConfig[z][0]+' '+disabled;
                         btnAtr[1][1]=btnConfig[z][1];
-                        btnAtr[2][1]='idData:'+permissionsTab[i].ID;
+                        btnAtr[2][1]='idData:'+permissionsTab[i].ID+':'+permissionsTab[i].Skrót+":"+permissionsTab[i].Nazwa;
                         btnAtr[5][0]=disabled;
                         btn=createHtmlElement('button',btnAtr,null);
                         btn.innerText=btnConfig[z][2];
@@ -319,11 +320,13 @@ function createAdaptedModal(modalType,idData)
     console.log("TASK - "+modalType+"\nID - "+idData);
     console.log(idData);
     clearAdaptedComponent();
+    var idData=splitValue(idData,':');
     var title=document.getElementById('AdaptedTextTitle');
     var bgTitle=document.getElementById("AdaptedBgTitle");
+    document.getElementById("AdaptedBodyContentTitle").innerText=idData[2]+' '+idData[3];
     bgTitle.classList.value="";
     bgTitle.classList.add("modal-header");
-    var idData=splitValue(idData,':');
+    
     console.log(idData);
     switch(modalType)
     {

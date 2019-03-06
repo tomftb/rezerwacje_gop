@@ -8,7 +8,7 @@ class manageUser extends initialDb
     protected $err="";
     protected $valueToReturn=null;
     protected $idUser=null;
-    private $taskPerm= ['perm'=>'','type'=>''];
+    protected $taskPerm= ['perm'=>'','type'=>''];
     const maxPercentPersToProj=100;
     protected $infoArray=array
             (
@@ -94,13 +94,10 @@ class manageUser extends initialDb
         {
             $this->query('SELECT SKROT FROM v_upr_i_slo_rola_v2 WHERE idRola=?',$idRole);
             $permRole=$this->queryReturnValue();
-            print_r($permRole); 
         }
         $this->query('SELECT SKROT FROM v_uzyt_i_upr_v2 WHERE idUzytkownik=?',$idUser);
         $perm=$this->queryReturnValue();
         $_SESSION['perm']=$this->parsePermRole($perm,$permRole);
-        echo "SESSION PERM ROLE CHANGED\n";
-        print_r($_SESSION);
     }
     private function parsePermRole($perm,$permRole)
     {
@@ -111,7 +108,6 @@ class manageUser extends initialDb
         {
             array_push($array1,$value['SKROT']);
         }
-        //print_r($array1);
         // FLATTEN 2
         foreach($permRole as $value)
         {
@@ -120,7 +116,6 @@ class manageUser extends initialDb
                 array_push($array2,$value['SKROT']);
             }
         } 
-        //print_r($array2);
         return (array_merge($array1,$array2));
     }
     protected function editUser($POSTDATA)

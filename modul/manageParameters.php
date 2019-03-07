@@ -175,7 +175,7 @@ class manageParameters extends initialDb
                     {
                         $this->err.="BŁĘDNE HASŁO</br>";
                     }
-                    echo "PARSE PASSWORD\n";
+                    //echo "PARSE PASSWORD\n";
                 }
                 break;
             case 'MAIL_RECV':

@@ -7,10 +7,11 @@ class manageProject extends initialDb
 {
     private $inpArray=array();
     protected $err="";
+    protected $filter='';
     protected $valueToReturn=null;
     protected $idProject=null;
     const maxPercentPersToProj=100;
-    private $taskPerm= ['perm'=>'','type'=>''];
+    protected $taskPerm= ['perm'=>'','type'=>''];
     protected $infoArray=array
             (
                 "numer_umowy"=>array
@@ -650,6 +651,15 @@ class manageProject extends initialDb
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;
     }
+    public function getAllProjectsFilter($filter)
+    {
+        $valueToReturn=array();
+        $this->query('SELECT * FROM v_all_proj WHERE id LIKE (?) OR numer_umowy LIKE (?) OR temat_umowy LIKE (?) OR kier_grupy LIKE (?) OR nadzor LIKE (?) ORDER BY id asc'
+                ,"%".$filter."%,%".$filter."%,%".$filter."%,%".$filter."%,%".$filter."%");
+        array_push($valueToReturn,$this->queryReturnValue());
+        array_push($valueToReturn,$_SESSION['perm']);
+        $this->valueToReturn=$valueToReturn;
+    }
      # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getProjectDocuments($idProject)
     {
@@ -744,6 +754,7 @@ class checkGetData extends manageProject
         array("edit",'','user'),
         array("removeProject",'DEL_PROJ','user'),
         array("getprojects",'LOG_INTO_PROJ','user'),
+        array("getprojectslike",'LOG_INTO_PROJ','user'),
         array("getprojectsmember",'','sys'),
         array("getprojectsleader",'','sys'),
         array("getprojectsmanager",'','sys'),
@@ -775,7 +786,9 @@ class checkGetData extends manageProject
             $this->checkTask();
             if($this->taskPerm['type']==='user')
             {
+                $this->checkLoggedUserPerm('LOG_INTO_APP');
                 $this->checkLoggedUserPerm($this->taskPerm['name']);
+                
             }
             if(!$this->err)
             {
@@ -847,6 +860,10 @@ class checkGetData extends manageProject
             break;
         case "getprojects":
             $this->getAllProjects();
+            break;
+        case "getprojectslike":
+            $this->filter=filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING);
+            $this->getAllProjectsFilter($this->filter);
             break;
         case "getprojectdetails":
             $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);

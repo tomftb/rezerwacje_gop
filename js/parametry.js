@@ -141,7 +141,7 @@ function setAll(dataToSetup)
     console.log('DATA LENGTH: '+dataL);
     console.log('DATA ROW LENGTH: '+rowL);
     // GET AND SETUP HEADER
-    var exceptions=new Array('Typ');
+    var exceptions=new Array('Typ','ModDat','ModUser');
     header.appendChild(setupTabHeader(dataToSetup[0],exceptions));  
     // GET AND SETUP BODY
     for(var i = 0; i < dataL; i++)
@@ -168,17 +168,24 @@ function setupTabHeader(dataToSetup,exceptions)
     } 
     return(tr);
 }
-function setupTabBody(dataToSetup)
+function setupTabBody(dataToSetup,exceptions)
 {
     var td='';
     var idData='';
     var typData='';
+    //var infoLastChange='';
+    var sInfoAtr=new Array(
+            Array('class','text-secondary')
+            )
+    var sInfo="";
     var  tr=createHtmlElement('tr',null,null);
     for(var prop in dataToSetup)
     {
         //console.log(dataToSetup[i]);
         idData=dataToSetup.ID;
         typData=dataToSetup.Typ;
+        sInfo=createHtmlElement('small',sInfoAtr,null);
+        sInfo.innerText='Ostatnia zmiana: '+dataToSetup.ModDat+" Użytkownik: "+dataToSetup.ModUser;
         //typeData=dataToSetup[i].ID;
         if(dataToSetup.hasOwnProperty(prop))
         {
@@ -187,20 +194,19 @@ function setupTabBody(dataToSetup)
             if(prop==='Wartość')
             {
                 td.appendChild(setupTypBodyField(dataToSetup[prop],idData,typData));
+                td.appendChild(sInfo);
                 tr.appendChild(td);
+               
             }
-            else if(prop==='Typ')
-            {
-                   //
-            }
-            else
+            else if(exceptions.indexOf(prop)===-1)
             {
                 td.innerText=dataToSetup[prop]; 
                 tr.appendChild(td);
             }
+            
         }
     } 
-    //console.log(tr);
+    console.log(tr);
     return(tr);
     
 }

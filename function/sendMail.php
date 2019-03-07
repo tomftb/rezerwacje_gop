@@ -27,11 +27,6 @@ if(checkFile("function/PHPMailer-master/src/PHPMailer.php")) include ("function/
 
 $mail = new PHPMailer\PHPMailer\PHPMailer();
 
-if(checkFile(".cfg/email.php")){ include (".cfg/email.php");};
-
-//die('stop email');
-
-
 //GET EMAIL PARAMETERS
 $dbLink->query('SELECT SKROT,WARTOSC FROM parametry WHERE UPPER(SKROT) LIKE (?) ','MAIL_%');
 
@@ -82,11 +77,11 @@ $parseParm=NEW EMAIL();
 $parseParm->setData($dbLink->queryReturnValue());
 $EMAIL=$parseParm->flattenParm();
 /*
- */
+ 
 echo "<pre>";
 print_r($EMAIL);
 echo "</pre>";
- 
+ */
 set_time_limit(10);
 try
 {

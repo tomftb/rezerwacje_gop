@@ -100,6 +100,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
     //SET DATA TO TABLE
     switch(taskToRun)
     {
+        case 'getuserslike':  
         case 'getusers':
             /* 
              * [].id
@@ -117,8 +118,9 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
              * [].mod_user
              * [].mod_user_id
              */
-            usersTab=data[0];
+          
             loggedUserPerm=data[1];
+            usersTab=data[0];
             break;
         case 'getNewUserSlo':
             userPermSlo=data[0];
@@ -236,21 +238,24 @@ function setAllUsers()
             {
                 disabled='disabled';
             }
-            btnAtr[0][1]='btn '+btnConfig[z][0]+' '+disabled;
+            btnAtr[0][1]='btn position-relative '+btnConfig[z][0]+' '+disabled;
             btnAtr[1][1]=btnConfig[z][1];
             btnAtr[2][1]='idUser:'+usersTab[i].ID;
             btnAtr[5][0]=disabled;
             btn=createHtmlElement('button',btnAtr,null);
             btn.innerText=btnConfig[z][2];
             btn.onclick=function(){ createAdaptedModal(this.name,this.id);};
+            
             divBtnGroup.appendChild(btn);
             disabled='no-disabled';
         }
         tdOption=createHtmlElement('td',null,null);
+        
         tdOption.appendChild(divBtnGroup);
         tr.appendChild(tdOption);
         allUsersData.appendChild(tr);
     };
+    console.log(allUsersData);
 }
 function createHtmlElement(htmlTag,elementAttribute,elementStyle)
 {
@@ -1024,7 +1029,7 @@ function createCheckBoxList(data,status)
         {
             var divErrAtr=new Array(
                 Array('class','alert alert-danger ml-3 col-sm-auto')    
-                )
+                );
                 var divErr=createHtmlElement('div',divErrAtr,null);
                 divErr.innerText="[SHOW_PERM_USER]Brak uprawnienia";
             

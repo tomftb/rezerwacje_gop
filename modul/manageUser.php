@@ -8,6 +8,7 @@ class manageUser extends initialDb
     protected $err="";
     protected $valueToReturn=null;
     protected $idUser=null;
+    protected $filter=null;
     protected $taskPerm= ['perm'=>'','type'=>''];
     const maxPercentPersToProj=100;
     protected $infoArray=array
@@ -362,6 +363,15 @@ class manageUser extends initialDb
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;
     }
+    public function getUsersLike($wsku,$filter)
+    {
+        $valueToReturn=array();
+        $this->query('SELECT ID,Imie,Nazwisko,Login,Email,TypKonta,Rola FROM v_all_user WHERE wskU=? AND (ID LIKE (?) OR Imie LIKE (?) OR Nazwisko LIKE (?) OR Login LIKE (?) OR Email LIKE (?) OR TypKonta LIKE (?) OR Rola LIKE (?)) ORDER BY id asc'
+                ,"${wsku},%".$filter."%,%".$filter."%,%".$filter."%,%".$filter."%,%".$filter."%,%".$filter."%,%".$filter."%");
+        array_push($valueToReturn,$this->queryReturnValue());
+        array_push($valueToReturn,$_SESSION['perm']);
+        $this->valueToReturn=$valueToReturn;
+    }
     # RETURN ALL NOT DELETED DICTIONARY and other FROM DB
     public function getSlo($tableToSelect,$order='ID')
     {
@@ -493,6 +503,7 @@ class checkGetData extends manageUser
     private $urlGetData=array();
     private $avaliableTask=array(
         array("getusers",'LOG_INTO_UZYT','user'),
+        array("getuserslike",'LOG_INTO_UZYT','user'),
         array("getNewUserSlo",'ADD_USER','user'),
         array("getPermSlo",'','user'),
         array("cUser",'ADD_USER','user'),
@@ -586,6 +597,10 @@ class checkGetData extends manageUser
         
         case "getusers" : // ENUM 0,1
             $this->getUsers('0');
+            break;
+        case "getuserslike":
+            $this->filter=filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING);
+            $this->getUsersLike('0',$this->filter);
             break;
         case "getNewUserSlo":
             $this->getNewUserSlo();

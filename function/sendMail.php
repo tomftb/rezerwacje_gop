@@ -81,10 +81,12 @@ class EMAIL
 $parseParm=NEW EMAIL();
 $parseParm->setData($dbLink->queryReturnValue());
 $EMAIL=$parseParm->flattenParm();
-/* */
+/*
+ */
 echo "<pre>";
 print_r($EMAIL);
 echo "</pre>";
+ 
 set_time_limit(10);
 try
 {
@@ -93,17 +95,25 @@ try
     $mail->Timeout  =   5;
     $mail->Host = $EMAIL['MAIL_SRV'];
     $mail->CharSet = $EMAIL['MAIL_CHARSET'];
-    $mail->Password = $EMAIL['MAIL_PASS'];
+    
     $mail->SMTPKeepAlive = true;
-    if($EMAIL['MAIL_PASS']!='')
-    {
-        $mail->SMTPAuth = true; 
-    }
-    $mail->Port = $EMAIL['MAIL_PORT_OUT']; 
     $from=explode('@',$EMAIL['MAIL_USER']);
     //$mail->setFrom('rezerwacje-gop@geofizyka.pl', 'rezerwacje-gop');
     $mail->setFrom($EMAIL['MAIL_USER'], $from[0]);
     $recipient=explode(';',$EMAIL['MAIL_RECIPIENT']);
+    if($EMAIL['MAIL_SECURE']!='')
+    {
+        $mail->SMTPSecure = 'tls'; 
+    }
+    
+    if($EMAIL['MAIL_PASS']!='')
+    {
+        $mail->Username = $from[0];
+        $mail->Password = $EMAIL['MAIL_PASS'];
+        $mail->SMTPAuth = true; 
+    }
+    $mail->Port = $EMAIL['MAIL_PORT_OUT']; 
+
     //print_r($recipient);
     if($EMAIL['MAIL_RECV'])
     {

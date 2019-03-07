@@ -27,6 +27,7 @@ if(checkPerm('LOG_INTO_ZGL_PROJ',$_SESSION['perm'],0))
             }
             else
             {
+                /**/
                 // INSERT TO DATABASE
                 $_POST["nazwaProjektu"]=trim($_POST["nazwaProjektu"]);
                 $curretDateTime=date('Y-m-d H:i:s');
@@ -44,10 +45,10 @@ if(checkPerm('LOG_INTO_ZGL_PROJ',$_SESSION['perm'],0))
                     VALUES
                     (?,?,?,?,?,?,?,?,?)'
                      ,$_POST["nazwaProjektu"].','.$_POST["rozmiarPlik"].','.$_POST['rozmiarJednostka'].','.$_SESSION['username'].','.$_SESSION["nazwiskoImie"].','.$_SESSION["mail"].','.$_POST["przypisaniPracownicy"].','.$curretDateTime.','.$_SERVER['HTTP_HOST']);  
-
+             
             //SEND E-MAIL
             if(checkFile("function/sendMail.php")) include("function/sendMail.php");
-
+           
             foreach($_POST as $value)
             {
                 UNSET($_POST[$value]);

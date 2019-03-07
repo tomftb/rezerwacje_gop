@@ -52,10 +52,47 @@ else
                                 if(checkFile($DOC_ROOT.'/view/vPracownicy.php')) {include($DOC_ROOT.'/view/vPracownicy.php');}
                             break;
                         // UZYTKOWNICY [LOG_INTO_UZYT]
-                        case 5:
+                        case 6:
                                 checkPerm('LOG_INTO_UZYT',$_SESSION['perm'],1);
                                 if(checkFile($DOC_ROOT.'/view/vUzytkownicy.php')) {include($DOC_ROOT.'/view/vUzytkownicy.php');}
                             break;
+                        // UPRAWNIENIA [LOG_INTO_UPR]
+                        case 7:
+                                checkPerm('LOG_INTO_UPR',$_SESSION['perm'],1);
+                                if(checkFile($DOC_ROOT.'/view/vUprawnienia.php')) {include($DOC_ROOT.'/view/vUprawnienia.php');}
+                                if(checkFile($DOC_ROOT.'/js/uprawnienia.js'))
+                                {
+                                    echo '<script type="text/javascript" src="'.$URL.'/js/uprawnienia.js"></script>';
+                                }
+                            break;
+                        // ROLE [LOG_INTO_ROLE]
+                        case 8:
+                                checkPerm('LOG_INTO_ROLE',$_SESSION['perm'],1);
+                                if(checkFile($DOC_ROOT.'/view/vRole.php')) {include($DOC_ROOT.'/view/vRole.php');}
+                                if(checkFile($DOC_ROOT.'/js/role.js'))
+                                {
+                                    echo '<script type="text/javascript" src="'.$URL.'/js/role.js"></script>';
+                                }
+                            break;
+                        // OPCJE [LOG_INTO_OPCJ]
+                        case 9:
+                                checkPerm('LOG_INTO_OPCJ',$_SESSION['perm'],1);
+                                if(checkFile($DOC_ROOT.'/view/vOpcje.php')) {include($DOC_ROOT.'/view/vOpcje.php');}
+                                if(checkFile($DOC_ROOT.'/js/opcje.js'))
+                                {
+                                    echo '<script type="text/javascript" src="'.$URL.'/js/opcje.js"></script>';
+                                }
+                            break;
+                        // PARAMETRY [LOG_INTO_PARM]
+                        case 10:
+                                checkPerm('LOG_INTO_PARM',$_SESSION['perm'],1);
+                                if(checkFile($DOC_ROOT.'/view/vParametry.php')) {include($DOC_ROOT.'/view/vParametry.php');}
+                                if(checkFile($DOC_ROOT.'/js/parametry.js'))
+                                {
+                                    echo '<script type="text/javascript" src="'.$URL.'/js/parametry.js"></script>';
+                                }
+                            break;
 	endswitch;
+       
         if(checkFile($DOC_ROOT.'/view/footer.php')) {include ($DOC_ROOT.'/view/footer.php');} 
 }

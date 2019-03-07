@@ -2,7 +2,7 @@
 <?php require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/modul/mValidUrl.php");?>
 <script type="text/javascript" src="<?php echo $URL;?>/js/projekty.js"></script>
 <body>
-<div class="w-100 " style="margin-top:-55px;position:fixed;">
+<div class="w-100 " style="margin-top:-55px;position:fixed; border:0px solid green; float:right; z-index:997;">
     <div class="row">
         <div class=" col-sm-2" >
             <div class="btn pull-left mt-0" > 
@@ -13,6 +13,14 @@
             <h2 class="text-center mb-3 mt-1 text-info">Projekty :</h2>
         </div>
         <div class=" col-sm-2" >
+            <div class="row ">
+                <div class="sm-col-8">
+                    <h5 class="text-right mt-2 text-secondary" >Szukaj : </h5>
+                </div>
+                <div class="sm-col-4">
+                    <input class="form-control mt-1" onchange="getAjaxData('getprojectslike','','','&filter='+this.value,null)"/>
+                </div>
+            </div>
         </div>
     </div>
 </div>

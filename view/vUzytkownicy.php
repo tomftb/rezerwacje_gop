@@ -2,42 +2,52 @@
 <?php require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/modul/mValidUrl.php");?>
 <script type="text/javascript" src="<?php echo $URL;?>/js/uzytkownicy.js"></script>
 <body>
-<div class="w-100 " style="margin-top:-55px;position:fixed;">
+<div class="w-100 " style="margin-top:-55px;position:fixed; border:0px solid green; float:right; z-index:997;">
     <div class="row">
-        <div class=" col-sm-2" >
+        <div class="col-sm-2" >
             <div class="btn pull-left mt-0" > 
                 <button id='addNewUserButton' class="btn btn-info pull-left mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#AdaptedModal" onclick="createAdaptedModal('cUser',null)">Dodaj użytkownika</button>
             </div> 
+            
         </div>
         <div class=" col-sm-8" >
             <h2 class="text-center mb-3 mt-1 text-info">Użytkownicy :</h2>
         </div>
-        <div class=" col-sm-2" >
+            
+        <div class=" col-sm-2 " >
+            <div class="row ">
+                <div class="sm-col-8">
+                    <h5 class="text-right mt-2 text-secondary" >Szukaj : </h5>
+                </div>
+                <div class="sm-col-4">
+                    <input class="form-control mt-1" onchange="getAjaxData('getuserslike','&filter='+this.value,'sUsers',null)"/>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-<div class="w-100 " style="margin-top:150px;" >
-<div class="mr-3 ml-3">
-    <div>
-        
-        <table class="table table-striped table-condensed">
-          <thead class="thead-dark">
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Imię</th>
-              <th scope="col">Nazwisko</th>
-              <th scope="col">Login</th>
-              <th scope="col">Email</th>
-              <th scope="col">Typ</th>
-              <th scope="col">Rola</th>
-              <th scope="col">Opcje</th>
-            </tr>
-          </thead>
-          <tbody id="allUsersData">
-          </tbody>
-        </table>
+<div class="w-100 position-static" style="margin-top:150px; " >
+    <div class="mr-3 ml-3">
+        <div>
+
+            <table class="table table-striped table-condensed">
+              <thead class="thead-dark">
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Imię</th>
+                  <th scope="col">Nazwisko</th>
+                  <th scope="col">Login</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Typ</th>
+                  <th scope="col">Rola</th>
+                  <th scope="col">Opcje</th>
+                </tr>
+              </thead>
+              <tbody id="allUsersData">
+              </tbody>
+            </table>
+        </div>
     </div>
-</div>
 </div>
 <!-- ADAPTED MODAL PROJECT -->
 <div class="modal fade" id="AdaptedModal" tabindex="-1" role="dialog" aria-labelledby="AdaptedModalContent" aria-hidden="true">

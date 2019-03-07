@@ -68,7 +68,7 @@ function parseAjaxResponse(response,task,functionStart,idRecord)
         ajaxData = JSON.parse(response);
         if(ajaxData[0][0]==='0')
         {
-            console.log(ajaxData[1]);
+            //console.log(ajaxData[1]);
             manageTaskAfterAjaxGet(task,ajaxData[1],functionStart,idRecord);
         }
         else
@@ -152,8 +152,8 @@ function setAll(dataToSetup)
 function setupTabHeader(dataToSetup,exceptions)
 {
     console.log('---setupTabHeader()---');
-    console.log(dataToSetup);
-    console.log(exceptions);
+    //console.log(dataToSetup);
+    //console.log(exceptions);
     var tr=createHtmlElement('tr',null,null);
     var th="";
     for(var prop in dataToSetup)
@@ -200,7 +200,7 @@ function setupTabBody(dataToSetup)
             }
         }
     } 
-    console.log(tr);
+    //console.log(tr);
     return(tr);
     
 }
@@ -252,7 +252,7 @@ function setupTypBodyField(dataToSetup,idData,typData)
             inputAttribute[0][1]='checkbox';
             if(dataToSetup>0)
             {
-                console.log('ckbox: '+dataToSetup);
+                //console.log('ckbox: '+dataToSetup);
                 inputAttribute[8][0]='checked';
                 labelInfo='TAK';
             };
@@ -282,7 +282,7 @@ function setupTypBodyField(dataToSetup,idData,typData)
             elem.onchange=function(){ changValue(this.value,idData);};
             break;
         case 'p':
-            inputAttribute[4][1]='';
+            inputAttribute[4][1]=dataToSetup;
             inputAttribute[0][1]='password';
             elem=createHtmlElement('input',inputAttribute,null);
             elem.onchange=function(){ changValue(this.value,idData);};

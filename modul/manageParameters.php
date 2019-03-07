@@ -96,7 +96,8 @@ class manageParameters extends initialDb
     protected function updateParm($uData)
     {
         if($this->err) { exit(0);}
-        $this->query('UPDATE parametry SET WARTOSC=? WHERE ID=?',$uData['value'].','.$uData['id']);
+        //print_r($_SESSION);
+        $this->query('UPDATE parametry SET WARTOSC=?,MOD_USER=?,MOD_USER_ID=? WHERE ID=?',$uData['value'].','.$_SESSION['username'].','.$_SESSION['userid'].','.$uData['id']);
     }
     public function getParmSkrt($id)
     {

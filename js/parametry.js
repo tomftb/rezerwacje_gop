@@ -26,7 +26,12 @@ var inputAttribute= new Array(
         Array('no-checked','')
         );
 var inputStyle=new Array();
-
+var textAreaAtr=new Array(
+            Array('class','form-control'),
+            Array('no-readOnly','true'),
+            Array('no-disabled','')
+            );
+    
 function getAjaxData(task,taskAddon,functionStart,idRecord)
 {
     console.log('---getAjaxData()---');
@@ -109,7 +114,15 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
     switch(functionStart)
     {
         case 'sParm':
-                setAll(data[0]);
+                console.log('sParm');
+                if(loggedUserPerm.indexOf('LOG_INTO_PARM')!==-1)
+                {
+                    setAll(data[0]);
+                }
+                else
+                {
+                    setOverAllErrDiv('[SHOW_PARM] Brak uprawnienia',true);
+                }
             break;
         default:
             break;
@@ -191,9 +204,29 @@ function setupTabBody(dataToSetup)
     return(tr);
     
 }
+function setFieldsEnable()
+{
+    inputAttribute[6][0]='no-readOnly';
+    inputAttribute[7][0]='no-disabled';
+    textAreaAtr[1][0]='no-readOnly';
+    textAreaAtr[2][0]='no-disabled'; 
+}
+function setFieldsDisable()
+{
+    inputAttribute[6][0]='readOnly';
+    inputAttribute[7][0]='disabled';
+    textAreaAtr[1][0]='readOnly';
+    textAreaAtr[2][0]='disabled';
+}
 function setupTypBodyField(dataToSetup,idData,typData)
 {
+    
     //PARSE TYP OF FIELD
+    setFieldsEnable();
+    if(loggedUserPerm.indexOf('EDIT_PARM')===-1)
+    {
+        setFieldsDisable();
+    }
     inputAttribute[0][1]='text';
     inputAttribute[1][1]='form-control mb-1';
     inputAttribute[2][1]=idData;
@@ -201,9 +234,7 @@ function setupTypBodyField(dataToSetup,idData,typData)
     inputAttribute[4][1]=dataToSetup;
     inputAttribute[8][0]='no-checked';
     var labelInfo='NIE';
-    var textAreaAtr=new Array(
-            Array('class','form-control')
-            );
+    
     var elem=createHtmlElement('input',inputAttribute,null);
     switch(typData)
     {
@@ -474,7 +505,7 @@ function setNewDataState(infoAlert)
 }
 function setOverAllErrDiv(data,action)
 {
-    console.log('---setOverAllErrDiv()---');
+    console.log('---setOverAllErrDiv()---\n'+data);
     var errDiv=document.getElementById('errDiv-Adapted-overall');
     if(action)
     {

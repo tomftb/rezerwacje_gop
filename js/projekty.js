@@ -378,6 +378,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
     //console.log('data - '+data+'\nid - '+id+'\nname - '+name);
     switch(taskToRun)
     {
+        case 'getprojectslike':
         case 'getprojects':
             // ADD PERM
             loggedUserPerm=data[1];
@@ -494,7 +495,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
             alert(data);
             break;
         default:
-            alert('[manageTask]ERROR - wrong task');
+            alert('[manageTaskAfterAjaxGet()]ERROR - wrong task');
             break;
     }
 }

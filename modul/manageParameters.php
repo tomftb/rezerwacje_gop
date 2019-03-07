@@ -38,7 +38,7 @@ class manageParameters extends initialDb
     public function getAllParm()
     {
         $valueToReturn=array();
-        $this->query('SELECT ID,Skrót,Nazwa,Opis,Wartość,Typ FROM v_parm WHERE 1=? ORDER BY id asc',1);
+        $this->query('SELECT ID,Skrót,Nazwa,Opis,Wartość,Typ,ModDat,ModUser FROM v_parm_v2 WHERE 1=? ORDER BY id asc',1);
         array_push($valueToReturn,$this->queryReturnValue());
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;
@@ -96,8 +96,9 @@ class manageParameters extends initialDb
     protected function updateParm($uData)
     {
         if($this->err) { exit(0);}
+        $curretDateTime=date('Y-m-d H:i:s');
         //print_r($_SESSION);
-        $this->query('UPDATE parametry SET WARTOSC=?,MOD_USER=?,MOD_USER_ID=? WHERE ID=?',$uData['value'].','.$_SESSION['username'].','.$_SESSION['userid'].','.$uData['id']);
+        $this->query('UPDATE parametry SET WARTOSC=?,MOD_DAT=?,MOD_USER=?,MOD_USER_ID=? WHERE ID=?',$uData['value'].','.$curretDateTime.','.$_SESSION['username'].','.$_SESSION['userid'].','.$uData['id']);
     }
     public function getParmSkrt($id)
     {

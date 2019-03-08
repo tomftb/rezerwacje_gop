@@ -6,6 +6,7 @@ class manageParameters extends initialDb
 {
     protected $idRole=0;
     private $inpArray=array();
+    protected $filter='';
     protected $err="";
     protected $valueToReturn=null;
     protected $taskPerm= ['perm'=>'','type'=>''];
@@ -39,6 +40,16 @@ class manageParameters extends initialDb
     {
         $valueToReturn=array();
         $this->query('SELECT ID,Skrót,Nazwa,Opis,Wartość,Typ,ModDat,ModUser FROM v_parm_v2 WHERE 1=? ORDER BY id asc',1);
+        array_push($valueToReturn,$this->queryReturnValue());
+        array_push($valueToReturn,$_SESSION['perm']);
+        $this->valueToReturn=$valueToReturn;
+    }
+    public function getAllParmLike($filter)
+    {
+        $filter="%${filter}%";
+        $valueToReturn=array();
+        $this->query('SELECT ID,Skrót,Nazwa,Opis,Wartość,Typ,ModDat,ModUser FROM v_parm_v2 WHERE ID LIKE (?) OR Skrót LIKE (?) OR Nazwa LIKE (?) OR Opis LIKE (?) OR Wartość LIKE (?) ORDER BY ID asc'
+                ,$filter.",".$filter.",".$filter.",".$filter.",".$filter);
         array_push($valueToReturn,$this->queryReturnValue());
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;
@@ -211,6 +222,7 @@ class checkGetData extends manageParameters
     private $urlGetData=array();
     private $avaliableTask=array(
         array("getAllParm",'LOG_INTO_PARM','user'),
+        array("getAllParmLike",'LOG_INTO_PARM','user'),
         array('setParm','EDIT_PARM','user')
     );
     function __construct()
@@ -295,6 +307,10 @@ class checkGetData extends manageParameters
         switch($this->urlGetData['task']):  
         case "getAllParm" : // ENUM 0,1
             $this->getAllParm();
+            break;
+        case "getAllParmLike" : // ENUM 0,1
+            $this->filter=filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING);
+            $this->getAllParmLike($this->filter);
             break;
         case 'setParm':
             $this->setParm($_POST);

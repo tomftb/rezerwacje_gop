@@ -50,11 +50,19 @@ else
                         case 4:
                                 checkPerm('LOG_INTO_PRAC',$_SESSION['perm'],1);
                                 if(checkFile($DOC_ROOT.'/view/vPracownicy.php')) {include($DOC_ROOT.'/view/vPracownicy.php');}
+                                if(checkFile($DOC_ROOT.'/js/pracownicy.js'))
+                                {
+                                    echo '<script type="text/javascript" src="'.$URL.'/js/pracownicy.js"></script>';
+                                };
                             break;
                         // UZYTKOWNICY [LOG_INTO_UZYT]
                         case 6:
                                 checkPerm('LOG_INTO_UZYT',$_SESSION['perm'],1);
                                 if(checkFile($DOC_ROOT.'/view/vUzytkownicy.php')) {include($DOC_ROOT.'/view/vUzytkownicy.php');}
+                                if(checkFile($DOC_ROOT.'/js/uzytkownicy.js'))
+                                {
+                                    echo '<script type="text/javascript" src="'.$URL.'/js/uzytkownicy.js"></script>';
+                                }
                             break;
                         // UPRAWNIENIA [LOG_INTO_UPR]
                         case 7:

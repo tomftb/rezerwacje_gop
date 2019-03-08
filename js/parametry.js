@@ -90,7 +90,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
     console.log('---manageTaskAfterAjaxGet()---');
     switch(taskToRun)
     {
-
+        case 'getAllParmLike':
         case 'getAllParm':
             /* 
              * [].ID

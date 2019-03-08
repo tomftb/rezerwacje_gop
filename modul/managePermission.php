@@ -6,6 +6,7 @@ class managePerm extends initialDb
 {
     private $inpArray=array();
     protected $err="";
+    protected $filter="";
     protected $valueToReturn=null;
     protected $taskPerm= ['perm'=>'','type'=>''];
     protected $infoArray=array
@@ -264,6 +265,16 @@ class managePerm extends initialDb
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;
     }
+    public function getAllPermLike($filter)
+    {
+        $filter="%${filter}%";
+        $valueToReturn=array();
+        $this->query('SELECT * FROM v_upr WHERE ID LIKE (?) OR Skrót LIKE (?) OR Nazwa LIKE (?) OR Opis LIKE (?) ORDER BY ID asc'
+                ,$filter.",".$filter.",".$filter.",".$filter);
+        array_push($valueToReturn,$this->queryReturnValue());
+        array_push($valueToReturn,$_SESSION['perm']);
+        $this->valueToReturn=$valueToReturn;
+    }
     # RETURN ALL NOT DELETED DICTIONARY and other FROM DB
     public function getSlo($tableToSelect,$order='ID')
     {
@@ -309,6 +320,7 @@ class checkGetData extends managePerm
     private $urlGetData=array();
     private $avaliableTask=array(
         array("getAllPerm",'LOG_INTO_UPR','user'),
+        array("getAllPermLike",'LOG_INTO_UPR','user'),
         array("getUsersWithPerm",'SHOW_PERM_USER','user'),
         array('editPermUsers','EDIT_PERM_USER','user')
     );
@@ -396,7 +408,10 @@ class checkGetData extends managePerm
         case "getAllPerm" : // ENUM 0,1
             $this->getAllPerm();
             break;
- 
+        case "getAllPermLike":
+            $this->filter=filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING);
+            $this->getAllPermLike($this->filter);
+            break;
         case "getUsersWithPerm" :
             $this->idData=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
             $this->getUsersWithPerm($this->idData);

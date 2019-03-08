@@ -45,6 +45,10 @@ else
                         case 3:
                                 checkPerm('LOG_INTO_PROJ',$_SESSION['perm'],1);
                                 if(checkFile($DOC_ROOT.'/view/vProjekty.php')) {include($DOC_ROOT.'/view/vProjekty.php');}
+                                if(checkFile($DOC_ROOT.'/js/projekty.js'))
+                                {
+                                    echo '<script type="text/javascript" src="'.$URL.'/js/projekty.js"></script>';
+                                };
                             break;
                         // PRACOWNICY [LOG_INTO_PRAC]
                         case 4:

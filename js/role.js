@@ -140,6 +140,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
             roleTab=data[0];
             permTab=data[1];
             break;
+        case 'getAllRoleLike':
         case 'getAllRole':
             /* 
              * [].ID

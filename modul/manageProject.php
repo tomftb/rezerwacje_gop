@@ -653,9 +653,10 @@ class manageProject extends initialDb
     }
     public function getAllProjectsFilter($filter)
     {
+        $filter="%${filter}%";
         $valueToReturn=array();
-        $this->query('SELECT * FROM v_all_proj WHERE id LIKE (?) OR numer_umowy LIKE (?) OR temat_umowy LIKE (?) OR kier_grupy LIKE (?) OR nadzor LIKE (?) ORDER BY id asc'
-                ,"%".$filter."%,%".$filter."%,%".$filter."%,%".$filter."%,%".$filter."%");
+        $this->query('SELECT * FROM v_all_proj WHERE id LIKE (?) OR numer_umowy LIKE (?) OR temat_umowy LIKE (?) OR kier_grupy LIKE (?) OR nadzor LIKE (?) OR term_realizacji LIKE (?) OR harm_data LIKE (?) OR koniec_proj LIKE (?) ORDER BY id asc'
+                ,$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter);
         array_push($valueToReturn,$this->queryReturnValue());
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;

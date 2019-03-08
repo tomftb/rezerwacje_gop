@@ -120,6 +120,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
     //SET DATA TO TABLE
     switch(taskToRun)
     {
+        case 'getAllPermLike':
         case 'getAllPerm':
             /* 
              * [].Skrót
@@ -167,7 +168,9 @@ function setAllPermissions()
     var dataL=permissionsTab.length;
     var rowL=Object.keys(permissionsTab).length;
     var allUsersData=document.getElementById("allDataBody");
+    var header=document.getElementById("allDataHeader");
     removeHtmlChilds(allUsersData);
+    removeHtmlChilds(header);
     console.log('DATA LENGTH: '+dataL);
     console.log('DATA ROW LENGTH: '+rowL);
     var divBtnGroupAtr=new Array(
@@ -203,7 +206,7 @@ function setAllPermissions()
                 tr.appendChild(th);
             }
         }
-    document.getElementById('allDataHeader').appendChild(tr);  
+    header.appendChild(tr);  
     for(var i = 0; i < dataL; i++)
     {    
         tr=createHtmlElement('tr',null,null);

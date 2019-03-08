@@ -8,6 +8,7 @@ class manageRole extends initialDb
     private $inpArray=array();
     protected $err="";
     protected $valueToReturn=null;
+    protected $filter='';
     protected $taskPerm= ['perm'=>'','type'=>''];
     protected $infoArray=array
             (
@@ -212,6 +213,16 @@ class manageRole extends initialDb
     {
         $valueToReturn=array();
         $this->query('SELECT ID,Nazwa,Opcje FROM v_slo_rola_all WHERE WSK_U=? ORDER BY ID asc',$wsku);
+        array_push($valueToReturn,$this->queryReturnValue());
+        array_push($valueToReturn,$_SESSION['perm']);
+        $this->valueToReturn=$valueToReturn;
+    }
+    public function getAllRoleLike($wsku,$filter)
+    {
+        $filter="%${filter}%";
+        $valueToReturn=array();
+        $this->query('SELECT ID,Nazwa,Opcje FROM v_slo_rola_all WHERE WSK_U=? AND (ID LIKE (?) OR Nazwa LIKE (?)) ORDER BY ID asc'
+                ,$wsku.",".$filter.",".$filter);
         array_push($valueToReturn,$this->queryReturnValue());
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;
@@ -471,6 +482,7 @@ class checkGetData extends manageRole
     private $urlGetData=array();
     private $avaliableTask=array(
         array("getAllRole",'LOG_INTO_ROLE','user'),
+        array("getAllRoleLike",'LOG_INTO_ROLE','user'),
         array("getNewRoleSlo",'ADD_ROLE','user'),
         array("cRole",'ADD_ROLE','user'),
         array("getUsersWithPerm",'SHOW_PERM_USER','user'),
@@ -563,6 +575,10 @@ class checkGetData extends manageRole
            
         case "getAllRole" : // ENUM 0,1
             $this->getAllRole('0');
+            break;
+        case "getAllRoleLike":
+            $this->filter=filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING);
+            $this->getAllRoleLike('0',$this->filter);
             break;
         case 'getNewRoleSlo':
             $this->getNewRoleSlo();

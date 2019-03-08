@@ -1,7 +1,7 @@
 <?php require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/redirectToLoginPage.php"); ?>
 <?php require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/modul/mValidUrl.php");?>
 <body>
-<div class="w-100 " style="margin-top:-55px;position:fixed;">
+<div class="w-100 " style="margin-top:-55px;position:fixed; z-index:996;">
     <div class="row">
         <div class=" col-sm-2" >
         </div>
@@ -9,6 +9,14 @@
             <h2 class="text-center mb-3 mt-1 text-info">Uprawnienia :</h2>
         </div>
         <div class=" col-sm-2" >
+            <div class="row ">
+                <div class="sm-col-8">
+                    <h5 class="text-right mt-2 text-secondary" >Szukaj : </h5>
+                </div>
+                <div class="sm-col-4">
+                    <input class="form-control mt-1" onchange="getAjaxData('getAllPermLike','&filter='+this.value,'sPermissions',null)"/>
+                </div>
+            </div>
         </div>
     </div>
 </div>

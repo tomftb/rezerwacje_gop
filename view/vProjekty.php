@@ -1,8 +1,7 @@
 <?php require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/redirectToLoginPage.php"); ?>
 <?php require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/modul/mValidUrl.php");?>
-<script type="text/javascript" src="<?php echo $URL;?>/js/projekty.js"></script>
 <body>
-<div class="w-100 " style="margin-top:-55px;position:fixed; border:0px solid green; float:right; z-index:997;">
+<div class="w-100 " style="margin-top:-55px; position:fixed; z-index:996;">
     <div class="row">
         <div class=" col-sm-2" >
             <div class="btn pull-left mt-0" > 
@@ -143,6 +142,3 @@
 </div>    
 <!-- END LEGEND -->
 <div id="div-inputPdf7a" style="display:block; border:0px solid black;"></div>
-<script>
-window.onload=getAjaxData('getProjectDefaultValues','','','','');
-</script>

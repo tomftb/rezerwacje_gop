@@ -9,7 +9,8 @@ class manageProject extends initialDb
     protected $err="";
     protected $valueToReturn=null;
     protected $idEmployee=null;
-    private $taskPerm= ['perm'=>'','type'=>''];
+    protected $filter='';
+    protected $taskPerm= ['perm'=>'','type'=>''];
     const maxPercentPersToProj=100;
     protected $infoArray=array
             (
@@ -339,6 +340,16 @@ class manageProject extends initialDb
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;
     }
+    public function getEmployeesLike($filter)
+    {
+        $filter="%${filter}%";
+        $valueToReturn=array();
+        $this->query('SELECT * FROM v_all_prac WHERE ID LIKE (?) OR ImieNazwisko LIKE (?) OR Stanowisko LIKE (?) OR Procent LIKE (?) ORDER BY ID asc'
+                ,$filter.",".$filter.",".$filter.",".$filter);
+        array_push($valueToReturn,$this->queryReturnValue());
+        array_push($valueToReturn,$_SESSION['perm']);
+        $this->valueToReturn=$valueToReturn;
+    }
      # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getEmployeeProjects($idEmployee)
     {
@@ -425,6 +436,7 @@ class checkGetData extends manageProject
     private $urlGetData=array();
     private $avaliableTask=array(
         array("getemployees",'LOG_INTO_PRAC','user'),
+        array("getemployeeslike","LOG_INTO_PRAC","user"),
         array("getemployeesspecslo",'','sys'),
         array("cEmployee",'','user'),
         array("getEmployeeProj",'SHOW_PROJ_EMPL','user'),
@@ -446,6 +458,7 @@ class checkGetData extends manageProject
             $this->checkTask();
             if($this->taskPerm['type']==='user')
             {
+                $this->checkLoggedUserPerm('LOG_INTO_APP');
                 $this->checkLoggedUserPerm($this->taskPerm['name']);
             }
             if(!$this->err)
@@ -515,7 +528,11 @@ class checkGetData extends manageProject
         switch($this->urlGetData['task']):
         
         case "getemployees" :
-            $this->getEmployees($_POST);
+            $this->getEmployees();
+            break;
+        case "getemployeeslike":
+            $this->filter=filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING);
+            $this->getEmployeesLike($this->filter);
             break;
         case "getemployeesspecslo" :
             $this->getSlo('v_slo_u_spec');

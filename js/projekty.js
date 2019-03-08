@@ -382,8 +382,8 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
         case 'getprojects':
             // ADD PERM
             loggedUserPerm=data[1];
-            console.log(loggedUserPerm);
-            console.log(loggedUserPerm[1]);
+            //console.log(loggedUserPerm);
+            //console.log(loggedUserPerm[1]);
             setButtonDisplay(document.getElementById('addNewProjectButton'),'ADD_PROJ',loggedUserPerm);
             setAllProjects(data[0]);
             break;
@@ -2748,6 +2748,7 @@ function editForm(elementWhereChange,taskToRun,editButton,formName)
     };
     console.log(elementWhereChange);
 }
+getAjaxData('getProjectDefaultValues','','','','');
 getAjaxData('getprojects','','','','');
 getAjaxData('getprojectgltech','','nadzor','','');
 getAjaxData('getprojectglkier','','kier_grupy','','');

@@ -58,6 +58,13 @@ function parseAjaxResponse(response,task,functionStart,idRecord)
     var ajaxData = new Array();
     try
     {
+     }
+    catch(err)
+    {
+        //document.getElementById("demo").innerHTML = err.message;
+        console.log('NOT A JSON FILE:\nERROR: '+err);
+        console.log(response);
+    }   
         ajaxData = JSON.parse(response);
         if(ajaxData[0][0]==='0')
         {
@@ -68,13 +75,7 @@ function parseAjaxResponse(response,task,functionStart,idRecord)
         {
             alert("[getAJaxData()]ERROR: "+ajaxData[1]);
         };
-    }
-    catch(err)
-    {
-        //document.getElementById("demo").innerHTML = err.message;
-        console.log('NOT A JSON FILE:\nERROR: '+err);
-        console.log(response);
-    }
+    
 }
 function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
 {
@@ -83,6 +84,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
     //SET DATA TO TABLE
     switch(taskToRun)
     {
+        case 'getemployeeslike':
         case 'getemployees':
             /* 
              * [].ID
@@ -150,11 +152,11 @@ function setAllEmployees(data)
 {
     console.log('---setAllEmployees()---');
     var dataL=data.length;
-    var rowL=Object.keys(data[0]).length;
+    
     var docElement=document.getElementById("allEmployeesData");
     removeHtmlChilds(docElement);
     console.log('DATA LENGTH: '+dataL);
-    console.log('DATA ROW LENGTH: '+rowL);
+    
     var divBtnGroupAtr=new Array(
                 Array('class','btn-group pull-left')
                 );
@@ -457,9 +459,9 @@ function createEmployeeProjectsRowContent(whereAppend,employeeProj,titleElement)
     console.log('---createDeleteEmployeeRowContent()---');
     console.log(whereAppend);
     var dataL=employeeProj.length;
-    var rowL=Object.keys(employeeProj[0]).length;
+    
     console.log('DATA LENGTH: '+dataL);
-    console.log('ROW LENGTH: '+rowL);
+   
     // SET WARNING
     var divAlertAtr=new Array(
             Array('class','w-100')
@@ -1194,3 +1196,4 @@ function setButtonDisplay(element,perm,userPerm)
         element.removeAttribute("disabled");
     }
 }
+getAjaxData('getemployees','','sEmployees',null);

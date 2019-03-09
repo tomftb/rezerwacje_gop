@@ -8,7 +8,6 @@
 							<div class="logo-back  d-flex flex-wrap align-items-center  " style="border:0px solid green; ">
                                                            <img src="HTTP://<?php echo $_SERVER['HTTP_HOST']; ?>/gt_utilities/gt_logo_280_175.png" class="" alt="Logo_Geofizyka_Torun">
 							</div>
-                                                    
 						</div>
 						<div class="col-xl-7 col-sm-7 col-12 pad-left-0" style="border:0px solid orange; ">
                                                     <form class="form-horizontal"  autocomplete="off" method="POST"  ENCTYPE="multipart/form-data" action="index.php" name="loginForm"> 

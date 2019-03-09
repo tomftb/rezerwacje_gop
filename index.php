@@ -35,12 +35,14 @@ else
                                 if(checkFile($DOC_ROOT.'/view/v_listaNod.php')) {include($DOC_ROOT.'/view/v_listaNod.php');}
                             break;
                         // ZGŁOŚ PROJEKT [LOG_INTO_ZGL_PROJ]
+                            /* NOT USED
                         case 2:
                                 checkPerm('LOG_INTO_ZGL_PROJ',$_SESSION['perm'],1);
                                 if(checkFile($DOC_ROOT.'/view/zglosProjekt.php')) {include($DOC_ROOT.'/view/zglosProjekt.php');}
                                 if(checkFile($DOC_ROOT.'/function/ajaxCheck.php')) {include($DOC_ROOT.'/function/ajaxCheck.php');}
                                 if(checkFile($DOC_ROOT.'/modul/addNewProject.php')) {include($DOC_ROOT.'/modul/addNewProject.php');}
                             break;
+                             */
                         // PROJEKTY [LOG_INTO_PROJ]    
                         case 3:
                                 checkPerm('LOG_INTO_PROJ',$_SESSION['perm'],1);

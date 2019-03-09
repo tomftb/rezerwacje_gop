@@ -13,7 +13,7 @@
                 <nav id="nav-menu-container pull-left" style="border:0px solid black">
                   <ul class="nav-menu" onclick="setMenuActive()">
                       <li id="li-1"><i class="fa fa-server" aria-hidden="true"></i><a href="<?php echo $URL."?id=1"; ?>">Rezerwuj Klaster</a></li>
-                      <li id="li-2"><i class="fa fa-address-card-o" aria-hidden="true"></i><a href="<?php echo $URL."?id=2"; ?>">Zgłoś projekt</a></li>
+                      <!-- <li id="li-2"><i class="fa fa-address-card-o" aria-hidden="true"></i><a href="<?php //echo $URL."?id=2"; ?>">Zgłoś projekt</a></li>-->
                       <li id="li-3"><i class="fa fa-address-card-o" aria-hidden="true"></i><a href="<?php echo $URL."?id=3"; ?>">Projekty</a></li>
                       <li id="li-4"><i class="fa fa-user-circle-o" aria-hidden="true"></i><a href="<?php echo $URL."?id=4"; ?>">Pracownicy</a></li>
                       <li id="li-5"><i class="fa fa-cog" aria-hidden="true"></i><a href="<?php echo $URL."?id=5"; ?>"> Administrator</a>

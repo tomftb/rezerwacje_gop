@@ -10,6 +10,7 @@ var employeeFields=new Array(
         new Array('t','Imię:','imie'),
         new Array('t','Nazwisko:','nazwisko'),
         new Array('t','Stanowisko:','stanowisko'),
+        new Array('t','Email:','email'),
         new Array('c-przydzial','Przydział:','przydzial')
     );
 // GLOBAL INPUT PROPERTIES
@@ -91,6 +92,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
              * [].ImieNazwisko
              * [].Stanowisko
              * [].Procent
+             * [].Email
              */
             employeeTab=data[0];
             loggedUserPerm=data[1];
@@ -734,6 +736,9 @@ function assignProjectDataToField(fieldId)
         case 'stanowisko':
             valueToReturn=currentEmployeeData[0].Stanowisko;
             break;
+        case 'email':
+            valueToReturn=currentEmployeeData[0].Email;
+            break;
         default:
             break;
     };
@@ -803,6 +808,17 @@ function parseFieldValue(data,fieldType,errDivAlt)
                 if(valueToParse.length>0)
                 {
                     regExp(valueToParse,typeOfValueToParse,"^[\\da-zA-Z'"+plChars+"][\\/\\-\\_\\.\\s\\da-zA-Z"+plChars+"]*[\\.\\da-zA-Z"+plChars+"]{1}$",errDiv);
+                }
+            break;
+        case 'email':
+                if(valueToParse.length>0)
+                {
+                    regExp(valueToParse,typeOfValueToParse,"^[a-zA-Z][\\d\\-\\_\\.\\s\\da-zA-Z]*@[\\da-zA-Z]{2,}.[a-zA-Z]{2,}$",errDiv);
+                }
+                else
+                {
+                    removeErrTab(typeOfValueToParse);
+                    hideDivErr(errDiv);
                 }
             break;
         default:
@@ -1065,6 +1081,7 @@ function postDataToUrl(nameOfForm)
             parseFieldValue( document.getElementById('imie').value,"imie","errDiv-imie");
             parseFieldValue( document.getElementById('nazwisko').value,"nazwisko","errDiv-nazwisko");
             parseFieldValue( document.getElementById('stanowisko').value,"stanowisko","errDiv-stanowisko");
+            parseFieldValue( document.getElementById('email').value,"email","errDiv-email");
             if(checkIsErr())
             {
                 console.log("err is true");

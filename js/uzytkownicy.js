@@ -1359,3 +1359,4 @@ function getDataFromJson(dataJson,fieldsToSetup)
     };
     return dataArray;
 }
+getAjaxData('getusers','','sUsers',null);

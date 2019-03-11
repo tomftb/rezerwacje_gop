@@ -52,12 +52,13 @@ var projectFileds=new Array(
         new Array('t','Numer:','numer_umowy'),
         new Array('t','Temat:','temat_umowy'),
         new Array('s-nadzor','Do kierowania grupa powołuje:','nadzor'),
-        new Array('d','Termin realizacji','term_realizacji'),
-        new Array('d','Kierującego zobowiązuję do przedstawienia harmonogramu prac do dnia','harm_data'),
+        new Array('d','Termin realizacji:','term_realizacji'),
+        new Array('d','Kierującego zobowiązuję do przedstawienia harmonogramu prac do dnia:','harm_data'),
         new Array('d','Kierującego zobowiązuję do zakończenia prac i napisania raportu z realizacji zadania do dnia:','koniec_proj'),
-        new Array('s-kier','Nadzór nad realizacją | powierzam','kier_grupy'),
+        new Array('s-kier','Nadzór nad realizacją | powierzam:','kier_grupy'),
         new Array('s-gltech','Główny technolog: ','gl_tech'),
         new Array('s-glkier','Kierownik Ośrodka: ','gl_kier'),
+        new Array('n','Rozmiar pliku bazowego: ','r_dane'),
         new Array('l-dok','Wykaz powiązanych dokumentów:','proj_dok','dokPowiazane')
     );
 // GLOBAL INPUT PROPERTIES
@@ -448,7 +449,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
                 dokCount=0;
                 currentProjectDetails=[];
                 setDisabledFields(taskToRun);
-                fields.push('id','create_date','typ_umowy','typ_umowy_alt','numer_umowy','temat_umowy','kier_grupy','kier_grupy_id','term_realizacji','harm_data','koniec_proj','nadzor','nadzor_id','kier_osr','kier_osr_id','technolog','technolog_id');
+                fields.push('id','create_date','typ_umowy','typ_umowy_alt','numer_umowy','temat_umowy','kier_grupy','kier_grupy_id','term_realizacji','harm_data','koniec_proj','nadzor','nadzor_id','kier_osr','kier_osr_id','technolog','technolog_id','r_dane','j_dane');
                 currentProjectDetails=getDataFromJson(data[0],fields);
                 fields=[];
                 fields.push('ID','NAZWA');
@@ -808,6 +809,9 @@ function createNewProjectViewFields(elementWhereAppend,formName)
                 createHiddenInputs(AddDictDocTab,div1Element,'addDoc');
                 AddDictDocTab=[];
                 createProjectDocList(AddDictDocTab,div1Element,1,formName);
+                break;
+            case 'n':   
+                div1Element.appendChild(createNumberField('inputProject'+i,projectFileds[i][2],null));
                 
                 break;
             default:
@@ -871,6 +875,7 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
     console.log('---createProjectDetailViewFields---');
     inputClass[0]='mb-1';
     //console.log(elementWhereAppend);
+    console.log(currentProjectDetails);
     removeNodeChilds(elementWhereAppend);
     // HTML TAGS
     var labelAttribute=new Array(
@@ -981,6 +986,8 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
             case 'l-dok':
                 createProjectDocList(currentProjectDetails[1],div1Element,1,taskToRun);
                 break;
+            case 'n':   
+                div1Element.appendChild(createNumberField('inputProject'+i,projectFileds[i][2],currentProjectDetails[0][17]+"|"+currentProjectDetails[0][18]));
             default:
                 break;
         };
@@ -1520,6 +1527,71 @@ function createDiv(elementWhereAdd)
     
     document.getElementById(elementWhereAdd).append(div);
     return divName;
+}
+//
+function createNumberField(id,name,value)
+{
+    console.log('---createNumberField()---');
+    var unit= new Array('TB','GB');
+    
+    var tmp=new Array();
+    var tmpUnit=new Array();
+    if(value===null)
+    {
+        //console.log('value is null');
+        value='1';
+    }
+    else
+    {
+        //console.log(value);
+        tmp=value.split("|");
+        value=tmp[0];
+        tmpUnit.push(tmp[1]);
+        for(var z=0;z<unit.length;z++)
+        {
+            //console.log(unit[z]);
+            //console.log("TMP: "+tmp[1]);
+            //console.log(unit.indexOf(tmp[1]));
+            if(tmpUnit.indexOf(unit[z])===-1)
+            {
+                //console.log('NOT FOUND ADD');
+                tmpUnit.push(unit[z]); 
+            };
+        }
+        unit=tmpUnit;
+    }
+    var selectUnit=createSelect2(unit,'j_dane','j_dane');
+    var divGroupAtr=new Array(
+	Array('class','input-group mb-1')
+	);
+
+    var divAutoAtr=new Array(
+	Array('class','input-group-addon')
+	);  
+    inputAttribute[0][1]='number';
+    inputAttribute[1][1]='form-control border-right-0';
+    inputAttribute[2][1]=name; // name
+    inputAttribute[3][1]=id;
+    inputAttribute[4][1]=value;
+    var inputElement=createHtmlElement('input',inputAttribute,inputClass,null);
+    inputElement.onchange=function(){checkNumber(this);};
+    var divAuto=createHtmlElement('div',divAutoAtr,null,null);
+    var divGroup=createHtmlElement('div',divGroupAtr,null,null);
+
+    divAuto.appendChild(selectUnit);
+    divGroup.appendChild(inputElement);
+    divGroup.appendChild(divAuto);
+    inputAttribute[1][1]='form-control';
+    return (divGroup);
+}
+function checkNumber(elem)
+{
+    console.log('---checkNumber()---\n'+elem);
+    if(elem.value<1)
+    {
+        console.log('value < 1');
+        elem.value=1;
+    }
 }
 // FUNCTION CREATE DEFAULT DATE PICKER ELEMENT
 function createDatePicker(idDatePicker,nameDatePicker,value)
@@ -2217,6 +2289,7 @@ function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
             divButtonElement.appendChild(confirmButtonElement);
             elementWhereAdd.appendChild(divButtonElement);
             break;
+            
         case 'closeProject':   
         case 'removeProject':
             var confirmButtonAttribute=new Array(
@@ -2286,6 +2359,31 @@ function createSelect(dataArray,fieldId,fieldName)
         option.appendChild(optionText);
         select.appendChild(option);
     };
+    return select;
+}
+function createSelect2(dataArray,fieldId,fieldName)
+{
+    console.log('---createSelect2()---\n'+fieldId);
+    //console.log('data - '+dataArray+'\n id - '+fieldId+'\n name - '+fieldName);
+    selectStyle.push(Array('borderTopLeftRadius','0px'),Array('borderBottomLeftRadius','0px'));
+    selectAttribute[1][1]=fieldId; // id 
+    selectAttribute[2][1]=fieldName; // name
+
+    var option=document.createElement("OPTION");
+    var optionText = document.createTextNode("");
+    
+    var select=createHtmlElement('select',selectAttribute,selectClass,selectStyle);    
+    for(var i=0;i<dataArray.length;i++)
+    {
+        //console.log(dataArray[i][fieldsToSetup[0]]+" - "+dataArray[i][fieldsToSetup[1]]);
+        option=document.createElement("OPTION");
+        
+            option.setAttribute("value",dataArray[i]);
+        optionText = document.createTextNode(dataArray[i]);
+        option.appendChild(optionText);
+        select.appendChild(option);
+    };
+    selectStyle=[];
     return select;
 }
 function setAllProjects(data)
@@ -2505,7 +2603,6 @@ function postDataToUrl(nameOfForm)
     var errDivAjax='errDiv-Adapted-overall';
     var confirmTask=false;
     var label;
-    var dataForm;
     switch(nameOfForm)
     {
         case 'addTeamToProject':
@@ -2532,7 +2629,7 @@ function postDataToUrl(nameOfForm)
         case 'closeProject':
             if(nameOfForm==='closeProject')
             {
-                label='zamknięcie'
+                label='zamknięcie';
             }
             taskUrl='modul/manageProject.php?task='+nameOfForm;
             confirmTask = confirm("Potwierdź "+label);
@@ -2577,6 +2674,8 @@ function postDataToUrl(nameOfForm)
 }
 function sendData(nameOfForm,taskUrl,errDivAjax)
 {
+    console.log('---sendData()---');
+    setLoadInfo(nameOfForm);
     var errDiv=document.getElementById(errDivAjax);
     var xmlhttp = new XMLHttpRequest();
     var host =  getUrl();
@@ -2589,15 +2688,7 @@ function sendData(nameOfForm,taskUrl,errDivAjax)
             response = JSON.parse(this.responseText);
             console.log("id0 - "+response[0]);
             console.log("id1 - "+response[1]);
-            if(response[0]==='1')
-            {
-                errDiv.innerHTML=response[1];
-                errDiv.style.display = "block";
-            }
-            else
-            {
-                runTaskAfterAjax(nameOfForm,errDiv);
-            }
+            runTaskAfterAjax(nameOfForm,errDiv,response[0],response[1]);
           }
           else
           {
@@ -2608,35 +2699,120 @@ function sendData(nameOfForm,taskUrl,errDivAjax)
         xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xmlhttp.send(createDataToSend(nameOfForm));
 }
-function runTaskAfterAjax(nameOfForm,errDivAjax)
+function setLoadInfo(task)
 {
-    console.log('---runTaskAfterAjax()---');
-    errDivAjax.innerHTML='';
-    errDivAjax.style.display = "none";
-    switch(nameOfForm)
+    console.log('---setLoadInfo()---\n'+task);
+    switch(task)
     {
-        
-        case 'addTeamToProject':
-            alert('Team updated');
-            $('#ProjectAdaptedModal').modal('hide'); 
-            break;
-        case 'closeProject':
-        case 'addNewProject':   
-        case 'removeProject':
-        case 'setprojectdetails':   
-            getAjaxData('getprojects','test','test');
-            $('#ProjectAdaptedModal').modal('hide'); 
-            break;
-        case 'setprojectdocuments':
-            alert('Documents updated');
-        
-            $('#ProjectAdaptedModal').modal('hide'); 
-            break;
-        default:
-            alert('[runTaskAfterAjax()]WRONG TASK - '+nameOfForm);
+        case 'addNewProject':
+            var infoDiv=document.getElementById('ProjectAdaptedBodyExtra');
+            removeNodeChilds(infoDiv);
+            var img = document.createElement("img");
+
+            var imgDiv = document.createElement("div");
+            imgDiv.classList.add("col-sm-auto");
+            imgDiv.classList.add("mr-0");
+
+            var pText= document.createElement("span");
+            pText.classList.add("text-secondary");
+            pText.classList.add("align-text-bottom");
+
+            pText.innerText='Creating and sendig confirm to recipients...';
+
+            var textDiv = document.createElement("div");
+            textDiv.classList.add("col-sm-10");
+            textDiv.classList.add("ml-0");
+            textDiv.classList.add("pt-3");
+
+            textDiv.classList.add("align-bottom");
+            textDiv.appendChild(pText);
+            img.src = getUrl()+"img/loading_60_60.gif";
+            imgDiv.appendChild(img);
+            //var text = document.createTextNode('Creating and sendig confirm to recipients...');
+
+            infoDiv.appendChild(imgDiv); 
+            infoDiv.appendChild(textDiv); 
+            console.log(infoDiv);
+            break;           
+        default:        
             break;
     };
-};
+    
+   
+}
+function runTaskAfterAjax(nameOfForm,errDivAjax,status,response)
+{
+    console.log('---runTaskAfterAjax()---\n'+status);
+    removeNodeChilds(document.getElementById('ProjectAdaptedBodyExtra'));
+    if(status==='1')
+    {
+        
+        stopFormModal(nameOfForm,errDivAjax,response);
+    }
+    else
+    {
+        closeFormModal(nameOfForm,errDivAjax);
+    }
+}
+function closeFormModal(nameOfForm,errDivAjax)
+{
+    hideDivErr(errDivAjax);
+    switch(nameOfForm)
+        {
+
+            case 'addTeamToProject':
+                alert('Team updated');
+                $('#ProjectAdaptedModal').modal('hide'); 
+                break;
+            case 'closeProject':
+            case 'addNewProject':   
+            case 'removeProject':
+            case 'setprojectdetails':   
+                getAjaxData('getprojects','test','test');
+                $('#ProjectAdaptedModal').modal('hide'); 
+                break;
+            case 'setprojectdocuments':
+                alert('Documents updated');
+                $('#ProjectAdaptedModal').modal('hide'); 
+                break;
+            default:
+                alert('[runTaskAfterAjax()]WRONG TASK - '+nameOfForm);
+                break;
+        };
+}
+function stopFormModal(nameOfForm,errDivAjax,response)
+{
+    showDivErr(errDivAjax,response);
+    switch(nameOfForm)
+        {
+            case 'addTeamToProject':
+            case 'setprojectdetails':
+            case 'addNewProject':
+                //var divButton=document.getElementById('ProjectAdaptedButtonsBottom');
+                //removeHtmlChilds(divButton);  
+                //createBodyButtonContent(divButton,'addNewProjectErr','noValue',null);
+                var divExtra=document.getElementById('ProjectAdaptedBodyExtra');
+                removeHtmlChilds(divExtra);     
+                divExtra.appendChild(getLegendDiv());
+                break;
+            default:
+                alert('[stopModal()]WRONG TASK - '+nameOfForm);
+                break;
+        };
+}
+function showDivErr(div,value)
+{
+    console.log('---showDivErr()---');
+    div.innerHTML=value;
+    div.style.display = "block";
+    
+}
+function hideDivErr(div)
+{
+    console.log('---hideDivErr()---');
+    div.innerText='';
+    div.style.display = "none";
+}
 function getFormData(formName)
 {
     console.log('---getFormData---\nName of form - '+formName);
@@ -2664,7 +2840,7 @@ function getFormData(formName)
 }
 function createDataToSend(nameOfForm)
 {
-    console.log('---createDataToSend---\nName of form - '+nameOfForm);
+    console.log('---createDataToSend()---\nName of form - '+nameOfForm);
     var formToCheck=document.getElementsByName(nameOfForm);
     var fieldName;
     var fieldValue;
@@ -2699,6 +2875,7 @@ $(document).keyup(function(e)
     if (e.key === "Escape")
     { // escape key maps to keycode `27`
         //setDefault(); NO MORE AVALIABLE
+        getAjaxData('getprojects','','','','');
     }
 });
 function closeNode(nodeToClose,clearErr)

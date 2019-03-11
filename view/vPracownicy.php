@@ -33,6 +33,7 @@
               <th scope="col">Imię i Nazwisko</th>
               <th scope="col">Stanowisko</th>
               <th scope="col">Procent wykorzystania</th>
+              <th scope="col">Email</th>
               <th scope="col">Opcje</th>
             </tr>
           </thead>

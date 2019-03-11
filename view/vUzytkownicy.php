@@ -120,10 +120,4 @@
 </div>    
 <!-- END LEGEND -->
 <div id="div-inputPdf7a" style="display:block;margin-bottom:50px;">
-    
-    
-    
 </div>
-<script>
-window.onload=getAjaxData('getusers','','sUsers',null);
-</script>

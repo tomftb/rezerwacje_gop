@@ -8,8 +8,10 @@ class manageProject extends initialDb
     private $inpArray=array();
     protected $err="";
     protected $filter='';
+    protected $mail='';
     protected $valueToReturn=null;
     protected $idProject=null;
+    protected $projPrac=array();
     const maxPercentPersToProj=100;
     protected $taskPerm= ['perm'=>'','type'=>''];
     protected $infoArray=array
@@ -40,6 +42,7 @@ class manageProject extends initialDb
     function __construct()
     {
         parent::__construct();
+        
     }
     
     private function parsePostData($postData=array())
@@ -83,10 +86,6 @@ class manageProject extends initialDb
             $this->err.="NO VALUE TO CHECK<br/>";
             return(0);
         }
-    }
-    private function explodeValue($valueToExplode,$delimiter)
-    {
-        return $arrayOfValue=explode($delimiter,$valueToExplode);
     }
     protected function getTeamValueToFind()
     {
@@ -235,6 +234,7 @@ class manageProject extends initialDb
         $this->err.="NO VALUE TO CHECK<br/>";
         return false;
     }
+    
     protected function addTeamToProject($valueToAdd)
     {
         /*
@@ -257,9 +257,12 @@ class manageProject extends initialDb
                 $persData=$this->getPersonData($value[0]);
                 $team[$id]['imie']=$persData[0]['imie'];
                 $team[$id]['nazwisko']=$persData[0]['nazwisko'];
+                $team[$id]['email']=$persData[0]['email'];
                 //$this->manageTeamPersActionIdDb($id,$team);
                 $this->manageTeamPersActionIdDb($team[$id]);
                 //array_splice($team, $id, 1);
+                $this->projPrac[$id][0]=$value[0];
+                $this->projPrac[$id][1]=$persData[0]['imie']." ".$persData[0]['nazwisko'];
             }
             $this->removeNotSendedTeamMembers($team);
             if(!$this->err)
@@ -267,6 +270,15 @@ class manageProject extends initialDb
                 foreach($team as $value)
                 {
                     $this->updateTeamInDb($value);
+                }
+                //print_r($this->projPrac);
+                //$this->projPrac=$team;
+                $this->mail=NEW email();
+                $errHeader='Uaktualniono członków zespołu. Niestety pojawiły się błędy w wysłaniu powiadomienia.';
+                $err=$this->mail->sendMail($this->cUpdateProjTeamSubjectMail(),$this->cUpdateProjTeamBodyMail(),$this->cNewProjRecMail(),$errHeader);
+                if($err)
+                {
+                    $this->err.=$err;
                 }
             }
         }
@@ -478,7 +490,7 @@ class manageProject extends initialDb
     }
     protected function getPersonData($id)
     {
-        $this->query('SELECT * FROM uzytkownik WHERE id=?',$id);
+        $this->query('SELECT * FROM pracownik WHERE id=?',$id);
         $personData=$this->queryReturnValue();
         if(count($personData)>0)
         {
@@ -536,17 +548,14 @@ class manageProject extends initialDb
         {
             // EXPLODE FIELDS:
             $typ_umowy=explode('|',$this->inpArray['typ_umowy']);
-            $kier_grupy=explode('|',$this->inpArray['kier_grupy']);
-            $nadzor=explode('|',$this->inpArray['nadzor']);
-            $technolog=explode('|',$this->inpArray['gl_tech']);
-            $kier_osr=explode('|',$this->inpArray['gl_kier']);
+            $this->setProjPrac();
             $curretDateTime=date('Y-m-d H:i:s');
             
             $this->query('INSERT INTO projekt_nowy 
-            (create_user,create_date,typ_umowy,typ_umowy_alt,numer_umowy,temat_umowy,kier_grupy,kier_grupy_id,term_realizacji,harm_data,koniec_proj,nadzor,nadzor_id,mod_user,mod_user_id,kier_osr,kier_osr_id,technolog,technolog_id) 
+            (create_user,create_date,typ_umowy,typ_umowy_alt,numer_umowy,temat_umowy,kier_grupy,kier_grupy_id,term_realizacji,harm_data,koniec_proj,nadzor,nadzor_id,mod_user,mod_user_id,kier_osr,kier_osr_id,technolog,technolog_id,r_dane,j_dane) 
 		VALUES
-		(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-        ,$_SESSION["username"].",${curretDateTime},".$typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$kier_grupy[1].",".$kier_grupy[0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$nadzor[1].",".$nadzor[0].",".$_SESSION["username"].",".$_SESSION["userid"].",".$kier_osr[1].','.$kier_osr[0].','.$technolog[1].','.$technolog[0]);
+		(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+        ,$_SESSION["username"].",${curretDateTime},".$typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$this->projPrac['kier_grupy'][1].",".$this->projPrac['kier_grupy'][0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$this->projPrac['nadzor'][1].",".$this->projPrac['nadzor'][0].",".$_SESSION["username"].",".$_SESSION["userid"].",".$this->projPrac['gl_kier'][1].','.$this->projPrac['gl_kier'][0].','.$this->projPrac['gl_tech'][1].','.$this->projPrac['gl_tech'][0].','.$this->inpArray['r_dane'].','.$this->inpArray['j_dane']);
                  
             if($this->getError()!=='')
             {
@@ -555,8 +564,124 @@ class manageProject extends initialDb
             else
             {
                 $this->addProjectDok($this->queryLastId());  
+                $this->mail=NEW email();
+                $errHeader='Projekt został założony. Niestety pojawiły się błędy w wysłaniu powiadomienia.';
+                $err=$this->mail->sendMail($this->cNewProjSubjectMail(),$this->cNewProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
+                if($err)
+                {
+                    $this->err.=$err;
+                }
             }    
         }     
+    }
+    protected function setProjPrac()
+    {
+        $this->projPrac['nadzor']=explode('|',$this->inpArray['nadzor']);
+        $this->projPrac['kier_grupy']=explode('|',$this->inpArray['kier_grupy']);
+        $this->projPrac['gl_tech']=explode('|',$this->inpArray['gl_tech']);
+        $this->projPrac['gl_kier']=explode('|',$this->inpArray['gl_kier']);
+        //print_r($this->projPrac);      
+    }
+    protected function getProjPracList()
+    {
+        $projPracList='';
+        $licz=0;
+        $sep='';
+        foreach($this->projPrac as $value)
+        {
+            if($licz)
+            {
+               $sep=', ';
+            }
+            $projPracList.=$sep.$value[1]; 
+            $licz++;
+        }
+        return($projPracList);
+    }
+    protected function getProjPracTeamList()
+    {
+        
+        $projPracList='';
+        $licz=0;
+        $sep='';
+        foreach($this->projPrac as $value)
+        {
+            if($licz)
+            {
+               $sep=', ';
+            }
+            $projPracList.=$sep.$value[1]; 
+            $licz++;
+        }
+        return($projPracList);
+    }
+    protected function cNewProjRecMail()
+    {
+        $recEmail=array();
+        
+        $pracEmail=array();
+
+        foreach($this->projPrac as $value)
+        {
+            $this->query("SELECT Email FROM v_all_prac_v3 WHERE id=?",$value[0]);
+            $pracEmail=$this->queryReturnValue();
+            //print_r($pracEmail);
+            
+            if(count($pracEmail)>0)
+            {
+                $pracEmail=array($pracEmail[0]['Email'],$value[1]);
+                array_push($recEmail,$pracEmail);
+            }
+        }
+        //print_r($recEmail);
+        return ($recEmail);
+    }
+    protected function cNewProjSubjectMail()
+    {
+        return('Zgłoszenie na utworzenie udziału dla Projektu');
+    }
+    protected function cUpdateProjSubjectMail()
+    {
+        return('Zgłoszenie na aktualizację udziału dla Projektu');
+    }
+    protected function cUpdateProjTeamSubjectMail()
+    {
+        return('Zgłoszenie na aktualizację członków zespołu dla udziału Projektu');
+    }
+    protected function cNewProjBodyMail()
+    {
+        $quota=$this->inpArray['r_dane']*30;
+        $mailBody="Zarejestrowano zgłoszenie na utworzenie nowego projektu o specyfikacji:\n\nNazwa projektu\t\t-\t".$this->inpArray['temat_umowy']."\n";
+        $mailBody.="Rozmiar pliku bazowego\t- \t".$this->inpArray['r_dane']." ".$this->inpArray['j_dane']."\n";
+        $mailBody.="Sugerowana quota\t- \t".$quota." ".$this->inpArray['j_dane']."\n";
+        $mailBody.="Przypisani użytkownicy\t- \t".$_SESSION['nazwiskoImie'].", ".$this->getProjPracList()."\n\n";
+        $mailBody.="Zgłaszający\t\t- \t".$_SESSION['nazwiskoImie']." (".$_SESSION["mail"].") ";	
+        
+        return ($mailBody);
+    }
+    protected function cUpdateProjBodyMail()
+    {
+        $quota=$this->inpArray['r_dane']*30;
+        $mailBody="Zarejestrowano aktualizację zgłoszonego projektu o specyfikacji:\n\nNazwa projektu\t\t-\t".$this->inpArray['temat_umowy']."\n";
+        $mailBody.="Rozmiar pliku bazowego\t- \t".$this->inpArray['r_dane']." ".$this->inpArray['j_dane']."\n";
+        $mailBody.="Sugerowana quota\t- \t".$quota." ".$this->inpArray['j_dane']."\n";
+        $mailBody.="Przypisani użytkownicy\t- \t".$_SESSION['nazwiskoImie'].", ".$this->getProjPracList()."\n\n";
+        $mailBody.="Aktualizujący\t\t- \t".$_SESSION['nazwiskoImie']." (".$_SESSION["mail"].") ";	
+       
+        return ($mailBody);
+    }
+    protected function cUpdateProjTeamBodyMail()
+    {
+        $this->query("SELECT temat_umowy from v_all_proj where id=?",$this->inpArray['addTeamToProjectid']);
+        $id=$this->queryReturnValue();
+        
+        $mailBody="Zarejestrowano aktualizację zgłoszonego projektu o specyfikacji:\n\n";
+        $mailBody.="Nazwa projektu\t\t-\t".$id[0]['temat_umowy']."\n";
+
+        $mailBody.="Przypisani członkowie zespołu\t- ".$this->getProjPracTeamList()."\n\n";
+        $mailBody.="Aktualizujący\t\t- \t".$_SESSION['nazwiskoImie']." (".$_SESSION["mail"].") ";	
+       
+        return ($mailBody);
     }
     protected function checkLoggedUserPerm($perm)
     {
@@ -620,17 +745,13 @@ class manageProject extends initialDb
         
         if(!$this->err)
         {
+            $this->setProjPrac();
             // EXPLODE FIELDS:
             $typ_umowy=explode('|',$this->inpArray['typ_umowy']);
-            $kier_grupy=explode('|',$this->inpArray['kier_grupy']);
-            $nadzor=explode('|',$this->inpArray['nadzor']);
-            $technolog=explode('|',$this->inpArray['gl_tech']);
-            $kier_osr=explode('|',$this->inpArray['gl_kier']);
-            
             $curretDateTime=date('Y-m-d H:i:s');
             
-            $this->query('UPDATE projekt_nowy SET typ_umowy=?,typ_umowy_alt=?,numer_umowy=?,temat_umowy=?,kier_grupy=?,kier_grupy_id=?,term_realizacji=?, harm_data=?, koniec_proj=?, nadzor=?,nadzor_id=?,mod_user=?,mod_user_id=?, dat_kor=?,kier_osr=?,kier_osr_id=?,technolog=?,technolog_id=? WHERE id=?',
-            $typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$kier_grupy[1].",".$kier_grupy[0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$nadzor[1].",".$nadzor[0].",".$_SESSION["username"].",".$_SESSION["userid"].",${curretDateTime},".$kier_osr[1].','.$kier_osr[0].','.$technolog[1].','.$technolog[0].",${idProject}");
+            $this->query('UPDATE projekt_nowy SET typ_umowy=?,typ_umowy_alt=?,numer_umowy=?,temat_umowy=?,kier_grupy=?,kier_grupy_id=?,term_realizacji=?, harm_data=?, koniec_proj=?, nadzor=?,nadzor_id=?,mod_user=?,mod_user_id=?, dat_kor=?,kier_osr=?,kier_osr_id=?,technolog=?,technolog_id=?,r_dane=?,j_dane=? WHERE id=?',
+            $typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$this->projPrac['kier_grupy'][1].",".$this->projPrac['kier_grupy'][0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$this->projPrac['nadzor'][1].",".$this->projPrac['nadzor'][0].",".$_SESSION["username"].",".$_SESSION["userid"].",${curretDateTime},".$this->projPrac['gl_kier'][1].','.$this->projPrac['gl_kier'][0].','.$this->projPrac['gl_tech'][1].','.$this->projPrac['gl_tech'][0].",".$this->inpArray['r_dane'].",".$this->inpArray['j_dane'].",${idProject}");
                  
             if($this->getError()!=='')
             {
@@ -638,7 +759,15 @@ class manageProject extends initialDb
             }
             else
             {
-                $this->updateProjectDoc($projectPost,$idProject);  
+                $this->updateProjectDoc($projectPost,$idProject); 
+                $this->mail=NEW email();
+                $errHeader='Projekt został zaktualizowany. Niestety pojawiły się błędy w wysłaniu powiadomienia.';
+                $err=$this->mail->sendMail($this->cUpdateProjSubjectMail(),$this->cUpdateProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
+                if($err)
+                {
+                    $this->err.=$err;
+                }
+                 
             }    
         }     
     }
@@ -651,12 +780,12 @@ class manageProject extends initialDb
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;
     }
-    public function getAllProjectsFilter($filter)
+    public function getAllProjectsFilter($wskU,$filter)
     {
         $filter="%${filter}%";
         $valueToReturn=array();
-        $this->query('SELECT * FROM v_all_proj WHERE id LIKE (?) OR numer_umowy LIKE (?) OR temat_umowy LIKE (?) OR kier_grupy LIKE (?) OR nadzor LIKE (?) OR term_realizacji LIKE (?) OR harm_data LIKE (?) OR koniec_proj LIKE (?) ORDER BY id asc'
-                ,$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter);
+        $this->query('SELECT * FROM v_all_proj_v3 WHERE wskU=? AND (id LIKE (?) OR numer_umowy LIKE (?) OR temat_umowy LIKE (?) OR kier_grupy LIKE (?) OR nadzor LIKE (?) OR term_realizacji LIKE (?) OR harm_data LIKE (?) OR koniec_proj LIKE (?) OR StatusName LIKE (?)) ORDER BY id asc'
+                ,$wskU.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter);
         array_push($valueToReturn,$this->queryReturnValue());
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;
@@ -671,7 +800,7 @@ class manageProject extends initialDb
     public function getProjectDetails($idProject)
     {
         $valueToReturn=array();
-        $this->query('SELECT * FROM v_all_proj_v2 WHERE id=?',$idProject);
+        $this->query('SELECT * FROM v_all_proj_v4 WHERE id=?',$idProject);
        
         array_push($valueToReturn,$this->queryReturnValue());
         $this->query('SELECT ID,NAZWA FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$idProject);
@@ -864,7 +993,7 @@ class checkGetData extends manageProject
             break;
         case "getprojectslike":
             $this->filter=filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING);
-            $this->getAllProjectsFilter($this->filter);
+            $this->getAllProjectsFilter('0',$this->filter);
             break;
         case "getprojectdetails":
             $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
@@ -932,6 +1061,112 @@ class checkGetData extends manageProject
     function __destruct()
     {
         $this->getErrValue();
+    }
+}
+class email extends initialDb
+{
+    protected $emailParm=array();
+    protected $email='';
+
+    function __construct()
+    {
+        parent::__construct();
+        $this->loadMail();
+        $this->setMailParm();
+    }
+    public function setMailParm()
+    {
+        //GET EMAIL PARAMETERS
+        $this->query('SELECT SKROT,WARTOSC FROM parametry WHERE UPPER(SKROT) LIKE (?) ','MAIL_%');
+        $this->emailParm=$this->parseParm($this->queryReturnValue());
+    }
+    private function parseParm($data)
+    {
+        $tmpArray=array();
+        foreach($data as $value)
+        {
+            $tmpArray[$value['SKROT']]=$value['WARTOSC'];
+        }
+        return($tmpArray);
+    }
+    protected function loadMail()
+    {
+        include_once (filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/PHPMailer-master/src/SMTP.php");
+        include_once (filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/PHPMailer-master/src/Exception.php");
+        include_once (filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/PHPMailer-master/src/PHPMailer.php");
+
+        $this->email = new PHPMailer\PHPMailer\PHPMailer();
+    }	
+    public function sendMail($subject,$body,$recipient,$errHeader)
+    {
+        $footer="\n\n--\nTa wiadomość została wygenerowana automatycznie z portalu ".filter_input(INPUT_SERVER,"SERVER_NAME").", nie odpowiadaj na nią.";
+        $err='';
+        
+        //echo "SEND MAIL\n";
+        //echo print_r($this->emailParm);
+        $this->email->IsSMTP();
+        $this->email->Timeout  =   10;
+        $this->email->Host = $this->emailParm['MAIL_SRV'];
+        $this->email->CharSet = $this->emailParm['MAIL_CHARSET'];
+
+        $this->email->SMTPKeepAlive = true;
+        $from=explode('@',$this->emailParm['MAIL_USER']);
+        $this->email->setFrom($this->emailParm['MAIL_USER'], $from[0]);
+        $adminRecipient=explode(';',$this->emailParm['MAIL_RECIPIENT']);
+        foreach($adminRecipient as $adminUser)
+        {
+            array_push($recipient,array($adminUser,'Admin'));
+        }
+        //$recipient=explode(';',$this->emailParm['MAIL_RECIPIENT']);
+        if($this->emailParm['MAIL_SECURE']!='')
+        {
+            $this->email->SMTPSecure = 'tls'; 
+        }
+        if($this->emailParm['MAIL_PASS']!='')
+        {
+            $this->email->Username = $from[0];
+            $this->email->Password = $this->emailParm['MAIL_PASS'];
+            $this->email->SMTPAuth = true; 
+        }
+        $this->email->Port = $this->emailParm['MAIL_PORT_OUT']; 
+        if($this->emailParm['MAIL_RECV'])
+        {
+            //print_r($_SESSION);
+            array_push($recipient,array($_SESSION['mail'],$_SESSION['nazwiskoImie']));
+        }
+        foreach($recipient as $emailAdres)
+        {
+            //print_r($this->email->parseAddresses($emailAdres))."\n";
+            //echo "Count: ".count($this->email->parseAddresses($emailAdres))."\n";
+            if(count($this->email->parseAddresses($emailAdres[0])))
+            {
+                $this->email->addAddress($emailAdres[0]);
+            }
+            else
+            {
+                $err.="<br/>[".$emailAdres[1]."] Nieprawidłowy adres email - ".$emailAdres[0];
+            }
+            
+        }
+        //var_dump(get_class_methods($this->email));
+        //print_r();
+        //var_dump($this->email->getToAddresses());
+        //print_r($this->email->getToAddresses());
+        $this->email->Subject  = $subject;
+        $this->email->Body     = $body.$footer;
+        $this->email->send();
+        $this->email->SmtpClose(); 
+        if(!$this->email->send())
+        {
+            //echo "ERROR: ".$this->email->ErrorInfo;
+            $errMail=explode(".",$this->email->ErrorInfo);
+            $err.=$errMail[0];
+        }
+        if($err)
+        {
+            $err=$errHeader.$err;
+        }
+        return($err);
     }
 }
 $manageProject=NEW checkGetData();

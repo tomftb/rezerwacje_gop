@@ -55,7 +55,7 @@
         <div class="modal-content" style="border:0px solid red">
           <div class="modal-header" id="ProjectAdaptedBgTitle">
             <h2 class="modal-title" id="fieldModalLabel"><span class="text-white" id="ProjectAdaptedTextTitle">USUWANIE PROJEKTU:</span></h2> 
-                <button type="button" class="close mr-0" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close mr-0" data-dismiss="modal" aria-label="Close" onclick="getAjaxData('getprojects','','','','')">
                     <i class="fa fa-times" aria-hidden="true"></i>
                 </button>
             </div>
@@ -76,7 +76,8 @@
                 <div class="alert alert-danger row" id="errDiv-Adapted-overall" style="border:0px solid blue">
                         <span id="errText-Adapted-overall"></span>
                 </div>
-                <div class="form-group row" id="ProjectAdaptedBodyExtra" style="border:0px solid blue"></div>
+                <div class="form-group row" id="ProjectAdaptedBodyExtra" style="border:0px solid blue">
+                </div>
             </div>
             <div class="modal-footer w-100 mt-1" >
                 <div class="w-100 mr-0 ml-0 pr-0 pl-0" style="border:0px solid purple">
@@ -114,7 +115,7 @@
     <div class="form-group row mb-0" id="addProjectModalDetailButtons">
        <div class=" col-sm-12" style="border:0px solid green;" >
            <div class="btn-group pull-right">
-                <button class="btn btn-dark" data-dismiss="modal">Anuluj</button>
+                <button class="btn btn-dark" data-dismiss="modal" onclick="getAjaxData('getprojects','','','','')">Anuluj</button>
                 <button id="postDataSubmit" class="btn btn-info" >Edytuj</button>
            </div>
        </div>

@@ -335,7 +335,7 @@ class manageProject extends initialDb
     public function getEmployees()
     {
         $valueToReturn=array();
-        $this->query('SELECT * FROM v_all_prac WHERE 1=? ORDER BY id asc',1);
+        $this->query('SELECT * FROM v_all_prac_v3 WHERE 1=? ORDER BY id asc',1);
         array_push($valueToReturn,$this->queryReturnValue());
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;
@@ -344,8 +344,8 @@ class manageProject extends initialDb
     {
         $filter="%${filter}%";
         $valueToReturn=array();
-        $this->query('SELECT * FROM v_all_prac WHERE ID LIKE (?) OR ImieNazwisko LIKE (?) OR Stanowisko LIKE (?) OR Procent LIKE (?) ORDER BY ID asc'
-                ,$filter.",".$filter.",".$filter.",".$filter);
+        $this->query('SELECT * FROM v_all_prac_v3 WHERE ID LIKE (?) OR ImieNazwisko LIKE (?) OR Stanowisko LIKE (?) OR Procent LIKE (?) OR Email LIKE (?)ORDER BY ID asc'
+                ,$filter.",".$filter.",".$filter.",".$filter.",".$filter);
         array_push($valueToReturn,$this->queryReturnValue());
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;
@@ -403,7 +403,7 @@ class manageProject extends initialDb
     {
         // CHECK GET
 	$valueToReturn=array();
-	$this->query('SELECT * FROM v_all_prac_v2 WHERE ID=?',$idEmployee);   
+	$this->query('SELECT * FROM v_all_prac_v4 WHERE ID=?',$idEmployee);   
         array_push($valueToReturn,$this->queryReturnValue());
         
 	$this->getEmployeeAllocation($idEmployee);

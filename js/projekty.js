@@ -300,7 +300,8 @@ function setTypOfAgreement(valueToSetup,idLabel,idListDok)
     var splitValue=valueToSetup.split("|");
     
     document.getElementById(idLabel).innerText =splitValue[1];
-    //document.getElementById("pdfDokListTypUmowy").innerHTML =splitValue[2];
+    document.getElementById("typOfAgreement").innerHTML =splitValue[2];
+    document.getElementById("inputtypOfAgreement").value =splitValue[0]+"|"+splitValue[2];
 }
 function addFormField()
 {
@@ -808,6 +809,7 @@ function createNewProjectViewFields(elementWhereAppend,formName)
                 div1Element.appendChild(liderProj);
                 break;
             case 'l-dok':
+                console.log(AddDictDocTab);
                 div1Element.appendChild(AddDictDoc);
                 createHiddenInputs(AddDictDocTab,div1Element,'addDoc');
                 AddDictDocTab=[];
@@ -830,13 +832,23 @@ function createHiddenInputs(dataArray,elementWhereAppend,name)
     var inpAtr= new Array(
             Array('name',''),
             Array('type','hidden'),
-            Array('value','')
+            Array('value',''),
+            Array('id','')
             );
     var input='';
     for(var i=0; i<dataArray.length;i++)
     {
         inpAtr[0][1]=name+i;
         inpAtr[2][1]=i+"|"+dataArray[i][1];
+        if(dataArray[i][2]!=='')
+        {
+            inpAtr[3][1]="input"+dataArray[i][2];
+        }
+        else
+        {
+            inpAtr[3][1]="";
+        }
+        
         input=createHtmlElement('input',inpAtr,null,null);
         elementWhereAppend.appendChild(input);
     };

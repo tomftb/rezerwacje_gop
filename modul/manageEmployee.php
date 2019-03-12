@@ -438,7 +438,7 @@ class checkGetData extends manageProject
         array("getemployees",'LOG_INTO_PRAC','user'),
         array("getemployeeslike","LOG_INTO_PRAC","user"),
         array("getemployeesspecslo",'','sys'),
-        array("cEmployee",'','user'),
+        array("cEmployee",'ADD_EMPL','user'),
         array("getEmployeeProj",'SHOW_PROJ_EMPL','user'),
         array('deleteEmployee','DEL_EMPL','user'),
         array('getEmployeeAllocation','SHOW_ALLOC_EMPL','user'),

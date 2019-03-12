@@ -1,5 +1,7 @@
 // origin
 var loggedUserPerm=new Array();
+var closeProjReason=new Array("Projekt został zrealizowany","Inwestor się wycofał","Inny");
+var deleteProjReason=new Array("Projekt został niepotrzebnie wprowadzony","Inny");
 var errInputValue= new Array();
 var memberProjTab=new Array();
 var countOfMemberProjTab=0;
@@ -776,18 +778,6 @@ function createNewProjectViewFields(elementWhereAppend,formName)
                 div1Element.appendChild(divErr);
                 break;
             case 's-kier':
-                 div1Element.appendChild(ManagerProj);
-                break;
-            case 's-gltech':
-                 div1Element.appendChild(gltechProj);
-                break;
-            case 's-glkier':
-                 div1Element.appendChild(glkierProj);
-                break;
-            case 'd':
-                div1Element.appendChild(createDatePicker('inputProject'+i,'d-'+projectFileds[i][2],''));
-                break;
-            case 's-nadzor':
                 // ADD EXTRA SPAN WITH ID
                 labelElement=createHtmlElement('label',labelAttribute,labelClass,null);
                 //console.log('S-NADZÓR');
@@ -802,6 +792,19 @@ function createNewProjectViewFields(elementWhereAppend,formName)
                 labelElement.appendChild(spanAgreement);
                 text = document.createTextNode(tmpArray[1]);
                 labelElement.appendChild(text);
+                 div1Element.appendChild(ManagerProj);
+                break;
+            case 's-gltech':
+                 div1Element.appendChild(gltechProj);
+                break;
+            case 's-glkier':
+                 div1Element.appendChild(glkierProj);
+                break;
+            case 'd':
+                div1Element.appendChild(createDatePicker('inputProject'+i,'d-'+projectFileds[i][2],''));
+                break;
+            case 's-nadzor':
+                
                 div1Element.appendChild(liderProj);
                 break;
             case 'l-dok':
@@ -2095,13 +2098,13 @@ function createDivCol(divName,colNumbers)
 }
 function createProjectRemoveBodyContent(elementWhereAdd,formName,idData)
 { 
-    console.log('---createProjectRemoveBodyContent---');
+    console.log('---createProjectRemoveBodyContent---\n'+formName);
     console.log('elementWhereAdd :');
     console.log(elementWhereAdd);
     removeHtmlChilds(elementWhereAdd);
     removeHtmlChilds(document.getElementById('ProjectAdaptedButtonsBottom'));
     var formElement=getFormHeader(formName);
-    var div=createDivCol('closeProject',12);
+    var div=createDivCol(formName,12);
     div.innerText='Podaj powód :';
     // input hidden with id FORM
     var inputIdAttribute=new Array(
@@ -2109,8 +2112,19 @@ function createProjectRemoveBodyContent(elementWhereAdd,formName,idData)
         Array('type','hidden'),
         Array('value',idData)
 	);
+    var reason=new Array();
+    if(formName==='closeProject')
+    {
+        reason=closeProjReason;
+    }
+    else
+    {
+        reason=deleteProjReason;
+    }
     var inputIdElement=createHtmlElement('input',inputIdAttribute,null,null);
+    div.appendChild(createSelect2(reason,formName,formName))
     formElement.appendChild(div);
+    
     formElement.appendChild(inputIdElement);
     
     elementWhereAdd.appendChild(formElement);

@@ -296,12 +296,20 @@ function myTrim(x)
 function setTypOfAgreement(valueToSetup,idLabel,idListDok)
 {
     console.log('---setTypeOfAgreement---');
-    console.log("VALUE: "+valueToSetup+"\nID ELEMENT LABEL: "+idLabel+"\nID ELEMENT IN DOK LIST: "+idListDok);
+    console.log("VALUE: "+valueToSetup+"\nID ELEMENT LABEL: "+idLabel);
+    //"\nID ELEMENT IN DOK LIST: "+idListDok);
     var splitValue=valueToSetup.split("|");
     
     document.getElementById(idLabel).innerText =splitValue[1];
-    document.getElementById("typOfAgreement").innerHTML =splitValue[2];
-    document.getElementById("inputtypOfAgreement").value =splitValue[0]+"|"+splitValue[2];
+    try
+    {
+        document.getElementById("typOfAgreement").innerHTML =splitValue[2];
+        document.getElementById("inputtypOfAgreement").value =splitValue[0]+"|"+splitValue[2];
+    }
+    catch(err)
+    {
+        console.log(err);
+    }
 }
 function addFormField()
 {
@@ -452,7 +460,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
                 dokCount=0;
                 currentProjectDetails=[];
                 setDisabledFields(taskToRun);
-                fields.push('id','create_date','typ_umowy','typ_umowy_alt','numer_umowy','temat_umowy','kier_grupy','kier_grupy_id','term_realizacji','harm_data','koniec_proj','nadzor','nadzor_id','kier_osr','kier_osr_id','technolog','technolog_id','r_dane','j_dane');
+                fields.push('id','create_date','typ_umowy','typ_umowy_alt','numer_umowy','temat_umowy','kier_grupy','kier_grupy_id','term_realizacji','harm_data','koniec_proj','nadzor','nadzor_id','kier_osr','kier_osr_id','technolog','technolog_id','r_dane','j_dane','create_user','mod_user','dat_kor');
                 currentProjectDetails=getDataFromJson(data[0],fields);
                 fields=[];
                 fields.push('ID','NAZWA');
@@ -840,7 +848,10 @@ function createHiddenInputs(dataArray,elementWhereAppend,name)
     {
         inpAtr[0][1]=name+i;
         inpAtr[2][1]=i+"|"+dataArray[i][1];
-        if(dataArray[i][2]!=='')
+        console.log('DATA ARRAY LENGTH - '+dataArray[i].length);
+        if(dataArray[i].length>2)
+        {
+            if(dataArray[i][2]!=='')
         {
             inpAtr[3][1]="input"+dataArray[i][2];
         }
@@ -848,6 +859,8 @@ function createHiddenInputs(dataArray,elementWhereAppend,name)
         {
             inpAtr[3][1]="";
         }
+        }
+        
         
         input=createHtmlElement('input',inpAtr,null,null);
         elementWhereAppend.appendChild(input);
@@ -881,7 +894,11 @@ function createProjectDetailView(elementWhereAdd,taskToRun,projectStatus)
     {
         confirmButton.classList.add("disabled");
     };
+    var info=document.getElementById("projectId");
+    console.log(currentProjectDetails);
+    info.innerText=currentProjectDetails[0][0]+"\nLast update: "+currentProjectDetails[0][20]+", "+currentProjectDetails[0][21];
     
+    //info.innerText=currentProjectDetails[0][0]+"\nCreate user: "+currentProjectDetails[0][19]+", Create date: "+currentProjectDetails[0][1]+"\nMod user: "+currentProjectDetails[0][20]+", Last update: "+currentProjectDetails[0][21];
     elementWhereAdd.append(mainTemplate);
 }
 
@@ -972,6 +989,18 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
                 div1Element.appendChild(divErr);
                 break;
             case 's-kier':
+                // ADD EXTRA SPAN WITH ID
+                labelElement=createHtmlElement('label',labelAttribute,labelClass,null);
+                spanAgreementAtr[0][1]='s-kier';
+                spanAgreement=createHtmlElement('span',spanAgreementAtr,null,null);
+                spanAgreement.innerText=currentProjectDetails[0][2];
+                tmpArray=splitValue(projectFileds[i][1],"|");
+                text = document.createTextNode(tmpArray[0]);
+                labelElement.appendChild(text);
+                labelElement.appendChild(spanAgreement);
+                text = document.createTextNode(tmpArray[1]);
+                labelElement.appendChild(text);
+                
                 currentDataArray=Array (currentProjectDetails[0][7],currentProjectDetails[0][6]);
                 rebuildedArray=(rebuildDataInArray(ManagerProjTab,0,currentDataArray,0));
                 div1Element.appendChild(createSelect(rebuildedArray,projectFileds[i][2],projectFileds[i][2]));
@@ -982,17 +1011,6 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
                 //div1Element.appendChild(createDatePicker('inputProject'+i,'d-'+projectFileds[i][2],''));
                 break;
             case 's-nadzor':
-                // ADD EXTRA SPAN WITH ID
-                labelElement=createHtmlElement('label',labelAttribute,labelClass,null);
-                spanAgreementAtr[0][1]='s-nadzor';
-                spanAgreement=createHtmlElement('span',spanAgreementAtr,null,null);
-                spanAgreement.innerText=currentProjectDetails[0][2];
-                tmpArray=splitValue(projectFileds[i][1],"|");
-                text = document.createTextNode(tmpArray[0]);
-                labelElement.appendChild(text);
-                labelElement.appendChild(spanAgreement);
-                text = document.createTextNode(tmpArray[1]);
-                labelElement.appendChild(text);
                 currentDataArray=Array (currentProjectDetails[0][12],currentProjectDetails[0][11]);
                 rebuildedArray=(rebuildDataInArray(liderProjTab,0,currentDataArray,0));
                 newSelect=createSelect(rebuildedArray,projectFileds[i][2],projectFileds[i][2]);

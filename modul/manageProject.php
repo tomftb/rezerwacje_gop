@@ -550,12 +550,12 @@ class manageProject extends initialDb
             $typ_umowy=explode('|',$this->inpArray['typ_umowy']);
             $this->setProjPrac();
             $curretDateTime=date('Y-m-d H:i:s');
-            
+            $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
             $this->query('INSERT INTO projekt_nowy 
-            (create_user,create_date,typ_umowy,typ_umowy_alt,numer_umowy,temat_umowy,kier_grupy,kier_grupy_id,term_realizacji,harm_data,koniec_proj,nadzor,nadzor_id,mod_user,mod_user_id,kier_osr,kier_osr_id,technolog,technolog_id,r_dane,j_dane) 
+            (create_user,create_date,typ_umowy,typ_umowy_alt,numer_umowy,temat_umowy,kier_grupy,kier_grupy_id,term_realizacji,harm_data,koniec_proj,nadzor,nadzor_id,mod_user,mod_user_id,mod_host,kier_osr,kier_osr_id,technolog,technolog_id,r_dane,j_dane) 
 		VALUES
-		(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-        ,$_SESSION["username"].",${curretDateTime},".$typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$this->projPrac['kier_grupy'][1].",".$this->projPrac['kier_grupy'][0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$this->projPrac['nadzor'][1].",".$this->projPrac['nadzor'][0].",".$_SESSION["username"].",".$_SESSION["userid"].",".$this->projPrac['gl_kier'][1].','.$this->projPrac['gl_kier'][0].','.$this->projPrac['gl_tech'][1].','.$this->projPrac['gl_tech'][0].','.$this->inpArray['r_dane'].','.$this->inpArray['j_dane']);
+		(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+        ,$_SESSION["username"].",${curretDateTime},".$typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$this->projPrac['kier_grupy'][1].",".$this->projPrac['kier_grupy'][0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$this->projPrac['nadzor'][1].",".$this->projPrac['nadzor'][0].",".$_SESSION["username"].",".$_SESSION["userid"].",".$modHost.",".$this->projPrac['gl_kier'][1].','.$this->projPrac['gl_kier'][0].','.$this->projPrac['gl_tech'][1].','.$this->projPrac['gl_tech'][0].','.$this->inpArray['r_dane'].','.$this->inpArray['j_dane']);
                  
             if($this->getError()!=='')
             {
@@ -749,9 +749,9 @@ class manageProject extends initialDb
             // EXPLODE FIELDS:
             $typ_umowy=explode('|',$this->inpArray['typ_umowy']);
             $curretDateTime=date('Y-m-d H:i:s');
-            
-            $this->query('UPDATE projekt_nowy SET typ_umowy=?,typ_umowy_alt=?,numer_umowy=?,temat_umowy=?,kier_grupy=?,kier_grupy_id=?,term_realizacji=?, harm_data=?, koniec_proj=?, nadzor=?,nadzor_id=?,mod_user=?,mod_user_id=?, dat_kor=?,kier_osr=?,kier_osr_id=?,technolog=?,technolog_id=?,r_dane=?,j_dane=? WHERE id=?',
-            $typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$this->projPrac['kier_grupy'][1].",".$this->projPrac['kier_grupy'][0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$this->projPrac['nadzor'][1].",".$this->projPrac['nadzor'][0].",".$_SESSION["username"].",".$_SESSION["userid"].",${curretDateTime},".$this->projPrac['gl_kier'][1].','.$this->projPrac['gl_kier'][0].','.$this->projPrac['gl_tech'][1].','.$this->projPrac['gl_tech'][0].",".$this->inpArray['r_dane'].",".$this->inpArray['j_dane'].",${idProject}");
+            $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
+            $this->query('UPDATE projekt_nowy SET typ_umowy=?,typ_umowy_alt=?,numer_umowy=?,temat_umowy=?,kier_grupy=?,kier_grupy_id=?,term_realizacji=?, harm_data=?, koniec_proj=?, nadzor=?,nadzor_id=?,mod_user=?,mod_user_id=?,mod_host=?, dat_kor=?,kier_osr=?,kier_osr_id=?,technolog=?,technolog_id=?,r_dane=?,j_dane=? WHERE id=?',
+            $typ_umowy[1].",".$typ_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$this->projPrac['kier_grupy'][1].",".$this->projPrac['kier_grupy'][0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$this->projPrac['nadzor'][1].",".$this->projPrac['nadzor'][0].",".$_SESSION["username"].",".$_SESSION["userid"].",${modHost},${curretDateTime},".$this->projPrac['gl_kier'][1].','.$this->projPrac['gl_kier'][0].','.$this->projPrac['gl_tech'][1].','.$this->projPrac['gl_tech'][0].",".$this->inpArray['r_dane'].",".$this->inpArray['j_dane'].",${idProject}");
                  
             if($this->getError()!=='')
             {
@@ -800,7 +800,7 @@ class manageProject extends initialDb
     public function getProjectDetails($idProject)
     {
         $valueToReturn=array();
-        $this->query('SELECT * FROM v_all_proj_v4 WHERE id=?',$idProject);
+        $this->query('SELECT * FROM v_all_proj_v5 WHERE id=?',$idProject);
        
         array_push($valueToReturn,$this->queryReturnValue());
         $this->query('SELECT ID,NAZWA FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$idProject);
@@ -881,7 +881,6 @@ class checkGetData extends manageProject
     private $urlGetData=array();
     private $avaliableTask=array(
         array("add",'ADD_PROJ','user'),
-        array("edit",'','user'),
         array("removeProject",'DEL_PROJ','user'),
         array("getprojects",'LOG_INTO_PROJ','user'),
         array("getprojectslike",'LOG_INTO_PROJ','user'),
@@ -980,8 +979,6 @@ class checkGetData extends manageProject
         case "addteam":
             $this->addTeamToProject($_POST);
             break;
-        case "edit":
-            break;
         case "removeProject":
             $this->deleteProject($_POST);
             break;
@@ -1039,7 +1036,7 @@ class checkGetData extends manageProject
             $this->updateProjectDoc($_POST,$this->idProject);
             //print_r($_POST);
             break;
-        case "setprojectdetails":
+        case "setprojectdetails": // EDIT PROJECT
             $this->idProject=filter_input(INPUT_POST,'idProject',FILTER_VALIDATE_INT);
             $this->updateProject($_POST,$this->idProject);
             //print_r($_POST);
@@ -1160,7 +1157,7 @@ class email extends initialDb
         {
             //echo "ERROR: ".$this->email->ErrorInfo;
             $errMail=explode(".",$this->email->ErrorInfo);
-            $err.=$errMail[0];
+            $err.="<br/>".$errMail[0];
         }
         if($err)
         {

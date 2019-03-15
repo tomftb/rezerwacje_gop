@@ -1,7 +1,5 @@
 // origin
 var loggedUserPerm=new Array();
-var closeProjReason=new Array("Projekt został zrealizowany","Inwestor się wycofał","Inny");
-var deleteProjReason=new Array("Projekt został niepotrzebnie wprowadzony","Inny");
 var errInputValue= new Array();
 var memberProjTab=new Array();
 var countOfMemberProjTab=0;
@@ -385,9 +383,8 @@ function getAjaxData(task,fieldIdToSetup,nameToSetup,addon,projectStatus)
 function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
 {
     console.log('---manageTaskAfterAjaxGet()---');
-    //console.log('TASK TO RUN - '+taskToRun+'\nDATA - '+data+'\nID - '+fieldId+'\nNAME - '+name+'\nPROJECT STATUS - '+projectStatus);
+    //console.log('TASK TO RUN - '+taskToRun+'\nDATA - '+data+'\nFIELD ID - '+fieldId+'\nNAME OR ID - '+name+'\nPROJECT STATUS - '+projectStatus);
     var fields=new Array();
-    //console.log('data - '+data+'\nid - '+id+'\nname - '+name);
     switch(taskToRun)
     {
         case 'getprojectslike':
@@ -506,6 +503,30 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
         case 'getpdf':
             alert(data);
             break;
+        case 'getprojectdelslo':
+        case 'getprojectcloseslo':
+            /*
+             * SLOWNIK:
+             * data[][1] = Id
+             * data[][2] = Nazwa
+             */
+            /*
+             * name = id data
+             */
+            fields.push('ID','Nazwa');
+            
+            var closeProjReason=getDataFromJson(data,fields);
+            closeProjReason.push(Array('0','Inny:'));
+            console.log(closeProjReason);
+            var taskToConfirm='closeProject';
+            if(taskToRun==='getprojectdelslo')
+            {
+                taskToConfirm='removeProject';
+            }
+            createProjectRemoveBodyContent(document.getElementById('ProjectAdaptedDynamicData'),taskToConfirm,name,closeProjReason);
+            createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),taskToConfirm,name,'');
+            break;
+        
         default:
             alert('[manageTaskAfterAjaxGet()]ERROR - wrong task');
             break;
@@ -556,7 +577,14 @@ function setFieldsAtr(task)
             inputAttribute[3][1]='idProject';
             inputAttribute[4][1]=idProject;
             break;
-            
+        case 'closeProject':
+        case 'removeProject':
+            selectClass=[];
+            selectStyle=[];
+            selectAttribute[0][1]='form-control mb-1 mr-0 ml-0';
+            selectAttribute[3][0]='no-readOnly';
+            selectAttribute[4][0]='no-disabled';
+            break;  
         default:
             break;
     };  
@@ -896,7 +924,7 @@ function createProjectDetailView(elementWhereAdd,taskToRun,projectStatus)
     };
     var info=document.getElementById("projectId");
     console.log(currentProjectDetails);
-    info.innerText=currentProjectDetails[0][0]+"\nLast update: "+currentProjectDetails[0][20]+", "+currentProjectDetails[0][21];
+    info.innerText=currentProjectDetails[0][0]+", Last update: "+currentProjectDetails[0][20]+", "+currentProjectDetails[0][21];
     
     //info.innerText=currentProjectDetails[0][0]+"\nCreate user: "+currentProjectDetails[0][19]+", Create date: "+currentProjectDetails[0][1]+"\nMod user: "+currentProjectDetails[0][20]+", Last update: "+currentProjectDetails[0][21];
     elementWhereAdd.append(mainTemplate);
@@ -2126,37 +2154,21 @@ function createDivCol(divName,colNumbers)
 	);
      return(createHtmlElement('div',divAtr,null,null));   
 }
-function createProjectRemoveBodyContent(elementWhereAdd,formName,idData)
+function createProjectRemoveBodyContent(elementWhereAdd,formName,idData,reason)
 { 
     console.log('---createProjectRemoveBodyContent---\n'+formName);
     console.log('elementWhereAdd :');
     console.log(elementWhereAdd);
     removeHtmlChilds(elementWhereAdd);
-    removeHtmlChilds(document.getElementById('ProjectAdaptedButtonsBottom'));
+    //removeHtmlChilds(document.getElementById('ProjectAdaptedButtonsBottom'));
+    setFieldsAtr(formName);
     var formElement=getFormHeader(formName);
     var div=createDivCol(formName,12);
     div.innerText='Podaj powód :';
-    // input hidden with id FORM
-    var inputIdAttribute=new Array(
-        Array('name',formName+'id'),
-        Array('type','hidden'),
-        Array('value',idData)
-	);
-    var reason=new Array();
-    if(formName==='closeProject')
-    {
-        reason=closeProjReason;
-    }
-    else
-    {
-        reason=deleteProjReason;
-    }
-    var inputIdElement=createHtmlElement('input',inputIdAttribute,null,null);
-    div.appendChild(createSelect2(reason,formName,formName))
+    div.appendChild(createSelect(reason,formName,formName));
     formElement.appendChild(div);
-    
-    formElement.appendChild(inputIdElement);
-    
+    formElement.appendChild(addInput('id',idData,'hidden'));
+
     elementWhereAdd.appendChild(formElement);
     console.log(elementWhereAdd);
 }
@@ -2237,6 +2249,7 @@ function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
 {
     console.log('---createBodyButtonContent---');
     console.log('Project status : '+projectStatus);
+    removeHtmlChilds(elementWhereAdd);
     //console.log('elementWhereAdd - '+elementWhereAdd);
     //console.log('task - '+task);
     // GROUP DIV BUTTON
@@ -2346,8 +2359,8 @@ function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
             var label='Zamknij';
             if(task==='removeProject')
             {
-                label= "Usuń";
                 confirmButtonClass[0]='btn-danger';
+                label='Usuń';
             }
             var confirmButtonElement=createHtmlElement('button',confirmButtonAttribute,confirmButtonClass,null);
             confirmButtonElement.innerText = label;
@@ -2361,14 +2374,16 @@ function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
             break;
     };
 }
-function addHiddenInput(name,value)
+function addInput(name,value,type)
 {
-    console.log('---addHiddenInput---');
-    var input=document.createElement("input");
-        input.setAttribute("type", "hidden");
-        input.setAttribute("value",value);
-        input.setAttribute("name",name);
-    document.getElementById("additionalDoc").append(input);
+    console.log('---addInput()---');
+    var inpAtr=new Array(
+        Array('name',name),
+        Array('type',type),
+        Array('value',value)
+	);
+    var inp=createHtmlElement('input',inpAtr,null,null);
+    return(inp);
 }
 function createSelect(dataArray,fieldId,fieldName)
 {
@@ -2596,8 +2611,8 @@ function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
             setDataDiv(titleData);
             bgTitle.classList.add("bg-danger");
             title.innerHTML="USUWANIE PROJEKTU:";
-            createProjectRemoveBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'removeProject',idData);
-            createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'removeProject',idData);
+            getAjaxData('getprojectdelslo','ProjectAdaptedDynamicData',idData,'');
+            
             break;
         case 'team_edit':
             document.getElementById("projectTitle").innerHTML = titleData;
@@ -2609,8 +2624,7 @@ function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
             setDataDiv(titleData);
             bgTitle.classList.add("bg-secondary");
             title.innerHTML="ZAMYKANIE PROJEKTU:";
-            createProjectRemoveBodyContent(document.getElementById('ProjectAdaptedDynamicData'),'closeProject',idData,projectStatus);
-            createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'closeProject',idData,projectStatus);
+            getAjaxData('getprojectcloseslo','ProjectAdaptedDynamicData',idData,'');
             break;
         default:
             alert('[setAdaptedModalProperties]ERROR - wrong type');

@@ -826,23 +826,28 @@ class manageProject extends initialDb
         $this->query('SELECT * FROM v_udzial_sum_procent_prac WHERE sumProcentowyUdzial<? ORDER BY idPracownik ASC ',100);
         $this->valueToReturn=$this->queryReturnValue();
     }
-    # DELETED PROJECT IN DB
-    function deleteProject($valueToDelete)
+    # SET NEW PROJECT STATUS
+    protected function setNewProjectStatus($dataPost,$status)
     {
-        $this->parsePostData($valueToDelete);
-        $this->query('UPDATE projekt_nowy SET wsk_u=? WHERE id=?',"1,".$this->inpArray['removeProjectid']);
-        $team=array();
-        $this->idProject=$this->inpArray['removeProjectid'];
-        $this->removeNotSendedTeamMembers($team);
-    }
-    # CLOSE PROJECT IN DB
-    function closeProject($valueToDelete)
-    {
-        $this->parsePostData($valueToDelete);
-        $this->query('UPDATE projekt_nowy SET status=? WHERE id=?',"c,".$this->inpArray['closeProjectid']);
-        $team=array();
-        $this->idProject=$this->inpArray['closeProjectid'];
-        $this->removeNotSendedTeamMembers($team);
+        $this->parsePostData($dataPost);
+        $curretDateTime=date('Y-m-d H:i:s');
+        $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
+        switch($status)
+        {
+            case 'c': # CLOSE PROJECT IN DB
+                $reason=explode("|",$this->inpArray['closeProject']);
+                $this->query('UPDATE projekt_nowy SET status=?,dat_kor=?, z_u_powod=?,mod_user=?,mod_user_id=?,mod_host=? WHERE id=?',"c,".$curretDateTime.",".$reason[1].",".$_SESSION["username"].",".$_SESSION["userid"].",${modHost},".$this->inpArray['id']);
+                break;
+            case 'd':# DELETED PROJECT IN DB
+                $reason=explode("|",$this->inpArray['removeProject']);
+                $this->query('UPDATE projekt_nowy SET wsk_u=?,dat_usn=?,status=?, z_u_powod=?,mod_user=?,mod_user_id=?,mod_host=? WHERE id=?',"1,".$curretDateTime.",d,".$reason[1].",".$_SESSION["username"].",".$_SESSION["userid"].",${modHost},".$this->inpArray['id']);
+                break;
+            default:
+                break;
+        }
+        //$team=array();
+        //$this->idProject=$this->inpArray['id'];
+        //$this->removeNotSendedTeamMembers($team);
     }
     # DELETED PROJECT IN DB
     function getProjectTeam($idProject)
@@ -901,7 +906,9 @@ class checkGetData extends manageProject
         array('setprojectdocuments','EDIT_DOK_PROJ','user'),
         array('setprojectdetails','EDIT_PROJ','user'),
         array('getpdf','GEN_PDF_PROJ','user'),
-        array('getProjectDefaultValues','','sys')
+        array('getProjectDefaultValues','','sys'),
+        array('getprojectcloseslo','','sys'),
+        array('getprojectdelslo','','sys')
     );
     function __construct()
     {
@@ -980,10 +987,10 @@ class checkGetData extends manageProject
             $this->addTeamToProject($_POST);
             break;
         case "removeProject":
-            $this->deleteProject($_POST);
+            $this->setNewProjectStatus($_POST,'d');
             break;
         case "closeProject":
-            $this->closeProject($_POST);
+            $this->setNewProjectStatus($_POST,'c');
             break;
         case "getprojects":
             $this->getAllProjects();
@@ -1026,7 +1033,7 @@ class checkGetData extends manageProject
             $this->getProjectTeam($idProject);
             break;
         case  "getallemployeeprojsumperc":
-            $this->getProjectSlo('v_udzial_sum_procent_prac','idPracownik');
+            $this->getProjectSlo('v_udzial_sum_procent_prac_v2','idPracownik');
             break;
         case  "getallavaliableemployeeprojsumperc":
             $this->getAllavaliableEmployee();
@@ -1048,6 +1055,12 @@ class checkGetData extends manageProject
             break;
         case 'getProjectDefaultValues':
             $this->getProjectDefaultValues();
+            break;
+        case 'getprojectcloseslo':
+            $this->getProjectSlo('v_slo_zamk_proj');
+            break;
+        case 'getprojectdelslo':
+            $this->getProjectSlo('v_slo_usun_proj');
             break;
         default:
             //no task

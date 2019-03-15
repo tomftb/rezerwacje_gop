@@ -207,7 +207,7 @@ class manageProject extends initialDb
                 $percentCurrentProj[0]['udzialProcent']=0;
             }
             //echo "Percent in current project - ".$percentCurrentProj[0]['udzialProcent']."\n";
-            $this->query('SELECT sumProcentowyUdzial FROM v_udzial_sum_procent_prac WHERE idPracownik=?',$id);
+            $this->query('SELECT sumProcentowyUdzial FROM v_udzial_sum_procent_prac_v2 WHERE idPracownik=?',$id);
             $percentOverall=$this->queryReturnValue();
             if(count($percentOverall)===0)
             {

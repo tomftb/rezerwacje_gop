@@ -198,7 +198,7 @@ class manageProject extends initialDb
         $maxAvaliable=0;
         if(trim($id)!='')
         {
-            $this->query('SELECT udzialProcent FROM v_udzial_prac_proj_percent WHERE idPracownik=? AND idProjekt=?',$id.','.$this->idProject);
+            $this->query('SELECT udzialProcent FROM v_udzial_prac_proj_percent_v2 WHERE idPracownik=? AND idProjekt=?',$id.','.$this->idProject);
             $percentCurrentProj=$this->queryReturnValue();
             //print_r($percentCurrentProj);
             //echo "count returned values - ".count($percentCurrentProj)."\n";

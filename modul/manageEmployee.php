@@ -189,8 +189,8 @@ class manageProject extends initialDb
     protected function updateEmployee($employeeData)
     {
         $curretDateTime=date('Y-m-d H:i:s');
-        $this->query('UPDATE pracownik SET imie=?, nazwisko=?, stanowisko=?, dat_mod=?, mod_user=?,mod_user_id=? WHERE id=?'
-            ,$employeeData['imie'].",".$employeeData['nazwisko'].",".$employeeData['stanowisko'].','.$curretDateTime.",".$_SESSION["username"].','.$_SESSION["userid"].','.$employeeData['idEmployee']);
+        $this->query('UPDATE pracownik SET imie=?, nazwisko=?, stanowisko=?, dat_mod=?, mod_user=?,mod_user_id=?,email=? WHERE id=?'
+            ,$employeeData['imie'].",".$employeeData['nazwisko'].",".$employeeData['stanowisko'].','.$curretDateTime.",".$_SESSION["username"].','.$_SESSION["userid"].','.$employeeData['email'].",".$employeeData['idEmployee']);
     }
     protected function addEmployeeSpec($employeeId,$value)
     {

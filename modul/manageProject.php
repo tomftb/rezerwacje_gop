@@ -1167,8 +1167,9 @@ class email extends initialDb
         //print_r($this->email->getToAddresses());
         $this->email->Subject  = $subject;
         $this->email->Body     = $body.$footer;
-        $this->email->send();
-        $this->email->SmtpClose(); 
+        //die('STOP');
+        
+        //$this->email->send();
         if(!$this->email->send())
         {
             //echo "ERROR: ".$this->email->ErrorInfo;
@@ -1179,6 +1180,7 @@ class email extends initialDb
         {
             $err=$errHeader.$err;
         }
+        $this->email->SmtpClose(); 
         return($err);
     }
 }

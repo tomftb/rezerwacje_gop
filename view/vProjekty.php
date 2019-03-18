@@ -116,7 +116,7 @@
        <div class=" col-sm-12" style="border:0px solid green;" >
            <div class="btn-group pull-right">
                 <button class="btn btn-dark" data-dismiss="modal" onclick="getAjaxData('getprojects','','','','')">Anuluj</button>
-                <button id="postDataSubmit" class="btn btn-info" >Edytuj</button>
+                <button id="sendDataBtn" class="btn btn-info" >Edytuj</button>
            </div>
        </div>
      </div>
@@ -132,7 +132,7 @@
                 <li>A - litera alfabetu, C - cyfra</li>
                 <li>Numer,temat i dokument:</li>
                     <ul style="list-style-type:disc;">
-                        <li>może się zaczą A|C</li>
+                        <li>może się zacząć A|C</li>
                         <li>może zawierać A,C,/,_,- i spacje</li>
                         <li>może się zakończyć .</li>
                     </ul>
@@ -142,4 +142,20 @@
             </ul>
 </div>    
 <!-- END LEGEND -->
+<!-- CLOSE REMOVE PROJECT LEGEND -->
+<div class="modal fade mb-0 pb-0 col-sm-12" id="legendDivCloseRemove" style="border:0px solid green;">
+    <hr class="w-100"></hr>
+        <small class="modal-title text-left text-secondary pl-1 pb-2" id="fieldModalLabel">Legenda:</small> 
+            <ul class="text-secondary font-weight-normal small" style="list-style-type:square;">
+                <li>A - litera alfabetu, C - cyfra</li>
+                <li>Powód:</li>
+                    <ul style="list-style-type:disc;">
+                        <li>może się zacząć A|C</li>
+                        <li>może zawierać A,C,/,_,- i spacje</li>
+                        <li>może się zakończyć .</li>
+                    </ul>
+                <li>Powód - max 1024 znaki.</li>
+            </ul>
+</div>    
+<!-- END CLOSE REMOVE PROJECT LEGEND -->
 <div id="div-inputPdf7a" style="display:block; border:0px solid black;"></div>

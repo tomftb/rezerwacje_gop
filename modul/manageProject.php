@@ -587,13 +587,18 @@ class manageProject extends initialDb
         $projPracList='';
         $licz=0;
         $sep='';
-        foreach($this->projPrac as $value)
+        foreach($this->projPrac as $key => $value)
         {
+            //echo $key."<br/>";
             if($licz)
             {
                $sep=', ';
             }
-            $projPracList.=$sep.$value[1]; 
+            if($key!='gl_kier')
+            {
+                $projPracList.=$sep.$value[1]; 
+            }
+            
             $licz++;
         }
         return($projPracList);
@@ -654,7 +659,8 @@ class manageProject extends initialDb
         $mailBody="Zarejestrowano zgłoszenie na utworzenie nowego projektu o specyfikacji:\n\nNazwa projektu\t\t-\t".$this->inpArray['temat_umowy']."\n";
         $mailBody.="Rozmiar pliku bazowego\t- \t".$this->inpArray['r_dane']." ".$this->inpArray['j_dane']."\n";
         $mailBody.="Sugerowana quota\t- \t".$quota." ".$this->inpArray['j_dane']."\n";
-        $mailBody.="Przypisani użytkownicy\t- \t".$_SESSION['nazwiskoImie'].", ".$this->getProjPracList()."\n\n";
+        $mailBody.="Przypisani użytkownicy\t- \t".$this->getProjPracList()."\n\n";
+        //$mailBody.="Przypisani użytkownicy\t- \t".$_SESSION['nazwiskoImie'].", ".$this->getProjPracList()."\n\n";
         $mailBody.="Zgłaszający\t\t- \t".$_SESSION['nazwiskoImie']." (".$_SESSION["mail"].") ";	
         
         return ($mailBody);

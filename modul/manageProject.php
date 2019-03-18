@@ -832,14 +832,17 @@ class manageProject extends initialDb
         $this->parsePostData($dataPost);
         $curretDateTime=date('Y-m-d H:i:s');
         $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
+        $reason=explode("|",$this->inpArray['reason']);
+        if($reason[0]==='0')
+        {
+            $reason[1]=$this->inpArray['extra'];
+        }
         switch($status)
         {
             case 'c': # CLOSE PROJECT IN DB
-                $reason=explode("|",$this->inpArray['closeProject']);
                 $this->query('UPDATE projekt_nowy SET status=?,dat_kor=?, z_u_powod=?,mod_user=?,mod_user_id=?,mod_host=? WHERE id=?',"c,".$curretDateTime.",".$reason[1].",".$_SESSION["username"].",".$_SESSION["userid"].",${modHost},".$this->inpArray['id']);
                 break;
             case 'd':# DELETED PROJECT IN DB
-                $reason=explode("|",$this->inpArray['removeProject']);
                 $this->query('UPDATE projekt_nowy SET wsk_u=?,dat_usn=?,status=?, z_u_powod=?,mod_user=?,mod_user_id=?,mod_host=? WHERE id=?',"1,".$curretDateTime.",d,".$reason[1].",".$_SESSION["username"].",".$_SESSION["userid"].",${modHost},".$this->inpArray['id']);
                 break;
             default:

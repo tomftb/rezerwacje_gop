@@ -272,19 +272,21 @@ function parseFieldValue(data,fieldType,errDivAlt)
     }
     checkIsErr();
 }
-function setSubmitButton(err)
+function setConfirmButton(err)
 {
-    var element = document.getElementById("postData");
+    var element = document.getElementById("sendDataBtn");
     if(err)
     {
         //console.log("button disabled");
-        element.classList.add("disabled");
+        element.classList.remove("disabled");
+        element.removeAttribute('disabled');
     }
-   else
-   {
+    else
+    {
        //console.log("button enabled");
-       element.classList.remove("disabled");
-   };
+       element.classList.add("disabled");
+       element.setAttribute("disabled", "TRUE");
+    };
 }
 function myTrim(x)
 {
@@ -722,10 +724,10 @@ function getProjectModalDetail()
     mainTemplate.classList.remove("fade");
     return(mainTemplate);
 }
-function getLegendDiv()
+function getLegendDiv(type)
 {
-    console.log('---getLegendDiv()---');
-    var legendDiv=document.getElementById('legendDiv').cloneNode(true);
+    console.log('---getLegendDiv()---\n'+type);
+    var legendDiv=document.getElementById(type).cloneNode(true);
     legendDiv.classList.remove("modal");
     legendDiv.classList.remove("fade"); 
     return(legendDiv);
@@ -741,6 +743,7 @@ function createNewProjectView(elementWhereAdd,formNameToSetup)
     formName.name=formNameToSetup;
     var confirmButton=mainTemplate.childNodes[1].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[3];
     confirmButton.innerText='Dodaj';
+    confirmButton.setAttribute('id','sendDataBtn');
     confirmButton.onclick=function()
     {
             postDataToUrl(formNameToSetup);
@@ -789,6 +792,7 @@ function createNewProjectViewFields(elementWhereAppend,formName)
         inputAttribute[2][1]=projectFileds[i][2];
         inputAttribute[3][1]=projectFileds[i][2];
         inputAttribute[4][1]='';
+        inputAttribute[5][1]='';
         labelAttribute[0][1]='inputProject'+i;
         labelElement=createHtmlElement('label',labelAttribute,labelClass,null);
         div1Element=createHtmlElement('div',div1,null,null);
@@ -911,7 +915,7 @@ function createProjectDetailView(elementWhereAdd,taskToRun,projectStatus)
     {
         confirmButton.onclick=function()
         {
-            document.getElementById('ProjectAdaptedBodyExtra').appendChild(getLegendDiv());
+            document.getElementById('ProjectAdaptedBodyExtra').appendChild(getLegendDiv('legendDiv'));
             
             confirmButton.innerText='Zatwierdź';
             setEnabledFields('getprojectdetails');
@@ -1134,7 +1138,7 @@ function createProjectDocList(docArray,elementWhereAppend,nrColWithData,taskToRu
         case 'getprojectdocuments':
                 if(projectDocEditMode)
                 {
-                    document.getElementById('ProjectAdaptedBodyExtra').appendChild(getLegendDiv());
+                    document.getElementById('ProjectAdaptedBodyExtra').appendChild(getLegendDiv('legendDiv'));
                     addButtonAvaliable=true;
                 }
                 break;
@@ -2150,9 +2154,12 @@ function createDivCol(divName,colNumbers)
     var divAtr=new Array(
         Array('name',divName),
         Array('id',divName),
-        Array('class','col-sm-'+colNumbers)      
+        Array('class','alert alert-danger col-sm-'+colNumbers)      
 	);
-     return(createHtmlElement('div',divAtr,null,null));   
+    var divStyle=new Array(
+            Array('display','none')
+            )
+     return(createHtmlElement('div',divAtr,null,divStyle));   
 }
 function createProjectRemoveBodyContent(elementWhereAdd,formName,idData,reason)
 { 
@@ -2163,14 +2170,64 @@ function createProjectRemoveBodyContent(elementWhereAdd,formName,idData,reason)
     //removeHtmlChilds(document.getElementById('ProjectAdaptedButtonsBottom'));
     setFieldsAtr(formName);
     var formElement=getFormHeader(formName);
-    var div=createDivCol(formName,12);
-    div.innerText='Podaj powód :';
-    div.appendChild(createSelect(reason,formName,formName));
-    formElement.appendChild(div);
-    formElement.appendChild(addInput('id',idData,'hidden'));
-
+    var idInput=addInput('id',idData,'hidden');
+    var extraInput=addInput('extra','','hidden');
+    var selectReason=createSelect(reason,'reason','reason');
+    var divErr=createDivCol('errDiv-extra',12);
+    divErr.innerText='bład';
+    selectReason.onchange = function() { checkSelectValue(this.value,formName,extraInput,divErr); };
+    formElement.innerText='Podaj Powód: ';
+    formElement.appendChild(idInput);
+    formElement.appendChild(selectReason);
+    formElement.appendChild(extraInput);
+    formElement.appendChild(divErr);
     elementWhereAdd.appendChild(formElement);
     console.log(elementWhereAdd);
+    console.log(elementWhereAdd.parentNode.parentNode);
+}
+function checkSelectValue(value,task,extraInput,divErr)
+{
+    console.log('---checkSelectValue()---\nTASK: '+task);
+    console.log("VALUE: "+value);
+    var divExtra=document.getElementById('ProjectAdaptedBodyExtra');
+    switch(task)
+            {
+                case 'removeProject':
+                case 'closeProject':
+                    console.log('CLOSE OR REMOVE PROJECT');
+                    var splitValue=value.split("|");
+                    if(splitValue[0]==='0')
+                    {
+                        setAnotherSolutionTrue(divExtra,extraInput);
+                    }
+                    else
+                    {
+                        setAnotherSolutionFalse(divExtra,extraInput,divErr);
+                    };
+                break;
+                
+                    default:
+                break;  
+            }
+    console.log(divExtra);           
+}
+function setAnotherSolutionTrue(divExtra,extraInput)
+{
+    divExtra.appendChild(getLegendDiv('legendDivCloseRemove'));
+    extraInput.setAttribute("type", "text");
+    extraInput.onblur=function()
+    {
+        parseFieldValue(extraInput.value,'extra','errDiv-extra');
+    };
+    
+}
+function setAnotherSolutionFalse(divExtra,extraInput,divErr)
+{
+    extraInput.setAttribute("type", "hidden");
+    extraInput.value='';
+    divErr.style.display="none";
+    removeHtmlChilds(divExtra);
+    setConfirmButton(true);
 }
 //##################################### createAddTeamBodyContent END ######################################
 function createAddTeamBodyContent(elementWhereAdd,formName,idData,projectStatus)
@@ -2247,7 +2304,7 @@ function createAddButton()
 }
 function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
 {
-    console.log('---createBodyButtonContent---');
+    console.log('---createBodyButtonContent()---');
     console.log('Project status : '+projectStatus);
     removeHtmlChilds(elementWhereAdd);
     //console.log('elementWhereAdd - '+elementWhereAdd);
@@ -2273,8 +2330,7 @@ function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
     // END GROUP DIV BUTTON
     switch(task)
     {
-        case 'showTeamProject':
-            
+        case 'showTeamProject':   
             var addButtonElement=createHtmlElement('button',addButtonAttribute,addButtonClass,null);
             addButtonElement.innerText = "Dodaj zespół";
 
@@ -2305,10 +2361,7 @@ function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
                     getAjaxData('getallemployeeprojsumperc','','','',projectStatus); //getallemployeeprojsumperc
                 };
             }
-            
-            
             cancelButtonElement.innerText = "Zamknij";
-            
             divButtonElement.appendChild(cancelButtonElement);
             if(teamBodyDataLengthContent>0)
             {
@@ -2350,7 +2403,8 @@ function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
         case 'closeProject':   
         case 'removeProject':
             var confirmButtonAttribute=new Array(
-                Array('class','btn')
+                Array('class','btn'),
+                Array('id','sendDataBtn')
                 );
             var confirmButtonClass=new Array(
                 'btn-secondary',
@@ -2377,17 +2431,18 @@ function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
 function addInput(name,value,type)
 {
     console.log('---addInput()---');
-    var inpAtr=new Array(
-        Array('name',name),
-        Array('type',type),
-        Array('value',value)
-	);
-    var inp=createHtmlElement('input',inpAtr,null,null);
+    inputAttribute[0][1]=type;
+    inputAttribute[1][1]='form-control mb-1';
+    inputAttribute[2][1]=name;
+    inputAttribute[3][1]=name;
+    inputAttribute[4][1]=value;
+    inputAttribute[5][1]='Wprowadź wyjaśnienie';
+    var inp=createHtmlElement('input',inputAttribute,null,null);
     return(inp);
 }
 function createSelect(dataArray,fieldId,fieldName)
 {
-    //console.log('---createSelect---\n'+fieldId);
+    console.log('---createSelect()---\n'+fieldName);
     //console.log('data - '+dataArray+'\n id - '+fieldId+'\n name - '+fieldName);
     selectAttribute[1][1]=fieldId; // id 
     selectAttribute[2][1]=fieldName; // name
@@ -2568,7 +2623,7 @@ function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
             title.innerHTML="POWOŁANIE GRUPY REALIZUJĄCEJ:";
             setDataDiv('');
             getAjaxData('getProjectDefaultValues','','','','');
-            divBodyExtra.appendChild(getLegendDiv());
+            divBodyExtra.appendChild(getLegendDiv('legendDiv'));
             break;
         case 'edit': // NOT USED
             bgTitle.classList.add("bg-info");
@@ -2650,12 +2705,17 @@ function checkIsErr()
     {
         errExists=true;
         console.log(i+" - "+errInputValue[i]);
+        setConfirmButton(false);
     }
+    if(!errExists)
+    {
+        setConfirmButton(true);
+    };
     return (errExists);
 }
 function postDataToUrl(nameOfForm)
 {
-    console.log('---postDataToUrl---');
+    console.log('---postDataToUrl()---');
     console.log(nameOfForm);
     var taskUrl;
     var errDivAjax='errDiv-Adapted-overall';
@@ -2667,24 +2727,20 @@ function postDataToUrl(nameOfForm)
             taskUrl='modul/manageProject.php?task=addteam';
             confirmTask=true;
             break;
-        case 'createPdfForm':
-            parseFieldValue( document.getElementById('temat_umowy').value,"temat_umowy","errDiv-temat_umowy");
-            parseFieldValue( document.getElementById('numer_umowy').value,"numer_umowy","errDiv-numer_umowy");
-            if(checkIsErr())
-            {
-                console.log("err is true");
-                setSubmitButton(true);
-                return(0);
-            };
-            setSubmitButton(false);
-            taskUrl='modul/manageProject.php?task=add';
-            document.getElementById("errDiv-overall").style.display = "none";
-            errDivAjax='errDiv-overall';
-            confirmTask=true;
-            break;
         case 'removeProject':
             label='usunięcie';
         case 'closeProject':
+            var inpReason=document.getElementById('reason').value;
+            var reasonValue=inpReason.split("|");
+            if(reasonValue[0]==='0')
+            {
+                parseFieldValue( document.getElementById('extra').value,"extra","errDiv-extra");
+                if(checkIsErr())
+                {
+                    console.log("err is true");
+                    return(0);
+                }
+            }
             if(nameOfForm==='closeProject')
             {
                 label='zamknięcie';
@@ -2713,10 +2769,8 @@ function postDataToUrl(nameOfForm)
             if(checkIsErr())
             {
                 console.log("err is true");
-                //setSubmitButton(true);
                 return(0);
-            };
-            //setSubmitButton(false);
+            }
             taskUrl='modul/manageProject.php?task=add';
             //document.getElementById("errDiv-overall").style.display = "none";
             //errDivAjax='errDiv-overall';
@@ -2851,7 +2905,7 @@ function stopFormModal(nameOfForm,errDivAjax,response)
                 //createBodyButtonContent(divButton,'addNewProjectErr','noValue',null);
                 var divExtra=document.getElementById('ProjectAdaptedBodyExtra');
                 removeHtmlChilds(divExtra);     
-                divExtra.appendChild(getLegendDiv());
+                divExtra.appendChild(getLegendDiv('legendDiv'));
                 break;
             default:
                 alert('[stopModal()]WRONG TASK - '+nameOfForm);

@@ -31,11 +31,21 @@ else
                         // REZERWACJA KLASTRA[LOG_INTO_KLAST]
 			default:  
                         case 1:
-                                $parm='LOG_INTO_KLAST';
-                                $appLoadData['FUNCTION']='/function/listaNod.php';
+                                if(checkPerm('LOG_INTO_KLAST',$_SESSION['perm'],1)) ;
+                                if(checkFile($DOC_ROOT.'/function/listaNod.php')) {include ($DOC_ROOT.'/function/listaNod.php');} 
+                                if(checkFile($DOC_ROOT.'/view/rezerwacje.php')) {include($DOC_ROOT.'/view/rezerwacje.php');}
+                                if(checkFile($DOC_ROOT.'/function/checkData.php')) {include ($DOC_ROOT.'/function/checkData.php');} 
+                                if(checkFile($DOC_ROOT.'/view/v_listaNod.php')) {include($DOC_ROOT.'/view/v_listaNod.php');}
+                                if(checkFile($DOC_ROOT.'/view/footer.php')) {include($DOC_ROOT.'/view/footer.php');} 
+                                
+                                /*
+                                 * $parm='LOG_INTO_KLAST';
+                                 * $appLoadData['FUNCTION']='/function/listaNod.php';
                                 $appLoadData['VIEW']='/view/rezerwacje.php';
                                 $appLoadData['FUNCTION1']='/function/checkData.php';
                                 $appLoadData['VIEW1']='/view/v_listaNod.php';
+                                 */
+                                
                             break;
                         // ZGŁOŚ PROJEKT [LOG_INTO_ZGL_PROJ]
                             /* NOT USED
@@ -50,7 +60,9 @@ else
                         case 3:
                                 $parm='LOG_INTO_PROJ';
                                 $appLoadData['VIEW']='/view/vProjekty.php';
-                                $appLoadData['JS']='/js/projekty.js';
+                                $appLoadData['JS1']='/js/createHtmlElement.js';
+                                $appLoadData['JS2']='/js/parseFieldValue.js';
+                                $appLoadData['JS3']='/js/projekty.js';
                             break;
                         // PRACOWNICY [LOG_INTO_PRAC]
                         case 4:
@@ -89,9 +101,13 @@ else
                                 $appLoadData['JS']='/js/parametry.js';
                             break;
 	endswitch;
-        checkPerm($parm,$_SESSION['perm'],1);
-        $appLoadData['FOOTER']='/view/footer.php';   
-        loadFiles($appLoadData,$dbLink);
+        if($parm)
+        {
+            checkPerm($parm,$_SESSION['perm'],1);
+            $appLoadData['FOOTER']='/view/footer.php';   
+            loadFiles($appLoadData,$dbLink); 
+        }
+        
 }
 
 function loadFiles($files,$dbLink)
@@ -110,8 +126,7 @@ function loadFileDependinfOfType($key,$file,$dbLink)
     $DOC_ROOT=filter_input(INPUT_SERVER,"DOCUMENT_ROOT");
     $URL=filter_input(INPUT_SERVER,"SERVER_NAME");
     $PORT=filter_input(INPUT_SERVER,"SERVER_PORT");
-    //echo $URL;
-    if($key==='JS')
+    if(preg_match("/JS/i", $key))
     {
         echo '<script type="text/javascript" src="HTTP://'.$URL.":".$PORT.$file.'"></script>';
     }

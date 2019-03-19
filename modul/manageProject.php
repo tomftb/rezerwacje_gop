@@ -566,13 +566,37 @@ class manageProject extends initialDb
                 $this->addProjectDok($this->queryLastId());  
                 $this->mail=NEW email();
                 $errHeader='Projekt został założony. Niestety pojawiły się błędy w wysłaniu powiadomienia.';
-                $err=$this->mail->sendMail($this->cNewProjSubjectMail(),$this->cNewProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
+                $err=$this->mail->sendMail($this->cNewProjSubjectMail(),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
                 if($err)
                 {
                     $this->err.=$err;
                 }
             }    
         }     
+    }
+    protected function sendMailToPers($POST)
+    {
+        $this->parsePostData($POST);
+        $this->query('SELECT * FROM v_all_proj_v5 WHERE id=?',$this->inpArray['id']);
+        $projectData=$this->queryReturnValue();
+        //print_r($projectData);
+        $this->projPrac['nadzor']=$projectData[0]['nadzor'];
+        $this->projPrac['kier_grupy']=$projectData[0]['kier_grupy'];
+        $this->projPrac['gl_tech']=$projectData[0]['technolog'];
+        $this->projPrac['gl_kier']=$projectData[0]['kier_osr'];
+        $this->inpArray['r_dane']=$projectData[0]['r_dane'];
+        $this->inpArray['j_dane']=$projectData[0]['j_dane'];
+        $this->inpArray['temat_umowy']=$projectData[0]['temat_umowy'];
+        $this->query('SELECT * FROM v_proj_prac_team_group WHERE idProjekt=?',$this->inpArray['id']);
+        $projectData=$this->queryReturnValue();
+        $this->projPrac['team']=$projectData[0]['NazwiskoImie'];
+        $this->mail=NEW email();
+        $errHeader='Pojawiły się błędy w wysłaniu powiadomienia.';
+        $err=$this->mail->sendMail($this->cRepeatInfoSubjectMail(),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
+        if($err)
+        {
+            $this->err.=$err;
+        }
     }
     protected function setProjPrac()
     {
@@ -587,16 +611,28 @@ class manageProject extends initialDb
         $projPracList='';
         $licz=0;
         $sep='';
+        $pers='';
         foreach($this->projPrac as $key => $value)
         {
-            //echo $key."<br/>";
+            //echo $key."\n";
+            //echo $value."\n";
+            //print_r($value);
             if($licz)
             {
                $sep=', ';
             }
             if($key!='gl_kier')
             {
-                $projPracList.=$sep.$value[1]; 
+                
+                if(is_array($value))
+                {
+                    $pers=$value[1];
+                }
+                else
+                {
+                    $pers=$value;
+                }
+                $projPracList.=$sep.$pers; 
             }
             
             $licz++;
@@ -645,6 +681,10 @@ class manageProject extends initialDb
     {
         return('Zgłoszenie na utworzenie udziału dla Projektu');
     }
+    protected function cRepeatInfoSubjectMail()
+    {
+        return('Powtórne powiadomienie o utworzonym udziale dla Projektu');
+    }
     protected function cUpdateProjSubjectMail()
     {
         return('Zgłoszenie na aktualizację udziału dla Projektu');
@@ -653,7 +693,7 @@ class manageProject extends initialDb
     {
         return('Zgłoszenie na aktualizację członków zespołu dla udziału Projektu');
     }
-    protected function cNewProjBodyMail()
+    protected function cProjBodyMail()
     {
         $quota=$this->inpArray['r_dane']*30;
         $mailBody="Zarejestrowano zgłoszenie na utworzenie nowego projektu o specyfikacji:\n\nNazwa projektu\t\t-\t".$this->inpArray['temat_umowy']."\n";
@@ -662,20 +702,10 @@ class manageProject extends initialDb
         $mailBody.="Przypisani użytkownicy\t- \t".$this->getProjPracList()."\n\n";
         //$mailBody.="Przypisani użytkownicy\t- \t".$_SESSION['nazwiskoImie'].", ".$this->getProjPracList()."\n\n";
         $mailBody.="Zgłaszający\t\t- \t".$_SESSION['nazwiskoImie']." (".$_SESSION["mail"].") ";	
-        
         return ($mailBody);
     }
-    protected function cUpdateProjBodyMail()
-    {
-        $quota=$this->inpArray['r_dane']*30;
-        $mailBody="Zarejestrowano aktualizację zgłoszonego projektu o specyfikacji:\n\nNazwa projektu\t\t-\t".$this->inpArray['temat_umowy']."\n";
-        $mailBody.="Rozmiar pliku bazowego\t- \t".$this->inpArray['r_dane']." ".$this->inpArray['j_dane']."\n";
-        $mailBody.="Sugerowana quota\t- \t".$quota." ".$this->inpArray['j_dane']."\n";
-        $mailBody.="Przypisani użytkownicy\t- \t".$_SESSION['nazwiskoImie'].", ".$this->getProjPracList()."\n\n";
-        $mailBody.="Aktualizujący\t\t- \t".$_SESSION['nazwiskoImie']." (".$_SESSION["mail"].") ";	
-       
-        return ($mailBody);
-    }
+   
+   
     protected function cUpdateProjTeamBodyMail()
     {
         $this->query("SELECT temat_umowy from v_all_proj where id=?",$this->inpArray['addTeamToProjectid']);
@@ -768,7 +798,7 @@ class manageProject extends initialDb
                 $this->updateProjectDoc($projectPost,$idProject); 
                 $this->mail=NEW email();
                 $errHeader='Projekt został zaktualizowany. Niestety pojawiły się błędy w wysłaniu powiadomienia.';
-                $err=$this->mail->sendMail($this->cUpdateProjSubjectMail(),$this->cUpdateProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
+                $err=$this->mail->sendMail($this->cUpdateProjSubjectMail(),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
                 if($err)
                 {
                     $this->err.=$err;
@@ -824,6 +854,12 @@ class manageProject extends initialDb
     public function getProjectSlo($tableToSelect,$order='ID')
     {
         $this->query('SELECT * FROM '.$tableToSelect.' WHERE 1=? ORDER BY '.$order.' ASC ',1);
+        $this->valueToReturn=$this->queryReturnValue();
+    }
+    public function getProjectEmplEmail()
+    {
+        $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+        $this->query('SELECT Pracownik,Pracownik_email AS Email FROM v_all_prac_proj_email WHERE Projekt_id=? ORDER BY Projekt_id ASC ',$id);
         $this->valueToReturn=$this->queryReturnValue();
     }
      # RETURN ALL AVALIABLE MEMBERS
@@ -894,7 +930,7 @@ class checkGetData extends manageProject
     );
     private $urlGetData=array();
     private $avaliableTask=array(
-        array("add",'ADD_PROJ','user'),
+        array("addNewProject",'ADD_PROJ','user'),
         array("removeProject",'DEL_PROJ','user'),
         array("getprojects",'LOG_INTO_PROJ','user'),
         array("getprojectslike",'LOG_INTO_PROJ','user'),
@@ -909,7 +945,7 @@ class checkGetData extends manageProject
         array("getadditionaldictdoc",'','sys'),
         array("getallemployeeprojsumperc",'EDIT_TEAM_PROJ','user'),
         array("getallavaliableemployeeprojsumperc",'','user'),
-        array("addteam",'EDIT_TEAM_PROJ','user'),
+        array("addTeamToProject",'EDIT_TEAM_PROJ','user'),
         array('getprojectdocuments','SHOW_DOK_PROJ','user'),
         array('closeProject','CLOSE_PROJ','user'),
         array('setprojectdocuments','EDIT_DOK_PROJ','user'),
@@ -917,7 +953,9 @@ class checkGetData extends manageProject
         array('getpdf','GEN_PDF_PROJ','user'),
         array('getProjectDefaultValues','','sys'),
         array('getprojectcloseslo','','sys'),
-        array('getprojectdelslo','','sys')
+        array('getprojectdelslo','','sys'),
+        array('getprojectemplemail','EMAIL_PROJ','user'),
+        array('sendEmail','EMAIL_PROJ','user')
     );
     function __construct()
     {
@@ -989,10 +1027,10 @@ class checkGetData extends manageProject
     {
         switch($this->urlGetData['task']):
         
-        case "add" :
+        case "addNewProject" :
             $this->addProject($_POST);
             break;
-        case "addteam":
+        case "addTeamToProject":
             $this->addTeamToProject($_POST);
             break;
         case "removeProject":
@@ -1070,6 +1108,12 @@ class checkGetData extends manageProject
             break;
         case 'getprojectdelslo':
             $this->getProjectSlo('v_slo_usun_proj');
+            break;
+        case 'getprojectemplemail':
+            $this->getProjectEmplEmail('v_all_prac_proj_email','Projekt_id');
+            break;
+        case 'sendEmail':
+            $this->sendMailToPers($_POST);
             break;
         default:
             //no task

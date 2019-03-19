@@ -25,53 +25,58 @@ function parseFieldValue(data,fieldType,errDivAlt)
         errDiv=document.getElementById(errDivAlt);
     };
     valueToParse=valueToParse.trim();
-    switch(typeOfValueToParse)
+    typeOfValueToParse=typeOfValueToParse.split('-');
+    switch(typeOfValueToParse[0])
     {
+        case 'extra':
         case 'numer_umowy':
         case 'temat_umowy':
-            regExp(valueToParse,typeOfValueToParse,"^[\\da-zA-Z'"+plChars+"][\\/\\-\\_\\s\\da-zA-Z"+plChars+"]*[\\.\\s\\da-zA-Z"+plChars+"]{1}$",errDiv);
+            regExp(valueToParse,typeOfValueToParse[0],"^[\\da-zA-Z'"+plChars+"][\\/\\-\\_\\s\\da-zA-Z"+plChars+"]*[\\.\\s\\da-zA-Z"+plChars+"]{1}$",errDiv);
             break;
         case 'imie':
                 if(valueToParse.length>2)
                 {
-                    regExp(valueToParse,typeOfValueToParse,"^[a-zA-Z'"+plChars+"][\\sa-zA-Z"+plChars+"]*[a-zA-Z"+plChars+"]{1}$",errDiv);
+                    regExp(valueToParse,typeOfValueToParse[0],"^[a-zA-Z'"+plChars+"][\\sa-zA-Z"+plChars+"]*[a-zA-Z"+plChars+"]{1}$",errDiv);
                 }
                 else
                 {
                     console.log('ERROR LENGTH');
-                    setErrTab(typeOfValueToParse);
+                    setErrTab(typeOfValueToParse[0]);
                     showDivErr(errDiv,'Błąd składni');
                 }
                 break;
         case 'nazwisko':
                 if(valueToParse.length>2)
                 {
-                    regExp(valueToParse,typeOfValueToParse,"^[a-zA-Z'"+plChars+"][\\-\\sa-zA-Z"+plChars+"]*[a-zA-Z"+plChars+"]{1}$",errDiv);
+                    regExp(valueToParse,typeOfValueToParse[0],"^[a-zA-Z'"+plChars+"][\\-\\sa-zA-Z"+plChars+"]*[a-zA-Z"+plChars+"]{1}$",errDiv);
                 }
                 else
                 {
                     console.log('ERROR LENGTH');
-                    setErrTab(typeOfValueToParse);
+                    setErrTab(typeOfValueToParse[0]);
                     showDivErr(errDiv,'Błąd składni');
                 }
             break;
         case 'stanowisko':
                 if(valueToParse.length>0)
                 {
-                    regExp(valueToParse,typeOfValueToParse,"^[\\da-zA-Z'"+plChars+"][\\/\\-\\_\\.\\s\\da-zA-Z"+plChars+"]*[\\.\\da-zA-Z"+plChars+"]{1}$",errDiv);
+                    regExp(valueToParse,typeOfValueToParse[0],"^[\\da-zA-Z'"+plChars+"][\\/\\-\\_\\.\\s\\da-zA-Z"+plChars+"]*[\\.\\da-zA-Z"+plChars+"]{1}$",errDiv);
                 }
             break;
         case 'email':
                 if(valueToParse.length>0)
                 {
-                    regExp(valueToParse,typeOfValueToParse,"^[a-zA-Z][\\d\\-\\_\\.\\s\\da-zA-Z]*@[\\da-zA-Z]{2,}.[a-zA-Z]{2,}$",errDiv);
+                    regExp(valueToParse,typeOfValueToParse[0],"^[a-zA-Z][\\d\\-\\_\\.\\s\\da-zA-Z]*@[\\da-zA-Z]{2,}.[a-zA-Z]{2,}$",errDiv);
                 }
                 else
                 {
-                    removeErrTab(typeOfValueToParse);
+                    removeErrTab(typeOfValueToParse[0]);
                     hideDivErr(errDiv);
                 }
             break;
+        case 'emailAccount':
+                regExp(valueToParse,typeOfValueToParse[0]+'-'+typeOfValueToParse[1],"^[a-zA-Z][\\d\\-\\_\\.\\s\\da-zA-Z]*@[\\da-zA-Z]{2,}.[a-zA-Z]{2,}$",errDiv);
+            break;   
         default:
             break;
     }
@@ -143,5 +148,6 @@ function checkIsErr()
 }
 function removeErrFromTab(indexToRemove)
 {
+    console.log('---removeErrFromTab()---');
     errInputValue.splice( errInputValue.indexOf(indexToRemove), 1 );
 }

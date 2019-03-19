@@ -824,7 +824,6 @@ function parseFieldValue(data,fieldType,errDivAlt)
         default:
             break;
     }
-  
 }
 function regExp(value,valueType,testCondition,errDiv)
 {

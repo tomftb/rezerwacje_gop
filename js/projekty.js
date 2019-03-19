@@ -1,6 +1,5 @@
 // origin
 var loggedUserPerm=new Array();
-var errInputValue= new Array();
 var memberProjTab=new Array();
 var countOfMemberProjTab=0;
 var countOfAvaliableMemberProjTab=0;
@@ -145,133 +144,7 @@ $.fn.datepicker.defaults.format = "dd.mm.yyyy";
 $.fn.datepicker.defaults.todayHighlight = true;
 $.fn.datepicker.defaults.language = 'pl';
 $.fn.datepicker.defaults.autoclose = true;
-// FUNCTION CREATE ANY HTML ELEMENT
-// a. html tag to setup
-// b. array of array to setup tag attribute
-// c. array of classes
-// d. array of css
-function createHtmlElement(htmlTag,elementAttribute,elementClassList,elementStyle)
-{
-    //console.log('---createElement---\n'+htmlTag);
-    //console.log(elementAttribute);
-    //console.log(elementClassList);
-    //console.log(elementStyle);
-    var htmlElement=document.createElement(htmlTag);
-    var i=0;
-    // ASSIGN Attribute
-    if(elementAttribute!==null && elementAttribute!==undefined)
-    {
-        for(j=i;j<elementAttribute.length;j++)
-        {
-            htmlElement.setAttribute(elementAttribute[j][0],elementAttribute[j][1]);
-        };
-    }
-    // ASSIGN ADDITIONAL CLASS
-    if(elementClassList!==null && elementClassList!==undefined)
-    {
-        for(j=i;j<elementClassList.length;j++)
-        {
-            htmlElement.classList.add(elementClassList[j]);
-        };
-    };
-    // ASSIGN STYLES
-    if(elementStyle!==null && elementStyle!==undefined)
-    {
-         for(j=i;j<elementStyle.length;j++)
-        {
-            //console.log(elementStyle[j][0]);
-            //console.log(elementStyle[j][1]);
-            //htmlElement.style.elementStyle[j][0] = elementStyle[j][1];
-            htmlElement=addStyleToHtmlTag(htmlElement,elementStyle[j][0],elementStyle[j][1]);
-        };
-    }
-    //console.log(htmlElement);
-    return (htmlElement);
-}
-function addStyleToHtmlTag(htmlElement,styleName,styleValue)
-{
-    switch(styleName)
-    {
-        case 'border':
-            htmlElement.style.border=styleValue;
-            break;
-        case 'backgroundColor':
-            htmlElement.style.backgroundColor=styleValue;
-            break;
-        case 'borderColor':
-            htmlElement.style.borderColor=styleValue;
-            break;
-        case 'color':
-            htmlElement.style.color=styleValue;
-            break;
-        case 'borderTopRightRadius':
-            htmlElement.style.borderTopRightRadius=styleValue;
-            break;
-        case 'borderBottomRightRadius':
-            htmlElement.style.borderBottomRightRadius=styleValue;
-            break;
-        case 'borderTopLeftRadius':
-            htmlElement.style.borderTopLeftRadius=styleValue;
-            break;
-        case 'borderBottomLeftRadius':
-            htmlElement.style.borderBottomLeftRadius=styleValue;
-            break;
-        case 'display':
-            htmlElement.style.display=styleValue;
-            break;
-        default:
-            break;
-    };
-    return(htmlElement);
-}
-function parseFieldValue(data,fieldType,errDivAlt)
-{
-    console.log('---parseFieldValue()---');
-    console.log(data);
-    console.log('FIELD TYPE: '+fieldType+'\nERR DIV ALT: '+errDivAlt);
-    console.log("DATA TYPE: "+typeof(data));
-    var errDiv='';
-    var plChars='ąĄćĆęĘłŁńŃóÓśŚżŻźŹ';
-    var valueToParse;
-    var typeOfValueToParse;
-    
-    if(typeof(data)==='object')
-    {
-        valueToParse=data.value;
-        typeOfValueToParse=data.name;
-        errDiv=data.parentNode.childNodes[1];   
-        console.log(data.parentNode.childNodes[1]);
-    }
-    else
-    {
-        valueToParse=data;
-        typeOfValueToParse=fieldType;
-        errDiv=document.getElementById(errDivAlt);
-    };
-    valueToParse=myTrim(valueToParse);
-    var thisRegex = new RegExp("^[\\da-zA-Z'"+plChars+"][\\/\\-\\_\\s\\da-zA-Z"+plChars+"]*[\\.\\s\\da-zA-Z"+plChars+"]{1}$");
-    if(!thisRegex.test(valueToParse))
-    {
-        console.log('[err]['+typeOfValueToParse+'] '+valueToParse);
-        if(errInputValue.indexOf(typeOfValueToParse)===-1)
-        {
-            errInputValue.push(typeOfValueToParse); 
-        };
-        errDiv.innerText = "Błąd składni";
-        errDiv.style.display = "block";
-    }
-    else
-    {
-        if(errInputValue.indexOf(typeOfValueToParse)!==-1)
-        {
-            errInputValue.splice(errInputValue.indexOf(typeOfValueToParse), 1 );
-        };
-        console.log('[ok]['+typeOfValueToParse+'] '+valueToParse);
-        errDiv.innerText = "";
-        errDiv.style.display = "none";
-    }
-    checkIsErr();
-}
+
 function setConfirmButton(err)
 {
     var element = document.getElementById("sendDataBtn");
@@ -292,7 +165,6 @@ function myTrim(x)
 {
     return x.replace(/^\s+|\s+$/gm,'');
 }
-
 function setTypOfAgreement(valueToSetup,idLabel,idListDok)
 {
     console.log('---setTypeOfAgreement---');
@@ -385,7 +257,7 @@ function getAjaxData(task,fieldIdToSetup,nameToSetup,addon,projectStatus)
 function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
 {
     console.log('---manageTaskAfterAjaxGet()---');
-    //console.log('TASK TO RUN - '+taskToRun+'\nDATA - '+data+'\nFIELD ID - '+fieldId+'\nNAME OR ID - '+name+'\nPROJECT STATUS - '+projectStatus);
+    console.log('TASK TO RUN - '+taskToRun+'\nDATA - '+data+'\nFIELD ID - '+fieldId+'\nNAME OR ID - '+name+'\nPROJECT STATUS - '+projectStatus);
     var fields=new Array();
     switch(taskToRun)
     {
@@ -528,7 +400,11 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
             createProjectRemoveBodyContent(document.getElementById('ProjectAdaptedDynamicData'),taskToConfirm,name,closeProjReason);
             createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),taskToConfirm,name,'');
             break;
-        
+        case 'getprojectemplemail':
+            console.log(data);
+            createEmailTeamBodyContent(document.getElementById('ProjectAdaptedDynamicData'),data,name); // data
+            
+            break;
         default:
             alert('[manageTaskAfterAjaxGet()]ERROR - wrong task');
             break;
@@ -1224,36 +1100,6 @@ function checkLength(field,type)
         default:
             break;
     };
-}
-function setErrTab(fName)
-{
-    console.log('---setErrTab()---');
-    console.log('FNAME: '+fName);
-    if(errInputValue.indexOf(fName)===-1)
-    {
-        errInputValue.push(fName); 
-    };
-}
-function removeErrTab(fName)
-{
-    console.log('---removeErrTab()---');
-    console.log('FNAME: '+fName);
-    if(errInputValue.indexOf(fName)!==-1)
-    {
-        errInputValue.splice(errInputValue.indexOf(fName), 1 );
-    };
-}
-function showDivErr(div,value)
-{
-    console.log('---showDivErr()---');
-    div.innerHTML=value;
-    div.style.display = "block";
-}
-function hideDivErr(div)
-{
-    console.log('---hideDivErr()---');
-    div.innerText='';
-    div.style.display = "none";
 }
 function createDocListRow(elementWhereAppend,inputElement,taskToRun)
 {
@@ -2030,6 +1876,148 @@ function appendElement(elementToAdd,whereToAdd)
     console.log(document.getElementById('divBodyData'));
     appendElementCounter++;
 }
+function createEmailTeamBodyContent(whereAppend,data,idProject)
+{
+    console.log('---createEmailTeamBodyContent()---');
+    //console.log('elementWhereAdd - '+elementWhereAdd);
+    //console.log(data);
+    //console.log(data[0]);
+    var dataL=data.length;
+    var form=getFormHeader('sendEmail');
+    console.log('DATA LENGTH: '+dataL);
+    // TITLE
+    var tag='h5';
+    var hAtr=new Array(
+                Array('class','text-dark mb-3 text-center font-weight-bold')
+                );
+    var info='Wykaz pracowników powiązanych z projektem:';
+    var titleElement=createHtmlElement(tag,hAtr,null);
+    titleElement.innerText=info;
+        whereAppend.appendChild(titleElement);
+    var tableAtr=new Array(
+            Array('class','table table-striped table-condensed')
+            );
+    var table=createHtmlElement('table',tableAtr,null);
+    var tr=createHtmlElement('tr',null,null);
+
+    // GET HEADER 
+    for(var prop in data[0])
+    {
+        if(data[0].hasOwnProperty(prop))
+        {
+            console.log(prop);
+            td=createHtmlElement('td',null,null);
+            prop=prop.replace("_", " ");
+            td.innerText=prop;
+            tr.appendChild(td);
+        }
+    };
+    table.appendChild(tr);   
+    // GET DATA
+    for(var i=0;i<data.length;i++)
+    {
+        tr=createHtmlElement('tr',null,null);
+        for(var prop in data[i])
+        {
+            if(data[i].hasOwnProperty(prop))
+            {
+                tr.appendChild(parseTableProperty(prop,data[i][prop],i));
+                
+            }
+        }
+        table.appendChild(tr);
+    };
+    form.appendChild(addInput("id",idProject,'hidden'));
+    form.appendChild(table);
+    whereAppend.appendChild(form);
+    
+    createBodyButtonContent(document.getElementById('ProjectAdaptedButtonsBottom'),'sendEmail','noValue','n');
+    console.log(whereAppend);
+}
+function createDivErr(id,value)
+{
+    //console.log('---createDivErr()---\n'+id);
+    var atr=new Array(
+            Array('class','col-sm-auto alert alert-danger mb-0'),
+            Array('id','errDiv-'+id),
+            );
+    var style=new Array(
+            Array('display','none')
+            );
+    var div=createHtmlElement('div',atr,null,style);
+    div.innerText=value;
+    return(div);
+}
+function parseTableProperty(prop,value,name)
+{
+    //console.log('---parseTableProperty()---\n'+prop);
+    //console.log('VALUE: '+value+"\nNAME: "+name);
+    var divRowAttribute=new Array(
+	Array('class','row')
+	);
+    var divRowSmClass=new Array(
+	'ml-0',
+        'mr-0'
+	);
+    var divRowElement=createHtmlElement('div',divRowAttribute,divRowSmClass,null);
+    var divColMdAutoAttribute=new Array(
+	Array('class','col-md-auto')
+	);
+    var divColMdAutoClass=new Array(
+	'pl-0',
+        'pr-0',
+        'mr-0'
+	);
+    var divColMdAutoElement=createHtmlElement('div',divColMdAutoAttribute,divColMdAutoClass,null);
+    var divColSm2Attribute=new Array(
+	Array('class','col-sm'),
+        Array('name','divCol2')
+	);
+    var divColSm2Class=new Array(
+	'pl-0',
+        'pr-0'
+	);
+    var divColSmElement2=createHtmlElement('div',divColSm2Attribute,divColSm2Class,null);
+    var td=createHtmlElement('td',null,null);
+    inputStyle=new Array(
+            Array('borderTopRightRadius','0px'),
+            Array('borderBottomRightRadius','0px')
+            );
+    var inp=addInput("emailAccount-"+name,value,'text');
+    var rmButton=createRemoveButton();
+    rmButton.onclick=function()
+    {
+        console.log('RM');
+        //console.log(this.parentNode.parentNode.childNodes[0].childNodes[0].name);
+        removeErrFromTab(this.parentNode.parentNode.childNodes[0].childNodes[0].name);
+        removeHtmlChilds(this.parentNode.parentNode.parentNode.parentNode);
+    };
+    inputStyle=new Array();
+    //var t='';
+    inp.onblur=function()
+    {
+        parseFieldValue(this.value,"emailAccount-"+name,"errDiv-emailAccount-"+name);
+    };
+    if(prop==='Email')
+    {
+        // CREATE INPUT WITH VALUE
+
+        divColSmElement2.appendChild(inp);
+        divColMdAutoElement.appendChild(rmButton);
+        divRowElement.appendChild(divColSmElement2);
+        divRowElement.appendChild(divColMdAutoElement);
+        td.appendChild(divRowElement);
+        td.appendChild(createDivErr("emailAccount-"+name,''));
+    }
+    else
+    {
+        //td.appendChild(addInput("emailPers-"+name,value,'hidden'));
+        //t = document.createTextNode(value);
+        //td.appendChild(t);
+        td.innerText=value;
+    }
+    return(td);
+}
 function createTeamBodyContent(elementWhereAdd,data,projectStatus)
 {
     console.log('---createTeamtBodyContent---');
@@ -2373,6 +2361,7 @@ function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
             };
             elementWhereAdd.appendChild(divButtonElement);
             break;
+        case 'sendEmail':
         case 'addTeamToProject':
             divButtonElement.appendChild(cancelButtonElement);
             
@@ -2387,8 +2376,13 @@ function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
             {
                 confirmButtonClass.push('disabled');
             };
+            var label='Zatwierdź';
+            if(task==='sendEmail')
+            {
+                label='Wyślij';
+            }
             var confirmButtonElement=createHtmlElement('button',confirmButtonAttribute,confirmButtonClass,null);
-            confirmButtonElement.innerText = "Zatwierdź";
+            confirmButtonElement.innerText = label;
             if(projectStatus==='m' || projectStatus==='n')
             {
                 confirmButtonElement.onclick = function() { postDataToUrl(task); };
@@ -2423,6 +2417,7 @@ function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
             divButtonElement.appendChild(confirmButtonElement);
             elementWhereAdd.appendChild(divButtonElement);
             break;
+        
         default:
             alert('[createBodyButtonContent]ERROR - wrong task');
             break;
@@ -2430,14 +2425,14 @@ function createBodyButtonContent(elementWhereAdd,task,formName,projectStatus)
 }
 function addInput(name,value,type)
 {
-    console.log('---addInput()---');
+    //console.log('---addInput()---');
     inputAttribute[0][1]=type;
     inputAttribute[1][1]='form-control mb-1';
     inputAttribute[2][1]=name;
     inputAttribute[3][1]=name;
     inputAttribute[4][1]=value;
-    inputAttribute[5][1]='Wprowadź wyjaśnienie';
-    var inp=createHtmlElement('input',inputAttribute,null,null);
+    inputAttribute[5][1]='Wprowadź';
+    var inp=createHtmlElement('input',inputAttribute,null,inputStyle);
     return(inp);
 }
 function createSelect(dataArray,fieldId,fieldName)
@@ -2539,6 +2534,7 @@ function setAllProjects(data)
                     //buttonConfig.push(new Array('btn-danger','getpdf','PDF'));//btn-outline-danger
                     buttonConfig.push(new Array('btn-secondary','close','Zamknij','CLOSE_PROJ'));
                     buttonConfig.push(new Array('btn-danger ','delete','Usuń','DEL_PROJ'));
+                    buttonConfig.push(new Array('btn-outline-info border-right-0','email','Email','EMAIL_PROJ'));
                     buttonpdfOff="<button class=\"btn  btn-outline-danger btn-danger mr-0 mb-0 mt-0 ml-0\" disabled>PDF</button>";
                     buttonpdfOn="<a href=\""+getUrl()+"modul/manageProject.php?task=getpdf&id="+arr[i].id+"\" class=\"btn btn-danger btn-outline-danger mr-0 mb-0 mt-0 ml-0\" role=\"button\" aria-disabled=\"true\" target=\"_blank\">PDF</a>";
                     //onclick=\"getPDF('"+arr[i].id+"','"+arr[i].status+"')\"
@@ -2681,6 +2677,12 @@ function setAdaptedModalProperties(modalType,idData,titleData,projectStatus)
             title.innerHTML="ZAMYKANIE PROJEKTU:";
             getAjaxData('getprojectcloseslo','ProjectAdaptedDynamicData',idData,'');
             break;
+        case 'email':
+            setDataDiv(titleData);
+            bgTitle.classList.add("bg-info");
+            title.innerHTML="RĘCZNE WYSŁANIE POWIADOMIENIA EMAIL:";
+            getAjaxData('getprojectemplemail','ProjectAdaptedDynamicData',idData,'&id='+idData);
+            break;
         default:
             alert('[setAdaptedModalProperties]ERROR - wrong type');
             break;
@@ -2697,34 +2699,18 @@ function closeModal(modalId)
 {
     $('#'+modalId).modal('hide');
 }
-function checkIsErr()
-{
-    console.log('---checkIsErr()---');
-    var errExists=false;
-    for(i=0;i<errInputValue.length;i++)
-    {
-        errExists=true;
-        console.log(i+" - "+errInputValue[i]);
-        setConfirmButton(false);
-    }
-    if(!errExists)
-    {
-        setConfirmButton(true);
-    };
-    return (errExists);
-}
+
 function postDataToUrl(nameOfForm)
 {
     console.log('---postDataToUrl()---');
     console.log(nameOfForm);
-    var taskUrl;
+    var taskUrl='modul/manageProject.php?task='+nameOfForm;
     var errDivAjax='errDiv-Adapted-overall';
     var confirmTask=false;
     var label;
     switch(nameOfForm)
     {
         case 'addTeamToProject':
-            taskUrl='modul/manageProject.php?task=addteam';
             confirmTask=true;
             break;
         case 'removeProject':
@@ -2745,7 +2731,6 @@ function postDataToUrl(nameOfForm)
             {
                 label='zamknięcie';
             }
-            taskUrl='modul/manageProject.php?task='+nameOfForm;
             confirmTask = confirm("Potwierdź "+label);
             break;
         case 'setprojectdetails':
@@ -2761,7 +2746,6 @@ function postDataToUrl(nameOfForm)
                 return(0);
             };
             confirmTask=true;
-            taskUrl='modul/manageProject.php?task='+nameOfForm;
             break;
         case 'addNewProject':
             parseFieldValue( document.getElementById('temat_umowy').value,"temat_umowy","errDiv-temat_umowy");
@@ -2771,9 +2755,29 @@ function postDataToUrl(nameOfForm)
                 console.log("err is true");
                 return(0);
             }
-            taskUrl='modul/manageProject.php?task=add';
-            //document.getElementById("errDiv-overall").style.display = "none";
-            //errDivAjax='errDiv-overall';
+            confirmTask=true;
+            break;
+        case 'sendEmail':
+            var formToCheck=document.getElementsByName(nameOfForm);
+            var fieldName;
+            var fieldValue;
+            // first is id
+            for( var i=0; i<formToCheck[0].elements.length; i++ )
+            {
+                fieldName =formToCheck[0].elements[i].name;
+                fieldValue =formToCheck[0].elements[i].value;
+                if(fieldName!=='')
+                {
+                    console.log("NAME : "+fieldName);
+                    console.log("Email : "+fieldValue);
+                    parseFieldValue( document.getElementById(fieldName).value,fieldName,"errDiv-"+fieldName);
+                } 
+            }
+            if(checkIsErr())
+            {
+                console.log("err is true");
+                return(0);
+            }
             confirmTask=true;
             break;
         default:
@@ -2887,6 +2891,8 @@ function closeFormModal(nameOfForm,errDivAjax)
                 alert('Documents updated');
                 $('#ProjectAdaptedModal').modal('hide'); 
                 break;
+            case 'sendEmail':
+                break;
             default:
                 alert('[runTaskAfterAjax()]WRONG TASK - '+nameOfForm);
                 break;
@@ -2897,6 +2903,7 @@ function stopFormModal(nameOfForm,errDivAjax,response)
     showDivErr(errDivAjax,response);
     switch(nameOfForm)
         {
+            
             case 'addTeamToProject':
             case 'setprojectdetails':
             case 'addNewProject':
@@ -2907,8 +2914,10 @@ function stopFormModal(nameOfForm,errDivAjax,response)
                 removeHtmlChilds(divExtra);     
                 divExtra.appendChild(getLegendDiv('legendDiv'));
                 break;
+            case 'sendEmail':
+                break;
             default:
-                alert('[stopModal()]WRONG TASK - '+nameOfForm);
+                alert('[stopFormModal()]WRONG TASK - '+nameOfForm);
                 break;
         };
 }
@@ -2996,7 +3005,7 @@ function closeNode(nodeToClose,clearErr)
     indexToRemove=clearErr.childNodes[1].name;
     console.log(clearErr.childNodes[1].name);
     console.log(nodeToClose);
-    errInputValue.splice( errInputValue.indexOf(indexToRemove), 1 );
+    removeErrFromTab(indexToRemove);
     checkIsErr();
 }
 function removeTeamPersRow(nodeToClose,clearErr)
@@ -3011,7 +3020,6 @@ function removeTeamPersRow(nodeToClose,clearErr)
     teamElementCounter--;
     // 
     closeNode(nodeToClose,clearErr);
-    
 }
 function changeNumberOfMembers(value)
 {

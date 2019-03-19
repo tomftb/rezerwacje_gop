@@ -2862,7 +2862,6 @@ function runTaskAfterAjax(nameOfForm,errDivAjax,status,response)
     removeNodeChilds(document.getElementById('ProjectAdaptedBodyExtra'));
     if(status==='1')
     {
-        
         stopFormModal(nameOfForm,errDivAjax,response);
     }
     else
@@ -2892,6 +2891,7 @@ function closeFormModal(nameOfForm,errDivAjax)
                 $('#ProjectAdaptedModal').modal('hide'); 
                 break;
             case 'sendEmail':
+                $('#ProjectAdaptedModal').modal('hide'); 
                 break;
             default:
                 alert('[runTaskAfterAjax()]WRONG TASK - '+nameOfForm);

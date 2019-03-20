@@ -20,8 +20,8 @@
                           <ul  class="mt-0 ml-0 nav-menu" onclick="setMenuActive()">
                             <li id="li-6"><a href="<?php echo $URL."?id=6"; ?>">Użytkownicy</a></li>
                             <li id="li-7"><a href="<?php echo $URL."?id=7"; ?>">Uprawnienia</a></li>
-                            <li id="li-8"><a href="<?php echo $URL."?id=8"; ?>">ROle</a></li>
-                            <li id="li-9"><a href="<?php echo $URL."?id=9"; ?>">Opcje</a></li>
+                            <li id="li-8"><a href="<?php echo $URL."?id=8"; ?>">Role</a></li>
+                            <!-- <li id="li-9"><a href="<?php //echo $URL."?id=9"; ?>">Opcje</a></li> -->
                             <li id="li-10"><a href="<?php echo $URL."?id=10"; ?>">Parametry</a></li>
                           </ul>
                         </li>

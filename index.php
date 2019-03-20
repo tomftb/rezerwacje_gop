@@ -128,12 +128,13 @@ function loadFiles($files,$dbLink)
 }
 function loadFileDependinfOfType($key,$file,$dbLink)
 {
+    $HTTP_HOST=filter_input(INPUT_SERVER,"HTTP_HOST");
     $DOC_ROOT=filter_input(INPUT_SERVER,"DOCUMENT_ROOT");
-    $URL=filter_input(INPUT_SERVER,"SERVER_NAME");
-    $PORT=filter_input(INPUT_SERVER,"SERVER_PORT");
+    $HTTP = (filter_input(INPUT_SERVER,"HTTPS") ? "HTTPS://" : "HTTP://"); 
+    $FURL=$HTTP.$HTTP_HOST;
     if(preg_match("/JS/i", $key))
     {
-        echo '<script type="text/javascript" src="HTTP://'.$URL.":".$PORT.$file.'"></script>';
+        echo '<script type="text/javascript" src="'.$FURL.$file.'"></script>';
     }
     else
     {

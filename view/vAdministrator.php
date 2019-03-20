@@ -16,7 +16,6 @@
     <div class="row">
         <div class=" col-sm-12" >
             <div class="text-center mt-3" > 
-                <p>  
             <a href="<?php echo $FURL."?id=6"; ?>" class="btn btn-outline-dark btn-lg " role="button" aria-pressed="true">Użytkwonicy</a>
             <a href="<?php echo $FURL."?id=7"; ?>" class="btn btn-outline-dark btn-lg ml-3" role="button" aria-pressed="true">Uprawnienia</a>
             <a href="<?php echo $FURL."?id=8"; ?>" class="btn btn-outline-dark btn-lg ml-3" role="button" aria-pressed="true">Role</a>

@@ -308,6 +308,8 @@ class manageProject extends initialDb
     }
     protected function manageSendedDocActionInDb(&$documentsInDb,&$doc,$idProject)
     {
+        $curretDateTime=date('Y-m-d H:i:s');
+        $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
         $insTask=true;
         //print_r($documentsInDb);
         if($doc[1]!=='n')
@@ -320,8 +322,8 @@ class manageProject extends initialDb
                     {
                         //echo "[".$doc[1]."]UPDATE DOC NAME IN DB - different name\n";
                         $this->query(
-                                   'UPDATE projekt_dok SET nazwa=?, wsk_u=? WHERE id_projekt=? AND id=?',
-                                 $doc[2].',0,'.$idProject.','.$doc[1]);
+                                   'UPDATE projekt_dok SET nazwa=?, wsk_u=?, mod_data=?,mod_user=?,mod_user_id=?,mod_host=? WHERE id_projekt=? AND id=?',
+                                 $doc[2].',0,'.$curretDateTime.",".$_SESSION["username"].",".$_SESSION["userid"].",".$modHost.','.$idProject.','.$doc[1]);
                                 }
                         $insTask=false;
                         break;
@@ -332,7 +334,7 @@ class manageProject extends initialDb
         {
             // INSERT
             //echo "[]INSERT INTO DB NEW DOC\n";
-            $this->query('INSERT INTO projekt_dok (id_projekt,nazwa) VALUES (?,?)',$idProject.','.$doc[2]);     
+            $this->query('INSERT INTO projekt_dok (id_projekt,nazwa,mod_data,mod_user,mod_user_id,mod_host) VALUES (?,?,?,?,?,?)',$idProject.','.$doc[2].",".$curretDateTime.",".$_SESSION["username"].",".$_SESSION["userid"].",".$modHost);     
         }
     }
     protected function isEmpty($key,$data)
@@ -389,6 +391,8 @@ class manageProject extends initialDb
         
         foreach($documentsInDb as $key => $value)
         {
+            $curretDateTime=date('Y-m-d H:i:s');
+            $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
             $idInDb=(string)$value['ID'];
             foreach($sendedDoc as $id => $data)
             {
@@ -405,8 +409,8 @@ class manageProject extends initialDb
                 // UPDATE - DELETE WSK_U=1
                 //echo "[DB=${idInDb}]NOT FOUND SET WSK_U=1\n";
                 $this->query(
-                     'UPDATE projekt_dok SET wsk_u=? WHERE id_projekt=? AND id=?',
-                     '1,'.$idProject.','.$idInDb); 
+                     'UPDATE projekt_dok SET wsk_u=?,mod_data=?,mod_user=?,mod_user_id=?,mod_host=? WHERE id_projekt=? AND id=?',
+                     '1,'.$curretDateTime.",".$_SESSION["username"].",".$_SESSION["userid"].",".$modHost.",".$idProject.','.$idInDb); 
             }
             $found=false;
             //print_r($value);
@@ -734,6 +738,8 @@ class manageProject extends initialDb
     protected function addProjectDok($id)
     {
         //echo __METHOD__."\n";
+        $curretDateTime=date('Y-m-d H:i:s');
+        $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
         $docCounter=1;
         if(!$this->err)
         {
@@ -749,7 +755,7 @@ class manageProject extends initialDb
                         $tmp[1]=$tmp[0];
                         $tmp[0]=$docCounter;
                     }   
-                    $this->query('INSERT INTO projekt_dok (id_projekt,nazwa) VALUES (?,?)',$id.",".$tmp[1]);    
+                    $this->query('INSERT INTO projekt_dok (id_projekt,nazwa,mod_data,mod_user,mod_user_id,mod_host) VALUES (?,?,?,?,?,?)',$id.",".$tmp[1].",".$curretDateTime.",".$_SESSION["username"].",".$_SESSION["userid"].",".$modHost);    
                     
                     if($this->getError()!=='')
                     {

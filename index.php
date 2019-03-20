@@ -64,11 +64,16 @@ else
                                 $appLoadData['JS2']='/js/parseFieldValue.js';
                                 $appLoadData['JS3']='/js/projekty.js';
                             break;
-                        // PRACOWNICY [LOG_INTO_PRAC]
+                         // PRACOWNICY [LOG_INTO_PRAC]
                         case 4:
                                 $parm='LOG_INTO_PRAC';
                                 $appLoadData['VIEW']='/view/vPracownicy.php';
                                 $appLoadData['JS']='/js/pracownicy.js';
+                            break;
+                        // ADMINISTRATOR [LOG_INTO_APP]
+                        case 5:
+                                $parm='LOG_INTO_APP';
+                                $appLoadData['VIEW']='/view/vAdministrator.php';
                             break;
                         // UZYTKOWNICY [LOG_INTO_UZYT]
                         case 6:
@@ -133,5 +138,6 @@ function loadFileDependinfOfType($key,$file,$dbLink)
     else
     {
         include($DOC_ROOT.$file);
+       
     }
 }

@@ -2820,6 +2820,7 @@ function setLoadInfo(task)
     console.log('---setLoadInfo()---\n'+task);
     switch(task)
     {
+        case 'sendEmail':
         case 'addNewProject':
             var infoDiv=document.getElementById('ProjectAdaptedBodyExtra');
             removeNodeChilds(infoDiv);

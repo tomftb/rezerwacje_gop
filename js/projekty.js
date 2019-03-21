@@ -2427,11 +2427,13 @@ function addInput(name,value,type)
 {
     //console.log('---addInput()---');
     inputAttribute[0][1]=type;
-    inputAttribute[1][1]='form-control mb-1';
+    inputAttribute[1][1]='form-control mb-0';
     inputAttribute[2][1]=name;
     inputAttribute[3][1]=name;
     inputAttribute[4][1]=value;
     inputAttribute[5][1]='Wprowadź';
+    inputAttribute[6][0]='no-readOnly';
+    inputAttribute[7][0]='no-disabled';
     var inp=createHtmlElement('input',inputAttribute,null,inputStyle);
     return(inp);
 }

@@ -690,6 +690,7 @@ function createNewProjectViewFields(elementWhereAppend,formName)
                 inputElement.onblur=function()
                 {
                     parseFieldValue(this,null,null);
+                    checkIsErr();
                 };
                 div1Element.appendChild(inputElement);
                 div1Element.appendChild(divErr);
@@ -892,6 +893,7 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
                 inputElement.onblur=function()
                 {
                     parseFieldValue(this,null,null);
+                    checkIsErr();
                 };
                 div1Element.appendChild(inputElement);
                 div1Element.appendChild(divErr);

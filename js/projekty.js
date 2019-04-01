@@ -44,12 +44,19 @@ var dokCount=0;
 var legendExtraLabels = new Array(
         ', Actual number of members : '
         );
+var systemProj='';
+var systemProjTab=new Array();
+var typProj='';
+var typProjTab=new Array();
 var currentProjectDoc=new Array();
 var projectFileds=new Array(
         new Array('hidden','','idProject'),
-        new Array('s-umowa',"Do realizacji :",'typ_umowy'),
+        new Array('s-umowa',"Do realizacji :",'rodzaj_umowy'),
         new Array('t','Numer:','numer_umowy'),
+        new Array('t','Klient:','klient_umowy'),
         new Array('t','Temat:','temat_umowy'),
+        new Array('s-typ','Typ:','typ_umowy'),
+        new Array('s-system','System:','system_umowy'),
         new Array('s-nadzor','Do kierowania grupa powołuje:','nadzor'),
         new Array('d','Termin realizacji:','term_realizacji'),
         new Array('d','Kierującego zobowiązuję do przedstawienia harmonogramu prac do dnia:','harm_data'),
@@ -171,7 +178,7 @@ function setTypOfAgreement(valueToSetup,idLabel,idListDok)
     console.log("VALUE: "+valueToSetup+"\nID ELEMENT LABEL: "+idLabel);
     //"\nID ELEMENT IN DOK LIST: "+idListDok);
     var splitValue=valueToSetup.split("|");
-    
+    console.log(splitValue);
     document.getElementById(idLabel).innerText =splitValue[1];
     try
     {
@@ -257,7 +264,10 @@ function getAjaxData(task,fieldIdToSetup,nameToSetup,addon,projectStatus)
 function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
 {
     console.log('---manageTaskAfterAjaxGet()---');
-    console.log('TASK TO RUN - '+taskToRun+'\nDATA - '+data+'\nFIELD ID - '+fieldId+'\nNAME OR ID - '+name+'\nPROJECT STATUS - '+projectStatus);
+    console.log('TASK TO RUN - '+taskToRun);
+    console.log('DATA - ');
+    console.log(data);
+    console.log('nFIELD ID - '+fieldId+'\nNAME OR ID - '+name+'\nPROJECT STATUS - '+projectStatus);
     var fields=new Array();
     switch(taskToRun)
     {
@@ -299,7 +309,6 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
         case 'gettypeofagreement': // SET GLOBAL Type Of Agreement
             fields.push('ID','Nazwa','NazwaAlt');
             TypeOfAgreementTab=getDataFromJson(data,fields);
-            TypeOfAgreementTabJson=data;
             //TypeOfAgreement=createTagWithData('select',data,id,name);
             TypeOfAgreement=createTagWithData('select',TypeOfAgreementTab,fieldId,name);
             console.log('Type Of Agreement Array:');
@@ -331,7 +340,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
                 dokCount=0;
                 currentProjectDetails=[];
                 setDisabledFields(taskToRun);
-                fields.push('id','create_date','typ_umowy','typ_umowy_alt','numer_umowy','temat_umowy','kier_grupy','kier_grupy_id','term_realizacji','harm_data','koniec_proj','nadzor','nadzor_id','kier_osr','kier_osr_id','technolog','technolog_id','r_dane','j_dane','create_user','mod_user','dat_kor');
+                fields.push('id','create_date','rodzaj_umowy','rodzaj_umowy_alt','numer_umowy','temat_umowy','kier_grupy','kier_grupy_id','term_realizacji','harm_data','koniec_proj','nadzor','nadzor_id','kier_osr','kier_osr_id','technolog','technolog_id','r_dane','j_dane','create_user','mod_user','dat_kor','klient','typ','system');
                 currentProjectDetails=getDataFromJson(data[0],fields);
                 fields=[];
                 fields.push('ID','NAZWA');
@@ -360,10 +369,13 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
              * data[3] = DODATKOWE DOKUMENTY 
              * data[4] = GLOWNY TECHNOLOG
              * data[5] = KIEROWNIK OSRODKA
+             * data[6] = SLOWNIK TYP UMOWY
+             * data[7] = SLOWNIK TYP SYSTEMU
              */
             //console.log(data[0]);
             //console.log(data[1]);
-            manageTaskAfterAjaxGet('gettypeofagreement',data[0],'typ_umowy','typ_umowy','n');
+            
+            manageTaskAfterAjaxGet('gettypeofagreement',data[0],'rodzaj_umowy','rodzaj_umowy','n');
             //console.log(data[2]);
             manageTaskAfterAjaxGet('getprojectsleader',data[1],'nadzor','nadzor','n');
             //console.log(data[3]);
@@ -372,7 +384,13 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
             manageTaskAfterAjaxGet('getadditionaldictdoc',data[3],'dokPowiazane','dokPowiazane','n');
             manageTaskAfterAjaxGet('getprojectgltech',data[4],'gl_tech','gl_tech','n');
             manageTaskAfterAjaxGet('getprojectglkier',data[5],'gl_kier','gl_kier','n');
-            createNewProjectView(document.getElementById('ProjectAdaptedDynamicData'),'addNewProject');
+            fields=['ID','Nazwa'];
+            console.log(fields);
+            systemProjTab=getDataFromJson(data[7],fields);
+            systemProj=createTagWithData('select',systemProjTab,'system_umowy','system_umowy');
+            typProjTab=getDataFromJson(data[6],fields);
+            typProj=createTagWithData('select',typProjTab,'typ_umowy','typ_umowy');
+            createNewProjectView(document.getElementById('ProjectAdaptedDynamicData'),'addProject');
             break;
         case 'getpdf':
             alert(data);
@@ -410,6 +428,7 @@ function manageTaskAfterAjaxGet(taskToRun,data,fieldId,name,projectStatus)
             break;
     }
 }
+
 function setButtonDisplay(element,perm,userPerm)
 {
     //console.log('---setButtonDisplay()---');
@@ -583,7 +602,7 @@ function createProjectDocViewFields(elementWhereAppend,taskToRun)
 	);
     labelAttribute[0][1]='inputProject'+i;
     labelElement=createHtmlElement('label',labelAttribute,labelClass,null);  
-    labelElement.innerText=projectFileds[9][1];
+    labelElement.innerText=projectFileds[15][1];
     div1Element=createHtmlElement('div',div1,null,null);
    
     elementWhereAppend.appendChild(labelElement);
@@ -680,7 +699,7 @@ function createNewProjectViewFields(elementWhereAppend,formName)
                 inputAttribute[0][1]='hidden'; 
                 break;
             case 's-umowa':
-                TypeOfAgreement.onchange = function() { setTypOfAgreement(this.value,projectFileds[8][0],projectFileds[9][0]); };
+                TypeOfAgreement.onchange = function() { setTypOfAgreement(this.value,projectFileds[11][0],projectFileds[12][0]); };
                 div1Element.appendChild(TypeOfAgreement);
                 break;
             case't':
@@ -711,6 +730,12 @@ function createNewProjectViewFields(elementWhereAppend,formName)
                 text = document.createTextNode(tmpArray[1]);
                 labelElement.appendChild(text);
                  div1Element.appendChild(ManagerProj);
+                break;
+            case 's-system':
+                    div1Element.appendChild(systemProj);
+                break;
+            case 's-typ':
+                    div1Element.appendChild(typProj);
                 break;
             case 's-gltech':
                  div1Element.appendChild(gltechProj);
@@ -813,7 +838,7 @@ function createProjectDetailView(elementWhereAdd,taskToRun,projectStatus)
 
 function createProjectDetailViewFields(elementWhereAppend,taskToRun)
 {
-    console.log('---createProjectDetailViewFields---');
+    console.log('---createProjectDetailViewFields()---');
     inputClass[0]='mb-1';
     //console.log(elementWhereAppend);
     console.log(currentProjectDetails);
@@ -872,7 +897,7 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
                 currentDataArray=Array (0,currentProjectDetails[0][2],currentProjectDetails[0][3]);
                 rebuildedArray=(rebuildDataInArray(TypeOfAgreementTab,1,currentDataArray,1));
                 newSelect=createSelect(rebuildedArray,projectFileds[i][2],projectFileds[i][2]);
-                newSelect.onchange = function() { setTypOfAgreement(this.value,projectFileds[8][0],projectFileds[9][0]); };
+                newSelect.onchange = function() { setTypOfAgreement(this.value,projectFileds[11][0],projectFileds[12][0]); };
                 div1Element.appendChild(newSelect);
                 break;
             case 's-glkier':// CREATE REBUILD TASK
@@ -915,6 +940,18 @@ function createProjectDetailViewFields(elementWhereAppend,taskToRun)
                 rebuildedArray=(rebuildDataInArray(ManagerProjTab,0,currentDataArray,0));
                 div1Element.appendChild(createSelect(rebuildedArray,projectFileds[i][2],projectFileds[i][2]));
                 //div1Element.appendChild(ManagerProj);
+                break;
+            case 's-system':
+                currentDataArray=Array (0,currentProjectDetails[0][24]);
+                rebuildedArray=(rebuildDataInArray(systemProjTab,1,currentDataArray,1));
+                newSelect=createSelect(rebuildedArray,projectFileds[i][2],projectFileds[i][2]);
+                div1Element.appendChild(newSelect);
+                break;
+            case 's-typ':
+                currentDataArray=Array (0,currentProjectDetails[0][23]);
+                rebuildedArray=(rebuildDataInArray(typProjTab,1,currentDataArray,1));
+                newSelect=createSelect(rebuildedArray,projectFileds[i][2],projectFileds[i][2]);
+                div1Element.appendChild(newSelect);
                 break;
             case 'd':
                 div1Element.appendChild(createDatePicker('inputProject'+i,'d-'+projectFileds[i][2],assignProjectDataToField(projectFileds[i][2])));
@@ -1024,7 +1061,7 @@ function createProjectDocList(docArray,elementWhereAppend,nrColWithData,taskToRu
                 
                 if(projectEditMode) addButtonAvaliable=true;
                 break;
-            case 'addNewProject':
+            case 'addProject':
                 addButtonAvaliable=true;
             default:
                 break;
@@ -1164,7 +1201,7 @@ function createDocListRow(elementWhereAppend,inputElement,taskToRun)
                 removeMode=true;
             };
             break;
-        case 'addNewProject':
+        case 'addProject':
                 removeMode=true;
             break;
         default:
@@ -1201,7 +1238,7 @@ function assignProjectDataToField(fieldId)
         case 'idProject':
             valueToReturn=currentProjectDetails[0][0];
             break;
-        case 'typ_umowy':
+        case 'rodzaj_umowy':
             valueToReturn=currentProjectDetails[0][2];
             break;
         case 'numer_umowy':
@@ -1224,6 +1261,9 @@ function assignProjectDataToField(fieldId)
             break;
         case 'nadzor':
              valueToReturn=currentProjectDetails[0][11];
+            break;
+        case 'klient_umowy':
+             valueToReturn=currentProjectDetails[0][22];
             break;
         default:
             break;
@@ -2459,7 +2499,7 @@ function createSelect(dataArray,fieldId,fieldName)
     {
         //console.log(dataArray[i][fieldsToSetup[0]]+" - "+dataArray[i][fieldsToSetup[1]]);
         option=document.createElement("OPTION");
-        if(fieldName==='typ_umowy')
+        if(fieldName==='rodzaj_umowy')
         {
             //console.log(dataArray[i][2]);
             option.setAttribute("value",dataArray[i][0]+'|'+dataArray[i][1]+"|"+dataArray[i][2]);
@@ -2742,6 +2782,7 @@ function postDataToUrl(nameOfForm)
             console.log('TEMAT UMOWY: '+document.getElementById('temat_umowy').value);
             parseFieldValue( document.getElementById('temat_umowy').value,"temat_umowy","errDiv-temat_umowy");
             parseFieldValue( document.getElementById('numer_umowy').value,"numer_umowy","errDiv-numer_umowy");
+            parseFieldValue( document.getElementById('klient_umowy').value,"klient_umowy","errDiv-klient_umowy");
         case 'setprojectdocuments':
             //console.log(dataForm);
             if(checkIsErr())
@@ -2751,7 +2792,7 @@ function postDataToUrl(nameOfForm)
             };
             confirmTask=true;
             break;
-        case 'addNewProject':
+        case 'addProject':
             parseFieldValue( document.getElementById('temat_umowy').value,"temat_umowy","errDiv-temat_umowy");
             parseFieldValue( document.getElementById('numer_umowy').value,"numer_umowy","errDiv-numer_umowy");
             if(checkIsErr())
@@ -2825,7 +2866,7 @@ function setLoadInfo(task)
     switch(task)
     {
         case 'sendEmail':
-        case 'addNewProject':
+        case 'addProject':
             var infoDiv=document.getElementById('ProjectAdaptedBodyExtra');
             removeNodeChilds(infoDiv);
             var img = document.createElement("img");
@@ -2885,7 +2926,7 @@ function closeFormModal(nameOfForm,errDivAjax)
                 $('#ProjectAdaptedModal').modal('hide'); 
                 break;
             case 'closeProject':
-            case 'addNewProject':   
+            case 'addProject':   
             case 'removeProject':
             case 'setprojectdetails':   
                 getAjaxData('getprojects','test','test');
@@ -2911,7 +2952,7 @@ function stopFormModal(nameOfForm,errDivAjax,response)
             
             case 'addTeamToProject':
             case 'setprojectdetails':
-            case 'addNewProject':
+            case 'addProject':
                 //var divButton=document.getElementById('ProjectAdaptedButtonsBottom');
                 //removeHtmlChilds(divButton);  
                 //createBodyButtonContent(divButton,'addNewProjectErr','noValue',null);
@@ -3052,10 +3093,10 @@ function editForm(elementWhereChange,taskToRun,editButton,formName)
 }
 getAjaxData('getProjectDefaultValues','','','','');
 getAjaxData('getprojects','','','','');
-getAjaxData('getprojectgltech','','nadzor','','');
-getAjaxData('getprojectglkier','','kier_grupy','','');
-getAjaxData('getprojectsleader','','nadzor','','');
-getAjaxData('getprojectsmanager','','kier_grupy','','');
-getAjaxData('gettypeofagreement','','typ_umowy','','');
-getAjaxData('getprojectsmember','','czlonek_grupy','','');//projectsmember
-getAjaxData('getadditionaldictdoc','','dodatkowe_dokumenty','','');//inputPdf8
+//getAjaxData('getprojectgltech','','nadzor','','');
+//getAjaxData('getprojectglkier','','kier_grupy','','');
+//getAjaxData('getprojectsleader','','nadzor','','');
+//getAjaxData('getprojectsmanager','','kier_grupy','','');
+//getAjaxData('gettypeofagreement','','rodzaj_umowy','','');
+//getAjaxData('getprojectsmember','','czlonek_grupy','','');//projectsmember
+//getAjaxData('getadditionaldictdoc','','dodatkowe_dokumenty','','');//inputPdf8

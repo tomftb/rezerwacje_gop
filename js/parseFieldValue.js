@@ -29,6 +29,7 @@ function parseFieldValue(data,fieldType,errDivAlt)
     switch(typeOfValueToParse[0])
     {
         case 'extra':
+        case 'klient_umowy':
         case 'numer_umowy':
         case 'temat_umowy':
             regExp(valueToParse,typeOfValueToParse[0],"^[\\da-zA-Z'"+plChars+"][\\/\\-\\_\\s\\da-zA-Z"+plChars+"]*[\\.\\s\\da-zA-Z"+plChars+"]{1}$",errDiv);

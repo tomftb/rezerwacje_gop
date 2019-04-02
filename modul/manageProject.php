@@ -863,7 +863,7 @@ class manageProject extends initialDb
         $filter="%${filter}%";
         $valueToReturn=array();
         // OR typ LIKE (?) OR system LIKE (?)
-        $this->query('SELECT * FROM v_all_proj_v7 WHERE wskU=? AND (id LIKE (?) OR numer_umowy LIKE (?) OR temat_umowy LIKE (?) OR kier_grupy LIKE (?) OR nadzor LIKE (?) OR term_realizacji LIKE (?) OR harm_data LIKE (?) OR koniec_proj LIKE (?) OR StatusName LIKE (?) OR StatusName LIKE (?) OR klient LIKE (?)) ORDER BY id desc'
+        $this->query('SELECT * FROM v_all_proj_v7 WHERE wskU=? AND (id LIKE (?) OR numer_umowy LIKE (?) OR temat_umowy LIKE (?) OR kier_grupy LIKE (?) OR nadzor LIKE (?) OR term_realizacji LIKE (?) OR typ LIKE (?) OR koniec_proj LIKE (?) OR StatusName LIKE (?) OR StatusName LIKE (?) OR klient LIKE (?)) ORDER BY id desc'
                 ,$wskU.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter); //.",".$filter.",".$filter
         array_push($valueToReturn,$this->queryReturnValue());
         array_push($valueToReturn,$_SESSION['perm']);

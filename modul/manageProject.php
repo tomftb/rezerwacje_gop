@@ -579,7 +579,7 @@ class manageProject extends initialDb
                 $this->addProjectDok($this->queryLastId());  
                 $this->mail=NEW email();
                 $errHeader='Projekt został założony. Niestety pojawiły się błędy w wysłaniu powiadomienia.';
-                $err=$this->mail->sendMail($this->cNewProjSubjectMail(),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
+                $err=$this->mail->sendMail($this->cNewProjSubjectMail($this->inpArray['klient_umowy'].', '.$this->inpArray['temat_umowy'].', '.$typ_um[1]),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
                 if($err)
                 {
                     $this->err.=$err;
@@ -590,22 +590,32 @@ class manageProject extends initialDb
     protected function sendMailToPers($POST)
     {
         $this->parsePostData($POST);
-        $this->query('SELECT * FROM v_all_proj_v5 WHERE id=?',$this->inpArray['id']);
+        $this->query('SELECT * FROM v_all_proj_v7 WHERE id=?',$this->inpArray['id']);
         $projectData=$this->queryReturnValue();
         //print_r($projectData);
         $this->projPrac['nadzor']=$projectData[0]['nadzor'];
         $this->projPrac['kier_grupy']=$projectData[0]['kier_grupy'];
         $this->projPrac['gl_tech']=$projectData[0]['technolog'];
         $this->projPrac['gl_kier']=$projectData[0]['kier_osr'];
+        
         $this->inpArray['r_dane']=$projectData[0]['r_dane'];
         $this->inpArray['j_dane']=$projectData[0]['j_dane'];
         $this->inpArray['temat_umowy']=$projectData[0]['temat_umowy'];
+        $this->inpArray['klient_umowy']=$projectData[0]['klient'];
+        $this->inpArray['system_umowy']=$projectData[0]['system'];
+        $this->inpArray['typ_umowy']=$projectData[0]['typ'];
+        $this->inpArray['d-term_realizacji']=$projectData[0]['term_realizacji'];
+        $this->inpArray['numer_umowy']=$projectData[0]['numer_umowy'];
         $this->query('SELECT * FROM v_proj_prac_team_group WHERE idProjekt=?',$this->inpArray['id']);
         $projectData=$this->queryReturnValue();
-        $this->projPrac['team']=$projectData[0]['NazwiskoImie'];
+        //print_r($projectData);
+        if(count($projectData)>0)
+        {
+            $this->projPrac['team']=$projectData[0]['NazwiskoImie'];
+        }
         $this->mail=NEW email();
         $errHeader='Pojawiły się błędy w wysłaniu powiadomienia.';
-        $err=$this->mail->sendMail($this->cRepeatInfoSubjectMail(),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
+        $err=$this->mail->sendMail($this->cRepeatInfoSubjectMail($this->inpArray['klient_umowy'].', '.$this->inpArray['temat_umowy'].', '.$this->inpArray['typ_umowy']),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
         if($err)
         {
             $this->err.=$err;
@@ -690,17 +700,17 @@ class manageProject extends initialDb
         //print_r($recEmail);
         return ($recEmail);
     }
-    protected function cNewProjSubjectMail()
+    protected function cNewProjSubjectMail($head)
     {
-        return('Zgłoszenie na utworzenie udziału dla Projektu');
+        return($head.'. Zgłoszenie na utworzenie udziału dla Projektu');
     }
-    protected function cRepeatInfoSubjectMail()
+    protected function cRepeatInfoSubjectMail($head)
     {
-        return('Powtórne powiadomienie o utworzonym udziale dla Projektu');
+        return($head.'. Powtórne powiadomienie o utworzonym udziale dla Projektu');
     }
-    protected function cUpdateProjSubjectMail()
+    protected function cUpdateProjSubjectMail($head)
     {
-        return('Zgłoszenie na aktualizację udziału dla Projektu');
+        return($head.'. Zgłoszenie na aktualizację udziału dla Projektu');
     }
     protected function cUpdateProjTeamSubjectMail()
     {
@@ -830,7 +840,7 @@ class manageProject extends initialDb
                 $this->inpArray['typ_umowy']=$typ_um[1];
                 $this->mail=NEW email();
                 $errHeader='Projekt został zaktualizowany. Niestety pojawiły się błędy w wysłaniu powiadomienia.';
-                $err=$this->mail->sendMail($this->cUpdateProjSubjectMail(),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
+                $err=$this->mail->sendMail($this->cUpdateProjSubjectMail($this->inpArray['klient_umowy'].', '.$this->inpArray['temat_umowy'].', '.$typ_um[1]),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
                 if($err)
                 {
                     $this->err.=$err;

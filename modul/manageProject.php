@@ -880,7 +880,7 @@ class manageProject extends initialDb
     public function getProjectDetails($idProject)
     {
         $valueToReturn=array();
-        $this->query('SELECT * FROM v_all_proj_v6 WHERE id=?',$idProject);
+        $this->query('SELECT * FROM v_all_proj_v7 WHERE id=?',$idProject);
        
         array_push($valueToReturn,$this->queryReturnValue());
         $this->query('SELECT ID,NAZWA FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$idProject);

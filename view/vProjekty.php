@@ -130,13 +130,14 @@
         <small class="modal-title text-left text-secondary pl-1 pb-2" id="fieldModalLabel">Legenda:</small> 
             <ul class="text-secondary font-weight-normal small" style="list-style-type:square;">
                 <li>A - litera alfabetu, C - cyfra</li>
-                <li>Numer,temat i dokument:</li>
+                <li>Numer,klient, temat i dokument:</li>
                     <ul style="list-style-type:disc;">
                         <li>może się zacząć A|C</li>
                         <li>może zawierać A,C,/,_,- i spacje</li>
                         <li>może się zakończyć .</li>
                     </ul>
                 <li>Numer - max 20 znaków.</li>
+                <li>Klient - max 100 znaków.</li>
                 <li>Temat - max 100 znaków.</li>
                 <li>Dokument - max 30 znaków</li>
             </ul>

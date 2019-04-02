@@ -182,8 +182,8 @@ function setTypOfAgreement(valueToSetup,idLabel,idListDok)
     document.getElementById(idLabel).innerText =splitValue[1];
     try
     {
-        document.getElementById("typOfAgreement").innerHTML =splitValue[2];
-        document.getElementById("inputtypOfAgreement").value =splitValue[0]+"|"+splitValue[2];
+        //document.getElementById("typOfAgreement").innerHTML =splitValue[2];
+        //document.getElementById("inputtypOfAgreement").value =splitValue[0]+"|"+splitValue[2];
     }
     catch(err)
     {
@@ -752,9 +752,9 @@ function createNewProjectViewFields(elementWhereAppend,formName)
                 break;
             case 'l-dok':
                 console.log(AddDictDocTab);
-                div1Element.appendChild(AddDictDoc);
-                createHiddenInputs(AddDictDocTab,div1Element,'addDoc');
-                AddDictDocTab=[];
+                //div1Element.appendChild(AddDictDoc);
+                //createHiddenInputs(AddDictDocTab,div1Element,'addDoc');
+                //AddDictDocTab=[];
                 createProjectDocList(AddDictDocTab,div1Element,1,formName);
                 break;
             case 'n':   
@@ -2795,6 +2795,7 @@ function postDataToUrl(nameOfForm)
         case 'addProject':
             parseFieldValue( document.getElementById('temat_umowy').value,"temat_umowy","errDiv-temat_umowy");
             parseFieldValue( document.getElementById('numer_umowy').value,"numer_umowy","errDiv-numer_umowy");
+            parseFieldValue( document.getElementById('klient_umowy').value,"klient_umowy","errDiv-klient_umowy");
             if(checkIsErr())
             {
                 console.log("err is true");

@@ -2541,7 +2541,7 @@ function createSelect2(dataArray,fieldId,fieldName)
 }
 function setAllProjects(data)
 {
-   // console.log('getAllProjects');
+    console.log('---setAllProjects()---');
     myFunction(data);
     function myFunction(arr)
     {
@@ -2614,7 +2614,7 @@ function setAllProjects(data)
                 }
             }
             
-            out+="<tr id=\"project"+arr[i].id+"\"><th scope=\"row\">"+arr[i].id+"</th><td>"+arr[i].numer_umowy+"</td><td>"+arr[i].klient+"</td><td>"+arr[i].temat_umowy+"</td><td>"+arr[i].create_date+"</td><td>"+arr[i].kier_grupy+"</td><td>"+arr[i].nadzor+"</td><td>"+arr[i].term_realizacji+"</td><td>"+arr[i].harm_data+"</td><td>"+arr[i].koniec_proj+"</td><td>"+statusProj+"</td><td><div class=\"btn-group\">"+button+"</div></td></tr>";
+            out+="<tr id=\"project"+arr[i].id+"\"><th scope=\"row\">"+arr[i].id+"</th><td>"+arr[i].numer_umowy+"</td><td>"+arr[i].klient+"</td><td>"+arr[i].temat_umowy+"</td><td>"+arr[i].typ+"</td><td>"+arr[i].create_date+"</td><td>"+arr[i].kier_grupy+"</td><td>"+arr[i].nadzor+"</td><td>"+arr[i].term_realizacji+"</td><td>"+arr[i].koniec_proj+"</td><td>"+statusProj+"</td><td><div class=\"btn-group\">"+button+"</div></td></tr>";
             button='';
         }
         document.getElementById("projectData").innerHTML = out;

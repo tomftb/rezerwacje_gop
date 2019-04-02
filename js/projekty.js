@@ -2614,7 +2614,7 @@ function setAllProjects(data)
                 }
             }
             
-            out+="<tr id=\"project"+arr[i].id+"\"><th scope=\"row\">"+arr[i].id+"</th><td>"+arr[i].numer_umowy+"</td><td>"+arr[i].temat_umowy+"</td><td>"+arr[i].create_date+"</td><td>"+arr[i].kier_grupy+"</td><td>"+arr[i].nadzor+"</td><td>"+arr[i].term_realizacji+"</td><td>"+arr[i].harm_data+"</td><td>"+arr[i].koniec_proj+"</td><td>"+statusProj+"</td><td><div class=\"btn-group\">"+button+"</div></td></tr>";
+            out+="<tr id=\"project"+arr[i].id+"\"><th scope=\"row\">"+arr[i].id+"</th><td>"+arr[i].numer_umowy+"</td><td>"+arr[i].klient+"</td><td>"+arr[i].temat_umowy+"</td><td>"+arr[i].create_date+"</td><td>"+arr[i].kier_grupy+"</td><td>"+arr[i].nadzor+"</td><td>"+arr[i].term_realizacji+"</td><td>"+arr[i].harm_data+"</td><td>"+arr[i].koniec_proj+"</td><td>"+statusProj+"</td><td><div class=\"btn-group\">"+button+"</div></td></tr>";
             button='';
         }
         document.getElementById("projectData").innerHTML = out;
@@ -2929,7 +2929,8 @@ function closeFormModal(nameOfForm,errDivAjax)
             case 'addProject':   
             case 'removeProject':
             case 'setprojectdetails':   
-                getAjaxData('getprojects','test','test');
+                //getAjaxData('getprojects','test','test');
+                getAjaxData('getprojectslike','','','','');
                 $('#ProjectAdaptedModal').modal('hide'); 
                 break;
             case 'setprojectdocuments':
@@ -3042,7 +3043,8 @@ $(document).keyup(function(e)
     if (e.key === "Escape")
     { // escape key maps to keycode `27`
         //setDefault(); NO MORE AVALIABLE
-        getAjaxData('getprojects','','','','');
+        //getAjaxData('getprojects','','','','');
+        getAjaxData('getprojectslike','','','','');
     }
 });
 function closeNode(nodeToClose,clearErr)
@@ -3092,7 +3094,8 @@ function editForm(elementWhereChange,taskToRun,editButton,formName)
     console.log(elementWhereChange);
 }
 getAjaxData('getProjectDefaultValues','','','','');
-getAjaxData('getprojects','','','','');
+//getAjaxData('getprojects','','','','');
+getAjaxData('getprojectslike','','','','');
 //getAjaxData('getprojectgltech','','nadzor','','');
 //getAjaxData('getprojectglkier','','kier_grupy','','');
 //getAjaxData('getprojectsleader','','nadzor','','');

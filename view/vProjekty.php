@@ -32,6 +32,7 @@
             <tr>
               <th scope="col">ID</th>
               <th scope="col">Numer</th>
+              <th scope="col">Klient</th>
               <th scope="col">Temat</th>
               <th scope="col">Data utworzenia</th>
               <th scope="col">Lider</th>

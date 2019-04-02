@@ -419,8 +419,8 @@ class dbManage
 				//$data=trim($data); // ltrim
 				if($lvl==0 && $data!='')
 				{
-					
-					$patterns = array('/\//','/\#/'); // nie moze byc backslash '/\*/', -- select * from
+					$patterns = array('/\#/');
+					//$patterns = array('/\//','/\#/'); // nie moze byc backslash '/\*/', -- select * from
 					foreach($patterns as $value)
 					{
 						//echo $value."</br>";

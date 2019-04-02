@@ -56,7 +56,7 @@
         <div class="modal-content" style="border:0px solid red">
           <div class="modal-header" id="ProjectAdaptedBgTitle">
             <h2 class="modal-title" id="fieldModalLabel"><span class="text-white" id="ProjectAdaptedTextTitle">USUWANIE PROJEKTU:</span></h2> 
-                <button type="button" class="close mr-0" data-dismiss="modal" aria-label="Close" onclick="getAjaxData('getprojects','','','','')">
+                <button type="button" class="close mr-0" data-dismiss="modal" aria-label="Close" onclick="getAjaxData('getprojectslike','','','&filter='+this.value,null)">
                     <i class="fa fa-times" aria-hidden="true"></i>
                 </button>
             </div>
@@ -116,7 +116,7 @@
     <div class="form-group row mb-0" id="addProjectModalDetailButtons">
        <div class=" col-sm-12" style="border:0px solid green;" >
            <div class="btn-group pull-right">
-                <button class="btn btn-dark" data-dismiss="modal" onclick="getAjaxData('getprojects','','','','')">Anuluj</button>
+                <button class="btn btn-dark" data-dismiss="modal" onclick="getAjaxData('getprojectslike','','','&filter='+this.value,null)">Anuluj</button>
                 <button id="sendDataBtn" class="btn btn-info" >Edytuj</button>
            </div>
        </div>

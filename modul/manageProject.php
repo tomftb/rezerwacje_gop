@@ -838,6 +838,7 @@ class manageProject extends initialDb
                 $this->updateProjectDoc($projectPost,$idProject); 
                 $this->inpArray['system_umowy']=$sys_um[1];
                 $this->inpArray['typ_umowy']=$typ_um[1];
+                //echo $typ_um[1]."\n";
                 $this->mail=NEW email();
                 $errHeader='Projekt został zaktualizowany. Niestety pojawiły się błędy w wysłaniu powiadomienia.';
                 $err=$this->mail->sendMail($this->cUpdateProjSubjectMail($this->inpArray['klient_umowy'].', '.$this->inpArray['temat_umowy'].', '.$typ_um[1]),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);

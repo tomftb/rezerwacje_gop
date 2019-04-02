@@ -34,11 +34,12 @@
               <th scope="col">Numer</th>
               <th scope="col">Klient</th>
               <th scope="col">Temat</th>
+              <th scope="col">Typ</th>
               <th scope="col">Data utworzenia</th>
               <th scope="col">Lider</th>
               <th scope="col">Manager</th>
               <th scope="col">Termin realizacji</th>
-              <th scope="col">Termin harmonogram</th>
+              <!--<th scope="col">Termin harmonogram</th>-->
               <th scope="col">Koniec projektu</th>
               <th scope="col">Status</th>
               <th scope="col">Opcje</th>

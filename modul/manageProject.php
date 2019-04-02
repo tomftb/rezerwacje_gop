@@ -557,7 +557,9 @@ class manageProject extends initialDb
             // EXPLODE FIELDS:
             $rodzaj_umowy=explode('|',$this->inpArray['rodzaj_umowy']);
             $typ_um=explode('|',$this->inpArray['typ_umowy']);
+            $this->inpArray['typ_umowy']=$typ_um[1];
             $sys_um=explode('|',$this->inpArray['system_umowy']);
+            $this->inpArray['system_umowy']=$sys_um[1];
             $this->setProjPrac();
             $curretDateTime=date('Y-m-d H:i:s');
             $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
@@ -573,6 +575,7 @@ class manageProject extends initialDb
             }
             else
             {
+                
                 $this->addProjectDok($this->queryLastId());  
                 $this->mail=NEW email();
                 $errHeader='Projekt został założony. Niestety pojawiły się błędy w wysłaniu powiadomienia.';
@@ -705,13 +708,21 @@ class manageProject extends initialDb
     }
     protected function cProjBodyMail()
     {
+        //print_r($this->inpArray);
         $quota=$this->inpArray['r_dane']*30;
-        $mailBody="Zarejestrowano zgłoszenie na utworzenie nowego projektu o specyfikacji:\n\nNazwa projektu\t\t-\t".$this->inpArray['temat_umowy']."\n";
-        $mailBody.="Rozmiar pliku bazowego\t- \t".$this->inpArray['r_dane']." ".$this->inpArray['j_dane']."\n";
-        $mailBody.="Sugerowana quota\t- \t".$quota." ".$this->inpArray['j_dane']."\n";
-        $mailBody.="Przypisani użytkownicy\t- \t".$this->getProjPracList()."\n\n";
+        $mailBody="Zarejestrowano zgłoszenie na utworzenie nowego projektu o specyfikacji:\n\n";
+        $mailBody.="Numer\t\t-\t".$this->inpArray['numer_umowy']."\n";
+        $mailBody.="Klient\t\t-\t".$this->inpArray['klient_umowy']."\n";
+        $mailBody.="Temat\t\t-\t".$this->inpArray['temat_umowy']."\n";
+        $mailBody.="Typ\t\t-\t".$this->inpArray['typ_umowy']."\n";
+        $mailBody.="\nRozmiar pliku bazowego\t- ".$this->inpArray['r_dane']." ".$this->inpArray['j_dane']."\n";
+        $mailBody.="Sugerowana quota\t- ".$quota." ".$this->inpArray['j_dane']."\n";
+        $mailBody.="Przypisani użytkownicy\t- ".$this->getProjPracList()."\n\n";
         //$mailBody.="Przypisani użytkownicy\t- \t".$_SESSION['nazwiskoImie'].", ".$this->getProjPracList()."\n\n";
-        $mailBody.="Zgłaszający\t\t- \t".$_SESSION['nazwiskoImie']." (".$_SESSION["mail"].") ";	
+        $mailBody.="Zgłaszający\t\t- ".$_SESSION['nazwiskoImie']." (".$_SESSION["mail"].") \n";	
+        $mailBody.="\n*Katalog\t\t- ".$this->inpArray['klient_umowy']."_".$this->inpArray['temat_umowy']."_".$this->inpArray['typ_umowy']."\n";
+        $mailBody.="*System\t\t\t- ".$this->inpArray['system_umowy']."\n";
+        $mailBody.="*Termin realizacji\t- ".$this->inpArray['d-term_realizacji']."\n";
         return ($mailBody);
     }
    
@@ -801,6 +812,7 @@ class manageProject extends initialDb
             $rodzaj_umowy=explode('|',$this->inpArray['rodzaj_umowy']);
             $sys_um=explode('|',$this->inpArray['system_umowy']);
             $typ_um=explode('|',$this->inpArray['typ_umowy']);
+
             $curretDateTime=date('Y-m-d H:i:s');
             $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
             $this->query('UPDATE projekt_nowy SET rodzaj_umowy=?,rodzaj_umowy_alt=?,numer_umowy=?,temat_umowy=?,kier_grupy=?,kier_grupy_id=?,term_realizacji=?, harm_data=?, koniec_proj=?, nadzor=?,nadzor_id=?,mod_user=?,mod_user_id=?,mod_host=?, dat_kor=?,kier_osr=?,kier_osr_id=?,technolog=?,technolog_id=?,r_dane=?,j_dane=?,klient=?,typ=?,system=? WHERE id=?',
@@ -812,7 +824,10 @@ class manageProject extends initialDb
             }
             else
             {
+                //print_r($this->inpArray);
                 $this->updateProjectDoc($projectPost,$idProject); 
+                $this->inpArray['system_umowy']=$sys_um[1];
+                $this->inpArray['typ_umowy']=$typ_um[1];
                 $this->mail=NEW email();
                 $errHeader='Projekt został zaktualizowany. Niestety pojawiły się błędy w wysłaniu powiadomienia.';
                 $err=$this->mail->sendMail($this->cUpdateProjSubjectMail(),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
@@ -837,8 +852,9 @@ class manageProject extends initialDb
     {
         $filter="%${filter}%";
         $valueToReturn=array();
-        $this->query('SELECT * FROM v_all_proj_v3 WHERE wskU=? AND (id LIKE (?) OR numer_umowy LIKE (?) OR temat_umowy LIKE (?) OR kier_grupy LIKE (?) OR nadzor LIKE (?) OR term_realizacji LIKE (?) OR harm_data LIKE (?) OR koniec_proj LIKE (?) OR StatusName LIKE (?)) ORDER BY id asc'
-                ,$wskU.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter);
+        // OR typ LIKE (?) OR system LIKE (?)
+        $this->query('SELECT * FROM v_all_proj_v7 WHERE wskU=? AND (id LIKE (?) OR numer_umowy LIKE (?) OR temat_umowy LIKE (?) OR kier_grupy LIKE (?) OR nadzor LIKE (?) OR term_realizacji LIKE (?) OR harm_data LIKE (?) OR koniec_proj LIKE (?) OR StatusName LIKE (?) OR StatusName LIKE (?) OR klient LIKE (?)) ORDER BY id desc'
+                ,$wskU.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter); //.",".$filter.",".$filter
         array_push($valueToReturn,$this->queryReturnValue());
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;

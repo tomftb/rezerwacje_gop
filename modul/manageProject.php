@@ -730,12 +730,18 @@ class manageProject extends initialDb
         $mailBody.="Przypisani użytkownicy\t- ".$this->getProjPracList()."\n\n";
         //$mailBody.="Przypisani użytkownicy\t- \t".$_SESSION['nazwiskoImie'].", ".$this->getProjPracList()."\n\n";
         $mailBody.="Zgłaszający\t\t- ".$_SESSION['nazwiskoImie']." (".$_SESSION["mail"].") \n";	
-        $mailBody.="\n*Katalog\t\t- ".$this->inpArray['klient_umowy']."_".$this->inpArray['temat_umowy']."_".$this->inpArray['typ_umowy']."\n";
+        // ADD YEAR TO THE END OF DIR NAME
+        $mailBody.="\n*Katalog\t\t- ".$this->inpArray['klient_umowy']."_".$this->inpArray['temat_umowy']."_".$this->inpArray['typ_umowy']."_".$this->getYearFromData($this->inpArray['d-term_realizacji'])."\n";
         $mailBody.="*System\t\t\t- ".$this->inpArray['system_umowy']."\n";
         $mailBody.="*Termin realizacji\t- ".$this->inpArray['d-term_realizacji']."\n";
         return ($mailBody);
     }
-   
+    private function getYearFromData($date)
+    {
+        $tmp=array();
+        $tmp=explode('-',$date);
+        return $tmp[0];
+    }
    
     protected function cUpdateProjTeamBodyMail()
     {

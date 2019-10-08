@@ -67,7 +67,9 @@ function parseFieldValue(data,fieldType,errDivAlt)
         case 'email':
                 if(valueToParse.length>0)
                 {
-                    regExp(valueToParse,typeOfValueToParse[0],"^[a-zA-Z][\\d\\-\\_\\.\\s\\da-zA-Z]*@[\\da-zA-Z]{2,}.[a-zA-Z]{2,}$",errDiv);
+                    // NEW PARSE REGEX
+                    //regExp(valueToParse,typeOfValueToParse[0],"^[a-zA-Z][\\d\\-\\_\\.\\s\\da-zA-Z]*@[\\da-zA-Z]{2,}.[a-zA-Z]{2,}$",errDiv);
+                    regExp(valueToParse,typeOfValueToParse[0],"^\\w+([\\.\\-]?\\w+)*@\\w+([\\.\\-]?\\w+)*(\\.\\w{2,3})+$",errDiv);
                 }
                 else
                 {

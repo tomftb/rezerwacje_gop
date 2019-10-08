@@ -59,7 +59,7 @@ class manageProject extends initialDb
                 {
                     //echo 'NOT EMPTY'.$value."\n";
                     $tmpArray=explode('.',$value);
-                    $this->inpArray[$key]=$tmpArray[2]."-".$tmpArray[1]."-".$tmpArray[0];
+                    $this->inpArray[$key]=trim($tmpArray[2])."-".trim($tmpArray[1])."-".trim($tmpArray[0]);
                     //echo $key." - ".$this->inpArray[$key];
                 }
                 else
@@ -731,6 +731,9 @@ class manageProject extends initialDb
         //$mailBody.="Przypisani użytkownicy\t- \t".$_SESSION['nazwiskoImie'].", ".$this->getProjPracList()."\n\n";
         $mailBody.="Zgłaszający\t\t- ".$_SESSION['nazwiskoImie']." (".$_SESSION["mail"].") \n";	
         // ADD YEAR TO THE END OF DIR NAME
+        // replace white spaces to _
+        $this->inpArray['klient_umowy']=preg_replace('/ /','_',$this->inpArray['klient_umowy']);
+        $this->inpArray['temat_umowy']=preg_replace('/ /','_',$this->inpArray['temat_umowy']);
         $mailBody.="\n*Katalog\t\t- ".$this->inpArray['klient_umowy']."_".$this->inpArray['temat_umowy']."_".$this->inpArray['typ_umowy']."_".$this->getYearFromData($this->inpArray['d-term_realizacji'])."\n";
         $mailBody.="*System\t\t\t- ".$this->inpArray['system_umowy']."\n";
         $mailBody.="*Termin realizacji\t- ".$this->inpArray['d-term_realizacji']."\n";

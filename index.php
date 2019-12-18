@@ -11,7 +11,7 @@ if(checkFile($DOC_ROOT.'/modul/mValidLogin.php')) {include($DOC_ROOT.'/modul/mVa
 $loginCheck=NEW validLogin();
 $appLoadData=array();
 $parm='';
-$uid= uniqid();
+
 if(!$loginCheck->checkLoginData())
 {    
     $bgColor=$loginCheck->getBgColorValue();
@@ -128,13 +128,14 @@ function loadFiles($files,$dbLink)
 }
 function loadFileDependinfOfType($key,$file,$dbLink)
 {
+    $uid= uniqid();
     $HTTP_HOST=filter_input(INPUT_SERVER,"HTTP_HOST");
     $DOC_ROOT=filter_input(INPUT_SERVER,"DOCUMENT_ROOT");
     $HTTP = (filter_input(INPUT_SERVER,"HTTPS") ? "HTTPS://" : "HTTP://"); 
     $FURL=$HTTP.$HTTP_HOST;
     if(preg_match("/JS/i", $key))
     {
-        echo '<script type="text/javascript" src="'.$FURL.$file.'"></script>';
+        echo '<script type="text/javascript" src="'.$FURL.$file.'?'.$uid.'"></script>';
     }
     else
     {

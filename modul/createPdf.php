@@ -93,7 +93,7 @@ class PDF extends tFPDF
         $this->Cell(0,6,'temat : '.$this->prDetails['klient'].' '.$this->prDetails['temat_umowy'].' '.$this->prDetails['typ'],0,1,'C');
         $this->Cell(0,10,'',0,1,'C');
         $this->pdfBodyPartList=array(
-            array('n','Do kierowania Grupą powołuję - '.$this->prDetails['kier_grupy']),
+            array('n','Do kierowania Grupą powołuję - '.$this->prDetails['nadzor']),
             array('n','W skład Grupy włączam pracowników wyszczególnionych w F.PJ-4.9/GOP/002'),
             array('n','Termin  realizacji '.$this->prDetails['rodzaj_umowy'].' '.$this->prDetails['term_realizacji']),
             array('n','Kierującego Grupą (Lidera) zobowiązuję do przedstawienia harmonogramu prac'),
@@ -101,7 +101,7 @@ class PDF extends tFPDF
             array('n','Zobowiązuję do prowadzenia dokumentacji i zapisów zgodnie z procedurami ISO'),
             array('n','Kierującego Grupą (Lidera) zobowiązuję do zakończenia prac i napisania raportu'),
             array('','z realizacji zadania do dnia '.$this->prDetails['term_realizacji']),
-            array('n','Nadzór nad realizacją  powierzam - '.$this->prDetails['nadzor']),
+            array('n','Nadzór nad realizacją  powierzam - '.$this->prDetails['kier_grupy']),
             array('n','Wykaz powiązanych dokumentów:')
         );
     }
@@ -149,7 +149,7 @@ class PDF extends tFPDF
         $this->Cell(0,10,'',0,0,'R');
         $this->Cell(0,1,'',0,1,'C');
         $this->Cell(15);
-        $this->Cell(0,10,' '.$this->prDetails['nadzor'].' ',0,0,'L');
+        $this->Cell(0,10,' '.$this->prDetails['kier_grupy'].' ',0,0,'L');
         $this->SetRightMargin(35);
         $this->Cell(0,10,' '.$this->prMainTech['ImieNazwisko'].' ',0,0,'R');
         $this->Cell(0,2,'',0,1,'C');

@@ -1,3 +1,5 @@
+// v. 18.12.2019
+
 // origin
 var loggedUserPerm=new Array();
 var memberProjTab=new Array();
@@ -57,11 +59,11 @@ var projectFileds=new Array(
         new Array('t','Temat:','temat_umowy'),
         new Array('s-typ','Typ:','typ_umowy'),
         new Array('s-system','System:','system_umowy'),
-        new Array('s-nadzor','Do kierowania grupa powołuje:','nadzor'),
+        new Array('s-nadzor','Do kierowania grupą (Lider) powołuje:','nadzor'),
         new Array('d','Termin realizacji:','term_realizacji'),
         new Array('d','Kierującego zobowiązuję do przedstawienia harmonogramu prac do dnia:','harm_data'),
         new Array('d','Kierującego zobowiązuję do zakończenia prac i napisania raportu z realizacji zadania do dnia:','koniec_proj'),
-        new Array('s-kier','Nadzór nad realizacją | powierzam:','kier_grupy'),
+        new Array('s-kier','Nadzór nad realizacją (Manager) | powierzam:','kier_grupy'),
         new Array('s-gltech','Główny technolog: ','gl_tech'),
         new Array('s-glkier','Kierownik Ośrodka: ','gl_kier'),
         new Array('n','Rozmiar pliku bazowego: ','r_dane'),
@@ -2614,7 +2616,7 @@ function setAllProjects(data)
                 }
             }
             
-            out+="<tr id=\"project"+arr[i].id+"\"><th scope=\"row\">"+arr[i].id+"</th><td>"+arr[i].numer_umowy+"</td><td>"+arr[i].klient+"</td><td>"+arr[i].temat_umowy+"</td><td>"+arr[i].typ+"</td><td>"+arr[i].create_date+"</td><td>"+arr[i].kier_grupy+"</td><td>"+arr[i].nadzor+"</td><td>"+arr[i].term_realizacji+"</td><td>"+arr[i].koniec_proj+"</td><td>"+statusProj+"</td><td><div class=\"btn-group\">"+button+"</div></td></tr>";
+            out+="<tr id=\"project"+arr[i].id+"\"><th scope=\"row\">"+arr[i].id+"</th><td>"+arr[i].numer_umowy+"</td><td>"+arr[i].klient+"</td><td>"+arr[i].temat_umowy+"</td><td>"+arr[i].typ+"</td><td>"+arr[i].create_date+"</td><td>"+arr[i].nadzor+"</td><td>"+arr[i].kier_grupy+"</td><td>"+arr[i].term_realizacji+"</td><td>"+arr[i].koniec_proj+"</td><td>"+statusProj+"</td><td><div class=\"btn-group\">"+button+"</div></td></tr>";
             button='';
         }
         document.getElementById("projectData").innerHTML = out;
@@ -3102,5 +3104,5 @@ getAjaxData('getprojectslike','','','','');
 //getAjaxData('getprojectsleader','','nadzor','','');
 //getAjaxData('getprojectsmanager','','kier_grupy','','');
 //getAjaxData('gettypeofagreement','','rodzaj_umowy','','');
-//getAjaxData('getprojectsmember','','czlonek_grupy','','');//projectsmember
+getAjaxData('getprojectsmember','','czlonek_grupy','','');//projectsmember
 //getAjaxData('getadditionaldictdoc','','dodatkowe_dokumenty','','');//inputPdf8

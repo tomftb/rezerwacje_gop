@@ -11,7 +11,7 @@ if(checkFile($DOC_ROOT.'/modul/mValidLogin.php')) {include($DOC_ROOT.'/modul/mVa
 $loginCheck=NEW validLogin();
 $appLoadData=array();
 $parm='';
-
+$uid= uniqid();
 if(!$loginCheck->checkLoginData())
 {    
     $bgColor=$loginCheck->getBgColorValue();

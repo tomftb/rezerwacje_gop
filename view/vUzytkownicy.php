@@ -17,7 +17,7 @@
                     <h5 class="mt-2 text-secondary" >Szukaj : </h5>
                 </div>
                 <div class="sm-col-4">
-                    <input class="ml-1 form-control mt-1" onchange="getAjaxData('getuserslike','&filter='+this.value,'sUsers',null)"/>
+                    <input class="ml-1 form-control mt-1" onchange="ajax.getData('getuserslike&wsku=0&filter='+this.value)"/>
                 </div>
             </div>
         </div>

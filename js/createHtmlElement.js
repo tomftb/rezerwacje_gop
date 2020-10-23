@@ -77,3 +77,96 @@ function addStyleToHtmlTag(htmlElement,styleName,styleValue)
     };
     return(htmlElement);
 }
+function removeHtmlChilds(htmlElement)
+{
+    console.log('---removeHtmlChilds()---');
+    while (htmlElement.firstChild)
+    {
+        //console.log(htmlElement.firstChild);
+        htmlElement.firstChild.remove(); 
+    };
+}
+function setButton(stat,btn)
+{
+    /*
+     * 
+     * STAT => Status true/false
+     */
+    /*
+     * GET BY ID
+     */
+    //var element = document.getElementById(idButton);
+    //var element = document.getElementById("sendDataBtn");
+    if(stat)
+    {
+        /*
+         * ENABLED
+         */
+        console.log("button disabled");
+        btn.classList.remove("disabled");
+        btn.removeAttribute('disabled');
+        //element.classList.remove("disabled");
+        //element.removeAttribute('disabled');
+    }
+    else
+    {
+        /*
+         * DISABLED
+         */
+        console.log("button enabled");
+        btn.classList.add("disabled");
+        btn.setAttribute("disabled", "TRUE");
+        //element.classList.add("disabled");
+        //element.setAttribute("disabled", "TRUE");
+    };
+    console.log(btn);
+}
+function showDiv(div,value)
+{
+    console.log('---showDivErr()---');
+    div.innerHTML=value;
+    div.style.display = "block";
+}
+function hideDiv(div)
+{
+    console.log('---hideDivErr()---');
+    div.innerText='';
+    div.style.display = "none";
+}
+function splitValue(value,delimiter)
+{
+    console.log('---splitValue()---');
+    if(value!==null && value!==undefined)
+    {
+        if(value.trim()!=='')
+        {
+            return value.split(delimiter);
+        }
+        else
+        {
+            return 0;
+        }
+    }  
+}
+function changeBoxValue(input)
+{
+    console.log('---changeBoxValue()---');
+    //console.log(input);
+    //console.log(input.value);
+    //console.log(typeof(input.value));
+    if(input.value==='0')
+    {
+        console.log('CHANGE TO 1');
+        input.value='1';
+    }
+    else
+    {
+        console.log('CHANGE TO 0');
+        input.value='0';
+    };
+    
+}
+function closeModal(modalId)
+{
+    $('#'+modalId).modal('hide');
+}

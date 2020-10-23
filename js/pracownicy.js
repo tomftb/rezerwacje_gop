@@ -1,10 +1,13 @@
+console.log(loggedUserPerm);
+var ajax = new Ajax();
+var error = new Error();
+var overallErr = false;
 var currentIdEmployee=0;
 var currentEmployeeData=new Array();
-var loggedUserPerm=new Array();
+//var loggedUserPerm=new Array();
 var errInputValue= new Array();
 var employeeTab=new Array();
 var employeeSloSPecTab=new Array();
-var employeeProj=new Array();
 var employeeFields=new Array(
         new Array('hidden','','idEmployee'),
         new Array('t','Imię:','imie'),
@@ -25,134 +28,192 @@ var inputAttribute= new Array(
         Array('no-disabled','')
         );
 var inputStyle=new Array();
-function getAjaxData(task,taskAddon,functionStart,idRecord)
+function manageTaskAfterAjax(d)
 {
-    console.log('---getAjaxData()---');
-    console.log("TASK : "+task+"\nTASK ADDON : "+taskAddon);
-
-    var url =  getUrl()+'modul/manageEmployee.php?task='+task+taskAddon;
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function()
-    {
-      if (this.readyState === 4 && this.status === 200)
-      {
-          parseAjaxResponse(this.responseText,task,functionStart,idRecord);
-      }
-      else
-      {
-          //console.log("error ajax"+this.status+" state - "+this.readyState);
-      }
-    };
-    xmlhttp.open("GET", url, true);
-    xmlhttp.send(); 
+    /*
+     * d => array response
+     */
+    console.log('===manageTaskAfterAjaxGet()===');
+    console.log(d);
+    // CHECK STATUS
+    console.log(error);
+    overallErr=Error.checkStatusExist(d['status']);
+    console.log(overallErr);
+    // SET SLO
+    setSlo(d);
+    // RUN FUNCTION
+    runFunction(d);
 }
-function getUrl()
+function setSlo(d)
 {
-    console.log('---getUrl()---');
-    var currentLocation = window.location;
-    return currentLocation.protocol+"//"+currentLocation.host+"/";
-}
-function parseAjaxResponse(response,task,functionStart,idRecord)
-{
-    console.log('---parseAjaxResponse()---');
-    var ajaxData = new Array();
-    try
+    console.log('===setSlo()===');
+    if(overallErr) { return ''; };
+    switch(d['data']['task'])
     {
-     }
-    catch(err)
-    {
-        //document.getElementById("demo").innerHTML = err.message;
-        console.log('NOT A JSON FILE:\nERROR: '+err);
-        console.log(response);
-    }   
-        ajaxData = JSON.parse(response);
-        if(ajaxData[0][0]==='0')
-        {
-            console.log(ajaxData[1]);
-            manageTaskAfterAjaxGet(task,ajaxData[1],functionStart,idRecord);
-        }
-        else
-        {
-            alert("[getAJaxData()]ERROR: "+ajaxData[1]);
-        };
-    
-}
-function manageTaskAfterAjaxGet(taskToRun,data,functionStart,idRecord)
-{
-    console.log('---manageTaskAfterAjaxGet()---');
-    //console.log('TASK TO RUN - '+taskToRun+'\nDATA - '+data+'\nID - '+fieldId+'\nNAME - '+name+');
-    //SET DATA TO TABLE
-    switch(taskToRun)
-    {
-        case 'getemployeeslike':
-        case 'getemployees':
+        case 'getEmployeesLike':
+        case 'getEmployees':
+            setButtonDisplay(document.getElementById('addNewEmployeeButton'),'ADD_EMPL');
+            setAllEmployees(d['data']['value']);
+            break;
+        case 'getEmployeeAllocation':
+            currentEmployeeData=d['data']['value'][0];
+            employeeSloSpecTab=d['data']['value'][1];
+            break;
+        case 'getEmployeesSpecSlo':
             /* 
+             * [].ID
+             * [].NAZWA
+             * [].DEFAULT
+             */
+            employeeSloSpecTab=d['data']['value'];
+            break;
+        case 'getEmployeeDetails':
+            currentEmployeeData=d['data']['value'][0];
+            console.log(currentEmployeeData);
+            employeeSloSpecTab=d['data']['value'][1];
+            console.log(employeeSloSpecTab);
+            break;
+        default:
+            console.log('TASK => '+d['data']['task']);  
+            //alert('setSlo() ERROR - wrong task');
+            break;
+    }
+}
+function runFunction(d)
+{
+    console.log('===runFunction()===\n'+d['data']['function']);
+    if(overallErr) { return ''; };
+    switch(d['data']['function'])
+    {
+        case 'sEmployees':
+                Error.checkStatusResponse(d);
+            break;
+        case 'cEmployee':
+                cEmployee(d);
+            break;
+        case 'cModal':
+                cModal(d);
+                break;
+        case 'details':
+                prepareModal('DANE PRACOWNIKA:','bg-info');
+                setEmployeeBodyContent(d['data']['function'],0);
+            break;
+        case 'dEmployee':
+                dEmployee(d);
+                break;
+        case 'allocation':
+                // ALL SLO SPEC
+                prepareModal('PRZYDZIAŁ PRACOWNIKA:','bg-info');
+                setAlloacationEmployeeBodyContent(d['data']['function'],0);
+                // ALL EMPLOYEE SLO SPEC
+                console.log('allocation');
+                break;
+        case 'projects':
+                prepareModal('PROJEKTY:','bg-warning');
+                setEmployeeProjectBodyContent(d['data']['function'],d['data']['value'][1],d['data']['value'][0]);
+                break;
+        default:
+                
+                alert('runFunction() ERROR - wrong function');
+            break;
+    }
+}
+function prepareModal(title,titleBg)
+{
+    removeHtmlChilds(document.getElementById('ProjectAdaptedDynamicData'));
+    removeHtmlChilds(document.getElementById('ProjectAdaptedButtonsBottom'));
+    removeHtmlChilds(document.getElementById('ProjectAdaptedBodyExtra'));
+    removeHtmlChilds(document.getElementById('AdaptedModalInfo'));
+    document.getElementById('errDiv-Adapted-overall').innerText='';
+    document.getElementById('errDiv-Adapted-overall').style.display='none';
+    document.getElementById('ProjectAdaptedTextTitle').innerText=title;
+    document.getElementById("ProjectAdaptedBgTitle").classList.add(titleBg);
+}
+function cModal(d)
+{
+    console.log('cModal\nRESPONSE:');
+    console.log(d);
+    console.log(document.getElementById('ProjectAdaptedModal'));
+    /*
+     * PARSE RESPONSE
+     * SET DIV ERROR
+    */ 
+    Error.setDiv('errDiv-Adapted-overall');
+    Error.setModal('ProjectAdaptedModal');
+    Error.checkStatusResponse(d);
+    if(Error.error===false)
+    {
+        ajax.getData('getEmployees');
+    }
+}
+function cEmployee(d)
+{
+    console.log('cEmployee\nRESPONSE:');
+    console.log(d);
+    console.log(document.getElementById('ProjectAdaptedModal'));
+    /*
+     * check task
+     */
+    if(d['data']['task']==='getEmployeesSpecSlo')
+    {
+        prepareModal('DODAJ PRACOWNIKA:','bg-info');
+        setEmployeeBodyContent(d['data']['function'],1);
+        /*
+        * PARSE RESPONSE
+        */ 
+        Error.checkStatusResponse(d);
+    }
+    else if(d['data']['task']==='cEmployee')
+    {
+        cModal(d);
+    }
+    else
+    {
+        console.log('cEmployee => wrong task => '+d['data']['task']);
+        alert('ERROR OCCURED!');
+        return '';
+    }
+}
+function dEmployee(d)
+{
+    console.log('dEmployee\nRESPONSE:');
+    console.log(d);
+    console.log(document.getElementById('ProjectAdaptedModal'));
+    /*
+     * check task
+     */
+    if(d['data']['task']==='getDeletedEmployeeProjects')
+    {
+        prepareModal('USUŃ PRACOWNIKA:','bg-danger');
+        setDeleteEmployeeBodyContent(d);
+        /*
+        * PARSE RESPONSE
+        */ 
+        Error.checkStatusResponse(d);
+    }
+    else if(d['data']['task']==='dEmployee')
+    {
+        cModal(d);
+    }
+    else
+    {
+        console.log('dEmployee => wrong task => '+d['data']['task']);
+        alert('ERROR OCCURED!');
+        return '';
+    }
+}
+function setAllEmployees(data)
+{
+    console.log('---setAllEmployees()---');
+    //console.log(data);
+                /* 
              * [].ID
              * [].ImieNazwisko
              * [].Stanowisko
              * [].Procent
              * [].Email
              */
-            employeeTab=data[0];
-            loggedUserPerm=data[1];
-            break;
-        case 'getEmployeeAllocation':
-        case 'getemployeesspecslo':
-            /* 
-             * [].ID
-             * [].NAZWA
-             * [].DEFAULT
-             */
-            employeeSloSpecTab=data;
-            break;
-        case 'getEmployeeProj':
-            employeeProj=data;
-            console.log(employeeProj);
-            break;
-        case 'getEmployeeDetails':
-            currentEmployeeData=data[0];
-            console.log(currentEmployeeData);
-            employeeSloSpecTab=data[1];
-            console.log(employeeSloSpecTab);
-            break;
-        default:
-            alert('[manageTaskAfterAjaxGet()]ERROR - wrong task');
-            break;
-    }
-    // RUN FUNCTION
-    switch(functionStart)
-    {
-        case 'sEmployees':
-                setButtonDisplay(document.getElementById('addNewEmployeeButton'),'ADD_EMPL',loggedUserPerm);
-                setAllEmployees(data[0]);
-            break;
-        case 'cEmployee':
-                setEmployeeBodyContent(functionStart,1);
-            break;
-        case 'details':
-                setEmployeeBodyContent(functionStart,0);
-            break;
-        case 'dEmployee':
-                setDeleteEmployeeBodyContent(functionStart,employeeProj,idRecord);
-                console.log('dEmployee');
-                break;
-        case 'allocation':
-                // ALL SLO SPEC
-                setAlloacationEmployeeBodyContent(functionStart,0);
-                // ALL EMPLOYEE SLO SPEC
-                console.log('allocation');
-                break;
-        case 'projects':
-                setEmployeeProjectBodyContent(functionStart,employeeProj,idRecord);
-                break;
-        default:
-            break;
-    }
-}
-function setAllEmployees(data)
-{
-    console.log('---setAllEmployees()---');
+    employeeTab=data;
     var dataL=data.length;
     
     var docElement=document.getElementById("allEmployeesData");
@@ -169,13 +230,13 @@ function setAllEmployees(data)
                 Array('id',''),
                 Array('data-toggle',"modal"),
                 Array('data-target','#ProjectAdaptedModal'),
-                Array('no-disabled','')     
+                Array('no-disabled',''),
                 );
     var btnConfig=new Array(
-            new Array('btn-info','details','Dane','SHOW_EMPL'),
-            new Array('btn-info','allocation','Przydział','SHOW_ALLOC_EMPL'),
-            new Array('btn-warning','projects','Projekty','SHOW_PROJ_EMPL'),
-            new Array('btn-danger','dEmployee','Usuń','DEL_EMPL')
+            new Array('btn-info','getEmployeeDetails&id=','Dane','SHOW_EMPL'),
+            new Array('btn-info','getEmployeeAllocation&id=','Przydział','SHOW_ALLOC_EMPL'),
+            new Array('btn-warning','getEmployeeProjects&id=','Projekty','SHOW_PROJ_EMPL'),
+            new Array('btn-danger','getDeletedEmployeeProjects&id=','Usuń','DEL_EMPL')
          );
     var btn='';
     var tr='';
@@ -184,19 +245,17 @@ function setAllEmployees(data)
     var disabled='no-disabled';
     for(var i = 0; i < dataL; i++)
     {    
-        tr=createHtmlElement('tr',null,null);
+        tr=createHtmlElement('tr',null,null,null);
         for(var prop in data[i])
         {
             if(data[i].hasOwnProperty(prop))
             {
-                td=createHtmlElement('td',null,null);
+                td=createHtmlElement('td',null,null,null);
                 td.innerText=data[i][prop];
                 tr.appendChild(td);
             }
         }
-        
-        divBtnGroup=createHtmlElement('div',divBtnGroupAtr,null);
-        
+        divBtnGroup=createHtmlElement('div',divBtnGroupAtr,null,null);
         for(var z=0;z<btnConfig.length;z++)
         {
             if(loggedUserPerm.indexOf(btnConfig[z][3])===-1)
@@ -204,173 +263,26 @@ function setAllEmployees(data)
                 disabled='disabled';
             }
             btnAtr[0][1]='btn '+btnConfig[z][0]+' '+disabled;
-            btnAtr[1][1]=btnConfig[z][1];
-            btnAtr[2][1]='idEmployee:'+data[i].ID;
+            btnAtr[1][1]=btnConfig[z][1]+data[i].ID;
+            btnAtr[2][1]=data[i].ID;
             btnAtr[5][0]=disabled;
-            btn=createHtmlElement('button',btnAtr,null);
+            //btnAtr[6][1]='&id='+data[i].ID+'&function='.btnConfig[z][4];
+            btn=createHtmlElement('button',btnAtr,null,null);
             btn.innerText=btnConfig[z][2];
-            btn.onclick=function(){ createAdaptedModal(this.name,this.id);};
+            btn.onclick=function(){
+                //console.log(this);
+                //console.log(this.name);
+                ajax.getData(this.name);
+            }; 
+            //btn.onclick=function(){ createAdaptedModal(this.name,this.id);};
             divBtnGroup.appendChild(btn);
             disabled='no-disabled';
         }
-        tdOption=createHtmlElement('td',null,null);
+        tdOption=createHtmlElement('td',null,null,null);
         tdOption.appendChild(divBtnGroup);
         tr.appendChild(tdOption);
         docElement.appendChild(tr);
     };
-}
-function createHtmlElement(htmlTag,elementAttribute,elementStyle)
-{
-    //console.log('---createElement()---');
-    //console.log(elementAttribute);
-    //console.log(elementClassList);
-    //console.log(elementStyle);
-    var htmlElement=document.createElement(htmlTag);
-    var i=0;
-    // ASSIGN Attribute
-    if(elementAttribute!==null && elementAttribute!==undefined)
-    {
-        for(j=i;j<elementAttribute.length;j++)
-        {
-            htmlElement.setAttribute(elementAttribute[j][0],elementAttribute[j][1]);
-        };
-    }
-    // ASSIGN STYLES
-    if(elementStyle!==null && elementStyle!==undefined)
-    {
-         for(j=i;j<elementStyle.length;j++)
-        {
-            //console.log(elementStyle[j][0]);
-            //console.log(elementStyle[j][1]);
-            //htmlElement.style.elementStyle[j][0] = elementStyle[j][1];
-            htmlElement=addStyleToHtmlTag(htmlElement,elementStyle[j][0],elementStyle[j][1]);
-        };
-    }
-    //console.log(htmlElement);
-    return (htmlElement);
-}
-function addStyleToHtmlTag(htmlElement,styleName,styleValue)
-{
-    //console.log('---addStyleToHtmlTag()---');
-    switch(styleName)
-    {
-        case 'border':
-            htmlElement.style.border=styleValue;
-            break;
-        case 'backgroundColor':
-            htmlElement.style.backgroundColor=styleValue;
-            break;
-        case 'borderColor':
-            htmlElement.style.borderColor=styleValue;
-            break;
-        case 'color':
-            htmlElement.style.color=styleValue;
-            break;
-        case 'borderTopRightRadius':
-            htmlElement.style.borderTopRightRadius=styleValue;
-            break;
-        case 'borderBottomRightRadius':
-            htmlElement.style.borderBottomRightRadius=styleValue;
-            break;
-        case 'borderTopLeftRadius':
-            htmlElement.style.borderTopLeftRadius=styleValue;
-            break;
-        case 'borderBottomLeftRadius':
-            htmlElement.style.borderBottomLeftRadius=styleValue;
-            break;
-        case 'display':
-            htmlElement.style.display=styleValue;
-            break;
-        default:
-            break;
-    };
-    return(htmlElement);
-}
-function createAdaptedModal(modalType,idEmployee)
-{
-    console.log('---createAdaptedModal()---');
-    console.log("TASK - "+modalType+"\nID EMPLOYEE - "+idEmployee);
-    console.log(idEmployee);
-    removeHtmlChilds(document.getElementById('ProjectAdaptedDynamicData'));
-    removeHtmlChilds(document.getElementById('ProjectAdaptedButtonsBottom'));
-    removeHtmlChilds(document.getElementById('ProjectAdaptedBodyExtra'));
-    removeHtmlChilds(document.getElementById('AdaptedModalInfo'));
-    document.getElementById('errDiv-Adapted-overall').innerText='';
-    document.getElementById('errDiv-Adapted-overall').style.display='none';
-    var title=document.getElementById('ProjectAdaptedTextTitle');
-    var bgTitle=document.getElementById("ProjectAdaptedBgTitle");
-    bgTitle.classList.value="";
-    bgTitle.classList.add("modal-header");
-    var employeeData=splitValue(idEmployee,':');
-    console.log(employeeData);
-    switch(modalType)
-    {
-        case 'cEmployee':
-            title.innerText='DODAJ PRACOWNIKA:';
-            bgTitle.classList.add("bg-info");
-            getAjaxData('getemployeesspecslo','',modalType,null);
-            break;
-        case 'details':
-            title.innerText='DANE PRACOWNIKA:';
-            bgTitle.classList.add("bg-info");
-            getAjaxData('getEmployeeDetails','&id='+employeeData[1],modalType,null);
-            document.getElementById('AdaptedModalInfo').innerText='Employee Id : '+employeeData[1];
-            break;
-        case 'allocation':
-            title.innerText='PRZYDZIAŁ PRACOWNIKA:';
-            bgTitle.classList.add("bg-info");
-            document.getElementById('AdaptedModalInfo').innerText='Employee Id : '+employeeData[1];
-            currentIdEmployee=employeeData[1];
-            document.getElementById('div-inputPdf7a').innerText='Current Employee Id : '+currentIdEmployee;
-            getAjaxData('getEmployeeAllocation','&id='+employeeData[1],modalType,null);
-            break;
-        case 'projects':
-            title.innerText='PROJEKTY:';
-            bgTitle.classList.add("bg-warning");
-            document.getElementById('AdaptedModalInfo').innerText='Employee Id : '+employeeData[1];
-            currentIdEmployee=employeeData[1];
-            document.getElementById('div-inputPdf7a').innerText='Current Employee Id : '+currentIdEmployee;
-            getAjaxData('getEmployeeProj','&id='+employeeData[1],modalType,employeeData[1]);
-            break;
-        case 'dEmployee':
-            title.innerText='USUŃ PRACOWNIKA:';
-            bgTitle.classList.add("bg-danger");
-            console.log(employeeData[1]);
-            document.getElementById('AdaptedModalInfo').innerText='Employee Id : '+employeeData[1];
-            currentIdEmployee=employeeData[1];
-            document.getElementById('div-inputPdf7a').innerText='Current Employee Id : '+currentIdEmployee;
-            // GET FULL DATA ABOUT EMPLOYEE PROJECTS
-            if(loggedUserPerm.indexOf('SHOW_PROJ_EMPL')!==-1)
-            {
-                console.log('SHOW_PROJ_EMPL : '+loggedUserPerm.indexOf('SHOW_PROJ_EMPL'));
-                getAjaxData('getEmployeeProj','&id='+employeeData[1],modalType,employeeData[1]);
-            }
-            else
-            {
-                employeeProj=[];
-                setDeleteEmployeeBodyContent(modalType,employeeProj,employeeData[1]);
-            }
-            // v_udzial_count_projekt_prac
-            
-            break;
-        default:
-            break;
-    }
-}
-function splitValue(value,delimiter)
-{
-    console.log('---splitValue()---');
-    if(value!==null && value!==undefined)
-    {
-        if(value.trim()!=='')
-        {
-            return value.split(delimiter);
-        }
-        else
-        {
-            return 0;
-        }
-    }  
 }
 function setEmployeeProjectBodyContent(task,employeeProj,idRecord)
 {
@@ -388,26 +300,48 @@ function setEmployeeProjectBodyContent(task,employeeProj,idRecord)
     mainDiv.appendChild(createBodyButtonContent(task));
     console.log(mainDiv);
 }
-function setDeleteEmployeeBodyContent(task,employeeProj,idRecord)
+function setDeleteEmployeeBodyContent(d)
 {
+    /*
+     * d => data 
+     */
     console.log('---setDeleteEmployeeBodyContent()---');
+    console.log(d);
     var dataDiv=getEmplDefModal();
     var form=dataDiv.childNodes[1].childNodes[1];
     console.log(form.childNodes[1]);
-    form.name='deleteEmployee';
-   
+    form.name='dEmployee';
+    form.id='dEmployee';
     console.log(form.childNodes[1]);
-    console.log('PROJECT COUNT: '+employeeProj.length);
-    
-    if(employeeProj.length>0)
+    console.log('PROJECT COUNT: '+d['data']['value'][1].length);
+    console.log(d['info']);
+    console.log(d['info']===''); 
+    if(d['data']['value'][1].length>0 && d['info']==='')
     {
-        createEmployeeProjectsRowContent(form.childNodes[1],employeeProj,genTextNode(task));
+        console.log('D1');
+        createEmployeeProjectsRowContent(form.childNodes[1],d['data']['value'][1],genTextNode(d['data']['function']));
         document.getElementById('ProjectAdaptedButtonsBottom').appendChild(createBodyButtonContent('projects'));
+    }
+    else if(d['data']['value'][1].length>0 && d['info']!=='')
+    {
+        console.log('D2');
+        // SET WARNING
+        var divAlertAtr=new Array(
+                Array('class','w-100')
+                );
+        var divAlert=createHtmlElement('div',divAlertAtr,null,null);
+
+            divAlert.appendChild(genTextNode('NO'+d['data']['function']));
+            //divAlert.appendChild(p);
+            form.childNodes[1].appendChild(divAlert);
+            document.getElementById('ProjectAdaptedButtonsBottom').appendChild(createBodyButtonContent('projects'));
     }
     else
     {
-        createHiddenInpRowEmployeeRowContent(form.childNodes[1],idRecord);
-        document.getElementById('ProjectAdaptedButtonsBottom').appendChild(createBodyButtonContent('deleteEmployee'));
+        console.log('D3');
+        createHiddenInpRowEmployeeRowContent(form,d['data']['value'][0]);
+        //createHiddenInpRowEmployeeRowContent(form.childNodes[1],d['data']['value'][0]);
+        document.getElementById('ProjectAdaptedButtonsBottom').appendChild(createBodyButtonContent('dEmployee'));
     }
     document.getElementById('ProjectAdaptedDynamicData').appendChild(dataDiv);
     console.log(dataDiv);
@@ -425,23 +359,26 @@ function genTextNode(task)
     switch(task)
     {
         case 'projects':
-            tag='h4'
+            tag='h4';
             hAtr[0][1]='text-dark mb-3 text-center font-weight-bold';
             info='Aktualny wykaz projektów powiązanych z pracownikiem:';
             break;
         case 'noprojects':
-            tag='h4'
+            tag='h4';
             hAtr[0][1]='text-dark mb-3 text-center font-weight-bold';
             info='Aktualnie pracownik nie bierze udziału w żadnym projekcie.';
             break;
         case 'dEmployee':
             info='Pracownik nie może zostać usunięty ponieważ bierze udział w poniższych projektach:';
             break;
+        case 'NOdEmployee':
+            info='Pracownik nie może zostać usunięty ponieważ bierze udział w projektach!';
+            break;
         default:
             break;
     }
     
-    var h=createHtmlElement(tag,hAtr,null);
+    var h=createHtmlElement(tag,hAtr,null,null);
     h.innerText=info;
     return(h);
 }
@@ -453,7 +390,7 @@ function createHiddenInpRowEmployeeRowContent(whereAppend,employeeId)
                 Array('name','idEmployee'),
                 Array('value',employeeId)
                 );
-    var inp=createHtmlElement('input',inpAtr,null);
+    var inp=createHtmlElement('input',inpAtr,null,null);
     whereAppend.appendChild(inp); 
 }
 function createEmployeeProjectsRowContent(whereAppend,employeeProj,titleElement)
@@ -468,7 +405,7 @@ function createEmployeeProjectsRowContent(whereAppend,employeeProj,titleElement)
     var divAlertAtr=new Array(
             Array('class','w-100')
             );
-    var divAlert=createHtmlElement('div',divAlertAtr,null);
+    var divAlert=createHtmlElement('div',divAlertAtr,null,null);
     
         divAlert.appendChild(titleElement);
         //divAlert.appendChild(p);
@@ -477,7 +414,7 @@ function createEmployeeProjectsRowContent(whereAppend,employeeProj,titleElement)
     var tableAtr=new Array(
             Array('class','table table-striped table-condensed')
             );
-    var table=createHtmlElement('table',tableAtr,null);
+    var table=createHtmlElement('table',tableAtr,null,null);
     var tr=createHtmlElement('tr',null,null);
 
     // GET HEADER 
@@ -485,7 +422,7 @@ function createEmployeeProjectsRowContent(whereAppend,employeeProj,titleElement)
         {
             if(employeeProj[0].hasOwnProperty(prop))
             {
-                td=createHtmlElement('td',null,null);
+                td=createHtmlElement('td',null,null,null);
                 prop=prop.replace("_", " ");
                 td.innerText=prop;
                 tr.appendChild(td);
@@ -495,12 +432,12 @@ function createEmployeeProjectsRowContent(whereAppend,employeeProj,titleElement)
     // GET DATA
     for(var i=0;i<employeeProj.length;i++)
     {
-        tr=createHtmlElement('tr',null,null);
+        tr=createHtmlElement('tr',null,null,null);
         for(var prop in employeeProj[i])
         {
             if(employeeProj[i].hasOwnProperty(prop))
             {
-                td=createHtmlElement('td',null,null);
+                td=createHtmlElement('td',null,null,null);
                 td.innerText=employeeProj[i][prop];
                 tr.appendChild(td);
             }
@@ -512,18 +449,18 @@ function createEmployeeProjectsRowContent(whereAppend,employeeProj,titleElement)
 function setAlloacationEmployeeBodyContent(task,status)
 {
     console.log('---setAlloacationEmployeeBodyContent()---');
-    console.log('ID EMPLOYEE: '+currentIdEmployee);
+    console.log('CURRENT EMPL DATA: ');
+    console.log(currentEmployeeData);
     
     var dataDiv=getEmplDefModal();
     var form=dataDiv.childNodes[1].childNodes[1];
-    form.name='employeeAllocation';
-    createHiddenInpRowEmployeeRowContent(form.childNodes[1],currentIdEmployee)
+    form.name='uEmployeeSpec';
+    form.id='uEmployeeSpec';
+    createHiddenInpRowEmployeeRowContent(form.childNodes[1],currentEmployeeData['ID'])
     setAlloacationEmployeeContent(form.childNodes[1],status);
     document.getElementById('ProjectAdaptedDynamicData').appendChild(dataDiv);
     console.log(dataDiv);
-    
     document.getElementById('ProjectAdaptedButtonsBottom').appendChild(createBodyButtonContent(task));
-
 }
 function setAlloacationEmployeeContent(whereAppend,status)
 {
@@ -533,11 +470,11 @@ function setAlloacationEmployeeContent(whereAppend,status)
     var divSm2Atr=new Array(
 	Array('class','col-sm-2')
 	);
-    var div1Sm2=createHtmlElement('div',divSm2Atr,null);
+    var div1Sm2=createHtmlElement('div',divSm2Atr,null,null);
     var divSm8Atr=new Array(
 	Array('class','col-sm-8')
 	);
-    var div1Sm8=createHtmlElement('div',divSm8Atr,null);
+    var div1Sm8=createHtmlElement('div',divSm8Atr,null,null);
     div1Sm8.appendChild(createCheckBoxList(employeeSloSpecTab,status));
     whereAppend.appendChild(div1Sm2);
     whereAppend.appendChild(div1Sm8);
@@ -550,6 +487,7 @@ function setEmployeeBodyContent(task,status)
     var form=dataDiv.childNodes[1].childNodes[1];
     console.log(form.childNodes[1]);
     form.name=task;
+    form.id=task;
    
     console.log(form.childNodes[1]);
     switch(status)
@@ -627,8 +565,8 @@ function createEditedEmployeeRowContent(whereAppend,status)
         inputAttribute[3][1]=employeeFields[i][2];
         inputAttribute[4][1]='';
         labelAttribute[0][1]='inputProject'+i;
-        labelElement=createHtmlElement('label',labelAttribute,null);
-        div1Element=createHtmlElement('div',div1,null);
+        labelElement=createHtmlElement('label',labelAttribute,null,null);
+        div1Element=createHtmlElement('div',div1,null,null);
         labelElement.innerText=employeeFields[i][1];
         switch(employeeFields[i][0])
         {
@@ -636,17 +574,20 @@ function createEditedEmployeeRowContent(whereAppend,status)
                 console.log('HIDDEN');
                 inputAttribute[0][1]='hidden'; 
                 inputAttribute[4][1]=currentEmployeeData[0].ID;
-                inputElement=createHtmlElement('input',inputAttribute,inputStyle);
+                inputElement=createHtmlElement('input',inputAttribute,null,inputStyle);
                 div1Element.appendChild(inputElement);
                 break;
             case 't':
                 inputAttribute[4][1]=assignProjectDataToField(employeeFields[i][2]);
-                inputElement=createHtmlElement('input',inputAttribute,inputStyle);
+                inputElement=createHtmlElement('input',inputAttribute,null,inputStyle);
                 divErrAtr[1][1]='errDiv-'+employeeFields[i][2];
-                divErr=createHtmlElement('div',divErrAtr,divErrStyle);
+                divErr=createHtmlElement('div',divErrAtr,null,divErrStyle);
                 inputElement.onblur=function()
                 {
+                    
                     parseFieldValue(this,null,null);
+                    checkIsErr(this);
+                    
                 };
                 div1Element.appendChild(inputElement);
                 div1Element.appendChild(divErr);
@@ -691,7 +632,7 @@ function createNewEmployeeRowContent(whereAppend)
         inputAttribute[3][1]=employeeFields[i][2];
         inputAttribute[4][1]='';
         labelAttribute[0][1]='inputProject'+i;
-        labelElement=createHtmlElement('label',labelAttribute,null);
+        labelElement=createHtmlElement('label',labelAttribute,null,null);
         div1Element=createHtmlElement('div',div1,null);
         labelElement.innerText=employeeFields[i][1];
         switch(employeeFields[i][0])
@@ -703,10 +644,11 @@ function createNewEmployeeRowContent(whereAppend)
             case 't':
                 inputElement=createHtmlElement('input',inputAttribute,inputStyle);
                 divErrAtr[1][1]='errDiv-'+employeeFields[i][2];
-                divErr=createHtmlElement('div',divErrAtr,divErrStyle);
+                divErr=createHtmlElement('div',divErrAtr,null,divErrStyle);
                 inputElement.onblur=function()
                 {
                     parseFieldValue(this,null,null);
+                    checkIsErr(document.getElementById('sendDataBtn'));
                 };
                 div1Element.appendChild(inputElement);
                 div1Element.appendChild(divErr);
@@ -751,147 +693,8 @@ function getEmplDefModal()
     var mainTemplate=document.getElementById('employeeModalDetail').cloneNode(true);
     mainTemplate.classList.remove("modal");
     mainTemplate.classList.remove("fade");
+    console.log(mainTemplate);
     return(mainTemplate);
-}
-function parseFieldValue(data,fieldType,errDivAlt)
-{
-    console.log('---parseFieldValue()---');
-    console.log('FIELD TYPE: '+fieldType+'\nERR DIV ALT: '+errDivAlt);
-    console.log("DATA TYPE: "+typeof(data));
-    var errDiv='';
-    var plChars='ąĄćĆęĘłŁńŃóÓśŚżŻźŹ';
-    var valueToParse='';
-    var typeOfValueToParse='';
-    if(typeof(data)==='object')
-    {
-        valueToParse=data.value;
-        typeOfValueToParse=data.name;
-        errDiv=data.parentNode.childNodes[1];   
-        console.log(data.parentNode.childNodes[1]);
-        console.log(data.name);
-        typeOfValueToParse=data.name;
-    }
-    else
-    {
-        valueToParse=data;
-        typeOfValueToParse=fieldType;
-        errDiv=document.getElementById(errDivAlt);
-    };
-    valueToParse=valueToParse.trim();
-    switch(typeOfValueToParse)
-    {
-        case 'imie':
-                if(valueToParse.length>2)
-                {
-                    regExp(valueToParse,typeOfValueToParse,"^[a-zA-Z'"+plChars+"][\\sa-zA-Z"+plChars+"]*[a-zA-Z"+plChars+"]{1}$",errDiv);
-                }
-                else
-                {
-                    console.log('ERROR LENGTH');
-                    setErrTab(typeOfValueToParse);
-                    showDivErr(errDiv,'Błąd składni');
-                }
-                break;
-        case 'nazwisko':
-                if(valueToParse.length>2)
-                {
-                    regExp(valueToParse,typeOfValueToParse,"^[a-zA-Z'"+plChars+"][\\-\\sa-zA-Z"+plChars+"]*[a-zA-Z"+plChars+"]{1}$",errDiv);
-                }
-                else
-                {
-                    console.log('ERROR LENGTH');
-                    setErrTab(typeOfValueToParse);
-                    showDivErr(errDiv,'Błąd składni');
-                }
-            break;
-        case 'stanowisko':
-                if(valueToParse.length>0)
-                {
-                    regExp(valueToParse,typeOfValueToParse,"^[\\da-zA-Z'"+plChars+"][\\/\\-\\_\\.\\s\\da-zA-Z"+plChars+"]*[\\.\\da-zA-Z"+plChars+"]{1}$",errDiv);
-                }
-            break;
-        case 'email':
-                if(valueToParse.length>0)
-                {
-                    regExp(valueToParse,typeOfValueToParse,"^[a-zA-Z][\\d\\-\\_\\.\\s\\da-zA-Z]*@[\\da-zA-Z]{2,}.[a-zA-Z]{2,}$",errDiv);
-                }
-                else
-                {
-                    removeErrTab(typeOfValueToParse);
-                    hideDivErr(errDiv);
-                }
-            break;
-        default:
-            break;
-    }
-}
-function regExp(value,valueType,testCondition,errDiv)
-{
-    console.log('---regExp()---');
-    var thisRegex = new RegExp(testCondition);
-    if(!thisRegex.test(value))
-    {
-        console.log('ERROR');
-        console.log('[err]['+valueType+'] '+value);
-        setErrTab(valueType);
-        showDivErr(errDiv,'Błąd składni');
-    }
-    else
-    {
-        console.log('[ok]['+valueType+'] '+value);
-        removeErrTab(valueType);
-        hideDivErr(errDiv);
-    }
-}
-function setErrTab(fName)
-{
-    console.log('---setErrTab()---');
-    console.log('FNAME: '+fName);
-    if(errInputValue.indexOf(fName)===-1)
-    {
-        errInputValue.push(fName); 
-    };
-}
-function removeErrTab(fName)
-{
-    console.log('---removeErrTab()---');
-    console.log('FNAME: '+fName);
-    if(errInputValue.indexOf(fName)!==-1)
-    {
-        errInputValue.splice(errInputValue.indexOf(fName), 1 );
-    };
-}
-function showDivErr(div,value)
-{
-    console.log('---showDivErr()---');
-    div.innerHTML=value;
-    div.style.display = "block";
-}
-function hideDivErr(div)
-{
-    console.log('---hideDivErr()---');
-    div.innerText='';
-    div.style.display = "none";
-}
-function checkIsErr()
-{
-    console.log('---checkIsErr()---');
-    var errExists=false;
-    for(i=0;i<errInputValue.length;i++)
-    {
-        errExists=true;
-        console.log(i+" - "+errInputValue[i]);
-    }
-    return (errExists);
-}
-function removeHtmlChilds(htmlElement)
-{
-    console.log('---removeHtmlChilds()---');
-    while (htmlElement.firstChild)
-    {
-        //console.log(htmlElement.firstChild);
-        htmlElement.firstChild.remove(); 
-    };
 }
 function createCheckBoxList(data,status)
 {
@@ -924,14 +727,14 @@ function createCheckBoxList(data,status)
             Array('class','ml-3 col-sm-12 custom-control custom-checkbox')
             );
     var divR='';;
-    var divOverAll=createHtmlElement('div',divOverAllAtr,null);
+    var divOverAll=createHtmlElement('div',divOverAllAtr,null,null);
     for(var i = 0; i < data.length; i++)
     {    
         
         //console.log(data[i].ID+' '+data[i].NAZWA+' '+data[i].DEFAULT);
         divR=createHtmlElement('div',divRAtr,null);
         labelAtr[1][1]='cbox-'+data[i].ID;
-        label=createHtmlElement('label',labelAtr,null);
+        label=createHtmlElement('label',labelAtr,null,null);
         label.innerText=data[i].NAZWA;
         cboxAtr[2][1]='cbox-ID:'+data[i].ID+'-NAME:'+data[i].NAZWA;
         cboxAtr[3][1]='cbox-'+data[i].ID;
@@ -951,7 +754,7 @@ function createCheckBoxList(data,status)
         {
            cboxAtr[6][0]='no-disabled'; 
         };
-        cbox=createHtmlElement('input',cboxAtr,null);
+        cbox=createHtmlElement('input',cboxAtr,null,null);
         cbox.onclick=function(){ changeBoxValue(this); };
         divR.appendChild(cbox);
         divR.appendChild(label);
@@ -960,23 +763,6 @@ function createCheckBoxList(data,status)
     console.log(divOverAll);
     return(divOverAll);
 }
-function changeBoxValue(input)
-{
-    console.log('---changeBoxValue()---');
-    //console.log(input);
-    //console.log(input.value);
-    //console.log(typeof(input.value));
-    if(input.value==='0')
-    {
-        console.log('CHANGE TO 1');
-        input.value='1';
-    }
-    else
-    {
-        console.log('CHANGE TO 0');
-        input.value='0';
-    };
-}
 function createBodyButtonContent(task)
 {
     console.log('---createBodyButtonContent()---');
@@ -984,35 +770,36 @@ function createBodyButtonContent(task)
     var divButtonAttribute=new Array(
                 Array('class','btn-group pull-right')
                 );
-    var divButtonElement=createHtmlElement('div',divButtonAttribute,null);
+    var divButtonElement=createHtmlElement('div',divButtonAttribute,null,null);
     // END GROUP DIV BUTTON
     // CANCEL BUTTON
     var cancelButtonAtr=new Array(
                 Array('class','btn btn-dark pull-right')
                 );
-    var cancelButton=createHtmlElement('button',cancelButtonAtr,null);
+    var cancelButton=createHtmlElement('button',cancelButtonAtr,null,null);
     cancelButton.innerText = "Anuluj";
     cancelButton.onclick = function() { closeModal('ProjectAdaptedModal'); };
     // ADD BUTTON
     var confirmButtonAtr = new Array(
-             Array('class','btn btn-info btn-add')
+            Array('class','btn btn-info btn-add'),
+            Array('id','sendDataBtn') 
             );
     var confirmButton='';
-
+    //console.log(document.getElementById(task));
     switch(task)
     {
         case 'cEmployee':
-            confirmButton=createHtmlElement('button',confirmButtonAtr,null);
+            confirmButton=createHtmlElement('button',confirmButtonAtr,null,null);
             confirmButton.innerText = "Dodaj";
-            confirmButton.onclick = function() { postDataToUrl(task); };
+            confirmButton.onclick = function() { postDataToUrl(this,task); };
             divButtonElement.appendChild(cancelButton);
             divButtonElement.appendChild(confirmButton);
             break;
-        case 'deleteEmployee':
+        case 'dEmployee':
             confirmButtonAtr[0][1]='btn btn-danger';
-            confirmButton=createHtmlElement('button',confirmButtonAtr,null);
+            confirmButton=createHtmlElement('button',confirmButtonAtr,null,null);
             confirmButton.innerText = 'Usuń';
-            confirmButton.onclick = function() { postDataToUrl(task); };
+            confirmButton.onclick = function() { postDataToUrl(this,task); };
             divButtonElement.appendChild(cancelButton);
             divButtonElement.appendChild(confirmButton);
             break;
@@ -1022,20 +809,20 @@ function createBodyButtonContent(task)
             break;
         case 'allocation':
             confirmButtonAtr[0][1]='btn btn-info';
-            confirmButton=createHtmlElement('button',confirmButtonAtr,null);
+            confirmButton=createHtmlElement('button',confirmButtonAtr,null,null);
             confirmButton.innerText = 'Edytuj';
             confirmButton.onclick = function()
             {
                 removeHtmlChilds(document.getElementById('ProjectAdaptedDynamicData'));
                 removeHtmlChilds(document.getElementById('ProjectAdaptedButtonsBottom'));
-                setAlloacationEmployeeBodyContent('employeeAllocation',1); 
+                setAlloacationEmployeeBodyContent('uEmployeeSpec',1); 
             };
             divButtonElement.appendChild(cancelButton);
             divButtonElement.appendChild(confirmButton);
             break;
         case 'details':
             confirmButtonAtr[0][1]='btn btn-info';
-            confirmButton=createHtmlElement('button',confirmButtonAtr,null);
+            confirmButton=createHtmlElement('button',confirmButtonAtr,null,null);
             confirmButton.innerText = 'Edytuj';
             confirmButton.onclick = function()
             {
@@ -1047,11 +834,11 @@ function createBodyButtonContent(task)
             divButtonElement.appendChild(confirmButton);
             break;
         case 'editEmployee':
-        case 'employeeAllocation':
+        case 'uEmployeeSpec':
             confirmButtonAtr[0][1]='btn btn-info';
-            confirmButton=createHtmlElement('button',confirmButtonAtr,null);
+            confirmButton=createHtmlElement('button',confirmButtonAtr,null,null);
             confirmButton.innerText = 'Zatwierdź';
-            confirmButton.onclick = function() { postDataToUrl(task); };
+            confirmButton.onclick = function() { postDataToUrl(this,task); };
             divButtonElement.appendChild(cancelButton);
             divButtonElement.appendChild(confirmButton);
             break;
@@ -1062,15 +849,11 @@ function createBodyButtonContent(task)
     
     return(divButtonElement);
 }
-function closeModal(modalId)
-{
-    $('#'+modalId).modal('hide');
-}
-function postDataToUrl(nameOfForm)
+function postDataToUrl(btn,nameOfForm)
 {
     console.log('---postDataToUrl()---');
+    console.log(btn);
     console.log(nameOfForm);
-    var taskUrl='modul/manageEmployee.php?task='+nameOfForm;
     var confirmTask=false;
 
     switch(nameOfForm)
@@ -1081,17 +864,17 @@ function postDataToUrl(nameOfForm)
             parseFieldValue( document.getElementById('nazwisko').value,"nazwisko","errDiv-nazwisko");
             parseFieldValue( document.getElementById('stanowisko').value,"stanowisko","errDiv-stanowisko");
             parseFieldValue( document.getElementById('email').value,"email","errDiv-email");
-            if(checkIsErr())
+            if(checkIsErr(btn))
             {
                 console.log("err is true");
                 return(0);
             };
             confirmTask=true;
             break;
-        case 'deleteEmployee':
+        case 'dEmployee':
             confirmTask = confirm("Potwierdź usunięcie pracownika");
             break;
-        case 'employeeAllocation':
+        case 'uEmployeeSpec':
             confirmTask=true;
             break;
         default:
@@ -1099,109 +882,13 @@ function postDataToUrl(nameOfForm)
     }; 
     if (confirmTask)
     {
-        sendData(nameOfForm,taskUrl);
+        ajax.sendData(nameOfForm,'POST');
     };
 }
-function sendData(nameOfForm,taskUrl)
-{
-    console.log('---sendData()---');
-    var xmlhttp = new XMLHttpRequest();
-    var host =  getUrl();
-    var url =  host+taskUrl;
-    xmlhttp.onreadystatechange = function()
-        {
-          if (this.readyState === 4 && this.status === 200)
-          {
-                runTaskAfterAjax(nameOfForm,this.responseText);
-          }
-          else
-          {
-              //console.log("error ajax"+this.status+" state - "+this.readyState);
-          }
-        };
-        xmlhttp.open("POST", url, true);
-        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xmlhttp.send(createDataToSend(nameOfForm));
-}
-function runTaskAfterAjax(nameOfForm,response)
-{
-    console.log('---runTaskAfterAjax()---');
-    console.log(response);
-    var responseData = JSON.parse(response);
-    if(responseData[0]==='1')
-    {
-        setOverAllErrDiv(responseData[1],true);
-    }
-    else
-    {
-        setOverAllErrDiv(responseData[1],false);
-        switch(nameOfForm)
-        {
-            case 'cEmployee':
-                setNewDataState('Employee added');
-                break;
-            case 'deleteEmployee':
-                setNewDataState('Employee removed');
-                break;
-            case 'editEmployee':
-            case 'employeeAllocation':
-                setNewDataState('Employee updated');
-                break;
-            default:
-                alert('[runTaskAfterAjax()]WRONG TASK - '+nameOfForm);
-                break;
-        } 
-    } 
-}
-function setNewDataState(infoAlert)
-{
-    alert(infoAlert);
-    getAjaxData('getemployees','','sEmployees',null);
-    $('#ProjectAdaptedModal').modal('hide'); 
-}
-function setOverAllErrDiv(data,action)
-{
-    console.log('---setOverAllErrDiv()---');
-    var errDiv=document.getElementById('errDiv-Adapted-overall');
-    if(action)
-    {
-        errDiv.innerHTML=data;
-        errDiv.style.display = "block";  
-    }
-    else
-    {
-        errDiv.innerHTML='';
-        errDiv.style.display = "none";  
-    };
-}
-function createDataToSend(nameOfForm)
-{
-    console.log('---createDataToSend---\nName of form - '+nameOfForm);
-    var formToCheck=document.getElementsByName(nameOfForm);
-    console.log(document.getElementById(nameOfForm));
-    console.log(formToCheck);
-    var fieldName;
-    var fieldValue;
-    var params = '';
-    
-    for( var i=0; i<formToCheck[0].elements.length; i++ )
-    {
-        fieldName =formToCheck[0].elements[i].name;
-        fieldValue =formToCheck[0].elements[i].value;
-        //console.log(i+'| form name: '+fieldName+" form value: "+fieldValue);
-        if(fieldName!=='')
-        {
-            console.log(fieldName+" - "+fieldValue);
-            params += fieldName + '=' + fieldValue + '&'; 
-        } 
-    }
-    //console.log(params);
-    return params;
-}
-function setButtonDisplay(element,perm,userPerm)
+function setButtonDisplay(element,perm)
 {
     //console.log('---setButtonDisplay()---');
-    if(userPerm.indexOf(perm)===-1)
+    if(loggedUserPerm.indexOf(perm)===-1)
     {
         element.classList.add('disabled');
         element.setAttribute("disabled", "");
@@ -1212,4 +899,4 @@ function setButtonDisplay(element,perm,userPerm)
         element.removeAttribute("disabled");
     }
 }
-getAjaxData('getemployees','','sEmployees',null);
+ajax.getData('getEmployees');

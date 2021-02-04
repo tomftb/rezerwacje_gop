@@ -1,5 +1,4 @@
 <?php
-require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/class/errorConfirm.php");
 class dbManage extends errorConfirm
 {
     private $dbLink;
@@ -13,6 +12,7 @@ class dbManage extends errorConfirm
     public $cDT='';
     public $RA='';
     private $pdoResult;
+    private $query;
     function __construct($host="",$database="",$port="",$user="",$password="",$log_lvl=0,$pass_cipher='n')
     {
         parent::__construct();
@@ -43,7 +43,7 @@ class dbManage extends errorConfirm
 	catch (PDOException $e)
 	{
             // pelny blad piszemy samo $e
-            $this->setError(0,"[ERROR][".__METHOD__."] Wystąpił błąd bazy danych :</br>".$e->getMessage()."</br>Powiadom administratora Tomasza Borczyńskiego.");
+            $this->setError(2,"[ERROR][".__METHOD__."] Wystąpił błąd bazy danych :</br>".$e->getMessage()."</br>Powiadom administratora Tomasza Borczyńskiego.");
 	}			
     }
     private function isPassCipher()
@@ -149,7 +149,7 @@ class dbManage extends errorConfirm
     }
     protected function checkExistInDb($tableName,$whereCondition,$valueToCheck)
     {
-        $this->log(2,"[".__METHOD__."]]\n table => ".$tableName."\n where => ".$whereCondition."\n value => ".$valueToCheck);  
+        $this->log(0,"[".__METHOD__."]]\n table => ".$tableName."\n where => ".$whereCondition."\n value => ".$valueToCheck);  
         if(trim($valueToCheck)!='')
         {
             return(count($this->query('SELECT * FROM '.$tableName.' WHERE '.$whereCondition,$valueToCheck)));
@@ -240,6 +240,35 @@ class dbManage extends errorConfirm
             case 'FETCH_OBJ':
                 $this->pdoResult=PDO::FETCH_OBJ;
                 break;
+        }
+    }
+    public function squery($sth,$pdoResult='FETCH_ASSOC')
+    {  
+        $this->log(2,"[".__METHOD__."] ".$sth);
+        $task=strtoupper(substr(trim($sth),0,6));
+        try
+	{
+            $this->query = $this->dbLink->prepare($sth);
+            $this->query->execute();
+        }
+        catch (PDOException $e)
+	{
+            $this->setError(1,"[ERROR][".__METHOD__."] Wystąpił błąd zapytania - $sth  :</br>".$e->getMessage()); //
+            return false;
+	}
+        return(self::result($task,$pdoResult));  
+    }
+    private function result($task,$pdoResult)
+    {
+        /* SELECT,INSERT,DELETE */
+        if($task==='SELECT')
+        {
+            self::parseQueryResultType($pdoResult);
+            return ($this->query->fetchAll($this->pdoResult));
+        }
+        else
+        {
+            return true;
         }
     }
     public function query($sqlAction="",$sqlValue="",$pdoResult='FETCH_ASSOC') // $pdoResult=PDO::FETCH_ASSOC

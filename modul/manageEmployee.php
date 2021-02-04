@@ -1,16 +1,8 @@
 <?php
-//session_start();
-require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/redirectToLoginPage.php");
-require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/.cfg/config.php');
-
 class manageEmployee extends initialDb
 {
     private $inpArray=array();
-    protected $err="";
-    protected $idEmployee=null;
-    protected $filter='';
-    protected $taskPerm= ['perm'=>'','type'=>''];
-    const maxPercentPersToProj=100;
+    protected $responseType='POST';
     private $response;
     protected $infoArray=array
             (
@@ -31,8 +23,7 @@ class manageEmployee extends initialDb
     function __construct()
     {
         parent::__construct();
-        require_once($this->DR."/class/utilities.php");
-        require_once($this->DR."/class/response.php");
+        $this->log(0,"[".__METHOD__."]");
         $this->utilities=NEW utilities();
         $this->response=NEW Response('Employee');
     }
@@ -45,7 +36,7 @@ class manageEmployee extends initialDb
         }
         else
         {
-            $this->setError(1,$this->utilities->getInfo());
+            $this->response->setError(1,$this->utilities->getInfo());
         }
     }
     public function cEmployee()
@@ -53,46 +44,46 @@ class manageEmployee extends initialDb
         $this->log(0,"[".__METHOD__."]");
         self::setInpArray();
         self::checkEmployeeValueLength();
-        if($this->checkExistInDb('pracownik','imie=? AND nazwisko=?',$this->inpArray['imie'].','.$this->inpArray['nazwisko']))
+        if($this->checkExistInDb('pracownik','imie=? AND nazwisko=?',$this->inpArray['Imie'].','.$this->inpArray['Nazwisko']))
         {
-            $this->setError(0,$this->infoArray['imie_nazwisko'][1]."<br/>");
+            $this->response->setError(0,$this->infoArray['imie_nazwisko'][1]."<br/>");
         }
-        $this->addEmployee($this->inpArray);
+        $this->addEmployee();
         $this->log(0,"[".__METHOD__."] EMPLOYEE ID => ".$this->queryLastId());
         $this->setEmployeeSpec($this->queryLastId());           
-        $this->response->setResponse(__METHOD__,'ok','cEmployee','POST');
+        return($this->response->setResponse(__METHOD__,'ok','cModal','POST'));
     }
-    public function editEmployee()
+    public function eEmployeeOn()
     {
         $this->log(0,"[".__METHOD__."]");   
         self::setInpArray();
         self::checkEmployeeValueLength();
-        $this->utilities->checkKeyExist('idEmployee',$this->inpArray);
+        $this->utilities->checkKeyExist('ID',$this->inpArray);
         if($this->utilities->getStatus()===0)
         {
-            if($this->checkExistInDb('pracownik','imie=? AND nazwisko=? AND id!=?',$this->inpArray['imie'].','.$this->inpArray['nazwisko'].','.$this->inpArray['idEmployee']))
+            if($this->checkExistInDb('pracownik','imie=? AND nazwisko=? AND id!=?',$this->inpArray['Imie'].','.$this->inpArray['Nazwisko'].','.$this->inpArray['ID']))
             {
-                $this->setError(0,$this->infoArray['imie_nazwisko'][1]."<br/>");
+                $this->response->setError(0,$this->infoArray['imie_nazwisko'][1]."<br/>");
             }
         }
         else
         {
-            $this->setError(1,$this->utilities->getInfo());
+            $this->response->setError(1,$this->utilities->getInfo());
         }
-        $this->updateEmployee($this->inpArray);
-        $this->setEmployeeSpec($this->inpArray['idEmployee']);
+        $this->updateEmployee();
+        $this->setEmployeeSpec($this->inpArray['ID']);
 
-        $this->response->setResponse(__METHOD__,'ok','cModal','POST');          
+        return($this->response->setResponse(__METHOD__,'ok','cModal','POST'));          
     }
     protected function setEmployeeSpec($idEmployee)
     {
         $this->log(0,"[".__METHOD__."]");   
-        if($this->getError()){ return ''; }
+        if($this->response->getError()){ return ''; }
         // CHECK AVALIABLE DICTIONARY
         $specPost=self::getSpecTabId();
         $specDb=self::getSpec();
         $this->checkSpecInDb($specPost,$specDb);
-        if($this->getError()){ return ''; }
+        if($this->response->getError()){ return ''; }
         self::setSpec($specDb,$specPost,$idEmployee);
     }
     private function setSpec($t1,$t2,$idEmployee)
@@ -114,20 +105,19 @@ class manageEmployee extends initialDb
             }
         } 
     }
-    public function uEmployeeSpec()
+    public function eEmployeeSpecOn()
     {
         $this->log(0,"[".__METHOD__."]");   
         self::setInpArray();
         // GET ID
         // $this->inpArray['idEmployee']
-        $this->utilities->checkKeyExist('idEmployee',$this->inpArray);
+        $this->utilities->checkKeyExist('ID',$this->inpArray);
         if(!$this->utilities->getStatus()===0)
         {
-            $this->setError(1,$this->utilities->getInfo());
+            $this->response->setError(1,$this->utilities->getInfo());
         }
-        self::setEmployeeSpec($this->inpArray['idEmployee']);
-        $this->setError(0,'TEST STOP');
-        $this->response->setResponse(__METHOD__,'ok','cModal','POST');          
+        self::setEmployeeSpec($this->inpArray['ID']);
+        return($this->response->setResponse(__METHOD__,'ok','cModal','POST'));          
     }
     protected function checkSpecInDb($t1,$t2)
     {
@@ -143,7 +133,7 @@ class manageEmployee extends initialDb
             $this->log(0,"[".__METHOD__."] ID => ".$v); 
             if(!in_array($v,$t2))
             {  
-                $this->setError(1,"DICTIONARY ID => ".$v." NOT FOUND IN DB");
+                $this->response->setError(1,"DICTIONARY ID => ".$v." NOT FOUND IN DB");
                 break;
             }         
         }
@@ -162,31 +152,30 @@ class manageEmployee extends initialDb
     protected function checkEmployeeValueLength()
     {
         $this->log(0,"[".__METHOD__."]");   
-        if($this->getError()){ return ''; }
-        if(strlen($this->inpArray['imie'])<3 || strlen($this->inpArray['nazwisko'])<3)
+        if($this->response->getError()){ return ''; }
+        if(strlen($this->inpArray['Imie'])<3 || strlen($this->inpArray['Nazwisko'])<3)
         {
-            $this->setError(0,$this->infoArray['imie_nazwisko'][0]."<br/>");
+            $this->response->setError(0,$this->infoArray['imie_nazwisko'][0]."<br/>");
         }
-        if(strlen($this->inpArray['imie'])>30 || strlen($this->inpArray['nazwisko'])>30)
+        if(strlen($this->inpArray['Imie'])>30 || strlen($this->inpArray['Nazwisko'])>30)
         {
-            $this->setError(0,$this->infoArray['imie_nazwisko'][2]."<br/>");
+            $this->response->setError(0,$this->infoArray['imie_nazwisko'][2]."<br/>");
         }
     }
-    protected function addEmployee($employeeData)
+    protected function addEmployee()
     {
-        if($this->getError()) { return '';}
+        if($this->response->getError()) { return '';}
         $this->query('INSERT INTO pracownik 
             (imie,nazwisko,stanowisko,mod_user,mod_user_id) 
 		VALUES
 		(?,?,?,?,?)'
-            ,$employeeData['imie'].",".$employeeData['nazwisko'].",".$employeeData['stanowisko'].",".$_SESSION["username"].','.$_SESSION["userid"]);
+            ,$this->inpArray['Imie'].",".$this->inpArray['Nazwisko'].",".$this->inpArray['Stanowisko'].",".$_SESSION["username"].','.$_SESSION["userid"]);
     }
-    protected function updateEmployee($employeeData)
+    protected function updateEmployee()
     {
-        if($this->getError()) { return '';}
-        $curretDateTime=date('Y-m-d H:i:s');
+        if($this->response->getError()) { return '';}
         $this->query('UPDATE pracownik SET imie=?, nazwisko=?, stanowisko=?, dat_mod=?, mod_user=?,mod_user_id=?,email=? WHERE id=?'
-            ,$employeeData['imie'].",".$employeeData['nazwisko'].",".$employeeData['stanowisko'].','.$curretDateTime.",".$_SESSION["username"].','.$_SESSION["userid"].','.$employeeData['email'].",".$employeeData['idEmployee']);
+            ,$this->inpArray['Imie'].",".$this->inpArray['Nazwisko'].",".$this->inpArray['Stanowisko'].','.$this->cDT.",".$_SESSION["username"].','.$_SESSION["userid"].','.$this->inpArray['Email'].",".$this->inpArray['ID']);
     }
     protected function addEmployeeSpec($employeeId,$value)
     {
@@ -252,19 +241,6 @@ class manageEmployee extends initialDb
         $this->logMultidimensional(2,$tmpArray,__LINE__."::".__METHOD__." specPost");
         return $tmpArray;
     }
-    protected function getTeamValueToFind()
-    {
-        if(!$this->err)
-        {
-            $teamValueToFind=array(
-                                    'team_czlonek_grupy_pers', 
-                                    'team_czlonek_grupy_percent',
-                                    'd-start_team_czlonek_grupy',
-                                    'd-end_team_czlonek_grupy'
-            );
-            return($teamValueToFind);
-        }
-    }
     protected function checkAndAddignTeamValue($key,$value,&$teamValueToFind,&$persAttributes,&$allPers,&$counter,$teamValueToFindLength)
     {
         $found=strpos($key,$teamValueToFind);
@@ -281,79 +257,61 @@ class manageEmployee extends initialDb
             }
         }
     }
-    protected function isEmpty($key,$data)
-    {
-        if(trim($data)==='')
-        {
-            $this->err.="[".$key."]".$this->infoArray['input'][0]."<br/>";
-        }
-    }
-    protected function getPersonData($id)
-    {
-        $this->query('SELECT * FROM uzytkownik WHERE id=?',$id);
-        $personData=$this->queryReturnValue();
-        if(count($personData)>0)
-        {
-            return($personData);
-        }
-        else
-        {
-            $this->err.="[${id}] NO DATA ABOUT PERSON IN DB!<br/>";
-        }
-    }
     # DELETED EMPLOYEE IN DB
     public function dEmployee()
     {
         $this->log(0,"[".__METHOD__."]");
         $this->inpArray=$this->utilities->getPost();
-        if (array_key_exists("idEmployee",$this->inpArray['data']))
+        if (array_key_exists("ID",$this->inpArray['data']))
         {
             //if(1>0)
-            if(count(self::getEmplProj($this->inpArray['data']['idEmployee']))>0)
+            if(count(self::getEmplProj($this->inpArray['data']['ID']))>0)
             {
-                $this->setError(0,'Employee can\'t be deleted. This employee appears in projects.');
+                $this->response->setError(0,'Employee can\'t be deleted. This employee appears in projects.');
             }
             else
             {
-                $this->query('UPDATE `pracownik` SET `wsk_u`=? WHERE `id`=?',"1,".$this->inpArray['data']['idEmployee']);
+                $this->query('UPDATE `pracownik` SET `wsk_u`=? WHERE `id`=?',"1,".$this->inpArray['data']['ID']);
             }         
         }
         else
         {
-            $this->setError(1,'KEY idEmployee NOT EXIST IN FORM');
+            $this->response->setError(1,'KEY ID NOT EXIST IN FORM');
         }    
-        $this->response->setResponse(__METHOD__,'ok','dEmployee','POST');
+        return($this->response->setResponse(__METHOD__,'ok','cModal','POST'));
     }
     # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getEmployees()
     {
-        $this->response->setResponse(__METHOD__,$this->query('SELECT * FROM `v_all_prac_v5` WHERE 1=? ORDER BY id asc',1),'sEmployees');
+        $this->responseType='GET';
+        return($this->response->setResponse(__METHOD__,$this->query('SELECT * FROM `v_all_prac_v5` WHERE 1=? ORDER BY id asc',1),'sEmployees'));
     }
     public function getEmployeesSpecSlo()
     {
         $f=$this->utilities->checkInputGetValSanitizeString('function');
         if($f['status']!==0)
         {
-            $this->setError(1,$f['info']);
+            $this->response->setError(1,$f['info']);
         }
-        $this->response->setResponse(__METHOD__,$this->query('SELECT * FROM `v_slo_u_spec` WHERE 1=? ORDER BY `ID` ASC ',1),$f['data']);
+        return($this->response->setResponse(__METHOD__,$this->query('SELECT * FROM `v_slo_u_spec` WHERE 1=? ORDER BY `ID` ASC ',1),$f['data']));
     }
     public function getEmployeesLike()
     {
         $this->log(0,"[".__METHOD__."]");
-        if($this->utilities->checkInputGetValSanitizeString('filter')['status']===1)
+        $this->responseType='GET';
+        if($this->utilities->checkKeyExist('filter',$_GET)['status']===1)
         {
-            $this->setError(1,' KEY filter in $_GET IS EMPTY');
+            $this->response->setError(1,'');
         }
         else
         {
-            $f='%'.$this->utilities->getData().'%';
+            $f='%'.filter_input(INPUT_GET,'filter').'%';
             $this->log(1,"[".__METHOD__."] filter => ".$f);
             $this->query('SELECT * FROM v_all_prac_v5 WHERE ID LIKE (?) OR ImieNazwisko LIKE (?) OR Stanowisko LIKE (?) OR Procent LIKE (?) OR Email LIKE (?)ORDER BY ID asc'
                 ,$f.",".$f.",".$f.",".$f.",".$f); 
         }
         $this->logMultidimensional(2,$this->queryReturnValue(),__LINE__."::".__METHOD__." data");
-        $this->response->setResponse(__METHOD__,$this->queryReturnValue(),'sEmployees');
+        return($this->response->setResponse(__METHOD__,$this->queryReturnValue(),'sEmployees'));
     }
      # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getEmployeeProjects()
@@ -361,14 +319,14 @@ class manageEmployee extends initialDb
         $data=array();        
         if($this->utilities->checkInputGetValInt('id')['status']===1)
         {
-            $this->setError(1,' KEY ID in $_GET IS EMPTY');
+            $this->response->setError(1,' KEY ID in $_GET IS EMPTY');
         }
         else
         {
             $data[0]=$this->utilities->getData();
             $data[1]=self::getEmplProj($this->utilities->getData());
         }
-        $this->response->setResponse(__METHOD__,$data,'projects');
+        return($this->response->setResponse(__METHOD__,$data,'projects'));
     }
      # RETURN ALL NOT DELETED PROJECT FROM DB FOR DELETING EMPLOYY
     public function getDeletedEmployeeProjects()
@@ -379,7 +337,7 @@ class manageEmployee extends initialDb
         $data=array();
         if($this->utilities->checkInputGetValInt('id')['status']===1)
         {
-            $this->setError(1,' KEY ID in $_GET IS EMPTY');
+            $this->response->setError(1,' KEY ID in $_GET IS EMPTY');
         }
         else if($this->utilities->checkInputGetValInt('id')['status']===0 && !(in_array('SHOW_PROJ_EMPL', $_SESSION['perm'])))
         {
@@ -392,7 +350,7 @@ class manageEmployee extends initialDb
             $data[0]=$this->utilities->getData();
             $data[1]=$this->query('SELECT ID_Projekt,Numer_umowy,Temat_umowy,Procent_udziału,Data_od,Data_do FROM v_proj_prac_v4 WHERE ID_Pracownik=? ORDER BY ID_Projekt ASC',$this->utilities->getData());  
         }
-        $this->response->setResponse(__METHOD__,$data,'dEmployee');
+        return($this->response->setResponse(__METHOD__,$data,'dEmployee'));
     }
     private function getEmplProj($id)
     {
@@ -406,7 +364,7 @@ class manageEmployee extends initialDb
     }
 
     # RETURN ALL EMPLOYEE SPEC DICTIONARY and other FROM DB
-    private function employeeAllocation($idEmployee)
+    private function employeeSpec($idEmployee)
     {
         $this->log(0,"[".__METHOD__."] ID Employess => ".$idEmployee);
         // GET DICTIONARY
@@ -414,23 +372,23 @@ class manageEmployee extends initialDb
         // GET EMPLOYEE DICTIONARY 
         $emplSlo=$this->query('SELECT * FROM v_all_prac_spec WHERE idPracownik=? ORDER BY idSlownik ASC ',$idEmployee);
         // COMBINE
-        return ($this->combineSloEmployeeAllocation($emplSpec,$emplSlo));
+        return ($this->combineSloEmployeeSpec($emplSpec,$emplSlo));
     }
-    public function getEmployeeAllocation()
+    public function getEmployeeSpec()
     {
         $data=array();
         if($this->utilities->checkInputGetValInt('id')===1)
         {
-            $this->setError(1,' KEY ID in $_GET IS EMPTY');
+            $this->response->setError(1,' KEY ID in $_GET IS EMPTY');
         }
         else
         {
             $data[0]=$this->query('SELECT * FROM v_all_prac_v4 WHERE ID=?',$this->utilities->getData())[0];   
-            $data[1]=self::employeeAllocation($this->utilities->getData());
+            $data[1]=self::employeeSpec($this->utilities->getData());
         }
-        $this->response->setResponse(__METHOD__,$data,'allocation');
+        return($this->response->setResponse(__METHOD__,$data,'eEmployeeSpec'));
     }
-    protected function combineSloEmployeeAllocation($slo,$empSol)
+    protected function combineSloEmployeeSpec($slo,$empSol)
     {
         foreach($slo as $id => $value)
         {
@@ -453,27 +411,15 @@ class manageEmployee extends initialDb
         $data=array();
         if($this->utilities->checkInputGetValInt('id')===1)
         {
-            $this->setError(1,' KEY ID in $_GET IS EMPTY');
+            $this->response->setError(1,' KEY ID in $_GET IS EMPTY');
         }
         else
         {   
-            $data[0]=$this->query('SELECT * FROM v_all_prac_v4 WHERE ID=?',$this->utilities->getData());   
-            $data[1]=self::employeeAllocation($this->utilities->getData());
+            $data[0]=$this->query('SELECT * FROM v_all_prac_v4 WHERE ID=?',$this->utilities->getData())[0];   
+            $data[1]=self::employeeSpec($this->utilities->getData());
             $this->logMultidimensional(2,$data,__LINE__."::".__METHOD__." data");
-            $this->response->setResponse(__METHOD__,$data,'details');
+            return($this->response->setResponse(__METHOD__,$data,'eEmployee'));
         }
-    }
-    public function returnData()
-    {
-        $this->log(0,"[".__METHOD__."]");
-        if($this->getError())
-        {
-            $this->log(0,"[".__METHOD__."] ERROR EXIST");
-            $this->response->setErrResponse(1,$this->getError(),__METHOD__,'','details');
-            return ($this->response->getResponse());
-        }
-        $this->log(0,"[".__METHOD__."] NO ERROR");
-        return ($this->response->getResponse());
     }
     function __destruct()
     {}

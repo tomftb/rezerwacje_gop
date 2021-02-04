@@ -1,19 +1,59 @@
 <?php
-session_start();
-require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/redirectToLoginPage.php");
-require(filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/.cfg/config.php');
-
 class manageProject extends initialDb
 {
+    protected $responseType='POST';
     private $inpArray=array();
-    protected $err="";
+    private $inpArrayDok=array();
+    private $lastProjectData=array();
+    private $projectDiff=array();
     protected $filter='';
     protected $mail='';
     protected $valueToReturn=null;
+    private $projectDocList='';
     protected $idProject=null;
     protected $projPrac=array();
-    const maxPercentPersToProj=100;
+
+    protected $projectChange=0;
+    private $notify='n';
+    private $modul=array();
     protected $taskPerm= ['perm'=>'','type'=>''];
+    private $projectParm=array(
+                        'dir'=>array(
+                            'old'=>'',
+                            'new'=>'',
+                            'change'=>false,
+                            'field'=>array(
+                                'klient'=>'',
+                                'temat_umowy'=>'',
+                                'typ_umowy'=>'',
+                                'd-term_realizacji'=>''
+                            )
+                        ),
+                        'size'=>array(
+                            'old'=>'',
+                            'old_size'=>'',
+                            'new'=>'',
+                            'new_size'=>'',
+                            'change'=>false,
+                            'field'=>array(
+                                'r_dane'=>'',
+                                'j_dane'=>''
+                                )
+                        ),
+                        'quota'=>array(
+                            'quota'=>'',
+                            'old_quota'=>'',
+                            'change'=>false,
+                            'field'=>array(
+                                'quota'=>''
+                            )
+                        ),
+                        'size_quota'=>array(
+                            'new_size_quota'=>'',
+                            'old_size_quota'=>''
+                        )
+            );
+    private $projectParameters=array();
     protected $infoArray=array
             (
                 "numer_umowy"=>array
@@ -36,1255 +76,1219 @@ class manageProject extends initialDb
                     "Nie uzupełniono pola.",
                     "Wprowadzona wartość jest za długa",
                     "Wprowadzona wartość jest za krótka"
+                ),
+                "err_mail"=>array
+                (
+                    "Projekt został utworzony/zaktualizowany. Pojawiły się błędy w wysłaniu powiadomienia.",
+                    "Pojawiły się błędy w wysłaniu powiadomienia."
                 )
             );
+    
+    const zm="<span style=\"font-weight:bold;color:#ff0000\">(ZMIANA)</span> &rarr;";
+    const spanBlack="<span style=\"font-weight:bold;color:#000000\">";
+    const sGreen="<span style=\"font-weight:bold;color:#008000\">";
+    const sEnd="</span>";
     
     function __construct()
     {
         parent::__construct();
-        
+        $this->log(0,"[".__METHOD__."]");
+        $this->notify='n';
+        //require($this->DR."/modul/manageProjectDocument.php");
+        //require($this->DR."/modul/manageProjectTeam.php");
+        $this->modul['DOCUMENT']=NEW manageProjectDocument();
+        $this->modul['TEAM']=NEW manageProjectTeam();
+        $this->utilities=NEW utilities();
+        $this->response=NEW Response('Project');
     }
-    
-    private function parsePostData($postData=array())
+    private function setInpArray()
     {
-        $tmpArray=array();
-        foreach($postData as $key =>$value)
+        $this->utilities->getPost(true,true);
+        if($this->utilities->getStatus()===0)
         {
-            $value=trim($value);
-            $this->inpArray[$key]=$value;
-            //echo $key." - ".$value."\n";
-            if(substr($key, 0,2)==='d-')
-            {
-                if($value!=='')
-                {
-                    //echo 'NOT EMPTY'.$value."\n";
-                    $tmpArray=explode('.',$value);
-                    $this->inpArray[$key]=trim($tmpArray[2])."-".trim($tmpArray[1])."-".trim($tmpArray[0]);
-                    //echo $key." - ".$this->inpArray[$key];
-                }
-                else
-                {
-                    //echo 'EMPTY'.$value."\n";
-                    //$this->inpArray[$key]=NULL;
-                    $this->inpArray[$key]='0000-00-00';
-                   // echo $key.' - '.$this->inpArray[$key]."\n";
-                };
-            };
-        }
-    }
-    private function checkExistInDb($tableName,$whereCondition,$valueToCheck)
-    {
-        //print_r($arrayOfWhere);
-        //echo $valueToCheck;
-        if(trim($valueToCheck)!='')
-        {
-            $this->query('SELECT * FROM '.$tableName.' WHERE '.$whereCondition,$valueToCheck)."<br/>";
-            return(count($this->queryReturnValue()));
+            $this->inpArray=$this->utilities->getData();
         }
         else
         {
-            $this->err.="NO VALUE TO CHECK<br/>";
-            return(0);
+            $this->response->setError(1,$this->utilities->getInfo());
         }
+        $this->inpArrayDok=$this->utilities->getDoc();
+
+        $this->log(0,"[".__METHOD__."] inpArray:");
+        $this->logMultidimensional(0,$this->inpArray,"L::".__LINE__."::".__METHOD__);
+        $this->log(0,"[".__METHOD__."] inpArrayDok:");
+        $this->logMultidimensional(0,$this->inpArrayDok,"L::".__LINE__."::".__METHOD__);
     }
-    protected function getTeamValueToFind()
+    protected function checkDateTypePost($k,$v)
     {
-        if(!$this->err)
-        {
-            $teamValueToFind=array(
-                                    'team_czlonek_grupy_pers', 
-                                    'team_czlonek_grupy_percent',
-                                    'd-start_team_czlonek_grupy',
-                                    'd-end_team_czlonek_grupy'
-            );
-            return($teamValueToFind);
-        }
-    }
-    
-    protected function checkAndAddignTeamValue($key,$value,&$teamValueToFind,&$persAttributes,&$allPers,&$counter,$teamValueToFindLength)
-    {
-        $found=strpos($key,$teamValueToFind);
-        if($found!==null && trim($found)!=='')
-        {    
-            //echo 'str pos - '.$found."\n";
-            $persAttributes[$counter]=$value;
-            $counter++;
-            if($counter===$teamValueToFindLength)
-            {
-                // LAST ELEMENT OF PERS
-                array_push($allPers,$persAttributes);
-                $counter=0;
-            }
-        }
-    }
-    protected function getSendedTeam()
-    {
-        $teamValueToFind=$this->getTeamValueToFind();
-        $teamValueToFindLength=count($teamValueToFind);
-        $persAttributes=array();
-        $allPers=array();
-        $counter=0;
-        if(!$this->err)
-        {
-            foreach($this->inpArray as $key =>$value)
-            {
-                //echo $key.' - '.$value.' - '.$teamValueToFind[$counter]."\n";
-                if($key==='addTeamToProjectid')
-                {
-                    $this->idProject=$value;
-                }
-                $this->checkAndAddignTeamValue($key,$value,$teamValueToFind[$counter],$persAttributes,$allPers,$counter,$teamValueToFindLength);
-            }
-            //print_r($allPers);
-            return($allPers);
-        }
-        return($allPers);
-    }
-    protected function getSendedDoc()
-    {
-        $documentList=array();
         $tmpArray=array();
-        $tmpId=array();
-        $isDoc=false;
-        $err=false;
-        $inputCounter=1;
-        if(!$this->err)
+        if(preg_match('/^(d-).*/i',$k))
+        //if(substr($k, 0,2)==='d-')
         {
-            foreach($this->inpArray as $key =>$value)
+            if($v!=='')
             {
-                $this->isEmpty("Pole - ".$inputCounter,$value);
-                    if(substr($key,0,7)==='orgDok-')
-                    {
-                        //echo "UPDATE";
-                        $tmpId=explode('-',$key);
-                        array_push($tmpArray,'org',$tmpId[1],$value);
-                        $isDoc=true;
-                        
-                    }
-                    else if(substr($key,0,7)==='newDok-')
-                    {
-                        //echo "INSERT";
-                        array_push($tmpArray,'new','n',$value);
-                        $isDoc=true;
-                    }
-                    else {};
-                    if($isDoc)
-                    {
-                       array_push($documentList,$tmpArray); 
-                    }
-                    $tmpArray=[];
-                    $tmpId=[];
-                    $isDoc=false;
-                    $inputCounter++;
+                /*
+                 * CHECK SEPARATOR
+                 */
+                $this->log(1,"[".__METHOD__."] FOUND NOT EMPTY DATE => ".$v);
+                $tmpArray=explode('.',$v);
+                $this->inpArray[$k]=trim($tmpArray[2])."-".trim($tmpArray[1])."-".trim($tmpArray[0]);
+            }
+            else
+            {
+                $this->log(1,"[".__METHOD__."] DATE => ".$v." => SET DEFAULT 0000-00-00");
+                $this->inpArray[$k]='0000-00-00';
             }
         }
-        return($documentList);
     }
-    protected function checkPersPercent($dataArray)
+    protected function checkDokTypePost($k,$v)
     {
-        $id=$dataArray[0];
-        $percentToSetup=$dataArray[1];
-        /*
-        echo __METHOD__."\n";
-        echo "id - ${id}\n";
-        echo "id project - ".$this->idProject."\n";
-        echo "percent to setup - ${percentToSetup}\n";
-         */
-        // MAX 100% percent per person
-        $percentOverall=0;
-        $percentCurrentProj=0;
-        $overallPercent=0;
-        $percentToChange=0;
-        $maxAvaliable=0;
-        if(trim($id)!='')
+        if(preg_match('/^(dok-).*/i',$k))
+        //if(substr($k, 0,7)==='orgDok-')
         {
-            $this->query('SELECT udzialProcent FROM v_udzial_prac_proj_percent_v2 WHERE idPracownik=? AND idProjekt=?',$id.','.$this->idProject);
-            $percentCurrentProj=$this->queryReturnValue();
-            //print_r($percentCurrentProj);
-            //echo "count returned values - ".count($percentCurrentProj)."\n";
-            if(count($percentCurrentProj)===0)
+            if($v!=='')
             {
-                $percentCurrentProj[0]['udzialProcent']=0;
+                $this->log(1,"[".__METHOD__."] FOUND NOT EMPTY DOCUMENT => ".$v);
+                $this->inpArrayDok[$k]=$v;
             }
-            //echo "Percent in current project - ".$percentCurrentProj[0]['udzialProcent']."\n";
-            $this->query('SELECT sumProcentowyUdzial FROM v_udzial_sum_procent_prac_v2 WHERE idPracownik=?',$id);
-            $percentOverall=$this->queryReturnValue();
-            if(count($percentOverall)===0)
-            {
-                $percentOverall[0]['sumProcentowyUdzial']=0;
-            }
-            //echo "Percent overall - ".$percentOverall[0]['sumProcentowyUdzial']."\n";
-            $overallPercent=$percentOverall[0]['sumProcentowyUdzial']-$percentCurrentProj[0]['udzialProcent'];
-            //echo "Percent used in antoher project - ".$overallPercent."\n";
-            //$overallPercent+=$percentToSetup;
-            //echo "const - ".self:: maxPercentPersToProj."\n";
-            $maxAvaliable=self:: maxPercentPersToProj-$overallPercent;
-            //echo "Max percent to setup - ".$maxAvaliable."\n";
-            $availablePercent=self:: maxPercentPersToProj-($percentOverall[0]['sumProcentowyUdzial']-$percentCurrentProj[0]['udzialProcent']);
-            if($maxAvaliable>=$percentToSetup)
-            {
-                //echo "Percent can be setup - (max avaliable - ${availablePercent}%)\n";
-                return true;
-            }
-            $percentToChange=$percentToSetup-$maxAvaliable;
-            //echo $this->err;
-            $this->err.="[".$dataArray['imie']." ".$dataArray['nazwisko']."]Too much percent to setup - (must remove ${percentToChange}%)</br>";
+            UNSET($this->inpArray[$k]);
+        }
+    }
+    private function getProjectData($id)
+    {
+        return ($this->squery("SELECT 
+                        `id` as 'i',
+                        `numer_umowy` as 'n',
+                        `klient` as 'k',
+                        `temat_umowy` as 't',
+                        `typ` as 't2',
+                        `create_date` as 'du',
+                        `create_user_full_name` as 'cu',
+                        `create_user_email` as 'cum',
+                        `nadzor` as 'l',
+                        `kier_grupy` as 'm',
+                        `term_realizacji` as 'ds',
+                        `koniec_proj` as 'dk'           
+                 FROM `projekt_nowy` WHERE `id`=".$id)[0]);
+    }
+    public function pTeam()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        $this->setInpArray(filter_input_array(INPUT_POST));
+        if($this->utilities->checkKeyExistEmpty('id',$this->inpArray)['status']!==0)
+        {
+            $this->response->setError(1,$this->utilities->getInfo());
             return false;
         }
-        $this->err.="NO VALUE TO CHECK<br/>";
-        return false;
+        $this->modul['TEAM']->setAdminEmail(self::getAdminEmail());
+        if($this->modul['TEAM']->setTeam($this->inpArray)!='')
+        {
+            $this->response->setError(0,$this->modul['TEAM']->getInfo());
+            return false;
+        }
+        return($this->response->setResponse(__METHOD__,'','cModal','POST'));
     }
-    
-    protected function addTeamToProject($valueToAdd)
+    public function pPDF()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        if($this->utilities->checkInputGetValInt('id')['status']===1)
+        {
+            $this->responseType='GET';
+            $this->response->setError(1,$this->utilities->getInfo());
+            return false;
+        }
+        $projectDetails=$this->query('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=? AND `wsk_u`=? ',$this->utilities->getData().",0")[0];
+        $projectDoc=$this->query('SELECT `nazwa` FROM `projekt_dok` WHERE `id_projekt`=? AND `wsk_u`=? ',$this->utilities->getData().",0");   
+        $projectTeam=$this->query('SELECT NazwiskoImie,DataOd,DataDo FROM v_proj_prac_v_pdf WHERE idProjekt=?',$this->utilities->getData());
+        require_once($this->DR.'/modul/createPdf.php'); 
+        $PDF = new PDF($projectDetails,$projectDoc,$projectTeam);
+        return($this->response->setResponse(__METHOD__,$PDF->getPdf(),'pPDF','POST'));
+    }
+    public function getProjectDefaultValues()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        $valueToReturn['rodzaj_umowy']=$this->query('SELECT * FROM v_slo_um_proj WHERE 1=? ORDER BY ID ASC ',1);
+        $valueToReturn['nadzor']=$this->query('SELECT * FROM v_slo_lider_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1);
+        $valueToReturn['kier_grupy']=$this->query('SELECT * FROM v_slo_kier_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1);
+        $valueToReturn['dokPowiazane']=$this->query('SELECT * FROM v_slo_dok WHERE 1=? ORDER BY ID ASC ',1);
+        $valueToReturn['gl_tech']=$this->query('SELECT * FROM v_slo_glow_tech_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1);
+        $valueToReturn['gl_kier']=$this->query('SELECT * FROM v_slo_kier_osr_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1);
+        $valueToReturn['typ_umowy']=$this->query('SELECT * FROM v_slo_typ_um WHERE 1=? ORDER BY ID ASC ',1);
+        $valueToReturn['system_umowy']=$this->query('SELECT * FROM v_slo_sys_um WHERE 1=? ORDER BY ID ASC ',1);
+        $valueToReturn['unitSlo']=self::getProjectUnitSlo();
+        $valueToReturn['quota']=$this->query("SELECT `WARTOSC` FROM `parametry` WHERE `SKROT`=?","PROJ_QUOTA",'FETCH_ASOC')[0]['WARTOSC'];
+        $valueToReturn['r_dane']=$this->query("SELECT `WARTOSC` FROM `parametry` WHERE `SKROT`=?","PROJ_BASE_FILE_SIZE",'FETCH_ASOC')[0]['WARTOSC'];
+        $valueToReturn['id']='';
+        $valueToReturn['numer_umowy']='';
+        $valueToReturn['klient']='';
+        $valueToReturn['temat_umowy']='';
+        $valueToReturn['term_realizacji']=date("d.m.Y");  
+        $valueToReturn['harm_data']=date("d.m.Y"); 
+        $valueToReturn['koniec_proj']=date("d.m.Y"); 
+        return($this->response->setResponse(__METHOD__, $valueToReturn,'pCreate','POST'));  
+    }
+    private function getProjectUnitSlo()
+    {
+        $slo=$this->query("SELECT `NAZWA`,`DEF` FROM `slo_jednostka_miary` WHERE `ID`>? AND `WSK_U`=? ORDER BY ID ASC ","0,0");
+        $def='';
+        $all=array();
+        foreach($slo as $v)
+        {
+            if($v['DEF']==='t')
+            {
+                $def=$v['NAZWA'];
+            }
+            else
+            {
+                array_push($all,$v['NAZWA']);
+            }
+            
+        }
+        array_unshift ($all,$def);
+        return $all;
+    }
+    private function getIdDataPost(&$v)
     {
         /*
-         * team[][0] - id
-         * team[][1] - percent to setup
-         * team[][2] - data start
-         * team[][3] - data end
+         * $v => value
          */
+        $tmp_data=explode('|',$v);
+        $id=$tmp_data[0];
+        $value='';
+        //$this->log(0,"[".__METHOD__."] original array");
+        //$this->logMultidimensional(0,$tmp_data,__METHOD__);
+        if(count($tmp_data)>0)
+        {
+            // remove head
+            array_shift($tmp_data);
+            //$this->log(0,"[".__METHOD__."] after array_shift");
+            //$this->logMultidimensional(0,$tmp_data,__METHOD__);
+            // scale tail
+            $value = implode (" ",$tmp_data);
+            //$this->log(0,"[".__METHOD__."] new value, after implode -> ".$v);
+        }
+        //$this->log(0,"[".__METHOD__."] id -> ".$id);
+        //$this->log(0,"[".__METHOD__."] new value, after implode -> ".$value);
+        $v=array($id,$value);
+    }
+    private function getIdDataProjectPost()
+    {
+        /*
+         * GET AND EXPLODE ID WITH DATA ON |
+         */
+        $this->log(0,"[".__METHOD__."]");
+        self::getIdDataPost($this->inpArray['typ_umowy']);
+        //$this->logMultidimensional(0,$this->inpArray['typ_umowy'],__METHOD__);
+        self::getIdDataPost($this->inpArray['system_umowy']);
+        self::getIdDataPost($this->inpArray['kier_grupy']);
+        self::getIdDataPost($this->inpArray['gl_tech']);
+        self::getIdDataPost($this->inpArray['gl_kier']);
+        self::getIdDataPost($this->inpArray['nadzor']);
+        $this->inpArray['rodzaj_umowy']=explode('|',$this->inpArray['rodzaj_umowy']);
+        //$this->logMultidimensional(0,$this->inpArray['rodzaj_umowy'],__METHOD__);
         
-        $this->parsePostData($valueToAdd);
-        $team=$this->getSendedTeam();
-        $persData=array();
-        
-        if(!$this->err)
-        {
-            // PARSE SENDED TEAM
-            foreach($team as $id => $value)
-            {
-                //echo "${id} - ${value[0]}\n";
-                $persData=$this->getPersonData($value[0]);
-                $team[$id]['imie']=$persData[0]['imie'];
-                $team[$id]['nazwisko']=$persData[0]['nazwisko'];
-                $team[$id]['email']=$persData[0]['email'];
-                //$this->manageTeamPersActionIdDb($id,$team);
-                $this->manageTeamPersActionIdDb($team[$id]);
-                //array_splice($team, $id, 1);
-                $this->projPrac[$id][0]=$value[0];
-                $this->projPrac[$id][1]=$persData[0]['imie']." ".$persData[0]['nazwisko'];
-            }
-            $this->removeNotSendedTeamMembers($team);
-            if(!$this->err)
-            {
-                foreach($team as $value)
-                {
-                    $this->updateTeamInDb($value);
-                }
-                //print_r($this->projPrac);
-                //$this->projPrac=$team;
-                $this->mail=NEW email();
-                $errHeader='Uaktualniono członków zespołu. Niestety pojawiły się błędy w wysłaniu powiadomienia.';
-                $err=$this->mail->sendMail($this->cUpdateProjTeamSubjectMail(),$this->cUpdateProjTeamBodyMail(),$this->cNewProjRecMail(),$errHeader);
-                if($err)
-                {
-                    $this->err.=$err;
-                }
-            }
-        }
     }
-    //
-    protected function updateProjectDoc($data,$idProject)
+    public function pCreate()
     {
-            $this->parsePostData($data);
-            $documents=$this->getSendedDoc();
-            //print_r($documents);
-            $this->getProjectDocuments($this->idProject);
-
-            $documentsInDb=$this->valueToReturn;
-            //print_r($documentsInDb);
-            $this->valueToReturn=[];
-            //print_r($documents);
-        if(!$this->err)
+        $this->log(0,"[".__METHOD__."]");
+        self::setInpArray();
+        $this->isEmpty('Numer',$this->inpArray['numer_umowy']);
+        $this->isEmpty('Temat',$this->inpArray['temat_umowy']);
+        if($this->response->getError()) { return false; }
+        if($this->checkExistInDb('projekt_nowy','temat_umowy=? AND wsk_u=?',$this->inpArray['temat_umowy'].",0"))
         {
-            // PARSE SENDED TEAM
-            foreach($documents as $key => $value)
-            {
-                $this->manageSendedDocActionInDb($documentsInDb,$value,$idProject);
-                //print_r($value);
-            }
-            $this->removeNotSendedDoc($documentsInDb,$documents,$idProject);
+            $this->response->setError(0,$this->infoArray['temat_umowy'][1]);
         }
-    }
-    protected function manageSendedDocActionInDb(&$documentsInDb,&$doc,$idProject)
-    {
-        $curretDateTime=date('Y-m-d H:i:s');
-        $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
-        $insTask=true;
-        //print_r($documentsInDb);
-        if($doc[1]!=='n')
+        if($this->checkExistInDb('projekt_nowy','numer_umowy=? AND wsk_u=?',$this->inpArray['numer_umowy'].",0"))
         {
-            foreach($documentsInDb as $key => $value)
-            {
-                if($value['ID']===$doc[1])
-                {   // UPDATE
-                    if(trim($value['NAZWA'])!==trim($doc[2]))
-                    {
-                        //echo "[".$doc[1]."]UPDATE DOC NAME IN DB - different name\n";
-                        $this->query(
-                                   'UPDATE projekt_dok SET nazwa=?, wsk_u=?, mod_data=?,mod_user=?,mod_user_id=?,mod_host=? WHERE id_projekt=? AND id=?',
-                                 $doc[2].',0,'.$curretDateTime.",".$_SESSION["username"].",".$_SESSION["userid"].",".$modHost.','.$idProject.','.$doc[1]);
-                                }
-                        $insTask=false;
-                        break;
-                    }
-                }  
+            $this->response->setError(0,$this->infoArray['numer_umowy'][1]);
         }
-        if($insTask)
-        {
-            // INSERT
-            //echo "[]INSERT INTO DB NEW DOC\n";
-            $this->query('INSERT INTO projekt_dok (id_projekt,nazwa,mod_data,mod_user,mod_user_id,mod_host) VALUES (?,?,?,?,?,?)',$idProject.','.$doc[2].",".$curretDateTime.",".$_SESSION["username"].",".$_SESSION["userid"].",".$modHost);     
-        }
+        if($this->response->getError()) { return false; }   
+        self::getIdDataProjectPost();
+        //self::getProjectParameters();
+        self::setProjectDir();
+        self::setQuotaField($this->inpArray['quota']);
+        self::setProjectParm($this->inpArray);
+        self::setProjectSizeQuota();
+        self::setProjPrac();
+        self::addProjectDb();
+        self::addProjectDok($this->idProject);  
+        self::sendNotify('Zarejestrowano zgłoszenie na utworzenie nowego projektu o specyfikacji:',$this->inpArray);
+        //$this->response->setError(0,'TEST STOP');
+        //self::clearProjectData();
+        return($this->response->setResponse(__METHOD__,'','cModal','POST'));
     }
-    protected function isEmpty($key,$data)
+    public function addProjectDb()
     {
-        if(trim($data)==='')
-        {
-            $this->err.="[".$key."]".$this->infoArray['input'][0]."<br/>";
-        };
-    }
-    protected function getPdf($idProject)
-    {
-           $this->getProjectDetails($idProject);
-        
-            /*
-             * [0] Project details
-             * [1] Documents
-             */
-            $projectDetails=array();
-            $projectDoc=array();
-            $projectTeam=array();
-            $projectMainManager=array();
-            $projectMainTech=array();
-
-            $projectDetails=$this->valueToReturn[0][0];
-            //print_r($projectDetails);
-            $projectDoc=$this->valueToReturn[1];
-
-            $this->getProjectTeamPdf($idProject);
-
-            if(count($this->valueToReturn)>0)
-            {
-                $projectTeam=$this->valueToReturn;
-
-            }
-            //print_r($projectTeam);
-            $this->getProjectPers('v_slo_kier_osr_proj');
-
-            $projectMainManager=$this->valueToReturn[0];
-            //print_r($projectMainManager);
-            $this->getProjectPers('v_slo_glow_tech_proj');
-            $projectMainTech=$this->valueToReturn[0];
-            //print_r($projectMainTech);
-            require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/modul/createPdf.php'); 
-    }
-    protected function removeNotSendedDoc(&$documentsInDb,$sendedDoc,$idProject)
-    {
-        $found=false;
-        $idInDb='';
-        $idInDoc='';
-        //echo "Sended documents:\n";
-        //print_r($sendedDoc);
-        //echo "Documents in database:\n";
-        //print_r($documentsInDb);
-        
-        foreach($documentsInDb as $key => $value)
-        {
-            $curretDateTime=date('Y-m-d H:i:s');
-            $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
-            $idInDb=(string)$value['ID'];
-            foreach($sendedDoc as $id => $data)
-            {
-                $idInDoc=(string)$data[1];
-                if($idInDb===$idInDoc)
-                {
-                    //echo "[DB=${idInDb}]FOUND IN SENDED DOC\n";
-                    $found=true;
-                    break;
-                }
-            }
-            if(!$found)
-            {
-                // UPDATE - DELETE WSK_U=1
-                //echo "[DB=${idInDb}]NOT FOUND SET WSK_U=1\n";
-                $this->query(
-                     'UPDATE projekt_dok SET wsk_u=?,mod_data=?,mod_user=?,mod_user_id=?,mod_host=? WHERE id_projekt=? AND id=?',
-                     '1,'.$curretDateTime.",".$_SESSION["username"].",".$_SESSION["userid"].",".$modHost.",".$idProject.','.$idInDb); 
-            }
-            $found=false;
-            //print_r($value);
-        }
-    }
-    //
-    protected function removeNotSendedTeamMembers(&$team)
-    {
-        // GET TEAM FROM DB
-        $this->getProjectTeam($this->idProject);
-        $this->valueToReturn;
-        $curretDateTime=date('Y-m-d H:i:s');
-        $found=false;
-        //print_r($this->valueToReturn);
-        // PARSE REMAIN TEAM
-        foreach($this->valueToReturn as $key)
-        {
-                /*  [idPracownik]
-                 *  [procentUdzial]
-                 *  [datOd]
-                 *  [datDo]
-                 */
-                //echo $key['idPracownik']."\n";
-                foreach($team as $id)
-                {
-                   //echo $id[0]."\n";
-                   if($id[0]==$key['idPracownik'])
-                   {
-                       //echo "FOUND\n";
-                       $found=true;
-                       break;
-                   }
-                }
-                if(!$found)
-                {
-                    //echo "REMOVE FROM DB.\n";
-                    $this->query(
-                     'UPDATE projekt_pracownik SET udzial_procent=?,dat_od=?,dat_do=?,mod_dat=?,mod_user_id=?,mod_user_name=?,wsk_u=? WHERE id_projekt=? AND id_pracownik=?',
-                     '0,0000-00-00,0000-00-00,'.$curretDateTime.','.$_SESSION["userid"].','.$_SESSION["username"].',1,'.$this->idProject.','.$key['idPracownik']); 
-                    // REMOVE FROM DB
-                }
-                $found=false;
-        }
-        $this->valueToReturn=null;
-    }
-    protected function manageTeamPersActionIdDb(&$teamRow)
-    {
-        // CHECK PERCENT
-        if($this->checkPersPercent($teamRow))
-        {
-            $count=$this->checkExistInDb('projekt_pracownik','id_projekt=? AND id_pracownik=? ',$this->idProject.','.$teamRow[0]);
-            if($count>0)
-            {
-                // UPDATE
-                array_push($teamRow,'UPDATE');
-            }
-            else
-            {
-                // INSERT
-                array_push($teamRow,'INSERT');
-            }
-        }
-    }
-    protected function updateTeamInDb($dataArray)
-    {
-        $curretDateTime=date('Y-m-d H:i:s');
-        if(end($dataArray)==='UPDATE')
-        {
-             $this->query(
-                     'UPDATE projekt_pracownik SET imie=?,nazwisko=?,udzial_procent=?,dat_od=?,dat_do=?,mod_dat=?,mod_user_id=?,mod_user_name=?,wsk_u=? WHERE id_projekt=? AND id_pracownik=?',
-                     $dataArray['imie'].','.$dataArray['nazwisko'].','.$dataArray[1].','.$dataArray[2].','.$dataArray[3].','.$curretDateTime.','.$_SESSION["userid"].','.$_SESSION["username"].',0,'.$this->idProject.','.$dataArray[0]);            
-        }
-        else
-        {
-            $this->query('INSERT INTO projekt_pracownik 
-            (id_projekt,id_pracownik,imie,nazwisko,udzial_procent,dat_od,dat_do,mod_dat,mod_user_id,mod_user_name) 
+        $this->query('INSERT INTO `projekt_nowy` 
+               (create_user,create_user_full_name,create_user_email,create_date,rodzaj_umowy,rodzaj_umowy_alt,numer_umowy,temat_umowy,kier_grupy,kier_grupy_id,term_realizacji,harm_data,koniec_proj,nadzor,nadzor_id,mod_user,mod_user_id,mod_host,kier_osr,kier_osr_id,technolog,technolog_id,r_dane,j_dane,klient,typ,system,rodzaj_umowy_id,typ_id,system_id,quota) 
 		VALUES
-		(?,?,?,?,?,?,?,?,?,?)'
-        ,$this->idProject.','.$dataArray[0].','.$dataArray['imie'].','.$dataArray['nazwisko'].','.$dataArray[1].','.$dataArray[2].','.$dataArray[3].','.$curretDateTime.','.$_SESSION["userid"].','.$_SESSION["username"]);        
-        }            
+		(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+                ,$_SESSION["username"].","
+                .$_SESSION["nazwiskoImie"].","
+                .$_SESSION["mail"].","
+                .$this->cDT.","
+                .$this->inpArray['rodzaj_umowy'][1].","
+                .$this->inpArray['rodzaj_umowy'][2].","
+                .$this->inpArray['numer_umowy'].","
+                .$this->inpArray['temat_umowy'].","
+                .$this->inpArray['kier_grupy'][1].","
+                .$this->inpArray['kier_grupy'][0].","
+                .$this->inpArray['d-term_realizacji'].","
+                .$this->inpArray['d-harm_data'].","
+                .$this->inpArray['d-koniec_proj'].","
+                .$this->inpArray['nadzor'][1].","
+                .$this->inpArray['nadzor'][0].","
+                .$_SESSION["username"].","
+                .$_SESSION["userid"].","
+                .$this->RA.","
+                .$this->inpArray['gl_kier'][1].','
+                .$this->inpArray['gl_kier'][0].','
+                .$this->inpArray['gl_tech'][1].','
+                .$this->inpArray['gl_tech'][0].','
+                .$this->inpArray['r_dane'].','
+                .$this->inpArray['j_dane'].','
+                .$this->inpArray['klient'].','
+                .$this->inpArray['typ_umowy'][1].','
+                .$this->inpArray['system_umowy'][1].','
+                .$this->inpArray['rodzaj_umowy'][0].','
+                .$this->inpArray['typ_umowy'][0].','
+                .$this->inpArray['system_umowy'][0].','
+                .$this->inpArray['quota']
+                );
+        $this->log(0,"[".__METHOD__."] AFTER INSERT ");
+        $this->idProject=$this->queryLastId();
+        $this->projectChange=1;
+        $this->notify='y';
     }
-    protected function getPersonData($id)
+    private function clearProjectData()
     {
-        $this->query('SELECT * FROM pracownik WHERE id=?',$id);
-        $personData=$this->queryReturnValue();
-        if(count($personData)>0)
+        $this->log(0,"[".__METHOD__."]");
+        if($this->response->getError())
         {
-            return($personData);
+            // update project set wsk_u = 1
+            $this->log(0,"[".__METHOD__."] ERROR EXIST, SET PROJEKT WSK_U = 1");
+            $this->query('UPDATE `projekt_nowy` SET wsk_u=? WHERE id=?',"1,".$this->idProject);   
         }
-        else
-        {
-            $this->err.="[${id}] NO DATA ABOUT PERSON IN DB!<br/>";
-        };
     }
-    protected function getProjectDefaultValues()
+    protected function getProjectParameters()
     {
-        $valueToReturn=array();
-        
-        $this->getProjectSlo('v_slo_um_proj');	
-        array_push($valueToReturn,$this->valueToReturn);
-        $this->getProjectPers('v_slo_lider_proj');
-        array_push($valueToReturn,$this->valueToReturn);
-        $this->getProjectPers('v_slo_kier_proj');
-        array_push($valueToReturn,$this->valueToReturn);
-        $this->getProjectSlo('v_slo_dok');
-        array_push($valueToReturn,$this->valueToReturn);
-        $this->getProjectPers('v_slo_glow_tech_proj');
-        array_push($valueToReturn,$this->valueToReturn);
-	$this->getProjectPers('v_slo_kier_osr_proj');
-        array_push($valueToReturn,$this->valueToReturn);
-        $this->getProjectSlo('v_slo_typ_um');
-        array_push($valueToReturn,$this->valueToReturn);
-        $this->getProjectSlo('v_slo_sys_um');
-        array_push($valueToReturn,$this->valueToReturn);
-        $this->valueToReturn=$valueToReturn;
-    }
-    protected function checkValuesOfProject()
-    {
-        $valueToCheck=array(
-            'numer_umowy',
-            'temat_umowy'
-        );
-        foreach($valueToCheck as $value)
+        $parm=array();
+        $this->query("SELECT `SKROT`,`WARTOSC` FROM `parametry` WHERE `SKROT` LIKE ?","%PROJ_",'FETCH_ASOC');
+        foreach($this->query("SELECT `SKROT`,`WARTOSC` FROM `parametry` WHERE `SKROT` LIKE ?","PROJ_%",'FETCH_ASOC') as $k => $v)
         {
-            if(trim($this->inpArray[$value])==='')
-            {
-                $this->err.=$this->infoArray[$value][0]."<br/>";
-            }
-            else
-            {
-                if($this->checkExistInDb('projekt_nowy',$value.'=? AND wsk_u=? ',$this->inpArray[$value].",0")>0)
-                {
-                    $this->err.=$this->infoArray[$value][1]."<br/>";
-                }
-            }
-        } 
-    }
-    protected function addProject($valueToAdd)
-    {
-        $this->parsePostData($valueToAdd);
-        $this->checkValuesOfProject();
-        if(!$this->err)
-        {
-            // EXPLODE FIELDS:
-            $rodzaj_umowy=explode('|',$this->inpArray['rodzaj_umowy']);
-            $typ_um=explode('|',$this->inpArray['typ_umowy']);
-            $this->inpArray['typ_umowy']=$typ_um[1];
-            $sys_um=explode('|',$this->inpArray['system_umowy']);
-            $this->inpArray['system_umowy']=$sys_um[1];
-            $this->setProjPrac();
-            $curretDateTime=date('Y-m-d H:i:s');
-            $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
-            $this->query('INSERT INTO projekt_nowy 
-            (create_user,create_date,rodzaj_umowy,rodzaj_umowy_alt,numer_umowy,temat_umowy,kier_grupy,kier_grupy_id,term_realizacji,harm_data,koniec_proj,nadzor,nadzor_id,mod_user,mod_user_id,mod_host,kier_osr,kier_osr_id,technolog,technolog_id,r_dane,j_dane,klient,typ,system) 
-		VALUES
-		(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-        ,$_SESSION["username"].",${curretDateTime},".$rodzaj_umowy[1].",".$rodzaj_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$this->projPrac['kier_grupy'][1].",".$this->projPrac['kier_grupy'][0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$this->projPrac['nadzor'][1].",".$this->projPrac['nadzor'][0].",".$_SESSION["username"].",".$_SESSION["userid"].",".$modHost.",".$this->projPrac['gl_kier'][1].','.$this->projPrac['gl_kier'][0].','.$this->projPrac['gl_tech'][1].','.$this->projPrac['gl_tech'][0].','.$this->inpArray['r_dane'].','.$this->inpArray['j_dane'].','.$this->inpArray['klient_umowy'].','.$typ_um[1].','.$sys_um[1]);
-                 
-            if($this->getError()!=='')
-            {
-                $this->err.=$this->getError()."<br/>";
-            }
-            else
-            {
-                
-                $this->addProjectDok($this->queryLastId());  
-                $this->mail=NEW email();
-                $errHeader='Projekt został założony. Niestety pojawiły się błędy w wysłaniu powiadomienia.';
-                $err=$this->mail->sendMail($this->cNewProjSubjectMail($this->inpArray['klient_umowy'].', '.$this->inpArray['temat_umowy'].', '.$typ_um[1]),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
-                if($err)
-                {
-                    $this->err.=$err;
-                }
-            }    
-        }     
-    }
-    protected function sendMailToPers($POST)
-    {
-        $this->parsePostData($POST);
-        $this->query('SELECT * FROM v_all_proj_v7 WHERE id=?',$this->inpArray['id']);
-        $projectData=$this->queryReturnValue();
-        //print_r($projectData);
-        $this->projPrac['nadzor']=$projectData[0]['nadzor'];
-        $this->projPrac['kier_grupy']=$projectData[0]['kier_grupy'];
-        $this->projPrac['gl_tech']=$projectData[0]['technolog'];
-        $this->projPrac['gl_kier']=$projectData[0]['kier_osr'];
-        
-        $this->inpArray['r_dane']=$projectData[0]['r_dane'];
-        $this->inpArray['j_dane']=$projectData[0]['j_dane'];
-        $this->inpArray['temat_umowy']=$projectData[0]['temat_umowy'];
-        $this->inpArray['klient_umowy']=$projectData[0]['klient'];
-        $this->inpArray['system_umowy']=$projectData[0]['system'];
-        $this->inpArray['typ_umowy']=$projectData[0]['typ'];
-        $this->inpArray['d-term_realizacji']=$projectData[0]['term_realizacji'];
-        $this->inpArray['numer_umowy']=$projectData[0]['numer_umowy'];
-        $this->query('SELECT * FROM v_proj_prac_team_group WHERE idProjekt=?',$this->inpArray['id']);
-        $projectData=$this->queryReturnValue();
-        //print_r($projectData);
-        if(count($projectData)>0)
-        {
-            $this->projPrac['team']=$projectData[0]['NazwiskoImie'];
+            $parm[$v['SKROT']]=$v['WARTOSC'];
         }
+        $this->logMultidimensional(1,$parm,__METHOD__);
+        return ($parm);
+        
+    }
+    private function setupInputValue($field='')
+    {
+        /*
+         * GET SPECIFICATION FIELD VALUE
+         */
+        $this->log(0,"[".__METHOD__."] field => ".$field);
+        if(is_array($this->inpArray[$field]))
+        //if(is_array($this->inpArray['system_umowy']))
+        {
+            $this->logMultidimensional(1,$this->inpArray[$field],__METHOD__);
+            //$this->logMultidimensional(1,$this->inpArray['system_umowy'],__METHOD__);
+            if(!array_key_exists(1, $this->inpArray[$field]))
+            //if(!array_key_exists(1, $this->inpArray['system_umowy']))
+            {
+                $this->response->setError(1,"ARRAY KEY => 1 NOT EXIST IN inpArray[".$field."]");
+                return '';
+            } 
+            return ($this->inpArray[$field][1]);
+            //return ($this->inpArray['system_umowy'][1]);
+        }
+        
+        return ($this->inpArray[$field]);
+        //return ($this->inpArray['system_umowy']);
+    }
+    public function pEmail()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        $this->setInpArray(filter_input_array(INPUT_POST));
+        if($this->utilities->checkKeyExistEmpty('id',$this->inpArray)['status']!==0)
+        {
+            $this->response->setError(1,$this->utilities->getInfo());
+            return false;
+        }
+        //$this->inpArray['id']=10000;
+        $data=$this->query('SELECT `create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=? AND `wsk_u`=? ',$this->inpArray['id'].",0");
+        if(count($data)!==1)
+        {
+            $this->response->setError(1,"[".__METHOD__."] THERE IS MORE THAN ONE OR NO PROJECT WITH `ID`=".$this->inpArray['id']." AND `wsk_u`=0");
+            return false;  
+        }
+        self::setProjectEmailFields($data[0]);
+        $this->logMulti(0,$data[0],__METHOD__);
         $this->mail=NEW email();
-        $errHeader='Pojawiły się błędy w wysłaniu powiadomienia.';
-        $err=$this->mail->sendMail($this->cRepeatInfoSubjectMail($this->inpArray['klient_umowy'].', '.$this->inpArray['temat_umowy'].', '.$this->inpArray['typ_umowy']),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
-        if($err)
+        if($this->mail->sendMail(
+                                $data[0]['subject'],
+                                self::projectBodyMailTemplate($data[0]['subject'],$data[0]),
+                                self::getRecipient(),
+                                $this->infoArray['err_mail'][1],
+                                true
+        )!=='')
         {
-            $this->err.=$err;
+            $this->response->setError(0, $this->mail->getErr()); 
         }
+        //$this->response->setError(0,'TEST STOP');
+        return($this->response->setResponse(__METHOD__,'','cModal','POST')); 
+    }
+    private function getProjectDoc()
+    {
+        $tmp='';
+        $doc=$this->query('SELECT `nazwa` FROM `projekt_dok` WHERE `id_projekt`=? AND `wsk_u`=? ',$this->inpArray['id'].",0");    
+        foreach($doc as $v)
+        {
+            $tmp.="-&nbsp;".$v['nazwa']."<br/>";
+        }
+        return $tmp;
+    }
+    private function getRecipient()
+    {
+        $patt=array();
+        foreach($this->inpArray as $k => $v)
+        {
+            if(preg_match('/^e(\d)+$/i',$k) && (trim($v)!==''))
+            {
+                array_push($patt,array($v,''));
+            }
+        }
+        return $patt;
+    }
+    private function setProjectEmailFields(&$d)
+    {
+        $d['size']=$d['r_dane'].$d['j_dane'];
+        $d['s_quota']=intval($d['quota'],10)*intval($d['r_dane'],10);
+        $d['applicant']=$d['create_user_full_name']."(".$d['create_user_email'].")";
+        $d['dir']=self::setDirName($d['klient'],$d['temat_umowy'],$d['typ_umowy'],$d['d-term_realizacji']);
+        $d['doc']=self::getProjectDoc();
+        $d['users']=$d['nadzor'].", ".$d['kier_grupy'].", ".$d['technolog'].".";
+        $d['subject']="Powtórne powiadomienie o założeniu Projektu :: ".$d['klient'].', '.$d['temat_umowy'].', '.$d['typ_umowy'];
     }
     protected function setProjPrac()
     {
-        $this->projPrac['nadzor']=explode('|',$this->inpArray['nadzor']);
-        $this->projPrac['kier_grupy']=explode('|',$this->inpArray['kier_grupy']);
-        $this->projPrac['gl_tech']=explode('|',$this->inpArray['gl_tech']);
-        $this->projPrac['gl_kier']=explode('|',$this->inpArray['gl_kier']);
-        //print_r($this->projPrac);      
+        $this->log(0,"[".__METHOD__."]");
+        //$this->logMultidimensional(0,$this->inpArray,__LINE__."::".__METHOD__." inpArray"); 
+        array_push($this->projPrac,
+                array($this->inpArray['nadzor'][0],$this->inpArray['nadzor'][1]),
+                array($this->inpArray['kier_grupy'][0],$this->inpArray['kier_grupy'][1]),
+                array($this->inpArray['gl_tech'][0],$this->inpArray['gl_tech'][1]),
+                array($this->inpArray['gl_kier'][0],$this->inpArray['gl_kier'][1]));   
+    
+        //$this->logMultidimensional(0,$this->projPrac,__METHOD__." projPrac"); 
+    }
+    protected function setPostProjPac()
+    {
+        $emailAddr=array();
+        //array_push($this->projPrac,
+        foreach($this->inpArray as $key => $value)
+        {
+            if(substr($key,0,13)==='emailAccount-')
+            {
+                array_push($emailAddr,array($value,$value));
+            }
+        }
+        $this->logMultidimensional(0,$emailAddr,__METHOD__." emailAddr"); 
+        return $emailAddr;
     }
     protected function getProjPracList()
     {
-        $projPracList='';
-        $licz=0;
-        $sep='';
-        $pers='';
-        foreach($this->projPrac as $key => $value)
-        {
-            //echo $key."\n";
-            //echo $value."\n";
-            //print_r($value);
-            if($licz)
-            {
-               $sep=', ';
-            }
-            if($key!='gl_kier')
-            {
-                
-                if(is_array($value))
-                {
-                    $pers=$value[1];
-                }
-                else
-                {
-                    $pers=$value;
-                }
-                $projPracList.=$sep.$pers; 
-            }
-            
-            $licz++;
-        }
+        $this->log(0,"[".__METHOD__."]");
+        $projPracList=$this->inpArray['nadzor'][1].",".$this->inpArray['kier_grupy'][1].",".$this->inpArray['gl_tech'][1].".";
+        $this->log(1,"[".__METHOD__."] Project workers list => ".$projPracList);
         return($projPracList);
     }
-    protected function getProjPracTeamList()
+    protected function cNewProjRecMail($admin=0)
     {
-        
-        $projPracList='';
-        $licz=0;
-        $sep='';
-        foreach($this->projPrac as $value)
-        {
-            if($licz)
-            {
-               $sep=', ';
-            }
-            $projPracList.=$sep.$value[1]; 
-            $licz++;
-        }
-        return($projPracList);
-    }
-    protected function cNewProjRecMail()
-    {
+        $this->log(0,"[".__METHOD__."]");
         $recEmail=array();
-        
+        if($admin)
+        {
+            $recEmail=self::getAdminEmail();
+        } 
         $pracEmail=array();
-
+        $this->logMultidimensional(1,$this->projPrac,__METHOD__." projPrac");
         foreach($this->projPrac as $value)
         {
-            $this->query("SELECT Email FROM v_all_prac_v3 WHERE id=?",$value[0]);
-            $pracEmail=$this->queryReturnValue();
-            //print_r($pracEmail);
-            
+            $pracEmail=$this->query("SELECT `Email` FROM `v_all_prac_v5` WHERE id=?",$value[0]); 
             if(count($pracEmail)>0)
             {
                 $pracEmail=array($pracEmail[0]['Email'],$value[1]);
                 array_push($recEmail,$pracEmail);
             }
         }
-        //print_r($recEmail);
         return ($recEmail);
+    }
+    private function getAdminEmail()
+    {
+        $this->log(0,"[".__METHOD__."] ");
+        $recEmail=array();
+        $ad=$this->query("SELECT `WARTOSC` FROM `parametry` WHERE `SKROT`=?","MAIL_RECIPIENT",'FETCH_ASOC');
+        $adminUsers=explode(';',$ad[0]['WARTOSC']);
+        foreach($adminUsers as $user)
+        {
+            $this->log(0,"[".__METHOD__."] ".$user);
+            array_push($recEmail,array($user,'Admin'));
+        }
+        return $recEmail;
     }
     protected function cNewProjSubjectMail($head)
     {
-        return($head.'. Zgłoszenie na utworzenie udziału dla Projektu');
+        return('Zgłoszenie na utworzenie udziału dla Projektu :: '.$head);
     }
     protected function cRepeatInfoSubjectMail($head)
     {
-        return($head.'. Powtórne powiadomienie o utworzonym udziale dla Projektu');
+        return('Powtórne powiadomienie o utworzonym udziale dla Projektu :: '.$head);
     }
-    protected function cUpdateProjSubjectMail($head)
-    {
-        return($head.'. Zgłoszenie na aktualizację udziału dla Projektu');
+    protected function uProjSubjectMail()
+    { 
+        $msg="Zgłoszenie aktualizacji Projektu :: ".$this->inpArray['klient'].', '.$this->inpArray['temat_umowy'].', '.$this->inpArray['typ_umowy'][1];
+        $this->log(0,"[".__METHOD__."] ".$msg);
+        return($msg);
     }
-    protected function cUpdateProjTeamSubjectMail()
+    protected function projectBodyMailTemplate($s,$d)
     {
-        return('Zgłoszenie na aktualizację członków zespołu dla udziału Projektu');
-    }
-    protected function cProjBodyMail()
-    {
-        //print_r($this->inpArray);
-        $quota=$this->inpArray['r_dane']*30;
-        $mailBody="Zarejestrowano zgłoszenie na utworzenie nowego projektu o specyfikacji:\n\n";
-        $mailBody.="Numer\t\t-\t".$this->inpArray['numer_umowy']."\n";
-        $mailBody.="Klient\t\t-\t".$this->inpArray['klient_umowy']."\n";
-        $mailBody.="Temat\t\t-\t".$this->inpArray['temat_umowy']."\n";
-        $mailBody.="Typ\t\t-\t".$this->inpArray['typ_umowy']."\n";
-        $mailBody.="\nRozmiar pliku bazowego\t- ".$this->inpArray['r_dane']." ".$this->inpArray['j_dane']."\n";
-        $mailBody.="Sugerowana quota\t- ".$quota." ".$this->inpArray['j_dane']."\n";
-        $mailBody.="Przypisani użytkownicy\t- ".$this->getProjPracList()."\n\n";
-        //$mailBody.="Przypisani użytkownicy\t- \t".$_SESSION['nazwiskoImie'].", ".$this->getProjPracList()."\n\n";
-        $mailBody.="Zgłaszający\t\t- ".$_SESSION['nazwiskoImie']." (".$_SESSION["mail"].") \n";	
-        // ADD YEAR TO THE END OF DIR NAME
-        // replace white spaces to _
-        $this->inpArray['klient_umowy']=preg_replace('/ /','_',$this->inpArray['klient_umowy']);
-        $this->inpArray['temat_umowy']=preg_replace('/ /','_',$this->inpArray['temat_umowy']);
-        $mailBody.="\n*Katalog\t\t- ".$this->inpArray['klient_umowy']."_".$this->inpArray['temat_umowy']."_".$this->inpArray['typ_umowy']."_".$this->getYearFromData($this->inpArray['d-term_realizacji'])."\n";
-        $mailBody.="*System\t\t\t- ".$this->inpArray['system_umowy']."\n";
-        $mailBody.="*Termin realizacji\t- ".$this->inpArray['d-term_realizacji']."\n";
+        /*
+         * s => subject
+         * d => data
+         */
+        $mailBody="<link href=\"http://fonts.googleapis.com/css?family=Lato:300,400,700&amp;subset=latin,latin-ext\" rel=\"stylesheet\" type=\"text/css\">";
+        $mailBody.="<style type=\"text/css\"> table.lato { font-family: 'Lato', Arial,monospace; font-weight:normal;font-size:14px; }p.lato { font-family: 'Lato', Arial,monospace; font-weight:normal;font-size:16px; } </style>";
+        $mailBody.="<p class=\"lato\">".$s."</p>";
+        $mailBody.="<table class=\"lato\" style=\"border:0px;border-collapse: collapse;\">";
+        $mailBody.="<tr><td><p style=\"margin:1px;\">Numer</p></td><td>-&nbsp;".$d['numer_umowy']."</td></tr>";
+        $mailBody.="<tr><td><p style=\"margin:1px;\">Klient</p></td><td>-&nbsp;".$d['klient']."</td></tr>";
+        $mailBody.="<tr><td><p style=\"margin:1px;\">Temat</p></td><td>-&nbsp;".$d['temat_umowy']."</td></tr>";
+        $mailBody.="<tr><td><p style=\"margin:1px;\">Typ</p></td><td>-&nbsp;".$d['typ_umowy']."</td></tr>";
+        $mailBody.="<tr><td><p style=\"margin:1px;\"><br/>Rozmiar pliku bazowego</p></td><td><br/>-&nbsp;".$d['size']."</td></tr>";
+        $mailBody.="<tr><td><p style=\"margin:1px;\">*Mnożnik quota</p></td><td>-&nbsp;".$d['quota']."</td></tr>";
+        $mailBody.="<tr><td><p style=\"margin:1px;\">Sugerowana quota</p></td><td>-&nbsp;".$d['s_quota']."</td></tr>";
+        $mailBody.="<tr><td><p style=\"margin:1px;\">Przypisani użytkownicy</p></td><td>-&nbsp;".$d['users']."</td></tr>";
+        $mailBody.="<tr><td><p style=\"margin:1px;\"></br>Zgłaszający</p></td><td><br/>-&nbsp;".$d['applicant']."</td></tr>";	
+        $mailBody.="<tr><td><p style=\"margin:1px;\"><br/>*Katalog</p></td><td><br/>-&nbsp;".$d['dir']."</td></tr>";
+        $mailBody.="<tr><td><p style=\"margin:1px;\">*System</p></td><td>-&nbsp;".$d['system']."</td></tr>";
+        $mailBody.="<tr><td style=\"vertical-align: top;\" valign=\"top\"><p style=\"margin:1px;\">*Termin realizacji</p></td><td>-&nbsp;".self::sGreen."START".self::sEnd.": ".$d['d-term_realizacji']."<br/>-&nbsp;".self::sGreen."KONIEC".self::sEnd.": ".$d['d-koniec_proj']."</td></tr>";
+        $mailBody.="<tr><td style=\"vertical-align: top;\" valign=\"top\"><p style=\"margin:1px;\">*Powiązane dokumenty</p></td><td>".$d['doc']."</td></tr>";
+        $mailBody.="</table>";
+        $this->log(0,$mailBody);
         return ($mailBody);
     }
-    private function getYearFromData($date)
+    protected function getLastProjectData()
     {
-        $tmp=array();
-        $tmp=explode('-',$date);
-        return $tmp[0];
-    }
-   
-    protected function cUpdateProjTeamBodyMail()
-    {
-        $this->query("SELECT temat_umowy from v_all_proj where id=?",$this->inpArray['addTeamToProjectid']);
-        $id=$this->queryReturnValue();
-        
-        $mailBody="Zarejestrowano aktualizację zgłoszonego projektu o specyfikacji:\n\n";
-        $mailBody.="Nazwa projektu\t\t-\t".$id[0]['temat_umowy']."\n";
-
-        $mailBody.="Przypisani członkowie zespołu\t- ".$this->getProjPracTeamList()."\n\n";
-        $mailBody.="Aktualizujący\t\t- \t".$_SESSION['nazwiskoImie']." (".$_SESSION["mail"].") ";	
-       
-        return ($mailBody);
-    }
-    protected function checkLoggedUserPerm($perm)
-    {
-        if(!in_array($perm,$_SESSION['perm']))
+        $this->log(0,"[".__METHOD__."]");
+        $data=$this->query('SELECT * FROM `v_project_post_compare` WHERE `idProject`=?',$this->inpArray['id']);
+        $this->logMultidimensional(2,$this->lastProjectData,__METHOD__." lastProjectData"); 
+        if(count($data)!==1)
         {
-           $this->err.="[${perm}] Brak uprawnienia";
-           return 0;
+            $this->response->setError(1,"[".__METHOD__."] THERE IS MORE THAN ONE PROJECT WITH ID, OR THERE NO PROJECT WITH THIS ID => ".$this->inpArray['id']);
+        }
+        $this->lastProjectData=$data[0];
+    }
+    protected function parseLastProjectData()
+    {
+        if(count($this->lastProjectData)===0) { return false;}
+        $this->log(1,"[".__METHOD__."][POST]");
+        $this->logMultidimensional(1,$this->inpArray,__METHOD__);
+        $this->log(1,"[".__METHOD__."][DB]");
+        $this->logMultidimensional(1,$this->lastProjectData,__METHOD__);
+        $this->projectDiff = array_diff($this->inpArray, $this->lastProjectData);
+        $this->log(1,"[".__METHOD__."][POST<->DB]");
+        $this->logMultidimensional(1,$this->projectDiff,__METHOD__);
+        $this->projectChange=count($this->projectDiff);
+        $this->log(0,"[".__METHOD__."][POST<->DB] count diff => ".$this->projectChange);
+    }
+    protected function addProjectDok($id=null)
+    {
+        $this->log(0,"[".__METHOD__."] ID PROJECT => ".$id);
+        if($this->response->getError()){ return false; }
+        if(intval($id)===0)
+        {
+            $this->response->setError(1,'WRONG ID PROJECT => '.$id);
+            return false;
+        }
+        self::parseResponse($this->modul['DOCUMENT']->addDok($id,$this->inpArrayDok));
+    }
+    public function pEdit()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        $this->setInpArray($_POST);
+        $this->isEmpty('Numer',$this->inpArray['numer_umowy']);
+        $this->isEmpty('Temat',$this->inpArray['temat_umowy']);
+        if($this->response->getError()) { return '';}
+        $this->parseFieldValueLength('numer_umowy',$this->inpArray['numer_umowy'],'projekt_nowy');
+        $this->parseFieldValueLength('temat_umowy',$this->inpArray['temat_umowy'],'projekt_nowy');
+        if($this->response->getError()) { return '';}
+        if($this->checkExistInDb('projekt_nowy','numer_umowy=? AND id!=? AND wsk_u=? ',$this->inpArray['numer_umowy'].','.$this->inpArray['id'].",0")>0)
+        {
+            $this->response->setError(0,$this->infoArray['numer_umowy'][1]);
+        }
+        if($this->checkExistInDb('projekt_nowy','temat_umowy=? AND id!=? AND wsk_u=? ',$this->inpArray['temat_umowy'].','.$this->inpArray['id'].",0")>0)
+        {
+            $this->response->setError(0,$this->infoArray['temat_umowy'][1]);
+        }
+        if(!$this->response->getError())
+        {  
+            self::getLastProjectData();
+            self::getProjectParameters();
+            self::setQuotaField($this->lastProjectData['quota']);
+            self::parseLastProjectData();
+            self::setProjectParm($this->lastProjectData);
+            self::setProjectDiff();
+            self::getIdDataProjectPost();
+            self::setProjectDir();
+            self::setProjectSizeQuota();
+            self::setProjPrac();
+            self::updateProjectDb();
+            //self::updateDoc(); 
+            self::parseResponse($this->modul['DOCUMENT']->updateDoc($this->inpArray['id'],$this->inpArrayDok));
+            
+            self::parseNotifyFields();
+            self::sendNotify('Zarejestrowano zgłoszenie na aktualizację projektu o specyfikacji:',$this->lastProjectData);
+        }     
+        //$this->response->setError(0,'TEST STOP');
+        return($this->response->setResponse(__METHOD__,'','cModal','POST'));
+    }
+    private function setQuotaField($quota)
+    {
+        $this->log(0,"[".__METHOD__."]");
+        //$this->inpArray['quota']=intval($this->projectParameters['PROJ_QUOTA']);
+        $this->projectParm['quota']['old_quota']=intval($quota);
+    }
+    public function pDocEdit()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        $this->setInpArray(filter_input_array(INPUT_POST));
+        if(trim($this->inpArray['id'])==='')
+        {
+            $this->response->setError(1,' KEY ID in $_POST IS EMPTY');
         }
         else
         {
-            return 1;
+           self::parseResponse($this->modul['DOCUMENT']->updateDoc($this->inpArray['id'],$this->inpArrayDok)); 
+        }
+        /*
+         * IT IS POSSIBLE TO ADD EMAIL NOTYFICATION
+         */
+        //$this->response->setError(0,'TEST STOP');
+        return($this->response->setResponse(__METHOD__,'','cModal','POST'));
+    }
+    public function pDoc()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        $id=$this->utilities->checkInputGetValInt('id');
+        $this->logMulti(0,$id,__METHOD__);
+        if($id['status']===1)
+        {
+            $this->response->setErrResponse(1,'PROJECT DOCUMENTS NOT FOUND','POST');
+        }
+        else
+        {
+            $v['id']=$id['data'];
+            $v['project']=self::getProjectData($v['id']);
+            $v['dokPowiazane']=$this->query('SELECT ID,NAZWA as "Nazwa" FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$id['data']);
+            return($this->response->setResponse(__METHOD__,$v,'pDoc','POST'));  
+        }    
+    }
+
+    private function setProjectDiff()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        if($this->projectChange===0)
+        {
+            $this->log(0,"[".__METHOD__."] BRAK ZMIAN WARTOŚCI PROJEKTU");
+            //$this->response->setError(0,"BRAK ZMIAN!");
+            //return false;
+        }
+        // update $lastProjectData for email message
+        array_walk($this->lastProjectData,array('self', 'prepareDataRemoveId'));
+        array_walk($this->projectDiff,array('self', 'prepareDataRemoveId'));  
+        array_walk($this->lastProjectData,array('self', 'updateProjectArray'));  
+    }
+    private function setProjectDir()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        /*
+         * Project data array
+         * for new project inpArray
+         * for update project lastProjectData
+         */
+        $this->projectParm['dir']['new']=self::setDirName(
+                                                            $this->inpArray['klient'],
+                                                            $this->inpArray['temat_umowy'],
+                                                            $this->inpArray['typ_umowy'][1],
+                                                            $this->inpArray['d-term_realizacji']
+        );
+        if($this->projectParm['dir']['change'])
+        {
+            $this->projectParm['dir']['old']=self::setDirName(
+                                                            $this->projectParm['dir']['field']['klient'],
+                                                            $this->projectParm['dir']['field']['temat_umowy'],
+                                                            $this->projectParm['dir']['field']['typ_umowy'],
+                                                            $this->projectParm['dir']['field']['d-term_realizacji']
+                    )." ".self::zm;
+            self::fixNewDir();
+        }  
+        self::setDir();
+    }
+    private function setDirName($klient,$temat,$typ,$date)
+    {
+        //$k=strtr(utf8_decode($k), utf8_decode('àáâãäąçćèéêëęìíîïñòóôõöóùúûüýÿśÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ'), 'aaaaaacceeeeeiiiinoooooouuuuyysAAAAACEEEEIIIINOOOOOUUUUY');
+        $k=preg_replace('/ /','_',$klient);
+        $t=preg_replace('/ /','_',$temat);
+        $u=preg_replace('/\\//','_',$typ);
+        $dir=$k."_".$t."_".$u."_".$this->utilities->getYearFromData($date);
+        $this->log(0,"[".__METHOD__."] ".$dir);
+        return $dir;
+    }
+    private function fixNewDir()
+    {
+        $this->projectParm['dir']['new']=self::spanBlack.$this->projectParm['dir']['new']."</span>";
+        $this->log(0,"[".__METHOD__."][new-fix] ".$this->projectParm['dir']['new']);
+    }
+    private function setDir()
+    {
+          $this->projectParm['dir']['new']=$this->projectParm['dir']['old']." ".$this->projectParm['dir']['new'];
+          $this->log(0,"[".__METHOD__."][new-old] ".$this->projectParm['dir']['new']);
+    }
+    
+    private function setProjectSizeQuota()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        /*
+         * Project data array
+         * for new project inpArray
+         * for update project lastProjectData
+         */
+        self::setBaseFileSize();
+        self::setQuota();
+        self::setSuggestedQuota();
+    }
+    private function setBaseFileSize()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        self::setOldSize();
+        if($this->projectParm['size']['change'])
+        {
+            self::setNewSize();
+        }
+        self::setEmailSize();
+    }
+    private function setQuota()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        self::setOldQuota();
+        if($this->projectParm['quota']['change'])
+        {
+            self::setNewQuota();
+        }
+        self::setEmailQuota();
+    }
+     private function setSuggestedQuota()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        self::setOldSuggestedQuota();
+        if($this->projectParm['quota']['change'] || $this->projectParm['size']['change'])
+        {
+            self::setNewSuggestedQuota();
+        }
+        self::setEmailSuggestedQuota();
+    }
+    private function setNewSize()
+    {
+        /*
+         * $this->inpArray['r_dane']);
+         * $this->inpArray['j_dane']);
+         * add info about change
+         */
+        $this->projectParm['size']['new_size']=self::zm." ".self::spanBlack.$this->inpArray['r_dane'].$this->inpArray['j_dane'].self::sEnd;
+        $this->log(0,"[".__METHOD__."] ".$this->projectParm['size']['new_size']);   
+    }
+    private function setOldSize()
+    {
+        $this->projectParm['size']['old_size']=$this->projectParm['size']['field']['r_dane'].$this->projectParm['size']['field']['j_dane'];
+        $this->log(0,"[".__METHOD__."] ".$this->projectParm['size']['old_size']);
+    }
+    private function setEmailSize()
+    {
+        $this->projectParm['size']['new_size']=$this->projectParm['size']['old_size']." ".$this->projectParm['size']['new_size'];
+    }
+    private function setNewQuota()
+    {
+        /*
+         * VALUE Already defined in method setQuotaField;
+         * ADD CSS
+         */
+        $this->projectParm['quota']['quota']=self::zm." ".self::spanBlack.$this->inpArray['quota'].self::sEnd;
+        $this->log(0,"[".__METHOD__."] ".$this->projectParm['size']['new_size']);   
+    }
+    private function setOldQuota()
+    {
+        /*
+         * Already defined in method setQuotaField;
+         */
+        //$this->projectParm['quota']['old_quota']='';
+        $this->log(0,"[".__METHOD__."] ".$this->projectParm['quota']['old_quota']);
+    }
+    private function setEmailQuota()
+    {
+        $this->projectParm['quota']['quota']=$this->projectParm['quota']['old_quota'].' '.$this->projectParm['quota']['quota'];
+    }
+    private function setNewSuggestedQuota()
+    {
+        /*
+         * VALUE Already defined in method setQuotaField;
+         * ADD CSS
+         */
+        if($this->projectParm['size']['change'] && $this->projectParm['quota']['change'])
+        {
+            $this->log(0,"[".__METHOD__."] CHANGE SIZE (WITH UNIT) AND QUOTA");
+            $this->projectParm['size_quota']['new_size_quota']=intval($this->inpArray['r_dane'])*intval($this->inpArray['quota']).$this->inpArray['j_dane'];
+        }  
+        else if($this->projectParm['size']['change'] && !$this->projectParm['quota']['change'])
+        {
+            $this->log(0,"[".__METHOD__."] CHANGE SIZE (WITH UNIT)");
+            $this->projectParm['size_quota']['new_size_quota']=intval($this->inpArray['r_dane'])*intval($this->projectParm['quota']['old_quota']).$this->inpArray['j_dane'];
+        }
+        else if(!$this->projectParm['size']['change'] && $this->projectParm['quota']['change'])
+        {
+            $this->log(0,"[".__METHOD__."] CHANGE QUOTA");
+            $this->projectParm['size_quota']['new_size_quota']=intval($this->projectParm['size']['field']['r_dane'])*intval($this->inpArray['quota']).$this->projectParm['size']['field']['j_dane'];
+        }
+        else
+        {
+            $this->response->setError(1, 'WRONG CASE !! NOTHING CHANGE !');  
+            $this->projectParm['size_quota']['new_size_quota']='ERROR';
+        }
+        $this->projectParm['size_quota']['new_size_quota']=self::zm." ".self::spanBlack.$this->projectParm['size_quota']['new_size_quota'].self::sEnd;
+        $this->log(0,"[".__METHOD__."] ".$this->projectParm['size_quota']['new_size_quota']);   
+    }
+    private function setOldSuggestedQuota()
+    {
+        $this->projectParm['size_quota']['old_size_quota']=intval($this->projectParm['size']['field']['r_dane'])*intval($this->projectParm['quota']['old_quota']).$this->projectParm['size']['field']['j_dane'];
+        $this->log(0,"[".__METHOD__."] ".$this->projectParm['size_quota']['old_size_quota']);
+    }
+    private function setEmailSuggestedQuota()
+    {
+        $this->projectParm['size_quota']['new_size_quota']=$this->projectParm['size_quota']['old_size_quota'].' '.$this->projectParm['size_quota']['new_size_quota'];
+    }
+    private function updateProjectArray($v,$k)
+    {
+        if(array_key_exists ( $k ,$this->projectDiff ))
+        {
+            $this->log(0,"[".__METHOD__."][$k] ".$v." KEY EXISTS -> update ".$this->projectDiff[$k]);
+            $this->lastProjectData[$k]=$this->lastProjectData[$k]." ".self::zm." ".self::spanBlack.$this->projectDiff[$k]."</span>";
+            $this->log(0,"[".__METHOD__."] ".$this->lastProjectData[$k]); 
+            self::checkProjectParmChange($k,$v,$this->projectParm['dir']); 
+            self::checkProjectParmChange($k,$v,$this->projectParm['size']); 
+            self::checkProjectParmChange($k,$v,$this->projectParm['quota']);
         }
     }
-    protected function addProjectDok($id)
+    private function checkProjectParmChange($k,$v,&$parm)
     {
-        //echo __METHOD__."\n";
-        $curretDateTime=date('Y-m-d H:i:s');
-        $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
-        $docCounter=1;
-        if(!$this->err)
+        $this->log(1,"[".__METHOD__."]");
+        //$this->log(1,"[".__METHOD__."] original array");
+        $this->logMultidimensional(0,$parm,__METHOD__);
+        if(array_key_exists($k,$parm['field']) && $parm['change']===false)
+        //if(in_array($k,$parm['field']))
         {
-            foreach($this->inpArray as $key => $value)
-            {
-                //echo $key." - ".$value."\n";
-                if((strpos($key,'addDoc')!==false || strpos($key,'newDok-')!==false) && $value!=='') 
-                {
-                    // echo "FOUND\n";
-                    $tmp=explode('|',$value);
-                    if(!isset($tmp[1]))
-                    {
-                        $tmp[1]=$tmp[0];
-                        $tmp[0]=$docCounter;
-                    }   
-                    $this->query('INSERT INTO projekt_dok (id_projekt,nazwa,mod_data,mod_user,mod_user_id,mod_host) VALUES (?,?,?,?,?,?)',$id.",".$tmp[1].",".$curretDateTime.",".$_SESSION["username"].",".$_SESSION["userid"].",".$modHost);    
-                    
-                    if($this->getError()!=='')
-                    {
-                        $this->err.=$this->getError()."<br/>";
-                    }
-                    $docCounter++;
-                };
-            }
-        };
+            $this->log(0,"[".__METHOD__."][f:$k][v:$v] array_key_exists in parm[field]");
+            $parm['change']=true;
+        }
     }
-    protected function updateProject($projectPost,$idProject)
+    private function setProjectParm($data)
     {
-        $this->parsePostData($projectPost);
-        $this->isEmpty('Numer',$this->inpArray['numer_umowy']);
-        $this->isEmpty('Temat',$this->inpArray['temat_umowy']);
-            /*
-             * echo "ID PROJECT: ".$idProject."\n";
-             * echo "NUMER: ".$this->inpArray['numer_umowy']."\n";
-             * echo "NUMER: ".$this->inpArray['temat_umowy']."\n";
-             */
-            if($this->checkExistInDb('projekt_nowy','numer_umowy=? AND id!=? AND wsk_u=? ',$this->inpArray['numer_umowy'].','.$idProject.",0")>0)
-            {
-                $this->err.=$this->infoArray['numer_umowy'][1]."<br/>";
-            }
-            if($this->checkExistInDb('projekt_nowy','temat_umowy=? AND id!=? AND wsk_u=? ',$this->inpArray['temat_umowy'].','.$idProject.",0")>0)
-            {
-                $this->err.=$this->infoArray['temat_umowy'][1]."<br/>";
-            }
-        
-        if(!$this->err)
+        $this->logMultidimensional(0,$data,__LINE__."::".__METHOD__);
+        $this->projectParm['dir']['field']['klient']=$data['klient'];
+        $this->projectParm['dir']['field']['temat_umowy']=$data['temat_umowy'];
+        $this->projectParm['dir']['field']['typ_umowy']=$data['typ_umowy'];
+        $this->projectParm['dir']['field']['d-term_realizacji']=$data['d-term_realizacji'];
+        $this->projectParm['size']['field']['r_dane']=$data['r_dane'];
+        $this->projectParm['size']['field']['j_dane']=$data['j_dane'];
+        $this->projectParm['quota']['field']['quota']=$data['quota'];
+    }
+    private function prepareDataRemoveId(&$v)
+    {
+        $tmp_data=explode('|',$v);
+        //$this->log(0,"[".__METHOD__."] original array");
+        //$this->logMultidimensional(0,$tmp_data,__METHOD__);
+        if(count($tmp_data)>1)
         {
-            $this->setProjPrac();
-            // EXPLODE FIELDS:
-            //echo "<pre>";
-            //print_r($this->inpArray);
-            //echo "</pre>";
-            $rodzaj_umowy=explode('|',$this->inpArray['rodzaj_umowy']);
-            $sys_um=explode('|',$this->inpArray['system_umowy']);
-            $typ_um=explode('|',$this->inpArray['typ_umowy']);
-
-            $curretDateTime=date('Y-m-d H:i:s');
-            $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
-            $this->query('UPDATE projekt_nowy SET rodzaj_umowy=?,rodzaj_umowy_alt=?,numer_umowy=?,temat_umowy=?,kier_grupy=?,kier_grupy_id=?,term_realizacji=?, harm_data=?, koniec_proj=?, nadzor=?,nadzor_id=?,mod_user=?,mod_user_id=?,mod_host=?, dat_kor=?,kier_osr=?,kier_osr_id=?,technolog=?,technolog_id=?,r_dane=?,j_dane=?,klient=?,typ=?,system=? WHERE id=?',
-            $rodzaj_umowy[1].",".$rodzaj_umowy[2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$this->projPrac['kier_grupy'][1].",".$this->projPrac['kier_grupy'][0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$this->projPrac['nadzor'][1].",".$this->projPrac['nadzor'][0].",".$_SESSION["username"].",".$_SESSION["userid"].",${modHost},${curretDateTime},".$this->projPrac['gl_kier'][1].','.$this->projPrac['gl_kier'][0].','.$this->projPrac['gl_tech'][1].','.$this->projPrac['gl_tech'][0].",".$this->inpArray['r_dane'].",".$this->inpArray['j_dane'].",".$this->inpArray['klient_umowy'].",".$typ_um[1].",".$sys_um[1].",${idProject}");
-                 
-            if($this->getError()!=='')
+            // remove head
+            array_shift($tmp_data);
+            //$this->log(0,"[".__METHOD__."] after array_shift");
+            //$this->logMultidimensional(0,$tmp_data,__METHOD__);
+            // scale tail
+            $v = implode (" ",$tmp_data);
+            //$this->log(0,"[".__METHOD__."] new value, after implode -> ".$v);
+        }
+    }
+    protected function updateProjectDb()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        if($this->response->getError()) { return ''; }
+        $this->log(0,"[".__METHOD__."] ".$this->inpArray['typ_umowy'][0]);
+        $this->log(0,"[".__METHOD__."] ".$this->inpArray['typ_umowy'][1]);
+        $this->logMultidimensional(0,$this->inpArray,__METHOD__."::inpArray");
+        /**/
+        $this->query('UPDATE `projekt_nowy` SET `rodzaj_umowy`=?,`rodzaj_umowy_alt`=?,`numer_umowy`=?,`temat_umowy`=?,`kier_grupy`=?,`kier_grupy_id`=?,`term_realizacji`=?,`harm_data`=?,`koniec_proj`=?,`nadzor`=?,`nadzor_id`=?,`mod_user`=?,`mod_user_id`=?,`mod_host`=?,`dat_kor`=?,`kier_osr`=?,`kier_osr_id`=?,`technolog`=?,`technolog_id`=?,`r_dane`=?,`j_dane`=?,`klient`=?,`typ`=?,`system`=?,`rodzaj_umowy_id`=?,`typ_id`=?,`system_id`=?,`quota`=? WHERE id=?',
+        $this->inpArray['rodzaj_umowy'][1].",".$this->inpArray['rodzaj_umowy'][2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$this->inpArray['kier_grupy'][1].",".$this->inpArray['kier_grupy'][0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$this->inpArray['nadzor'][1].",".$this->inpArray['nadzor'][0].",".$_SESSION["username"].",".$_SESSION["userid"].",".$this->RA.",".$this->cDT.",".$this->inpArray['gl_kier'][1].','.$this->inpArray['gl_kier'][0].','.$this->inpArray['gl_tech'][1].','.$this->inpArray['gl_tech'][0].",".$this->inpArray['r_dane'].",".$this->inpArray['j_dane'].",".$this->inpArray['klient'].",".$this->inpArray['typ_umowy'][1].",".$this->inpArray['system_umowy'][1].",".$this->inpArray['rodzaj_umowy'][0].",".$this->inpArray['typ_umowy'][0].",".$this->inpArray['system_umowy'][0].",".$this->inpArray['quota'].",".$this->inpArray['id']);              
+        
+    }
+    private function getNotifyFields()
+    {
+        $nf=$this->query('SELECT SUBSTRING(`SKROT`,20) AS "SKRT" FROM `parametry` WHERE `SKROT` LIKE ? AND `WARTOSC`=? ORDER BY `ID` ASC','INFORM_CHANGE_PROJ_%,1');
+        //$this->logMultidimensional(0,$nf,__METHOD__."=>notifyFields");
+        return $nf;
+    }
+    private function parseNotifyFields()
+    {
+        /*
+         * nf = notify fields, array with 0,1 value
+         * 0 -> not send on change
+         * 1 -> send on change
+         * 
+         */
+        /*
+         * ERROR EXIST OR NO CHANGE
+         */
+        if($this->response->getError() || $this->projectChange===0) { return '';}
+        $this->logMultidimensional(0,$this->projectDiff,__METHOD__."=>projectDiff");
+         
+        foreach(self::getNotifyFields() as $i => $f)
+        {
+            if(array_key_exists($f['SKRT'], $this->projectDiff))
             {
-                $this->err.=$this->getError()."<br/>";
+                $this->log(0,"[".__METHOD__."] FOUND NOTIFY FIELD (".$f['SKRT'].") => setup var notify = y");
+                $this->notify='y';
+                break;
             }
-            else
-            {
-                //print_r($this->inpArray);
-                $this->updateProjectDoc($projectPost,$idProject); 
-                $this->inpArray['system_umowy']=$sys_um[1];
-                $this->inpArray['typ_umowy']=$typ_um[1];
-                //echo $typ_um[1]."\n";
-                $this->mail=NEW email();
-                $errHeader='Projekt został zaktualizowany. Niestety pojawiły się błędy w wysłaniu powiadomienia.';
-                $err=$this->mail->sendMail($this->cUpdateProjSubjectMail($this->inpArray['klient_umowy'].', '.$this->inpArray['temat_umowy'].', '.$typ_um[1]),$this->cProjBodyMail(),$this->cNewProjRecMail(),$errHeader);
-                if($err)
-                {
-                    $this->err.=$err;
-                }
-                 
-            }    
-        }     
+        }    
+    }
+    protected function sendNotify($subject,$data)
+    {
+        $this->log(0,"[".__METHOD__."]");
+        /*
+         * ERROR EXIST OR NO CHANGE
+         */
+        if($this->response->getError() || $this->projectChange===0) { return '';}   
+        $this->log(0,"[".__METHOD__."] notify var => ".$this->notify);
+        if($this->notify==='n'){ return false;}
+        /*
+         * FIX DATA FOR TEMPLATE
+         */
+        self::setDataForBodyEmailTemplate($data);
+        if($this->response->getError()) { return false; }
+        $this->mail=NEW email();    
+        if($this->mail->sendMail(self::uProjSubjectMail(),self::projectBodyMailTemplate($subject,$data),self::cNewProjRecMail(1),$this->infoArray['err_mail'][0],true)!=='')
+        {
+            $this->response->setError(0, $this->mail->getErr());        
+        }   
+    }
+    private function setDataForBodyEmailTemplate(&$d)
+    {
+        $this->logMulti(0,$d,__METHOD__);
+        $d['typ_umowy']=self::setupInputValue('typ_umowy');
+        $d['size']=$this->projectParm['size']['new_size'];
+        $d['quota']=$this->projectParm['quota']['quota'];
+        $d['s_quota']=$this->projectParm['size_quota']['new_size_quota'];
+        $d['users']=$this->getProjPracList();
+        $d['applicant']=$_SESSION['nazwiskoImie']." (".$_SESSION["mail"].")";
+        $d['dir']=$this->projectParm['dir']['new'];
+        $d['system']=self::setupInputValue('system_umowy'); 
+        $d['doc']="- ".$this->projectDocList;
     }
     # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getAllProjects()
     {
         $valueToReturn=array();
-        $this->query('SELECT * FROM v_all_proj WHERE 1=? ORDER BY id desc',1);
-        array_push($valueToReturn,$this->queryReturnValue());
+        array_push($valueToReturn,$this->query('SELECT * FROM v_all_proj WHERE 1=? ORDER BY id desc',1));
         array_push($valueToReturn,$_SESSION['perm']);
         $this->valueToReturn=$valueToReturn;
     }
-    public function getAllProjectsFilter($wskU,$filter)
+    public function getprojectslike()
     {
-        $filter="%${filter}%";
-        $valueToReturn=array();
-        // OR typ LIKE (?) OR system LIKE (?)
-        $this->query('SELECT * FROM v_all_proj_v7 WHERE wskU=? AND (id LIKE (?) OR numer_umowy LIKE (?) OR temat_umowy LIKE (?) OR kier_grupy LIKE (?) OR nadzor LIKE (?) OR term_realizacji LIKE (?) OR typ LIKE (?) OR koniec_proj LIKE (?) OR StatusName LIKE (?) OR StatusName LIKE (?) OR klient LIKE (?)) ORDER BY id desc'
-                ,$wskU.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter.",".$filter); //.",".$filter.",".$filter
-        array_push($valueToReturn,$this->queryReturnValue());
-        array_push($valueToReturn,$_SESSION['perm']);
-        $this->valueToReturn=$valueToReturn;
+        $this->log(0,"[".__METHOD__."] ");
+        $wskU=0;
+        $f="%".filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING)."%";
+        $this->log(0,"[".__METHOD__."] GET => ".$f);
+        $this->query('SELECT 
+                        `id` as "i",
+                        `numer_umowy` as "n",
+                        `klient` as "k",
+                        `temat_umowy` as "t",
+                        `typ` as "t2",
+                        `create_date` as "du",
+                        `nadzor` as "l",
+                        `kier_grupy` as "m",
+                        `term_realizacji` as "ds",
+                        `koniec_proj` as "dk",     
+                        (case when (`status` = "n") then "Nowy" when (`status` = "c") then "Zamknięty" when (`status` = "d") then "Usunięty" when (`status` = "m") then "W trakcie" else "Błąd" end) as "s"
+                 FROM `projekt_nowy` WHERE `wsk_u`=? AND (`id` LIKE (?) OR `numer_umowy` LIKE (?) OR `temat_umowy` LIKE (?) OR `kier_grupy` LIKE (?) OR `nadzor` LIKE (?) OR `term_realizacji` LIKE (?) OR `typ` LIKE (?) OR `koniec_proj` LIKE (?) OR `status` LIKE (?) OR `klient` LIKE (?)) ORDER BY `id` desc'
+                ,$wskU.",".$f.",".$f.",".$f.",".$f.",".$f.",".$f.",".$f.",".$f.",".$f.",".$f);
+        return($this->response->setResponse(__METHOD__,$this->queryReturnValue(),''));
     }
-     # RETURN ALL NOT DELETED PROJECT FROM DB
-    public function getProjectDocuments($idProject)
+    # GET PROJECT DETAILS
+    public function pDetails()
     {
-        $this->query('SELECT ID,NAZWA FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$idProject);
-        $this->valueToReturn=$this->queryReturnValue();
+        $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+        $v=$this->query('SELECT `id`,`numer_umowy`,`klient`,`temat_umowy`,`term_realizacji`,`harm_data`,`koniec_proj`,`quota`,`r_dane` FROM v_all_proj_v10 WHERE id=?',$this->idProject)[0];       
+        $v['rodzaj_umowy']=self::setProjectRodzajUmowy($this->query('SELECT `rodzaj_umowy_id` as "ID",`rodzaj_umowy` as "Nazwa",`rodzaj_umowy_alt` as "NazwaAlt" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_um_proj WHERE 1=? ORDER BY ID ASC ',1));               
+        $v['nadzor']=self::setProjectMember($this->query('SELECT `nadzor_id` as "id",`nadzor` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_lider_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1));
+        $v['kier_grupy']=self::setProjectMember($this->query('SELECT `kier_grupy_id` as "id",`kier_grupy` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_kier_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1));
+        $v['gl_tech']=self::setProjectMember($this->query('SELECT `technolog_id` as "id",`technolog` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_glow_tech_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1));
+        $v['gl_kier']=self::setProjectMember($this->query('SELECT `kier_osr_id` as "id",`kier_osr` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_kier_osr_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1));      
+        $v['typ_umowy']=self::setProjectDict($this->query('SELECT `typ_id` as "ID",`typ` as "Nazwa" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_typ_um WHERE 1=? ORDER BY ID ASC ',1));
+        $v['system_umowy']=self::setProjectDict($this->query('SELECT `system_id` as "ID",`system` as "Nazwa" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_sys_um WHERE 1=? ORDER BY ID ASC ',1));
+        $v['unitSlo']=self::setProjectUnitSlo($this->query('SELECT `j_dane` FROM `v_all_proj_v10` WHERE id=?',$this->idProject)[0]['j_dane']);
+        $v['project']=self::getProjectData($this->idProject);
+        $v['dokPowiazane']=$this->query('SELECT ID,NAZWA as "Nazwa" FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$this->idProject);
+        return($this->response->setResponse(__METHOD__, $v,'pDetails','POST')); 
     }
-    # RETURN CURRENT PROJECT DETAILS
-    public function getProjectDetails($idProject)
+    private function setProjectUnitSlo($j_dane)
     {
-        $valueToReturn=array();
-        $this->query('SELECT * FROM v_all_proj_v7 WHERE id=?',$idProject);
-       
-        array_push($valueToReturn,$this->queryReturnValue());
-        $this->query('SELECT ID,NAZWA FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$idProject);
-
-        array_push($valueToReturn,$this->queryReturnValue());
-        $this->valueToReturn=$valueToReturn;
+        $slo=$this->query("SELECT `NAZWA` FROM `slo_jednostka_miary` WHERE `ID`>? AND `WSK_U`=? ORDER BY ID ASC ","0,0");
+        $all=array($j_dane);
+        foreach($slo as $i => $v)
+        {
+            if($v['NAZWA']===$j_dane)
+            {
+                $this->log(0,"[".__METHOD__."] FOUND identical");
+                UNSET($slo[$i]);
+            }
+            else
+            {
+                array_push($all,$v['NAZWA']);
+            }   
+        }
+        return $all;
     }
-    # RETURN ALL NOT DELETED PROJECTs Members,LEADERs,SLO and other FROM DB
-    public function getProjectPers($tableToSelect)
+    private function setProjectDict($pData,$dic)
     {
-        $this->query('SELECT * FROM '.$tableToSelect.' WHERE 1=? ORDER BY ImieNazwisko ASC ',1);
-        $this->valueToReturn=$this->queryReturnValue();
+        $this->logMultidimensional(0,$pData,__LINE__."::".__METHOD__." Project DATA");
+        $this->logMultidimensional(0,$dic,__LINE__."::".__METHOD__." Project dictionary");
+        /*
+         * check exist, if exist remove
+         */
+        foreach($dic as $id => $value)
+        {
+            if($pData[0]['ID']===$value['ID'] && $pData[0]['Nazwa']===$value['Nazwa'] )
+            {
+                $this->log(0,"[".__METHOD__."] FOUND identical");
+                UNSET($dic[$id]);
+            }
+        }
+        return array_merge($pData,$dic);
     }
-     # RETURN ALL NOT DELETED DICTIONARY and other FROM DB
-    public function getProjectSlo($tableToSelect,$order='ID')
+    private function setProjectRodzajUmowy($pData,$dic)
     {
-        $this->query('SELECT * FROM '.$tableToSelect.' WHERE 1=? ORDER BY '.$order.' ASC ',1);
-        $this->valueToReturn=$this->queryReturnValue();
+        $this->logMultidimensional(0,$pData,__LINE__."::".__METHOD__." Project DATA");
+        $this->logMultidimensional(0,$dic,__LINE__."::".__METHOD__." Project dictionary");
+        /*
+         * check exist, if exist remove
+         */
+        foreach($dic as $id => $value)
+        {
+            if($pData[0]['ID']===$value['ID'] && $pData[0]['Nazwa']===$value['Nazwa'] && $pData[0]['NazwaAlt']===$value['NazwaAlt'] )
+            {
+                $this->log(0,"[".__METHOD__."] FOUND identical");
+                UNSET($dic[$id]);
+            }
+        }
+        return array_merge($pData,$dic);
     }
-    public function getProjectEmplEmail()
+    private function setProjectMember($pData,$dic)
     {
-        $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-        $this->query('SELECT Pracownik,Pracownik_email AS Email FROM v_all_prac_proj_email WHERE Projekt_id=? ORDER BY Projekt_id ASC ',$id);
-        $this->valueToReturn=$this->queryReturnValue();
+        $this->logMultidimensional(0,$pData,__LINE__."::".__METHOD__." Project DATA");
+        $this->logMultidimensional(0,$dic,__LINE__."::".__METHOD__." Project dictionary");
+         /*
+         * check exist, if exist remove
+         */
+        foreach($dic as $id => $value)
+        {
+            if($pData[0]['id']===$value['id'] && $pData[0]['ImieNazwisko']===$value['ImieNazwisko'])
+            {
+                $this->log(0,"[".__METHOD__."] FOUND identical");
+                UNSET($dic[$id]);
+            }
+        }
+        return array_merge($pData,$dic);
+    }
+    public function getProjectEmailData()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        if($this->utilities->checkInputGetValInt('id')['status']===1)
+        {
+            $this->response->setError(1,$this->utilities->getInfo());
+        }
+        else
+        {
+            $v['id']=$this->utilities->getData();
+            $v['project']=self::getProjectData($v['id']);
+            $v['email']=$this->query('SELECT Pracownik,Pracownik_email AS Email FROM v_all_prac_proj_email WHERE Projekt_id=? ORDER BY Projekt_id ASC ',$this->utilities->getData());
+            return($this->response->setResponse(__METHOD__,$v,'pEmail','POST'));  
+        }    
     }
      # RETURN ALL AVALIABLE MEMBERS
     public function getAllavaliableEmployee()
     {
-        $this->query('SELECT * FROM v_udzial_sum_procent_prac WHERE sumProcentowyUdzial<? ORDER BY idPracownik ASC ',100);
-        $this->valueToReturn=$this->queryReturnValue();
+        $this->valueToReturn=$this->query('SELECT * FROM v_udzial_sum_procent_prac WHERE sumProcentowyUdzial<? ORDER BY idPracownik ASC ',100);
+    }
+    public function pDelete()
+    {
+        self::setNewProjectStatus('d');
+        if($this->response->getError()){ return false; }
+        return($this->response->setResponse(__METHOD__, '','cModal','POST')); 
+    }
+    public function pClose()
+    {
+        self::setNewProjectStatus('c');
+        if($this->response->getError()){ return false; }
+        return($this->response->setResponse(__METHOD__, '','cModal','POST')); 
     }
     # SET NEW PROJECT STATUS
-    protected function setNewProjectStatus($dataPost,$status)
+    protected function setNewProjectStatus($status)
     {
-        $this->parsePostData($dataPost);
-        $curretDateTime=date('Y-m-d H:i:s');
-        $modHost=filter_input(INPUT_SERVER,"REMOTE_ADDR");
+        $this->log(0,"[".__METHOD__."]");
+        $this->setInpArray(filter_input_array(INPUT_POST));
+        if($this->utilities->checkKeyExistEmpty('id',$this->inpArray)['status']!==0)
+        {
+            $this->response->setError(1,$this->utilities->getInfo());
+            return false;
+        }
         $reason=explode("|",$this->inpArray['reason']);
         if($reason[0]==='0')
         {
             $reason[1]=$this->inpArray['extra'];
         }
+        if(trim($reason[1])==='')
+        {
+            $this->response->setError(0,'Podaj powód!');
+            return false;
+        }
         switch($status)
         {
             case 'c': # CLOSE PROJECT IN DB
-                $this->query('UPDATE projekt_nowy SET status=?,dat_kor=?, z_u_powod=?,mod_user=?,mod_user_id=?,mod_host=? WHERE id=?',"c,".$curretDateTime.",".$reason[1].",".$_SESSION["username"].",".$_SESSION["userid"].",${modHost},".$this->inpArray['id']);
+                $this->query('UPDATE `projekt_nowy` SET status=?,dat_kor=?, z_u_powod=?,mod_user=?,mod_user_id=?,mod_host=? WHERE id=?',"c,".$this->cDT.",".$reason[1].",".$_SESSION["username"].",".$_SESSION["userid"].",".$this->RA.",".$this->inpArray['id']);
                 break;
             case 'd':# DELETED PROJECT IN DB
-                $this->query('UPDATE projekt_nowy SET wsk_u=?,dat_usn=?,status=?, z_u_powod=?,mod_user=?,mod_user_id=?,mod_host=? WHERE id=?',"1,".$curretDateTime.",d,".$reason[1].",".$_SESSION["username"].",".$_SESSION["userid"].",${modHost},".$this->inpArray['id']);
+                $this->query('UPDATE `projekt_nowy` SET wsk_u=?,dat_usn=?,status=?, z_u_powod=?,mod_user=?,mod_user_id=?,mod_host=? WHERE id=?',"1,".$this->cDT.",d,".$reason[1].",".$_SESSION["username"].",".$_SESSION["userid"].",".$this->RA.",".$this->inpArray['id']);
                 break;
             default:
                 break;
         }
-        //$team=array();
-        //$this->idProject=$this->inpArray['id'];
-        //$this->removeNotSendedTeamMembers($team);
+        return true;
+       
     }
-    # DELETED PROJECT IN DB
-    function getProjectTeam($idProject)
+    public function getProjectTeam()
     {
-        $this->query('SELECT idPracownik,ImieNazwisko,procentUdzial,datOd,datDo FROM v_proj_prac_v2 WHERE idProjekt=?',$idProject);
-        $this->valueToReturn=$this->queryReturnValue();
+        $this->log(0,"[".__METHOD__."]");
+        if($this->utilities->checkInputGetValInt('id')===1)
+        {
+            $this->response->setError(1,' KEY ID in $_GET IS EMPTY');
+            return false;
+        }
+        $v['id']=intval($this->utilities->getData(),10);
+        $v['team']=$this->modul['TEAM']->getTeam($v['id']);
+        $v['project']=self::getProjectData($v['id']);
+        return($this->response->setResponse(__METHOD__,$v,'pTeamOff','POST'));  
     }
-    function getProjectTeamPdf($idProject)
+    public function pTeamOff()
     {
-        $this->query('SELECT NazwiskoImie,DataOd,DataDo FROM v_proj_prac_v_pdf WHERE idProjekt=?',$idProject);
-        $this->valueToReturn=$this->queryReturnValue();
+        $this->log(0,"[".__METHOD__."]");
+        $this->setInpArray(filter_input_array(INPUT_POST));
+        if($this->utilities->checkKeyExistEmpty('id',$this->inpArray)['status']!==0)
+        {
+            $this->response->setError(1,$this->utilities->getInfo());
+            return false;
+        }
+        $v['id']=intval($this->utilities->getData()['id'],10);
+        $v['team']=$this->modul['TEAM']->getTeam(intval($this->inpArray['id'],10));
+        $v['ava']=$this->modul['TEAM']->getAvaTeam($this->utilities->getData()['id']);  
+        $this->logMulti(0,$v,__LINE__."::".__METHOD__."");
+        return($this->response->setResponse(__METHOD__,$v,'pTeam','POST'));  
     }
     public function getReturnedValue()
     {
+        $this->log(0,"[".__METHOD__."]");
         echo json_encode($this->valueToReturn);
     }
-    public function getErrValue()
+    protected function isEmpty($key,$data)
     {
-        if($this->err)
+        if(trim($data)==='')
         {
-            echo json_encode(array("1",$this->err));
+            $this->response->setError(0,"[".$key."]".$this->infoArray['input'][0]);
+        }
+    }
+    public function getProjectCloseSlo()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        if($this->utilities->checkInputGetValInt('id')['status']===1)
+        {
+            $this->response->setError(1,$this->utilities->getInfo());
+            return false;
+        }
+        $v['id']=$this->utilities->getData();
+        $v['project']=self::getProjectData($v['id']);
+        $v['slo']=$this->query('SELECT * FROM `v_slo_zamk_proj` WHERE 1=? ORDER BY `ID` ASC ',1);
+        return($this->response->setResponse(__METHOD__,$v,'pClose','POST'));  
+    }
+    public function getProjectDeleteSlo()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        if($this->utilities->checkInputGetValInt('id')['status']===1)
+        {
+            $this->response->setError(1,$this->utilities->getInfo());
+            return false;
+        }
+        $v['id']=$this->utilities->getData();
+        $v['project']=self::getProjectData($v['id']);
+        $v['slo']=$this->query('SELECT * FROM `v_slo_usun_proj` WHERE 1=? ORDER BY `ID` ASC',1);
+        return($this->response->setResponse(__METHOD__,$v,'pDelete','POST'));  
+        
+    }
+    private function parseResponse($response)
+    {
+        if($response['status']===0)
+        {
+            /*
+             * NO CHANGE IN DOCUMENT'S
+             * CHECK IS DATA IS ALREADY MODYFIED
+             * IF YES, OK
+             * IF NO, SET 0
+             */
+            if($this->projectChange===0)
+            {
+                // ALREADY SETUP NO CHANGE
+                $this->response->setError(0,'BRAK ZMIAN !');
+            }
+             $this->projectDocList=$response['info'];
+        }
+        else if($response['status']===1)
+        {
+            // CHANGE    
+            $this->projectDiff['dok']=1;
+            $this->projectChange=1;
+            $this->projectDocList=$response['info'];
+        }
+        else if($response['status']===2)
+        {
+            // ERROR
+            $this->response->setError(0,$response['info']);
         }
         else
         {
-            echo json_encode(array("0",$this->valueToReturn));
+            // BAD RESPONSE STATUS
+             $this->response->setError(1,'BAD RESPONSE STATUS FROM MODULE');
         }
     }
     function __destruct()
-    {}
-};
-class checkGetData extends manageProject
-{
-    private $avaliableFunction=array(
-        "task"=>"task"
-    );
-    private $urlGetData=array();
-    private $avaliableTask=array(
-        array("addProject",'ADD_PROJ','user'),
-        array("removeProject",'DEL_PROJ','user'),
-        array("getprojects",'LOG_INTO_PROJ','user'),
-        array("getprojectslike",'LOG_INTO_PROJ','user'),
-        array("getprojectsmember",'','sys'),
-        array("getprojectsleader",'','sys'),
-        array("getprojectsmanager",'','sys'),
-        array("getprojectgltech",'','sys'),
-        array("getprojectglkier",'','sys'),
-        array("getprojectteam",'SHOW_TEAM_PROJ','user'),
-        array('getprojectdetails','SHOW_PROJ','user'),
-        array("gettypeofagreement",'','sys'),
-        array("getadditionaldictdoc",'','sys'),
-        array("getallemployeeprojsumperc",'EDIT_TEAM_PROJ','user'),
-        array("getallavaliableemployeeprojsumperc",'','user'),
-        array("addTeamToProject",'EDIT_TEAM_PROJ','user'),
-        array('getprojectdocuments','SHOW_DOK_PROJ','user'),
-        array('closeProject','CLOSE_PROJ','user'),
-        array('setprojectdocuments','EDIT_DOK_PROJ','user'),
-        array('setprojectdetails','EDIT_PROJ','user'),
-        array('getpdf','GEN_PDF_PROJ','user'),
-        array('getProjectDefaultValues','','sys'),
-        array('getprojectcloseslo','','sys'),
-        array('getprojectdelslo','','sys'),
-        array('getprojectemplemail','EMAIL_PROJ','user'),
-        array('sendEmail','EMAIL_PROJ','user')
-    );
-    function __construct()
     {
-        parent::__construct();
-        $this->addNewTypOfErr();
-        $this->getUrlData();
-        
-        if($this->checkUrlTask())
-        {
-            // CHECK PERM
-            $this->checkTask();
-            if($this->taskPerm['type']==='user')
-            {
-                $this->checkLoggedUserPerm('LOG_INTO_APP');
-                $this->checkLoggedUserPerm($this->taskPerm['name']);
-                
-            }
-            if(!$this->err)
-            {
-                $this->runTask();
-            }
-        }
-    }
-    private function getUrlData()
-    {
-        foreach($_GET as $key=>$value)
-        {
-            $this->urlGetData[$key]=$value;
-        }
-    }
-    private function addNewTypOfErr()
-    {
-        $this->infoArray['urlTask'][0]='Wrong function to execute';
-        $this->infoArray['urlTask'][1]='Task not exists';
-    }
-    private function checkUrlTask()
-    {
-        if(array_key_exists($this->avaliableFunction["task"], $this->urlGetData))
-        {
-            return 1;
-        }
-        else
-        {
-            $this->err.= $this->infoArray['urlTask'][0];
-            return 0;
-        }
-        return 0;
-    }
-   
-    private function checkTask()
-    {
-        foreach($this->avaliableTask as $id =>$task)
-        {
-            if($task[0]==$this->urlGetData['task'])
-            {
-                $this->setTaskPerm($this->avaliableTask[$id][1],$this->avaliableTask[$id][2]);
-                return 1;
-            }
-        }
-        $this->err.= $this->infoArray['urlTask'][1];
-        return 0;
-    }
-    private function setTaskPerm($permName='',$permType='')
-    {
-        $this->taskPerm['name']=$permName;
-        $this->taskPerm['type']=$permType;
-    }
-    private function runTask()
-    {
-        switch($this->urlGetData['task']):
-        
-        case "addProject" :
-            $this->addProject($_POST);
-            break;
-        case "addTeamToProject":
-            $this->addTeamToProject($_POST);
-            break;
-        case "removeProject":
-            $this->setNewProjectStatus($_POST,'d');
-            break;
-        case "closeProject":
-            $this->setNewProjectStatus($_POST,'c');
-            break;
-        case "getprojects":
-            $this->getAllProjects();
-            break;
-        case "getprojectslike":
-            $this->filter=filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING);
-            $this->getAllProjectsFilter('0',$this->filter);
-            break;
-        case "getprojectdetails":
-            $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-            $this->getProjectDetails($this->idProject);
-            break;
-        case 'getprojectdocuments':
-            $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-            $this->getProjectDocuments($this->idProject);
-            break;
-        case "getprojectsmember":
-            $this->getProjectPers('v_slo_czlonek_proj');
-            break;
-        case "getprojectsleader":
-            $this->getProjectPers('v_slo_lider_proj');
-            break;
-        case "getprojectsmanager":
-            $this->getProjectPers('v_slo_kier_proj');
-            break;
-        case "gettypeofagreement":
-            $this->getProjectSlo('v_slo_um_proj');
-            break;
-        case "getprojectgltech":
-            $this->getProjectPers('v_slo_glow_tech_proj');
-            break;
-        case "getprojectglkier":
-            $this->getProjectPers('v_slo_kier_osr_proj');
-            break;
-        case "getadditionaldictdoc":
-            $this->getProjectSlo('v_slo_dok');
-            break;
-        case  "getprojectteam":
-            $idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-            $this->getProjectTeam($idProject);
-            break;
-        case  "getallemployeeprojsumperc":
-            $this->getProjectSlo('v_udzial_sum_procent_prac_v2','idPracownik');
-            break;
-        case  "getallavaliableemployeeprojsumperc":
-            $this->getAllavaliableEmployee();
-            break;
-        case "setprojectdocuments":
-            $this->idProject=filter_input(INPUT_POST,'idProject',FILTER_VALIDATE_INT);
-            $this->updateProjectDoc($_POST,$this->idProject);
-            //print_r($_POST);
-            break;
-        case "setprojectdetails": // EDIT PROJECT
-            $this->idProject=filter_input(INPUT_POST,'idProject',FILTER_VALIDATE_INT);
-            $this->updateProject($_POST,$this->idProject);
-            //print_r($_POST);
-            break;
-        case 'getpdf':
-            $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-            //echo ($this->idProject);
-            $this->getPdf($this->idProject);
-            break;
-        case 'getProjectDefaultValues':
-            $this->getProjectDefaultValues();
-            break;
-        case 'getprojectcloseslo':
-            $this->getProjectSlo('v_slo_zamk_proj');
-            break;
-        case 'getprojectdelslo':
-            $this->getProjectSlo('v_slo_usun_proj');
-            break;
-        case 'getprojectemplemail':
-            $this->getProjectEmplEmail('v_all_prac_proj_email','Projekt_id');
-            break;
-        case 'sendEmail':
-            $this->sendMailToPers($_POST);
-            break;
-        default:
-            //no task
-            break;
-        
-        endswitch;
-    }
-    function __destruct()
-    {
-        $this->getErrValue();
+        $this->log(0,"[".__METHOD__."]");
     }
 }
-class email extends initialDb
-{
-    protected $emailParm=array();
-    protected $email='';
-
-    function __construct()
-    {
-        parent::__construct();
-        $this->loadMail();
-        $this->setMailParm();
-    }
-    public function setMailParm()
-    {
-        //GET EMAIL PARAMETERS
-        $this->query('SELECT SKROT,WARTOSC FROM parametry WHERE UPPER(SKROT) LIKE (?) ','MAIL_%');
-        $this->emailParm=$this->parseParm($this->queryReturnValue());
-    }
-    private function parseParm($data)
-    {
-        $tmpArray=array();
-        foreach($data as $value)
-        {
-            $tmpArray[$value['SKROT']]=$value['WARTOSC'];
-        }
-        return($tmpArray);
-    }
-    protected function loadMail()
-    {
-        include_once (filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/PHPMailer-master/src/SMTP.php");
-        include_once (filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/PHPMailer-master/src/Exception.php");
-        include_once (filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/function/PHPMailer-master/src/PHPMailer.php");
-
-        $this->email = new PHPMailer\PHPMailer\PHPMailer();
-    }	
-    public function sendMail($subject,$body,$recipient,$errHeader)
-    {
-        $footer="\n\n--\nTa wiadomość została wygenerowana automatycznie z portalu ".filter_input(INPUT_SERVER,"SERVER_NAME").", nie odpowiadaj na nią.";
-        $err='';
-        
-        //echo "SEND MAIL\n";
-        //echo print_r($this->emailParm);
-        $this->email->IsSMTP();
-        $this->email->Timeout  =   10;
-        $this->email->Host = $this->emailParm['MAIL_SRV'];
-        $this->email->CharSet = $this->emailParm['MAIL_CHARSET'];
-
-        $this->email->SMTPKeepAlive = true;
-        $from=explode('@',$this->emailParm['MAIL_USER']);
-        $this->email->setFrom($this->emailParm['MAIL_USER'], $from[0]);
-        $adminRecipient=explode(';',$this->emailParm['MAIL_RECIPIENT']);
-        foreach($adminRecipient as $adminUser)
-        {
-            array_push($recipient,array($adminUser,'Admin'));
-        }
-        //$recipient=explode(';',$this->emailParm['MAIL_RECIPIENT']);
-        if($this->emailParm['MAIL_SECURE']!='')
-        {
-            $this->email->SMTPSecure = 'tls'; 
-        }
-        if($this->emailParm['MAIL_PASS']!='')
-        {
-            $this->email->Username = $from[0];
-            $this->email->Password = $this->emailParm['MAIL_PASS'];
-            $this->email->SMTPAuth = true; 
-        }
-        $this->email->Port = $this->emailParm['MAIL_PORT_OUT']; 
-        if($this->emailParm['MAIL_RECV'])
-        {
-            //print_r($_SESSION);
-            array_push($recipient,array($_SESSION['mail'],$_SESSION['nazwiskoImie']));
-        }
-        foreach($recipient as $emailAdres)
-        {
-            //print_r($this->email->parseAddresses($emailAdres))."\n";
-            //echo "Count: ".count($this->email->parseAddresses($emailAdres))."\n";
-            if(count($this->email->parseAddresses($emailAdres[0])))
-            {
-                $this->email->addAddress($emailAdres[0]);
-            }
-            else
-            {
-                $err.="<br/>[".$emailAdres[1]."] Nieprawidłowy adres email - ".$emailAdres[0];
-            }
-            
-        }
-        //var_dump(get_class_methods($this->email));
-        //print_r();
-        //var_dump($this->email->getToAddresses());
-        //print_r($this->email->getToAddresses());
-        $this->email->Subject  = $subject;
-        $this->email->Body     = $body.$footer;
-        //die('STOP');
-        
-        //$this->email->send();
-        if(!$this->email->send())
-        {
-            //echo "ERROR: ".$this->email->ErrorInfo;
-            $errMail=explode(".",$this->email->ErrorInfo);
-            $err.="<br/>".$errMail[0];
-        }
-        if($err)
-        {
-            $err=$errHeader.$err;
-        }
-        $this->email->SmtpClose(); 
-        return($err);
-    }
-}
-$manageProject=NEW checkGetData();

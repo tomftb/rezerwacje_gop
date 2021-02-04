@@ -58,7 +58,7 @@ class manageEmployee extends initialDb
         $this->log(0,"[".__METHOD__."]");   
         self::setInpArray();
         self::checkEmployeeValueLength();
-        $this->utilities->checkKeyExist('ID',$this->inpArray);
+        $this->utilities->checkKeyExist('ID',$this->inpArray,$this->response->error);
         if($this->utilities->getStatus()===0)
         {
             if($this->checkExistInDb('pracownik','imie=? AND nazwisko=? AND id!=?',$this->inpArray['Imie'].','.$this->inpArray['Nazwisko'].','.$this->inpArray['ID']))
@@ -111,7 +111,7 @@ class manageEmployee extends initialDb
         self::setInpArray();
         // GET ID
         // $this->inpArray['idEmployee']
-        $this->utilities->checkKeyExist('ID',$this->inpArray);
+        $this->utilities->checkKeyExist('ID',$this->inpArray,$this->respone->error);
         if(!$this->utilities->getStatus()===0)
         {
             $this->response->setError(1,$this->utilities->getInfo());

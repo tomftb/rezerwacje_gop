@@ -8,6 +8,8 @@ class Ajax
 {
     link='';
     type="POST";
+    form='';
+    formName='';
     
     constructor() 
     { 
@@ -26,21 +28,45 @@ class Ajax
     sendData(formName,type)
     {
         //console.log('AJAX::sendData()\n'+formName);
-        var form=document.getElementById(formName);
+        
+        this.checkType(formName);
+       
         //console.log(form);
         this.type=type;
-        if(form===null)
-        {
-            //console.log('FORM NOT FOUND => getElementById => '+form);
-            alert('ERROR OCURRED!');
-            return '';
-        }
-        var fd = new FormData(form);
+        
+        var fd = new FormData(this.form);
         /*
          * WE WANT TEXT TO CHECK RETURNED VALUE
          */
         //console.log(fd);
-        this.runXhr(fd,'router.php?task='+formName);
+        this.runXhr(fd,'router.php?task='+this.formName);
+    }
+    checkType(formName)
+    {
+        //console.log('AJAX::checkType()\n'+formName);
+        //console.log(typeof(formName));
+        if(typeof(formName)==='string')
+        {
+            this.form=document.getElementById(formName);
+            this.formName=formName;
+        }
+        else if(typeof(formName)==='object')
+        {
+            this.form=formName;
+            this.formName=this.form.name;
+        }
+        else
+        {
+            //console.log('FORM NOT FOUND => getElementById => '+form);
+            alert('FORM ERROR OCURRED!');
+            return '';
+        }
+        if(this.form===null)
+        {
+            //console.log('FORM NOT FOUND => getElementById => '+form);
+            alert('FORM ERROR OCURRED!');
+            return '';
+        }
     }
     getData (task)
     {

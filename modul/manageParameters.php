@@ -20,7 +20,7 @@ class manageParameters extends initialDb
         $this->log(0,"[".__METHOD__."] filter => ".$f);
         $this->query('SELECT `ID` as \'i\' ,`Skrót` as \'s\',`Nazwa` as \'n\',`Opis` as \'o\',`Wartość` as \'v\',`Typ` as \'t\',`ModDat` as \'md\',`ModUser` as \'mu\' FROM `v_parm_v2` WHERE ID LIKE (?) OR Skrót LIKE (?) OR Nazwa LIKE (?) OR Opis LIKE (?) OR Wartość LIKE (?) ORDER BY ID asc'
                 ,$f.",".$f.",".$f.",".$f.",".$f);
-        return($this->response->setResponse(__METHOD__,$this->queryReturnValue(),'','GET'));
+        return($this->response->setResponse(__METHOD__,$this->queryReturnValue(),'showAll','GET'));
     }
     public function updateParm()
     {

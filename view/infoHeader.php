@@ -31,7 +31,7 @@
             </div>
         </div>
 </header><!-- #header -->
-<SCRIPT type="text/javascript" src="<?=$URL?>/js/headerView.js<?=uniqid()?>"></SCRIPT>
+<SCRIPT type="text/javascript" src="<?=$URL?>/js/headerView.js?<?=uniqid()?>"></SCRIPT>
 <!-- ADAPTED MODAL PROJECT -->
 <div class="modal fade" id="AdaptedModal" tabindex="-1" role="dialog" aria-labelledby="AdaptedModalContent" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">

@@ -26,7 +26,7 @@
 <!-- KONIEC IKONKA GT -->
 <!-- CSS -->
 <link rel="stylesheet" href="<?=$URL?>/css/gt-admin.css?<?=$u?>" >
-<link rel="stylesheet" href="<?=$URL?>/css/bootstrap.min.4.1.1.css" >
+<link rel="stylesheet" href="<?=$URL?>/css/bootstrap.min.4.5.3.css" >
 <link rel="stylesheet" href="<?=$URL?>/css/bootstrap-datepicker.min.css" >
 <link rel="stylesheet" href="<?=$URL?>/css/font-awesome.min.4.7.0.css" >
 <link rel="stylesheet" href="<?=$URL?>/css/bootstrap-datepicker3.css" >

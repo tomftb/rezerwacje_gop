@@ -50,6 +50,7 @@ class Error
         {
             console.log('Error::checkStatusResponse() => wrong status => '+d['status']);
             alert('Error::ERROR OCCURED!');
+            Error.error=true;
         }
         return Error.error;
     }
@@ -77,7 +78,7 @@ class Error
     }
     static clearError = function ()
     {
-        error=false;
+         Error.error=false;
     }
     static parseType = function(d)
     {
@@ -85,7 +86,9 @@ class Error
         if(d['type']==='undefined')
         {
             console.log('Error::parseType() => wrong type => '+d['type']);
+            Error.error=true;
             alert('Error::ERROR OCCURED!'); 
+            
         }
         else if(d['type']==='POST' && d['status']===1)
         {
@@ -130,6 +133,7 @@ class Error
             Error.error=true;
             console.log('Error::parseType() => wrong type => '+d['type']);
             alert('Error::ERROR OCCURED!'); 
+
         }
     }
     static setDiv = function (id)

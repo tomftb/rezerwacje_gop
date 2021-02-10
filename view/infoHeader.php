@@ -34,7 +34,7 @@
 <SCRIPT type="text/javascript" src="<?=$URL?>/js/headerView.js?<?=uniqid()?>"></SCRIPT>
 <!-- ADAPTED MODAL PROJECT -->
 <div class="modal fade" id="AdaptedModal" tabindex="-1" role="dialog" aria-labelledby="AdaptedModalContent" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-xl" role="document" id="AdaptedModalDialog" >
         <div class="modal-content">
           <div class="modal-header" id="AdaptedBgTitle">
             <h2 class="modal-title" id="fieldModalLabel"><span class="text-white" id="AdaptedTextTitle"></span></h2> 

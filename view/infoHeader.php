@@ -23,6 +23,7 @@
                             <li id="li-8"><a href="<?php echo $URL."?id=8"; ?>">Role</a></li>
                             <!-- <li id="li-9"><a href="<?php //echo $URL."?id=9"; ?>">Opcje</a></li> -->
                             <li id="li-10"><a href="<?php echo $URL."?id=10"; ?>">Parametry</a></li>
+                            <li id="li-11"><a href="<?php echo $URL."?id=11"; ?>">Etapy Projektu</a></li>
                           </ul>
                         </li>
                     <li><i class="fa fa-sign-out" aria-hidden="true"></i><a href="<?php echo $URL."?logout=t"; ?>"> Wyloguj</a></li>

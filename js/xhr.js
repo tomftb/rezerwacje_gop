@@ -13,7 +13,7 @@ class Ajax
     
     constructor() 
     { 
-        //console.log('Ajax::constructor()');
+        console.log('Ajax::constructor()');
         //console.log(this);
         this.setUrl();
     }
@@ -70,7 +70,7 @@ class Ajax
     }
     getData (task)
     {
-        //console.log('AJAX::getData()');
+        console.log('AJAX::getData('+task+')');
         //console.log("TASK : "+task);
         this.type='GET';
         this.runXhr(null,'router.php?task='+task);

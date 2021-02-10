@@ -3,12 +3,6 @@ session_start();
 define('DR',filter_input(INPUT_SERVER,"DOCUMENT_ROOT"));
 require(DR."/.cfg/config.php");
 require(DR."/function/autoLoader.php");
-//require(DR."/class/logToFile.php");
-//require(DR."/class/errorConfirm.php");
-//require(DR."/function/redirectToLoginPage.php");
-//require(DR."/class/validPerm.php");
-//require(DR.'/class/email.php');
-//require(DR."/class/utilities.php");
 
 class Router extends validPerm
 {

@@ -3,7 +3,8 @@ class Table
     columns=new Object();
     buttons=new Object();
     columnsExceptions=new Array();
-    buttonsType='btnGroup';
+    //buttonsType='btnGroup';
+    buttonFunction;
     
     constructor() 
     { 
@@ -25,7 +26,25 @@ class Table
     setButtonsType(type)
     {
         /* btn-group, dropdown */
-        this.buttonsType=type;
+        if(type==='btn-group')
+        {
+            this.buttonFunction=function(i)
+            {
+                return this.setGroupBtn(i);
+            };
+        }
+        else if(type==='dropdown')
+        {
+            this.buttonFunction=function(i)
+            {
+                return this.setDropDown(i);
+            };
+        }
+        else
+        {
+            /* wrong type */
+        }
+        
     }
     showTable(d)
     {
@@ -66,29 +85,13 @@ class Table
             } 
         }
         var td=document.createElement('td');
-            //td.appendChild(this.setGroupBtn(d['i']));
-            this.setBtnColType(td,d['i'])
+            td.appendChild(this.buttonFunction(d['i']));
+            //this.setBtnColType(td,d['i']);
         tr.appendChild(td);
-    }
-    setBtnColType(td,i)
-    {
-        if(this.buttonsType==='btn-group')
-        {
-           td.appendChild(setGroupBtn(i));
-        }
-        else if(this.buttonsType==='dropdown')
-        {
-            td.appendChild(this.setDropDown(i));
-        }
-        else
-        {
-            /* wrong type */
-        }
     }
     setDropDown(i)
     {
         var btnGroup=createTag('','div','btn-group pull-left');
-           
             btnGroup.setAttribute('role','group');
         var button=createTag('Opcje','button','btn btn-secondary dropdown-toggle bg-info');
             button.setAttribute('id','btnGroupDrop'+i);

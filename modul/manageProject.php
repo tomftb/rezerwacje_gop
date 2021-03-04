@@ -98,6 +98,7 @@ class manageProject extends initialDb
         //require($this->DR."/modul/manageProjectTeam.php");
         $this->modul['DOCUMENT']=NEW manageProjectDocument();
         $this->modul['TEAM']=NEW manageProjectTeam();
+        $this->modul['REPORT']=NEW manageProjectReport();
         $this->utilities=NEW utilities();
         $this->response=NEW Response('Project');
     }
@@ -292,9 +293,13 @@ class manageProject extends initialDb
     {
         $this->log(0,"[".__METHOD__."]");
         self::setInpArray();
+        $this->response->setType('POST');
         $this->isEmpty('Numer',$this->inpArray['numer_umowy']);
         $this->isEmpty('Temat',$this->inpArray['temat_umowy']);
-        if($this->response->getError()) { return false; }
+        if($this->response->getError())
+        {
+           return($this->response->setResponse(__METHOD__,'','cModal','POST'));
+        }
         if($this->checkExistInDb('projekt_nowy','temat_umowy=? AND wsk_u=?',$this->inpArray['temat_umowy'].",0"))
         {
             $this->response->setError(0,$this->infoArray['temat_umowy'][1]);
@@ -303,7 +308,10 @@ class manageProject extends initialDb
         {
             $this->response->setError(0,$this->infoArray['numer_umowy'][1]);
         }
-        if($this->response->getError()) { return false; }   
+        if($this->response->getError())
+        {
+            return($this->response->setResponse(__METHOD__,'','cModal','POST'));
+        }
         self::getIdDataProjectPost();
         //self::getProjectParameters();
         self::setProjectDir();
@@ -1286,6 +1294,11 @@ class manageProject extends initialDb
             // BAD RESPONSE STATUS
              $this->response->setError(1,'BAD RESPONSE STATUS FROM MODULE');
         }
+    }
+    public function getProjectReportData()
+    {
+        $v[0]='';
+        return($this->response->setResponse(__METHOD__, $v,'pReportOff','POST')); 
     }
     function __destruct()
     {

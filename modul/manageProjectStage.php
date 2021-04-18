@@ -18,7 +18,6 @@ class manageProjectStage extends initialDb
                     "Istnieje już rola o podanej nazwie",
                 )
             );
-    private $sth;
     function __construct()
     {
         parent::__construct();
@@ -73,12 +72,6 @@ class manageProjectStage extends initialDb
         }
         return($this->response->setResponse(__METHOD__,$return,'','GET'));
     }
-    public function getNewRoleSlo()
-    {
-        $v['rola']=$this->squery('select * from v_slo_rola');
-        $v['perm']=$this->squery('select `ID` as \'i\',`NAZWA` as \'n\' from v_slo_upr');
-        return($this->response->setResponse(__METHOD__,$v,'cRole'));
-    }
     public function getProjectStageDeleteSlo()
     {
         parent::log(0,"[".__METHOD__."]");
@@ -90,7 +83,13 @@ class manageProjectStage extends initialDb
         {
             parent::logMulti(0,$this->utilities->getData());
             $v['stage']=self::getProjectStageData($this->utilities->getData());
-            $v['slo']=$this->squery('SELECT `id` as \'ID\',`nazwa` AS \'Nazwa\' FROM `slo_usun_proj_etap` WHERE id>0 AND wsk_u=\'0\' ORDER BY `ID` ASC');
+            try{
+                parent::newQuery("SELECT `id` as ID,`nazwa` AS Nazwa FROM `slo_usun_proj_etap` WHERE id>0 AND wsk_u='0' ORDER BY `ID` ASC");
+                $v['slo']=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);
+            }
+            catch (PDOException $e){
+                $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
+            }
         }
         return($this->response->setResponse(__METHOD__,$v,'psDelete','POST'));  
     }
@@ -127,7 +126,6 @@ class manageProjectStage extends initialDb
     {
         parent::log(0,"[".__METHOD__."]");
         $id=filter_input(INPUT_POST,'id',FILTER_VALIDATE_INT);
-        parent::logMulti(0, $_POST);
         $reason=explode('|',filter_input(INPUT_POST,'reason'));
         parent::log(0,'id => '.$id);
         if(!$id)
@@ -137,7 +135,25 @@ class manageProjectStage extends initialDb
         else
         {
             /* CHECK wsk_b */
-            parent::query('UPDATE `slo_projekt_etap` SET `wsk_u`=?,`delete_user_id`=?,`delete_login`=?,`delete_fullname`=?,`delete_date`=?,`delete_reason`=?,`delete_host`=? WHERE `id`=?','1,'.$_SESSION["userid"].','.$_SESSION["username"].','.$_SESSION["nazwiskoImie"].',NOW(),'.$reason[1].','.$_SERVER['REMOTE_ADDR'].','.$id);
+
+            $query_data=array(
+                ':id'=>array($id,'INT'),
+                ':wsku'=>array('1','STR'),
+                ':userid'=>array($_SESSION["userid"],'INT'),
+                ':username'=>array($_SESSION["username"],'STR'),
+                ':fullname'=>array($_SESSION["nazwiskoImie"],'STR'),
+                ':aktualnadata'=>array($this->cDT,'STR'),
+                ':ra'=>array($this->RA,'STR'),
+                ':reason'=>array($reason[1],'STR')
+            );
+            try
+            {
+                parent::newQuery("UPDATE `slo_projekt_etap` SET `wsk_u`=:wsku,`delete_user_id`=:userid,`delete_login`=:username,`delete_fullname`=:fullname,`delete_date`=:aktualnadata,`delete_reason`=:reason,`delete_host`=:ra WHERE `id`=:id",$query_data);   
+            }
+            catch (PDOException $e)
+            {
+                $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
+            }
         }
         return ($this->response->setResponse(__METHOD__,'','cModal','POST'));
     }
@@ -418,20 +434,12 @@ class manageProjectStage extends initialDb
         {
             parent::log(0," STAGE => ".$v['i']);
             parent::logMulti(0,$this->stageData);
-            foreach($this->stageData as $ks => $vs)
-            {
-                parent::log(0," SENDED STAGE ID => ".$vs[':id'][0]);
-                if($v['i']===$vs[':id'][0])
-                {
-                    self::updateStageElement($vs);
-                    UNSET($this->actProjectStageData['body'][$k]);
-                    UNSET($this->stageData[$ks]);
-                    $found=true;
-                    break;
-                }
+            self::checkInStageData($v,$found);
+            if($found){
+                self::updateStageElement($v);
+                UNSET($this->actProjectStageData['body'][$k]);
             }
-            if(!$found)
-            {
+            else{
                 $tmp[":id"]=array($v['i'],'INT');
                 self::deleteStageElement($tmp);
             }
@@ -441,6 +449,19 @@ class manageProjectStage extends initialDb
         $this->lastStageId=$this->inpArray['id'];
         array_map(array($this, 'insertStageElement'),$this->stageData);
         //$this->response->setError(0,'['.__METHOD__.']['.__LINE__.'] TEST STOP');
+    }
+    private function checkInStageData($v,&$found)
+    {
+        foreach($this->stageData as $ks => $vs)
+        {
+            parent::log(0," SENDED STAGE ID => ".$vs[':id'][0]);
+            if($v['i']===$vs[':id'][0])
+            {
+                UNSET($this->stageData[$ks]);
+                $found=true;
+                break;
+            }
+        }
     }
     private function addUpdateAddOns(&$data)
     {
@@ -469,17 +490,6 @@ class manageProjectStage extends initialDb
         {
             $mainArray[$k]=$v;
         }
-    }
-    public function getProjectStageDetails()
-    {
-        if($this->utilities->checkInputGetValInt('id')['status']===1)
-        {
-            $this->response->setError(1,$this->utilities->getInfo());
-        }
-        /* CHECK IS NOT REMOVED */
-        //$v['role']=self::getRole($this->utilities->getData());
-        //$v['perm']=self::getRolePerm();
-        //return($this->response->setResponse(__METHOD__,$v,'sRole','POST',$this->getError()));
     }
     public function getNewStageSlo()
     {

@@ -1226,9 +1226,17 @@ function functionBtn(f,btn,task)
                     
                 };
                 break;
+        case 'psDelete':
+                btn.onclick = function() {
+                    if(confirm("Potwierdź usunięcie etapu projektu"))
+                    {   
+                        postData(this,task); 
+                    };
+                };
+                break;
         case 'psEdit':
         case 'psCreate':
-        case 'psDelete':
+        //case 'psDelete':
             btn.onclick = function() { postData(this,task); };
             break;
         default: 

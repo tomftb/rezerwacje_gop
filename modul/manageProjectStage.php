@@ -412,6 +412,7 @@ class manageProjectStage extends initialDb
     private function updateStageElement($value)
     {
         parent::log(0,"[".__METHOD__."]");
+        parent::logMulti(0,$value);
         $value[':id_projekt_etap']=array($this->inpArray['id'],'INT');
         self::addUpdateAddOns($value);
         parent::logMulti(2,$value);
@@ -434,9 +435,8 @@ class manageProjectStage extends initialDb
         {
             parent::log(0," STAGE => ".$v['i']);
             parent::logMulti(0,$this->stageData);
-            self::checkInStageData($v,$found);
             if($found){
-                self::updateStageElement($v);
+                
                 UNSET($this->actProjectStageData['body'][$k]);
             }
             else{
@@ -457,6 +457,7 @@ class manageProjectStage extends initialDb
             parent::log(0," SENDED STAGE ID => ".$vs[':id'][0]);
             if($v['i']===$vs[':id'][0])
             {
+                self::updateStageElement($vs);
                 UNSET($this->stageData[$ks]);
                 $found=true;
                 break;

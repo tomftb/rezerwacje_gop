@@ -55,14 +55,14 @@ var defaultTableBtnConfig=
         },
         HIDE_STAGE : {
             label : 'Ukryj',
-            task : 'psHide',
+            task : 'getProjectStageHideSlo',
             class : 'btn-secondary',
             perm :true,
             attributes : { 'data-toggle' : 'modal', 'data-target': '#AdaptedModal' }
         },
         DEL_STAGE : {
             label : 'Usuń',
-            task : 'getProjectStageDeleteSlo',
+            task : 'getProjectStageDelSlo',
             class : 'btn-danger',
             perm :true,
             attributes : { 'data-toggle' : 'modal', 'data-target': '#AdaptedModal' }
@@ -132,8 +132,11 @@ function runFunction(d)
         case 'cModal':
                 cModal(defaultTask,d);
             break;
+        case 'psHide':
+                removeHideData('Ukryj','UKRYJ ETAP PROJEKT:','secondary');
+            break;
         case 'psDelete':
-                removeData('Usuń','USUŃ ETAP PROJEKT:','danger');
+                removeHideData('Usuń','USUŃ ETAP PROJEKT:','danger');
             break;
         default:
                 displayAll(d);
@@ -1108,9 +1111,9 @@ function createTable(colTitle,tBody)
     return table;
 }
 
-function removeData(btnLabel,title,titleClass)
+function removeHideData(btnLabel,title,titleClass)
 {
-    console.log('===removeData()===');
+    console.log('===removeHideData()===');
      /*
         * SLOWNIKI:
         * data[0] = DATA
@@ -1120,17 +1123,17 @@ function removeData(btnLabel,title,titleClass)
     var form=createForm('POST',actData['data']['function'],'form-horizontal','OFF');
     var add=document.getElementById('AdaptedDynamicData'); 
     removeFields(form);
-    add.appendChild(createTag(actData['data']['value']['stage']['head'].t,'h5','text-'+titleClass+' mb-3 text-center font-weight-bold'));
+    add.appendChild(createTag(actData['data']['value']['head'].t,'h5','text-'+titleClass+' mb-3 text-center font-weight-bold'));
     add.appendChild(form);
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),''));
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(actData['data']['function'],createBtn(btnLabel,'btn btn-'+titleClass,actData['data']['function']),actData['data']['function']));
     /* INFO */
-    document.getElementById('AdaptedModalInfo').appendChild(createTag("Project Stage ID: "+actData['data']['value']['stage']['head'].i+", Create user: "+actData['data']['value']['stage']['head'].cu+" ("+actData['data']['value']['stage']['head'].cul+"), Create date: "+actData['data']['value']['stage']['head'].cd,'small','text-left text-secondary ml-1'));
+    document.getElementById('AdaptedModalInfo').appendChild(createTag("Project Stage ID: "+actData['data']['value']['head'].i+", Create user: "+actData['data']['value']['head'].cu+" ("+actData['data']['value']['head'].cul+"), Create date: "+actData['data']['value']['head'].cd,'small','text-left text-secondary ml-1'));
 }
 function removeFields(ele)
 { 
     console.log('---removeFields()---');
-    ele.appendChild(createInput('hidden','id',actData['data']['value']['stage']['head'].i,'','','n'));
+    ele.appendChild(createInput('hidden','id',actData['data']['value']['head'].i,'','','n'));
     var p=createTag('Podaj Powód: ','p','text-left');
     var inp=createInput('text','extra','','form-control mb-1','Wprowadź powód','n');
         inp.style.display = "none";
@@ -1213,26 +1216,20 @@ function functionBtn(f,btn,task)
                     ajax.getData(defaultTask);
                 };
             break;
-        case 'edit':
-                
+        case 'edit':               
                 btn.onclick = function()
                 {
                     clearAdaptedModalData();
                     actData['data']['function']='psEdit';
                     actData['data']['task']='psEdit';
-                    //manageData('Zatwierdź','Edycja','info','psEdit')
-                    
                     runFunction(actData);
-                    
                 };
                 break;
+        case 'psHide':
+                assignConfirmBtn(btn,"Potwierdź ukrycie etapu projektu",task);
+                break;
         case 'psDelete':
-                btn.onclick = function() {
-                    if(confirm("Potwierdź usunięcie etapu projektu"))
-                    {   
-                        postData(this,task); 
-                    };
-                };
+                assignConfirmBtn(btn,"Potwierdź usunięcie etapu projektu",task);
                 break;
         case 'psEdit':
         case 'psCreate':
@@ -1243,6 +1240,14 @@ function functionBtn(f,btn,task)
             break;
     }
     return btn;
+}
+function assignConfirmBtn(btn,confirmlabel,task){
+    btn.onclick = function() {
+        if(confirm(confirmlabel))
+        {   
+            postData(this,task); 
+        };
+    };
 }
 function postData(btn,nameOfForm)
 {
@@ -1344,6 +1349,13 @@ function createData()
 {
     clearAdaptedModalData();
     ajax.getData('getNewStageSlo');
+}
+function showHidden(ele)
+{
+    console.log('===showHidden()===\n'+ele.value);
+    changeBoxValue(ele);
+    defaultTask='getprojectsstagelike&v='+ele.value;
+    findData(document.getElementById('findData').value);
 }
 ajax.getData(defaultTask);
 //document.getElementById('closeModal').onclick = function(){ reloadData(defaultTask); };

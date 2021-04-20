@@ -9,15 +9,8 @@ class manageProjectStage extends initialDb
     private $lastStageId=0;
     private $dbLink;
     private $actProjectStageData=array();
-    protected $infoArray=array
-            (
-                "nazwa"=>array
-                (
-                    "Podana Nazwa jest za krótka",
-                    "Podana Nazwa jest za długa",
-                    "Istnieje już rola o podanej nazwie",
-                )
-            );
+    private $brTag='';
+
     function __construct()
     {
         parent::__construct();
@@ -35,7 +28,8 @@ class manageProjectStage extends initialDb
         //$f=filter_input(INPUT_GET,'filter');
         //$f='a';
         parent::log(0,"[".__METHOD__."] filter => ".$f);
-        $select="SELECT s.`id` as 'i',s.`number` as 'n',s.`title` as 't',(select e.`value` FROM `slo_projekt_etap_ele` as e WHERE e.`id_projekt_etap`=s.`id` ORDER BY e.`id` ASC LIMIT 0,1) as `v` FROM `slo_projekt_etap` s  ";
+        parent::logMulti(0,filter_input_array(INPUT_GET));
+        $select="SELECT s.`id` as 'i',s.`number` as 'n',s.`title` as 't',(select e.`value` FROM `slo_projekt_etap_ele` as e WHERE e.`id_projekt_etap`=s.`id` and `wsk_u`='0' and `wsk_v`='0' ORDER BY e.`id` ASC LIMIT 0,1) as `v` FROM `slo_projekt_etap` s  ";
         $where='';
         if(is_numeric($f)){
             parent::log(0,"[".__METHOD__."] filter is numeric ");
@@ -44,13 +38,16 @@ class manageProjectStage extends initialDb
                     ':id'=>array($f_int,'INT'),
                     ':number'=>array($f_int,'INT')
             );
-            $where="WHERE s.`wsk_u`=:wsku AND (s.`id` LIKE (:id) OR s.`number` LIKE (:number) OR s.`title` LIKE :title) ORDER BY s.`id` ASC";
+            $where="WHERE s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`id` LIKE (:id) OR s.`number` LIKE (:number) OR s.`title` LIKE :title) ORDER BY s.`id` ASC";
          }
         else{
             parent::log(0,"[".__METHOD__."] filter not numeric ");
-            $where="WHERE s.`wsk_u`=:wsku AND (s.`title` LIKE :title) ORDER BY s.`id` ASC";
+            $where="WHERE s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`title` LIKE :title) ORDER BY s.`id` ASC";
         }
-        $query_data[':wsku']=array('0','STR');
+        self::setGetWsk('u');
+        self::setGetWsk('v');
+        $query_data[':wsk_u']=array($this->inpArray['u'],'STR');
+        $query_data[':wsk_v']=array($this->inpArray['v'],'STR');
         $query_data[':title']=array('%'.$f.'%','STR');
         
         /* 
@@ -72,90 +69,146 @@ class manageProjectStage extends initialDb
         }
         return($this->response->setResponse(__METHOD__,$return,'','GET'));
     }
-    public function getProjectStageDeleteSlo()
-    {
+    public function getProjectStageHideSlo(){
         parent::log(0,"[".__METHOD__."]");
-        if($this->utilities->checkInputGetValInt('id')['status']===1)
-        {
-            $this->response->setError(1,$this->utilities->getInfo());   
-        }
-        else
-        {
-            parent::logMulti(0,$this->utilities->getData());
-            $v['stage']=self::getProjectStageData($this->utilities->getData());
-            try{
-                parent::newQuery("SELECT `id` as ID,`nazwa` AS Nazwa FROM `slo_usun_proj_etap` WHERE id>0 AND wsk_u='0' ORDER BY `ID` ASC");
-                $v['slo']=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);
-            }
-            catch (PDOException $e){
-                $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
-            }
-        }
-        return($this->response->setResponse(__METHOD__,$v,'psDelete','POST'));  
+        $this->actProjectStageData=array();
+        $this->brTag='&lt;br /&gt;';
+        self::setGetId();
+        self::getProjectStageData($this->inpArray['id']);
+        self::getSlo('psHide');
+        return($this->response->setResponse(__METHOD__,$this->actProjectStageData,'psHide','POST'));  
     }
-    private function getProjectStageData($id)
+    public function getProjectStageDelSlo(){
+        parent::log(0,"[".__METHOD__."]");
+        $this->actProjectStageData=array();
+        $this->brTag='&lt;br /&gt;';
+        self::setGetId();
+        self::getProjectStageData($this->inpArray['id']);
+        self::checkWskB();
+        self::getSlo('psDelete');
+        return($this->response->setResponse(__METHOD__,$this->actProjectStageData,'psDelete','POST'));  
+    }
+    private function setGetWsk($wsk='u')
+    {
+        $this->inpArray[$wsk]=filter_input(INPUT_GET,$wsk);
+        if($this->inpArray[$wsk]===null || $this->inpArray[$wsk]===false){
+            parent::log(0,"[".__METHOD__."] wsk_".$wsk." NOT EXIST, SET DEFAULT 0");
+            $this->inpArray[$wsk]='0';
+        }
+    }
+    private function setGetId(){
+        $this->inpArray['id']=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+        if($this->inpArray['id']===null || $this->inpArray['id']===false){
+            $this->response->setError(1,"[".__METHOD__."] KEY id NOT EXIST OR ID IS NOT INT");
+        }
+    }
+    private function setPostId(){
+        $this->inpArray['id']=filter_input(INPUT_POST,'id',FILTER_VALIDATE_INT);
+        if($this->inpArray['id']===null || $this->inpArray['id']===false){
+            $this->response->setError(1,"[".__METHOD__."] KEY id NOT EXIST OR ID IS NOT INT");
+        }
+    }
+    private function checkWskB(){
+        parent::log(0,"[".__METHOD__."]");
+        /* $_SESSION['id']*/
+    }
+    private function getSlo($slo='psDelete'){
+        if($this->response->getError()!==''){ return false;}
+        $sqlData=array();
+        //$this->actProjectStageData['stage']=
+        try{
+            $sqlData[':name']=array($slo,'STR');
+            parent::newQuery("SELECT s.`id` as ID,s.`nazwa` AS Nazwa FROM `slo` s,`app_task` a WHERE s.`id_app_task`=a.`id` AND s.id>0 AND s.wsk_u='0' AND a.`name`=:name ORDER BY s.`id` ASC",$sqlData);
+            $this->actProjectStageData['slo']=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);
+        }
+        catch (PDOException $e){
+            $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
+        }
+    }
+    private function getProjectStageData($id=0)
     {
         parent::log(0,"[".__METHOD__."]");
         try{
             $v[':id']=array($id,'INT');
             parent::newQuery("SELECT `id` as 'i',`id_dzial` as 'id',`number` as 'n',`title` as 't',`create_user_fullname` as 'cu',`create_user_login` as 'cul',`create_date` as 'cd',`mod_login` as 'mu',`mod_date` as 'md',`buffer_user_id` as 'bu',`wsk_u` as 'wu', `delete_fullname` as 'du' FROM `slo_projekt_etap` WHERE `id`=:id LIMIT 0,1",$v);
-            $d['head']=parent::getSth()->fetch(PDO::FETCH_ASSOC);
+            $this->actProjectStageData['head']=array_map(array($this,'preapareProjectStageData'),parent::getSth()->fetch(PDO::FETCH_ASSOC));
             parent::newQuery("SELECT `id` as 'i',`value` as 'v',`file_selected` as 'f',`file_position` as 'fp',`wsk_v` as 'wsk_v' FROM `slo_projekt_etap_ele` WHERE `id_projekt_etap`=:id AND `wsk_u`='0' ",$v);
-            $d['body']=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);
+            $this->actProjectStageData['body']=array_map(array($this,'preapareProjectStageData'),parent::getSth()->fetchAll(PDO::FETCH_ASSOC));
         }
         catch (PDOException $e){
             $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
 	}
-        return $d;
+    }
+    private function preapareProjectStageData($data){
+        return str_replace($this->brTag,"",$data);
     }
     public function psDetails()
     {
         parent::log(0,"[".__METHOD__."]");
         $v=array();
-        if($this->utilities->checkInputGetValInt('id')['status']===1)
-        {
-            $this->response->setError(1,$this->utilities->getInfo());   
-        }
-        else
-        {
-            $v=self::getProjectStageData($this->utilities->getData());
-        }
-        return ($this->response->setResponse(__METHOD__,$v,'psDetails','POST'));
+        $this->actProjectStageData=array();
+        $this->brTag='&lt;br /&gt;';
+        self::setGetId();
+        self::getProjectStageData($this->inpArray['id']);
+        return ($this->response->setResponse(__METHOD__,$this->actProjectStageData,'psDetails','POST'));
     }
-    public function psDelete()
-    {
+    public function psHide(){
         parent::log(0,"[".__METHOD__."]");
-        $id=filter_input(INPUT_POST,'id',FILTER_VALIDATE_INT);
-        $reason=explode('|',filter_input(INPUT_POST,'reason'));
-        parent::log(0,'id => '.$id);
-        if(!$id)
-        {
-            $this->response->setError(1,'FIELD ID NOT EXIST IN POST');
-        }
-        else
-        {
-            /* CHECK wsk_b */
-
-            $query_data=array(
-                ':id'=>array($id,'INT'),
+        self::setPostId();
+        self::setReason();
+        self::sqlHideStage();
+        return ($this->response->setResponse(__METHOD__,'','cModal','POST'));
+    }
+    public function psDelete(){
+        parent::log(0,"[".__METHOD__."]");
+        self::setPostId();
+        self::setReason();
+        /* CHECK wsk_b */
+        self::sqlDeleteStage();
+        return ($this->response->setResponse(__METHOD__,'','cModal','POST'));
+    }
+    private function sqlDeleteStage(){
+        if($this->response->getError()!==''){ return false;}
+        $query_data=array(
+                ':id'=>array($this->inpArray['id'],'INT'),
                 ':wsku'=>array('1','STR'),
                 ':userid'=>array($_SESSION["userid"],'INT'),
                 ':username'=>array($_SESSION["username"],'STR'),
                 ':fullname'=>array($_SESSION["nazwiskoImie"],'STR'),
                 ':aktualnadata'=>array($this->cDT,'STR'),
                 ':ra'=>array($this->RA,'STR'),
-                ':reason'=>array($reason[1],'STR')
+                ':delete_reason'=>array($this->inpArray['reason'][1],'STR')
             );
             try
             {
-                parent::newQuery("UPDATE `slo_projekt_etap` SET `wsk_u`=:wsku,`delete_user_id`=:userid,`delete_login`=:username,`delete_fullname`=:fullname,`delete_date`=:aktualnadata,`delete_reason`=:reason,`delete_host`=:ra WHERE `id`=:id",$query_data);   
+                parent::newQuery("UPDATE `slo_projekt_etap` SET `wsk_u`=:wsku,`delete_user_id`=:userid,`delete_login`=:username,`delete_fullname`=:fullname,`delete_date`=:aktualnadata,`delete_reason`=:delete_reason,`delete_host`=:ra WHERE `id`=:id",$query_data);   
             }
             catch (PDOException $e)
             {
                 $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
             }
+    }
+    private function sqlHideStage(){
+        if($this->response->getError()!==''){ return false;}
+        $query_data=array(
+            ':id'=>array($this->inpArray['id'],'INT'),
+            ':wsk_v'=>array('1','STR'),
+            ':hide_reason'=>array($this->inpArray['reason'][1],'STR')
+        );
+        self::addUpdateAddOns($query_data);
+        try{
+            parent::newQuery("UPDATE `slo_projekt_etap` SET `wsk_v`=:wsk_v,`mod_user_id`=:mod_user_id,`mod_login`=:mod_login,`mod_date`=:mod_date,`hide_reason`=:hide_reason,`mod_host`=:mod_host WHERE `id`=:id",$query_data);   
         }
-        return ($this->response->setResponse(__METHOD__,'','cModal','POST'));
+        catch (PDOException $e){
+            $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
+        }
+    }
+    private function setReason(){
+        $this->inpArray['reason']=explode('|',filter_input(INPUT_POST,'reason'));
+        if(count($this->inpArray['reason'])!==2){
+            $this->response->setError(1,"[".__METHOD__."] WRONG ARRAY MEMBERS, SHOULD BE 2:");
+            parent::logMulti(0,$this->inpArray['reason'],__METHOD__);
+        }
     }
     public function psCreate()
     {
@@ -301,7 +354,8 @@ class manageProjectStage extends initialDb
         parent::log(0,"[".__METHOD__."]");
         if($this->response->getError()!==''){return false;}
         $this->inpArray['id']=intval($this->inpArray['id']);
-        $this->actProjectStageData=self::getProjectStageData($this->inpArray['id']); // $this->inpArray['id']
+        self::getProjectStageData($this->inpArray['id']);
+        $this->actProjectStageData= // $this->inpArray['id']
         /* EXIST AND IS NOT BLOCKED ? */
         parent::logMulti(2,$this->actProjectStageData,__METHOD__);
         self::checkStageHead();
@@ -435,8 +489,8 @@ class manageProjectStage extends initialDb
         {
             parent::log(0," STAGE => ".$v['i']);
             parent::logMulti(0,$this->stageData);
+            self::checkInStageData($v,$found);
             if($found){
-                
                 UNSET($this->actProjectStageData['body'][$k]);
             }
             else{
@@ -452,6 +506,7 @@ class manageProjectStage extends initialDb
     }
     private function checkInStageData($v,&$found)
     {
+        parent::log(0,"[".__METHOD__."]");
         foreach($this->stageData as $ks => $vs)
         {
             parent::log(0," SENDED STAGE ID => ".$vs[':id'][0]);

@@ -10,9 +10,9 @@ class manageProjectStage extends initialDb
     private $dbLink;
     private $actProjectStageData=array();
     private $brTag='';
+    
 
-    function __construct()
-    {
+    function __construct(){
         parent::__construct();
         parent::log(0,"[".__METHOD__."]");
         $this->response=NEW Response('Etapy');
@@ -20,8 +20,7 @@ class manageProjectStage extends initialDb
         $this->dbLink=parent::getDbLink();
     }
     # RETURN ALL NOT DELETED PROJECT FROM DB
-    public function getprojectsstagelike()
-    { 
+    public function getprojectsstagelike(){ 
         /*FILTER_SANITIZE_STRING => Remove all HTML tags from a string:*/
         //$f="%".filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING)."%";
         $f=htmlentities(nl2br(filter_input(INPUT_GET,'filter')), ENT_QUOTES,'UTF-8',FALSE);
@@ -31,13 +30,12 @@ class manageProjectStage extends initialDb
         parent::logMulti(0,filter_input_array(INPUT_GET));
         $select="SELECT s.`id` as 'i',s.`number` as 'n',s.`title` as 't',(select e.`value` FROM `slo_projekt_etap_ele` as e WHERE e.`id_projekt_etap`=s.`id` and `wsk_u`='0' and `wsk_v`='0' ORDER BY e.`id` ASC LIMIT 0,1) as `v` FROM `slo_projekt_etap` s  ";
         $where='';
+        $query_data=array();
         if(is_numeric($f)){
             parent::log(0,"[".__METHOD__."] filter is numeric ");
             $f_int=intval($f,10);
-            $query_data=array(
-                    ':id'=>array($f_int,'INT'),
-                    ':number'=>array($f_int,'INT')
-            );
+            $query_data[':id']=array($f_int,'INT');
+            $query_data[':number']=array($f_int,'INT');
             $where="WHERE s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`id` LIKE (:id) OR s.`number` LIKE (:number) OR s.`title` LIKE :title) ORDER BY s.`id` ASC";
          }
         else{
@@ -55,12 +53,10 @@ class manageProjectStage extends initialDb
            $query_data[':value']=array('%'.$f.'%','STR');
          * 
          */
-        try
-	{
+        try{
             parent::newQuery($select.$where,$query_data);   
 	}
-	catch (PDOException $e)
-	{
+	catch (PDOException $e){
             $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
 	}
         $return=array();
@@ -84,12 +80,12 @@ class manageProjectStage extends initialDb
         $this->brTag='&lt;br /&gt;';
         self::setGetId();
         self::getProjectStageData($this->inpArray['id']);
-        self::checkWskB();
+        self::checkWskB(intval($this->actProjectStageData['head']['bu'],10));
+        self::setWskB(intval($_SESSION['userid'],10));
         self::getSlo('psDelete');
         return($this->response->setResponse(__METHOD__,$this->actProjectStageData,'psDelete','POST'));  
     }
-    private function setGetWsk($wsk='u')
-    {
+    private function setGetWsk($wsk='u'){
         $this->inpArray[$wsk]=filter_input(INPUT_GET,$wsk);
         if($this->inpArray[$wsk]===null || $this->inpArray[$wsk]===false){
             parent::log(0,"[".__METHOD__."] wsk_".$wsk." NOT EXIST, SET DEFAULT 0");
@@ -97,9 +93,8 @@ class manageProjectStage extends initialDb
         }
     }
     private function setGetId(){
-        $this->inpArray['id']=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-        if($this->inpArray['id']===null || $this->inpArray['id']===false){
-            $this->response->setError(1,"[".__METHOD__."] KEY id NOT EXIST OR ID IS NOT INT");
+        if(!$this->utilities->setGetIntKey($this->inpArray['id'],'id')){
+             $this->response->setError(1,"[".__METHOD__."] KEY id NOT EXIST OR ID IS NOT INT");
         }
     }
     private function setPostId(){
@@ -108,16 +103,47 @@ class manageProjectStage extends initialDb
             $this->response->setError(1,"[".__METHOD__."] KEY id NOT EXIST OR ID IS NOT INT");
         }
     }
-    private function checkWskB(){
+    private function checkWskB($wskb=0){
         parent::log(0,"[".__METHOD__."]");
+        parent::log(0,"[".__METHOD__."] wskb => ".$wskb);
+        parent::log(0,"[".__METHOD__."] session userid => ".$_SESSION['userid']);
+        if($wskb>0 && $wskb!==intval($_SESSION['userid'],10)){
+            $this->response->setError(0,"[ERROR] Aktualnie etap projektu jest aktualizowany przez innego użytkownika.");
+        }
         /* $_SESSION['id']*/
+    }
+    private function setWskB($userid=0){
+        parent::log(0,"[".__METHOD__."] USER ID => ".$userid);
+        if($this->response->getError()!==''){ return false;}
+        $query_data=array(
+            ':id'=>array($this->inpArray['id'],'INT'),
+            ':buffer_user_id'=>array($userid,'INT'),
+        );
+        try{
+            parent::newQuery("UPDATE `slo_projekt_etap` SET `buffer_user_id`=:buffer_user_id WHERE `id`=:id",$query_data);   
+        }
+        catch (PDOException $e){
+            $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
+        }
+    }
+    private function getWskB($idProject){
+        parent::log(0,"[".__METHOD__."]");
+        if($this->response->getError()!==''){ return false;}
+        $query_data=array(':id'=>array($idProject,'INT'));
+        try{
+            parent::newQuery("select `buffer_user_id` as bu FROM `slo_projekt_etap` WHERE `id`=:id",$query_data);   
+            $this->inpArray['wskb']=parent::getSth()->fetch(PDO::FETCH_ASSOC)['bu'];
+            parent::logMulti(0,$this->inpArray['wskb']);
+        }
+        catch (PDOException $e){
+            $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
+        }
     }
     private function getSlo($slo='psDelete'){
         if($this->response->getError()!==''){ return false;}
-        $sqlData=array();
+        $sqlData=array(':name'=>array($slo,'STR'));
         //$this->actProjectStageData['stage']=
         try{
-            $sqlData[':name']=array($slo,'STR');
             parent::newQuery("SELECT s.`id` as ID,s.`nazwa` AS Nazwa FROM `slo` s,`app_task` a WHERE s.`id_app_task`=a.`id` AND s.id>0 AND s.wsk_u='0' AND a.`name`=:name ORDER BY s.`id` ASC",$sqlData);
             $this->actProjectStageData['slo']=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);
         }
@@ -125,8 +151,7 @@ class manageProjectStage extends initialDb
             $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
         }
     }
-    private function getProjectStageData($id=0)
-    {
+    private function getProjectStageData($id=0){
         parent::log(0,"[".__METHOD__."]");
         try{
             $v[':id']=array($id,'INT');
@@ -142,10 +167,8 @@ class manageProjectStage extends initialDb
     private function preapareProjectStageData($data){
         return str_replace($this->brTag,"",$data);
     }
-    public function psDetails()
-    {
+    public function psDetails(){
         parent::log(0,"[".__METHOD__."]");
-        $v=array();
         $this->actProjectStageData=array();
         $this->brTag='&lt;br /&gt;';
         self::setGetId();
@@ -164,7 +187,10 @@ class manageProjectStage extends initialDb
         self::setPostId();
         self::setReason();
         /* CHECK wsk_b */
+        self::getWskB($this->inpArray['id']);
+        self::checkWskB(intval($this->inpArray['wskb'],10));
         self::sqlDeleteStage();
+        self::setWskB();
         return ($this->response->setResponse(__METHOD__,'','cModal','POST'));
     }
     private function sqlDeleteStage(){
@@ -179,12 +205,10 @@ class manageProjectStage extends initialDb
                 ':ra'=>array($this->RA,'STR'),
                 ':delete_reason'=>array($this->inpArray['reason'][1],'STR')
             );
-            try
-            {
+            try{
                 parent::newQuery("UPDATE `slo_projekt_etap` SET `wsk_u`=:wsku,`delete_user_id`=:userid,`delete_login`=:username,`delete_fullname`=:fullname,`delete_date`=:aktualnadata,`delete_reason`=:delete_reason,`delete_host`=:ra WHERE `id`=:id",$query_data);   
             }
-            catch (PDOException $e)
-            {
+            catch (PDOException $e){
                 $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
             }
     }
@@ -228,8 +252,7 @@ class manageProjectStage extends initialDb
         self::addProjectStage();
         return ($this->response->setResponse(__METHOD__,'','cModal','POST'));
     }
-    private function checkInputFields()
-    {
+    private function checkInputFields(){
         parent::log(0,"[".__METHOD__."]");
         parent::logMulti(0, $this->inpArray);
         $fieldValue=false;
@@ -247,8 +270,7 @@ class manageProjectStage extends initialDb
             $this->response->setError(0,' Należy wprowadzić wartość dla etapu projektu');
         }
     }
-    private function checkInputFieldsLength()
-    {
+    private function checkInputFieldsLength(){
         parent::log(0,"[".__METHOD__."]");
         if($this->response->getError()!==''){return false;}
         $keyToCheck=array('number'=>array('numerze',1,200),'title'=>array('tytule',3,200),'value'=>array('zawartość',1,65535));
@@ -265,8 +287,7 @@ class manageProjectStage extends initialDb
             }   
         }
     }
-    private function createStage()
-    {
+    private function createStage(){
         parent::log(0,"[".__METHOD__."]");
         if($this->response->getError()!==''){return false;}
         $tmp=array();
@@ -290,8 +311,7 @@ class manageProjectStage extends initialDb
 
         self::checkStageFileInserted();
     }
-    private function createStageData($id,$field,$value)
-    {
+    private function createStageData($id,$field,$value){
         /*
          * $stageData
          */
@@ -318,18 +338,14 @@ class manageProjectStage extends initialDb
            
         }
     }
-    private function checkStageFileInserted()
-    {
-        foreach($this->stageData as $i => $s)
-        {
-            if(!array_key_exists(':file', $s))
-            {
+    private function checkStageFileInserted(){
+        foreach($this->stageData as $i => $s){
+            if(!array_key_exists(':file', $s)){
                 $this->stageData[$i][':file']=array(0,'STR');
             }
         }
     }
-    public function psEdit()
-    {
+    public function psEdit(){
         parent::log(0,"[".__METHOD__."]");
         $this->inpArray=filter_input_array(INPUT_POST);
         try {
@@ -349,8 +365,7 @@ class manageProjectStage extends initialDb
         self::updateProjectStage();
         return ($this->response->setResponse(__METHOD__,'','cModal','POST'));
     }
-    private function checkStageData()
-    {
+    private function checkStageData(){
         parent::log(0,"[".__METHOD__."]");
         if($this->response->getError()!==''){return false;}
         $this->inpArray['id']=intval($this->inpArray['id']);
@@ -359,18 +374,14 @@ class manageProjectStage extends initialDb
         /* EXIST AND IS NOT BLOCKED ? */
         parent::logMulti(2,$this->actProjectStageData,__METHOD__);
         self::checkStageHead();
-        
         parent::log(0,"COUNT BODY => ".count($this->actProjectStageData['body']));
     }
-    private function checkStageHead()
-    {
+    private function checkStageHead(){
         parent::log(0,"COUNT HEAD => ".is_array($this->actProjectStageData['head']));
-        if(!is_array($this->actProjectStageData['head']))
-        {
+        if(!is_array($this->actProjectStageData['head'])){
             throw new ErrorException(' STAGE '.$this->inpArray['id'].' WAS DELETED', 0, 0, __METHOD__, __LINE__);
         }
-        if($this->actProjectStageData['head']['wu']==='1')
-        {
+        if($this->actProjectStageData['head']['wu']==='1'){
             $this->response->setError(0,' Projekt został już usunięty przez '.$this->actProjectStageData['head']['du']);
             return false;
         }
@@ -378,14 +389,12 @@ class manageProjectStage extends initialDb
         $idBuffer=intval($this->actProjectStageData['head']['bu'],10);
         parent::log(0,"Actual user id => ".$idUser);
         parent::log(0,"Buffer user id => ".$idBuffer);
-        if($idBuffer>0 && $idUser!=$idBuffer)
-        {
+        if($idBuffer>0 && $idUser!=$idBuffer){
             $this->response->setError(0,' Aktualnie etap projektu jest już otwarty przez użytkownika '.$idBuffer);
             return false;
         }
     }
-    protected function addProjectStage()
-    {
+    protected function addProjectStage(){
         parent::log(0,"[".__METHOD__."]");
         if($this->response->getError()!==''){return false;}
         $this->inpArray['number']=intval($this->inpArray['number']);
@@ -411,8 +420,7 @@ class manageProjectStage extends initialDb
             $this->dbLink->rollback(); 
 	}     
     }
-    private function insertStageElement($value)
-    {
+    private function insertStageElement($value){
         parent::log(0,"[".__METHOD__."]");
         $value[':idproject']=array($this->lastStageId,'INT');
         /* REMOVE FAKE ID */
@@ -420,8 +428,7 @@ class manageProjectStage extends initialDb
         self::addInsertAddOns($value);
         parent::newQuery("INSERT INTO `slo_projekt_etap_ele` (`id_projekt_etap`,`value`,`file_selected`,`file_position`,`create_user_id`,`create_user_login`,`create_user_fullname`,`create_date`,`create_host`,`mod_user_id`,`mod_login`,`mod_host`) VALUES (:idproject,:value,:file,:fileposition,:userid,:username,:nazwiskoimie,:aktualnadata,:ra,:userid2,:username2,:ra2)",$value);
     }
-    private function addInsertAddOns(&$data)
-    {
+    private function addInsertAddOns(&$data){
         $addOns=array(
                     ':userid'=>array($_SESSION["userid"],'INT'),
                     ':username'=>array($_SESSION["username"],'STR'),
@@ -435,8 +442,7 @@ class manageProjectStage extends initialDb
          self::mergeArray($data,$addOns);
     }
 
-    private function updateProjectStage()
-    {
+    private function updateProjectStage(){
         parent::log(0,"[".__METHOD__."]");
         if($this->response->getError()!=='') { return false;}
         $this->inpArray['id']=intval($this->inpArray['id']);
@@ -463,8 +469,7 @@ class manageProjectStage extends initialDb
             $this->dbLink->rollback(); 
 	} 
     }
-    private function updateStageElement($value)
-    {
+    private function updateStageElement($value){
         parent::log(0,"[".__METHOD__."]");
         parent::logMulti(0,$value);
         $value[':id_projekt_etap']=array($this->inpArray['id'],'INT');
@@ -472,21 +477,18 @@ class manageProjectStage extends initialDb
         parent::logMulti(2,$value);
         parent::newQuery("UPDATE `slo_projekt_etap_ele` SET `value`=:value,`file_selected`=:file,`file_position`=:fileposition,`mod_user_id`=:mod_user_id,`mod_login`=:mod_login,`mod_host`=:mod_host,`mod_date`=:mod_date WHERE `id_projekt_etap`=:id_projekt_etap AND `id`=:id",$value);
     }
-    private function deleteStageElement($value)
-    {
+    private function deleteStageElement($value){
         parent::log(0,"[".__METHOD__."]");
         $value[':id_projekt_etap']=array($this->inpArray['id'],'INT');
         self::addDeleteAddOns($value);
         parent::logMulti(0,$value);
         parent::newQuery("UPDATE `slo_projekt_etap_ele` SET `wsk_u`='1',`delete_user_id`=:delete_user_id,`delete_login`=:delete_login,`delete_fullname`=:delete_fullname,`delete_date`=:delete_date,`delete_host`=:delete_host WHERE `id_projekt_etap`=:id_projekt_etap AND `id`=:id",$value);
     }
-    private function manageStageElement()
-    {
+    private function manageStageElement(){
         parent::log(0,"[".__METHOD__."]");
         $found=false;
         $tmp=array();
-        foreach($this->actProjectStageData['body'] as $k => $v)
-        {
+        foreach($this->actProjectStageData['body'] as $k => $v){
             parent::log(0," STAGE => ".$v['i']);
             parent::logMulti(0,$this->stageData);
             self::checkInStageData($v,$found);
@@ -504,14 +506,11 @@ class manageProjectStage extends initialDb
         array_map(array($this, 'insertStageElement'),$this->stageData);
         //$this->response->setError(0,'['.__METHOD__.']['.__LINE__.'] TEST STOP');
     }
-    private function checkInStageData($v,&$found)
-    {
+    private function checkInStageData($v,&$found){
         parent::log(0,"[".__METHOD__."]");
-        foreach($this->stageData as $ks => $vs)
-        {
+        foreach($this->stageData as $ks => $vs){
             parent::log(0," SENDED STAGE ID => ".$vs[':id'][0]);
-            if($v['i']===$vs[':id'][0])
-            {
+            if($v['i']===$vs[':id'][0]){
                 self::updateStageElement($vs);
                 UNSET($this->stageData[$ks]);
                 $found=true;
@@ -519,8 +518,7 @@ class manageProjectStage extends initialDb
             }
         }
     }
-    private function addUpdateAddOns(&$data)
-    {
+    private function addUpdateAddOns(&$data){
         $addOns=array(
                     ':mod_user_id'=>array($_SESSION["userid"],'INT'),
                     ':mod_login'=>array($_SESSION["username"],'STR'),
@@ -529,8 +527,7 @@ class manageProjectStage extends initialDb
         );
         self::mergeArray($data,$addOns);
     }
-    private function addDeleteAddOns(&$data)
-    {
+    private function addDeleteAddOns(&$data){
         $addOns=array(
                     ':delete_user_id'=>array($_SESSION["userid"],'INT'),
                     ':delete_login'=>array($_SESSION["username"],'STR'),
@@ -540,26 +537,20 @@ class manageProjectStage extends initialDb
         );
         self::mergeArray($data,$addOns);
     }
-    private function mergeArray(&$mainArray,$additionalArray)
-    {
-        foreach($additionalArray as $k => $v)
-        {
+    private function mergeArray(&$mainArray,$additionalArray){
+        foreach($additionalArray as $k => $v){
             $mainArray[$k]=$v;
         }
     }
-    public function getNewStageSlo()
-    {
+    public function getNewStageSlo(){
         return ($this->response->setResponse(__METHOD__,'','psCreate','POST'));
     }
-    protected function checkValueLength($value,$label,$min,$max)
-    {
+    protected function checkValueLength($value,$label,$min,$max){
         parent::log(0,"[".__METHOD__."]");
-        if(strlen($value)<$min)
-        {
+        if(strlen($value)<$min){
             $this->response->setError(0,"W ".$label." nie wprowadzono minimalnej ilości znaków");
         }
-        if(strlen($value)>$max)
-        {
+        if(strlen($value)>$max){
             $this->response->setError(0,"W ".$label." przekroczono dopuszczalną ilość znaków");
         }
     }

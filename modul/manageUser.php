@@ -1,16 +1,9 @@
 <?php
-session_start();
-require(filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/.cfg/config.php');
-
 class manageUser extends initialDb
 {
     private $inpArray=array();
-    protected $err="";
-    protected $valueToReturn=null;
-    protected $idUser=null;
-    protected $filter=null;
-    protected $taskPerm= ['perm'=>'','type'=>''];
-    const maxPercentPersToProj=100;
+    protected $actData=array();
+    protected $responseType='POST';
     protected $infoArray=array
             (
                 "imie_nazwisko"=>array
@@ -24,203 +17,159 @@ class manageUser extends initialDb
                     "Istnieje już użytkownik o podanym Loginie"
                 )
             );
-    function __construct()
-    {
+    function __construct(){
         parent::__construct();
+        $this->log(0,"[".__METHOD__."]");
+        $this->utilities=NEW utilities();
+        $this->response=NEW Response('User');
     }
-    private function getPostData($postData=array())
-    {
-        $tmpArray=array();
-        foreach($postData as $key =>$value)
+    private function setInpArray(){
+        $this->utilities->getPost();
+        if($this->utilities->getStatus()===0)
         {
-            $value=trim($value);
-            $this->inpArray[$key]=$value;
-            //echo $key." - ".$value."\n";
-            if(substr($key, 0,2)==='d-')
-            {
-                if($value!=='')
-                {
-                    $tmpArray=explode('.',$value);
-                    $this->inpArray[$key]=$tmpArray[2]."-".$tmpArray[1]."-".$tmpArray[0];
-                    //echo $key." - ".$this->inpArray[$key];
-                }
-                else
-                {
-                    $this->inpArray[$key]='0000-00-00';
-                };
-            }
+            $this->inpArray=$this->utilities->getData();
+        }
+        else
+        {
+            $this->response->setError(1,$this->utilities->getInfo());
         }
     }
-    protected function cUser($POSTDATA)
+    public function cUser()
     {
-        $this->getPostData($POSTDATA);
-        $this->checkUserValueLength($this->inpArray);
-        if($this->checkExistInDb('uzytkownik','login=?',$this->inpArray['login']))
+        $this->log(0,"[".__METHOD__."]");
+        self::setInpArray();
+        self::checkUserValueLength();
+        if($this->checkExistInDb('uzytkownik','login=?',$this->inpArray['Login']))
         {
-            $this->err.=$this->infoArray['login'][0]."<br/>";
+            $this->response->setError(0,$this->infoArray['login'][0]);
         }
-        if($this->checkExistInDb('uzytkownik','imie=? AND nazwisko=?',$this->inpArray['imie'].','.$this->inpArray['nazwisko']))
+        if($this->checkExistInDb('uzytkownik','imie=? AND nazwisko=?',$this->inpArray['Imie'].','.$this->inpArray['Nazwisko']))
         {
-            $this->err.=$this->infoArray['imie_nazwisko'][2]."<br/>";
+            $this->response->setError(0,$this->infoArray['imie_nazwisko'][2]);
         }
-        // CHECK PASSWORD INP EXIST
-        if(!$this->checkSpecField("haslo"))
-        {
-            $this->inpArray['haslo']='';
-        }
-        // CHECK AVALIABLE ROLE
-        $permArray=$this->returnPermTabFromPost($this->inpArray);
-        $this->checkExistSloPerm($permArray);
-        if(!$this->err)
-        {
-            $this->addUser($this->inpArray);
-            if($this->getError()!=='')
-            {
-                $this->err.=$this->getError()."<br/>";
-            }
-            else
-            {
-                // EDIT USER PERMISSION
-                $this->editUserPerm($permArray,$this->queryLastId()); 
-                
-            }    
-        }
+        // CHECK PASSWORD/TYPKONTA INPUT EXIST
+        $this->inpArray['Haslo']=$this->utilities->setDafaultValue("haslo",$this->inpArray,'');
+        $this->inpArray['TypKonta']=$this->utilities->setDafaultValue("typkonta",$this->inpArray,'a'); // ACTIVE Directory
+        $this->addUser();    
+        // EDIT USER PERMISSION
+        $this->inpArray['ID']=$this->queryLastId();
+        self::setPerm(); 
+        return($this->response->setResponse(__METHOD__,'','','POST'));
     }
-    protected function setActSessionPermRole($idRole,$idUser)
+    protected function setActSessionPermRole()
     {
+        $this->log(0,"[".__METHOD__."]");
+        if($_SESSION['userid']!==$this->inpArray['ID']) { return ''; }
+        $idRole=$this->query('SELECT `idRola` FROM `v_all_user` WHERE ID=?',$this->inpArray['ID'])[0];
+        $this->logMultidimensional(2,$idRole['IdRola'],__LINE__."::".__METHOD__." idRole");
         // UPDATE CURRENT USER SESSION PERM;
-        //echo "UPDATE PERM ROLE<br/>";
         $permRole=array();
-        if($idRole)
+        $idRole=intval($idRole['IdRola'],10);
+        if($idRole>0)
         {
-            $this->query('SELECT SKROT FROM v_upr_i_slo_rola_v2 WHERE idRola=?',$idRole);
-            $permRole=$this->queryReturnValue();
+            $permRole=$this->query('SELECT `SKROT` FROM `v_upr_i_slo_rola_v2` WHERE `idRola`=?',$idRole);
         }
-        $this->query('SELECT SKROT FROM v_uzyt_i_upr_v2 WHERE idUzytkownik=?',$idUser);
-        $perm=$this->queryReturnValue();
-        $_SESSION['perm']=$this->parsePermRole($perm,$permRole);
+        $perm=$this->query('SELECT `SKROT` FROM `v_uzyt_i_upr_v2` WHERE `idUzytkownik`=?',$this->inpArray['ID']);
+        $_SESSION['perm']=array();
+        foreach(array_merge($perm,$permRole) as $v)
+        {
+            array_push($_SESSION['perm'],$v['SKROT']);
+        }
+        $this->logMultidimensional(2,$_SESSION['perm'],__LINE__."::".__METHOD__." SESSION['perm']");
     }
-    private function parsePermRole($perm,$permRole)
+    public function eUserOn()
     {
-        $array1=array();
-        $array2=array();
-        // FLATTEN 1
-        foreach($perm as $value)
+        $this->log(0,"[".__METHOD__."]");
+        self::setInpArray();
+        self::checkUserValueLength();
+        if($this->checkExistInDb('uzytkownik','login=? AND id!=?',$this->inpArray['Login'].','.$this->inpArray['ID']))
         {
-            array_push($array1,$value['SKROT']);
+            $this->response->setError(0,$this->infoArray['login'][0]);
         }
-        // FLATTEN 2
-        foreach($permRole as $value)
+        if($this->checkExistInDb('uzytkownik','imie=? AND nazwisko=? AND id!=?',$this->inpArray['Imie'].','.$this->inpArray['Nazwisko'].','.$this->inpArray['ID']))
         {
-            if(!in_array($value['SKROT'],$array1))
-            {
-                array_push($array2,$value['SKROT']);
-            }
-        } 
-        return (array_merge($array1,$array2));
-    }
-    protected function editUser($POSTDATA)
-    {
-        $this->getPostData($POSTDATA);
-        $this->checkUserValueLength($this->inpArray);
-        $this->getSpecField("idUser");
-     
-        if($this->checkExistInDb('uzytkownik','login=? AND id!=?',$this->inpArray['login'].','.$this->inpArray['idUser']))
-        {
-            $this->err.=$this->infoArray['login'][0]."<br/>";
-        }
-        if($this->checkExistInDb('uzytkownik','imie=? AND nazwisko=? AND id!=?',$this->inpArray['imie'].','.$this->inpArray['nazwisko'].','.$this->inpArray['idUser']))
-        {
-            $this->err.=$this->infoArray['imie_nazwisko'][2]."<br/>";
+            $this->response->setError(0,$this->infoArray['imie_nazwisko'][2]);
         }
         // CHECK PASSWORD INP EXIST
-        if(!$this->checkSpecField("haslo"))
+        $this->inpArray['Haslo']=$this->utilities->setDafaultValue("haslo",$this->inpArray,'');
+        $this->inpArray['TypKonta']=$this->utilities->setDafaultValue("typkonta",$this->inpArray,'a'); // ACTIVE Directory
+        self::updateUser();
+        self::setPerm();
+        self::setActSessionPermRole();
+        return($this->response->setResponse(__METHOD__,'ok','cModal','POST'));
+    }
+    protected function setUserPerm($permArray,$userId)
+    {
+        $this->log(0,"[".__METHOD__."]");
+        if($this->getError()) { return '';}
+        foreach($permArray as $value)
         {
-            $this->inpArray['haslo']='';
-        }
-        
-        // CHECK AVALIABLE DICTIONARY
-        $permArray=$this->returnPermTabFromPost($this->inpArray);
-        $this->checkExistSloPerm($permArray);
-        if(!$this->err)
-        {
-            $this->updateUser($this->inpArray);
-            if($this->getError()!=='')
+            //echo $value[0].' - '.$value[1];
+            if($value[2]>0)
             {
-                $this->err.=$this->getError()."<br/>";
+                $this->addUserPerm($userId,$value[0]);
             }
             else
             {
-                $this->editUserPerm($permArray,$this->inpArray['idUser']);
-                if($_SESSION['userid']===$this->inpArray['idUser'])
-                {
-                    $this->setActSessionPermRole($this->inpArray['rola'],$this->inpArray['idUser']);
-                }
-            }    
-        }
-    }
-    protected function editUserPerm($permArray,$userId)
-    {
-        // print_r($permArray);
-        if(!$this->err)
-        {
-            foreach($permArray as $value)
-            {
-                //echo $value[0].' - '.$value[1];
-                if($value[2]>0)
-                {
-                    $this->addUserPerm($userId,$value[0]);
-                }
-                else
-                {
-                    $this->removeUserPerm($userId,$value[0]);
-                }
+                $this->removeUserPerm($userId,$value[0]);
             }
         }
     }
-    protected function updateUserPerm($POSTDATA)
+    public function uPerm()
     {
-        // GET SENDED DATA VIA POST
-        $this->getPostData($POSTDATA);
-        $permArray=$this->returnPermTabFromPost($this->inpArray);
-        // CHECK AVALIABLE DICTIONARY
-        $this->checkExistSloPerm($permArray);
-        // GET AND CHECK USER ID
-        $id=$this->getSpecField("idUser");
-        
-        if(!$this->err)
+        $this->log(0,"[".__METHOD__."]");
+        self::setInpArray();
+        self::setPerm();
+        self::setActSessionPermRole();
+        return($this->response->setResponse(__METHOD__,'ok','cModal','POST'));
+    }
+    private function getSloPerm()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        $db=array();
+        foreach($this->query('SELECT `ID` FROM `v_slo_upr` WHERE `ID`>?',0) as $v)
         {
-            $this->editUserPerm($permArray,$id);
-            if($_SESSION['userid']===$this->inpArray['idUser'])
+            array_push($db,$v['ID']);
+        }
+        $this->logMultidimensional(2,$db,__LINE__."::".__METHOD__." db");
+        return ($db);
+    }
+    protected function checkPermInDb($t1,$t2)
+    {
+        /*
+         * CHECK EXIST IN DB
+         * t1 => POST
+         * t2 => DATABASE
+         */
+        $this->log(2,"[".__METHOD__."]");   
+        foreach($t1 as $v)
+        {
+            //$this->logMultidimensional(0,$v,__LINE__."::".__METHOD__." t1");
+            $this->log(2,"[".__METHOD__."] ID => ".$v); 
+            if(!in_array($v,$t2))
+            {  
+                $this->response->setError(1,"DICTIONARY ID => ".$v." NOT FOUND IN DB");
+                break;
+            }         
+        }
+    }
+    private function setPerm()
+    {
+        if($this->getError()) { return ''; }
+        $permDb=self::getSloPerm();
+        $permPost=$this->utilities->getArrayKeyValue('ID',$this->utilities->getCbox());
+        self::checkPermInDb($permPost,$permDb);
+        if($this->getError()) { return ''; }
+        foreach($permDb as $v)
+        {
+            if(in_array($v,$permPost))
             {
-                // GET USER ROLE
-                $this->query('SELECT idRola FROM v_all_user WHERE ID=?',$this->inpArray['idUser']);
-                $idRole=$this->queryReturnValue();
-                $this->setActSessionPermRole($idRole[0]['IdRola'],$this->inpArray['idUser']);
+                $this->addUserPerm($this->inpArray['ID'],$v);
             }
-        }
-    }
-    protected function getSpecField($field)
-    {
-        if (array_key_exists($field,$this->inpArray))
-        {
-            return $this->inpArray[$field];
-        }
-        else
-        {
-            $this->err.= '['.$field.']FORM KEY NOT EXIST';
-            return (0);
-        } 
-    }
-     protected function checkSpecField($field)
-    {
-        if (array_key_exists($field,$this->inpArray))
-        {
-            return (true);
-        }
-        else
-        {
-            return (false);
+            else
+            {
+                $this->removeUserPerm($this->inpArray['ID'],$v);
+            }
         } 
     }
     protected function checkExistSloPerm($permTab)
@@ -231,39 +180,40 @@ class manageUser extends initialDb
             if(!$this->checkExistInDb('v_slo_upr','ID=?',$value[0]))
             { 
                 $value[1]=preg_replace('/_/', ' ', $value[1]);
-                $this->err.="[".$value[1]."]PERMISSION DICTIONARY WAS DELETED<br/>";
+                $this->response->setError(1,"[".$value[1]."] PERMISSION DICTIONARY WAS DELETED");
             }
         }
     }
-    protected function checkUserValueLength($employeeData)
+    protected function checkUserValueLength()
     {
-        if(strlen($employeeData['imie'])<3 || strlen($employeeData['nazwisko'])<3 || strlen($employeeData['login'])<3)
+        if(strlen($this->inpArray['Imie'])<3 || strlen($this->inpArray['Nazwisko'])<3 || strlen($this->inpArray['Login'])<3)
         {
-            $this->err.=$this->infoArray['imie_nazwisko'][0]."<br/>";
+            $this->response->setError(0,$this->infoArray['imie_nazwisko'][0]);
         }
-        if(strlen($employeeData['imie'])>30 || strlen($employeeData['nazwisko'])>30 || strlen($employeeData['login'])>30)
+        if(strlen($this->inpArray['Imie'])>30 || strlen($this->inpArray['Nazwisko'])>30 || strlen($this->inpArray['Login'])>30)
         {
-            $this->err.=$this->infoArray['imie_nazwisko'][1]."<br/>";
+            $this->response->setError(0,$this->infoArray['imie_nazwisko'][1]);
         }
     }
-    protected function addUser($uData)
+    protected function addUser()
     {
-        $curretDateTime=date('Y-m-d H:i:s');
+        if($this->getError()) { return ''; }
         $this->query('INSERT INTO uzytkownik 
             (imie,nazwisko,login,haslo,email,typ,id_rola,mod_dat,mod_user,mod_user_id) 
 		VALUES
 		(?,?,?,?,?,?,?,?,?,?)'
-            ,$uData['imie'].",".$uData['nazwisko'].",".$uData['login'].",".$uData['haslo'].",".$uData['email'].",".$uData['typkonta'].",".$uData['rola'].",".$curretDateTime.",".$_SESSION["username"].','.$_SESSION["userid"]);
+            ,$this->inpArray['Imie'].",".$this->inpArray['Nazwisko'].",".$this->inpArray['Login'].",".$this->inpArray['Haslo'].",".$this->inpArray['Email'].",".$this->inpArray['TypKonta'].",".$this->inpArray['Rola'].",".$this->cDT.",".$_SESSION["username"].','.$_SESSION["userid"]);
     }
-    protected function updateUser($userData)
+    protected function updateUser()
     {
-        $curretDateTime=date('Y-m-d H:i:s');
+         if($this->getError()) { return ''; }
         $this->query('UPDATE uzytkownik SET imie=?, nazwisko=?, login=?,email=?,haslo=?,typ=?,id_rola=?, mod_dat=?, mod_user=?,mod_user_id=? WHERE id=?'
-            ,$userData['imie'].",".$userData['nazwisko'].",".$userData['login'].",".$userData['email'].",".$userData['haslo'].",".$userData['typkonta'].",".$userData['rola'].','.$curretDateTime.",".$_SESSION["username"].','.$_SESSION["userid"].','.$userData['idUser']);
+            ,$this->inpArray['Imie'].",".$this->inpArray['Nazwisko'].",".$this->inpArray['Login'].",".$this->inpArray['Email'].",".$this->inpArray['Haslo'].",".$this->inpArray['TypKonta'].",".$this->inpArray['Rola'].','.$this->cDT.",".$_SESSION["username"].','.$_SESSION["userid"].','.$this->inpArray['ID']);
     }
     protected function addUserPerm($userId,$value)
     {
-        //echo $employeeId.' - '.$value;
+         if($this->getError()) { return ''; }
+        $this->log(2,"[".__METHOD__."] USER ID => ".$userId.", VALUE => ".$value);
         // CHECK IS EXIST
         if(!$this->checkExistInDb('v_uzyt_i_upr','idUzytkownik=? AND idUprawnienie=?',$userId.','.$value))
         {
@@ -273,190 +223,176 @@ class manageUser extends initialDb
     }
     protected function removeUserPerm($userId,$value)
     {
+        if($this->getError()) { return ''; }
+        $this->log(2,"[".__METHOD__."] USER ID => ".$userId.", VALUE => ".$value);
         if($this->checkExistInDb('v_uzyt_i_upr','idUzytkownik=? AND idUprawnienie=?',$userId.','.$value))
         {
             // EXIST -> DELETE
             $this->query('DELETE FROM uzyt_i_upr WHERE id_uzytkownik=? AND id_uprawnienie=?',$userId.",".$value); 
         }   
-    }
-    protected function returnPermTabFromPost($DATA)
+    }    
+    protected function getUserData($id)
     {
-        $tmpArray=array();
-        $tmpRec=array();
-        $id='';
-        $name='';
-        foreach($DATA as $key => $value)
+        $this->log(0,"[".__METHOD__."]");
+        $data=$this->query('SELECT * FROM `uzytkownik` WHERE `id`=?',$id);
+        if(count($data)>0)
         {
-            //echo $key." - ".$value."\n";
-            //echo "STRPOS - ".strpos($key,'cbox')."\n";
-            if(strpos($key,'cbox-')!==false) 
-            {
-                //echo "FOUND\n";
-                $tmpData=explode('-',$key);
-                //print_r($tmpData);
-                // GET ID $tmpData[1]
-                // GET NAME $tmpData[2]
-                $id=explode(':',$tmpData[1]);
-                $name=explode(':',$tmpData[2]);
-                array_push($tmpRec,$id[1],$name[1],$value);
-                array_push($tmpArray,$tmpRec);
-            }
-            $tmpRec=[];
-        }
-        
-        //print_r($tmpArray);
-        return $tmpArray;
-    }
-    private function checkExistInDb($tableName,$whereCondition,$valueToCheck)
-    {
-        if(trim($valueToCheck)!='')
-        {
-            $this->query('SELECT * FROM '.$tableName.' WHERE '.$whereCondition,$valueToCheck)."<br/>";
-            return(count($this->queryReturnValue()));
+            return($data[0]);
         }
         else
         {
-            $this->err.="NO VALUE TO CHECK<br/>";
-            return(0);
-        }
-    }
-    private function explodeValue($valueToExplode,$delimiter)
-    {
-        return $arrayOfValue=explode($delimiter,$valueToExplode);
-    }
-    protected function isEmpty($key,$data)
-    {
-        if(trim($data)==='')
-        {
-            $this->err.="[".$key."]".$this->infoArray['input'][0]."<br/>";
-        };
-    }
-    protected function getPersonData($id)
-    {
-        $this->query('SELECT * FROM uzytkownik WHERE id=?',$id);
-        $personData=$this->queryReturnValue();
-        if(count($personData)>0)
-        {
-            return($personData);
-        }
-        else
-        {
-            $this->err.="[${id}] NO DATA ABOUT PERSON IN DB!<br/>";
+            $this->response->setError(1,'NO DATA ABOUT PERSON IN DB! ID USER => '.$id);
         }
     }
     # DELETED PROJECT IN DB
-    protected function deleteUser($postData)
+    public function dUser()
     {
-        $this->getPostData($postData);
-        $this->getSpecField("idUser");
-        if (!$this->err)
-        {
-            $this->query('UPDATE uzytkownik SET wsk_u=? WHERE id=?',"1,".$this->inpArray['idUser']);
-        }  
+        $this->log(0,"[".__METHOD__."]");
+        self::setInpArray();
+        $this->logMultidimensional(0,$this->inpArray,__LINE__."::".__METHOD__." inpArray");
+        $this->query('UPDATE `uzytkownik` SET `wsk_u`=? WHERE `id`=?',"1,".$this->inpArray['ID']);
+        return($this->response->setResponse(__METHOD__,'ok','cModal','POST'));
     }
     # RETURN ALL NOT DELETED PROJECT FROM DB
-    public function getUsers($wsku)
+    public function getUsers()
     {
-        $valueToReturn=array();
-        $this->query('SELECT ID,Imie,Nazwisko,Login,Email,TypKonta,Rola FROM v_all_user WHERE wskU=? ORDER BY id asc',"${wsku}");
-        array_push($valueToReturn,$this->queryReturnValue());
-        array_push($valueToReturn,$_SESSION['perm']);
-        $this->valueToReturn=$valueToReturn;
+        $this->log(0,"[".__METHOD__."]");
+        $this->responseType='GET';
+        if($this->utilities->checkInputGetValInt('wsku')['status']===1)
+        {
+            $this->response->setError(1,' KEY wsku in $_GET IS EMPTY');
+        }
+        else
+        {
+            $this->query('SELECT ID,Imie,Nazwisko,Login,Email,TypKonta,Rola FROM v_all_user WHERE wskU=? ORDER BY id asc',"".$this->utilities->getData().""); 
+        }  
+        return($this->response->setResponse(__METHOD__,$this->queryReturnValue(),''));
     }
-    public function getUsersLike($wsku,$filter)
+    public function getUsersLike()
     {
-        $valueToReturn=array();
-        $this->query('SELECT ID,Imie,Nazwisko,Login,Email,TypKonta,Rola FROM v_all_user WHERE wskU=? AND (ID LIKE (?) OR Imie LIKE (?) OR Nazwisko LIKE (?) OR Login LIKE (?) OR Email LIKE (?) OR TypKonta LIKE (?) OR Rola LIKE (?)) ORDER BY id asc'
-                ,"${wsku},%".$filter."%,%".$filter."%,%".$filter."%,%".$filter."%,%".$filter."%,%".$filter."%,%".$filter."%");
-        array_push($valueToReturn,$this->queryReturnValue());
-        array_push($valueToReturn,$_SESSION['perm']);
-        $this->valueToReturn=$valueToReturn;
+        $this->log(0,"[".__METHOD__."]");
+        $this->responseType='GET';
+        if(!$this->utilities->checkInputGetValInt('wsku')['status']===1)
+        {
+            $this->response->setError(1,'');
+        }
+        $w=$this->utilities->getData();
+        if($this->utilities->checkKeyExist('filter',$_GET)['status']===1)
+        {
+            $this->response->setError(1,'');
+        }
+        if(!$this->getError())
+        {
+            $f='%'.filter_input(INPUT_GET,'filter').'%';
+            $this->logMultidimensional(0,$f,__LINE__."::".__METHOD__." FILTR");
+            $this->query('SELECT ID,Imie,Nazwisko,Login,Email,TypKonta,Rola FROM v_all_user WHERE wskU=? AND (ID LIKE (?) OR Imie LIKE (?) OR Nazwisko LIKE (?) OR Login LIKE (?) OR Email LIKE (?) OR TypKonta LIKE (?) OR Rola LIKE (?)) ORDER BY id asc'
+                ,"$w,".$f.",".$f.",".$f.",".$f.",".$f.",".$f.",".$f);
+        }
+        return($this->response->setResponse(__METHOD__,$this->queryReturnValue(),''));   
+    }
+    public function getUserDel()
+    {
+        $this->log(0,"[".__METHOD__."]");       
+        if($this->utilities->checkInputGetValInt('id')['status']===1)
+        {
+            $this->response->setError(1,' KEY ID in $_GET IS EMPTY');
+        }
+        else
+        {          
+            return($this->response->setResponse(__METHOD__,self::getUserData($this->utilities->getData()),'dUser'));
+        } 
     }
     # RETURN ALL NOT DELETED DICTIONARY and other FROM DB
     public function getSlo($tableToSelect,$order='ID')
     {
         $this->query('SELECT * FROM '.$tableToSelect.' WHERE 1=? ORDER BY '.$order.' ASC ',1);
-        $this->valueToReturn=$this->queryReturnValue();
+        $this->actData=$this->queryReturnValue();
     }
     # RETURN ALL EMPLOYEE SPEC DICTIONARY and other FROM DB
-    public function getUserPerm($idUser)
+    public function getUserPerm()
     {
-        // GET DICTIONARY
-        $this->getSlo('v_slo_upr');
-        // $this->valueToReturn act slo
-        // GET EMPLOYEE DICTIONARY 
-        $this->query('SELECT * FROM v_uzyt_i_upr WHERE idUzytkownik=? ORDER BY idUprawnienie ASC ',$idUser);
-        $emplSlo=$this->queryReturnValue();
-
-        // COMBINE
-        $this->valueToReturn=$this->combineSlo($this->valueToReturn,'ID',$emplSlo,'idUprawnienie');
-        
+        $this->log(0,"[".__METHOD__."]");
+        if($this->utilities->checkInputGetValInt('id')['status']===1)
+        {
+            $this->response->setError(1,' KEY ID in $_GET IS EMPTY');
+        }
+        else
+        {
+            $data[0]=$this->utilities->getData();
+            $data[1]=self::getUserPermDB($data[0]);
+            return($this->response->setResponse(__METHOD__,$data,'uPermOff','POST'));
+        }
     }
-    public function getNewUserSlo()
-    {
-        $arrToReturn=array();
-        // SLO UPR
-        $this->getSlo('v_slo_upr');
-        array_push($arrToReturn,$this->valueToReturn);
-        
-        // SLO ROLA
-        $this->getSlo('v_slo_rola');
-        $allSlo=$this->valueToReturn;
-        $emptArr=array(array('ID'=>0,'NAZWA'=>'','DEFAULT'=>'t'));
-        $userRoleSlo=array_merge($emptArr,$allSlo);
-        array_push($arrToReturn,$userRoleSlo);
-        $this->valueToReturn=$arrToReturn;
+    /* getUserPermDB */
+    private function sqlGetUserPerm(){ // $idUser
+        $this->log(0,"[".__METHOD__."]");
+        /* GET DICTIONARY */
+        parent::newQuery('SELECT * FROM `v_slo_upr` WHERE `ID`>0 ORDER BY `ID` ASC ');
+        $slo=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);
+        parent::logMulti(2,$slo,__LINE__."::".__METHOD__." slo");
+        /* GET USER DICTIONARY */
+        parent::newQuery('SELECT * FROM `v_uzyt_i_upr` WHERE `idUzytkownik`='.$this->inpArray['id'].' ORDER BY `idUprawnienie` ASC');
+        $userSlo=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);
+        parent::logMulti(2,$userSlo,__LINE__."::".__METHOD__." userSlo");
+        /* COMBINE */
+        self::combineSlo($slo,'ID',$userSlo,'idUprawnienie');
+        $this->logMultidimensional(2,$this->actData,__LINE__."::".__METHOD__." userSloComb");
     }
     protected function combineSlo($slo,$sloKey,$usrSol,$sloUserKey)
     {
         // $sloKey = ID
         // $sloUserKey = idUprawnienie
-        foreach($slo as $id => $value)
-        {
-            foreach($usrSol as $key => $valueEmpl)
-            {
-                if($value[$sloKey]===$valueEmpl[$sloUserKey])
-                {
+        foreach($slo as $id => $value){
+            foreach($usrSol as $key => $valueEmpl){
+                if($value[$sloKey]===$valueEmpl[$sloUserKey]){
                     $slo[$id]['DEFAULT']='t';
                     unset($usrSol[$key]);
                     break;
                 }
             }
         }
-        return($slo);
+        array_push($this->actData,$slo);
     }
     # RETURN CURRENT PROJECT DETAILS
-    public function getUserDetails($idUser)
-    {
-        if(!$this->err)
-        {
-            // GET USER
-            $valueToReturn=array();
-            $this->query('SELECT * FROM v_all_user WHERE ID=?',$idUser);
-            
-            array_push($valueToReturn,$this->queryReturnValue());
-            //print_r($valueToReturn[0][0]);
-            //echo $valueToReturn[0][0]['IdRola']."\n";
-            //GET USER PERM
-            $this->getUserPerm($idUser);
-            array_push($valueToReturn,$this->valueToReturn);
+    public function getUserDetails(){
+        $this->log(0,"[".__METHOD__."]");
+        self::setGetId();
+        self::sqlGetUserDetails(); 
+        return($this->response->setResponse(__METHOD__,$this->actData,'eUser','POST'));
+    }
+    private function sqlGetUserDetails(){
+        if($this->response->getError()){ return false;}
+        try{
+            /* GET USER DATA */
+            self::sqlGetUserData();
+            /* GET USER PERM */
+            self::sqlGetUserPerm();
             //GET USER ROLE
-            array_push($valueToReturn,$this->getUserRole($valueToReturn[0][0]['IdRola']));
-            $this->valueToReturn=$valueToReturn;
+            array_push($this->actData,self::getUserRole($this->actData[0]['IdRola']));
+            $this->logMultidimensional(2,$this->actData,__LINE__."::".__METHOD__." data");
         }
+        catch (PDOException $e){
+            $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
+        }  
+    }
+    private function sqlGetUserdata(){
+        $this->log(0,"[".__METHOD__."]");
+        if($this->response->getError()){ return false;}
+        $sqlData=array(':id'=>array($this->inpArray['id'],'INT'));
+        parent::newQuery("SELECT * FROM `v_all_user` WHERE `id`=:id",$sqlData);
+        $this->actData[0]=parent::getSth()->fetch(PDO::FETCH_ASSOC);
     }
     public function getUserRole($idUserRole='')
     {
+        $this->log(0,"[".__METHOD__."] ID USER ROLE => ".$idUserRole);
         $userRoleSlo=array();
         // GET ALL ROLE
-        $this->query('SELECT * FROM v_slo_rola WHERE 1=?',1);  
-        $allRole=$this->queryReturnValue();
+        $allRole=$this->query('SELECT * FROM v_slo_rola WHERE 1=?',1);  
         if($idUserRole!='')
         {
                 // COMBINE USER DICT
-                $emptArr=array('ID'=>0,'NAZWA'=>'');
-                $this->query('SELECT * FROM v_slo_rola WHERE ID=?',$idUserRole);  
-                $userRole=$this->queryReturnValue();
+                $emptArr=array('ID'=>'0','NAZWA'=>''); 
+                $userRole= $this->query('SELECT *,"t" AS "DEFAULT" FROM v_slo_rola WHERE ID=?',$idUserRole); 
                 array_push($userRole,$emptArr);
                 foreach($allRole as $key => $value)
                 {
@@ -470,175 +406,28 @@ class manageUser extends initialDb
         }
         else
         {
-            $emptArr=array(array('ID'=>0,'NAZWA'=>'','DEFAULT'=>'t'));
+            $emptArr=array(array('ID'=>'0','NAZWA'=>'','DEFAULT'=>'t'));
             //echo 'NO USER ROLE\n';
             $userRoleSlo=array_merge($emptArr,$allRole);
         }
         //print_r($userRoleSlo);
         return ($userRoleSlo);
     }
-    public function getReturnedValue()
-    {
-        echo json_encode($this->valueToReturn);
+    public function getNewUserSlo(){
+        $this->log(0,"[".__METHOD__."]");
+        // SLO UPR
+        $data[0]=$this->query('SELECT * FROM v_slo_upr WHERE 1=? ORDER BY ID ASC ',1);
+        // SLO ROLA
+        $data[1]=$this->query('SELECT * FROM v_slo_rola WHERE 1=? ORDER BY ID ASC ',1);
+        // ADD EMPTY ROLA
+        array_push($data[1],array('ID'=>'0','NAZWA'=>'','DEFAULT'=>'t'));
+        return($this->response->setResponse(__METHOD__, $data,'cUser'));   
     }
-    public function getErrValue()
-    {
-        if($this->err)
-        {
-            echo json_encode(array("1",$this->err));
-        }
-        else
-        {
-            echo json_encode(array("0",$this->valueToReturn));
+    private function setGetId(){
+        if(!$this->utilities->setGetIntKey($this->inpArray['id'],'id')){
+             $this->response->setError(1,"[".__METHOD__."] KEY id NOT EXIST OR ID IS NOT INT");
         }
     }
     function __destruct()
     {}
 }
-class checkGetData extends manageUser
-{
-    private $avaliableFunction=array(
-        "task"=>"task"
-    );
-    private $urlGetData=array();
-    private $avaliableTask=array(
-        array("getusers",'LOG_INTO_UZYT','user'),
-        array("getuserslike",'LOG_INTO_UZYT','user'),
-        array("getNewUserSlo",'ADD_USER','user'),
-        array("getPermSlo",'','user'),
-        array("cUser",'ADD_USER','user'),
-        array('deleteUser','DEL_USER','user'),
-        array('getUserPerm','SHOW_PERM_USER','user'),
-        array('userPermissions','EDIT_PERM_USER','user'),
-        array('getUserDetails','SHOW_USER','user'),
-        array('getRoleSlo','','user'),
-        array('editUser','EDIT_USER','user')
-    );
-    function __construct()
-    {
-        parent::__construct();
-        $this->addNewTypOfErr();
-        $this->getUrlData();
-        
-        if($this->checkUrlTask())
-        {
-            // CHECK PERM
-            $this->checkTask();
-            if($this->taskPerm['type']==='user')
-            {
-                $this->checkLoggedUserPerm('LOG_INTO_APP');
-                $this->checkLoggedUserPerm($this->taskPerm['name']);
-            }
-            if(!$this->err)
-            {
-                $this->runTask();
-            }
-        }
-    }
-    private function getUrlData()
-    {
-        foreach($_GET as $key=>$value)
-        {
-            $this->urlGetData[$key]=$value;
-        }
-    }
-    private function addNewTypOfErr()
-    {
-        $this->infoArray['urlTask'][0]='[manageUser]Wrong function to execute';
-        $this->infoArray['urlTask'][1]='[manageUser]Task not exists';
-    }
-    private function checkUrlTask()
-    {
-        if(array_key_exists($this->avaliableFunction["task"], $this->urlGetData))
-        {
-            return 1;
-        }
-        else
-        {
-            $this->err.= $this->infoArray['urlTask'][0];
-            return 0;
-        }
-        return 0;
-    }
-   
-    private function checkTask()
-    {
-        foreach($this->avaliableTask as $id =>$task)
-        {
-            if($task[0]==$this->urlGetData['task'])
-            {
-                $this->setTaskPerm($this->avaliableTask[$id][1],$this->avaliableTask[$id][2]);
-                return 1;
-            }
-        }
-        $this->err.= $this->infoArray['urlTask'][1];
-        return 0;
-    }
-    private function setTaskPerm($permName='',$permType='')
-    {
-        $this->taskPerm['name']=$permName;
-        $this->taskPerm['type']=$permType;
-    }
-    protected function checkLoggedUserPerm($perm)
-    {
-        if(!in_array($perm,$_SESSION['perm']))
-        {
-           $this->err.="[${perm}] Brak uprawnienia";
-           return 0;
-        }
-        else
-        {
-            return 1;
-        }
-    }
-    private function runTask()
-    {
-        switch($this->urlGetData['task']):
-        
-        case "getusers" : // ENUM 0,1
-            $this->getUsers('0');
-            break;
-        case "getuserslike":
-            $this->filter=filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING);
-            $this->getUsersLike('0',$this->filter);
-            break;
-        case "getNewUserSlo":
-            $this->getNewUserSlo();
-            break;
-        case "getPermSlo" :
-            $this->getSlo('v_slo_upr');
-            break;
-        case "getRoleSlo" :
-            $this->getSlo('v_slo_rola');
-            break;
-        case "cUser":
-            //print_r($_POST);
-            $this->cUser($_POST);
-            break;
-        case 'editUser':
-            $this->editUser($_POST);
-            break;
-        case 'getUserPerm':
-            $this->idUser=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-            $this->getUserPerm($this->idUser);
-            break;
-        case 'deleteUser':
-            $this->deleteUser($_POST);
-        case 'userPermissions':
-            $this->updateUserPerm($_POST);
-            break;
-        case 'getUserDetails':
-            $this->idUser=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-            $this->getUserDetails($this->idUser);
-        default:
-            //no task
-            break;
-        
-        endswitch;
-    }
-    function __destruct()
-    {
-        $this->getErrValue();
-    }
-}
-$manageEmployee=NEW checkGetData();

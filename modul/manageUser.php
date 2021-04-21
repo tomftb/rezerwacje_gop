@@ -330,8 +330,7 @@ class manageUser extends initialDb
         self::combineSlo($slo,'ID',$userSlo,'idUprawnienie');
         $this->logMultidimensional(2,$this->actData,__LINE__."::".__METHOD__." userSloComb");
     }
-    protected function combineSlo($slo,$sloKey,$usrSol,$sloUserKey)
-    {
+    protected function combineSlo($slo,$sloKey,$usrSol,$sloUserKey){
         // $sloKey = ID
         // $sloUserKey = idUprawnienie
         foreach($slo as $id => $value){
@@ -350,6 +349,7 @@ class manageUser extends initialDb
         $this->log(0,"[".__METHOD__."]");
         self::setGetId();
         self::sqlGetUserDetails(); 
+        self::sqlGetAccountType();
         return($this->response->setResponse(__METHOD__,$this->actData,'eUser','POST'));
     }
     private function sqlGetUserDetails(){
@@ -360,7 +360,7 @@ class manageUser extends initialDb
             /* GET USER PERM */
             self::sqlGetUserPerm();
             //GET USER ROLE
-            array_push($this->actData,self::getUserRole($this->actData[0]['IdRola']));
+            self::getUserRole();
             $this->logMultidimensional(2,$this->actData,__LINE__."::".__METHOD__." data");
         }
         catch (PDOException $e){
@@ -374,36 +374,47 @@ class manageUser extends initialDb
         parent::newQuery("SELECT * FROM `v_all_user` WHERE `id`=:id",$sqlData);
         $this->actData[0]=parent::getSth()->fetch(PDO::FETCH_ASSOC);
     }
-    public function getUserRole($idUserRole='')
+    protected function sqlGetAccountType(){
+        $this->log(0,"[".__METHOD__."]");
+        if($this->response->getError()){ return false;}
+        parent::newQuery("SELECT s.`id`,s.`nazwa` FROM `slo` s,`app_task` a WHERE s.`id_app_task`=a.`id` AND a.`name`='sAccountType' AND s.`wsk_u`='0'");
+        $this->actData['accounttype']=parent::getSth()->fetch(PDO::FETCH_ASSOC);
+    }
+    public function getUserRole()
     {
-        $this->log(0,"[".__METHOD__."] ID USER ROLE => ".$idUserRole);
+        $this->log(0,"[".__METHOD__."] ID USER ROLE => ".$this->actData[0]['IdRola']);
+        if($this->response->getError()){ return false;}
         $userRoleSlo=array();
-        // GET ALL ROLE
-        $allRole=$this->query('SELECT * FROM v_slo_rola WHERE 1=?',1);  
-        if($idUserRole!='')
+        $emptArr=array(array('ID'=>'0','NAZWA'=>'','DEFAULT'=>'t'));
+        /* GET ALL ROLE */ 
+        $allRole=self::sqlGetAllRole();
+  
+        if($this->actData[0]['IdRola']!='')
         {
-                // COMBINE USER DICT
-                $emptArr=array('ID'=>'0','NAZWA'=>''); 
-                $userRole= $this->query('SELECT *,"t" AS "DEFAULT" FROM v_slo_rola WHERE ID=?',$idUserRole); 
-                array_push($userRole,$emptArr);
-                foreach($allRole as $key => $value)
-                {
-                    if($value['ID']===$userRole[0]['ID'])
-                    {
-                        unset($allRole[$key]);
-                        break;
-                    }
+            // COMBINE USER DICT
+            $emptArr=array('ID'=>'0','NAZWA'=>''); 
+            $userRole=self::sqlGetUserRole($this->actData[0]['IdRola']);
+            array_push($userRole,$emptArr);
+            foreach($allRole as $key => $value){
+                if($value['ID']===$userRole[0]['ID']){
+                    unset($allRole[$key]);
+                    break;
                 }
-                $userRoleSlo=array_merge($userRole,$allRole);
+            }
+            $userRoleSlo=array_merge($userRole,$allRole);
         }
-        else
-        {
-            $emptArr=array(array('ID'=>'0','NAZWA'=>'','DEFAULT'=>'t'));
-            //echo 'NO USER ROLE\n';
+        else{
             $userRoleSlo=array_merge($emptArr,$allRole);
         }
-        //print_r($userRoleSlo);
-        return ($userRoleSlo);
+        array_push($this->actData,$userRoleSlo);
+    }
+    private function sqlGetAllRole(){
+        parent::newQuery("SELECT * FROM `v_slo_rola`");
+        return (parent::getSth()->fetchAll(PDO::FETCH_ASSOC));
+    }
+    private function sqlGetUserRole($idRole){
+        parent::newQuery('SELECT *,"t" AS "DEFAULT" FROM `v_slo_rola` WHERE `ID`='.$idRole);
+        return (parent::getSth()->fetchAll(PDO::FETCH_ASSOC));
     }
     public function getNewUserSlo(){
         $this->log(0,"[".__METHOD__."]");

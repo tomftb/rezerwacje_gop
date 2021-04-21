@@ -303,29 +303,21 @@ class manageUser extends initialDb
         } 
     }
     # RETURN ALL NOT DELETED DICTIONARY and other FROM DB
-    public function getSlo($tableToSelect,$order='ID')
-    {
+    public function getSlo($tableToSelect,$order='ID'){
         $this->query('SELECT * FROM '.$tableToSelect.' WHERE 1=? ORDER BY '.$order.' ASC ',1);
         $this->actData=$this->queryReturnValue();
     }
     # RETURN ALL EMPLOYEE SPEC DICTIONARY and other FROM DB
-    public function getUserPerm()
-    {
+    public function getUserPerm(){
         $this->log(0,"[".__METHOD__."]");
-        if($this->utilities->checkInputGetValInt('id')['status']===1)
-        {
-            $this->response->setError(1,' KEY ID in $_GET IS EMPTY');
-        }
-        else
-        {
-            $data[0]=$this->utilities->getData();
-            $data[1]=self::getUserPermDB($data[0]);
-            return($this->response->setResponse(__METHOD__,$data,'uPermOff','POST'));
-        }
+        self::setGetId();
+        array_push($this->actData,$this->inpArray['id']);
+        self::sqlGetUserPerm();
+        return($this->response->setResponse(__METHOD__,$this->actData,'uPermOff','POST'));
     }
-    /* getUserPermDB */
-    private function sqlGetUserPerm(){ // $idUser
+    private function sqlGetUserPerm(){
         $this->log(0,"[".__METHOD__."]");
+        if($this->response->getError()){ return false;}
         /* GET DICTIONARY */
         parent::newQuery('SELECT * FROM `v_slo_upr` WHERE `ID`>0 ORDER BY `ID` ASC ');
         $slo=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);

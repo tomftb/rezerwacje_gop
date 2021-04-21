@@ -69,20 +69,17 @@ class validLogin
         return $this->bgColor;
     }
 
-    private function checkLoginInAD()
-    {
+    private function checkLoginInAD(){
         $this->logLink->log(0,"[".__METHOD__."]");
         /* GET FROM CONST */
-        $ldap=new ldapAuth(ldapParm['host'],ldapParm['filter'],ldapParm['tree'],ldapParm['port'],ldapParm['user'],ldapParm['password']);
-        
+        $ldap=new ldapAuth(ldapParm['host'],ldapParm['filter'],ldapParm['tree'],ldapParm['port'],ldapParm['user'],ldapParm['password']); 
         $ldap->loginAd($this->userName,$this->userPassword);
-        if(!$ldap->getError())
-        {
+        if(!$ldap->getError()){
             $_SESSION["mail"]=$ldap->getUserAdData('mail',0);
             $_SESSION["nazwiskoImie"]=$ldap->getUserAdData('name',0); 
             return 1;
 	}
-        self::setError($this->getError(),'');
+        self::setError($ldap->getError(),'');
         return 0;
     }
     private function checkLogin()

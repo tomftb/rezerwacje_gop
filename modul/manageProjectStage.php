@@ -277,10 +277,10 @@ class manageProjectStage extends initialDb
         foreach($this->inpArray as $k => $v){
             parent::log(0,$k);
             if(preg_match('/^(\d)+(-value){1}$/', $k)){
-                self::checkValueLength($this->inpArray[$k],'zawartość '.$k,1,65535);
+                self::checkDataLength($this->inpArray[$k],'zawartość '.$k,1,65535);
             }
             else if(array_key_exists($k, $keyToCheck)){
-                self::checkValueLength($v,$keyToCheck[$k][0],$keyToCheck[$k][1],$keyToCheck[$k][2]);
+                self::checkDataLength($v,$keyToCheck[$k][0],$keyToCheck[$k][1],$keyToCheck[$k][2]);
             }
             else{
                 /* FILE KEY ? */
@@ -545,13 +545,11 @@ class manageProjectStage extends initialDb
     public function getNewStageSlo(){
         return ($this->response->setResponse(__METHOD__,'','psCreate','POST'));
     }
-    protected function checkValueLength($value,$label,$min,$max){
+    protected function checkDataLength($value,$label,$min,$max){
         parent::log(0,"[".__METHOD__."]");
-        if(strlen($value)<$min){
-            $this->response->setError(0,"W ".$label." nie wprowadzono minimalnej ilości znaków");
-        }
-        if(strlen($value)>$max){
-            $this->response->setError(0,"W ".$label." przekroczono dopuszczalną ilość znaków");
+        $check=$this->utilities->checkValueLength($value,$label,$min,$max);
+        if($check){
+            $this->response->setError(0,$check);
         }
     }
     function __destruct()

@@ -16,7 +16,7 @@
 								<div class="log-body">
                                                                     <div class="form-group myr-top">
                                                                         <label>Login</label>
-                                                                        <input type="text" class="form-control custom" name="username" placeholder="Login">
+                                                                        <input type="text" class="form-control custom" name="username" placeholder="Login" value="<?=filter_input(INPUT_POST,'username')?>">
                                                                     </div>
                                                                     <div class="form-group myr-top">
                                                                         <label>Password</label>

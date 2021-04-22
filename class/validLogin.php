@@ -38,7 +38,7 @@ class validLogin
             if(!self::getUserData()) {return 0;}
             if(!self::checkUserData()) {return 0;}
             if(!self::checkLogin()) {return 0;}
-            if(!self::getUserPerm($this->userData['id'])) { return 0;}
+            if(!self::getUserPerm()) { return 0;}
             self::setSessionData();
         }
         return 1;
@@ -85,8 +85,11 @@ class validLogin
     private function checkLogin()
     {
         $this->logLink->log(0,"[".__METHOD__."] ACCOUNT TYPE => ".$this->userData['typ']);
+        $this->userData['typ']=intval($this->userData['typ'],10);
+        /* TO DO => GET AVALIABLE ACCOUNT TYPE */
         /* CHECK ACCOUNT TYPE */
-        if($this->userData['typ']==='l')
+        /* OLD => if($this->userData['typ']==='l') */
+        if($this->userData['typ']===2)
         {
             /* 
              * LOCAL ACCOUNT => CHECK PASSWORD 
@@ -100,7 +103,8 @@ class validLogin
             $_SESSION["mail"]=$this->userData['email'];
             $_SESSION["nazwiskoImie"]=$this->userData['nazwisko'].' '.$this->userData['imie']; 
         }
-        else if($this->userData['typ']==='a'){
+        /* OLD V => else if($this->userData['typ']==='a'){ */
+        else if($this->userData['typ']===1){
             /* AD ACCOUNT => CHECK IN AD */
             if(!self::checkLoginInAD()) {return 0;}
         }
@@ -125,8 +129,9 @@ class validLogin
 	{
             $this->dbLink->newQuery("SELECT `id`,`imie`,`nazwisko`,`email`,`wsk_u`,`typ`,`haslo`,`id_rola` FROM `uzytkownik` WHERE `login`=:login",$sqlData);
             $this->userData=$this->dbLink->getSth()->fetch(PDO::FETCH_ASSOC);
-            $this->userData['id_rola']=intval($this->userData['id_rola'],10);
-            $this->userData['id']=intval($this->userData['id'],10);
+            
+            
+            
             $this->logLink->logMulti(2,$this->userData,__METHOD__);
 	}
 	catch (PDOException $e)
@@ -160,8 +165,8 @@ class validLogin
     protected function setActSessionPermRole()
     {
         $this->logLink->log(0,"[".__METHOD__."]");
-        $sqlData[':id_rola']=array($this->userData['id_rola'],'INT');
-        $sqlDataPerm[':id']=array($this->userData['id'],'INT');
+        $sqlData[':id_rola']=array(intval($this->userData['id_rola'],10),'INT');
+        $sqlDataPerm[':id']=array(intval($this->userData['id'],10),'INT');
         try
 	{
             /* ROLE PERM */

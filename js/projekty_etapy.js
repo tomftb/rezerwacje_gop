@@ -44,7 +44,7 @@ var mainTableColumns={
 };
 
 /* OBJECT ELEMENT IS A NAME OF PERMISSION */
-var defaultTableBtnConfig=
+var tableBtn=
         {
         SHOW_STAGE : {
             label : 'Wyświetl',
@@ -68,13 +68,16 @@ var defaultTableBtnConfig=
             attributes : { 'data-toggle' : 'modal', 'data-target': '#AdaptedModal' }
         }
     };
-var defaultTableExceptionCol=new Array();
+var defaultTableExceptionCol=new Array('bl');
 
-setButtonAvaliable();  
+setTableBtnAva();  
 table.setIdFiled(0);
-table.setButtons(defaultTableBtnConfig);
+table.setButtons(tableBtn);
 table.setColumns(mainTableColumns);
 table.setColExceptions(defaultTableExceptionCol);
+table.setBtnInfo('Actual blocked by user: ','small','text-danger');
+table.setbtnInfoCol('bl');
+//table.setBtnInfoEle(createTag('asdasd','p'));
 table.setButtonsType('btn-group');
 
 function runFunction(d)
@@ -103,7 +106,9 @@ function runFunction(d)
                             cd:'n/a',
                             cul:'n/a',
                             md:'n/a',
-                            mu:'n/a'
+                            mu:'n/a',
+                            by:0,
+                            bl:''
                         },
                         'body':new Array ({
                                             i:'0',
@@ -133,10 +138,12 @@ function runFunction(d)
                 cModal(defaultTask,d);
             break;
         case 'psHide':
-                removeHideData('Ukryj','UKRYJ ETAP PROJEKT:','secondary');
+                changeDataState('Ukryj','UKRYJ ETAP PROJEKT:','secondary');
             break;
         case 'psDelete':
-                removeHideData('Usuń','USUŃ ETAP PROJEKT:','danger');
+                changeDataState('Usuń','USUŃ ETAP PROJEKT:','danger');
+            break;
+        case 'block':
             break;
         default:
                 displayAll(d);
@@ -146,6 +153,7 @@ function runFunction(d)
 function manageData(btnLabel,title,titleClass,task)
 {
     console.log('===manageData()===\n'+btnLabel);
+    defaultTask='getprojectsstagelike&b='+actData['data']['value']['head']['i'];
     //Error.checkStatusResponse(actData);
     prepareModal(title,'bg-'+titleClass);  
 
@@ -214,9 +222,20 @@ function manageData(btnLabel,title,titleClass,task)
     
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),''));
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn('psShowStage',createBtn('Podgląd','btn btn-info','psShowStage'),'psShowStage'));
-    document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(task,createBtn(btnLabel,'btn btn-info',task),task));
+    var confirmBtn=createBtn(btnLabel,'btn btn-info',task);
+    var actBlockInfo=createTag('','small','text-left text-danger ml-1');
+    var info=createTag("Project Stage ID: "+actData['data']['value']['head'].i+", Create user: "+actData['data']['value']['head'].cu+" ("+actData['data']['value']['head'].cul+"), Create date: "+actData['data']['value']['head'].cd,'small','text-left text-secondary ml-1');
+    if(parseInt(actData['data']['value']['head']['bu'],10)>0){
+        actBlockInfo.innerText =' Actual blocked by user: '+actData['data']['value']['head']['bl'];
+   
+    }
+    else{
+        document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(task,confirmBtn,task));
+    }
+    
         /* INFO */
-    document.getElementById('AdaptedModalInfo').appendChild(createTag("Project Stage ID: "+actData['data']['value']['head'].i+", Create user: "+actData['data']['value']['head'].cu+" ("+actData['data']['value']['head'].cul+"), Create date: "+actData['data']['value']['head'].cd,'small','text-left text-secondary ml-1'));
+    document.getElementById('AdaptedModalInfo').appendChild(info);
+    document.getElementById('AdaptedModalInfo').appendChild(actBlockInfo);
 }
 function createInputTextField(title,height)
 {
@@ -1111,14 +1130,15 @@ function createTable(colTitle,tBody)
     return table;
 }
 
-function removeHideData(btnLabel,title,titleClass)
+function changeDataState(btnLabel,title,titleClass)
 {
-    console.log('===removeHideData()===');
+    console.log('===changeDataState()===');
      /*
         * SLOWNIKI:
         * data[0] = DATA
         * data[1] = SLO
     */
+    defaultTask='getprojectsstagelike&b='+actData['data']['value']['head'].i;
     prepareModal(title,'bg-'+titleClass);
     var form=createForm('POST',actData['data']['function'],'form-horizontal','OFF');
     var add=document.getElementById('AdaptedDynamicData'); 
@@ -1165,6 +1185,7 @@ function checkReason(t,id)
 function displayAll(d)
 {
     console.log('===displayAll()===');
+
     if(Error.checkStatusResponse(d)) { return ''; };
     console.log(Error.checkStatusResponse(d));
     /* SETUP DEFAULT TABLE COLUMN */
@@ -1223,6 +1244,8 @@ function functionBtn(f,btn,task)
                     actData['data']['function']='psEdit';
                     actData['data']['task']='psEdit';
                     runFunction(actData);
+                    console.log(actData);
+                    ajax.getData('setProjectStageWskB&id='+actData['data']['value']['head']['i']);
                 };
                 break;
         case 'psHide':
@@ -1270,10 +1293,10 @@ function postData(btn,nameOfForm)
         ajax.sendData(nameOfForm,'POST');
     };   
 }
-function setButtonAvaliable()
+function setTableBtnAva()
 {
-    console.log('setButtonAvaliable()');
-    for (const property in defaultTableBtnConfig)
+    console.log('setTableBtnAva()');
+    for (const property in tableBtn)
     {     
         
         //console.log(property);
@@ -1281,14 +1304,14 @@ function setButtonAvaliable()
         if(loggedUserPerm.includes(property))
         {
             /* NOTHNG TO DO */
-            //console.log(defaultTableBtnConfig[property]);
+            //console.log(tableBtn[property]);
         }
         else
         {
-            defaultTableBtnConfig[property].perm=false;
-            defaultTableBtnConfig[property].class=defaultTableBtnConfig[property].class+" disabled";
-            defaultTableBtnConfig[property]['attributes'].disabled="disabled";
-            //console.log(defaultTableBtnConfig[property]);
+            tableBtn[property].perm=false;
+            tableBtn[property].class=tableBtn[property].class+" disabled";
+            tableBtn[property]['attributes'].disabled="disabled";
+            //console.log(tableBtn[property]);
         }
     }
 }

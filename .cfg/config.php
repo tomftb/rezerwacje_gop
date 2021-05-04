@@ -20,5 +20,7 @@ define('ldapParm',array
             ));
 define('HH',filter_input(INPUT_SERVER,"HTTP_HOST"));
 define('APP_NAME',"Rezerwacje GOP");
-define('APP_URL','http://rezerwacje-gop.geofizyka.pl:8080/');
+define('APP_URL','http://rezerwacje-gop.local:8080/');
 //define('APP_URL','http://rezerwacjegop.geofizyka.pl/');
+
+//5DPbvuNiRbyoUBTN

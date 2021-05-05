@@ -117,7 +117,7 @@ class file {
     private function checkUploadDir(){
         self::log(__METHOD__);
         if(!is_dir($this->uploadDir) || !file_exists($this->uploadDir) || !is_writable($this->uploadDir)){
-            self::setErr(__METHOD__,$this->uploadDir.' not a dir OR not exist OR not writables');
+            self::setErr(__METHOD__,$this->uploadDir.' not a dir OR not exist OR not writable');
             return false;
         }
     }

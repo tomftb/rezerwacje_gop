@@ -13,6 +13,8 @@ class dbManage extends errorConfirm
     public $RA='';
     private $pdoResult;
     private $query;
+    private $sth;
+    
     function __construct($host="",$database="",$port="",$user="",$password="",$log_lvl=0,$pass_cipher='n')
     {
         parent::__construct();
@@ -371,6 +373,7 @@ class dbManage extends errorConfirm
     }
     private function parseQueryVal($sqlValue)
     {
+         $this->log(2,"[".__METHOD__."]");
         /*
          * PDO BIND VALUE START FROM 1
          */
@@ -380,10 +383,12 @@ class dbManage extends errorConfirm
         if(!is_array($sqlValue))
         {
             $tmp=explode(',',$sqlValue);
+            $this->log(0,"not array, explode by ,");
         }
         else
         {
             $tmp=$sqlValue;
+            $this->log(0,"array");
         }
         //$this->logMultidimensional(0,$tmp,__METHOD__);
         foreach($tmp as $id => $val)
@@ -392,7 +397,9 @@ class dbManage extends errorConfirm
             self::parseDateValue($val);
             $this->sqlValueArrBind[$i]=$this->clearData($val,0);
             $this->sqlValueArr[$id]=$this->clearData($val,0);
+            
             $i++;
+           
         }
         //$this->logMultidimensional(0,$this->sqlValueArr,__METHOD__."::sqlValueArr");
         //$this->logMultidimensional(0,$this->sqlValueArrBind,__METHOD__."::sqlValueArrBind");
@@ -425,6 +432,7 @@ class dbManage extends errorConfirm
 	{
             $this->setError(1,"[ERROR][".__METHOD__."] Wystąpił błąd zapytania :</br>".$e->getMessage()); //
 	}
+        return 0;
     }
     public function queryReturnValue()
     {
@@ -440,28 +448,102 @@ class dbManage extends errorConfirm
     }	
     private function clearData($data,$lvl=1)
     {
-        //$this->log(0,"[".__METHOD__."]");
+        $this->log(2,"[".__METHOD__."] ".$data);
 	$data=trim($data);		
 	//echo "data |".$data."|<br/>";
 	//$data=trim($data); // ltrim
 	if($lvl==0 && $data!='')
 	{
-            $patterns = array('/\#/');
+            //$patterns = array('/\#/');
             //$patterns = array('/\//','/\#/'); // nie moze byc backslash '/\*/', -- select * from
-            foreach($patterns as $value)
-            {
+           // foreach($patterns as $value)
+            //{
 		//echo $value."</br>";
-		$data=preg_replace($value, '', $data);
-            }
-            $data=strip_tags($data);
+		//$data=preg_replace($value, '', $data);
+            //}
+            //$data=strip_tags($data);
             $data=htmlspecialchars($data, ENT_QUOTES);
             $this->log(2,"[".__METHOD__."] $data");
 	}
 	return $data;
     }
+    public function newQuery($sql,$value=array())
+    {
+        parent::log(2,"[".__METHOD__."]");
+        $this->sth = $this->dbLink->prepare($sql);
+        self::pdoBindValue($value);
+        $this->sth->execute();
+    }
+    private function pdoBindValue($data)
+    {
+        parent::log(2,"[".__METHOD__."]");
+        
+        /* data is array for example:
+         * $sqlData[':id']=array('id','INT');
+         */
+        
+        /*
+            PDO::PARAM_BOOL (int)
+            Represents a boolean data type.
+            PDO::PARAM_NULL (int)
+            Represents the SQL NULL data type.
+            PDO::PARAM_INT (int)
+            Represents the SQL INTEGER data type.
+            PDO::PARAM_STR (int)
+            Represents the SQL CHAR, VARCHAR, or other string data type.
+            PDO::PARAM_STR_NATL (int)
+            Flag to denote a string uses the national character set. Available since PHP 7.2.0
+            PDO::PARAM_STR_CHAR (int)
+            Flag to denote a string uses the regular character set. Available since PHP 7.2.0
+            PDO::PARAM_LOB (int)
+            Represents the SQL large object data type.
+            PDO::PARAM_STMT (int)
+            Represents a recordset type. Not currently supported by any drivers.
+            PDO::PARAM_INPUT_OUTPUT (int)
+            Specifies that the parameter is an INOUT parameter for a stored procedure. You must bitwise-OR this value with an explicit PDO::PARAM_* data type.
+         */
+        $pdoType=PDO::PARAM_INT;
+        foreach($data as $k => $v)
+        {
+            parent::log(0,"KEY => ".$k." VALUE => ".$v[0]." PDO::TYPE => ".$v[1]);
+            if($v[1]==='INT'){
+                $pdoType=PDO::PARAM_INT; //echo "is numeric $value - ".is_numeric($value)."</br>";
+            }
+            else if($v[1]==='STR'){
+                $pdoType=PDO::PARAM_STR;
+            }
+            else{
+                parent::log(0,"[ERROR][".__METHOD__."] Wrong data => value");
+                break;
+            }
+            $this->sth->bindValue($k,$v[0],$pdoType);
+        }
+    }
+    public function getSth()
+    {
+        return $this->sth;
+    }
+    public function getError(){
+        return parent::getError();
+    }
+    public function getDbLink(){
+        return $this->dbLink;
+    }
+    public function beginTransaction(){
+        $this->dbLink->beginTransaction(); //PHP 5.1 and new
+    }
+    public function commit(){
+        $this->dbLink->commit();  //PHP 5 and new
+    }
+    public function rollback(){
+        $this->dbLink->rollback(); 
+    }
+    public function lastInsertId(){
+        return $this->dbLink->lastInsertId();
+    }
     function __destruct()
     {
-        $this->log(2,"[".__METHOD__."]");
+        $this->log(0,"[".__METHOD__."]");
         $this->dbLink = null;	
     }
 }

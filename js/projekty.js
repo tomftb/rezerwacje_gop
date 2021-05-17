@@ -2,6 +2,7 @@ var ajax = new Ajax();
 var error = new Error();
     Error.setDiv('errDiv-Adapted-overall');
     Error.setModal('AdaptedModal');
+var report = new Report();
 var table=new Table();
 var defaultTask='getprojectslike';
 var fieldDisabled='y';
@@ -10,7 +11,6 @@ var actDay = getActDate();
 var actProject=new Object();
 setButtonDisplay(document.getElementById('pCreate'),'ADD_PROJ');
 //console.log(loggedUserPerm);
-
 
 var mainTableColumns={
     ID:{
@@ -147,6 +147,7 @@ function runFunction(d)
     // RUN FUNCTION
     if(Error.checkStatusExist(d['status'])) { return ''; };
     projectData=d; 
+    console.log(projectData);
     console.log('FUNCTION TO RUN:\n'+d['data']['function']);
     switch(d['data']['function'])
     {
@@ -206,32 +207,21 @@ function runFunction(d)
                 setAvaTeam();
                 pTeam(true);
                 break;
+        case 'showStagePreview':
+                console.log(d);
+                report.showPreview(d['data']['value']);
+                break;
         case 'pReportOff':
-                pReport();
+                //pReport();
+                report.setData(d);
+                report.create();
                 break;
         default:
                 displayAll(d);
             break;
     }
 }
-function pReport()
-{
-    prepareModal('Raport:','bg-primary');
-    var report = new Report();
-    report.setModal(document.getElementById('AdaptedModal'));
-    report.setForm(createForm('POST',projectData['data']['function'],'form-horizontal','OFF'));
-    var dynamicData=document.getElementById('AdaptedDynamicData');
-    var rowDiv=createTag('','div','row')
-    var optionDiv=createTag('','div','col-md-6');
-    var optionLabel=createTag('Dostępne etapy:','h5','');
-        optionDiv.appendChild(optionLabel);
-    var dataDiv=createTag('','div','col-md-6');
-    var dataLabel=createTag('Aktualny dokument:','h5','');  
-        dataDiv.appendChild(dataLabel);
-        rowDiv.appendChild(optionDiv);
-        rowDiv.appendChild(dataDiv);
-        dynamicData.appendChild(rowDiv);
-}
+
 function pEmail()
 {
     prepareModal('RĘCZNE WYSŁANIE POWIADOMIENIA EMAIL:','bg-info');
@@ -262,9 +252,10 @@ function pEmail()
     add.appendChild(form);
     /* BUTTONS */
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),''));
-    document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(projectData['data']['function'],createBtn('Wyślij','btn btn-info',projectData['data']['function']),projectData['data']['function']));
+    document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(projectData['data']['function'],createBtn('Wyślij','btn btn-info','confirmData'),projectData['data']['function']));//projectData['data']['function']
     /* INFO */
     document.getElementById('AdaptedModalInfo').appendChild(createTag("Project ID: "+projectData['data']['value']['project'].i+", Create user: "+projectData['data']['value']['project'].cu+" ("+projectData['data']['value']['project'].cum+"), Create date: "+projectData['data']['value']['project'].du,'small','text-left text-secondary ml-1'));
+    console.log(document.getElementById('AdaptedButtonsBottom'));
 }
 
 function createTitle(text)
@@ -375,7 +366,7 @@ function projectManage(btnLabel,title,titleClass)
     pCreateFields(form);
     add.appendChild(form);
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),''));
-    document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(projectData['data']['function'],createBtn(btnLabel,'btn btn-'+titleClass,projectData['data']['function']),projectData['data']['function']));
+    document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(projectData['data']['function'],createBtn(btnLabel,'btn btn-'+titleClass,'confirmData'),projectData['data']['function']));//projectData['data']['function']
 }
 function pDocCreateFields(ele)
 {
@@ -507,10 +498,11 @@ function createProjectInput(type,value,label)
         inp.onblur=function ()
         {
             parseFieldValue(this,null,null);
-            checkIsErr(document.getElementById('sendDataBtn'));
+            checkIsErr(document.getElementById('confirmData'));
         };
     divAll.appendChild(inp);
     divAll.appendChild(divErr);
+    console.log(divAll);
     return divAll;
 }
 function createQuota(q)

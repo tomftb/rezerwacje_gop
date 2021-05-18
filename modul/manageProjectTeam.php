@@ -18,14 +18,12 @@ class manageProjectTeam extends initialDb {
         'data'
     );
         
-    function __construct()
-    {
+    function __construct(){
         parent::__construct();
         $this->log(0,"[".__METHOD__."]");
         $this->utilities=NEW utilities();
     }
-    public function getTeam($id)
-    {
+    public function getTeam($id){
         $this->log(1,"[".__METHOD__."] ID => ".$id);
         return $this->query('SELECT `idPracownik`,`ImieNazwisko`,`procentUdzial`,`datOd`,`datDo` FROM `v_proj_prac_v5` WHERE `idProjekt`=? AND `wskU`=?',$id.',0');
     }
@@ -33,12 +31,10 @@ class manageProjectTeam extends initialDb {
     {
         $this->log(1,"[".__METHOD__."] ID => ".$id);
         $personData=$this->squery('SELECT `imie`,`nazwisko`,`email` FROM `pracownik` WHERE `id`='.$id);
-        if(count($personData)>0)
-        {
+        if(count($personData)>0){
             return($personData[0]);
         }
-        else
-        {
+        else{
             $this->setError(0,"[${id}] NO DATA ABOUT PERSON IN DB!");
         }
     }
@@ -89,8 +85,7 @@ class manageProjectTeam extends initialDb {
         
         //return $this->query('SELECT * FROM `v_ava_prac_curdate` WHERE `id`=? ORDER BY `id` ASC ',$id);
     }
-    public function setTeam($DATA)
-    {
+    public function setTeam($DATA){
         $this->log(1,"[".__METHOD__."]");
         $this->idProject=$DATA['id'];
         $p=$this->squery("SELECT `numer_umowy`,`klient`,`temat_umowy`,`typ` from `projekt_nowy` where id=".$this->idProject)[0];
@@ -101,24 +96,12 @@ class manageProjectTeam extends initialDb {
         self::setupMember();              
         array_map(array($this, 'checkTeamMemberAvailable'),$this->member); 
         self::setNewTeamMembers(); 
-        $this->mail=NEW email();
-        if($this->mail->sendMail(
-                                    'Zgłoszenie na aktualizację członków zespołu :: '.$p['klient'].', '.$p['temat_umowy'].', '.$p['typ'],
-                                    self::emailBody($p),
-                                    self::emailRecipient(),
-                                    'Uaktualniono członków zespołu. Niestety pojawiły się błędy w wysłaniu powiadomienia.',
-                                    true
-        )!=='')
-        {
-            $this->setError(0, $this->mail->getErr()); 
-        }
+        self::sendNotify($p);
         return  $this->getError();
         //$this->setError(0,"TEST STOP");
     }
-    private function setupMember()
-    {
-        foreach($this->member as $id => $m)
-        {
+    private function setupMember(){
+        foreach($this->member as $id => $m){
             $p=self::getMemeber($m['pers']);
             $this->member[$id]['imie']=$p['imie'];
             $this->member[$id]['nazwisko']=$p['nazwisko'];
@@ -329,13 +312,23 @@ class manageProjectTeam extends initialDb {
         }
         return ($recEmail);
     }
-    public function setAdminEmail($a)
-    {
+    public function setAdminEmail($a){
         /* array of emaiuls */
         $this->adminEmailList=$a;
     }
-    function __destruct()
-    {
-        
+    private function sendNotify($p){
+         $this->log(0,"[".__METHOD__."]");
+        if($this->getError()!=='') {return false;}
+        $this->mail=NEW email();
+        if($this->mail->sendMail(
+                                    'Zgłoszenie na aktualizację członków zespołu :: '.$p['klient'].', '.$p['temat_umowy'].', '.$p['typ'],
+                                    self::emailBody($p),
+                                    self::emailRecipient(),
+                                    'Uaktualniono członków zespołu. Niestety pojawiły się błędy w wysłaniu powiadomienia.',
+                                    true
+        )!==''){
+            $this->setError(0, $this->mail->getErr()); 
+        }
     }
+    function __destruct(){}
 }

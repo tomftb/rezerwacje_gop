@@ -32,6 +32,7 @@
 <link rel="stylesheet" href="<?=$URL?>/css/bootstrap-datepicker3.css" >
 <link rel="stylesheet" href="<?=$URL?>/css/header.css?<?=$u?>" >
 <link rel="stylesheet" href="<?=$URL?>/js/jquery.validationEngine/validationEngine.jquery.css" type="text/css" />
+<!-- <link rel="stylesheet" href="<?=$URL?>/css/all.css"> load all FONTAWESOME styles -->
 <!-- END CSS -->
 <!-- JS -->
 <script type="text/javascript" src="<?=$URL?>/js/jquery-3.3.1.min.js"></script>

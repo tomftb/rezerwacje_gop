@@ -29,7 +29,6 @@ class Report
     
     constructor() {
         console.log('Report::constructor()');
-        
     }
     setData(projectStageData){
         /* TO DO => PARSE RESPONSE STATUS */
@@ -107,8 +106,17 @@ class Report
             div.appendChild(img);
             return div;
     }
+    setDefaultData(){
+        console.log('Report::setDefaultData()');
+        console.log(Report.actStage);
+        for(const prop in Report.actStage){
+            delete Report.actStage[prop];
+        };
+        Report.fieldCounter=0;
+    }
     create(){
         console.log('Report::create()');
+        this.setDefaultData();
         prepareModal('Raport:','bg-primary');
         this.setModal(document.getElementById('AdaptedModal'));
         this.createLinks();
@@ -351,11 +359,11 @@ class Report
         return(div); 
     }
     static mvBtn(){
-    var i=createTag('','i','fas fa-long-arrow-alt-up text-dark text-center ml-2 ml-1 ');
+    var i=createTag('','i','fa fa-long-arrow-up text-dark text-center ml-2 ml-1 ');
         i.setAttribute('aria-hidden','true');
         Report.changeArrow(i);
         Report.mvUp(i);
-    var i1=createTag('','i','fas fa-long-arrow-alt-down text-dark text-center ml-1 mr-1 ');
+    var i1=createTag('','i','fa fa-long-arrow-down text-dark text-center ml-1 mr-1 ');
         i1.setAttribute('aria-hidden','true');
         Report.changeArrow(i1);
         Report.mvDown(i1);
@@ -375,7 +383,7 @@ class Report
                 Report.addStageData(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.childNodes[0].childNodes[1].childNodes[1],this.id);
             }; 
         var text=document.createTextNode(' ');
-        var arrow=createTag('','i','fas fa-caret-right');
+        var arrow=createTag('','i','fa fa-caret-right');
             btn.appendChild(text);
            btn.appendChild(arrow);
             return (btn);

@@ -92,13 +92,14 @@ class manageProject extends initialDb
     function __construct()
     {
         parent::__construct();
-        $this->log(0,"[".__METHOD__."]");
+        parent::log(0,"[".__METHOD__."]");
         $this->notify='n';
         //require($this->DR."/modul/manageProjectDocument.php");
         //require($this->DR."/modul/manageProjectTeam.php");
         $this->modul['DOCUMENT']=NEW manageProjectDocument();
         $this->modul['TEAM']=NEW manageProjectTeam();
         $this->modul['REPORT']=NEW manageProjectReport();
+        $this->modul['FILE']=NEW manageProjectReport();
         $this->utilities=NEW utilities();
         $this->response=NEW Response('Project');
     }
@@ -182,10 +183,8 @@ class manageProject extends initialDb
             return false;
         }
         $this->modul['TEAM']->setAdminEmail(self::getAdminEmail());
-        if($this->modul['TEAM']->setTeam($this->inpArray)!='')
-        {
+        if($this->modul['TEAM']->setTeam($this->inpArray)!=''){
             $this->response->setError(0,$this->modul['TEAM']->getInfo());
-            return false;
         }
         return($this->response->setResponse(__METHOD__,'','cModal','POST'));
     }
@@ -201,9 +200,24 @@ class manageProject extends initialDb
         $projectDetails=$this->query('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=? AND `wsk_u`=? ',$this->utilities->getData().",0")[0];
         $projectDoc=$this->query('SELECT `nazwa` FROM `projekt_dok` WHERE `id_projekt`=? AND `wsk_u`=? ',$this->utilities->getData().",0");   
         $projectTeam=$this->query('SELECT NazwiskoImie,DataOd,DataDo FROM v_proj_prac_v_pdf WHERE idProjekt=?',$this->utilities->getData());
-        require_once($this->DR.'/modul/createPdf.php'); 
-        $PDF = new PDF($projectDetails,$projectDoc,$projectTeam);
+        //require_once($this->DR.'/modul/createPdf.php'); 
+        $PDF = new createPdf($projectDetails,$projectDoc,$projectTeam);
         return($this->response->setResponse(__METHOD__,$PDF->getPdf(),'pPDF','POST'));
+    }
+    public function pGenDoc()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        if($this->utilities->checkInputGetValInt('id')['status']===1)
+        {
+            $this->responseType='GET';
+            $this->response->setErrResponse(1,$this->utilities->getInfo());
+            return  $this->response->getReposnse();
+        }
+         $projectDetails=$this->query('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`klient`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=? AND `wsk_u`=? ',$this->utilities->getData().",0")[0];
+        //$phWord=new PhpWord();
+
+        $DOC = new createDoc($projectDetails,'Project_'.$this->utilities->getData().'.docx');
+        return($this->response->setResponse(__METHOD__,$DOC->getDoc(),'pGenDoc','POST'));
     }
     public function getProjectDefaultValues()
     {
@@ -321,7 +335,10 @@ class manageProject extends initialDb
         self::setProjPrac();
         self::addProjectDb();
         self::addProjectDok($this->idProject);  
-        self::sendNotify('Zarejestrowano zgłoszenie na utworzenie nowego projektu o specyfikacji:',$this->inpArray);
+        self::sendNotify(
+                        "Zgłoszenie na utworzenie Projektu :: ".$this->inpArray['klient'].', '.$this->inpArray['temat_umowy'].', '.$this->inpArray['typ_umowy'][1],
+                        'Zarejestrowano zgłoszenie na utworzenie nowego projektu o specyfikacji:',
+                                $this->inpArray);
         //$this->response->setError(0,'TEST STOP');
         //self::clearProjectData();
         return($this->response->setResponse(__METHOD__,'','cModal','POST'));
@@ -533,35 +550,24 @@ class manageProject extends initialDb
         }
         return ($recEmail);
     }
-    private function getAdminEmail()
-    {
+    private function getAdminEmail(){
         $this->log(0,"[".__METHOD__."] ");
         $recEmail=array();
         $ad=$this->query("SELECT `WARTOSC` FROM `parametry` WHERE `SKROT`=?","MAIL_RECIPIENT",'FETCH_ASOC');
         $adminUsers=explode(';',$ad[0]['WARTOSC']);
-        foreach($adminUsers as $user)
-        {
+        foreach($adminUsers as $user){
             $this->log(0,"[".__METHOD__."] ".$user);
             array_push($recEmail,array($user,'Admin'));
         }
         return $recEmail;
     }
-    protected function cNewProjSubjectMail($head)
-    {
+    protected function cNewProjSubjectMail($head){
         return('Zgłoszenie na utworzenie udziału dla Projektu :: '.$head);
     }
-    protected function cRepeatInfoSubjectMail($head)
-    {
+    protected function cRepeatInfoSubjectMail($head){
         return('Powtórne powiadomienie o utworzonym udziale dla Projektu :: '.$head);
     }
-    protected function uProjSubjectMail()
-    { 
-        $msg="Zgłoszenie aktualizacji Projektu :: ".$this->inpArray['klient'].', '.$this->inpArray['temat_umowy'].', '.$this->inpArray['typ_umowy'][1];
-        $this->log(0,"[".__METHOD__."] ".$msg);
-        return($msg);
-    }
-    protected function projectBodyMailTemplate($s,$d)
-    {
+    protected function projectBodyMailTemplate($s,$d){
         /*
          * s => subject
          * d => data
@@ -657,7 +663,10 @@ class manageProject extends initialDb
             self::parseResponse($this->modul['DOCUMENT']->updateDoc($this->inpArray['id'],$this->inpArrayDok));
             
             self::parseNotifyFields();
-            self::sendNotify('Zarejestrowano zgłoszenie na aktualizację projektu o specyfikacji:',$this->lastProjectData);
+            self::sendNotify(
+                        "Zgłoszenie aktualizacji Projektu :: ".$this->inpArray['klient'].', '.$this->inpArray['temat_umowy'].', '.$this->inpArray['typ_umowy'][1],
+                        'Zarejestrowano zgłoszenie na aktualizację projektu o specyfikacji:',
+                        $this->lastProjectData);
         }     
         //$this->response->setError(0,'TEST STOP');
         return($this->response->setResponse(__METHOD__,'','cModal','POST'));
@@ -978,7 +987,7 @@ class manageProject extends initialDb
             }
         }    
     }
-    protected function sendNotify($subject,$data)
+    protected function sendNotify($subject,$body,$data)
     {
         $this->log(0,"[".__METHOD__."]");
         /*
@@ -993,7 +1002,7 @@ class manageProject extends initialDb
         self::setDataForBodyEmailTemplate($data);
         if($this->response->getError()) { return false; }
         $this->mail=NEW email();    
-        if($this->mail->sendMail(self::uProjSubjectMail(),self::projectBodyMailTemplate($subject,$data),self::cNewProjRecMail(1),$this->infoArray['err_mail'][0],true)!=='')
+        if($this->mail->sendMail($subject,self::projectBodyMailTemplate($body,$data),self::cNewProjRecMail(1),$this->infoArray['err_mail'][0],true)!=='')
         {
             $this->response->setError(0, $this->mail->getErr());        
         }   
@@ -1295,10 +1304,24 @@ class manageProject extends initialDb
              $this->response->setError(1,'BAD RESPONSE STATUS FROM MODULE');
         }
     }
-    public function getProjectReportData()
-    {
-        $v[0]='';
-        return($this->response->setResponse(__METHOD__, $v,'pReportOff','POST')); 
+    public function getProjectReportData(){
+        $this->log(0,"[".__METHOD__."]");
+        $this->modul['REPORT']->getProjectReportData();
+        return($this->response->setResponse(__METHOD__, $this->modul['REPORT']->getProjectReportData(),'pReportOff','POST')); 
+    }
+    public function setReportImage(){
+        $this->log(0,"[".__METHOD__."]");
+        //$this->modul['REPORT']->getTmpReport();
+        $data=$this->modul['REPORT']->getTmpFiles();
+        if($data[0]===false){
+            $this->response->setError(1,$data[1]);
+        }
+        return($this->response->setResponse(__METHOD__,$data[1],'showStagePreview','POST')); 
+    }
+    private function setGetId(){
+        if(!$this->utilities->setGetIntKey($this->inpArray['id'],'id')){
+             $this->response->setError(1,"[".__METHOD__."] KEY id NOT EXIST OR ID IS NOT INT");
+        }
     }
     function __destruct()
     {

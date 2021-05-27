@@ -28,7 +28,7 @@ class manageProjectStage extends initialDb
         //$f='a';
         parent::log(0,"[".__METHOD__."] filter => ".$f);
         parent::logMulti(0,filter_input_array(INPUT_GET));
-        $select="SELECT s.`id` as 'i',s.`number` as 'n',s.`title` as 't',(select e.`value` FROM `slo_projekt_etap_ele` as e WHERE e.`id_projekt_etap`=s.`id` and `wsk_u`='0' and `wsk_v`='0' ORDER BY e.`id` ASC LIMIT 0,1) as `v`,s.`buffer_user_id` as 'sss',b.`login` as 'bl' FROM `slo_projekt_etap` s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id`";
+        $select="SELECT s.`id` as 'i',s.`number` as 'n',s.`title` as 't',(select e.`value` FROM `slo_projekt_etap_ele` as e WHERE e.`id_projekt_etap`=s.`id` and `wsk_u`='0' and `wsk_v`='0' ORDER BY e.`id` ASC LIMIT 0,1) as `v`,b.`login` as 'bl' FROM `slo_projekt_etap` s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id`";
         $where='';
         $query_data=array();
         if(is_numeric($f)){
@@ -37,7 +37,7 @@ class manageProjectStage extends initialDb
             $query_data[':id']=array($f_int,'INT');
             $query_data[':number']=array($f_int,'INT');
             $where="WHERE s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`id` LIKE (:id) OR s.`number` LIKE (:number) OR s.`title` LIKE :title) ORDER BY s.`id` ASC";
-         }
+        }
         else{
             parent::log(0,"[".__METHOD__."] filter not numeric ");
             $where="WHERE s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`title` LIKE :title) ORDER BY s.`id` ASC";
@@ -400,7 +400,7 @@ class manageProjectStage extends initialDb
         if($this->response->getError()!==''){return false;}
         $this->inpArray['id']=intval($this->inpArray['id']);
         self::getProjectStageData($this->inpArray['id']);
-        $this->actProjectStageData= // $this->inpArray['id']
+        //$this->actProjectStageData=$this->inpArray['id']
         /* EXIST AND IS NOT BLOCKED ? */
         parent::logMulti(2,$this->actProjectStageData,__METHOD__);
         self::checkStageHead();
@@ -575,6 +575,28 @@ class manageProjectStage extends initialDb
         self::setGetId();
         self::setWskB(intval($_SESSION['userid'],10));
         return ($this->response->setResponse(__METHOD__,'','block','POST'));
+    }
+    public function getProjectAllStage(){
+        parent::log(0,"[".__METHOD__."]");
+        $return=[];
+        //$stageBody="(select e.`value` FROM `slo_projekt_etap_ele` as e WHERE e.`id_projekt_etap`=s.`id` and `wsk_u`='0' and `wsk_v`='0' ORDER BY e.`id` ASC)";
+        try{
+            parent::newQuery("SELECT s.`id` as 'i',s.`number` as 'n',s.`title` as 't',s.`create_user_login` as 'cu' FROM `slo_projekt_etap` s WHERE s.`id`>0 AND s.`wsk_v`='0' AND s.`wsk_u`='0' ORDER BY s.`id`");   
+            $head=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);
+            foreach($head as $v){
+                /* GET STAGE BODY */
+                parent::newQuery("SELECT s.`value` as 'v',s.`file_selected` as 'f',s.`file_position` as 'fp' FROM `slo_projekt_etap_ele` s WHERE s.`id_projekt_etap`=".$v['i']." AND s.`wsk_v`='0' AND s.`wsk_u`='0' ORDER BY s.`id`");   
+                $body=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);
+                foreach($body as $kb => $vb){
+                    $body[$kb]['v']=html_entity_decode($body[$kb]['v']);
+                }
+                array_push($return,array('i'=>$v['i'],'n'=>$v['n'],'t'=>html_entity_decode($v['t']),'cu'=>$v['cu'],'v'=>$body));
+            }
+	}
+	catch (PDOException $e){
+            $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
+	}
+        return($this->response->setResponse(__METHOD__,$return,'','GET'));
     }
     function __destruct()
     {}

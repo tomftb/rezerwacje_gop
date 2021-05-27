@@ -9,7 +9,7 @@ class Report
     static modal=new Object();
     static stageData=new Array();
     static fieldCounter=0;
-    static formName='setReportImage';
+    static perm=new Array();
     static link={
         stage:new Object(),
         dynamicData:new Object(),
@@ -30,9 +30,15 @@ class Report
     constructor() {
         console.log('Report::constructor()');
     }
-    setData(projectStageData){
+    static getFormName(){
+        /* SIMILAR TO CONST */
+        return 'setProjectReport';
+    }
+    setData(projectStageData,perm){
         /* TO DO => PARSE RESPONSE STATUS */
         Report.stageData=projectStageData['data']['value'];
+        Report.perm=perm;
+        //console.log(Report.perm);
         /* TO DO +. DYNAMIC CHANGE */
         //Report.formName=projectStageData['data']['function'];
     }
@@ -161,8 +167,10 @@ class Report
        
     }
     createButtons(){
-        Report.link.buttons.appendChild(functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),''));
-        Report.link.buttons.appendChild(Report.showReport());
+        Report.link.buttons.appendChild(Report.btnCancelReport());
+        Report.link.buttons.appendChild(Report.btnShowReport());
+        Report.link.buttons.appendChild(Report.btnExportToDoc());
+        Report.link.buttons.appendChild(Report.btnConfirmReport());
     }
     setModal(modal){
         console.log('Report::setModal()');
@@ -172,7 +180,7 @@ class Report
     setForm(){
         console.log('Report::setForm()');
         //console.log(Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3]);
-        Report.link.dynamicData.appendChild(createForm('POST',Report.formName,'form-horizontal','OFF'));
+        Report.link.dynamicData.appendChild(createForm('POST',Report.getFormName(),'form-horizontal','OFF'));
         Report.link.form=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0];
         //console.log(Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0]);
         
@@ -291,7 +299,7 @@ class Report
         for(const prop in Report.actStage[Report.fieldCounter].v){
             var textarea=createTag(Report.actStage[Report.fieldCounter].v[prop]['v'],'textarea','form-control w-100 mt-2 ml-2 mr-2'); //form-control    
             //var textarea=createTag('','div',' w-100'); //form-control
-            textarea.setAttribute('name',Report.fieldCounter+'-value');
+            textarea.setAttribute('name',Report.fieldCounter+'-'+counter+'-value');
             textarea.setAttribute('id',Report.fieldCounter+'-'+counter+'-data-stage-value');
             textarea.setAttribute('style','height:200px; ');//
             textarea.setAttribute('contenteditable','true');
@@ -472,7 +480,7 @@ class Report
         
         return divFormFile;
     }
-    static showReport(){
+    static btnShowReport(){
         console.log('Report::showRaport()');   
         var btn=createBtn('Podgląd','btn btn-info','psShowStage');
             btn.onclick= function() {
@@ -484,7 +492,11 @@ class Report
                     this.innerText='Podgląd';
                 }
                 else{
-                    postData(this,Report.formName);
+                    //Report.formName=Report.formName+'Image';
+                    Report.link.form.name=Report.getFormName()+'Image'
+                    console.log(Report.link.form.name);
+                    postData(this,Report.link.form);
+                    
                     Report.showReportDetails();
                     Report.link.stage.childNodes[0].classList.add("d-none");
                     Report.link.stage.childNodes[0].classList.remove("block");
@@ -496,7 +508,48 @@ class Report
         };     
         return btn;
     }
-
+    static btnConfirmReport(){
+        console.log('Report::showRaport()');   
+        var btn=createBtn('Zatwierdź','btn btn-success','confirmData');
+        /* CHECK PERMISSIONS */
+        if(Report.perm.includes('GEN_PROJECT_REPORT')){
+            /* POST DATA */
+            btn.onclick= function() {
+                //postData(this,Report.formName);
+                Report.link.form.name=Report.getFormName();
+                console.log(Report.link.form.name);
+                postData(this,Report.link.form);
+            };
+        }
+        else{
+            btn.classList.add("disabled");
+        }
+        return btn;
+    }
+     static btnExportToDoc(){
+        console.log('Report::showRaport()');   
+        var btn=createBtn('DOC','btn btn-primary','btnExportToDoc');
+        /* CHECK PERMISSIONS */
+        if(Report.perm.includes('GEN_PROJ_REP_DOC')){
+            /* POST DATA */
+            btn.onclick= function() {
+                console.log(this);
+                console.log(Report.getFormName());
+                Report.link.form.name=Report.getFormName()+'Doc';
+                postData(this,Report.link.form);
+                //var win = window.open('test', '_blank');
+                //    win.focus();
+            };
+        }
+        else{
+            btn.classList.add("disabled");
+        }
+        return btn;
+    }
+    static btnCancelReport(){
+        /* REMOVE TMP FILES */
+        return functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),'');
+    }
     static showReportDetails(){
         console.log('Report::showReportDetails()');  
         

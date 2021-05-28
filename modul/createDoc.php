@@ -19,43 +19,57 @@ class createDoc extends errorConfirm {
     
     function __construct($projectDetails,$files,$fileName,$ext=''){
         parent::__construct();
-        parent::log(0,$fileName);
-        parent::log(0,$ext);
+        parent::log(0,"[".__METHOD__."]".$fileName);
+        parent::log(0,"[".__METHOD__."]".$ext);
         //parent::logMulti(0, $projectDetails);
         //parent::logMulti(0, $files);
         $this->projectData=$projectDetails;
         $this->fileName=$fileName."_".uniqid().$ext;
         require_once 'bootstrap.php';
         // Creating the new document...
+        $settings=new \PhpOffice\PhpWord\Settings();
+        $settings::setOutputEscapingEnabled(true);
         $this->phpWord = new \PhpOffice\PhpWord\PhpWord();
+        
+        //parent::logMulti(0, var_dump($settings));
+        //$settings= new \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
+        
         //parent::setError(1,'test error');
     }
     public function createProjectStageReport(){
         parent::log(0,"[".__METHOD__."]");
         $this->mainSection = $this->phpWord->addSection();
         self::setUpData(); 
+        parent::log(0,"[".__METHOD__.'] LOAD => \PhpOffice\PhpWord\IOFactory::createWriter()');
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
         /* check is file exist */
+        parent::log(0,"[".__METHOD__.'] SAVE FILE');
+        //$objWriter->setOutputEscapingEnabled(true);
         $objWriter->save($this->DR."/".self::docDir.$this->fileName);
     }
     public function createProjectReport(){
-        /* Note: any element you append to a document must reside inside of a Section. */
+        parent::log(0,"[".__METHOD__."]");
+        
+         try {
+           /* Note: any element you append to a document must reside inside of a Section. */
 
-    // Adding an empty Section to the document...
-    $section = $this->phpWord->addSection();
-    
-    $text = "some text";
-    $this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
-    $this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
-    $section->addText($text, 'r2Style', 'p2Style');
-    
-    // Adding Text element to the Section having font styled by default...
-    $section->addText( 'Do Realizacji: '.$this->projectData['rodzaj_umowy'],array('size'=>22,'color' => 'FF8080'));
-    $section->addText( 'Numer: '.$this->projectData['rodzaj_umowy']);
-    $section->addText( 'Do kierowania grupą (Lider) powołuje : '.$this->projectData['nadzor']);
-    $section->addText( 'Temat: '.$this->projectData['rodzaj_umowy']);
-    $section->addText( 'Typ: '.$this->projectData['typ_umowy']);
-    $section->addText( 'System: '.$this->projectData['system']);
+        // Adding an empty Section to the document...
+        parent::log(0,"[".__METHOD__."] BEFORE SECTION");
+        $section = $this->phpWord->addSection();
+        parent::log(0,"[".__METHOD__."] SECTION");
+        $text = "some text";
+        $this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
+        $this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
+        $section->addText($text, 'r2Style', 'p2Style');
+        parent::log(0,"[".__METHOD__."] AFTER addText");
+        // Adding Text element to the Section having font styled by default...
+        $section->addText( 'Do Realizacji: '.$this->projectData['rodzaj_umowy'],array('size'=>22,'color' => 'FF8080'));
+        $section->addText( 'Numer: '.$this->projectData['rodzaj_umowy']);
+        $section->addText( 'Do kierowania grupą (Lider) powołuje : '.$this->projectData['nadzor']);
+        $section->addText( 'Temat: '.$this->projectData['rodzaj_umowy']);
+        $section->addText( 'Typ: '.$this->projectData['typ_umowy']);
+        $section->addText( 'System: '.$this->projectData['system']);
+         parent::log(0,"[".__METHOD__."] AFTER multiply addText");
         /*
     * Note: it's possible to customize font style of the Text element you add in three ways:
     * - inline;
@@ -64,7 +78,9 @@ class createDoc extends errorConfirm {
     */
     // New portrait section - NEW BLANK PAGE
     //$section = $this->phpWord->addSection();
+         parent::log(0,"[".__METHOD__."] BEFORE NEXT SECTION");
     $section = $this->phpWord->addSection();
+     parent::log(0,"[".__METHOD__."] AFTER NEXT SECTION");
     // TITLE
     $section->addTitle('Welcome to Project', 1);
    // Adding Text element with font customized inline...
@@ -92,8 +108,9 @@ class createDoc extends errorConfirm {
    $myTextElement = $section->addText('Do Realizacji: '.$this->projectData['rodzaj_umowy']);
    $myTextElement->setFontStyle($fontStyle);
    // Image
+    parent::log(0,"[".__METHOD__."] BEFORE ADD IMAGE");
     $section->addImage($this->DR.'/upload/609a22bf9f7c0_0.jpeg', array('width'=>800, 'height'=>533));
-    
+     parent::log(0,"[".__METHOD__."] AFTER ADD IMAGE");
     /* --- */
     
     // Inline font style
@@ -174,6 +191,7 @@ $section->addText("Normal paragraph again. {$filler_text}");
 /* --- */
 
 /* -- TABLE -- */
+ parent::log(0,"[".__METHOD__."] BEFORE table");
 $section = $this->phpWord->addSection();
 $header = array('size' => 16, 'bold' => true);
 
@@ -191,6 +209,7 @@ for ($r = 1; $r <= $rows; $r++) {
     }
 }
 // 2. Advanced table
+ parent::log(0,"[".__METHOD__."] BEFORE Advanced table");
 $section = $this->phpWord->addSection();
 $section->addTextBreak(1);
 $section->addText('Fancy table', $header);
@@ -299,7 +318,9 @@ $row->addCell(1000)->addText('3');
 
     /* -- END TABLE -- */
     // Saving the document as OOXML file...
+    parent::log(0,"[".__METHOD__."] BEFORE createWriter");
     $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
+    parent::log(0,"[".__METHOD__."] BEFORE SAVE FILE");
     $objWriter->save($this->DR."/".self::docDir.$this->fileName);
    // Saving the document as ODF file...
     //$objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'ODText');
@@ -308,6 +329,19 @@ $row->addCell(1000)->addText('3');
     // Saving the document as HTML file...
     //$objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'HTML');
     //$objWriter->save('helloWorld.html');
+        } 
+        catch (Throwable $t) { // Executed only in PHP 7, will not match in PHP 5.x         
+            $this->response->setError(1,'PHP7 Caught exception: '.$t->getMessage()." in ".$t->getFile());
+        } 
+        catch (Exception $e) {// Executed only in PHP 5.x, will not be reached in PHP 7
+            $this->response->setError(1,'PHP5 Caught exception: '.$e->getMessage()." in ".$e->getFile());
+        }
+        finally{
+            
+        }
+        
+        
+     parent::log(0,"[".__METHOD__."] END");
     }
     private function setUpData(){
         parent::log(0,"[".__METHOD__."]");
@@ -325,7 +359,7 @@ $row->addCell(1000)->addText('3');
                 self::writeData($convert,$v);   
             }
         }
-        //parent::setError(1,'test error');
+        parent::setError(1,'test error');
     }
     private function writeData($convert,$v){
         parent::log(0,"[".__METHOD__."]");
@@ -468,6 +502,6 @@ $row->addCell(1000)->addText('3');
         return self::docDir.$this->fileName;
     }
     function _desctruct(){
-        //$this->log(0,"[".__METHOD__."]");
+        parent::log(0,"[".__METHOD__."]");
     }
 }

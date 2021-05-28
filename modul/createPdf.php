@@ -1,15 +1,12 @@
 <?php
-//session_start();
-//require('..\\lib\\fpdf181\\tfpdf.php');
-#require('lib\\fpdf181\\\\makefont\\makefont.php');
-$DOC_ROOT=(filter_input(INPUT_SERVER,"DOCUMENT_ROOT"));
-require($DOC_ROOT.'/lib/fpdf181/tfpdf.php');
-//require(filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/.cfg/config.php');
 
-define("_SYSTEM_TTFONTS", $DOC_ROOT.'/lib/fpdf181/font/unifont/lato/');
-define("FPDF_FONTPATH",$DOC_ROOT.'/lib/fpdf181/font/');
+//$DR=(filter_input(INPUT_SERVER,"DOCUMENT_ROOT"));
+require(DR.'/lib/fpdf181/tfpdf.php');
 
-class PDF extends tFPDF
+define("_SYSTEM_TTFONTS", DR.'/lib/fpdf181/font/unifont/lato/');
+define("FPDF_FONTPATH",DR.'/lib/fpdf181/font/');
+
+class createPdf extends tFPDF
 {
     protected $pdfBodyPartList=array();
     protected $prDetails=array();
@@ -18,22 +15,28 @@ class PDF extends tFPDF
     protected $prMainManager=array();
     protected $prMainTech=array();
     protected $DOC_ROOT='';
+    private $log;
     /*
      * I -> OPEN
      * D -> DOWNLOAD
      */
     
-    protected $outputType='I';
-    function __construct($projectDetails,$projectDoc,$projectTeam,$projectMainManager,$projectMainTech)
+    protected $outputType='S';
+    function __construct($projectDetails,$projectDoc,$projectTeam)
     {
         parent::__construct();
-        $this->DOC_ROOT=filter_input(INPUT_SERVER,"DOCUMENT_ROOT");
+        
+        $this->DOC_ROOT=filter_input(INPUT_SERVER,"DOCUMENT_ROOT").'/..';
+        self::loadLog();
         $this->prDetails=$projectDetails;
         $this->prDocs=$projectDoc;
         $this->prTeam=$projectTeam;
-        $this->prMainManager=$projectMainManager;
-        $this->prMainTech=$projectMainTech;
-        $this->createDocument();
+        self::createDocument();
+    }
+    function loadLog()
+    {
+        $this->log=NEW logToFile();
+        $this->log->log(0,__METHOD__);
     }
     // Page header
     function Header()
@@ -71,15 +74,16 @@ class PDF extends tFPDF
         $this->Cell(0,6,'',0,1,'C');
         $this->Cell(0,0,'Zabrania się samowolnego dokonywania zmian, kopiowania i rozpowszechniania tego dokumentu',0,0,'C');   
     }
-    function createDocument()
+    private function createDocument()
     {
-        $this->setProjectDetails();
+        self::setProjectDetails();
         $this->setProjectDocuments();
         $this->genDetailPdf();
         $this->genProjectTeam();
     }
-    function setProjectDetails()
+    private function setProjectDetails()
     {
+        $this->log->logMulti(0,$this->prDetails,__METHOD__);
         $this->SetTitle("Powołanie grupy realizującej",true);
         $this->SetAuthor("Tomasz Borczyński" ,true);
         $this->SetSubject("Powołanie grupy sejsmicznej" ,true);
@@ -90,17 +94,17 @@ class PDF extends tFPDF
         $this->SetFont('Lato', '', 11);   
         $this->Cell(0,3,'',0,1,'C');
         $this->Cell(0,6,'do realizacji '.$this->prDetails['rodzaj_umowy'].' nr '.$this->prDetails['numer_umowy'],0,1,'C');
-        $this->Cell(0,6,'temat : '.$this->prDetails['klient'].' '.$this->prDetails['temat_umowy'].' '.$this->prDetails['typ'],0,1,'C');
+        $this->Cell(0,6,'temat : '.$this->prDetails['klient'].' '.$this->prDetails['temat_umowy'].' '.$this->prDetails['typ_umowy'],0,1,'C');
         $this->Cell(0,10,'',0,1,'C');
         $this->pdfBodyPartList=array(
             array('n','Do kierowania Grupą powołuję - '.$this->prDetails['nadzor']),
             array('n','W skład Grupy włączam pracowników wyszczególnionych w F.PJ-4.9/GOP/002'),
-            array('n','Termin  realizacji '.$this->prDetails['rodzaj_umowy'].' '.$this->prDetails['term_realizacji']),
+            array('n','Termin  realizacji '.$this->prDetails['rodzaj_umowy'].' '.$this->prDetails['d-term_realizacji'].' - '.$this->prDetails['d-koniec_proj']),
             array('n','Kierującego Grupą (Lidera) zobowiązuję do przedstawienia harmonogramu prac'),
             array('','do dnia '.$this->prDetails['harm_data']),
             array('n','Zobowiązuję do prowadzenia dokumentacji i zapisów zgodnie z procedurami ISO'),
             array('n','Kierującego Grupą (Lidera) zobowiązuję do zakończenia prac i napisania raportu'),
-            array('','z realizacji zadania do dnia '.$this->prDetails['term_realizacji']),
+            array('','z realizacji zadania do dnia '.$this->prDetails['d-term_realizacji']),
             array('n','Nadzór nad realizacją  powierzam - '.$this->prDetails['kier_grupy']),
             array('n','Wykaz powiązanych dokumentów:')
         );
@@ -108,11 +112,12 @@ class PDF extends tFPDF
     function setProjectDocuments()
     {
         // PROJECT DOCUMENTS DOCUMENT
-        foreach($this->prDocs as $keyFiled => $valueToAdd)
+        $this->log->logMulti(0,$this->prDocs ,__METHOD__);
+        foreach($this->prDocs as $valueToAdd)
         {
             //print_r($valueToAdd);
-            array_push($this->pdfBodyPartList,array('l',''.$valueToAdd['NAZWA']));
-        };
+            array_push($this->pdfBodyPartList,array('l',''.$valueToAdd['nazwa']));
+        }
         //print_r($pdfBodyPartList);
     }
     function genDetailPdf()
@@ -123,7 +128,7 @@ class PDF extends tFPDF
         $letterBig=array("a","b","c","d","e","f","g","h","i","j","k","l","m");
         $createDate=explode(' ',$this->prDetails['create_date']);
         $i=0;
-        foreach($this->pdfBodyPartList as $key =>$value)
+        foreach($this->pdfBodyPartList as $value)
         {
             if($value[0]==='n')
             {
@@ -142,7 +147,7 @@ class PDF extends tFPDF
                 $this->Cell(10);
                 $this->Cell(0,10,$value[1],0,1);
             }
-        };
+        }
         $this->SetFont('Lato','',9);
         $this->Cell(10);
         $this->Cell(0,10,'',0,0,'L');
@@ -151,7 +156,7 @@ class PDF extends tFPDF
         $this->Cell(15);
         $this->Cell(0,10,' '.$this->prDetails['kier_grupy'].' ',0,0,'L');
         $this->SetRightMargin(35);
-        $this->Cell(0,10,' '.$this->prMainTech['ImieNazwisko'].' ',0,0,'R');
+        $this->Cell(0,10,' '.$this->prDetails['technolog'].' ',0,0,'R');
         $this->Cell(0,2,'',0,1,'C');
         $this->Cell(0,10,'............................................................................',0,0,'L');
         $this->SetRightMargin(20);
@@ -165,7 +170,7 @@ class PDF extends tFPDF
         $this->Cell(0,6,'',0,1,'C');
         $this->Cell(0,10,'',0,0,'R');
         $this->Cell(0,1,'',0,1,'C');
-        $this->Cell(0,10,'Zatwierdzam : '.$this->prMainManager['ImieNazwisko'].' ',0,0,'R');
+        $this->Cell(0,10,'Zatwierdzam : '.$this->prDetails['kier_osr'].' ',0,0,'R');
         $this->Cell(0,2,'',0,1,'C');
         $this->SetRightMargin(20);
         $this->Cell(0,10,'............................................................................',0,0,'R');
@@ -189,7 +194,7 @@ class PDF extends tFPDF
         $this->Cell(0,10,'realizujących '.$this->prDetails['rodzaj_umowy'].' nr '.$this->prDetails['numer_umowy'],0,0,'L');
         $this->Cell(0,6,'',0,1,'C');
         $this->Cell(0,1,'............................................................................................................................................',0,1,'R');
-        $this->Cell(0,10,'temat '.$this->prDetails['klient'].' '.$this->prDetails['temat_umowy'].' '.$this->prDetails['typ'],0,0,'L');
+        $this->Cell(0,10,'temat '.$this->prDetails['klient'].' '.$this->prDetails['temat_umowy'].' '.$this->prDetails['typ_umowy'],0,0,'L');
         //Cell(width,height,text,border,ln,align,fill,llink)
         $this->Cell(0,6,'',0,1,'C');
         $this->Cell(0,1,'............................................................................................................................................................................',0,1,'R');
@@ -197,10 +202,8 @@ class PDF extends tFPDF
         // Header
         $header = array('L.P.', 'NAZWISKO I IMIĘ', 'DATA OD','DATA DO', 'PODPIS I DATA');
         $width=34;  
-        foreach($header as $id=>$col)
-        {
-            switch($id)
-            {
+        foreach($header as $id=>$col){
+            switch($id){
                 case 0:
                      $width=10;
                     break;
@@ -220,13 +223,10 @@ class PDF extends tFPDF
         $this->Ln();      
         // Data
         $lp=1;
-        foreach($this->prTeam as $row)
-        {
+        foreach($this->prTeam as $row){
             $this->Cell(10,7,$lp,1,0,'C');
-            foreach($row as $id =>$col)
-            {
-                switch($id)
-                {
+            foreach($row as $id =>$col){
+                switch($id){
                     case 'NazwiskoImie':
                         $width=74; 
                         $value=$col;
@@ -240,7 +240,7 @@ class PDF extends tFPDF
                         $width=35.5;
                         $value=$col;
                         break;
-                };
+                }
                 $this->Cell($width,7,$value,1,0,'C');
             }
             // EMPTY CELL FOR PODPIS I DATA
@@ -249,30 +249,16 @@ class PDF extends tFPDF
             $this->Ln();
         }
     }
-    function testData()
-    {
+    function testData(){
         //TEST DATA CONTENT
-        foreach($this->projectDetails as $keyFiled => $valueToAdd)
-        {
+        foreach($this->projectDetails as $keyFiled => $valueToAdd){
             $this->Cell(0,10,$keyFiled." - ".$valueToAdd,0,1,'C');  
         }
     }
-    function setOutput($type)
-    {
-        $avaTypes=array('I','D');
-        if(in_array($type,$avaTypes)) 
-        {
-          $this->outputType=$type;  
-        }
-        else
-        {
-            $this->outputType='I'; 
-        }
+    public function getPdf(){
+        $pdfName='projekt.pdf';
+        $this->Output($this->DOC_ROOT.'/PDF/'.$pdfName,'F');
+        return ($pdfName);
     }
-    function __destruct()
-    {
-        $this->Output('project.pdf',$this->outputType);
-    }
+    function __destruct(){}
 }
-$pdf = new PDF($projectDetails,$projectDoc,$projectTeam,$projectMainManager,$projectMainTech);
-?>

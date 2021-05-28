@@ -25,7 +25,7 @@ class createDoc extends errorConfirm {
         //parent::logMulti(0, $files);
         $this->projectData=$projectDetails;
         $this->fileName=$fileName."_".uniqid().$ext;
-        require_once 'bootstrap.php';
+        require_once DR.'/bootstrap.php';
         // Creating the new document...
         $settings=new \PhpOffice\PhpWord\Settings();
         $settings::setOutputEscapingEnabled(true);
@@ -359,7 +359,7 @@ $row->addCell(1000)->addText('3');
                 self::writeData($convert,$v);   
             }
         }
-        parent::setError(1,'test error');
+        //parent::setError(1,'test error');
     }
     private function writeData($convert,$v){
         parent::log(0,"[".__METHOD__."]");

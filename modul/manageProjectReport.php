@@ -24,7 +24,8 @@ class manageProjectReport extends initialDb{
 
         $this->log(0,"[".__METHOD__."]");
         $this->modul['FILE']=NEW file();
-        $this->modul['FILE']->setUrl(APP_URL."function/showFile.php?dir=tmp_upload&file=");
+        $this->modul['FILE']->setUrl(APP_URL."router.php?task=showProjectReportFile&dir=tmp_upload&file=");
+        //$this->modul['FILE']->setUrl(APP_URL."function/showFile.php?dir=tmp_upload&file=");
         $this->modul['FILE']->setNewFileName($_SESSION['uid']);
         $this->modul['FILE']->setUploadDir($this->DR."/".TMP_UPLOAD_DIR);
         $this->modul['FILE']->setAcceptedFileExtension(array('image/jpeg'));

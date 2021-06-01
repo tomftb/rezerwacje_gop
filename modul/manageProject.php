@@ -1,5 +1,5 @@
 <?php
-class manageProject extends initialDb
+final class manageProject extends initialDb
 {
     protected $responseType='POST';
     private $inpArray=array();
@@ -202,11 +202,11 @@ class manageProject extends initialDb
         $projectTeam=$this->query('SELECT NazwiskoImie,DataOd,DataDo FROM v_proj_prac_v_pdf WHERE idProjekt=?',$this->utilities->getData());
         //require_once($this->DR.'/modul/createPdf.php'); 
         $PDF = new createPdf($projectDetails,$projectDoc,$projectTeam);
-        return($this->response->setResponse(__METHOD__,$PDF->getPdf(),'pPDF','POST'));
+        return($this->response->setResponse(__METHOD__,$PDF->getPdf(),'downloadProjectPdf','POST'));
     }
-    public function pGenDoc()
-    {
+    public function pGenDoc(){
         $this->log(0,"[".__METHOD__."]");
+        //echo 'asdsad';
         if($this->utilities->checkInputGetValInt('id')['status']===1)
         {
             $this->responseType='GET';
@@ -216,8 +216,9 @@ class manageProject extends initialDb
          $projectDetails=$this->query('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`klient`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=? AND `wsk_u`=? ',$this->utilities->getData().",0")[0];
         //$phWord=new PhpWord();
 
-        $DOC = new createDoc($projectDetails,'Project_'.$this->utilities->getData().'.docx');
-        return($this->response->setResponse(__METHOD__,$DOC->getDoc(),'pGenDoc','POST'));
+        $doc = new createDoc($projectDetails,$_FILES,'Project_'.$this->utilities->getData(),'.docx');
+        $doc->createProjectReport();
+        return($this->response->setResponse(__METHOD__,$doc->getDocName(),'downloadProjectDoc','POST'));
     }
     public function getProjectDefaultValues()
     {
@@ -1309,7 +1310,7 @@ class manageProject extends initialDb
         $this->modul['REPORT']->getProjectReportData();
         return($this->response->setResponse(__METHOD__, $this->modul['REPORT']->getProjectReportData(),'pReportOff','POST')); 
     }
-    public function setReportImage(){
+    public function setProjectReportImage(){
         $this->log(0,"[".__METHOD__."]");
         //$this->modul['REPORT']->getTmpReport();
         $data=$this->modul['REPORT']->getTmpFiles();
@@ -1318,10 +1319,51 @@ class manageProject extends initialDb
         }
         return($this->response->setResponse(__METHOD__,$data[1],'showStagePreview','POST')); 
     }
+    public function setProjectReportDoc(){
+        $this->log(0,"[".__METHOD__."]");
+        $this->inpArray=filter_input_array(INPUT_POST);
+        $docName='';
+        /* parse data */
+        //var_dump($this->inpArray);
+        if(!$this->inpArray){
+            $this->response->setError(0,'NO STAGE SELECTED');
+        }
+        else{
+            $doc=new createDoc($this->inpArray,$_FILES,'ProjectReport1','.docx');
+            $doc->createProjectStageReport();
+            if($doc->getError()!==''){
+                $this->response->setError(1,$doc->getError());
+            }
+            else{
+                $docName=$doc->getDocName();
+            }
+        }
+        return($this->response->setResponse(__METHOD__,$docName,'downloadReportDoc','POST'));
+    }
     private function setGetId(){
         if(!$this->utilities->setGetIntKey($this->inpArray['id'],'id')){
              $this->response->setError(1,"[".__METHOD__."] KEY id NOT EXIST OR ID IS NOT INT");
         }
+    }
+    public function downloadProjectPdf(){
+        $this->log(0,"[".__METHOD__."]");
+        $download=new downloadFile();
+        $download->getFile(filter_input(INPUT_GET,"file"));
+    }
+    public function downloadProjectDoc(){
+        $this->log(0,"[".__METHOD__."]");
+        $download=new downloadFile();
+        $download->getFile(filter_input(INPUT_GET,"file"));
+    }
+    public function downloadReportDoc(){
+        $this->log(0,"[".__METHOD__."]");
+        $download=new downloadFile();
+        $download->getFile(filter_input(INPUT_GET,"file"));
+    }     
+    public function showProjectReportFile(){
+        $this->log(0,"[".__METHOD__."]");
+        $showFile=new showFile();
+        $showFile->getFile(filter_input(INPUT_GET,"dir"),filter_input(INPUT_GET,"file"));
     }
     function __destruct()
     {

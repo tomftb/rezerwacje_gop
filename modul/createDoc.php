@@ -4,6 +4,7 @@ class createDoc extends errorConfirm {
     private $fileName='default.docx';
     private $projectData=array();
     private $mainSection;
+    private $files=[];
     /*
     private $css=[
         'name'=>'Arial',// Arial
@@ -14,17 +15,19 @@ class createDoc extends errorConfirm {
     ];
      *
      */
-    private $css=[];
+    private $FontStyle=[];
+    private $ParagraphStyle=[];
     const docDir='DOC/';
     
     function __construct($projectDetails,$files,$fileName,$ext=''){
         parent::__construct();
-        parent::log(0,"[".__METHOD__."]".$fileName);
-        parent::log(0,"[".__METHOD__."]".$ext);
+        parent::log(0,"[".__METHOD__."] FILENAME => ".$fileName);
+        parent::log(0,"[".__METHOD__."] EXTENSION => ".$ext);
         //parent::logMulti(0, $projectDetails);
         //parent::logMulti(0, $files);
         $this->projectData=$projectDetails;
         $this->fileName=$fileName."_".uniqid().$ext;
+        $this->files=$files;
         require_once DR.'/bootstrap.php';
         // Creating the new document...
         $settings=new \PhpOffice\PhpWord\Settings();
@@ -40,12 +43,19 @@ class createDoc extends errorConfirm {
         parent::log(0,"[".__METHOD__."]");
         $this->mainSection = $this->phpWord->addSection();
         self::setUpData(); 
-        parent::log(0,"[".__METHOD__.'] LOAD => \PhpOffice\PhpWord\IOFactory::createWriter()');
-        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
-        /* check is file exist */
-        parent::log(0,"[".__METHOD__.'] SAVE FILE');
-        //$objWriter->setOutputEscapingEnabled(true);
-        $objWriter->save($this->DR."/".self::docDir.$this->fileName);
+        //parent::setError(0,__LINE__.'TEST STOP');
+        if(parent::getError()){
+            /* ERROR EXIST, NO SAVE FILE */
+            return false;
+        }
+        else{
+            parent::log(0,"[".__METHOD__.'] LOAD => \PhpOffice\PhpWord\IOFactory::createWriter()');
+            $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
+            /* check is file exist */
+            parent::log(0,"[".__METHOD__.'] SAVE FILE => '.$this->DR."/".self::docDir.$this->fileName);
+            //$objWriter->setOutputEscapingEnabled(true);
+            $objWriter->save($this->DR."/".self::docDir.$this->fileName);
+        }
     }
     public function createProjectReport(){
         parent::log(0,"[".__METHOD__."]");
@@ -352,16 +362,16 @@ $row->addCell(1000)->addText('3');
             //parent::log(0,"KEY => ".$k);
             if(preg_match("/^\d\d*-t$/",$k)){
                 parent::log(0,"FOUND TITLE ".$k);
-                self::writeData($convert,$v);   
+                self::writeData($convert,$v,$k);   
             }
             if(preg_match("/^\d\d*-\d\d*-value$/",$k)){
                 parent::log(0,"FOUND TEXTAREA ".$k);
-                self::writeData($convert,$v);   
+                self::writeData($convert,$v,$k);   
             }
         }
         //parent::setError(1,'test error');
     }
-    private function writeData($convert,$v){
+    private function writeData($convert,$v,$id){
         parent::log(0,"[".__METHOD__."]");
         $convert->addHtml($v);
         $data=$convert->getHtmlArray();
@@ -371,34 +381,120 @@ $row->addCell(1000)->addText('3');
         }
         else{
             foreach($data as $k => $v){
-                /* KEY v[0] VALUE */
+                /* KEY v[0] VALUE ARRAY */
                 /* KEY v[1] STYLE */
-                self::writeTekst($v[0],$v[1]);
-                //parent::logMulti(0, $v);       
+                self::writeDataToFile($v[0],$v[1],$id);
+                //parent::logMwriteTekstulti(0, $v);       
             }
         }
     }
 
         
-    private function writeTekst($v,$tag){
+    private function writeDataToFile($v,$tag,$id){
         parent::log(0,"[".__METHOD__."]");
-        $this->css=[];
+        $this->FontStyle=[];
+        $this->ParagraphStyle=[];
         //$css=array('name' => 'Tahoma', 'size' => 10, 'color' => '#ff0000', 'bold' => true,'italic'=>true,'underline' => 'single');
         self::setUpTag($tag);
         //array_map(array($this, 'setUpTag'), $tag);
-        parent::log(0,"CSS:");
-        parent::logMulti(0,$this->css);
-        foreach($v as $k => $tekst){
-            parent::log(0,$tekst);  
-            $this->mainSection->addText($tekst,$this->css);//array('underline' => 'single') //$fontStyleName
+        parent::log(0,"FONT STYLE:");
+        parent::logMulti(0,$this->FontStyle);
+        /* PARSE FILE */
+        $filePostion='bottom';
+        $file='';
+        if(preg_match('/value$/',$id)){
+            parent::log(0,"FOUND VALUE");
+            /* GET ID */
+            $tmpId=mb_substr($id,0,-5);
+            parent::log(0,"VALUE ID => ".$tmpId);
+            /* SET FILE POSITION */
+            self::setFilePosition($tmpId,$filePostion);
+            /* SET FILE */
+            self::setFile($tmpId,$filePostion,$file);
         }
+        self::addTextFile($v,$filePostion,$file);   
+    }
+    private function setFilePosition($id,&$filePostion){
+        if(array_key_exists($id."fileposition", $this->projectData)){
+            $filePostion=$this->projectData[$id."fileposition"];
+            UNSET($this->projectData[$id."fileposition"]);
+        }
+        else{
+            parent::log(0,"NO FILE POSITION => STAY DEFAULT ");
+        }
+        parent::log(0,"FILE POSITION => ".$filePostion);
+    }
+    private function setFile($id,&$filePostion,&$file){
+        if(array_key_exists($id."fileData", $this->files)){
+            parent::log(0,"FOUND FILE => ".$this->files[$id."fileData"]);
+            $file=$this->files[$id."fileData"];
+            UNSET($this->files[$id."fileData"]);
+        }
+        else{
+            /* SETUP DEFAULT TEXT POSITION */
+            $filePostion='bottom';
+        }
+    }
+    private function addTextFile($tekstArray,$filePosition,$file){
+        parent::log(0,"[".__METHOD__."] FILE POSITION => ".$filePosition);
+        $this->mainSection = $this->phpWord->addSection(array('breakType' => 'continuous'));
+        //$this->mainSection->addTextBreak();
+        /* NO FILE */
+        if($file===''){
+            array_map(array($this, 'writeTekst'), $tekstArray);
+            return '';
+        }
+        $imageProperties=getimagesize($file);
+        //parent::logMulti(0,$imageProperties);
+        switch($filePosition):
+            default:
+            case 'bottom':    
+                /* ADD TEXT */
+                array_map(array($this, 'writeTekst'), $tekstArray);
+                /* ADD FILE - IMAGE */
+                $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1]));
+                break;
+            case 'top':
+                /* ADD FILE */
+                 $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1]));
+                /* ADD TEXT */
+                array_map(array($this, 'writeTekst'), $tekstArray);
+                break;
+            case 'left':
+                self::setMultiColumnSection();
+                $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1]));
+                array_map(array($this, 'writeTekst'), $tekstArray);
+                self::setMultiColumnSection();
+                break;
+            case 'right':
+                self::setMultiColumnSection();
+                array_map(array($this, 'writeTekst'), $tekstArray);
+                //$this->mainSection->addText($tekstArray[0],$this->FontStyle,$this->ParagraphStyle);    
+                //$this->mainSection->addText($tekstArray[0],$this->FontStyle,$this->ParagraphStyle);  
+                
+                $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1]));
+                self::setMultiColumnSection();
+                break;
+        endswitch;
+    }
+    private function writeTekst($tekst){
+         $this->mainSection->addText($tekst,$this->FontStyle,$this->ParagraphStyle);//array('underline' => 'single') //$fontStyleName          
+    }
+    private function setMultiColumnSection($colNum=2,$colSpace=10,$breakType='continuous'){
+        $this->mainSection = $this->phpWord->addSection(array(
+                                                                'colsNum'   => $colNum,
+                                                                'colsSpace' => $colSpace,
+                                                                'breakType' => $breakType
+                                                            ));
     }
     private function setUpTag($t){
         parent::log(0,"[".__METHOD__."]");      
         /* PARSE STYLE FROM THE END LAST STYLE MOST IMPORTANT */
         for($i=count($t);$i>0;$i--){
             parent::logMulti(0,$t[$i-1]);      
+            /* PARSE CSS STYLE */
             self::parseStyle($t[$i-1][1]);
+            /* PARSE HTML TAG */
             self::parseTag($t[$i-1][0]);
         }        
     }
@@ -408,10 +504,10 @@ $row->addCell(1000)->addText('3');
             parent::log(0,"[".__METHOD__."] KEY STYLE IS NOT AN ARRAY => OMIT");
             return false;
         }
-        $avaStyle=['font-size'=>'size','color'=>'color','font-family'=>'name','font-weight'=>'bold','background-color'=>'fgColor'];
+        $avaStyle=['font-size'=>'size','color'=>'color','font-family'=>'name','font-weight'=>'bold','background-color'=>'fgColor','text-align'=>'align'];
         //parent::logMulti(0,$style);
         foreach($style as $s){
-            $val=explode(':',$s);
+            $val=explode(':',$s); 
             self::checkStyleProperty($avaStyle,$val);        
         /* text-decoration => underline, font-weight => normal, bold */
         }
@@ -422,15 +518,18 @@ $row->addCell(1000)->addText('3');
             return false;
         }
         $val[0]=mb_strtolower(trim($val[0]));
+        $val[1]=mb_strtolower(trim($val[1]));
         if(!array_key_exists($val[0], $avaStyle)){
             parent::setError(0,'WRONG STYLE '.$val[0].' STYLE UNAVALIABLE');
             //parent::log(0,"[".__METHOD__."] UNAVALIABLE STYLE => ".$val[0]);   
             return false;     
         }
-        if(!array_key_exists($avaStyle[$val[0]], $this->css)){
+        if(!array_key_exists($avaStyle[$val[0]], $this->FontStyle)){
             self::parseSizeType($avaStyle[$val[0]],$val[1]);
             self::parseFontWeight($avaStyle[$val[0]],$val[1]);
-            $this->css[$avaStyle[$val[0]]]=$val[1];
+             /* SETUP TEXT ALIGN */
+            $this->FontStyle[$avaStyle[$val[0]]]=$val[1];
+            self::parseTextAlign($avaStyle[$val[0]],$val[1]);
         }
     }
     private function parseTag($tag){
@@ -452,10 +551,8 @@ $row->addCell(1000)->addText('3');
         /* change tag name */
         $tag=$avaTag[$tag][0];
         
-        if(!array_key_exists($tag, $this->css)){
-            
-            //self::parseFontWeight($avaTag[$tag],$tag);
-            $this->css[$tag]=$tagValue;
+        if(!array_key_exists($tag, $this->FontStyle)){
+            $this->FontStyle[$tag]=$tagValue;
         }
         else{
             parent::log(0,"[".__METHOD__."] STYLE ALREADY SETUP => ".$tag);   
@@ -496,10 +593,24 @@ $row->addCell(1000)->addText('3');
             /* NO FONT-WEIGHT */
             //$weight=false;
         }
-        
+    }
+    private function parseTextAlign($style,$align){
+        parent::log(0,"[".__METHOD__."] STYLE => ".$style.", ALIGN => ".$align);
+        if($style!=='align'){ return false; }
+        $cssAlign=[
+                'center'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER,
+                'left'=>\PhpOffice\PhpWord\SimpleType\Jc::LEFT,
+                'right'=>\PhpOffice\PhpWord\SimpleType\Jc::RIGHT];
+        if(!array_key_exists($align,$cssAlign)){
+            parent::setError(0,'WRONG STYLE ALIGN ATTRIBUTE => '.$align);
+        }
+        else{
+            $this->ParagraphStyle['align']=$cssAlign[$align];       
+            UNSET($this->FontStyle['align']);
+        }
     }
     public function getDocName(){
-        return self::docDir.$this->fileName;
+        return $this->fileName;
     }
     function _desctruct(){
         parent::log(0,"[".__METHOD__."]");

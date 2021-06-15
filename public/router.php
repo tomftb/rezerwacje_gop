@@ -89,7 +89,8 @@ class Router extends validPerm
         ['downloadReportDoc','GEN_PROJ_REP_DOC','user','file'],
         ['pGenDoc','GEN_DOC_PROJ','user'],
         ['downloadProjectDoc','GEN_DOC_PROJ','user','file'],
-        ['showProjectReportFile','GEN_PROJ_REP_DOC','user','file']
+        ['showProjectReportFile','GEN_PROJ_REP_DOC','user','file'],
+        ['setProjectReport','SAVE_PROJ_REPORT','user','json']
     ];
     private $modul=[];
     private $modulData=[];
@@ -189,8 +190,22 @@ class Router extends validPerm
         array_push($this->modul,new manageUser());
         array_push($this->modul,new manageEmployee());
         array_push($this->modul,new manageProjectStage());
+        array_push($this->modul,new manageProjectReport());
     }
     private function loadMethod(){
+        try { 
+            /* CHEK METHOD EXIST, AND IS THERE ONLY ONE METHOD */
+            self::findMethod();
+            
+        } 
+        catch (Throwable $t) { // Executed only in PHP 7, will not match in PHP 5.x         
+            parent::setError($t->getCode(),$t->getMessage(),$t->getFile());
+        } 
+        catch (Exception $e) {// Executed only in PHP 5.x, will not be reached in PHP 7
+            parent::setError($e->getCode(),$e->getMessage(),$e->getFile());
+        }
+    }
+    private function findMethod(){
         $methodFound=array(); // counter
         $methodFoundCounter=0;
         foreach($this->modul as $id => $name){
@@ -201,16 +216,16 @@ class Router extends validPerm
             }
         }
         if($methodFoundCounter===0){
-            parent::setError(1,'Task not exists => '.$this->urlGetData['task']);    
+            throw New Exception('Task not exists => '.$this->urlGetData['task'],1);
         }
         else if($methodFoundCounter>1){
-            parent::setError(1,' Task avaliable in more than one model => '.$this->urlGetData['task']);  
+            throw New Exception('Task avaliable in more than one model => '.$this->urlGetData['task'],1);
         }
         else{
             $this->modulData=$this->modul[$methodFound[0]]->{$this->urlGetData['task']}();
         }
     }
-    function parseReturnData(){
+    private function parseReturnData(){
         if(parent::getError()) { return '';}
         if($this->modulData['status']===true){
             parent::setError(0,$this->modulData['info']);
@@ -232,7 +247,7 @@ class Router extends validPerm
             /* setup file */
         }
     }
-    function __destruct(){
+    public function __destruct(){
         if(parent::getError()){
             parent::log(2,"[".__METHOD__."] ERROR EXIST: ".parent::getError());
             echo json_encode(array('status'=>1,'type'=>'POST','data'=>array(),'info'=>parent::getError()));

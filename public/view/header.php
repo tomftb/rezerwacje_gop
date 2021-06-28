@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title><?=APP_TITLE?></title>
 <!-- CSS -->
-<link rel="stylesheet" href="<?=APP_URL?>/css/mycss.css" >
+<link rel="stylesheet" href="<?=APP_URL?>/css/gt-admin.css" >
 <link rel="stylesheet" href="<?=APP_URL?>/css/bootstrap.min.4.5.3.css" >
 <link rel="stylesheet" href="<?=APP_URL?>/css/bootstrap-datepicker.min.css" >
 <link rel="stylesheet" href="<?=APP_URL?>/css/font-awesome.min.4.7.0.css" >

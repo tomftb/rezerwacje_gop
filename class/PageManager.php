@@ -20,6 +20,9 @@ class PageManager
     private static function loadBody($idPage){
         switch ($idPage):
                         default:  
+                        case 1:
+                                New RezerwujKlaster();
+                            break;    
                         case 3:
                                 New Projekty();
                             break;

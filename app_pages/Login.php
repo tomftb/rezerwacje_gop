@@ -2,8 +2,20 @@
 final class Login extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_UZYT';
-    private $view=['Login/Head.php','Login/Body.php','Login/Footer.php'];
-    private $js=[];
+    private $view=['vLogin.php'];
+    private $js=[
+                'jquery-3.3.1.min.js',
+                'jquery-ui-1.10.1.custom/jquery-ui-1.10.1.custom.min.js',
+                'bootstrap-4.1.3.min.js'];
+    private $css=[
+        'bootstrap.min.4.1.1.css',
+        'gt-admin.css'
+    ];
+    private $meta=[
+                    'http-equiv="content-type" content="text/html; charset=UTF-8"',
+                    'name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"'
+            ];
+
     private $loginErr='';
     private $loginBgColor='';
 	
@@ -21,7 +33,9 @@ final class Login extends Page{
     public function setPage(){
 	$this->Log->log(0,"[".__METHOD__."]");
 	parent::setJs($this->js);
+        parent::setCSS($this->css);
         parent::setView($this->view);
+        parent::setMeta($this->meta);
         parent::setMainPerm($this->mainPerm);
     }
     public function checkLogin(){

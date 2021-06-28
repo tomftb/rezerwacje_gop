@@ -7,3 +7,5 @@ error_php56.log
 .cfg/config.php
 tmp_upload/*
 upload/*
+DOC/*
+PDF/*

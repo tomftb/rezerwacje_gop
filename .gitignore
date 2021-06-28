@@ -1,5 +1,9 @@
 log/*
 access.log
 error.log
+access_php56.log
+error_php56.log
 /nbproject/private/
 .cfg/config.php
+tmp_upload/*
+upload/*

@@ -10,6 +10,7 @@ define('UPLOAD_DIR','upload/');
 define('CDT',date('Y-m-d H:i:s'));
 define('RA',filter_input(INPUT_SERVER,"REMOTE_ADDR"));
 define('DR_PUBLIC',filter_input(INPUT_SERVER,"DOCUMENT_ROOT"));
+define('APP_AUTHOR',"Autor: Tomasz Borczyński");
 /*
 	LOG LEVEL:
 	0 = basic

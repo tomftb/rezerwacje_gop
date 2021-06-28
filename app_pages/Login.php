@@ -1,9 +1,8 @@
 <?php
-
 final class Login extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_UZYT';
-    private $view=['headerLogin.php','vLogin.php','footerLogin.php'];
+    private $view=['Login/Head.php','Login/Body.php','Login/Footer.php'];
     private $js=[];
     private $loginErr='';
     private $loginBgColor='';

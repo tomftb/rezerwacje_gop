@@ -53,5 +53,14 @@ abstract class Page{
     public function setMainPerm($perm=''){
         $this->mainPerm=$perm;
     }
+    public function setHead(){
+        
+    }
+    public function setBody(){
+        
+    }
+    public function setFooter(){
+        
+    }
     public function __destruct(){}
 }

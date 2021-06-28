@@ -1,4 +1,5 @@
-<?php if(!defined('APP_NAME')) { die();};?>
+<?php if(!defined('APP_NAME')) { die();}?>
+<body>
 <div class="login-page">
 	<div class="container">
 		<div class="row">
@@ -58,3 +59,4 @@
 		</div>
 	</div>
 </div>
+

@@ -1,5 +1,5 @@
 <?php
-class Response extends errorConfirm {
+class Response {
     //put your code here
     private $response=array(
         'status'=>0,
@@ -8,30 +8,34 @@ class Response extends errorConfirm {
         'modul'=>'Employee',
         'data'=>array()
     );
+    private $Log;
+    private $Error;
     function __construct($m)
     {
         /*
          * m => modul
          */
-        parent::__construct();
+        $this->Log=Logger::init(__METHOD__);
+        $this->Error=New ErrorHandler();
+        $this->Log->log(0,"[".__METHOD__."]");
         $this->response['modul']=$m;
     }
-    public function setErrResponse($s='1',$i='',$t='GET')
+    public function setErrResponse($i='',$t='GET')
     {
-        $this->log(0,"[".__METHOD__."] ERROR EXIST");
-        $this->response['status']=$s;
+        $this->Log->log(0,"[".__METHOD__."] ERROR EXIST");
+        $this->response['status']=1;
         $this->response['info']=$i;
         $this->response['type']=$t;   
     }
     public function setResponse($m,$d,$f='cModal',$t='GET')
     {
-        if($this->getError()!=='')
+        if($this->Error->getError()!=='')
         {
-            $this->setErrResponse(1,$this->getError(),$t);
+            $this->setErrResponse($this->Error->getError(),$t);
         }
         else
         {
-            $this->log(0,"[".__METHOD__."] NO ERROR");
+            $this->Log->log(0,"[".__METHOD__."] NO ERROR");
             $this->response['data']['task']=self::parseTask($m);
             $this->response['data']['function']=$f;
             $this->response['data']['value']=$d;
@@ -39,17 +43,32 @@ class Response extends errorConfirm {
         }
         return $this->response;
     }
+    public function getErrResponse($i='',$t='GET')
+    {
+        $this->Log->log(0,"[".__METHOD__."] ERROR EXIST:");
+        $this->Log->log(0,$i);
+        $this->response['status']=1;
+        $this->response['info']='[ERROR] Wystąpił błąd aplikacji! Skontaktuj się z Administratorem!';
+        $this->response['type']=$t;   
+        return $this->response;
+    }
     public function getResponse()
     {
         return ($this->response);
+    }
+    public function setError($d='',$l=0){
+        $this->Error->setError($d,$l);
+    }
+    public function getError(){
+        $this->Error->getError();
     }
     public function setStatus()
     {
         
     }
-    public function setType()
+    public function setType($type='GET')
     {
-        
+        $this->response['type']=$type;
     }
     private function parseTask($t)
     {

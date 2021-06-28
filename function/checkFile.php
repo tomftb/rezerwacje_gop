@@ -12,19 +12,17 @@ function checkFile($plik)
 			}
 			else
 			{
-				echo "<p class=\"P_LOAD_FILE\"><span class=\"S_LOAD_ERR\">Brak prawa do odczytu </span>- ".$plik."</p>";
-							
+				echo "<p class=\"P_LOAD_FILE\"><span class=\"S_LOAD_ERR\">Brak prawa do odczytu </span>- ".$plik."</p>";			
 			}
 		}
 		else
 		{
 			echo "<p class=\"P_LOAD_FILE\"><span class=\"S_LOAD_ERR\">Typ pliku nie regularny </span>- ".$plik."</p>";
-		};
+		}
 	}
 	else
 	{
-		echo "<p class=\"P_LOAD_FILE\"><span class=\"S_LOAD_ERR\">Plik nie istnieje </span>- ".$plik."</p>";	
-	};
+            echo "<p class=\"P_LOAD_FILE\"><span class=\"S_LOAD_ERR\">Plik nie istnieje </span>- ".$plik."</p>";	
+	}
 return 0;
-};
-?>
+}

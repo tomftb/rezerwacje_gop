@@ -109,7 +109,7 @@ function __construct($orientation='P', $unit='mm', $size='A4')
 	{
 		$this->fontpath = FPDF_FONTPATH;
 		if(substr($this->fontpath,-1)!='/' && substr($this->fontpath,-1)!='\\')
-			$this->fontpath .= '/';
+			$this->fontpath .= '/';  
 	}
 	elseif(is_dir(dirname(__FILE__).'/font'))
 		$this->fontpath = dirname(__FILE__).'/font/';
@@ -491,17 +491,27 @@ function AddFont($family, $style='', $file='', $uni=false)
 	$fontkey = $family.$style;
 	if(isset($this->fonts[$fontkey]))
 		return;
-
 	if ($uni) {
-		if (defined("_SYSTEM_TTFONTS") && file_exists(_SYSTEM_TTFONTS.$file )) { $ttffilename = _SYSTEM_TTFONTS.$file ; }
-		else { $ttffilename = $this->_getfontpath().'unifont/'.$file ; }
+		if (defined("_SYSTEM_TTFONTS") && file_exists(_SYSTEM_TTFONTS.$file ))
+                {
+                    $ttffilename = _SYSTEM_TTFONTS.$file ;
+                }
+		else 
+                {
+                    $ttffilename = $this->_getfontpath().'unifont/'.$file ;
+                }
 		$unifilename = $this->_getfontpath().'unifont/'.strtolower(substr($file ,0,(strpos($file ,'.'))));
-		$name = '';
+                $name = '';
 		$originalsize = 0;
+               
 		$ttfstat = stat($ttffilename);
+                
 		if (file_exists($unifilename.'.mtx.php')) {
 			include($unifilename.'.mtx.php');
+                        // OVERWRITE T.B.
+                        $ttffile=$ttffilename;
 		}
+
 		if (!isset($type) ||  !isset($name) || $originalsize != $ttfstat['size']) {
 			$ttffile = $ttffilename;
 			require_once($this->_getfontpath().'unifont/ttfonts.php');

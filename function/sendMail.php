@@ -1,5 +1,6 @@
 <?php
 require_once($DOC_ROOT.'/function/checkFile.php');
+require_once(filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/class/logToFile.php");
 if(checkFile($DOC_ROOT.'/.cfg/config.php')) include_once($DOC_ROOT.'/.cfg/config.php');
 
 $rPlik=filter_input(INPUT_POST,"rozmiarPlik",FILTER_VALIDATE_INT);
@@ -30,11 +31,16 @@ $mail = new PHPMailer\PHPMailer\PHPMailer();
 //GET EMAIL PARAMETERS
 $dbLink->query('SELECT SKROT,WARTOSC FROM parametry WHERE UPPER(SKROT) LIKE (?) ','MAIL_%');
 
-class EMAIL
+class EMAIL extends logToFile
 {
     private $flattenParm=array();
     private $parm=array();
     private $data=array();
+    function __construct()
+    {
+        $this->log(0,"[".__METHOD__."]");
+        parent::__construct();
+    }
     public function setData($data)
     {
        

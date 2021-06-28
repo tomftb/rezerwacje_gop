@@ -67,15 +67,14 @@ class file {
     }
     public function uploadFiles(){
         self::log(__METHOD__);
-        if($this->err){ return false;}
+        if($this->err){ return array();}
         $n=0;
         try {
             self::log(__METHOD__,"FILES:");
             self::logMulti($_FILES);
             foreach($_FILES as $k => $f){
-            move_uploaded_file($_FILES[$k]["tmp_name"], $this->uploadDir.$this->newFileName.'_'.$n.'.jpeg');
-            $this->uploadFiles[$k]=$this->url.$this->newFileName.'_'.$n.'.jpeg';
-            $n++;
+                self::setupFile($_FILES[$k],$k,$n);
+                $n++;
             }
         } 
         catch (Throwable $t) { // Executed only in PHP 7, will not match in PHP 5.x         
@@ -123,6 +122,41 @@ class file {
     }
     private function checkFileName(){
         self::log(__METHOD__);
+    }
+    private function checkFileSize($tmpFile){
+        self::log(__METHOD__);
+    }
+    private function checkFileType($tmpFile){
+        self::log(__METHOD__);
+    }
+    private function checkFile($tmpFile){
+        
+    }
+    private function checkFilePresent($tmpFile){
+        self::log(__METHOD__);
+        if(intval($tmpFile['error'],10)===4){
+                self::log('','NO FILE: err lvl => '.$tmpFile['error']);
+                return false;
+        }
+        return true;
+    }
+    private function setupFile($tmpFile,$k,$n){
+        self::log(__METHOD__);
+        if($this->err){ return false;}
+        if(!self::checkFilePresent($tmpFile)){
+            return false;
+        }
+        else{
+            self::checkFileSize($tmpFile);
+            self::checkFileType($tmpFile);
+            self::moveFile($tmpFile,$k,$n);
+        }   
+    }
+    private function moveFile($tmpFile,$k,$n){
+        self::log(__METHOD__);
+        if($this->err){ return false;}
+        move_uploaded_file($tmpFile["tmp_name"], $this->uploadDir.$this->newFileName.'_'.$n.'.jpeg');
+        $this->uploadFiles[$k]=$this->url.$this->newFileName.'_'.$n.'.jpeg';
     }
     public function __destruct(){
         

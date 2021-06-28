@@ -1,15 +1,6 @@
-<?php
-if(!defined("DR")){
-    die('Direct access not permitted');
-
-}
-else{
-    require_once(DR."/function/redirectToLoginPage.php");
-    require_once(DR."/modul/mValidUrl.php");
-} 
-?>
+<?php if(!defined("APP_URL")){ die('Direct access not permitted');} ?>
 <body>
-<div class="w-100 "  style="margin-top:-65px;position:fixed; z-index:996;">
+<div class="w-100 "  style="margin-top:-55px;position:fixed; z-index:996;">
     <div class="row">
         <div class=" col-sm-4" >
             <div class="btn pull-left mt-0" > 

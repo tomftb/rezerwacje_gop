@@ -1,5 +1,8 @@
 <?php
-class dbManage extends errorConfirm
+/*
+	TODO -> SINGLETON
+*/
+abstract class dbManage extends errorConfirm
 {
     private $dbLink;
     private $Parm=array('host'=>'','database'=>'','port'=>0,'user'=>'','password'=>'','log_lvl'=>0,'pass_cipher'=>'n');
@@ -15,41 +18,36 @@ class dbManage extends errorConfirm
     private $query;
     private $sth;
     
-    function __construct($host="",$database="",$port="",$user="",$password="",$log_lvl=0,$pass_cipher='n')
+    protected function __construct($host="",$database="",$port="",$user="",$password="",$log_lvl=0,$pass_cipher='n')
     {
         parent::__construct();
         $this->log(2,"[".__METHOD__."]");
         $this->cDT=date('Y-m-d H:i:s');
         $this->RA=filter_input(INPUT_SERVER,"REMOTE_ADDR");
-	self::setDbParm(get_defined_vars());
-	//$this->checkHost($this->Parm['host'],$this->Parm['port']); otwiera polaczenie, ale go nie zamyka !! nie uzywac (testowo ddoana metoda)
-	$this->checkLibraryExists($this->library[0],0);
-        if(!$this->getError())
-        {
-            $this->connectDB();
+		self::setDbParm(get_defined_vars());
+		//$this->checkHost($this->Parm['host'],$this->Parm['port']); otwiera polaczenie, ale go nie zamyka !! nie uzywac (testowo ddoana metoda)
+		$this->checkLibraryExists($this->library[0],0);
+        if(!$this->getError()){
+			$this->connectDB();
         }
     }
-    public function connectDB()
-    {
+    protected function connectDB(){
         $this->log(2,"[".__METHOD__."] ");
         self::isPassCipher();
-	try
-	{
+		try
+		{
             $this->dbLink = new PDO("mysql:host=".$this->Parm['host'].";dbname=".$this->Parm['database'].";port=".$this->Parm['port'].";encoding=utf8", $this->Parm['user'], $this->Parm['password']);
             $this->dbLink->exec("set names utf8");
             $this->dbLink->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // parametr ,a nastepnie wartosc dla paraemtru // PDO::ERRMODE_EXCEPTION
             $this->dbLink->setAttribute( PDO::ATTR_EMULATE_PREPARES,true); // production set to - false
             $this->dbLink->setAttribute( PDO::ATTR_PERSISTENT, 0); // false
             //$this->dbLink->setAttribute( PDO::ATTR_AUTOCOMMIT,0);
-	}
-	catch (PDOException $e)
-	{
-            // pelny blad piszemy samo $e
+		}
+		catch (PDOException $e){
             $this->setError(2,"[ERROR][".__METHOD__."] Wystąpił błąd bazy danych :</br>".$e->getMessage()."</br>Powiadom administratora Tomasza Borczyńskiego.");
-	}			
+		}			
     }
-    private function isPassCipher()
-    {
+    private function isPassCipher(){
         $this->log(2,"[".__METHOD__."] ");
         /*
          * only base64

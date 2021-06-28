@@ -23,8 +23,6 @@ class createDoc extends errorConfirm {
         parent::__construct();
         parent::log(0,"[".__METHOD__."] FILENAME => ".$fileName);
         parent::log(0,"[".__METHOD__."] EXTENSION => ".$ext);
-        //parent::logMulti(0, $projectDetails);
-        //parent::logMulti(0, $files);
         $this->projectData=$projectDetails;
         $this->fileName=$fileName."_".uniqid().$ext;
         $this->files=$files;
@@ -33,16 +31,12 @@ class createDoc extends errorConfirm {
         $settings=new \PhpOffice\PhpWord\Settings();
         $settings::setOutputEscapingEnabled(true);
         $this->phpWord = new \PhpOffice\PhpWord\PhpWord();
-        
-        //parent::logMulti(0, var_dump($settings));
-        //$settings= new \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
-        
-        //parent::setError(1,'test error');
     }
     public function createProjectStageReport(){
         parent::log(0,"[".__METHOD__."]");
         $this->mainSection = $this->phpWord->addSection();
-        self::setUpData(); 
+        empty($this->projectData) ? parent::setError(0,"NO STAGE DATA SELECTED") :  self::setUpData(); 
+       
         //parent::setError(0,__LINE__.'TEST STOP');
         if(parent::getError()){
             /* ERROR EXIST, NO SAVE FILE */
@@ -445,24 +439,24 @@ $row->addCell(1000)->addText('3');
             return '';
         }
         $imageProperties=getimagesize($file);
-        //parent::logMulti(0,$imageProperties);
+        parent::logMulti(0,$imageProperties);
         switch($filePosition):
             default:
             case 'bottom':    
                 /* ADD TEXT */
                 array_map(array($this, 'writeTekst'), $tekstArray);
                 /* ADD FILE - IMAGE */
-                $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1]));
+                $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER));
                 break;
             case 'top':
                 /* ADD FILE */
-                 $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1]));
+                 $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER));
                 /* ADD TEXT */
                 array_map(array($this, 'writeTekst'), $tekstArray);
                 break;
             case 'left':
                 self::setMultiColumnSection();
-                $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1]));
+                $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER));
                 array_map(array($this, 'writeTekst'), $tekstArray);
                 self::setMultiColumnSection();
                 break;
@@ -472,7 +466,7 @@ $row->addCell(1000)->addText('3');
                 //$this->mainSection->addText($tekstArray[0],$this->FontStyle,$this->ParagraphStyle);    
                 //$this->mainSection->addText($tekstArray[0],$this->FontStyle,$this->ParagraphStyle);  
                 
-                $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1]));
+                $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER));
                 self::setMultiColumnSection();
                 break;
         endswitch;

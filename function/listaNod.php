@@ -1,5 +1,12 @@
 <?php
-require_once($_SERVER["DOCUMENT_ROOT"]."/function/redirectToLoginPage.php");
+if(!defined("DR")){
+    die('Direct access not permitted');
+}
+else{
+    require_once(DR."/function/redirectToLoginPage.php");
+    require_once(DR."/.cfg/config.php");
+} 
+$dbLink=NEW initialDb();
 /*
  * CREATE SELECT OPTION LIST
  */

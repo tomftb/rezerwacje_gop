@@ -1,7 +1,7 @@
 <?php
-require_once($_SERVER["DOCUMENT_ROOT"]."/function/redirectToLoginPage.php");
-if(checkPerm('EDIT_KLAST',$_SESSION['perm'],0))
-{
+if(!defined("DR")){ die('Direct access not permitted'); }
+//require_once($_SERVER["DOCUMENT_ROOT"]."/function/redirectToLoginPage.php");
+if(checkPerm('EDIT_KLAST',$_SESSION['perm'],0)){
     if(ISSET($_POST["rezerwuj"]))
     {	//echo "Wcisnieto \"rezerwuj\"</br>";
         //echo "<p class=\"P_LOAD_FILE\"><span class=\"S_LOAD_OK\">Załadowano funkcję </span>- ".basename(__FILE__,'.php')."</p>";
@@ -25,4 +25,3 @@ if(checkPerm('EDIT_KLAST',$_SESSION['perm'],0))
         $dbLink->query($updateNod,$updateNodValue);
     }
 }
-

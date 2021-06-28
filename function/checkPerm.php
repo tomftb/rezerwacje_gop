@@ -3,11 +3,24 @@ function checkPerm($perm,$permArray,$stop=1)
 {
     if(!in_array($perm,$permArray))
     {
-        parseStop($stop);
+        parseStop($perm,$stop);
     }
     else
     {
         return 1;
+    }
+}
+function parseStop($perm,$stop)
+{
+    if($stop)
+    {
+        showErr($perm);
+        die(); 
+    }
+    else
+    {
+        //echo '<div class="container" style="margin-top:100px;"></div>';
+        return 0;
     }
 }
 function showErr($perm)
@@ -19,18 +32,4 @@ function showErr($perm)
     echo '</div>';
     echo '</div>'; 
     if(checkFile($DOC_ROOT.'/view/footer.php')) {include ($DOC_ROOT.'/view/footer.php');}
-}
-function parseStop($perm,$stop)
-{
-    
-    if($stop)
-    {
-        showErr($perm);
-        die(); 
-    }
-    else
-    {
-        echo '<div class="container" style="margin-top:100px;"></div>';
-        return 0;
-    }
 }

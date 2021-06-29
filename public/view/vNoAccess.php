@@ -1,11 +1,6 @@
-<div class="alert alert-danger row" id="errDiv-Adapted-overall">
-    <span id="errText-Adapted-overall">BRAK DOSTĘPU</span>
+<div class="row mt-5">
+    <div class="alert alert-danger col-12 mt-5" id="errDiv-Adapted-overall">
+        <span id="errText-Adapted-overall">[<?=$this->mainPerm?>] NO ACCESS</span>
+    </div>
 </div>
-<?php
-
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 

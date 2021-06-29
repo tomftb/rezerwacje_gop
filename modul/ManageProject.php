@@ -1083,22 +1083,25 @@ final class ManageProject implements ManageProjectCommand
     public function pDetails()
     {
         $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-        $v=$this->query('SELECT `id`,`numer_umowy`,`klient`,`temat_umowy`,`term_realizacji`,`harm_data`,`koniec_proj`,`quota`,`r_dane` FROM v_all_proj_v10 WHERE id=?',$this->idProject)[0];       
-        $v['rodzaj_umowy']=self::setProjectRodzajUmowy($this->query('SELECT `rodzaj_umowy_id` as "ID",`rodzaj_umowy` as "Nazwa",`rodzaj_umowy_alt` as "NazwaAlt" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_um_proj WHERE 1=? ORDER BY ID ASC ',1));               
-        $v['nadzor']=self::setProjectMember($this->query('SELECT `nadzor_id` as "id",`nadzor` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_lider_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1));
-        $v['kier_grupy']=self::setProjectMember($this->query('SELECT `kier_grupy_id` as "id",`kier_grupy` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_kier_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1));
-        $v['gl_tech']=self::setProjectMember($this->query('SELECT `technolog_id` as "id",`technolog` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_glow_tech_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1));
-        $v['gl_kier']=self::setProjectMember($this->query('SELECT `kier_osr_id` as "id",`kier_osr` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_kier_osr_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1));      
-        $v['typ_umowy']=self::setProjectDict($this->query('SELECT `typ_id` as "ID",`typ` as "Nazwa" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_typ_um WHERE 1=? ORDER BY ID ASC ',1));
-        $v['system_umowy']=self::setProjectDict($this->query('SELECT `system_id` as "ID",`system` as "Nazwa" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_sys_um WHERE 1=? ORDER BY ID ASC ',1));
-        $v['unitSlo']=self::setProjectUnitSlo($this->query('SELECT `j_dane` FROM `v_all_proj_v10` WHERE id=?',$this->idProject)[0]['j_dane']);
+        $sql=[
+            ':id'=>[$this->idProject,'INT']
+        ];
+        $v=$this->dbLink->squery('SELECT `id`,`numer_umowy`,`klient`,`temat_umowy`,`term_realizacji`,`harm_data`,`koniec_proj`,`quota`,`r_dane` FROM v_all_proj_v10 WHERE id=:id',$sql)[0];       
+        $v['rodzaj_umowy']=self::setProjectRodzajUmowy($this->dbLink->squery('SELECT `rodzaj_umowy_id` as "ID",`rodzaj_umowy` as "Nazwa",`rodzaj_umowy_alt` as "NazwaAlt" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_um_proj ORDER BY ID ASC'));               
+        $v['nadzor']=self::setProjectMember($this->dbLink->squery('SELECT `nadzor_id` as "id",`nadzor` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_lider_proj ORDER BY ImieNazwisko ASC'));
+        $v['kier_grupy']=self::setProjectMember($this->dbLink->squery('SELECT `kier_grupy_id` as "id",`kier_grupy` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_kier_proj ORDER BY ImieNazwisko ASC'));
+        $v['gl_tech']=self::setProjectMember($this->dbLink->squery('SELECT `technolog_id` as "id",`technolog` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_glow_tech_proj ORDER BY ImieNazwisko ASC'));
+        $v['gl_kier']=self::setProjectMember($this->dbLink->squery('SELECT `kier_osr_id` as "id",`kier_osr` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_kier_osr_proj ORDER BY ImieNazwisko ASC'));      
+        $v['typ_umowy']=self::setProjectDict($this->dbLink->squery('SELECT `typ_id` as "ID",`typ` as "Nazwa" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_typ_um ORDER BY ID ASC'));
+        $v['system_umowy']=self::setProjectDict($this->dbLink->squery('SELECT `system_id` as "ID",`system` as "Nazwa" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_sys_um ORDER BY ID ASC'));
+        $v['unitSlo']=self::setProjectUnitSlo($this->dbLink->squery('SELECT `j_dane` FROM `v_all_proj_v10` WHERE id=:id',$sql)[0]['j_dane']);
         $v['project']=self::getProjectData($this->idProject);
-        $v['dokPowiazane']=$this->query('SELECT ID,NAZWA as "Nazwa" FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$this->idProject);
-        return($this->response->setResponse(__METHOD__, $v,'pDetails','POST')); 
+        $v['dokPowiazane']=$this->dbLink->squery('SELECT ID,NAZWA as "Nazwa" FROM v_proj_dok WHERE ID_PROJEKT=:id ORDER BY id ASC',$sql);
+        echo json_encode($this->response->setResponse(__METHOD__, $v,'pDetails','POST')); 
     }
     private function setProjectUnitSlo($j_dane)
     {
-        $slo=$this->query("SELECT `NAZWA` FROM `slo_jednostka_miary` WHERE `ID`>? AND `WSK_U`=? ORDER BY ID ASC ","0,0");
+        $slo=$this->dbLink->squery("SELECT `NAZWA` FROM `slo_jednostka_miary` WHERE `ID`>0 AND `WSK_U`='0' ORDER BY ID ASC ");
         $all=array($j_dane);
         foreach($slo as $i => $v)
         {
@@ -1170,15 +1173,16 @@ final class ManageProject implements ManageProjectCommand
         $this->Log->log(0,"[".__METHOD__."]");
         if($this->utilities->checkInputGetValInt('id')['status']===1)
         {
-            $this->response->setError(1,$this->utilities->getInfo());
+            Throw New Exception ($this->utilities->getInfo(),1);
         }
-        else
-        {
-            $v['id']=$this->utilities->getData();
-            $v['project']=self::getProjectData($v['id']);
-            $v['email']=$this->query('SELECT Pracownik,Pracownik_email AS Email FROM v_all_prac_proj_email WHERE Projekt_id=? ORDER BY Projekt_id ASC ',$this->utilities->getData());
-            return($this->response->setResponse(__METHOD__,$v,'pEmail','POST'));  
-        }    
+        $sql=[
+            ':id'=>[$this->utilities->getData(),'INT']
+        ];
+        $v['id']=$this->utilities->getData();
+        $v['project']=self::getProjectData($v['id']);
+        $v['email']=$this->dbLink->squery('SELECT Pracownik,Pracownik_email AS Email FROM v_all_prac_proj_email WHERE Projekt_id=:id ORDER BY Projekt_id ASC',$sql);
+        return($this->response->setResponse(__METHOD__,$v,'pEmail','POST'));  
+          
     }
      # RETURN ALL AVALIABLE MEMBERS
     public function getAllavaliableEmployee()

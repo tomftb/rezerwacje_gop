@@ -10,7 +10,7 @@ final class Projekty extends Page{
     public function __construct(){
         parent::__construct();	
         self::setPage();
-		parent::loadMainJs();
+	parent::loadMainJs();
         parent::load();
 		
     }

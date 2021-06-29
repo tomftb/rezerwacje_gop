@@ -1235,15 +1235,11 @@ final class ManageProject implements ManageProjectCommand
     public function getProjectTeam()
     {
         $this->Log->log(0,"[".__METHOD__."]");
-        if($this->utilities->checkInputGetValInt('id')===1)
-        {
-            $this->response->setError(1,' KEY ID in $_GET IS EMPTY');
-            return false;
-        }
-        $v['id']=intval($this->utilities->getData(),10);
+        $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+        $v['id']=intval($id,10);
         $v['team']=$this->modul['TEAM']->getTeam($v['id']);
         $v['project']=self::getProjectData($v['id']);
-        return($this->response->setResponse(__METHOD__,$v,'pTeamOff','POST'));  
+        echo json_encode($this->response->setResponse(__METHOD__,$v,'pTeamOff','POST'));  
     }
     public function pTeamOff()
     {

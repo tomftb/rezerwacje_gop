@@ -8,6 +8,7 @@ class ManageProjectTeam{
     private $adminEmailList=array();
     const maxPercentPersToProj=100;
     private $Log;
+    private $dbLink;
     /*
      * status:
      * false -> error, no change
@@ -23,10 +24,12 @@ class ManageProjectTeam{
         $this->Log=Logger::init(__METHOD__);
         $this->Log->log(0,"[".__METHOD__."]");
         $this->utilities=NEW Utilities();
+        $this->dbLink=LoadDb::load();
     }
-    public function getTeam($id){
+    public function getTeam($id=0){
         $this->Log->log(1,"[".__METHOD__."] ID => ".$id);
-        return $this->query('SELECT `idPracownik`,`ImieNazwisko`,`procentUdzial`,`datOd`,`datDo` FROM `v_proj_prac_v5` WHERE `idProjekt`=? AND `wskU`=?',$id.',0');
+        $sql=[':id'=>[$id,'INT']];
+        return $this->dbLink->squery('SELECT `idPracownik`,`ImieNazwisko`,`procentUdzial`,`datOd`,`datDo` FROM `v_proj_prac_v5` WHERE `idProjekt`=:id AND `wskU`=0',$sql);
     }
     public function getMemeber($id)
     {

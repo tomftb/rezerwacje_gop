@@ -9,7 +9,11 @@ var fieldDisabled='y';
 var projectData=new Object();
 var actDay = getActDate();
 var actProject=new Object();
-setButtonDisplay(document.getElementById('pCreate'),'ADD_PROJ');
+/* 
+ * TURN OFF 
+ * setButtonDisplay(document.getElementById('pCreate'),'ADD_PROJ');
+ * */
+
 //console.log(loggedUserPerm);
 
 var mainTableColumns={

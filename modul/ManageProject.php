@@ -719,19 +719,12 @@ final class ManageProject implements ManageProjectCommand
     public function pDoc()
     {
         $this->Log->log(0,"[".__METHOD__."]");
-        $id=$this->utilities->checkInputGetValInt('id');
-        $this->Log->logMulti(0,$id,__METHOD__);
-        if($id['status']===1)
-        {
-            $this->response->setErrResponse(1,'PROJECT DOCUMENTS NOT FOUND','POST');
-        }
-        else
-        {
-            $v['id']=$id['data'];
-            $v['project']=self::getProjectData($v['id']);
-            $v['dokPowiazane']=$this->query('SELECT ID,NAZWA as "Nazwa" FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$id['data']);
-            return($this->response->setResponse(__METHOD__,$v,'pDoc','POST'));  
-        }    
+        $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+        $sql=[':id'=>[$this->idProject,'INT']];
+        $v['id']= $this->idProject;
+        $v['project']=self::getProjectData( $this->idProject);
+        $v['dokPowiazane']=$this->dbLink->squery('SELECT ID,NAZWA as "Nazwa" FROM v_proj_dok WHERE ID_PROJEKT=:id ORDER BY id ASC',$sql);
+        echo json_encode($this->response->setResponse(__METHOD__,$v,'pDoc','POST'));      
     }
 
     private function setProjectDiff()

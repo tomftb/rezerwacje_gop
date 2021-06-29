@@ -1,8 +1,6 @@
 <?php 
-if(!defined("DR")){
-    die('Direct access not permitted');
-}
-    //require_once($_SERVER["DOCUMENT_ROOT"]."/function/redirectToLoginPage.php");
+if(!defined("DR")){ die('Direct access not permitted'); }
+
     $disabled='';
     $info='';
     $border='border-info';

@@ -16,7 +16,7 @@ var actProject=new Object();
 
 //console.log(loggedUserPerm);
 
-var mainTableColumns={
+const mainTableColumns={
     ID:{
         style:'width:70px;',
         scope:'col'
@@ -698,6 +698,9 @@ function setButtonAvaliable()
             //defaultTableBtnConfig[property]['attributes'].disabled="disabled";
         }
     }
+}
+function search(value){
+    ajax.getData(defaultTask+'&filter='+value)
 }
 ajax.getData(defaultTask);
 //document.getElementById('closeModal').onclick = function(){ reloadData(defaultTask); };

@@ -114,23 +114,7 @@ final class ModulManager{
              */
             $invoker->setTask(New Task($this->modul[$methodFound[0]],$method));
             $invoker->runTask();
-            /*
-             * OLD VERSION
-             */
-            //$this->modulData=$this->modul[$methodFound[0]]->{$method}();
         }
-    }
-    public function getResult($returnType='json'){
-        /* OLD VERSION
-        if($returnType==='json'){
-            $this->Log->log(0,"[".__METHOD__."] RETURN JSON");
-            echo json_encode($this->modulData);
-        }
-        else{
-            $this->Log->log(0,"[".__METHOD__."] RETURN HEADER FROM FILE");
-            // setup file
-        }
-        */
     }
     public function __destruct(){}
 }

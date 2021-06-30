@@ -172,23 +172,7 @@ final class ManageProject implements ManageProjectCommand
     }
     private function getProjectData($id)
     {
-        $sql=[
-            ':id'=>[$id,'INT']
-        ];
-        return ($this->dbLink->squery("SELECT 
-                        `id` as 'i',
-                        `numer_umowy` as 'n',
-                        `klient` as 'k',
-                        `temat_umowy` as 't',
-                        `typ` as 't2',
-                        `create_date` as 'du',
-                        `create_user_full_name` as 'cu',
-                        `create_user_email` as 'cum',
-                        `nadzor` as 'l',
-                        `kier_grupy` as 'm',
-                        `term_realizacji` as 'ds',
-                        `koniec_proj` as 'dk'           
-                 FROM `projekt_nowy` WHERE `id`=:id",$sql)[0]);
+        return ($this->dbLink->squery("SELECT * FROM `v_all_proj_v11` WHERE `i`=:id",[':id'=>[$id,'INT']])[0]);
     }
     public function pPDF()
     {
@@ -1215,15 +1199,6 @@ final class ManageProject implements ManageProjectCommand
             default:
                 Throw New Exception('WRONG TASK!',1);
         }
-    }
-    public function getProjectTeam()
-    {
-        $this->Log->log(0,"[".__METHOD__."]");
-        $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-        $v['id']=intval($id,10);
-        $v['team']=$this->modul['TEAM']->getTeam($v['id']);
-        $v['project']=self::getProjectData($v['id']);
-        echo json_encode($this->response->setResponse(__METHOD__,$v,'pTeamOff','POST'));  
     }
     public function getReturnedValue()
     {

@@ -14,7 +14,6 @@ interface ManageProjectCommand
     public function getprojectslike();
     public function pClose();
     public function getProjectCloseSlo();
-    public function getProjectTeam();
 }
 final class ManageProject implements ManageProjectCommand
 {
@@ -112,7 +111,7 @@ final class ManageProject implements ManageProjectCommand
         $this->Log->log(0,"[".__METHOD__."]");
         $this->notify='n';
         $this->modul['DOCUMENT']=NEW ManageProjectDocument();
-        $this->modul['TEAM']=NEW ManageProjectTeam();
+        /* $this->modul['TEAM']=NEW ManageProjectTeam(); */
         $this->modul['REPORT']=NEW ManageProjectReport();
         $this->modul['FILE']=NEW ManageProjectReport();
         $this->utilities=NEW Utilities();
@@ -177,32 +176,24 @@ final class ManageProject implements ManageProjectCommand
     public function pPDF()
     {
         $this->Log->log(0,"[".__METHOD__."]");
-        if($this->utilities->checkInputGetValInt('id')['status']===1){
-            $this->responseType='GET';
-            Throw New Exception ($this->utilities->getInfo(),1);
-        }
-        $projectDetails=$this->query('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=? AND `wsk_u`=? ',$this->utilities->getData().",0")[0];
-        $projectDoc=$this->query('SELECT `nazwa` FROM `projekt_dok` WHERE `id_projekt`=? AND `wsk_u`=? ',$this->utilities->getData().",0");   
-        $projectTeam=$this->query('SELECT NazwiskoImie,DataOd,DataDo FROM v_proj_prac_v_pdf WHERE idProjekt=?',$this->utilities->getData());
-        //require_once($this->DR.'/modul/createPdf.php'); 
+        $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+        $this->utilities->isValueEmpty($id);
+        $sql[':id']=[$id,'INT'];
+        $projectDetails=$this->dbLink->squery('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=:id AND `wsk_u`=0',$sql)[0];
+        $projectDoc=$this->dbLink->squery('SELECT `nazwa` FROM `projekt_dok` WHERE `id_projekt`=:id AND `wsk_u`=0 ',$sql);   
+        $projectTeam=$this->dbLink->squery('SELECT `NazwiskoImie`,`DataOd`,`DataDo` FROM `v_proj_prac_v_pdf` WHERE `idProjekt`=:id',$sql); 
         $PDF = new createPdf($projectDetails,$projectDoc,$projectTeam);
-        return($this->response->setResponse(__METHOD__,$PDF->getPdf(),'downloadProjectPdf','POST'));
+        echo json_encode($this->utilities->getResponse(__METHOD__,$PDF->getPdf(),'downloadProjectPdf','POST'));
     }
     public function pGenDoc(){
         $this->Log->log(0,"[".__METHOD__."]");
-        //echo 'asdsad';
-        if($this->utilities->checkInputGetValInt('id')['status']===1)
-        {
-            $this->responseType='GET';
-            $this->response->setErrResponse(1,$this->utilities->getInfo());
-            return  $this->response->getReposnse();
-        }
-         $projectDetails=$this->query('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`klient`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=? AND `wsk_u`=? ',$this->utilities->getData().",0")[0];
-        //$phWord=new PhpWord();
-
+        $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+        $this->utilities->isValueEmpty($id);
+        $sql[':id']=[$id,'INT'];
+        $projectDetails=$this->dbLink->squery('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`klient`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=:id AND `wsk_u`=0 ',$sql)[0];
         $doc = new createDoc($projectDetails,$_FILES,'Project_'.$this->utilities->getData(),'.docx');
         $doc->createProjectReport();
-        return($this->response->setResponse(__METHOD__,$doc->getDocName(),'downloadProjectDoc','POST'));
+        echo json_encode($this->utilities->getResponse(__METHOD__,$doc->getDocName(),'downloadProjectDoc','POST'));
     }
     public function getProjectDefaultValues(){
         $this->Log->log(0,"[".__METHOD__."]");

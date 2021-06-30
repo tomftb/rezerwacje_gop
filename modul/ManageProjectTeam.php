@@ -9,16 +9,6 @@ class ManageProjectTeam{
     const maxPercentPersToProj=100;
     private $Log;
     private $dbLink;
-    /*
-     * status:
-     * false -> error, no change
-     * true -> change
-     */
-    private $response=array(
-        'status'=>false,
-        'info'=>'',
-        'data'
-    );
         
     function __construct(){
         $this->Log=Logger::init(__METHOD__);
@@ -26,26 +16,34 @@ class ManageProjectTeam{
         $this->Utilities=NEW Utilities();
         $this->dbLink=LoadDb::load();
     }
+    public function getProjectTeam()
+    {
+        $this->Log->log(0,"[".__METHOD__."]");
+        $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+        $v['id']=intval($id,10);
+        $v['team']=self::getTeam($v['id']);
+        $v['project']=$this->dbLink->squery("SELECT * FROM `v_all_proj_v11` WHERE `i`=:id",[':id'=>[$v['id'],'INT']])[0];
+        echo json_encode($this->response->setResponse(__METHOD__,$v,'pTeamOff','POST'));  
+    }
     public function getTeam($id=0){
         $this->Log->log(1,"[".__METHOD__."] ID => ".$id);
-        $sql=[':id'=>[$id,'INT']];
+        $sql[':id']=[$id,'INT'];
         return $this->dbLink->squery('SELECT `idPracownik`,`ImieNazwisko`,`procentUdzial`,`datOd`,`datDo` FROM `v_proj_prac_v5` WHERE `idProjekt`=:id AND `wskU`=0',$sql);
     }
     public function getMemeber($id)
     {
         $this->Log->log(1,"[".__METHOD__."] ID => ".$id);
-        $personData=$this->squery('SELECT `imie`,`nazwisko`,`email` FROM `pracownik` WHERE `id`='.$id);
+        $personData=$this->dbLink->squery('SELECT `imie`,`nazwisko`,`email` FROM `pracownik` WHERE `id`=:i',[':i'=>[$id,'INT']]);
         if(count($personData)>0){
             return($personData[0]);
         }
         else{
-            $this->setError(0,"[${id}] NO DATA ABOUT PERSON IN DB!");
+            Throw New Exception("[${id}] NO DATA ABOUT PERSON IN DB!",1);
         }
     }
-    public function getTeamFullData($id)
+    private function getTeamFullData()
     {
-        $this->Log->log(1,"[".__METHOD__."] ID => ".$id);
-        return ($this->squery("SELECT `id_pracownik` as 'pers',`imie`,`nazwisko`,`udzial_procent` as 'percent',concat(substr(`projekt_pracownik`.`dat_od`,9,11),'.',substr(`projekt_pracownik`.`dat_od`,6,2),'.',substr(`projekt_pracownik`.`dat_od`,1,4)) as 'ds',concat(substr(`projekt_pracownik`.`dat_do`,9,11),'.',substr(`projekt_pracownik`.`dat_do`,6,2),'.',substr(`projekt_pracownik`.`dat_do`,1,4)) as 'de' FROM `projekt_pracownik` WHERE `id_projekt`=".$id));
+        return ($this->dbLink->squery("SELECT `id_pracownik` as 'pers',`imie`,`nazwisko`,`udzial_procent` as 'percent',concat(substr(`projekt_pracownik`.`dat_od`,9,11),'.',substr(`projekt_pracownik`.`dat_od`,6,2),'.',substr(`projekt_pracownik`.`dat_od`,1,4)) as 'ds',concat(substr(`projekt_pracownik`.`dat_do`,9,11),'.',substr(`projekt_pracownik`.`dat_do`,6,2),'.',substr(`projekt_pracownik`.`dat_do`,1,4)) as 'de' FROM `projekt_pracownik` WHERE `id_projekt`=".$this->idProject));
     }
     public function getTeamMember($id)
     {
@@ -62,20 +60,36 @@ class ManageProjectTeam{
         $v['team']=self::getTeam($v['id']);
         $v['ava']=self::getAvaTeam($v['id']);  
         $this->Log->logMulti(0,$v,__LINE__."::".__METHOD__."");
-        echo json_encode($this->response->setResponse(__METHOD__,$v,'pTeam','POST'));  
+        echo json_encode($this->Utilities->getResponse(__METHOD__,$v,'pTeam','POST'));  
+    }
+    public function pTeam()
+    {
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->inpArray=filter_input_array(INPUT_POST);
+        $this->Utilities->keyExist($this->inpArray,'id');
+        $this->Utilities->isEmptyKeyValue($this->inpArray,'id',true);
+        $this->idProject=$this->Utilities->getNumber($this->inpArray['id']);
+        UNSET($this->inpArray['id']);
+        /* TO DO
+        $this->adminEmailList=self::getAdminEmail();
+         * 
+         */
+        self::setTeam();
+        echo json_encode($this->Utilities->getResponse(__METHOD__,'','cModal','POST'));  
     }
     public function getAvaTeam($idProject)
     {
         $this->Log->log(1,"[".__METHOD__."] ID Project => ".$idProject);
-        $team=($this->query("SELECT
+        $sql[':id']=[$idProject,'INT'];
+        $team=($this->dbLink->squery("SELECT
 		`p`.`id`,
 		CONCAT(`p`.`imie`,' ',`p`.`nazwisko`) as 'ImieNazwisko',
-          (select (100 - cast(ifnull(sum(`pp`.`udzial_procent`),0) as signed)) FROM `projekt_pracownik` pp WHERE `p`.`id`=`pp`.`id_pracownik` and `pp`.`dat_do`<=curdate() and `pp`.`wsk_u`=? AND `id_projekt`<>?) as 'ava'         
-        from 
-            `pracownik` p
-        where 
-            `p`.`wsk_u`=?
-                ","0,".$idProject.",0"));
+                (select (100 - cast(ifnull(sum(`pp`.`udzial_procent`),0) as signed)) FROM `projekt_pracownik` pp WHERE `p`.`id`=`pp`.`id_pracownik` and `pp`.`dat_do`<=curdate() and `pp`.`wsk_u`=0 AND `id_projekt`<>:id) as 'ava'         
+                FROM 
+                `pracownik` p
+                WHERE 
+            `p`.`wsk_u`=0
+                ",$sql));
        foreach($team as $id => $value)
         {
             if($value['ava']<0)
@@ -85,36 +99,35 @@ class ManageProjectTeam{
         }
         
         return $team;
-        //return $this->query('SELECT * FROM `v_ava_prac_curdate` WHERE `id`>? ORDER BY `id` ASC ',$id);
     }
-    public function getAvaTeamMember($id)
+    private function getAvaTeamMember($id)
     {
         $this->Log->log(1,"[".__METHOD__."] ID => ".$id.", id Project => ".$this->idProject);
         /*
          * RETURN WITH wsk_u=0 , percent 
          */
-
-	return ($this->query("select 
+        $sql=[
+            ':id'=>[$this->idProject,'INT'],
+            ':idm'=>[$id,'INT'],
+        ];
+	return ($this->dbLink->squery("select 
                             `p`.`id` AS `id`,
-(select (100 - cast(ifnull(sum(`pp`.`udzial_procent`),0) as signed)) from `projekt_pracownik` `pp` where ((`pp`.`dat_do` > curdate()) and `pp`.`wsk_u` = ? AND `pp`.`id_projekt`<>? and `pp`.`id_pracownik` = `p`.`id`)) AS `ava` from `pracownik` `p` where `p`.id=? AND `p`.`wsk_u` = ?;","0,".$this->idProject.",".$id.",0"));
+(select (100 - cast(ifnull(sum(`pp`.`udzial_procent`),0) as signed)) from `projekt_pracownik` `pp` where ((`pp`.`dat_do` > curdate()) and `pp`.`wsk_u` = 0 AND `pp`.`id_projekt`<>:id and `pp`.`id_pracownik` = `p`.`id`)) AS `ava` from `pracownik` `p` where `p`.id=:idm AND `p`.`wsk_u` = 0;",$sql));
         
         
         //return $this->query('SELECT * FROM `v_ava_prac_curdate` WHERE `id`=? ORDER BY `id` ASC ',$id);
     }
-    public function setTeam($DATA){
+    private function setTeam(){
         $this->Log->log(1,"[".__METHOD__."]");
-        $this->idProject=$DATA['id'];
-        $p=$this->squery("SELECT `numer_umowy`,`klient`,`temat_umowy`,`typ` from `projekt_nowy` where id=".$this->idProject)[0];
-        UNSET($DATA['id']);
-        self::setTeamMembers($DATA);    
+        $sql[":id"]=[$this->idProject,'INT'];
+        $p=$this->dbLink->squery("SELECT `numer_umowy`,`klient`,`temat_umowy`,`typ` from `projekt_nowy` where id=:id",$sql)[0];
+        self::setTeamMembers();    
         $this->Log->logMulti(0,$this->member,'member');
         array_map(array($this, 'checkTeamMemberConsistency'),$this->member);
         self::setupMember();              
         array_map(array($this, 'checkTeamMemberAvailable'),$this->member); 
         self::setNewTeamMembers(); 
         self::sendNotify($p);
-        return  $this->getError();
-        //$this->setError(0,"TEST STOP");
     }
     private function setupMember(){
         foreach($this->member as $id => $m){
@@ -125,23 +138,17 @@ class ManageProjectTeam{
             $this->emailTeamList.="<tr><td>".$p['imie'].' '.$p['nazwisko'].'</td><td>'.$this->member[$id]['ds'].'</td><td>'.$this->member[$id]['de'].'</td></tr>';
         }  
     }
-    private function setTeamMembers($DATA)
+    private function setTeamMembers()
     {
-        $this->Log->logMulti(1,$DATA);
-        foreach($DATA as $k => $v)
+        $this->Log->logMulti(1,$this->inpArray);
+        foreach($this->inpArray as $k => $v)
         {
             /* CHECK IS EMPTY */
-            if(trim($v)==='')
-            {
-                $this->setError(1,'['.$k.'] VALUE IS EMPTY');
-                return false;
+            if(trim($v)===''){
+                Throw New Exception('['.$k.'] VALUE IS EMPTY',1);
             }
-            if(!self::checkAndSetTeamMember($k,$v))
-            {
-                return false;
-            }
+            self::checkAndSetTeamMember($k,$v);
         }
-        return true;
     }
     private function checkAndSetTeamMember($k,$v)
     {
@@ -153,91 +160,87 @@ class ManageProjectTeam{
          * de_
          */
         $tmp=explode('_',$k);
-        if(!array_key_exists(1, $tmp))
-        {
-            $this->setError(1,'ARRAY KEY [1] NOT FOUND');
-            return false;
+        if(!array_key_exists(1, $tmp)){
+            Throw New Exception('ARRAY KEY [1] NOT FOUND',1);
         }
-        if(!in_array($tmp[0],$this->teamPostFields))
-        //if($tmp[0]!=='pers' && $tmp[0]!=='percent' && $tmp[0]!=='ds' && $tmp[0]!=='de')
-        {
-            $this->setError(1,'KEY NOT EXIST IN ACCEPTED FORM FIELDS => '.$tmp[0]);
-            return false;
+        if(!in_array($tmp[0],$this->teamPostFields)){
+            Throw New Exception('KEY NOT EXIST IN ACCEPTED FORM FIELDS => '.$tmp[0],1);
         }
         /* SETUP PROPER MySQL DATE */
         self::checkDate($tmp,$v);
         $this->member[$tmp[1]][$tmp[0]]=$v;
-        return true;
     }
     private function checkDate($tmp,&$v)
     {
-        if($tmp[0]==='ds' || $tmp[0]==='de')
-        {
-           
-            if($this->utilities->setMysqlDate($v,'.')['status']!==0)
-            {
-                $this->setError(0,'Nieprwidłowa data ('.$tmp[0].') w wierszu nr '.$tmp[1]);
-                //return false;
+        if($tmp[0]==='ds' || $tmp[0]==='de'){
+            if($this->Utilities->setMysqlDate($v,'.')['status']!==0){
+                Throw New Exception('Nieprwidłowa data ('.$tmp[0].') w wierszu nr '.$tmp[1],0);
             } 
-            $v=$this->utilities->getData();
+            $v=$this->Utilities->getData();
         }
-        //return true;
     }
     private function checkTeamMemberConsistency($teamMember)
     {
         $this->Log->log(1,"[".__METHOD__."]");
-        if($this->getError()!==''){return false;}
-        if(count($teamMember)!==count($this->teamPostFields))
-        {
-           $this->setError(1,'CONSISTENCY ERROR => count(input_array)!=count(teamPostFields)'); 
+        if(count($teamMember)!==count($this->teamPostFields)){
+            Throw New Exception('CONSISTENCY ERROR => count(input_array)!=count(teamPostFields)',1);
         }
     }
     private function checkTeamMemberAvailable($teamMember)
     {
         $this->Log->log(1,"[".__METHOD__."]".$teamMember['pers']);
-        if($this->getError()!==''){return false;}
         $member=self::getAvaTeamMember($teamMember['pers']);
         $this->Log->log(1,"[".__METHOD__."] COUNT => ".count($member));
         $this->Log->logMulti(0,$member);
-        if(count($member)!=1)
-        {
-            $this->setError(0,'Pracownik '.$teamMember['imie'].' '.$teamMember['nazwisko'].' nie jest dostępny.');
-            return false;
+        if(count($member)!=1){
+            Throw New Exception('Pracownik '.$teamMember['imie'].' '.$teamMember['nazwisko'].' nie jest dostępny.',0);
         }
         $this->Log->logMulti(0,$member);
-        if($member[0]['ava']<$teamMember['percent'])
-        {
-            $this->setError(0,'Dla pracownika '.$teamMember['imie'].' '.$teamMember['nazwisko'].' wskazano niedozwoloną wielkość udziału. Dostępna wartość - '.$member[0]['ava']."");
-            return false;
+        if($member[0]['ava']<$teamMember['percent']){
+            Throw New Exception('Dla pracownika '.$teamMember['imie'].' '.$teamMember['nazwisko'].' wskazano niedozwoloną wielkość udziału. Dostępna wartość - '.$member[0]['ava'],0);
         }
     }
     private function setNewTeamMembers()
     {
         $this->Log->log(1,"[".__METHOD__."]");
-        if($this->getError()!==''){return false;}
-        $this->actTeamMembers=self::getTeamFullData($this->idProject);
+        $this->actTeamMembers=self::getTeamFullData();
         $this->Log->logMulti(0,$this->actTeamMembers,'actTeamMembers');
         /* SET CHANGE */
         $change=false;
         /* REMOVE NOT SENDED */
-        foreach($this->actTeamMembers as $a)
-        {
-            self::rmTeamMember($a,$change);
-        } 
-        /* SET ACTION */
-        foreach($this->member as $id => $m)
-        {
-            self::updInsMember($id,$m,$change);
-        }  
-        if(!$change)
-        {
-            $this->setError(0,'Nie wprowadzono żadnych zmian!');
+        try{
+            $sql=[
+                ":mod_dat"=>[CDT,"STR"],
+                ":mod_user_id"=>[$_SESSION["userid"],'INT'],
+                ":mod_user_name"=>[$_SESSION["username"],'STR'],
+                ":id_projekt"=>[$this->idProject,'INT']
+            ];
+            $this->dbLink->beginTransaction(); //PHP 5.1 and new
+            foreach($this->actTeamMembers as $a){
+                self::rmTeamMember($a,$change,$sql);
+            } 
+            /* SET ACTION */
+            foreach($this->member as $id => $m){
+                self::updInsMember($id,$m,$change,$sql);
+            }  
+            $this->dbLink->commit();  //PHP 5 and new
+        }
+        catch (PDOException $e){
+            $this->dbLink->rollback(); 
+            throw New Exception("DATABASE ERROR: ".$e->getMessage(),1); 
+	} 
+        if(!$change){
+            Throw New Exception('Nie wprowadzono żadnych zmian!',0);
         }
     }
-    private function updInsMember($i,&$m,&$c)
+    private function updInsMember($i,&$m,&$c,$sql)
     {
         $this->Log->log(1,"[".__METHOD__."]");
         $f=false;
+        $sql[":udzial_procent"]=[$m['percent'],'INT'];
+        $sql[":dat_od"]=[$m['ds'],'STR'];
+        $sql[":dat_do"]=[$m['de'],'STR'];
+        $sql[":id_pracownik"]=[$m['pers'],'INT'];
         foreach($this->actTeamMembers as $a)
         {
             if(intval($a['pers'])===intval($m['pers']) && intval($a['percent'])===intval($m['percent']) && $a['ds']==$m['ds'] && $a['de']==$m['de'])
@@ -248,9 +251,12 @@ class ManageProjectTeam{
             else if(intval($a['pers'])===intval($m['pers']))
             {
                 $this->Log->log(1,"[".__METHOD__."] FOUND");
-                $this->query(
-                     'UPDATE projekt_pracownik SET imie=?,nazwisko=?,udzial_procent=?,dat_od=?,dat_do=?,mod_dat=?,mod_user_id=?,mod_user_name=?,wsk_u=? WHERE id_projekt=? AND id_pracownik=?',
-                     $a['imie'].','.$a['nazwisko'].','.$m['percent'].','.$m['ds'].','.$m['de'].','.$this->cDT.','.$_SESSION["userid"].','.$_SESSION["username"].',0,'.$this->idProject.','.$m['pers']); 
+                $sql[":imie"]=[$a['imie'],'STR'];
+                $sql[":nazwisko"]=[$a['nazwisko'],'STR'];
+                $sql[":wsk_u"]=['0','STR'];
+
+                $this->dbLink->query(
+                     'UPDATE `projekt_pracownik` SET imie=:imie,nazwisko=:nazwisko,udzial_procent=:udzial_procent,dat_od=:dat_od,dat_do=:dat_do,mod_dat=:mod_dat,mod_user_id=:mod_user_id,mod_user_name=:mod_user_name,wsk_u=:wsk_u WHERE id_projekt=:id_projekt AND id_pracownik=:id_pracownik',$sql); 
                 $c=true;
                 $f=true;
             } 
@@ -258,46 +264,32 @@ class ManageProjectTeam{
         if(!$f)
         {
             $c=true;
-            $this->query('INSERT INTO projekt_pracownik 
+            $sql[":imie"]=[$m['imie'],'STR'];
+            $sql[":nazwisko"]=[$m['nazwisko'],'STR'];    
+            $this->dbLink->query('INSERT INTO `projekt_pracownik` 
             (id_projekt,id_pracownik,imie,nazwisko,udzial_procent,dat_od,dat_do,mod_dat,mod_user_id,mod_user_name) 
 		VALUES
-		(?,?,?,?,?,?,?,?,?,?)'
-        ,$this->idProject.','.$m['pers'].','.$m['imie'].','.$m['nazwisko'].','.$m['percent'].','.$m['ds'].','.$m['de'].','.$this->cDT.','.$_SESSION["userid"].','.$_SESSION["username"]);  
+		(:id_projekt,:id_pracownik,:imie,:nazwisko,:udzial_procent,:dat_od,:dat_do,:mod_dat,:mod_user_id,:mod_user_name)'
+            ,$sql);  
         }
     }
-    private function rmTeamMember($a,&$c)
+    private function rmTeamMember($a,&$c,$sql)
     {
         $this->Log->log(1,"[".__METHOD__."]");
         $f=false;
         foreach($this->member as $m)
         {
-            if(intval($a['pers'])===intval($m['pers']))
-            {
+            if(intval($a['pers'])===intval($m['pers'])){
                 $this->Log->log(1,"[".__METHOD__."] FOUND, NOT REMOVE");
                 $f=true;
             }
         }
-        if(!$f)
-        {
+        if(!$f){
             $this->Log->log(1,"[".__METHOD__."] NOT FOUND, REMOVE ID MEMBER=> ".$a['pers'].", ID PROJECT => ".$this->idProject);
-            $this->squery('UPDATE `projekt_pracownik` SET udzial_procent=0,dat_od=\'0000-00-00\',dat_do=\'0000-00-00\',mod_dat=\''.$this->cDT.'\',mod_user_id='.$_SESSION["userid"].',mod_user_name=\''.$_SESSION["username"].'\',wsk_u=\'1\' WHERE id_projekt='.$this->idProject.' AND id_pracownik='.$a['pers']); 
+            $sql[":id_pracownik"]=[$a['pers'],'INT'];
+            $this->dbLink->query('UPDATE `projekt_pracownik` SET udzial_procent=0,dat_od="0000-00-00",dat_do="0000-00-00",mod_dat=:mod_dat,mod_user_id=:mod_user_id,mod_user_name=:mod_user_name,wsk_u="1" WHERE id_projekt=:id_projekt AND id_pracownik=:id_pracownik',$sql); 
             $c=true;
         }
-    }
-    public function getProjectPers($t)
-    {
-        /*
-         * t => TABLE OR VIEW
-         */
-        return $this->query('SELECT * FROM '.$t.' WHERE 1=? ORDER BY ImieNazwisko ASC ',1);
-    }
-    public function getInfo()
-    {
-        return $this->getError();
-    }
-    public function getData()
-    {
-        return $this->response['data'];
     }
     protected function emailBody($p)
     {     
@@ -333,18 +325,14 @@ class ManageProjectTeam{
         $this->adminEmailList=$a;
     }
     private function sendNotify($p){
-         $this->Log->log(0,"[".__METHOD__."]");
-        if($this->getError()!=='') {return false;}
-        $this->mail=NEW email();
-        if($this->mail->sendMail(
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->mail=NEW Email();
+        $this->mail->sendMail(
                                     'Zgłoszenie na aktualizację członków zespołu :: '.$p['klient'].', '.$p['temat_umowy'].', '.$p['typ'],
                                     self::emailBody($p),
                                     self::emailRecipient(),
                                     'Uaktualniono członków zespołu. Niestety pojawiły się błędy w wysłaniu powiadomienia.',
-                                    true
-        )!==''){
-            $this->setError(0, $this->mail->getErr()); 
-        }
+                                    true);
     }
     function __destruct(){}
 }

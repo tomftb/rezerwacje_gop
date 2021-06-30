@@ -1,5 +1,9 @@
 <?php
-class ManageProjectTeam{
+interface ManageProjectTeamCommand
+{
+    public function getProjectTeam();
+}
+final class ManageProjectTeam implements ManageProjectTeamCommand{
     private $member=array();
     private $teamPostFields=array('pers','percent','ds','de');
     private $idProject='';
@@ -23,12 +27,11 @@ class ManageProjectTeam{
         $v['id']=intval($id,10);
         $v['team']=self::getTeam($v['id']);
         $v['project']=$this->dbLink->squery("SELECT * FROM `v_all_proj_v11` WHERE `i`=:id",[':id'=>[$v['id'],'INT']])[0];
-        echo json_encode($this->response->setResponse(__METHOD__,$v,'pTeamOff','POST'));  
+        echo json_encode($this->Utilities->getResponse(__METHOD__,$v,'pTeamOff','POST'));  
     }
-    public function getTeam($id=0){
+    private function getTeam($id=0){
         $this->Log->log(1,"[".__METHOD__."] ID => ".$id);
-        $sql[':id']=[$id,'INT'];
-        return $this->dbLink->squery('SELECT `idPracownik`,`ImieNazwisko`,`procentUdzial`,`datOd`,`datDo` FROM `v_proj_prac_v5` WHERE `idProjekt`=:id AND `wskU`=0',$sql);
+        return $this->dbLink->squery('SELECT `idPracownik`,`ImieNazwisko`,`procentUdzial`,`datOd`,`datDo` FROM `v_proj_prac_v5` WHERE `idProjekt`=:id AND `wskU`=0',[':id'=>[$id,'INT']]);
     }
     public function getMemeber($id)
     {
@@ -311,7 +314,7 @@ class ManageProjectTeam{
     {
         $this->Log->log(0,"[".__METHOD__."]");
         /* set admin list */
-        $recEmail=$this->adminEmailList;
+        $recEmail=self::getAdminEmail();
         $this->Log->logMulti(1,$this->member,__METHOD__." emailRecipient");
         foreach($this->member as $value)
         {
@@ -320,9 +323,17 @@ class ManageProjectTeam{
         }
         return ($recEmail);
     }
-    public function setAdminEmail($a){
+    private function getAdminEmail(){
         /* array of emaiuls */
-        $this->adminEmailList=$a;
+        $this->Log->log(0,"[".__METHOD__."] ");
+        $recEmail=[];
+        $ad=$this->dbLink->squery("SELECT `WARTOSC` FROM `parametry` WHERE `SKROT`='MAIL_RECIPIENT'");
+        $adminUsers=explode(';',$ad[0]['WARTOSC']);
+        foreach($adminUsers as $user){
+            $this->Log->log(0,"[".__METHOD__."] ".$user);
+            array_push($recEmail,array($user,'Admin'));
+        }
+        return $recEmail;
     }
     private function sendNotify($p){
         $this->Log->log(0,"[".__METHOD__."]");

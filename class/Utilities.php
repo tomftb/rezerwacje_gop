@@ -99,6 +99,19 @@ class Utilities
     public function getNumber($n=0,$base=10){
         return intval($n,$base);
     }
+    public function getResponse($t='',$v='',$f,$type=''){
+        return ([
+                'data'=>[
+                            'task'=>$t,
+                            'value'=>$v,
+                            'function'=>$f
+                        ],
+                'type'=>$type,
+                'status'=>0,
+                'info'=>'',
+                'modul'=>'',
+        ]);
+    }
     public function getPost($trim=true,$date=false)
     {
         $this->Log->log(0,"[".__METHOD__."]");

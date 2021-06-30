@@ -23,7 +23,7 @@ class ManageProjectTeam{
     function __construct(){
         $this->Log=Logger::init(__METHOD__);
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->utilities=NEW Utilities();
+        $this->Utilities=NEW Utilities();
         $this->dbLink=LoadDb::load();
     }
     public function getTeam($id=0){
@@ -52,10 +52,22 @@ class ManageProjectTeam{
         $this->Log->log(1,"[".__METHOD__."] ID => ".$id);
         return $this->query('SELECT `idPracownik`,`ImieNazwisko`,`procentUdzial`,`datOd`,`datDo` FROM `v_proj_prac_v5` WHERE `idPracownik`=?',$id);
     }
+    public function pTeamOff()
+    {
+        $this->Log->log(0,"[".__METHOD__."]");
+        $post=filter_input_array(INPUT_POST);
+        $this->Utilities->keyExist($post,'id');
+        $this->Utilities->isEmptyKeyValue($post,'id',true);
+        $v['id']=$this->Utilities->getNumber($post['id']);
+        $v['team']=self::getTeam($v['id']);
+        $v['ava']=self::getAvaTeam($v['id']);  
+        $this->Log->logMulti(0,$v,__LINE__."::".__METHOD__."");
+        echo json_encode($this->response->setResponse(__METHOD__,$v,'pTeam','POST'));  
+    }
     public function getAvaTeam($idProject)
     {
         $this->Log->log(1,"[".__METHOD__."] ID Project => ".$idProject);
-       $team=($this->query("SELECT
+        $team=($this->query("SELECT
 		`p`.`id`,
 		CONCAT(`p`.`imie`,' ',`p`.`nazwisko`) as 'ImieNazwisko',
           (select (100 - cast(ifnull(sum(`pp`.`udzial_procent`),0) as signed)) FROM `projekt_pracownik` pp WHERE `p`.`id`=`pp`.`id_pracownik` and `pp`.`dat_do`<=curdate() and `pp`.`wsk_u`=? AND `id_projekt`<>?) as 'ava'         

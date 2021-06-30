@@ -5,7 +5,6 @@
 interface ManageProjectCommand
 {
     public function pDelete();
-    public function pTeam();
     public function pPDF();
     public function pGenDoc();
     public function getProjectDefaultValues();
@@ -190,21 +189,6 @@ final class ManageProject implements ManageProjectCommand
                         `term_realizacji` as 'ds',
                         `koniec_proj` as 'dk'           
                  FROM `projekt_nowy` WHERE `id`=:id",$sql)[0]);
-    }
-    public function pTeam()
-    {
-        $this->Log->log(0,"[".__METHOD__."]");
-        $this->setInpArray(filter_input_array(INPUT_POST));
-        if($this->utilities->checkKeyExistEmpty('id',$this->inpArray)['status']!==0)
-        {
-            $this->response->setError(1,$this->utilities->getInfo());
-            return false;
-        }
-        $this->modul['TEAM']->setAdminEmail(self::getAdminEmail());
-        if($this->modul['TEAM']->setTeam($this->inpArray)!=''){
-            $this->response->setError(0,$this->modul['TEAM']->getInfo());
-        }
-        return($this->response->setResponse(__METHOD__,'','cModal','POST'));
     }
     public function pPDF()
     {

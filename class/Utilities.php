@@ -79,6 +79,26 @@ class Utilities
         }
         return (self::response());
     }
+    public function keyExist($a,$k){
+        if (!array_key_exists($k,$a)){
+            Throw New Exception('No ID KEY in ARRAY!',1);
+        }
+    }
+    public function isEmptyKeyValue($a,$k,$t=true){
+        if($t){
+            if(empty(trim($a[$k]))){
+                Throw New Exception('KEY ID is Empty (WITH TRIM)!',1);
+            }
+        }
+        else{
+            if(empty($a[$k])){
+                Throw New Exception('KEY ID is Empty!',1);
+            }
+        }  
+    }
+    public function getNumber($n=0,$base=10){
+        return intval($n,$base);
+    }
     public function getPost($trim=true,$date=false)
     {
         $this->Log->log(0,"[".__METHOD__."]");

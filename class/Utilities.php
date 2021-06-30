@@ -38,6 +38,11 @@ class Utilities
         }
         return (self::response());
     }
+    public function isValueEmpty($value=''){
+        if(trim($value)===''){
+           Throw New exception ("VALUE IS EMPTY",1);
+        }
+    }
     public function checkInputGetValSanitizeString($key)
     {
         $s=filter_input(INPUT_GET,$key); //$key

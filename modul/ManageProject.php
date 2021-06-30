@@ -1241,21 +1241,6 @@ final class ManageProject implements ManageProjectCommand
         $v['project']=self::getProjectData($v['id']);
         echo json_encode($this->response->setResponse(__METHOD__,$v,'pTeamOff','POST'));  
     }
-    public function pTeamOff()
-    {
-        $this->Log->log(0,"[".__METHOD__."]");
-        $this->setInpArray(filter_input_array(INPUT_POST));
-        if($this->utilities->checkKeyExistEmpty('id',$this->inpArray)['status']!==0)
-        {
-            $this->response->setError(1,$this->utilities->getInfo());
-            return false;
-        }
-        $v['id']=intval($this->utilities->getData()['id'],10);
-        $v['team']=$this->modul['TEAM']->getTeam(intval($this->inpArray['id'],10));
-        $v['ava']=$this->modul['TEAM']->getAvaTeam($this->utilities->getData()['id']);  
-        $this->Log->logMulti(0,$v,__LINE__."::".__METHOD__."");
-        return($this->response->setResponse(__METHOD__,$v,'pTeam','POST'));  
-    }
     public function getReturnedValue()
     {
         $this->Log->log(0,"[".__METHOD__."]");

@@ -21,7 +21,7 @@ final class Logger{
 		}
 		else{
 			// ALREADY INITIALISED
-			self::log(0,'Logger already initialised => init from => '.$from,__METHOD__);
+			/* self::log(0,'Logger already initialised => init from => '.$from,__METHOD__); */
 		}
 		return self::$logLink;
 	}

@@ -193,7 +193,7 @@ class ManageUser
         $this->inpArray=filter_input_array(INPUT_POST);
         self::setPerm();
         self::setActSessionPermRole();
-        return($this->response->setResponse(__METHOD__,'ok','cModal','POST'));
+        echo json_encode($this->utilities->getResponse(__METHOD__,'ok','cModal','POST'));
     }
     private function sqlGetSloPerm(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -395,8 +395,7 @@ class ManageUser
         $this->Log->log(0,"[".__METHOD__."]");    
         self::setGetId();
         /* TO DO GET USER DALA WITH DELETE SLO */
-        return($this->response->setResponse(__METHOD__,$this->inpArray['id'],'dUser','POST'));
-        
+        echo json_encode($this->utilities->getResponse(__METHOD__,$this->inpArray['id'],'dUser','POST'));
     }
     # RETURN ALL NOT DELETED DICTIONARY and other FROM DB
     public function getSlo($tableToSelect,$order='ID'){
@@ -409,7 +408,7 @@ class ManageUser
         self::setGetId();
         array_push($this->actData,$this->inpArray['id']);
         array_push($this->actData,self::sqlGetUserPerm());
-        return($this->response->setResponse(__METHOD__,$this->actData,'uPermOff','POST'));
+        echo json_encode($this->utilities->getResponse(__METHOD__,$this->actData,'uPermOff','POST'));
     }
     private function sqlGetUserPerm(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -521,8 +520,9 @@ class ManageUser
         return($this->response->setResponse(__METHOD__, $actData,'cUser','POST'));
     }
     private function setGetId(){
-        if(!$this->utilities->setGetIntKey($this->inpArray['id'],'id')){
-             $this->response->setError(1,"[".__METHOD__."] KEY id NOT EXIST OR ID IS NOT INT");
+        $this->inpArray['id']=$this->utilities->getNumber(filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT));
+        if($this->inpArray['id']===0){
+            Throw New Exception('Wrong ID => '.$this->inpArray['id'],1);
         }
     }
     function __destruct(){}

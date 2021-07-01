@@ -58,11 +58,12 @@ class Database extends PDO{
     }
     public function squery($sth,$param=[],$result='FETCH_ASSOC'){ 
         $task=strtoupper(substr(trim($sth),0,6));
-		$result=strtoupper(trim($result));
+	$result=strtoupper(trim($result));
+        self::checkParamIsArray($param);
         try{
             self::$dbLink->sth = self::$dbLink->prepare($sth);
-			array_walk($param,array($this,'pdoBindValue')); 
-			self::$dbLink->sth->execute();
+            array_walk($param,array($this,'pdoBindValue')); 
+            self::$dbLink->sth->execute();
         }
         catch (PDOException $e){
 			throw New Exception(__METHOD__.$e,1);
@@ -78,7 +79,8 @@ class Database extends PDO{
     }
     public function query($sql,$param=[]){
         self::$dbLink->sth = self::$dbLink->prepare($sql);
-		array_walk($param,array($this,'pdoBindValue')); 
+        self::checkParamIsArray($param);
+        array_walk($param,array($this,'pdoBindValue')); 
         self::$dbLink->sth->execute();
     }
     private function pdoBindValue($param,$key){
@@ -90,6 +92,56 @@ class Database extends PDO{
 			throw New Exception(__METHOD__."WRONG PDO PARAMETER => ".$param[1],1);
 		}
         self::$dbLink->sth->bindValue($key,$param[0],$this->pdoParam[$param[1]]);
+    }
+    private function checkParamIsArray($param=[]){
+        if(!is_array($param)){
+            Throw New Exception('PDO::PARAM IS NOT ARRAY',1);
+        }
+        foreach($param as $k => $v){
+            if(!is_array($v)){
+                Throw New Exception('PDO::PARAM::'.$k.' VALUE IS NOT ARRAY',1);
+            }
+        }
+    }
+    public function checkMaxValuelength(string $field='',$value='',string $table='')
+    {
+        $v=mb_strlen($value);
+        $f=self::getColumnTableLength($field,$table);
+        if($v>$f){
+            Throw New Exception('Field '.$field.' value too long. Max '.$f.' you introduced '.$v,0);
+        }
+    }
+    private function getColumnTableLength($c,$t)
+    {
+        $meta= self::squery("SHOW FULL COLUMNS from ".$t." WHERE Field='".$c."'");
+        return(self::parseColumnLength($meta[0]['Type']));
+    }
+    private function parseColumnLength($columnType)
+    {
+        $columnType=mb_strtolower($columnType);
+        $l=0;
+        switch($columnType)
+        {
+            case 'text':
+                    $l=65535;
+                    break;
+            case (mb_substr($columnType, 0, 8)==='varchar('):
+                    $l=intval(mb_substr($columnType, 8, 2));
+                    break;
+            case (mb_substr($columnType, 0, 4)==='int('):
+                    /*
+                     * TO BUILD
+                     */
+                    //$l=mb_substr($columnType, 4, 6);
+                    
+            default:
+                    /*
+                     * DEFAULT AS TEXT
+                     */
+                    $l=65535;
+                break;
+        }
+        return $l;
     }
     function __destruct(){}
 }

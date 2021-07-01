@@ -452,15 +452,12 @@ class ManageUser
     }
     private function sqlGetUserPerm(){
         $this->Log->log(0,"[".__METHOD__."]");
-        if($this->response->getError()){ return false;}
         /* GET DICTIONARY */
-        $this->dbLink->query('SELECT * FROM `v_slo_upr` WHERE `ID`>0 ORDER BY `ID` ASC ');
-        $slo=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);
-        $this->Log->logMulti(2,$slo,__LINE__."::".__METHOD__." slo");
+        $slo=$this->dbLink->squery('SELECT * FROM `v_slo_upr` WHERE `ID`>0 ORDER BY `ID` ASC');
+        $this->Log->logMulti(0,$slo,__LINE__."::".__METHOD__." slo");
         /* GET USER DICTIONARY */
-        $this->dbLink->query('SELECT * FROM `v_uzyt_i_upr` WHERE `idUzytkownik`='.$this->inpArray['id'].' ORDER BY `idUprawnienie` ASC');
-        $userSlo=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);
-        $this->Log->logMulti(2,$userSlo,__LINE__."::".__METHOD__." userSlo");
+        $userSlo=$this->dbLink->squery('SELECT * FROM `v_uzyt_i_upr` WHERE `idUzytkownik`=:i ORDER BY `idUprawnienie` ASC',[':i'=>[$this->inpArray['id'],'INT']]);
+        $this->Log->logMulti(0,$userSlo,__LINE__."::".__METHOD__." userSlo");
         /* COMBINE */
         return(self::combineSlo($slo,'ID',$userSlo,'idUprawnienie'));
  }
@@ -481,40 +478,43 @@ class ManageUser
     # RETURN CURRENT PROJECT DETAILS
     public function getUserDetails(){
         $this->Log->log(0,"[".__METHOD__."]");
-        self::setGetId();
+        $this->inpArray['id']=$this->utilities->getNumber(filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT));
         self::getUserAllDetails(); 
-        return($this->response->setResponse(__METHOD__,$this->actData,'eUser','POST'));
+        echo json_encode($this->utilities->getResponse(__METHOD__,$this->actData,'eUser','POST'));
     }
     private function getUserAllDetails(){
-        if($this->response->getError()){ return false;}
         try{
             /* GET USER DATA */
-            $this->actData['user']=self::sqlGetUserData();
+            self::sqlGetUserData();
             /* GET USER PERM */
             $this->actData['perm']=self::sqlGetUserPerm();
             /* GET USER ROLE */
             $this->actData['role']=self::getUserRole();
             /* GET ACCOUNT TYPE */
             $this->actData['accounttype']=self::getAccountType();
-            $this->logMultidimensional(2,$this->actData,__LINE__."::".__METHOD__." data");
+            $this->Log->logMulti(2,$this->actData,__LINE__."::".__METHOD__." data");
         }
         catch (PDOException $e){
-            $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
+            Throw New Exception ("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1); 
         }  
     }
     private function sqlGetUserdata(){
-        $this->Log->log(0,"[".__METHOD__."]");
-        if($this->response->getError()){ return false;}
-        $sqlData=array(':id'=>array($this->inpArray['id'],'INT'));
-        $this->dbLink->query("SELECT * FROM `v_all_user` WHERE `id`=:id",$sqlData);
-        return (parent::getSth()->fetch(PDO::FETCH_ASSOC));
+        $this->Log->log(0,"[".__METHOD__."] USER ID => ".$this->inpArray['id']);
+        $user=$this->dbLink->squery("SELECT * FROM `v_all_user` WHERE `id`=:i",[':i'=>[$this->inpArray['id'],'INT']]);
+        $count=count($user);
+        if($count!==1){
+            Throw New Exception ('Użytkownik o ID '.$this->inpArray['id'].' został usunięty ',0);
+        }
+        if($count>1){
+            Throw New Exception ('There is more than 1 ('.$count.') user with ID '.$this->inpArray['id'],1);
+        }
+        $this->actData['user']=$user[0];
     }
     private function getAccountType(){
-        $this->Log->log(0,"[".__METHOD__."]");
-        if($this->response->getError()){ return false;}
-        $noUserAccount=self::sqlGetNotUserAccountType();
+        $this->Log->log(0,"[".__METHOD__."] TYP KONTA => ".$this->actData['user']['TypKontaValue']);
+        $noUserAccount=$this->dbLink->squery("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`wsk_u`='0' AND a.`id`!=".$this->actData['user']['TypKontaValue']." ORDER BY a.`id`");
         $this->Log->logMulti(0,$noUserAccount,'noUserAccount');
-        $account[0]=self::sqlGetUserAccountType();
+        $account[0]=$this->dbLink->squery("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`id`=".$this->actData['user']['TypKontaValue']);
         return array_merge($account,$noUserAccount);
     }
     protected function sqlGetAllAccountType(){
@@ -523,27 +523,18 @@ class ManageUser
         $this->dbLink->query("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`wsk_u`='0' ORDER BY a.`id`");
         return ( parent::getSth()->fetchAll(PDO::FETCH_ASSOC));
     }
-    private function sqlGetUserAccountType(){
-        $this->dbLink->query("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`id`=".$this->actData['user']['TypKontaValue']);
-        return ( parent::getSth()->fetch(PDO::FETCH_ASSOC));
-    }
-    private function sqlGetNotUserAccountType(){
-        $this->dbLink->query("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`wsk_u`='0' AND a.`id`!=".$this->actData['user']['TypKontaValue']." ORDER BY a.`id`");
-        return ( parent::getSth()->fetchAll(PDO::FETCH_ASSOC));
-    }
     public function getUserRole(){
         $this->Log->log(0,"[".__METHOD__."] ID USER ROLE => ".$this->actData['user']['IdRola']);
-        if($this->response->getError()){ return false;}
         $userRoleSlo=array();
         $emptArr=array(array('ID'=>'0','NAZWA'=>'','DEFAULT'=>'t'));
         /* GET ALL ROLE */ 
-        $allRole=self::sqlGetAllRole();
+        $allRole=$this->dbLink->squery("SELECT * FROM `v_slo_rola`");
   
         if($this->actData['user']['IdRola']!='')
         {
             // COMBINE USER DICT
             $emptArr=array('ID'=>'0','NAZWA'=>''); 
-            $userRole=self::sqlGetUserRole($this->actData['user']['IdRola']);
+            $userRole=$this->dbLink->squery('SELECT *,"t" AS "DEFAULT" FROM `v_slo_rola` WHERE `ID`=:i',[':i'=>[$this->actData['user']['IdRola'],'INT']]);
             array_push($userRole,$emptArr);
             foreach($allRole as $key => $value){
                 if($value['ID']===$userRole[0]['ID']){
@@ -557,14 +548,6 @@ class ManageUser
             $userRoleSlo=array_merge($emptArr,$allRole);
         }
        return $userRoleSlo;
-    }
-    private function sqlGetAllRole(){
-        $this->dbLink->query("SELECT * FROM `v_slo_rola`");
-        return (parent::getSth()->fetchAll(PDO::FETCH_ASSOC));
-    }
-    private function sqlGetUserRole($idRole){
-        $this->dbLink->query('SELECT *,"t" AS "DEFAULT" FROM `v_slo_rola` WHERE `ID`='.$idRole);
-        return (parent::getSth()->fetchAll(PDO::FETCH_ASSOC));
     }
     public function getNewUserSlo(){
         $this->Log->log(0,"[".__METHOD__."]");

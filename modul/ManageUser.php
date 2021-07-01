@@ -24,13 +24,13 @@ class ManageUser
             self::checkUserData();
             self::addUser();
         } 
-        catch (Throwable $t) { // Executed only in PHP 7, will not match in PHP 5.x         
-            $this->response->setError(1,'PHP7 Caught exception: '.$t->getMessage()." in ".$t->getFile());
+        catch (Throwable $t) { // Executed only in PHP 7, will not match in PHP 5.x      
+            Throw New Exception('PHP7 Caught exception: '.$t->getMessage()." in ".$t->getFile(),1);
         } 
-        catch (Exception $e) {// Executed only in PHP 5.x, will not be reached in PHP 7
-            $this->response->setError(1,'PHP5 Caught exception: '.$e->getMessage()." in ".$e->getFile());
+        finally {
+            
         }
-        return($this->response->setResponse(__METHOD__,'ok','cModal','POST'));
+        $this->utilities->jsonResponse(__METHOD__,'ok','cModal','POST');
     }
     protected function setActSessionPermRole(){
         $this->Log->log(0,"[".__METHOD__."]");

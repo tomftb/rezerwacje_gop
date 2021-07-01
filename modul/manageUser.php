@@ -18,19 +18,11 @@ class ManageUser
         $this->inpArray=filter_input_array(INPUT_POST);
         $this->inpArray['ID']=0;
         $this->actData['haslo']='';
-        try {
-            // self::checkInputFields(); /* TO DO */
-            self::checkUserValueLength();
-            self::checkUserData();
-            self::addUser();
-        } 
-        catch (Throwable $t) { // Executed only in PHP 7, will not match in PHP 5.x         
-            $this->response->setError(1,'PHP7 Caught exception: '.$t->getMessage()." in ".$t->getFile());
-        } 
-        catch (Exception $e) {// Executed only in PHP 5.x, will not be reached in PHP 7
-            $this->response->setError(1,'PHP5 Caught exception: '.$e->getMessage()." in ".$e->getFile());
-        }
-        return($this->response->setResponse(__METHOD__,'ok','cModal','POST'));
+        // self::checkInputFields(); /* TO DO */
+        self::checkUserValueLength();
+        self::checkUserData();
+        self::addUser();
+        $this->utilities->jsonResponse(__METHOD__,'ok','cModal','POST');
     }
     protected function setActSessionPermRole(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -65,7 +57,7 @@ class ManageUser
         self::sqlGetUserFullData();
         self::checkUserData();
         self::updateUser();    
-        echo json_encode($this->utilities->getResponse(__METHOD__,'ok','cModal','POST'));
+        $this->utilities->jsonResponse(__METHOD__,'ok','cModal','POST');
     }
     private function checkUserData(){
         self::sqlCheckUserExist();
@@ -258,9 +250,8 @@ class ManageUser
         $this->Log->log(0,"[".__METHOD__."]");
         try{
             $this->dbLink->beginTransaction(); //PHP 5.1 and new
-            self::sqlUpdateUser();  
             self::sqlAddUser();
-            $this->inpArray['ID']= parent::lastInsertId(); 
+            $this->inpArray['ID']= $this->dbLink->lastInsertId(); 
             self::setPerm();
             $this->dbLink->commit();  
         }
@@ -391,7 +382,7 @@ class ManageUser
     }
     public function getUserDel(){
         $this->Log->log(0,"[".__METHOD__."]");    
-        self::setGetId();
+        $this->utilities->setGet('id',$this->inpArray);
         /* TO DO GET USER DALA WITH DELETE SLO */
         echo json_encode($this->utilities->getResponse(__METHOD__,$this->inpArray['id'],'dUser','POST'));
     }
@@ -403,7 +394,7 @@ class ManageUser
     # RETURN ALL EMPLOYEE SPEC DICTIONARY and other FROM DB
     public function getUserPerm(){
         $this->Log->log(0,"[".__METHOD__."]");
-        self::setGetId();
+        $this->utilities->setGet('id',$this->inpArray);
         array_push($this->actData,$this->inpArray['id']);
         array_push($this->actData,self::sqlGetUserPerm());
         echo json_encode($this->utilities->getResponse(__METHOD__,$this->actData,'uPermOff','POST'));
@@ -436,7 +427,7 @@ class ManageUser
     # RETURN CURRENT PROJECT DETAILS
     public function getUserDetails(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->inpArray['id']=$this->utilities->getNumber(filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT));
+        $this->utilities->setGet('id',$this->inpArray);
         self::getUserAllDetails(); 
         echo json_encode($this->utilities->getResponse(__METHOD__,$this->actData,'eUser','POST'));
     }
@@ -510,12 +501,6 @@ class ManageUser
         $actData['accounttype']=$this->dbLink->squery("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`wsk_u`='0' ORDER BY a.`id`");
         array_push($actData['role'],array('ID'=>'0','NAZWA'=>'','DEFAULT'=>'t'));
         echo json_encode($this->utilities->getResponse(__METHOD__, $actData,'cUser','POST'));
-    }
-    private function setGetId(){
-        $this->inpArray['id']=$this->utilities->getNumber(filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT));
-        if($this->inpArray['id']===0){
-            Throw New Exception('Wrong ID => '.$this->inpArray['id'],1);
-        }
     }
     function __destruct(){}
 }

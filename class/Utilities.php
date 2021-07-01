@@ -86,22 +86,22 @@ class Utilities
     }
     public function keyExist($a,$k){
         if (!array_key_exists($k,$a)){
-            Throw New Exception('No ID KEY in ARRAY!',1);
+            Throw New Exception('No '.$k.' KEY in ARRAY!',1);
         }
     }
-    public function isEmptyKeyValue($a,$k,$t=true){
+    public function isEmptyKeyValue($a,$k,$t=true,$errLvl=1){
         if($t){
             if(empty(trim($a[$k]))){
-                Throw New Exception('KEY ID is Empty (WITH TRIM)!',1);
+                Throw New Exception('KEY '.$k.' is Empty (WITH TRIM)!',$errLvl);
             }
         }
         else{
             if(empty($a[$k])){
-                Throw New Exception('KEY ID is Empty!',1);
+                Throw New Exception('KEY '.$k.' is Empty!',$errLvl);
             }
         }  
     }
-    public function getNumber($n=0,$base=10){
+    public function getNumber($n,$base=10){
         return intval($n,$base);
     }
     public function getResponse($t='',$v='',$f,$type=''){

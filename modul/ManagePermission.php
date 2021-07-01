@@ -57,12 +57,15 @@ class ManagePermission
                 break;
             }   
         }
+        self::delete($found,$v['idu']);
+    }
+    private function delete($found,$idu){
         if(!$found)
         {
-            $this->Log->log(0,"[".__METHOD__."] USER (".$v['idu'].") NOT FOUND IN INPUT ARRAY => DELETE");
+            $this->Log->log(0,"[".__METHOD__."] USER (".$idu.") NOT FOUND IN INPUT ARRAY => DELETE");
             $sql=[
                 ':ip'=>[$this->idPerm,'INT'],
-                ':iu'=>[$v['idu'],'INT']
+                ':iu'=>[$idu,'INT']
             ];
             $this->dbLink->query('DELETE FROM `uzyt_i_upr` WHERE `id_uzytkownik`=:iu AND id_uprawnienie=:ip',$sql);   
         }

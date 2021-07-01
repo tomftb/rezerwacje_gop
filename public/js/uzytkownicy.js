@@ -561,6 +561,9 @@ function postData(btn,nameOfForm)
         ajax.sendData(nameOfForm,'POST');
     };
 }
+function create(){
+    ajax.getData('getNewUserSlo');
+}
 function findData(value)
 {
     ajax.getData(defaultTask+'&filter='+value);

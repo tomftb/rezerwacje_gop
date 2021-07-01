@@ -5,7 +5,6 @@
 interface ManageProjectCommand
 {
     public function pDelete();
-    public function pTeam();
     public function pPDF();
     public function pGenDoc();
     public function getProjectDefaultValues();
@@ -15,9 +14,8 @@ interface ManageProjectCommand
     public function getprojectslike();
     public function pClose();
     public function getProjectCloseSlo();
-    public function getProjectTeam();
 }
-final class ManageProject implements ManageProjectCommand
+final class ManageProject extends DatabaseProject implements ManageProjectCommand
 {
     private $responseType='POST';
     private $inpArray=array();
@@ -109,11 +107,11 @@ final class ManageProject implements ManageProjectCommand
     private $dbLink;
     
     public function __construct(){
+        parent::__construct();
         $this->Log=Logger::init(__METHOD__);
         $this->Log->log(0,"[".__METHOD__."]");
         $this->notify='n';
         $this->modul['DOCUMENT']=NEW ManageProjectDocument();
-        $this->modul['TEAM']=NEW ManageProjectTeam();
         $this->modul['REPORT']=NEW ManageProjectReport();
         $this->modul['FILE']=NEW ManageProjectReport();
         $this->utilities=NEW Utilities();
@@ -173,120 +171,33 @@ final class ManageProject implements ManageProjectCommand
     }
     private function getProjectData($id)
     {
-        $sql=[
-            ':id'=>[$id,'INT']
-        ];
-        return ($this->dbLink->squery("SELECT 
-                        `id` as 'i',
-                        `numer_umowy` as 'n',
-                        `klient` as 'k',
-                        `temat_umowy` as 't',
-                        `typ` as 't2',
-                        `create_date` as 'du',
-                        `create_user_full_name` as 'cu',
-                        `create_user_email` as 'cum',
-                        `nadzor` as 'l',
-                        `kier_grupy` as 'm',
-                        `term_realizacji` as 'ds',
-                        `koniec_proj` as 'dk'           
-                 FROM `projekt_nowy` WHERE `id`=:id",$sql)[0]);
-    }
-    public function pTeam()
-    {
-        $this->Log->log(0,"[".__METHOD__."]");
-        $this->setInpArray(filter_input_array(INPUT_POST));
-        if($this->utilities->checkKeyExistEmpty('id',$this->inpArray)['status']!==0)
-        {
-            $this->response->setError(1,$this->utilities->getInfo());
-            return false;
-        }
-        $this->modul['TEAM']->setAdminEmail(self::getAdminEmail());
-        if($this->modul['TEAM']->setTeam($this->inpArray)!=''){
-            $this->response->setError(0,$this->modul['TEAM']->getInfo());
-        }
-        return($this->response->setResponse(__METHOD__,'','cModal','POST'));
+        return ($this->dbLink->squery("SELECT * FROM `v_all_proj_v11` WHERE `i`=:id",[':id'=>[$id,'INT']])[0]);
     }
     public function pPDF()
     {
         $this->Log->log(0,"[".__METHOD__."]");
-        if($this->utilities->checkInputGetValInt('id')['status']===1){
-            $this->responseType='GET';
-            Throw New Exception ($this->utilities->getInfo(),1);
-        }
-        $projectDetails=$this->query('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=? AND `wsk_u`=? ',$this->utilities->getData().",0")[0];
-        $projectDoc=$this->query('SELECT `nazwa` FROM `projekt_dok` WHERE `id_projekt`=? AND `wsk_u`=? ',$this->utilities->getData().",0");   
-        $projectTeam=$this->query('SELECT NazwiskoImie,DataOd,DataDo FROM v_proj_prac_v_pdf WHERE idProjekt=?',$this->utilities->getData());
-        //require_once($this->DR.'/modul/createPdf.php'); 
+        $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+        $this->utilities->isValueEmpty($id);
+        $sql[':id']=[$id,'INT'];
+        $projectDetails=$this->dbLink->squery('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=:id AND `wsk_u`=0',$sql)[0];
+        $projectDoc=$this->dbLink->squery('SELECT `nazwa` FROM `projekt_dok` WHERE `id_projekt`=:id AND `wsk_u`=0 ',$sql);   
+        $projectTeam=$this->dbLink->squery('SELECT `NazwiskoImie`,`DataOd`,`DataDo` FROM `v_proj_prac_v_pdf` WHERE `idProjekt`=:id',$sql); 
         $PDF = new createPdf($projectDetails,$projectDoc,$projectTeam);
-        return($this->response->setResponse(__METHOD__,$PDF->getPdf(),'downloadProjectPdf','POST'));
+        echo json_encode($this->utilities->getResponse(__METHOD__,$PDF->getPdf(),'downloadProjectPdf','POST'));
     }
     public function pGenDoc(){
         $this->Log->log(0,"[".__METHOD__."]");
-        //echo 'asdsad';
-        if($this->utilities->checkInputGetValInt('id')['status']===1)
-        {
-            $this->responseType='GET';
-            $this->response->setErrResponse(1,$this->utilities->getInfo());
-            return  $this->response->getReposnse();
-        }
-         $projectDetails=$this->query('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`klient`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=? AND `wsk_u`=? ',$this->utilities->getData().",0")[0];
-        //$phWord=new PhpWord();
-
+        $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+        $this->utilities->isValueEmpty($id);
+        $sql[':id']=[$id,'INT'];
+        $projectDetails=$this->dbLink->squery('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`klient`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=:id AND `wsk_u`=0 ',$sql)[0];
         $doc = new createDoc($projectDetails,$_FILES,'Project_'.$this->utilities->getData(),'.docx');
         $doc->createProjectReport();
-        return($this->response->setResponse(__METHOD__,$doc->getDocName(),'downloadProjectDoc','POST'));
+        echo json_encode($this->utilities->getResponse(__METHOD__,$doc->getDocName(),'downloadProjectDoc','POST'));
     }
     public function getProjectDefaultValues(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $valueToReturn['rodzaj_umowy']=$this->dbLink->squery('SELECT * FROM v_slo_um_proj ORDER BY ID ASC');
-        $valueToReturn['nadzor']=$this->dbLink->squery('SELECT * FROM v_slo_lider_proj ORDER BY ImieNazwisko ASC ');
-        $valueToReturn['kier_grupy']=$this->dbLink->squery('SELECT * FROM v_slo_kier_proj ORDER BY ImieNazwisko ASC ');
-        $valueToReturn['dokPowiazane']=$this->dbLink->squery('SELECT * FROM v_slo_dok ORDER BY ID ASC ');
-        $valueToReturn['gl_tech']=$this->dbLink->squery('SELECT * FROM v_slo_glow_tech_proj ORDER BY ImieNazwisko ASC ');
-        $valueToReturn['gl_kier']=$this->dbLink->squery('SELECT * FROM v_slo_kier_osr_proj ORDER BY ImieNazwisko ASC ');
-        $valueToReturn['typ_umowy']=$this->dbLink->squery('SELECT * FROM v_slo_typ_um  ORDER BY ID ASC ');
-        $valueToReturn['system_umowy']=$this->dbLink->squery('SELECT * FROM v_slo_sys_um ORDER BY ID ASC ');
-        $valueToReturn['unitSlo']=self::getProjectUnitSlo();
-        $valueToReturn['quota']=$this->dbLink->squery("SELECT `WARTOSC` FROM `parametry` WHERE `SKROT`='PROJ_QUOTA'")[0]['WARTOSC'];
-        $valueToReturn['r_dane']=$this->dbLink->squery("SELECT `WARTOSC` FROM `parametry` WHERE `SKROT`='PROJ_BASE_FILE_SIZE'")[0]['WARTOSC'];
-        $valueToReturn['id']='';
-        $valueToReturn['numer_umowy']='';
-        $valueToReturn['klient']='';
-        $valueToReturn['temat_umowy']='';
-        $valueToReturn['term_realizacji']=date("d.m.Y");  
-        $valueToReturn['harm_data']=date("d.m.Y"); 
-        $valueToReturn['koniec_proj']=date("d.m.Y"); 
-        /*return($this->response->setResponse(__METHOD__, $valueToReturn,'pCreate','POST'));  */
-        echo json_encode($this->response->setResponse(__METHOD__, $valueToReturn,'pCreate','POST'));
-        
-    }
-    private function getProjectUnitSlo()
-    {
-        $this->Log->log(0,"[".__METHOD__."]");
-        $sloIterator=New DataIterator($this->dbLink->squery("SELECT `NAZWA`,`DEF` FROM `slo_jednostka_miary` WHERE `ID`>0 AND `WSK_U`='0' ORDER BY ID ASC "));
-        //$sloIterator=New DataIterator('TEST-STRING');
-        //$sloIterator=New DataIterator(new stdClass);
-        $def='';
-        $all=array();
-        
-        while ($sloIterator->valid()) {
-            //$this->Log->logMulti(0,$sloIterator->key(),"KEY");
-            $current = $sloIterator->current();
-            //$this->Log->logMulti(0,$current,"CURRENT VALUE");
-            
-            if($current['DEF']==='t')
-            {
-                $def=$current['NAZWA'];
-            }
-            else
-            {
-                array_push($all,$current['NAZWA']);
-            }
-            $sloIterator->next();
-        }
-      
-        array_unshift ($all,$def);
-        return $all;
+        echo json_encode($this->utilities->getResponse(__METHOD__, parent::getProjectDefaultValues(),'pCreate','POST'));
     }
     private function getIdDataPost(&$v)
     {
@@ -296,20 +207,11 @@ final class ManageProject implements ManageProjectCommand
         $tmp_data=explode('|',$v);
         $id=$tmp_data[0];
         $value='';
-        //$this->Log->log(0,"[".__METHOD__."] original array");
-        //$this->Log->logMulti(0,$tmp_data,__METHOD__);
-        if(count($tmp_data)>0)
-        {
+        if(count($tmp_data)>0){
             // remove head
             array_shift($tmp_data);
-            //$this->Log->log(0,"[".__METHOD__."] after array_shift");
-            //$this->Log->logMulti(0,$tmp_data,__METHOD__);
-            // scale tail
             $value = implode (" ",$tmp_data);
-            //$this->Log->log(0,"[".__METHOD__."] new value, after implode -> ".$v);
         }
-        //$this->Log->log(0,"[".__METHOD__."] id -> ".$id);
-        //$this->Log->log(0,"[".__METHOD__."] new value, after implode -> ".$value);
         $v=array($id,$value);
     }
     private function getIdDataProjectPost()
@@ -326,8 +228,6 @@ final class ManageProject implements ManageProjectCommand
         self::getIdDataPost($this->inpArray['gl_kier']);
         self::getIdDataPost($this->inpArray['nadzor']);
         $this->inpArray['rodzaj_umowy']=explode('|',$this->inpArray['rodzaj_umowy']);
-        //$this->Log->logMulti(0,$this->inpArray['rodzaj_umowy'],__METHOD__);
-        
     }
     public function pCreate()
     {
@@ -336,111 +236,28 @@ final class ManageProject implements ManageProjectCommand
         $this->response->setType('POST');
         self::isEmpty('Numer',$this->inpArray['numer_umowy']);
         self::isEmpty('Temat',$this->inpArray['temat_umowy']);
-        $sql=[
-            ':numer_umowy'=>[$this->inpArray['numer_umowy'],'STR']
-        ];
-        if($this->dbLink->squery('SELECT * FROM `projekt_nowy` WHERE `wsk_u`=\'0\' AND  `numer_umowy`=:numer_umowy',$sql)){
+        if($this->dbLink->squery('SELECT * FROM `projekt_nowy` WHERE `wsk_u`=\'0\' AND  `numer_umowy`=:numer_umowy',[':numer_umowy'=>[$this->inpArray['numer_umowy'],'STR']])){
            Throw New Exception ($this->infoArray['numer_umowy'][1],0); 
         }
-        $sql=[
-            ':temat_umowy'=>[$this->inpArray['temat_umowy'],'STR']
-        ];
-        if($this->dbLink->squery('SELECT * FROM `projekt_nowy` WHERE `wsk_u`=\'0\' AND  `temat_umowy`=:temat_umowy',$sql)){
+
+        if($this->dbLink->squery('SELECT * FROM `projekt_nowy` WHERE `wsk_u`=\'0\' AND  `temat_umowy`=:temat_umowy',[':temat_umowy'=>[$this->inpArray['temat_umowy'],'STR']])){
            Throw New Exception ($this->infoArray['temat_umowy'][1],0); 
         }
-
         self::getIdDataProjectPost();
-        //self::getProjectParameters();
         self::setProjectDir();
         self::setQuotaField($this->inpArray['quota']);
         self::setProjectParm($this->inpArray);
         self::setProjectSizeQuota();
         self::setProjPrac();
-        self::addProjectDb();
+        parent::addProjectDb($this->inpArray);
+        self::parseResponse($this->modul['DOCUMENT']->addDok(parent::getProjectId(),$this->inpArrayDok));
+        $this->projectChange=1;
+        $this->notify='y';
         self::sendNotify(
                         "Zgłoszenie na utworzenie Projektu :: ".$this->inpArray['klient'].', '.$this->inpArray['temat_umowy'].', '.$this->inpArray['typ_umowy'][1],
                         'Zarejestrowano zgłoszenie na utworzenie nowego projektu o specyfikacji:',
                                 $this->inpArray);
-        //$this->response->setError(0,'TEST STOP');
-        //self::clearProjectData();
-        //return($this->response->setResponse(__METHOD__,'','cModal','POST'));
-        echo json_encode(($this->response->setResponse(__METHOD__,'','cModal','POST')));
-    }
-    public function addProjectDb()
-    {
-        try{
-            $sql=[
-                ':create_user'=>[$_SESSION["username"],'STR'],
-                ':create_user_full_name'=>[$_SESSION["nazwiskoImie"],'STR'],
-                ':create_user_email'=>[$_SESSION["mail"],'STR'],
-                ':create_date'=>[CDT,'STR'],
-                ':rodzaj_umowy'=>[$this->inpArray['rodzaj_umowy'][1],'STR'],
-                ':rodzaj_umowy_alt'=>[$this->inpArray['rodzaj_umowy'][2],'STR'],
-                ':numer_umowy'=>[$this->inpArray['numer_umowy'],'STR'],
-                ':temat_umowy'=>[$this->inpArray['temat_umowy'],'STR'],
-                ':kier_grupy'=>[$this->inpArray['kier_grupy'][1],'STR'],
-                ':kier_grupy_id'=>[$this->inpArray['kier_grupy'][0],'INT'],
-                ':term_realizacji'=>[$this->inpArray['d-term_realizacji'],'STR'],
-                ':harm_data'=>[$this->inpArray['d-harm_data'],'STR'],
-                ':koniec_proj'=>[$this->inpArray['d-koniec_proj'],'STR'],
-                ':nadzor'=>[$this->inpArray['nadzor'][1],'STR'],
-                ':nadzor_id'=>[$this->inpArray['nadzor'][0],'INT'],
-                ':mod_user'=>[$_SESSION["username"],'STR'],
-                ':mod_user_id'=>[$_SESSION["userid"],'INT'],
-                ':mod_host'=>[RA,'STR'],
-                ':kier_osr'=>[$this->inpArray['gl_kier'][1],'STR'],
-                ':kier_osr_id'=>[$this->inpArray['gl_kier'][0],'INT'],
-                ':technolog'=>[$this->inpArray['gl_tech'][1],'STR'],
-                ':technolog_id'=>[$this->inpArray['gl_tech'][0],'INT'],
-                ':r_dane'=>[$this->inpArray['r_dane'],'INT'],
-                ':j_dane'=>[$this->inpArray['j_dane'],'STR'],
-                ':klient'=>[$this->inpArray['klient'],'STR'],
-                ':typ'=>[$this->inpArray['typ_umowy'][1],'STR'],
-                ':system'=>[$this->inpArray['system_umowy'][1],'STR'],
-                ':rodzaj_umowy_id'=>[$this->inpArray['rodzaj_umowy'][0],'INT'],
-                ':typ_id'=>[$this->inpArray['typ_umowy'][0],'INT'],
-                ':system_id'=>[$this->inpArray['system_umowy'][0],'INT'],
-                ':quota'=>[$this->inpArray['quota'],'INT']
-            ];
-            $this->dbLink->beginTransaction(); //PHP 5.1 and new
-            $this->dbLink->query('INSERT INTO `projekt_nowy` 
-                   (create_user,create_user_full_name,create_user_email,create_date,rodzaj_umowy,rodzaj_umowy_alt,numer_umowy,temat_umowy,kier_grupy,kier_grupy_id,term_realizacji,harm_data,koniec_proj,nadzor,nadzor_id,mod_user,mod_user_id,mod_host,kier_osr,kier_osr_id,technolog,technolog_id,r_dane,j_dane,klient,typ,system,rodzaj_umowy_id,typ_id,system_id,quota) 
-                    VALUES
-                    (:create_user,:create_user_full_name,:create_user_email,:create_date,:rodzaj_umowy,:rodzaj_umowy_alt,:numer_umowy,:temat_umowy,:kier_grupy,:kier_grupy_id,:term_realizacji,:harm_data,:koniec_proj,:nadzor,:nadzor_id,:mod_user,:mod_user_id,:mod_host,:kier_osr,:kier_osr_id,:technolog,:technolog_id,:r_dane,:j_dane,:klient,:typ,:system,:rodzaj_umowy_id,:typ_id,:system_id,:quota)'
-                    ,$sql);
-            /* Must BEFORE COMMIT, OTHERWISE LAST ID = 0 */
-            $this->idProject=$this->dbLink->lastInsertId();
-            self::parseResponse($this->modul['DOCUMENT']->addDok($this->idProject,$this->inpArrayDok));
-            $this->dbLink->commit();  //PHP 5 and new
-        }
-	catch (PDOException $e){
-            $this->dbLink->rollback(); 
-            throw New Exception("DATABASE ERROR: ".$e->getMessage(),1); 
-	} 
-        $this->projectChange=1;
-        $this->notify='y';
-    }
-    private function clearProjectData()
-    {
-        $this->Log->log(0,"[".__METHOD__."]");
-        if($this->response->getError())
-        {
-            // update project set wsk_u = 1
-            $this->Log->log(0,"[".__METHOD__."] ERROR EXIST, SET PROJEKT WSK_U = 1");
-            $this->query('UPDATE `projekt_nowy` SET wsk_u=? WHERE id=?',"1,".$this->idProject);   
-        }
-    }
-    private function getProjectParameters()
-    {
-        $parm=array();
-        $this->query("SELECT `SKROT`,`WARTOSC` FROM `parametry` WHERE `SKROT` LIKE ?","%PROJ_",'FETCH_ASOC');
-        foreach($this->query("SELECT `SKROT`,`WARTOSC` FROM `parametry` WHERE `SKROT` LIKE ?","PROJ_%",'FETCH_ASOC') as $k => $v)
-        {
-            $parm[$v['SKROT']]=$v['WARTOSC'];
-        }
-        $this->Log->logMulti(1,$parm,__METHOD__);
-        return ($parm);
-        
+        echo json_encode(($this->utilities->getResponse(__METHOD__,'','cModal','POST')));
     }
     private function setupInputValue($field='')
     {
@@ -628,13 +445,12 @@ final class ManageProject implements ManageProjectCommand
     private function getLastProjectData()
     {
         $this->Log->log(0,"[".__METHOD__."]");
-        $data=$this->query('SELECT * FROM `v_project_post_compare` WHERE `idProject`=?',$this->inpArray['id']);
-        $this->Log->logMulti(2,$this->lastProjectData,__METHOD__." lastProjectData"); 
-        if(count($data)!==1)
-        {
-            $this->response->setError(1,"[".__METHOD__."] THERE IS MORE THAN ONE PROJECT WITH ID, OR THERE NO PROJECT WITH THIS ID => ".$this->inpArray['id']);
+        $data=$this->dbLink->squery('SELECT * FROM `v_project_post_compare` WHERE `idProject`=:i',['i'=>[$this->inpArray['id'],'INT']]);
+        if(count($data)!==1){
+            Throw New Exception("[".__METHOD__."] THERE IS MORE THAN ONE PROJECT WITH ID, OR THERE NO PROJECT WITH THIS ID => ".$this->inpArray['id'],1);
         }
         $this->lastProjectData=$data[0];
+        $this->Log->logMulti(2,$this->lastProjectData,__METHOD__." lastProjectData"); 
     }
     private function parseLastProjectData()
     {
@@ -652,45 +468,53 @@ final class ManageProject implements ManageProjectCommand
     public function pEdit()
     {
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->setInpArray($_POST);
-        $this->isEmpty('Numer',$this->inpArray['numer_umowy']);
-        $this->isEmpty('Temat',$this->inpArray['temat_umowy']);
-        if($this->response->getError()) { return '';}
-        $this->parseFieldValueLength('numer_umowy',$this->inpArray['numer_umowy'],'projekt_nowy');
-        $this->parseFieldValueLength('temat_umowy',$this->inpArray['temat_umowy'],'projekt_nowy');
-        if($this->response->getError()) { return '';}
-        if($this->checkExistInDb('projekt_nowy','numer_umowy=? AND id!=? AND wsk_u=? ',$this->inpArray['numer_umowy'].','.$this->inpArray['id'].",0")>0)
-        {
-            $this->response->setError(0,$this->infoArray['numer_umowy'][1]);
-        }
-        if($this->checkExistInDb('projekt_nowy','temat_umowy=? AND id!=? AND wsk_u=? ',$this->inpArray['temat_umowy'].','.$this->inpArray['id'].",0")>0)
-        {
-            $this->response->setError(0,$this->infoArray['temat_umowy'][1]);
-        }
-        if(!$this->response->getError())
-        {  
-            self::getLastProjectData();
-            self::getProjectParameters();
-            self::setQuotaField($this->lastProjectData['quota']);
-            self::parseLastProjectData();
-            self::setProjectParm($this->lastProjectData);
-            self::setProjectDiff();
-            self::getIdDataProjectPost();
-            self::setProjectDir();
-            self::setProjectSizeQuota();
-            self::setProjPrac();
-            self::updateProjectDb();
-            //self::updateDoc(); 
-            self::parseResponse($this->modul['DOCUMENT']->updateDoc($this->inpArray['id'],$this->inpArrayDok));
-            
-            self::parseNotifyFields();
-            self::sendNotify(
+        //$this->inpArray=filter_input_array(INPUT_POST);
+        self::setInpArray();
+        $this->utilities->keyExist($this->inpArray,'id');
+        $this->utilities->isEmptyKeyValue($this->inpArray,'id',true,0);
+        $this->utilities->keyExist($this->inpArray,'numer_umowy');
+        $this->utilities->isEmptyKeyValue($this->inpArray,'numer_umowy',true,0);
+        $this->utilities->keyExist($this->inpArray,'temat_umowy');
+        $this->utilities->isEmptyKeyValue($this->inpArray,'temat_umowy',true,0);
+
+        $this->inpArray['numer_umowy']=trim($this->inpArray['numer_umowy']);
+        $this->inpArray['temat_umowy']=trim($this->inpArray['temat_umowy']);
+        
+        $this->dbLink->checkMaxValuelength('numer_umowy',$this->inpArray['numer_umowy'],'projekt_nowy');
+        $this->dbLink->checkMaxValuelength('temat_umowy',$this->inpArray['temat_umowy'],'projekt_nowy');
+        self::projectExist('numer_umowy',$this->inpArray['id']);
+        self::projectExist('temat_umowy',$this->inpArray['id']);
+        self::getLastProjectData();
+        self::setQuotaField($this->lastProjectData['quota']);
+        self::parseLastProjectData();
+        self::setProjectParm($this->lastProjectData);
+        self::setProjectDiff();
+        self::getIdDataProjectPost();
+        self::setProjectDir();
+        self::setProjectSizeQuota();
+        self::setProjPrac();
+        parent::updateProjectDb($this->inpArray); 
+        self::parseResponse($this->modul['DOCUMENT']->updateDoc($this->inpArray['id'],$this->inpArrayDok));    
+        self::parseNotifyFields();
+        self::sendNotify(
                         "Zgłoszenie aktualizacji Projektu :: ".$this->inpArray['klient'].', '.$this->inpArray['temat_umowy'].', '.$this->inpArray['typ_umowy'][1],
                         'Zarejestrowano zgłoszenie na aktualizację projektu o specyfikacji:',
                         $this->lastProjectData);
-        }     
-        //$this->response->setError(0,'TEST STOP');
-        return($this->response->setResponse(__METHOD__,'','cModal','POST'));
+             
+        echo json_encode($this->utilities->getResponse(__METHOD__,'','cModal','POST'));
+    }
+    private function projectExist($field='',$id=0){
+        $this->Log->log(0,"[".__METHOD__."] ".$field." => ".$this->inpArray[$field]);  
+        if(empty($this->inpArray[$field])){
+            return false;
+        }
+        $sql=[
+            ':id'=>[$id,'INT'],
+            ':field'=>[$this->inpArray[$field],'STR'],
+            ];
+        if (count($this->dbLink->squery('SELECT * FROM `projekt_nowy` WHERE id!=:id AND `'.$field.'`=:field AND wsk_u=0',$sql))>0){
+            Throw New Exception($this->infoArray[$field][1],0);
+        }
     }
     private function setQuotaField($quota)
     {
@@ -719,19 +543,12 @@ final class ManageProject implements ManageProjectCommand
     public function pDoc()
     {
         $this->Log->log(0,"[".__METHOD__."]");
-        $id=$this->utilities->checkInputGetValInt('id');
-        $this->Log->logMulti(0,$id,__METHOD__);
-        if($id['status']===1)
-        {
-            $this->response->setErrResponse(1,'PROJECT DOCUMENTS NOT FOUND','POST');
-        }
-        else
-        {
-            $v['id']=$id['data'];
-            $v['project']=self::getProjectData($v['id']);
-            $v['dokPowiazane']=$this->query('SELECT ID,NAZWA as "Nazwa" FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$id['data']);
-            return($this->response->setResponse(__METHOD__,$v,'pDoc','POST'));  
-        }    
+        $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+        $sql=[':id'=>[$this->idProject,'INT']];
+        $v['id']= $this->idProject;
+        $v['project']=self::getProjectData( $this->idProject);
+        $v['dokPowiazane']=$this->dbLink->squery('SELECT ID,NAZWA as "Nazwa" FROM v_proj_dok WHERE ID_PROJEKT=:id ORDER BY id ASC',$sql);
+        echo json_encode($this->response->setResponse(__METHOD__,$v,'pDoc','POST'));      
     }
 
     private function setProjectDiff()
@@ -966,21 +783,10 @@ final class ManageProject implements ManageProjectCommand
             //$this->Log->log(0,"[".__METHOD__."] new value, after implode -> ".$v);
         }
     }
-    private function updateProjectDb()
-    {
-        $this->Log->log(0,"[".__METHOD__."]");
-        if($this->response->getError()) { return ''; }
-        $this->Log->log(0,"[".__METHOD__."] ".$this->inpArray['typ_umowy'][0]);
-        $this->Log->log(0,"[".__METHOD__."] ".$this->inpArray['typ_umowy'][1]);
-        $this->Log->logMulti(0,$this->inpArray,__METHOD__."::inpArray");
-        /**/
-        $this->query('UPDATE `projekt_nowy` SET `rodzaj_umowy`=?,`rodzaj_umowy_alt`=?,`numer_umowy`=?,`temat_umowy`=?,`kier_grupy`=?,`kier_grupy_id`=?,`term_realizacji`=?,`harm_data`=?,`koniec_proj`=?,`nadzor`=?,`nadzor_id`=?,`mod_user`=?,`mod_user_id`=?,`mod_host`=?,`dat_kor`=?,`kier_osr`=?,`kier_osr_id`=?,`technolog`=?,`technolog_id`=?,`r_dane`=?,`j_dane`=?,`klient`=?,`typ`=?,`system`=?,`rodzaj_umowy_id`=?,`typ_id`=?,`system_id`=?,`quota`=? WHERE id=?',
-        $this->inpArray['rodzaj_umowy'][1].",".$this->inpArray['rodzaj_umowy'][2].",".$this->inpArray['numer_umowy'].",".$this->inpArray['temat_umowy'].",".$this->inpArray['kier_grupy'][1].",".$this->inpArray['kier_grupy'][0].",".$this->inpArray['d-term_realizacji'].",".$this->inpArray['d-harm_data'].",".$this->inpArray['d-koniec_proj'].",".$this->inpArray['nadzor'][1].",".$this->inpArray['nadzor'][0].",".$_SESSION["username"].",".$_SESSION["userid"].",".$this->RA.",".$this->cDT.",".$this->inpArray['gl_kier'][1].','.$this->inpArray['gl_kier'][0].','.$this->inpArray['gl_tech'][1].','.$this->inpArray['gl_tech'][0].",".$this->inpArray['r_dane'].",".$this->inpArray['j_dane'].",".$this->inpArray['klient'].",".$this->inpArray['typ_umowy'][1].",".$this->inpArray['system_umowy'][1].",".$this->inpArray['rodzaj_umowy'][0].",".$this->inpArray['typ_umowy'][0].",".$this->inpArray['system_umowy'][0].",".$this->inpArray['quota'].",".$this->inpArray['id']);              
-        
-    }
+
     private function getNotifyFields()
     {
-        $nf=$this->query('SELECT SUBSTRING(`SKROT`,20) AS "SKRT" FROM `parametry` WHERE `SKROT` LIKE ? AND `WARTOSC`=? ORDER BY `ID` ASC','INFORM_CHANGE_PROJ_%,1');
+        $nf=$this->dbLink->squery('SELECT SUBSTRING(`SKROT`,20) AS "SKRT" FROM `parametry` WHERE `SKROT` LIKE "INFORM_CHANGE_PROJ_%" AND `WARTOSC`=1 ORDER BY `ID` ASC');
         //$this->Log->logMulti(0,$nf,__METHOD__."=>notifyFields");
         return $nf;
     }
@@ -1083,22 +889,25 @@ final class ManageProject implements ManageProjectCommand
     public function pDetails()
     {
         $this->idProject=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
-        $v=$this->query('SELECT `id`,`numer_umowy`,`klient`,`temat_umowy`,`term_realizacji`,`harm_data`,`koniec_proj`,`quota`,`r_dane` FROM v_all_proj_v10 WHERE id=?',$this->idProject)[0];       
-        $v['rodzaj_umowy']=self::setProjectRodzajUmowy($this->query('SELECT `rodzaj_umowy_id` as "ID",`rodzaj_umowy` as "Nazwa",`rodzaj_umowy_alt` as "NazwaAlt" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_um_proj WHERE 1=? ORDER BY ID ASC ',1));               
-        $v['nadzor']=self::setProjectMember($this->query('SELECT `nadzor_id` as "id",`nadzor` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_lider_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1));
-        $v['kier_grupy']=self::setProjectMember($this->query('SELECT `kier_grupy_id` as "id",`kier_grupy` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_kier_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1));
-        $v['gl_tech']=self::setProjectMember($this->query('SELECT `technolog_id` as "id",`technolog` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_glow_tech_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1));
-        $v['gl_kier']=self::setProjectMember($this->query('SELECT `kier_osr_id` as "id",`kier_osr` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_kier_osr_proj WHERE 1=? ORDER BY ImieNazwisko ASC ',1));      
-        $v['typ_umowy']=self::setProjectDict($this->query('SELECT `typ_id` as "ID",`typ` as "Nazwa" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_typ_um WHERE 1=? ORDER BY ID ASC ',1));
-        $v['system_umowy']=self::setProjectDict($this->query('SELECT `system_id` as "ID",`system` as "Nazwa" FROM `v_all_proj_v9` WHERE id=?',$this->idProject),$this->query('SELECT * FROM v_slo_sys_um WHERE 1=? ORDER BY ID ASC ',1));
-        $v['unitSlo']=self::setProjectUnitSlo($this->query('SELECT `j_dane` FROM `v_all_proj_v10` WHERE id=?',$this->idProject)[0]['j_dane']);
+        $sql=[
+            ':id'=>[$this->idProject,'INT']
+        ];
+        $v=$this->dbLink->squery('SELECT `id`,`numer_umowy`,`klient`,`temat_umowy`,`term_realizacji`,`harm_data`,`koniec_proj`,`quota`,`r_dane` FROM v_all_proj_v10 WHERE id=:id',$sql)[0];       
+        $v['rodzaj_umowy']=self::setProjectRodzajUmowy($this->dbLink->squery('SELECT `rodzaj_umowy_id` as "ID",`rodzaj_umowy` as "Nazwa",`rodzaj_umowy_alt` as "NazwaAlt" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_um_proj ORDER BY ID ASC'));               
+        $v['nadzor']=self::setProjectMember($this->dbLink->squery('SELECT `nadzor_id` as "id",`nadzor` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_lider_proj ORDER BY ImieNazwisko ASC'));
+        $v['kier_grupy']=self::setProjectMember($this->dbLink->squery('SELECT `kier_grupy_id` as "id",`kier_grupy` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_kier_proj ORDER BY ImieNazwisko ASC'));
+        $v['gl_tech']=self::setProjectMember($this->dbLink->squery('SELECT `technolog_id` as "id",`technolog` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_glow_tech_proj ORDER BY ImieNazwisko ASC'));
+        $v['gl_kier']=self::setProjectMember($this->dbLink->squery('SELECT `kier_osr_id` as "id",`kier_osr` as "ImieNazwisko" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_kier_osr_proj ORDER BY ImieNazwisko ASC'));      
+        $v['typ_umowy']=self::setProjectDict($this->dbLink->squery('SELECT `typ_id` as "ID",`typ` as "Nazwa" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_typ_um ORDER BY ID ASC'));
+        $v['system_umowy']=self::setProjectDict($this->dbLink->squery('SELECT `system_id` as "ID",`system` as "Nazwa" FROM `v_all_proj_v9` WHERE id=:id',$sql),$this->dbLink->squery('SELECT * FROM v_slo_sys_um ORDER BY ID ASC'));
+        $v['unitSlo']=self::setProjectUnitSlo($this->dbLink->squery('SELECT `j_dane` FROM `v_all_proj_v10` WHERE id=:id',$sql)[0]['j_dane']);
         $v['project']=self::getProjectData($this->idProject);
-        $v['dokPowiazane']=$this->query('SELECT ID,NAZWA as "Nazwa" FROM v_proj_dok WHERE ID_PROJEKT=? ORDER BY id ASC',$this->idProject);
-        return($this->response->setResponse(__METHOD__, $v,'pDetails','POST')); 
+        $v['dokPowiazane']=$this->dbLink->squery('SELECT ID,NAZWA as "Nazwa" FROM v_proj_dok WHERE ID_PROJEKT=:id ORDER BY id ASC',$sql);
+        echo json_encode($this->response->setResponse(__METHOD__, $v,'pDetails','POST')); 
     }
     private function setProjectUnitSlo($j_dane)
     {
-        $slo=$this->query("SELECT `NAZWA` FROM `slo_jednostka_miary` WHERE `ID`>? AND `WSK_U`=? ORDER BY ID ASC ","0,0");
+        $slo=$this->dbLink->squery("SELECT `NAZWA` FROM `slo_jednostka_miary` WHERE `ID`>0 AND `WSK_U`='0' ORDER BY ID ASC ");
         $all=array($j_dane);
         foreach($slo as $i => $v)
         {
@@ -1170,15 +979,16 @@ final class ManageProject implements ManageProjectCommand
         $this->Log->log(0,"[".__METHOD__."]");
         if($this->utilities->checkInputGetValInt('id')['status']===1)
         {
-            $this->response->setError(1,$this->utilities->getInfo());
+            Throw New Exception ($this->utilities->getInfo(),1);
         }
-        else
-        {
-            $v['id']=$this->utilities->getData();
-            $v['project']=self::getProjectData($v['id']);
-            $v['email']=$this->query('SELECT Pracownik,Pracownik_email AS Email FROM v_all_prac_proj_email WHERE Projekt_id=? ORDER BY Projekt_id ASC ',$this->utilities->getData());
-            return($this->response->setResponse(__METHOD__,$v,'pEmail','POST'));  
-        }    
+        $sql=[
+            ':id'=>[$this->utilities->getData(),'INT']
+        ];
+        $v['id']=$this->utilities->getData();
+        $v['project']=self::getProjectData($v['id']);
+        $v['email']=$this->dbLink->squery('SELECT Pracownik,Pracownik_email AS Email FROM v_all_prac_proj_email WHERE Projekt_id=:id ORDER BY Projekt_id ASC',$sql);
+        return($this->response->setResponse(__METHOD__,$v,'pEmail','POST'));  
+          
     }
      # RETURN ALL AVALIABLE MEMBERS
     public function getAllavaliableEmployee()
@@ -1235,34 +1045,6 @@ final class ManageProject implements ManageProjectCommand
                 Throw New Exception('WRONG TASK!',1);
         }
     }
-    public function getProjectTeam()
-    {
-        $this->Log->log(0,"[".__METHOD__."]");
-        if($this->utilities->checkInputGetValInt('id')===1)
-        {
-            $this->response->setError(1,' KEY ID in $_GET IS EMPTY');
-            return false;
-        }
-        $v['id']=intval($this->utilities->getData(),10);
-        $v['team']=$this->modul['TEAM']->getTeam($v['id']);
-        $v['project']=self::getProjectData($v['id']);
-        return($this->response->setResponse(__METHOD__,$v,'pTeamOff','POST'));  
-    }
-    public function pTeamOff()
-    {
-        $this->Log->log(0,"[".__METHOD__."]");
-        $this->setInpArray(filter_input_array(INPUT_POST));
-        if($this->utilities->checkKeyExistEmpty('id',$this->inpArray)['status']!==0)
-        {
-            $this->response->setError(1,$this->utilities->getInfo());
-            return false;
-        }
-        $v['id']=intval($this->utilities->getData()['id'],10);
-        $v['team']=$this->modul['TEAM']->getTeam(intval($this->inpArray['id'],10));
-        $v['ava']=$this->modul['TEAM']->getAvaTeam($this->utilities->getData()['id']);  
-        $this->Log->logMulti(0,$v,__LINE__."::".__METHOD__."");
-        return($this->response->setResponse(__METHOD__,$v,'pTeam','POST'));  
-    }
     public function getReturnedValue()
     {
         $this->Log->log(0,"[".__METHOD__."]");
@@ -1306,34 +1088,25 @@ final class ManageProject implements ManageProjectCommand
              * IF YES, OK
              * IF NO, SET 0
              */
-            if($this->projectChange===0)
-            {
+            if($this->projectChange===0){
                 // ALREADY SETUP NO CHANGE
                 $this->response->setError(0,'BRAK ZMIAN !');
             }
              $this->projectDocList=$response['info'];
         }
-        else if($response['status']===1)
-        {
+        else if($response['status']===1){
             // CHANGE    
             $this->projectDiff['dok']=1;
             $this->projectChange=1;
             $this->projectDocList=$response['info'];
         }
-        else if($response['status']===2)
-        {
+        else if($response['status']===2){
             // ERROR
-            $this->response->setError(0,$response['info']);
+            Throw New Exception ($response['info'],0);
         }
-        else
-        {
+        else{
             // BAD RESPONSE STATUS
-             $this->response->setError(1,'BAD RESPONSE STATUS FROM MODULE');
-        }
-    }
-    private function setGetId(){
-        if(!$this->utilities->setGetIntKey($this->inpArray['id'],'id')){
-             $this->response->setError(1,"[".__METHOD__."] KEY id NOT EXIST OR ID IS NOT INT");
+            Throw New Exception ('BAD RESPONSE STATUS FROM MODULE',1);
         }
     }
     public function downloadProjectPdf(){
@@ -1356,5 +1129,5 @@ final class ManageProject implements ManageProjectCommand
         $showFile=new showFile();
         $showFile->getFile(filter_input(INPUT_GET,"dir"),filter_input(INPUT_GET,"file"));
     }
-    function __destruct(){$this->Log->log(0,"[".__METHOD__."]");}
+    function __destruct(){}
 }

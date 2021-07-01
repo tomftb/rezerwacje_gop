@@ -130,21 +130,15 @@ class ManagePermission
     public function getUsersWithPerm()
     {
         $this->Log->log(0,"[".__METHOD__."]");
-        if(!$this->utilities->checkInputGetValInt('id')['status']===1)
-        {
-            $this->response->setError(1,'');
-        }
-        else
-        {
-            // ID PERM
-            $v['i']=$this->utilities->getData();
-            // GET USERS WITH PERM
-            $v['u']=$this->query('SELECT id, ImieNazwisko FROM v_upr_i_uzyt_v3 WHERE idUprawnienie=?',$this->utilities->getData());
-            // GET ALL USERS
-            $v['a']=$this->query('SELECT ID as "id",CONCAT(Imie," ",Nazwisko) AS "ImieNazwisko" FROM v_all_user WHERE wskU=? ORDER BY ID asc',"0");
-        }   
-        return($this->response->setResponse(__METHOD__, $v,'uPermOff','POST'));
+        $id=$this->utilities->getNumber(filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT));
+        $this->Log->log(0,"[".__METHOD__."] ID => ".$id);
+        // ID PERM
+        $v['i']=$id;
+        // GET USERS WITH PERM
+        $v['u']=$this->dbLink->squery('SELECT id, ImieNazwisko FROM `v_upr_i_uzyt_v3` WHERE idUprawnienie=:i',[':i'=>[$id,'INT']]);
+        // GET ALL USERS
+        $v['a']=$this->dbLink->squery('SELECT ID as "id",CONCAT(Imie," ",Nazwisko) AS "ImieNazwisko" FROM `v_all_user` WHERE wskU=0 ORDER BY ID asc');
+        echo json_encode($this->utilities->getResponse(__METHOD__, $v,'uPermOff','POST'));
     }
-    function __destruct()
-    {}
+    function __destruct(){}
 }

@@ -38,6 +38,11 @@ class Utilities
         }
         return (self::response());
     }
+    public function isValueEmpty($value=''){
+        if(trim($value)===''){
+           Throw New exception ("VALUE IS EMPTY",1);
+        }
+    }
     public function checkInputGetValSanitizeString($key)
     {
         $s=filter_input(INPUT_GET,$key); //$key
@@ -78,6 +83,39 @@ class Utilities
             //$this->setError(1,' KEY '.$k.' in ARRAY IS EMPTY');
         }
         return (self::response());
+    }
+    public function keyExist($a,$k){
+        if (!array_key_exists($k,$a)){
+            Throw New Exception('No '.$k.' KEY in ARRAY!',1);
+        }
+    }
+    public function isEmptyKeyValue($a,$k,$t=true,$errLvl=1){
+        if($t){
+            if(empty(trim($a[$k]))){
+                Throw New Exception('KEY '.$k.' is Empty (WITH TRIM)!',$errLvl);
+            }
+        }
+        else{
+            if(empty($a[$k])){
+                Throw New Exception('KEY '.$k.' is Empty!',$errLvl);
+            }
+        }  
+    }
+    public function getNumber($n,$base=10){
+        return intval($n,$base);
+    }
+    public function getResponse($t='',$v='',$f,$type=''){
+        return ([
+                'data'=>[
+                            'task'=>$t,
+                            'value'=>$v,
+                            'function'=>$f
+                        ],
+                'type'=>$type,
+                'status'=>0,
+                'info'=>'',
+                'modul'=>'',
+        ]);
     }
     public function getPost($trim=true,$date=false)
     {

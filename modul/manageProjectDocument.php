@@ -35,30 +35,40 @@ class ManageProjectDocument {
     public function updateDoc($id,$doc)
     {
         $this->Log->log(0,"[".__METHOD__."]");
+        if(trim($id)===''){
+            Throw New Exception ("ID PROJECT IS EMPTY",1);
+        }
         $this->inpArrayDok=$doc;
         $this->idProject=$id;
         $this->addLabel=self::sBlue."DODANO".self::sEnd.": ";
-        self::getDbDok($id);
-        array_map(array($this, 'removeEmptyDok'),array_keys($this->inpArrayDok),$this->inpArrayDok);
-        array_map(array($this, 'existInDb'),array_keys($this->inpArrayDok),$this->inpArrayDok); 
-        //self::insertNewDok($this->idProject,$this->inpArrayDok,self::sBlue."DODANO".self::sEnd.": ");
-        array_map(array($this, 'insertNewDok'),$this->inpArrayDok);
-        array_map(array($this, 'removeNotSendedDoc'),$this->dbDok);
+        try{
+             $this->dbLink->beginTransaction(); //PHP 5.1 and new
+            self::getDbDok($id);
+            array_map(array($this, 'removeEmptyDok'),array_keys($this->inpArrayDok),$this->inpArrayDok);
+            array_map(array($this, 'existInDb'),array_keys($this->inpArrayDok),$this->inpArrayDok); 
+            //self::insertNewDok($this->idProject,$this->inpArrayDok,self::sBlue."DODANO".self::sEnd.": ");
+            array_map(array($this, 'insertNewDok'),$this->inpArrayDok);
+            array_map(array($this, 'removeNotSendedDoc'),$this->dbDok);
+            $this->dbLink->commit();  //PHP 5 and new
+         }
+        catch (PDOException $e){
+            $this->dbLink->rollback(); 
+            throw New Exception(__METHOD__.$e,1);
+	}
         return (self::setResponse());
     }
     # RETURN ALL NOT DELETED PROJECT FROM DB
-    private function getDbDok($idProject='')
+    private function getDbDok($idProject=1)
     {
         /*
          * GET DOCUMENTS DATA FROM DATABASE
          */
         $this->Log->log(0,"[".__METHOD__."] ID PROJECT => ".$idProject);
-        if($idProject==='') { $this->setError(1," WRONG ID PROJECT => (".$idProject.")"); }
-        $this->dbDok=$this->query('SELECT `ID`,`NAZWA` as \'Nazwa\' FROM `v_proj_dok` WHERE `ID_PROJEKT`=? ORDER BY `id` ASC',$idProject);
-        $this->Log->logMultidimensional(0,$this->dbDok,__METHOD__." dbDok"); 
+        $this->dbDok=$this->dbLink->squery('SELECT `ID`,`NAZWA` as \'Nazwa\' FROM `v_proj_dok` WHERE `ID_PROJEKT`=:i ORDER BY `id` ASC',['i'=>[$idProject,'INT']]);
+        $this->Log->logMulti(0,$this->dbDok,__METHOD__." dbDok"); 
         return ($this->dbDok);
     }
-    public function getDoc($idProject)
+    public function getDoc($idProject=1)
     {
         $this->Log->log(0,"[".__METHOD__."]");
         if($idProject==='') { $this->setError(1," WRONG ID PROJECT => (".$idProject.")"); }
@@ -74,7 +84,6 @@ class ManageProjectDocument {
     private function existInDb($k,$v)
     {
         $this->Log->log(0,"[".__METHOD__."] $k , $v");
-        if($this->getError()) { return '';}
         foreach($this->dbDok as $id => $dok)
         {
             $this->Log->log(0,"[".__METHOD__."] $id , ".$dok['Nazwa']);
@@ -115,21 +124,48 @@ class ManageProjectDocument {
     private function removeNotSendedDoc($dok)
     {
         $this->Log->log(0,"[".__METHOD__."] SET WSK_U = 1 FOR ".$dok['ID']." => ".$dok['Nazwa']);
-        if($this->getError()) { return '';}
         /*
          * FOR TEST
          */
         //$dok['ID']=999;
-        if($this->checkExistInDb('projekt_dok','id=? AND id_projekt=?',$dok['ID'].','.$this->idProject)>0)
+        if($this->documentExist($this->idProject,$dok['ID']))
         {
-            $this->response['status']=1;
-            $this->query( 'UPDATE `projekt_dok` SET wsk_u=?,mod_data=?,mod_user=?,mod_user_id=?,mod_host=? WHERE id_projekt=? AND id=?','1,'.$this->cDT.",".$_SESSION["username"].",".$_SESSION["userid"].",".$this->RA.",".$this->idProject.','.$dok['ID']); 
+
+            $sql=[
+                ':wsk_u'=>['1','STR'],
+                ':mod_data'=>[CDT,'STR'],
+                ':mod_user'=>[$_SESSION["username"],'STR'],
+                ':mod_user_id'=>[$_SESSION["userid"],'INT'],
+                ':mod_host'=>[RA,'STR'],
+                ':id_projekt'=>[$this->idProject,'INT'],
+                ':id'=>[$dok['ID'],'INT']
+            ];
+            $this->dbLink->query('UPDATE `projekt_dok` SET '
+                    . 'wsk_u=:wsk_u,'
+                    . 'mod_data=:mod_data,'
+                    . 'mod_user=:mod_user,'
+                    . 'mod_user_id=:mod_user_id,'
+                    . 'mod_host=:mod_host '
+                    . 'WHERE '
+                    . 'id_projekt=:id_projekt '
+                    . 'AND id=:id',$sql); 
             self::setupActDokListField(self::sRed."USUNIĘTO".self::sEnd.": ".$dok['Nazwa']);
         }
-        else
-        {
-            $this->setError(1,"DOCUMENT NOT FOUND IN DATABASE => ID => ".$dok['ID'].", NAZWA => ".$dok['NAZWA']);
+        else{
+            Throw New Exception("DOCUMENT NOT FOUND IN DATABASE => ID => ".$dok['ID'].", NAZWA => ".$dok['NAZWA'],1);
         }
+    }
+    private function documentExist($id=0,$idDoc=0){
+        $this->Log->log(0,"[".__METHOD__."]");  
+        $sql=[
+            ':id'=>[$id,'INT'],
+            ':idDoc'=>[$idDoc,'INT'],
+            ];
+       
+        if (count($this->dbLink->squery('SELECT * FROM `projekt_dok` WHERE `id_projekt`=:id AND id=:idDoc',$sql))>0){
+            return true;
+        }
+        return false;
     }
     private function setupActDokListField($dok)
     {

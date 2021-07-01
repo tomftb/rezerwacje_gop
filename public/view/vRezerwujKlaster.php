@@ -4,7 +4,10 @@ if(!defined("DR")){ die('Direct access not permitted'); }
     $disabled='';
     $info='';
     $border='border-info';
-    if(!checkPerm('EDIT_KLAST',$_SESSION['perm'],0))
+    //echo"<pre>";
+    //print_r($_SESSION['perm']);
+    //echo"</pre>";
+    if(!in_array('EDIT_KLAST',$_SESSION['perm']))
     {
         $border='border-white';
         $disabled='disabled';

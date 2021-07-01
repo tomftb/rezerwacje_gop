@@ -382,7 +382,7 @@ class ManageUser
     }
     public function getUserDel(){
         $this->Log->log(0,"[".__METHOD__."]");    
-        self::setGetId();
+        $this->utilities->setGet('id',$this->inpArray);
         /* TO DO GET USER DALA WITH DELETE SLO */
         echo json_encode($this->utilities->getResponse(__METHOD__,$this->inpArray['id'],'dUser','POST'));
     }
@@ -394,7 +394,7 @@ class ManageUser
     # RETURN ALL EMPLOYEE SPEC DICTIONARY and other FROM DB
     public function getUserPerm(){
         $this->Log->log(0,"[".__METHOD__."]");
-        self::setGetId();
+        $this->utilities->setGet('id',$this->inpArray);
         array_push($this->actData,$this->inpArray['id']);
         array_push($this->actData,self::sqlGetUserPerm());
         echo json_encode($this->utilities->getResponse(__METHOD__,$this->actData,'uPermOff','POST'));
@@ -427,7 +427,7 @@ class ManageUser
     # RETURN CURRENT PROJECT DETAILS
     public function getUserDetails(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->inpArray['id']=$this->utilities->getNumber(filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT));
+        $this->utilities->setGet('id',$this->inpArray);
         self::getUserAllDetails(); 
         echo json_encode($this->utilities->getResponse(__METHOD__,$this->actData,'eUser','POST'));
     }
@@ -501,12 +501,6 @@ class ManageUser
         $actData['accounttype']=$this->dbLink->squery("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`wsk_u`='0' ORDER BY a.`id`");
         array_push($actData['role'],array('ID'=>'0','NAZWA'=>'','DEFAULT'=>'t'));
         echo json_encode($this->utilities->getResponse(__METHOD__, $actData,'cUser','POST'));
-    }
-    private function setGetId(){
-        $this->inpArray['id']=$this->utilities->getNumber(filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT));
-        if($this->inpArray['id']===0){
-            Throw New Exception('Wrong ID => '.$this->inpArray['id'],1);
-        }
     }
     function __destruct(){}
 }

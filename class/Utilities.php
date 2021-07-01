@@ -117,6 +117,12 @@ class Utilities
                 'modul'=>'',
         ]);
     }
+    public function setGet($key='id',&$input=[]){
+        $input[$key]=self::getNumber(filter_input(INPUT_GET,$key,FILTER_VALIDATE_INT));
+        if($input[$key]===0){
+            Throw New Exception('Wrong ID => '.$input['id'],1);
+        }
+    }
     public function jsonResponse($t='',$v='',$f,$type=''){
         echo json_encode(self::getResponse($t,$v,$f,$type));
     }

@@ -117,6 +117,9 @@ class Utilities
                 'modul'=>'',
         ]);
     }
+    public function jsonResponse($t='',$v='',$f,$type=''){
+        echo json_encode(self::getResponse($t='',$v='',$f,$type=''));
+    }
     public function getPost($trim=true,$date=false)
     {
         $this->Log->log(0,"[".__METHOD__."]");

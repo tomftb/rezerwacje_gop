@@ -36,85 +36,68 @@ class ManageUser
     }
     protected function setActSessionPermRole(){
         $this->Log->log(0,"[".__METHOD__."]");
-        if($this->response->getError()){ return false;}
         if($_SESSION['userid']!==$this->inpArray['ID']) { return ''; }
-        $qData[':id']=array($this->inpArray['ID'],'INT');
-        $this->dbLink->query("SELECT `id_rola` as 'IdRola' FROM `uzytkownik` WHERE `id`=:id",$qData); 
-        $idRole=parent::getSth()->fetch(PDO::FETCH_ASSOC);
+        $this->dbLink->query("SELECT `id_rola` as 'IdRola' FROM `uzytkownik` WHERE `id`=:id",[':id'=>[$this->inpArray['ID'],'INT']]); 
+        $idRole=$this->dbLink->sth->fetch(PDO::FETCH_ASSOC);
         if(!is_array($idRole)){
-            throw new ErrorException(' USER '.$this->inpArray['ID'].' NOT EXIST IN DATABASE', 0, 0, __METHOD__, __LINE__);
+            Throw New Exception('USER '.$this->inpArray['ID'].' NOT EXIST IN DATABASE',1);
         }    
-        $this->logMulti(0,$idRole['IdRola'],__LINE__."::".__METHOD__." idRole");
+        $this->Log->logMulti(0,$idRole['IdRola'],__LINE__."::".__METHOD__." idRole");
         // UPDATE CURRENT USER SESSION PERM;
         $permRole=array();
         $idRole=intval($idRole['IdRola'],10);
         if($idRole>0){
             $this->dbLink->query("SELECT `SKROT` FROM `v_upr_i_slo_rola_v2` WHERE `idRola`=".$idRole); 
-            $permRole=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);
+            $permRole=$this->dbLink->sth->fetchAll(PDO::FETCH_ASSOC);
         }
         $this->dbLink->query('SELECT `SKROT` FROM `v_uzyt_i_upr_v2` WHERE `idUzytkownik`='.$this->inpArray['ID']); 
-        $perm=parent::getSth()->fetchAll(PDO::FETCH_ASSOC);
+        $perm=$this->dbLink->sth->fetchAll(PDO::FETCH_ASSOC);
         $_SESSION['perm']=array();
         foreach(array_merge($perm,$permRole) as $v){
             array_push($_SESSION['perm'],$v['SKROT']);
         }
-        $this->logMultidimensional(2,$_SESSION['perm'],__LINE__."::".__METHOD__." SESSION['perm']");
+        $this->Log->logMulti(2,$_SESSION['perm'],__LINE__."::".__METHOD__." SESSION['perm']");
     }
     public function eUserOn(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->inpArray=filter_input_array(INPUT_POST);
         //$this->Log->logMulti(2,$this->inpArray,__METHOD__."::POST");
-        try {
-            // self::checkInputFields(); /* TO DO */
-            self::checkUserValueLength();
-            self::sqlGetUserFullData();
-            self::checkUserData();
-            self::updateUser();    
-        } 
-        catch (Throwable $t) { // Executed only in PHP 7, will not match in PHP 5.x         
-            $this->response->setError(1,'PHP7 Caught exception: '.$t->getMessage()." in ".$t->getFile());
-        } 
-        catch (Exception $e) {// Executed only in PHP 5.x, will not be reached in PHP 7
-            $this->response->setError(1,'PHP5 Caught exception: '.$e->getMessage()." in ".$e->getFile());
-        }
-        return($this->response->setResponse(__METHOD__,'ok','cModal','POST'));
+        // self::checkInputFields(); /* TO DO */
+        self::checkUserValueLength();
+        self::sqlGetUserFullData();
+        self::checkUserData();
+        self::updateUser();    
+        echo json_encode($this->utilities->getResponse(__METHOD__,'ok','cModal','POST'));
     }
     private function checkUserData(){
-        if($this->response->getError()){ return false;}
-        try{
-            self::sqlCheckUserExist();
-            self::checkUserAccountType();
-            self::checkUserAccountPassword();   
-        }
-        catch (PDOException $e){
-            $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
-        }
+        self::sqlCheckUserExist();
+        self::checkUserAccountType();
+        self::checkUserAccountPassword();   
     }
     private function updateUser(){
-        if($this->response->getError()){ return false;}
+        $this->Log->log(0,"[".__METHOD__."]");
         try{
-            parent::beginTransaction(); //PHP 5.1 and new
+            $this->dbLink->beginTransaction(); //PHP 5.1 and new
             self::sqlUpdateUser();  
             self::setPerm();
             self::setActSessionPermRole();
-            parent::commit();  
+            $this->dbLink->commit();  
         }
         catch (PDOException $e){
-            $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage()); 
-            parent::rollback();
+            $this->dbLink->rollback();
+            Throw New Exception("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
         }
     }
     private function sqlCheckUserExist(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $query_data=array(
+        $query_data=[
             ':id'=>array(intval($this->inpArray['ID'],10),'INT'),
             ':login'=>array(trim($this->inpArray['Login']),'STR'),
             ':imie'=>array(trim($this->inpArray['Imie']),'STR'),
             ':nazwisko'=>array(trim($this->inpArray['Nazwisko']),'STR')
-            );
-        $this->dbLink->query("select `id` FROM `uzytkownik` WHERE `id`!=:id AND `wsk_u`='0' AND (`login`=:login OR (`nazwisko`=:nazwisko AND `imie`=:imie))",$query_data); 
-        if(count(parent::getSth()->fetchAll(PDO::FETCH_ASSOC))>0){
-            $this->response->setError(0,"Istnieje już użytkownik o podanym loginie lub imieniu i nazwisku");
+            ];
+        if(count($this->dbLink->squery("select `id` FROM `uzytkownik` WHERE `id`!=:id AND `wsk_u`='0' AND (`login`=:login OR (`nazwisko`=:nazwisko AND `imie`=:imie))",$query_data))>0){
+            Throw New Exception("Istnieje już użytkownik o podanym loginie lub imieniu i nazwisku",0);
         }
     }
     
@@ -127,19 +110,15 @@ class ManageUser
         $acc=explode('|',$this->inpArray['accounttype']);
         $this->inpArray['accounttype']=intval($acc[0],10); 
     }
-    private function checkAccountTypeExist(){
-        $qData[':id']=array($this->inpArray['accounttype'],'INT'); //$this->inpArray['accounttype']
-        $this->dbLink->query("select `id`,`name` FROM `app_account_type` WHERE `id`=:id AND `wsk_u`='0'",$qData); 
-        $tmp=parent::getSth()->fetch(PDO::FETCH_ASSOC);
+    private function checkAccountTypeExist()
+    {
+        $tmp=$this->dbLink->squery("select `id`,`name` FROM `app_account_type` WHERE `id`=:id AND `wsk_u`='0'",[':id'=>[$this->inpArray['accounttype'],'INT']]);
         if(!is_array($tmp)){
-            throw new ErrorException(' ACCOUNT TYPE '.$this->inpArray['accounttype'].' NOT EXIST IN DATABASE', 0, 0, __METHOD__, __LINE__);
+            throw new Exception(' ACCOUNT TYPE '.$this->inpArray['accounttype'].' NOT EXIST IN DATABASE',1);
         }
-        else{
-            $this->accountType=$tmp['name'];
-        }
+        $this->accountType=$tmp[0]['name'];  
     }
     private function checkUserAccountPassword(){
-        $this->Log->log(0,"[".__METHOD__."]");
         $this->Log->log(0,"ACCOUNT TYPE => ".$this->accountType);
         switch($this->accountType){
             case 'Active Directory':
@@ -150,7 +129,7 @@ class ManageUser
                 self::setUserPassword(); 
                 break;
             default:
-                    throw new ErrorException(' ACCOUNT TYPE `'.$this->accountType.'` NOT OPERATED', 0, 0, __METHOD__, __LINE__);
+                throw new Exception(' ACCOUNT TYPE `'.$this->accountType.'` NOT OPERATED',1);
         }
     }
     private function setUserPassword(){
@@ -167,28 +146,29 @@ class ManageUser
     }
     private function checkUserPassword(){
         $this->Log->log(0,"[".__METHOD__."]");
+        $err='';
         /* TRIM */
         $this->Log->log(0,$this->inpArray['Haslo']);
         $this->inpArray['Haslo']=trim($this->inpArray['Haslo']);
         /* LENGTH */
-        $check=self::checkDataLength($this->inpArray['Haslo'],'polu hasło',6,30);
-        if($check){
-            $this->response->setError(0,$check);
-        }
+        $err=self::checkDataLength($this->inpArray['Haslo'],'polu hasło',6,30);
         /* PREG_MATCH = TWO DIGIT */
         if(!preg_match('/.*\d+.*/', $this->inpArray['Haslo'])){
-            $this->response->setError(0,'W haśle musi się znależć co najmniej jedna cyfra');
+            $err.='<br/>W haśle musi się znależć co najmniej jedna cyfra';
         }
         if(!preg_match('/.*\D+.*\D+.*/', $this->inpArray['Haslo'])){
-            $this->response->setError(0,'W haśle muszą się znależć co najmniej dwie litery');
+            $err.='<br/>W haśle muszą się znależć co najmniej dwie litery';
         }
         if(!preg_match('/[!@#$%^&*()_+]+/', $this->inpArray['Haslo'])){
-            $this->response->setError(0,'W haśle musi się znależć co najmniej jeden znak specjalny !@#$%^&*()_+');
+            $err.='<br/>W haśle musi się znależć co najmniej jeden znak specjalny !@#$%^&*()_+';
+        }
+        if($err){ 
+            Throw New Exception($err,0);    
         }
     }
     private function setPassword(){
         $this->Log->log(0,"[".__METHOD__."] PASSWORD_BCRYPT ALGORITHM");
-        if($this->response->getError()){ return false;}
+        
         $this->inpArray['Haslo']=password_hash($this->inpArray['Haslo'], PASSWORD_BCRYPT);
         //$this->Log->log(0,$this->inpArray['Haslo']);
         $this->Log->log(0,"LENGTH => ".mb_strlen($this->inpArray['Haslo']));
@@ -217,13 +197,12 @@ class ManageUser
     }
     private function sqlGetSloPerm(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $db=array();
-        $this->dbLink->query("SELECT `ID` FROM `v_slo_upr` WHERE `ID`>0");   
-        //$tmp=parent::getSth()->fetchAll(PDO::FETCH_ASSOC)['bu'];
-        foreach(parent::getSth()->fetchAll(PDO::FETCH_ASSOC) as $v){
+        $db=array(); 
+        $this->dbLink->query("SELECT `ID` FROM `v_slo_upr` WHERE `ID`>0");
+        foreach($this->dbLink->sth->fetchAll(PDO::FETCH_ASSOC)  as $v){
             array_push($db,$v['ID']);
         }
-        $this->logMulti(2,$db,__LINE__."::".__METHOD__." db");
+        $this->Log->logMulti(2,$db,__LINE__."::".__METHOD__." db");
         return ($db);
     }
     protected function checkPermInDb($t1,$t2)
@@ -236,21 +215,19 @@ class ManageUser
         $this->Log->log(2,"[".__METHOD__."]");   
         foreach($t1 as $v)
         {
-            //$this->logMultidimensional(0,$v,__LINE__."::".__METHOD__." t1");
+            //$this->Log->logMulti(0,$v,__LINE__."::".__METHOD__." t1");
             $this->Log->log(2,"[".__METHOD__."] ID => ".$v); 
             if(!in_array($v,$t2))
             {  
-                $this->response->setError(1,"DICTIONARY ID => ".$v." NOT FOUND IN DB");
-                break;
+                Throw New Exception ("DICTIONARY ID => ".$v." NOT FOUND IN DB",1);
             }         
         }
     }
     private function setPerm(){
-        if($this->response->getError()){ return false;}
+        $this->Log->log(0,"[".__METHOD__."]");
         $permDb=self::sqlGetSloPerm();
         $permPost=$this->utilities->getArrayKeyValue('ID',$this->utilities->getCboxFromInput($this->inpArray));
         self::checkPermInDb($permPost,$permDb);
-        if($this->response->getError()) { return ''; }
         foreach($permDb as $v){
             if(in_array($v,$permPost)){
                 self::sqlAddUserPerm($this->inpArray['ID'],$v);
@@ -272,106 +249,90 @@ class ManageUser
             }
         }
     }
-    protected function checkDataLength($value,$label,$min,$max){
-        $this->Log->log(0,"[".__METHOD__."]");
-        $check=$this->utilities->checkValueLength($value,$label,$min,$max);
-        if($check){
-            $this->response->setError(0,$check);
-        }
-    }
     protected function checkUserValueLength(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $check[0]=self::checkDataLength($this->inpArray['Imie'],'polu imię',3,30);
-        $check[1]=self::checkDataLength($this->inpArray['Nazwisko'],'polu nazwisko',3,30);
-        $check[2]=self::checkDataLength($this->inpArray['Login'],'polu login',3,30);
-        foreach($check as $v){
-            if($v){
-                $this->response->setError(0,$v);
-            }
+        $check[0]=$this->utilities->checkValueLength($this->inpArray['Imie'],'polu imię',3,30);
+        $check[1]=$this->utilities->checkValueLength($this->inpArray['Nazwisko'],'polu nazwisko',3,30);
+        $check[2]=$this->utilities->checkValueLength($this->inpArray['Login'],'polu login',3,30);
+        
+        if($check[0]!=='' || $check[1]!=='' || $check[2]!==''){
+             Throw New Exception($check[0].$check[1].$check[2],0);
         }
     }
     protected function addUser(){
-        if($this->response->getError()){ return false;}
+        $this->Log->log(0,"[".__METHOD__."]");
         try{
-            parent::beginTransaction(); //PHP 5.1 and new
+            $this->dbLink->beginTransaction(); //PHP 5.1 and new
             self::sqlUpdateUser();  
             self::sqlAddUser();
             $this->inpArray['ID']= parent::lastInsertId(); 
             self::setPerm();
-            parent::commit();  
+            $this->dbLink->commit();  
         }
         catch (PDOException $e){
-            $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage()); 
-            parent::rollback();
+            $this->dbLink->rollback();
+            Throw New Eception ("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
+           
         }
     }
     private function sqlAddUser(){
-        $qData=array();
+        $qData=[];
         self::addSqlUserAddOns($qData);
         $this->dbLink->query("INSERT INTO `uzytkownik` (`imie`,`nazwisko`,`login`,`haslo`,`email`,`typ`,`id_rola`,`mod_dat`,`mod_user`,`mod_user_id`) VALUES
 		(:imie,:nazwisko,:login,:haslo,:email,:typ,:id_rola,:mod_dat,:mod_user,:mod_user_id);",$qData);
     } 
     private function sqlUpdateUser()
     {
-        if($this->response->getError()){ return false;}
-        $qData=array(
-            ':id'=>array($this->inpArray['ID'],'INT'), 
-        );
+        $this->Log->log(0,"[".__METHOD__."]");
+        $qData=[
+            ':id'=>[$this->inpArray['ID'],'INT'], 
+        ];
         self::addSqlUserAddOns($qData);
         $this->dbLink->query("UPDATE `uzytkownik` SET `imie`=:imie,`nazwisko`=:nazwisko,`login`=:login,`email`=:email,`haslo`=:haslo,`typ`=:typ,`id_rola`=:id_rola,`mod_dat`=:mod_dat,`mod_user`=:mod_user,`mod_user_id`=:mod_user_id WHERE `id`=:id",$qData);
     }
     private function addSqlUserAddOns(&$data){
-        $addOns=array(
-            ':imie'=>array(trim($this->inpArray['Imie']),'STR'),
-            ':nazwisko'=>array(trim($this->inpArray['Nazwisko']),'STR'),
-            ':login'=>array(trim($this->inpArray['Login']),'STR'),
-            ':email'=>array(trim($this->inpArray['Email']),'STR'),
-            ':haslo'=>array($this->inpArray['Haslo'],'STR'),
-            ':typ'=>array($this->inpArray['accounttype'],'INT'),
-            ':id_rola'=>array($this->inpArray['Rola'],'INT'),
-            ':mod_dat'=>array($this->cDT,'STR'),
-            ':mod_user'=>array($_SESSION["username"],'STR'),
-            ':mod_user_id'=>array($_SESSION["userid"],'INT'),
-        );
+        $this->Log->log(0,"[".__METHOD__."]");
+        $addOns=[
+            ':imie'=>[trim($this->inpArray['Imie']),'STR'],
+            ':nazwisko'=>[trim($this->inpArray['Nazwisko']),'STR'],
+            ':login'=>[trim($this->inpArray['Login']),'STR'],
+            ':email'=>[trim($this->inpArray['Email']),'STR'],
+            ':haslo'=>[$this->inpArray['Haslo'],'STR'],
+            ':typ'=>[$this->inpArray['accounttype'],'INT'],
+            ':id_rola'=>[$this->inpArray['Rola'],'INT'],
+            ':mod_dat'=>[CDT,'STR'],
+            ':mod_user'=>[$_SESSION["username"],'STR'],
+            ':mod_user_id'=>[$_SESSION["userid"],'INT']
+        ];
         $this->utilities->mergeArray($data,$addOns);
     }
     protected function sqlAddUserPerm($userId,$value)
     {
-        if($this->response->getError()) { return ''; }
         $this->Log->log(2,"[".__METHOD__."] USER ID => ".$userId.", VALUE => ".$value);
-        /* CHECK IS EXIST */
-        $this->dbLink->query("select * FROM `v_uzyt_i_upr` WHERE `idUzytkownik`=".$userId." AND `idUprawnienie`=".$value); 
-        if(!is_array(parent::getSth()->fetch(PDO::FETCH_ASSOC))){
+        /* CHECK IS EXIST */ 
+        $this->dbLink->query("select * FROM `v_uzyt_i_upr` WHERE `idUzytkownik`=".$userId." AND `idUprawnienie`=".$value);
+        if(!is_array($this->dbLink->sth->fetch(PDO::FETCH_ASSOC))){
             /* NOT EXIST => INSERT */
             $this->dbLink->query('INSERT INTO `uzyt_i_upr` (`id_uzytkownik`,`id_uprawnienie`) VALUES ('.$userId.','.$value.')'); 
         }
     }
     protected function sqlRemoveUserPerm($userId,$value)
     {
-        if($this->response->getError()) { return ''; }
         $this->Log->log(2,"[".__METHOD__."] USER ID => ".$userId.", VALUE => ".$value);
          /* CHECK IS EXIST */
-        $this->dbLink->query("select * FROM `v_uzyt_i_upr` WHERE `idUzytkownik`=".$userId." AND `idUprawnienie`=".$value); 
-        if(is_array(parent::getSth()->fetch(PDO::FETCH_ASSOC))){
+        $this->dbLink->query("select * FROM `v_uzyt_i_upr` WHERE `idUzytkownik`=".$userId." AND `idUprawnienie`=".$value);
+        if(is_array($this->dbLink->sth->fetch(PDO::FETCH_ASSOC))){
             /* EXIST -> DELETE */
             $this->dbLink->query('DELETE FROM `uzyt_i_upr` WHERE `id_uzytkownik`='.$userId.' AND `id_uprawnienie`='.$value); 
         }   
     }
     protected function sqlGetUserFullData(){
         $this->Log->log(0,"[".__METHOD__."]");
-        if($this->response->getError()) { return ''; }
-        try{
-            $qData[':id']=array($this->inpArray['ID'],'INT'); //$this->inpArray['accounttype']
-            $this->dbLink->query("select * FROM `uzytkownik` WHERE `id`=:id",$qData); 
-            $this->actData=parent::getSth()->fetch(PDO::FETCH_ASSOC);
-            if(!is_array($this->actData)){
-                throw new ErrorException(' USER `'.$this->inpArray['ID'].'` NOT EXIST IN', 0, 0, __METHOD__, __LINE__);
-            } 
+        $user=$this->dbLink->squery("select * FROM `uzytkownik` WHERE `id`=:i",[':i'=>[$this->inpArray['ID'],'INT']]); 
+        if(!is_array($user)){
+            throw new Exception(' USER `'.$this->inpArray['ID'].'` NOT EXIST IN DATABASE', 1);
         }
-        catch (PDOException $e){
-            $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
-        }
-       
+        $this->actData=$user[0];
         $this->Log->logMulti(0,$this->actData);
     }
     # DELETED PROJECT IN DB
@@ -420,7 +381,7 @@ class ManageUser
 	catch (PDOException $e){
             Throw New Exception("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
 	}
-        /* parent::getSth()->fetchAll(PDO::FETCH_ASSOC) */
+        /* $this->dbLink->sth->fetchAll(PDO::FETCH_ASSOC) */
         echo json_encode($this->response->setResponse(__METHOD__,$result,'','GET'));  
     }
     private function setGetWsk($wsk='u'){
@@ -489,9 +450,9 @@ class ManageUser
             /* GET USER PERM */
             $this->actData['perm']=self::sqlGetUserPerm();
             /* GET USER ROLE */
-            $this->actData['role']=self::getUserRole();
+            self::getUserRole();
             /* GET ACCOUNT TYPE */
-            $this->actData['accounttype']=self::getAccountType();
+            self::getAccountType();
             $this->Log->logMulti(2,$this->actData,__LINE__."::".__METHOD__." data");
         }
         catch (PDOException $e){
@@ -513,23 +474,22 @@ class ManageUser
     private function getAccountType(){
         $this->Log->log(0,"[".__METHOD__."] TYP KONTA => ".$this->actData['user']['TypKontaValue']);
         $noUserAccount=$this->dbLink->squery("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`wsk_u`='0' AND a.`id`!=".$this->actData['user']['TypKontaValue']." ORDER BY a.`id`");
-        $this->Log->logMulti(0,$noUserAccount,'noUserAccount');
-        $account[0]=$this->dbLink->squery("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`id`=".$this->actData['user']['TypKontaValue']);
-        return array_merge($account,$noUserAccount);
+        $this->Log->logMulti(2,$noUserAccount,'noUserAccount');
+        $account=$this->dbLink->squery("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`id`=".$this->actData['user']['TypKontaValue']);
+        $this->actData['accounttype']=array_merge($account,$noUserAccount);
     }
     protected function sqlGetAllAccountType(){
         $this->Log->log(0,"[".__METHOD__."]");
         if($this->response->getError()){ return false;}
         $this->dbLink->query("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`wsk_u`='0' ORDER BY a.`id`");
-        return ( parent::getSth()->fetchAll(PDO::FETCH_ASSOC));
+        return ( $this->dbLink->sth->fetchAll(PDO::FETCH_ASSOC));
     }
     public function getUserRole(){
         $this->Log->log(0,"[".__METHOD__."] ID USER ROLE => ".$this->actData['user']['IdRola']);
-        $userRoleSlo=array();
-        $emptArr=array(array('ID'=>'0','NAZWA'=>'','DEFAULT'=>'t'));
+        $userRoleSlo=[];
+        $emptArr=[['ID'=>'0','NAZWA'=>'','DEFAULT'=>'t']];
         /* GET ALL ROLE */ 
         $allRole=$this->dbLink->squery("SELECT * FROM `v_slo_rola`");
-  
         if($this->actData['user']['IdRola']!='')
         {
             // COMBINE USER DICT
@@ -547,7 +507,7 @@ class ManageUser
         else{
             $userRoleSlo=array_merge($emptArr,$allRole);
         }
-       return $userRoleSlo;
+       $this->actData['role']=$userRoleSlo;
     }
     public function getNewUserSlo(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -565,6 +525,5 @@ class ManageUser
              $this->response->setError(1,"[".__METHOD__."] KEY id NOT EXIST OR ID IS NOT INT");
         }
     }
-    function __destruct()
-    {}
+    function __destruct(){}
 }

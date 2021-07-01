@@ -3,7 +3,6 @@ class ManageUser
 {
     private $inpArray=array();
     private $actData=array();
-    private $responseType='POST';
     private $accountType='';
     private $Log;
     private $dbLink;
@@ -13,7 +12,6 @@ class ManageUser
         $this->dbLink=LoadDb::load();
         $this->Log->log(0,"[".__METHOD__."]");
         $this->utilities=NEW Utilities();
-        $this->response=NEW Response('User');
     }
     public function cUser(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -100,7 +98,6 @@ class ManageUser
             Throw New Exception("Istnieje już użytkownik o podanym loginie lub imieniu i nazwisku",0);
         }
     }
-    
     private function checkUserAccountType(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::setAccountType();
@@ -146,7 +143,6 @@ class ManageUser
     }
     private function checkUserPassword(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $err='';
         /* TRIM */
         $this->Log->log(0,$this->inpArray['Haslo']);
         $this->inpArray['Haslo']=trim($this->inpArray['Haslo']);
@@ -168,7 +164,6 @@ class ManageUser
     }
     private function setPassword(){
         $this->Log->log(0,"[".__METHOD__."] PASSWORD_BCRYPT ALGORITHM");
-        
         $this->inpArray['Haslo']=password_hash($this->inpArray['Haslo'], PASSWORD_BCRYPT);
         //$this->Log->log(0,$this->inpArray['Haslo']);
         $this->Log->log(0,"LENGTH => ".mb_strlen($this->inpArray['Haslo']));
@@ -339,21 +334,24 @@ class ManageUser
     public function dUser(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->inpArray=filter_input_array(INPUT_POST); 
+        $this->utilities->keyExist($this->inpArray,'ID');
+        $this->utilities->isEmptyKeyValue($this->inpArray,'ID',true,1);
         /* TO DO => CHECK INPUT */
         try{
-            $qData[':id']=array($this->inpArray['ID'],'INT'); //$this->inpArray['accounttype']
-            $this->dbLink->query("UPDATE `uzytkownik` SET `wsk_u`='1' WHERE `id`=:id",$qData); 
+            $this->dbLink->beginTransaction(); //PHP 5.1 and new
+            $this->dbLink->query("UPDATE `uzytkownik` SET `wsk_u`='1' WHERE `id`=:id",[':id'=>[$this->inpArray['ID'],'INT']]); 
+            $this->dbLink->commit();  
         }
         catch (PDOException $e){
-            $this->response->setError(1,"[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage());
+            $this->dbLink->rollback();
+            Throw New Exception("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
         }
-        return($this->response->setResponse(__METHOD__,'ok','cModal','POST'));
+        echo json_encode($this->utilities->getResponse(__METHOD__,'ok','cModal','POST'));
     }
     public function getUsersLike(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->responseType='GET';
         $f=htmlentities(nl2br(filter_input(INPUT_GET,'filter')), ENT_QUOTES,'UTF-8',FALSE);
-
         $this->Log->log(0,"[".__METHOD__."] filter => ".$f);
         $this->Log->logMulti(0,filter_input_array(INPUT_GET));
         $select="SELECT u.`id` as 'ID',u.`imie` as 'Imie',u.`nazwisko` as 'Nazwisko',u.`login` as 'Login',u.`email` as 'Email',a.`name` as 'TypKonta', (SELECT r.`NAZWA` FROM `slo_rola` as r WHERE  u.`id_rola`=r.`id` ) as `Rola` FROM `uzytkownik` u, `app_account_type` as a WHERE u.`typ`=a.`id`  AND u.`wsk_u`=:wsk_u AND";
@@ -382,7 +380,7 @@ class ManageUser
             Throw New Exception("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
 	}
         /* $this->dbLink->sth->fetchAll(PDO::FETCH_ASSOC) */
-        echo json_encode($this->response->setResponse(__METHOD__,$result,'','GET'));  
+        echo json_encode($this->utilities->getResponse(__METHOD__,$result,'','GET'));  
     }
     private function setGetWsk($wsk='u'){
         $this->inpArray[$wsk]=filter_input(INPUT_GET,$wsk);
@@ -477,12 +475,6 @@ class ManageUser
         $account=$this->dbLink->squery("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`id`=".$this->actData['user']['TypKontaValue']);
         $this->actData['accounttype']=array_merge($account,$noUserAccount);
     }
-    protected function sqlGetAllAccountType(){
-        $this->Log->log(0,"[".__METHOD__."]");
-        if($this->response->getError()){ return false;}
-        $this->dbLink->query("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`wsk_u`='0' ORDER BY a.`id`");
-        return ( $this->dbLink->sth->fetchAll(PDO::FETCH_ASSOC));
-    }
     public function getUserRole(){
         $this->Log->log(0,"[".__METHOD__."] ID USER ROLE => ".$this->actData['user']['IdRola']);
         $userRoleSlo=[];
@@ -511,13 +503,13 @@ class ManageUser
     public function getNewUserSlo(){
         $this->Log->log(0,"[".__METHOD__."]");
         // SLO UPR
-        $actData['perm']=$this->query('SELECT * FROM v_slo_upr WHERE 1=? ORDER BY ID ASC ',1);
+        $actData['perm']=$this->dbLink->squery('SELECT * FROM `v_slo_upr` ORDER BY `ID` ASC ');
         // SLO ROLA
-        $actData['role']=$this->query('SELECT * FROM v_slo_rola WHERE 1=? ORDER BY ID ASC ',1);
+        $actData['role']=$this->dbLink->squery('SELECT * FROM `v_slo_rola` ORDER BY `ID` ASC ');
         /* ACCOUNT TYPE */
-        $actData['accounttype']=self::sqlGetAllAccountType();
+        $actData['accounttype']=$this->dbLink->squery("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`wsk_u`='0' ORDER BY a.`id`");
         array_push($actData['role'],array('ID'=>'0','NAZWA'=>'','DEFAULT'=>'t'));
-        return($this->response->setResponse(__METHOD__, $actData,'cUser','POST'));
+        echo json_encode($this->utilities->getResponse(__METHOD__, $actData,'cUser','POST'));
     }
     private function setGetId(){
         $this->inpArray['id']=$this->utilities->getNumber(filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT));

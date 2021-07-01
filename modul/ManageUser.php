@@ -18,18 +18,10 @@ class ManageUser
         $this->inpArray=filter_input_array(INPUT_POST);
         $this->inpArray['ID']=0;
         $this->actData['haslo']='';
-        try {
-            // self::checkInputFields(); /* TO DO */
-            self::checkUserValueLength();
-            self::checkUserData();
-            self::addUser();
-        } 
-        catch (Throwable $t) { // Executed only in PHP 7, will not match in PHP 5.x      
-            Throw New Exception('PHP7 Caught exception: '.$t->getMessage()." in ".$t->getFile(),1);
-        } 
-        finally {
-            
-        }
+        // self::checkInputFields(); /* TO DO */
+        self::checkUserValueLength();
+        self::checkUserData();
+        self::addUser();
         $this->utilities->jsonResponse(__METHOD__,'ok','cModal','POST');
     }
     protected function setActSessionPermRole(){
@@ -65,7 +57,7 @@ class ManageUser
         self::sqlGetUserFullData();
         self::checkUserData();
         self::updateUser();    
-        echo json_encode($this->utilities->getResponse(__METHOD__,'ok','cModal','POST'));
+        $this->utilities->jsonResponse(__METHOD__,'ok','cModal','POST');
     }
     private function checkUserData(){
         self::sqlCheckUserExist();
@@ -258,9 +250,8 @@ class ManageUser
         $this->Log->log(0,"[".__METHOD__."]");
         try{
             $this->dbLink->beginTransaction(); //PHP 5.1 and new
-            self::sqlUpdateUser();  
             self::sqlAddUser();
-            $this->inpArray['ID']= parent::lastInsertId(); 
+            $this->inpArray['ID']= $this->dbLink->lastInsertId(); 
             self::setPerm();
             $this->dbLink->commit();  
         }

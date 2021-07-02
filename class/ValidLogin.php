@@ -18,7 +18,7 @@ class ValidLogin
     }
     public function checkLoginData(){
         $this->logLink->log(0,"[".__METHOD__."]");
-        if($this->checkGet()){
+        if(self::checkGet()){
             return 0;
         }
         else if(self::checkSession()){
@@ -105,33 +105,32 @@ class ValidLogin
              */
             //$this->logLink->log(0,"[".__METHOD__."] ".password_hash($this->userPassword, PASSWORD_BCRYPT));
             if (!password_verify($this->userPassword, $this->userData[0]['haslo'])) {
-                Throw New Exception('Błędne hasło.');
+                Throw New Exception('Błędne hasło.',0);
             }
             $_SESSION["mail"]=$this->userData[0]['email'];
             $_SESSION["nazwiskoImie"]=$this->userData[0]['nazwisko'].' '.$this->userData[0]['imie']; 
         }
-        else if($this->userData['typ']===1){
+        else if($this->userData[0]['typ']===1){
             /* AD ACCOUNT => CHECK IN AD */
             self::checkLoginInAD();
         }
         else{
             /* WRONG ACCOUNT TYPE => SET ERROR */
-            $this->logLink->log(0,"[".__METHOD__."] Wrong account type => ".$this->userData['typ']);
-            Throw New Exception('Brak uprawnienia do zalogowania się.');
+            $this->logLink->log(0,"[".__METHOD__."] Wrong account type => ".$this->userData[0]['typ']);
+            Throw New Exception('Brak uprawnienia do zalogowania się.',0);
         }
     }
     private function setSessionData(){
         $this->logLink->log(0,"[".__METHOD__."]");
         $_SESSION["username"]=$this->userName;
         $_SESSION["userid"]=$this->userData[0]['id'];
-        $_SESSION["perm"]=$this->userData['perm'];  
+        $_SESSION["perm"]=$this->userData[0]['perm'];  
         $_SESSION["uid"]= uniqid();
     }
     private function getUserData(){
         $this->logLink->log(0,"[".__METHOD__."]");
-        $sqlData[':login']=array($this->userName,'STR');
         try{
-            $this->userData=$this->dbLink->squery("SELECT `id`,`imie`,`nazwisko`,`email`,`wsk_u`,`typ`,`haslo`,`id_rola` FROM `uzytkownik` WHERE `login`=:login",$sqlData);
+            $this->userData=$this->dbLink->squery("SELECT `id`,`imie`,`nazwisko`,`email`,`wsk_u`,`typ`,`haslo`,`id_rola` FROM `uzytkownik` WHERE `login`=:login",[':login'=>[$this->userName,'STR']]);
             $this->logLink->logMulti(2,$this->userData,__METHOD__);
 	}
 	catch (PDOException $e){
@@ -142,6 +141,7 @@ class ValidLogin
     private function checkUserData(){
         $this->logLink->log(0,"[".__METHOD__."]");
         if(count($this->userData)!==1){
+            $this->logLink->log(0,"[".__METHOD__."] THERE IS NO USER OR THERE IS MORE THAN ONE USER WITH LOGIN => ".$this->userName);
             Throw New Exception('Brak uprawnienia do zalogowania się.',0);
         }
     }

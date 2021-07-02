@@ -9,16 +9,18 @@ class ValidLogin
     private $userData=array();
     private $dbLink;
     private $logLink;
+    private $Error;
     
     public function __construct(){
         $this->logLink=Logger::init(__METHOD__);
+        $this->Error=New ErrorHandler();
         $this->logLink->log(0,"[".__METHOD__."]");
         $this->userName=filter_input(INPUT_POST,"username");
         $this->userPassword=filter_input(INPUT_POST,"password");
     }
     public function checkLoginData(){
         $this->logLink->log(0,"[".__METHOD__."]");
-        if($this->checkGet()){
+        if(self::checkGet()){
             return 0;
         }
         else if(self::checkSession()){
@@ -105,19 +107,19 @@ class ValidLogin
              */
             //$this->logLink->log(0,"[".__METHOD__."] ".password_hash($this->userPassword, PASSWORD_BCRYPT));
             if (!password_verify($this->userPassword, $this->userData[0]['haslo'])) {
-                Throw New Exception('Błędne hasło.');
+                Throw New Exception('Błędne hasło.',0);
             }
             $_SESSION["mail"]=$this->userData[0]['email'];
             $_SESSION["nazwiskoImie"]=$this->userData[0]['nazwisko'].' '.$this->userData[0]['imie']; 
         }
-        else if($this->userData['typ']===1){
+        else if($this->userData[0]['typ']===1){
             /* AD ACCOUNT => CHECK IN AD */
             self::checkLoginInAD();
         }
         else{
             /* WRONG ACCOUNT TYPE => SET ERROR */
-            $this->logLink->log(0,"[".__METHOD__."] Wrong account type => ".$this->userData['typ']);
-            Throw New Exception('Brak uprawnienia do zalogowania się.');
+            $this->logLink->log(0,"[".__METHOD__."] Wrong account type => ".$this->userData[0]['typ']);
+            Throw New Exception('Brak uprawnienia do zalogowania się.',0);
         }
     }
     private function setSessionData(){
@@ -129,9 +131,8 @@ class ValidLogin
     }
     private function getUserData(){
         $this->logLink->log(0,"[".__METHOD__."]");
-        $sqlData[':login']=array($this->userName,'STR');
         try{
-            $this->userData=$this->dbLink->squery("SELECT `id`,`imie`,`nazwisko`,`email`,`wsk_u`,`typ`,`haslo`,`id_rola` FROM `uzytkownik` WHERE `login`=:login",$sqlData);
+            $this->userData=$this->dbLink->squery("SELECT `id`,`imie`,`nazwisko`,`email`,`wsk_u`,`typ`,`haslo`,`id_rola` FROM `uzytkownik` WHERE `login`=:login",[':login'=>[$this->userName,'STR']]);
             $this->logLink->logMulti(2,$this->userData,__METHOD__);
 	}
 	catch (PDOException $e){
@@ -142,6 +143,7 @@ class ValidLogin
     private function checkUserData(){
         $this->logLink->log(0,"[".__METHOD__."]");
         if(count($this->userData)!==1){
+            $this->logLink->log(0,"[".__METHOD__."] THERE IS NO USER OR THERE IS MORE THAN ONE USER WITH LOGIN => ".$this->userName);
             Throw New Exception('Brak uprawnienia do zalogowania się.',0);
         }
     }
@@ -169,10 +171,10 @@ class ValidLogin
         try{
             /* ROLE PERM */
             $this->userData['rolePerm']=$this->dbLink->squery("SELECT `SKROT` FROM v_upr_i_slo_rola_v2 WHERE `idRola`=:id_rola",$sqlData);
-            $this->logLink->logMulti(2,$this->userData['rolePerm'],__METHOD__."::ROLE PERM");
+            $this->logLink->logMulti(0,$this->userData['rolePerm'],__METHOD__."::ROLE PERM");
             /* USER PERM */
             $this->userData['userPerm']=$this->dbLink->squery("SELECT `SKROT` FROM `v_uzyt_i_upr_v2` WHERE `idUzytkownik`=:id",$sqlDataPerm);
-            $this->logLink->logMulti(2,$this->userData['userPerm'],__METHOD__."::USER PERM");
+            $this->logLink->logMulti(0,$this->userData['userPerm'],__METHOD__."::USER PERM");
             /* COMBINE PERM */
             self::combinePerm();
 	}
@@ -194,9 +196,9 @@ class ValidLogin
         }
         $this->logLink->logMulti(2,$this->userData['perm'],__METHOD__."::COMBINE PERM");
     }
-    private function setError($userError='',$log=''){
-        $this->logLink->log(0,$log);
-        $this->info=$userError;
+    private function setError($error='',$lvl=0){
+        $this->Error->setError($error,$lvl);
+        $this->info=$this->Error->getError();
         $this->bgColor='bg-danger';
     }
     public function __destruct() {}

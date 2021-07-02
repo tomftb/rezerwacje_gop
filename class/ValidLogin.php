@@ -126,7 +126,7 @@ class ValidLogin
         $this->logLink->log(0,"[".__METHOD__."]");
         $_SESSION["username"]=$this->userName;
         $_SESSION["userid"]=$this->userData[0]['id'];
-        $_SESSION["perm"]=$this->userData[0]['perm'];  
+        $_SESSION["perm"]=$this->userData['perm'];  
         $_SESSION["uid"]= uniqid();
     }
     private function getUserData(){
@@ -171,10 +171,10 @@ class ValidLogin
         try{
             /* ROLE PERM */
             $this->userData['rolePerm']=$this->dbLink->squery("SELECT `SKROT` FROM v_upr_i_slo_rola_v2 WHERE `idRola`=:id_rola",$sqlData);
-            $this->logLink->logMulti(2,$this->userData['rolePerm'],__METHOD__."::ROLE PERM");
+            $this->logLink->logMulti(0,$this->userData['rolePerm'],__METHOD__."::ROLE PERM");
             /* USER PERM */
             $this->userData['userPerm']=$this->dbLink->squery("SELECT `SKROT` FROM `v_uzyt_i_upr_v2` WHERE `idUzytkownik`=:id",$sqlDataPerm);
-            $this->logLink->logMulti(2,$this->userData['userPerm'],__METHOD__."::USER PERM");
+            $this->logLink->logMulti(0,$this->userData['userPerm'],__METHOD__."::USER PERM");
             /* COMBINE PERM */
             self::combinePerm();
 	}

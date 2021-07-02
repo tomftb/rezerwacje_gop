@@ -27,7 +27,6 @@ class ManageEmployee
         $this->dbLink=LoadDb::load();
         $this->Log->log(0,"[".__METHOD__."]");
         $this->utilities=NEW Utilities();
-        $this->response=NEW Response('Employee');
     }
     private function setInpArray()
     {
@@ -282,12 +281,6 @@ class ManageEmployee
         }    
         return($this->response->setResponse(__METHOD__,'ok','cModal','POST'));
     }
-    # RETURN ALL NOT DELETED PROJECT FROM DB
-    public function getEmployees()
-    {
-        $this->responseType='GET';
-        return($this->response->setResponse(__METHOD__,$this->query('SELECT * FROM `v_all_prac_v5` WHERE 1=? ORDER BY id asc',1),'sEmployees'));
-    }
     public function getEmployeesSpecSlo()
     {
         $f=$this->utilities->checkInputGetValSanitizeString('function');
@@ -299,14 +292,10 @@ class ManageEmployee
     }
     public function getEmployeesLike(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->responseType='GET';
         $f='%'.filter_input(INPUT_GET,'filter').'%';
         $this->Log->log(1,"[".__METHOD__."] filter => ".$f);
-        $sql=[
-            ':f'=>[$f,'STR']
-        ];
-        $data=$this->dbLink->squery('SELECT * FROM `v_all_prac_v5` WHERE ID LIKE (:f) OR ImieNazwisko LIKE (:f) OR Stanowisko LIKE (:f) OR Procent LIKE (:f) OR Email LIKE (:f)ORDER BY ID asc',$sql); 
-        echo json_encode($this->response->setResponse(__METHOD__,$data,'sEmployees'));
+        $data=$this->dbLink->squery('SELECT * FROM `v_all_prac_v5` WHERE ID LIKE (:f) OR ImieNazwisko LIKE (:f) OR Stanowisko LIKE (:f) OR Procent LIKE (:f) OR Email LIKE (:f)ORDER BY ID asc',[':f'=>[$f,'STR']]); 
+        echo json_encode($this->utilities->getResponse(__METHOD__,$data,'sEmployees','GET'));
     }
      # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getEmployeeProjects()

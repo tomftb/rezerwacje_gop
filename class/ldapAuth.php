@@ -32,7 +32,7 @@ class ldapAuth{
 	{
             $this->Log->log(0,"[".__METHOD__."]");
             if(extension_loaded($library)){	
-                $this->Log->log(1,"[".__METHOD__."] Rozszerzenie ".$library." jest uwzględnione w konfiguracji PHP.");
+                $this->Log->log(1,"[".__METHOD__."] Rozszerzenie ".$library." jest uwzględnione w konfiguracji PHP.",1);
 		foreach($this->functionLibrary[$library] as $libraryId => $functionName)
 		{
                     $this->checkFunctionExists($library,$functionName);
@@ -89,7 +89,7 @@ class ldapAuth{
 		{
                     $errno=iconv('cp1250', "UTF-8", $errno);
                     $errstr=iconv('cp1250', "UTF-8", $errstr);
-                    $this->setError(2,"[".__METHOD__."] Client REMOTE ADDR => ".$_SERVER['REMOTE_ADDR'].". Brak odpowiedzi ".$host.":".$port." [".$errno." - ".$errstr."].");
+                    Throw New Exception ("[".__METHOD__."] Client REMOTE ADDR => ".$_SERVER['REMOTE_ADDR'].". Brak odpowiedzi ".$host.":".$port." [".$errno." - ".$errstr."].",1);
 		}
             }
             catch (Exception $e){
@@ -116,8 +116,7 @@ class ldapAuth{
 	private function connectAD()
 	{	
             $this->Log->log(0,"[".__METHOD__."]");
-            try
-            {
+
                 $ADLDAP_CON = ldap_connect('ldap://'.$this->ADparm['AD_url']);
                 ldap_set_option($ADLDAP_CON, LDAP_OPT_PROTOCOL_VERSION, 3);  
                 if(@ldap_bind($ADLDAP_CON,$this->ADparm['AD_user'],$this->ADparm['AD_pass'])) //
@@ -152,10 +151,7 @@ class ldapAuth{
                 else{
                     Throw New Exception ("[ERROR][ldap_bind] FALSE",1);
                 }
-            }
-            catch(Exception $e){
-                Throw New Exception ("[".__METHOD__."]","Przechwycono wyjatek: ".$e->getMessage(),1);
-            }	
+            	
             return 0;
 	}
         private function ldapUserBind(&$connLink,$user,$pass,$sr='')

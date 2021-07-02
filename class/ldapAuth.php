@@ -77,23 +77,15 @@ class ldapAuth{
             $errno="";
             $errstr="";
             $timeout=4;
-            try
-            {
-		$connection = @fsockopen($host,$port,$errno,$errstr,$timeout);//
-		if (is_resource($connection))
-		{
-                    $this->Log->log(1,"[".__METHOD__."] connection is_resource. $host:$port ( ".getservbyport($port, 'tcp').") jest otwarty.");     
-                    fclose($connection);
-                }
-		else
-		{
-                    $errno=iconv('cp1250', "UTF-8", $errno);
-                    $errstr=iconv('cp1250', "UTF-8", $errstr);
-                    Throw New Exception ("[".__METHOD__."] Client REMOTE ADDR => ".$_SERVER['REMOTE_ADDR'].". Brak odpowiedzi ".$host.":".$port." [".$errno." - ".$errstr."].",1);
-		}
+            $connection = @fsockopen($host,$port,$errno,$errstr,$timeout);//
+            if (is_resource($connection)){
+                $this->Log->log(1,"[".__METHOD__."] connection is_resource. $host:$port ( ".getservbyport($port, 'tcp').") jest otwarty.");     
+                fclose($connection);
             }
-            catch (Exception $e){
-                Throw New Exception ("[".__METHOD__."] Przechwycono wyjatek: ".$e->getMessage(),1);
+            else{
+                $errno=iconv('cp1250', "UTF-8", $errno);
+                $errstr=iconv('cp1250', "UTF-8", $errstr);
+                Throw New Exception ("[".__METHOD__."] Client REMOTE ADDR => ".$_SERVER['REMOTE_ADDR'].". Brak odpowiedzi ".$host.":".$port." [".$errno." - ".$errstr."].",1);
             }
 	}
 	public function loginAd($user="",$password="")

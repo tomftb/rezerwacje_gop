@@ -9,9 +9,11 @@ class ValidLogin
     private $userData=array();
     private $dbLink;
     private $logLink;
+    private $Error;
     
     public function __construct(){
         $this->logLink=Logger::init(__METHOD__);
+        $this->Error=New ErrorHandler();
         $this->logLink->log(0,"[".__METHOD__."]");
         $this->userName=filter_input(INPUT_POST,"username");
         $this->userPassword=filter_input(INPUT_POST,"password");
@@ -194,9 +196,9 @@ class ValidLogin
         }
         $this->logLink->logMulti(2,$this->userData['perm'],__METHOD__."::COMBINE PERM");
     }
-    private function setError($userError='',$log=''){
-        $this->logLink->log(0,$log);
-        $this->info=$userError;
+    private function setError($error='',$lvl=0){
+        $this->Error->setError($error,$lvl);
+        $this->info=$this->Error->getError();
         $this->bgColor='bg-danger';
     }
     public function __destruct() {}

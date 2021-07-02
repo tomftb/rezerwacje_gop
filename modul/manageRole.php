@@ -1,7 +1,6 @@
 <?php
 class ManageRole
 {
-    protected $responseType='POST';
     protected $idRole=0;
     private $inpArray=array();
     protected $filter='';
@@ -22,7 +21,6 @@ class ManageRole
         $this->Log=Logger::init(__METHOD__);
         $this->dbLink=LoadDb::load();
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->response=NEW Response('Role');
         $this->utilities=NEW Utilities();
     }
     # RETURN ALL NOT DELETED PROJECT FROM DB
@@ -40,7 +38,7 @@ class ManageRole
     {
         $v['rola']=$this->squery('select * from v_slo_rola');
         $v['perm']=$this->squery('select `ID` as \'i\',`NAZWA` as \'n\' from v_slo_upr');
-        return($this->response->setResponse(__METHOD__,$v,'cRole'));
+        $this->utilities->jsonResponse(__METHOD__,$v,'cRole');
     }
     public function rDelete()
     {

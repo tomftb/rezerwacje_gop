@@ -9,7 +9,10 @@ interface ErrorHandlerInterface{
  */
 class ErrorHandler implements ErrorHandlerInterface{
     private $error='';
-    public function __construct(){}
+    private $Log;
+    public function __construct(){
+        $this->Log=Logger::init();
+    }
     public function setError($data,$errLvl=0){
         /*
          * lvl = 0 user error
@@ -20,6 +23,7 @@ class ErrorHandler implements ErrorHandlerInterface{
     }
     private function parseErrLvl($d='',$l=0)
     {
+        $this->Log->log(0,$d);
         if ($l===0){
             self::firstError($d);
 	}

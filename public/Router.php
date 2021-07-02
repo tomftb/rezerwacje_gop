@@ -37,7 +37,7 @@ final class Router
     public function __destruct(){
         if($this->Error->getError()){
             $this->Log->log(2,"[".__METHOD__."] ERROR EXIST: ".$this->Error->getError());
-            echo json_encode(array('status'=>1,'type'=>'POST','data'=>array(),'info'=>$this->Error->getError()));
+            echo json_encode(['status'=>1,'type'=>'POST','data'=>[],'info'=>$this->Error->getError()]);
         }
         else{
             $this->Log->log(2,"[".__METHOD__."] NO ERROR");

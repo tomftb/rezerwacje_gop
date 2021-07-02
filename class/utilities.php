@@ -101,6 +101,10 @@ class Utilities
             }
         }  
     }
+    public function validateKey($a,$k,$t=true,$errLvl=1){
+        self::keyExist($a,$k);
+        self::isEmptyKeyValue($a,$k,$t,$errLvl);
+    }
     public function getNumber($n,$base=10){
         return intval($n,$base);
     }
@@ -120,10 +124,16 @@ class Utilities
     public function setGet($key='id',&$input=[]){
         $input[$key]=self::getNumber(filter_input(INPUT_GET,$key,FILTER_VALIDATE_INT));
         if($input[$key]===0){
-            Throw New Exception('Wrong ID => '.$input['id'],1);
+            Throw New Exception('Wrong ID => '.$input[$key],1);
         }
     }
-    public function jsonResponse($t='',$v='',$f,$type=''){
+    public function setGetString($key='id',&$input=[]){
+        $input[$key]=filter_input(INPUT_GET,$key,FILTER_SANITIZE_STRING);
+        if(trim($input[$key])===''){
+            Throw New Exception('Key is empty '.$key.' => '.$input[$key],1);
+        }
+    }
+    public function jsonResponse($t='',$v='',$f,$type='POST'){
         echo json_encode(self::getResponse($t,$v,$f,$type));
     }
     public function getPost($trim=true,$date=false)

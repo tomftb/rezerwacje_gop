@@ -474,19 +474,16 @@ function cModal(task,d)
 }
 function setButtonDisplay(element,perm)
 {
-    //console.log('---setButtonDisplay()---');
-    if(!loggedUserPerm.indexOf(perm)===-1)
+    console.log('---setButtonDisplay()---');
+    if(loggedUserPerm.indexOf(perm)===-1)
     {
         element.classList.add('disabled');
         element.setAttribute("disabled", "");
         return false;
     }
-    else
-    {
-        element.classList.remove("disabled");
-        element.removeAttribute("disabled");
-        return true;
-    }
+    element.classList.remove("disabled");
+    element.removeAttribute("disabled");
+    return true;
 }
 function createDatePicker(name,value,disabled)
 {

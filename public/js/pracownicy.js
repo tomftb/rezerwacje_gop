@@ -5,7 +5,7 @@ var error = new Error();
     Error.setModal('AdaptedModal');
 var overallErr = false;
 var currentIdEmployee=0;
-var defaultTask='getEmployeesLike';
+const defaultTask='getEmployeesLike';
 var currentEmployeeData={
         'ID':'',
         'Imie':'',

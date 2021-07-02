@@ -283,12 +283,8 @@ class ManageEmployee
     }
     public function getEmployeesSpecSlo()
     {
-        $f=$this->utilities->checkInputGetValSanitizeString('function');
-        if($f['status']!==0)
-        {
-            $this->response->setError(1,$f['info']);
-        }
-        return($this->response->setResponse(__METHOD__,$this->query('SELECT * FROM `v_slo_u_spec` WHERE 1=? ORDER BY `ID` ASC ',1),$f['data']));
+        $this->utilities->setGetString('function',$this->inpArray);
+        $this->utilities->jsonResponse(__METHOD__,$this->dbLink->squery('SELECT * FROM `v_slo_u_spec` ORDER BY `ID` ASC'),$this->inpArray['function']);
     }
     public function getEmployeesLike(){
         $this->Log->log(0,"[".__METHOD__."]");

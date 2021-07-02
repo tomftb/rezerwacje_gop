@@ -1,4 +1,4 @@
-console.log(loggedUserPerm);
+//console.log(loggedUserPerm);
 var ajax = new Ajax();
 var error = new Error();
     Error.setDiv('errDiv-Adapted-overall');
@@ -41,12 +41,13 @@ var inputStyle=new Array();
 function runFunction(d)
 {
     console.log('===runFunction()===\n'+d['data']['function']);
-    overallErr=Error.checkStatusExist(d['status']);
-    if(overallErr) { return ''; };
+    console.log(d);
+    if(Error.checkStatusExist(d['status'])) { return ''; };
+    Error.checkStatusResponse(d);
     switch(d['data']['function'])
     {
         case 'sEmployees':
-                setButtonDisplay(document.getElementById('addNewEmployeeButton'),'ADD_EMPL');
+                //setButtonDisplay(document.getElementById('addNewEmployeeButton'),'ADD_EMPL1');
                 setAllEmployees(d['data']['value']);
                 Error.checkStatusResponse(d);
             break;
@@ -70,7 +71,7 @@ function runFunction(d)
                 eEmployeeProject(d);  
                 break;
         default:
-                alert('runFunction() ERROR - wrong function');
+                //alert('runFunction() ERROR - wrong function');
             break;
     }
 }
@@ -586,4 +587,12 @@ function functionBtn(f,btn,task)
     }
     return btn;
 }
+function create(){
+    ajax.getData('getEmployeesSpecSlo&function=cEmployee');
+}
+function setBtnPerm(){
+    console.log('setBTnPerm()');
+    setButtonDisplay(document.getElementById('addNewEmployeeButton'),'ADD_EMPL');
+}
+
 ajax.getData(defaultTask);

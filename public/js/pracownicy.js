@@ -5,7 +5,7 @@ var error = new Error();
     Error.setModal('AdaptedModal');
 var overallErr = false;
 var currentIdEmployee=0;
-var defaultTask='getEmployees';
+var defaultTask='getEmployeesLike';
 var currentEmployeeData={
         'ID':'',
         'Imie':'',
@@ -54,7 +54,7 @@ function runFunction(d)
                 cEmployee(d);
             break;
         case 'cModal':
-                cModal('getEmployees',d);
+                cModal(defaultTask,d);
                 break;
         case 'eEmployee':
                 clearAdaptedModalData();

@@ -61,7 +61,7 @@ final class UrlManager{
         ['eUserOn','EDIT_USER','user'],
         ['dUser','DEL_USER','user'],
         ["getEmployeesLike","LOG_INTO_PRAC","user"],
-        ["getEmployeesSpecSlo",'','sys'],
+        ["getEmployeesSpecSlo",'ADD_EMPL','user'],
         ["cEmployee",'ADD_EMPL','user'],
         ["getEmployeeProjects",'SHOW_PROJ_EMPL','user'],
         ['getDeletedEmployeeProjects','DEL_EMPL','user'],

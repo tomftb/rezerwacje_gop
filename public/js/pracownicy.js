@@ -44,10 +44,10 @@ function runFunction(d)
     console.log(d);
     if(Error.checkStatusExist(d['status'])) { return ''; };
     Error.checkStatusResponse(d);
+    
     switch(d['data']['function'])
     {
         case 'sEmployees':
-                //setButtonDisplay(document.getElementById('addNewEmployeeButton'),'ADD_EMPL1');
                 setAllEmployees(d['data']['value']);
                 Error.checkStatusResponse(d);
             break;
@@ -70,8 +70,10 @@ function runFunction(d)
         case 'projects':
                 eEmployeeProject(d);  
                 break;
-        default:
-                //alert('runFunction() ERROR - wrong function');
+        default:  
+                //clearAdaptedModalData();
+                //Error.checkStatusResponse(d);
+                /* TO DO */
             break;
     }
 }
@@ -200,6 +202,7 @@ function setAllEmployees(data)
 
             btn.innerText=btnConfig[z][2];
             btn.onclick=function(){
+                clearAdaptedModalData();
                 ajax.getData(this.name);
             }; 
             divBtnGroup.appendChild(btn);

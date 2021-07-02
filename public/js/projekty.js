@@ -14,7 +14,7 @@ var actProject=new Object();
  * setButtonDisplay(document.getElementById('pCreate'),'ADD_PROJ');
  * */
 
-//console.log(loggedUserPerm);
+console.log(loggedUserPerm);
 
 const mainTableColumns={
     ID:{
@@ -700,7 +700,12 @@ function setButtonAvaliable()
     }
 }
 function search(value){
-    ajax.getData(defaultTask+'&filter='+value)
+    ajax.getData(defaultTask+'&filter='+value);
 }
+function setBtnPerm(){
+    console.log('setBtnPerm()');
+    setButtonDisplay(document.getElementById('pCreate'),'ADD_PROJ');
+}
+
 ajax.getData(defaultTask);
 //document.getElementById('closeModal').onclick = function(){ reloadData(defaultTask); };

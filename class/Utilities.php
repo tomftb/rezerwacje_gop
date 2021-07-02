@@ -101,6 +101,10 @@ class Utilities
             }
         }  
     }
+    public function validateKey($a,$k,$t=true,$errLvl=1){
+        self::keyExist($a,$k);
+        self::isEmptyKeyValue($a,$k,$t,$errLvl);
+    }
     public function getNumber($n,$base=10){
         return intval($n,$base);
     }

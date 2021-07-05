@@ -61,8 +61,7 @@ class ManageEmployee
     {
         $this->Log->log(0,"[".__METHOD__."]");   
         $this->inpArray=filter_input_array(INPUT_POST);
-        $this->utilities->keyExist($this->inpArray,'ID');
-        $this->utilities->isEmptyKeyValue($this->inpArray,'ID',true,0);
+        $this->utilities->validateKey($this->inpArray,'ID',true,1);
         self::checkEmployeeValueLength();
         self::employeeExistId();
         self::updateEmployee();

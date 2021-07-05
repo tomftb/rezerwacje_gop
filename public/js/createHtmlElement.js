@@ -194,7 +194,10 @@ function createCheckBox(label,id,disabled,checked)
 function setCheckBoxValue(ele,v)
 {
     /* v => 1, 0 */
-    if(v==='1')
+    /*
+     * ACCEPT STRING OR INTEGER
+     */
+    if(v==='1' || v===1)
     {
         ele.setAttribute('checked','');
         ele.setAttribute('value','1');

@@ -86,22 +86,25 @@ class Utilities
     }
     public function keyExist($a,$k){
         if (!array_key_exists($k,$a)){
-            Throw New Exception('No '.$k.' KEY in ARRAY!',1);
+            Throw New Exception("[".__METHOD__.'] No '.$k.' KEY in ARRAY!',1);
         }
     }
     public function isEmptyKeyValue($a,$k,$t=true,$errLvl=1){
         if($t){
             if(empty(trim($a[$k]))){
-                Throw New Exception('KEY '.$k.' is Empty (WITH TRIM)!',$errLvl);
+                Throw New Exception("[".__METHOD__.'] KEY '.$k.' is Empty (WITH TRIM)!',$errLvl);
             }
         }
         else{
             if(empty($a[$k])){
-                Throw New Exception('KEY '.$k.' is Empty!',$errLvl);
+                Throw New Exception("[".__METHOD__.'] KEY '.$k.' is Empty!',$errLvl);
             }
         }  
     }
-    public function validateKey($a,$k,$t=true,$errLvl=1){
+    public function validateKey($a=[],$k,$t=true,$errLvl=1){
+        if(!is_array($a)){
+            Throw New Exception("[".__METHOD__.'] ARG 1 IS NOT ARRAY!',$errLvl);
+        }
         self::keyExist($a,$k);
         self::isEmptyKeyValue($a,$k,$t,$errLvl);
     }
@@ -124,13 +127,13 @@ class Utilities
     public function setGet($key='id',&$input=[]){
         $input[$key]=self::getNumber(filter_input(INPUT_GET,$key,FILTER_VALIDATE_INT));
         if($input[$key]===0){
-            Throw New Exception('Wrong ID => '.$input[$key],1);
+            Throw New Exception("[".__METHOD__.'] Wrong ID => '.$input[$key],1);
         }
     }
     public function setGetString($key='id',&$input=[]){
         $input[$key]=filter_input(INPUT_GET,$key,FILTER_SANITIZE_STRING);
         if(trim($input[$key])===''){
-            Throw New Exception('Key is empty '.$key.' => '.$input[$key],1);
+            Throw New Exception("[".__METHOD__.'] Key is empty '.$key.' => '.$input[$key],1);
         }
     }
     public function jsonResponse($t='',$v='',$f,$type='POST'){

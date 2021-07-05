@@ -4,16 +4,6 @@ class ManageRole
     protected $idRole=0;
     private $inpArray=array();
     protected $filter='';
-    protected $taskPerm= ['perm'=>'','type'=>''];
-    protected $infoArray=array
-            (
-                "nazwa"=>array
-                (
-                    "Podana Nazwa jest za krótka",
-                    "Podana Nazwa jest za długa",
-                    "Istnieje już rola o podanej nazwie",
-                )
-            );
     private $Log;
     private $dbLink;
     function __construct()
@@ -28,107 +18,133 @@ class ManageRole
     {
         $f="%".filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING)."%";
         $this->Log->log(0,"[".__METHOD__."] filter => ".$f);
-        echo json_encode($this->response->setResponse(
+        $this->utilities->jsonResponse(
                 __METHOD__,
                 $this->dbLink->squery('SELECT `ID` as \'i\',`Nazwa` as \'n\' FROM `v_slo_rola_all` WHERE `WSK_U`=\'0\' AND (`ID` LIKE (:f) OR `Nazwa` LIKE (:f)) ORDER BY ID ASC',[':f'=>[$f,'STR']]),
                 '',
-                'GET'));
+                'GET');
     }
     public function getNewRoleSlo()
     {
-        $v['rola']=$this->squery('select * from v_slo_rola');
-        $v['perm']=$this->squery('select `ID` as \'i\',`NAZWA` as \'n\' from v_slo_upr');
+        $v['rola']=$this->dbLink->squery('select * from v_slo_rola');
+        $v['perm']=$this->dbLink->squery('select `ID` as \'i\',`NAZWA` as \'n\' from v_slo_upr');
         $this->utilities->jsonResponse(__METHOD__,$v,'cRole');
     }
     public function rDelete()
     {
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->idRole=filter_input(INPUT_POST,'id',FILTER_VALIDATE_INT);
-        $this->Log->log(0,'id role => '.$this->idRole);
-        if(!$this->idRole)
-        {
-            $this->response->setError(1,'FIELD ID NOT EXIST IN POST');
+        $this->inpArray=filter_input_array(INPUT_POST);
+        $this->utilities->validateKey($this->inpArray,'id',true,1); 
+        $this->Log->log(0,'id role => '.$this->inpArray['id']);
+        try{
+            $this->dbLink->beginTransaction(); //PHP 5.1 and new
+            $this->dbLink->query('UPDATE `slo_rola` SET `WSK_U`=\'1\' WHERE `ID`=:i',[':i'=>[$this->inpArray['id'],'INT']]);
+            $this->dbLink->commit();  
         }
-        else
-        {
-            $this->query('UPDATE `slo_rola` SET `WSK_U`=? WHERE `ID`=?','1,'.$this->idRole);
-        }
-        return ($this->response->setResponse(__METHOD__,'','cModal','POST'));
+        catch (PDOException $e){
+            $this->dbLink->rollback();
+            Throw New Exception("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
+        }  
+        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
     }
     public function cRole()
     {
         $this->inpArray=filter_input_array(INPUT_POST);
-        $this->utilities->checkKeyExist('nazwa',$this->inpArray,$this->response->error);
+        $this->utilities->validateKey($this->inpArray,'nazwa',true,1); 
         self::checkRoleValueLength();
         self::checkRoleName();
         UNSET($this->inpArray['id']);
-        // CHECK AVALIABLE ROLE
         self::addRole();
-        // EDIT ROLE PERMISSION
-        self::addNewRolePerm($this->queryLastId());  
-        return ($this->response->setResponse(__METHOD__,'','cModal','POST'));
+        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
     }
     public function rEdit()
     {
+        $this->Log->log(0,"[".__METHOD__."]");
         $this->inpArray=filter_input_array(INPUT_POST);
-        $this->utilities->checkKeyExist('id',$this->inpArray,$this->response->error);
-        $this->utilities->checkKeyExist('nazwa',$this->inpArray,$this->response->error);
+        $this->utilities->validateKey($this->inpArray,'id',true,1);
+        $this->utilities->validateKey($this->inpArray,'nazwa',true,1);
+        $this->idRole=$this->inpArray['id'];
+        UNSET($this->inpArray['id']);
+        $sql=[
+            ':n'=>[$this->inpArray['nazwa'],'STR'],
+            ':i'=>[$this->idRole,'INT']
+        ];
         self::checkRoleValueLength();
-        self::checkEditedRoleName();
-        self::updateRole();
-        self::removeRolePerm($this->inpArray['id']);  
-        self::addNewRolePerm($this->inpArray['id']);
-        
-        return ($this->response->setResponse(__METHOD__,'','cModal','POST'));
+        self::checkEditedRoleName($sql);
+        self::updateRole($sql);
+        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
     }
     protected function addRole()
     {
-        if($this->response->getError()!=='') { return false;}
-        $this->query("INSERT INTO `slo_rola` (`NAZWA`,`create_user`,`create_user_full_name`,`create_user_email`,`create_host`) VALUES (?,?,?,?,?)",$this->inpArray['nazwa']. ",".$_SESSION["username"].",".$_SESSION["nazwiskoImie"].",".$_SESSION["mail"].",".$_SERVER['REMOTE_ADDR']);
+        try{
+            $this->dbLink->beginTransaction(); //PHP 5.1 and new
+            $sql=[
+                ':NAZWA'=>[$this->inpArray['nazwa'],'STR'],
+                ':create_user'=>[$_SESSION["username"],'STR'],
+                ':create_user_full_name'=>[$_SESSION["nazwiskoImie"],'STR'],
+                ':create_user_email'=>[$_SESSION["mail"],'STR'],
+                ':create_host'=>[RA,'STR']
+            ];
+            $this->dbLink->query("INSERT INTO `slo_rola` (`NAZWA`,`create_user`,`create_user_full_name`,`create_user_email`,`create_host`) VALUES (:NAZWA,:create_user,:create_user_full_name,:create_user_email,:create_host)",$sql);
+            // EDIT ROLE PERMISSION
+            array_walk($this->inpArray,array('self', 'insertRolePerm'),$this->dbLink->lastInsertId());
+            $this->dbLink->commit();  
+        }
+        catch (PDOException $e){
+            $this->dbLink->rollback();
+            Throw New Exception("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
+        }  
     }
     private function checkRoleName()
     {
-        if($this->response->getError()!=='') { return false;}
-        if($this->checkExistInDb('v_slo_rola','NAZWA=?',$this->inpArray['nazwa']))
-        {
-            $this->response->setError(0, $this->infoArray['nazwa'][2]."<br/>");
+        $data=$this->dbLink->squery('SELECT * FROM `v_slo_rola` WHERE TRIM(`NAZWA`)=:n',[':n'=>[$this->inpArray['nazwa'],'STR']]);
+        if(count($data)){
+            Throw New Exception ('Istnieje rola o podanej nazwie',0);
         }
     }
-    private function checkEditedRoleName()
+    private function checkEditedRoleName($sql)
     {
-        if($this->response->getError()!=='') { return false;}
-        if($this->checkExistInDb('v_slo_rola','NAZWA=? AND ID!=?',$this->inpArray['nazwa'].','.$this->inpArray['id']))
-        {
-            $this->response->setError(0, $this->infoArray['nazwa'][2]."<br/>");
+        $data=$this->dbLink->squery('SELECT * FROM `v_slo_rola` WHERE TRIM(`NAZWA`)=:n AND `ID`!=:i',$sql);
+        if(count($data)){
+            Throw New Exception ('Istnieje rola o podanej nazwie',0);
         }
     }
-    private function updateRole()
+    private function updateRole($sql)
     {
-        if($this->response->getError()!=='') { return false;}
-        $this->query('UPDATE `slo_rola` SET `NAZWA`=? WHERE `ID`=?',$this->inpArray['nazwa'].','.$this->inpArray['id']);
-    }
-    protected function addNewRolePerm($idRole)
-    {
-        if($this->response->getError()!=='') {return false;}
-        $this->Log->log(0,"[".__METHOD__."] ID ROLE => ".$idRole);
-        foreach($this->inpArray as $id => $value)
-        {
-            $this->insertRolePerm($idRole,$id,$value);
+        try{
+            $this->dbLink->beginTransaction(); //PHP 5.1 and new
+            $this->dbLink->query('UPDATE `slo_rola` SET `NAZWA`=:n WHERE `ID`=:i',$sql);
+            UNSET($this->inpArray['nazwa']);
+            self::removeRolePerm($this->idRole);  
+            array_walk($this->inpArray,array('self', 'insertRolePerm'),$this->idRole);
+            /* TO DO => CHECK SOMETHING LEFT FORM POST (inpArray) */
+            $this->dbLink->commit();  
         }
+        catch (PDOException $e){
+            $this->dbLink->rollback();
+            Throw New Exception("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
+        } 
     }
     private function removeRolePerm($idRole)
     {
         /* GET EXIST ROLE PERM */
         /* DELETE NOT SENDED */
-        foreach($this->query('SELECT `id_upr` as \'iu\' FROM `upr_i_slo_rola` WHERE `id_rola`=?',$idRole) as $v)
+        foreach($this->dbLink->squery('SELECT `id_upr` as \'iu\' FROM `upr_i_slo_rola` WHERE `id_rola`=:idr',['idr'=>[$idRole,'INT']]) as $v)
         {
             $this->Log->log(0,"[".__METHOD__."] ID PERM => ".$v['iu']);
-            if(!array_key_exists('perm_'.$v['iu'], $this->inpArray ))
-            {
-                $this->Log->log(0,__METHOD__." REMOVE ROLE (${idRole}) PERM (".$v['iu'].")");
-                $this->query('DELETE FROM `upr_i_slo_rola` WHERE `id_rola`=? AND `id_upr`=?',$idRole.",".$v['iu']);  
-            }
+            self::deleteRolePerm($idRole,$v['iu']);
        }
+    }
+    private function deleteRolePerm($idRole,$idUpr){
+        if(!array_key_exists('perm_'.$idUpr, $this->inpArray ))
+        {
+            $this->Log->log(0,__METHOD__." REMOVE ROLE (${idRole}) PERM (${idUpr})");
+            $sql=[
+                    ':idr'=>[$idRole,'INT'],
+                    ':idu'=>[$idUpr,'INT']
+            ];
+            $this->dbLink->query('DELETE FROM `upr_i_slo_rola` WHERE `id_rola`=:idr AND `id_upr`=:idu',$sql);  
+        }
     }
     private function checkRolePermKey($id,$value)
     {
@@ -142,65 +158,66 @@ class ManageRole
         /* WRONG VALUE, ACCEPT ONLY 1 */
         return false;
     }
-    protected function insertRolePerm($idRole,$idPerm,$value)
+    private function insertRolePerm($value,$keyPerm,$idRole)
     {
-        if(!self::checkRolePermKey($idPerm,$value))
-        {
+        if(!self::checkRolePermKey($keyPerm,$value)){
             return false;
         }
-        $tmp_id=explode('_',$idPerm);   
-        $this->Log->log(0,"[".__METHOD__."] ADD ROLE (${idRole}) PERM (".$tmp_id[1].")");
-        
-        if(!$this->checkExistInDb('upr_i_slo_rola','id_rola=? AND id_upr=?',$idRole.','.$tmp_id[1]))
-        {
-            // NOT EXIST -> ADD
-            $this->Log->log(0,__METHOD__." NOT EXIST => ADD");
-            self::checkExistSloPerm($tmp_id[1]);
-            if($this->response->getError()!=='') { return false;}
-            $this->query('INSERT INTO upr_i_slo_rola (id_rola,id_upr) VALUES (?,?)',$idRole.",".$tmp_id[1]); 
+        $tmp_id=explode('_',$keyPerm);   
+        $this->Log->log(0,"[".__METHOD__."] ADD ROLE (${idRole}) PERM (".$tmp_id[1].")"); 
+        $sql=[
+            ':idr'=>[$idRole,'INT'],
+            ':idu'=>[$tmp_id[1],'INT']
+        ];
+        if(self::checkPermRolePairExitsts($sql)){
+            return true;
         }
+        // NOT EXIST -> ADD
+        $this->Log->log(0,__METHOD__." NOT EXIST => ADD");
+        self::checkExistSloPerm($tmp_id[1]);
+        $this->dbLink->query('INSERT INTO `upr_i_slo_rola` (`id_rola`,`id_upr`) VALUES (:idr,:idu)',$sql); 
     }
-
+    private function checkPermRolePairExitsts($sql){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->dbLink->query('SELECT * FROM `upr_i_slo_rola` WHERE id_rola=:idr AND id_upr=:idu',$sql);
+        if(!is_array($this->dbLink->sth->fetch(PDO::FETCH_ASSOC))){
+            return false;
+        }
+        return true;
+    }
     private function checkExistSloPerm($idPerm)
     {
-        if(!$this->checkExistInDb('uprawnienia','`ID`=?',$idPerm))
-        {
-            $this->response->setError(1,'UPR ('.$idPerm.') NOT EXIST IN DATABASE');
+        $this->Log->log(0,"[".__METHOD__."] ID PERM => ".$idPerm);
+        $this->dbLink->query('SELECT * FROM `uprawnienia` WHERE ID=:i',[':i'=>[$idPerm,'INT']]);
+        if(!is_array($this->dbLink->sth->fetch(PDO::FETCH_ASSOC))){
+            Throw New Exception ('UPR ('.$idPerm.') NOT EXIST IN DATABASE',1);
         }
     }
-    private function getRole($id)
+    private function getRole()
     {
-        if($this->response->getError()!=='') { return false;}
-        $roleData=$this->query('SELECT `ID` as \'i\',`Nazwa` as \'n\',`WSK_U` as \'u\',`create_user` as \'cu\',`create_user_email` as\'cue\',`create_date` as \'cd\' FROM `slo_rola` WHERE `ID`=?',$id);
-        if(count($roleData)!==1)
-        {
-            $this->response->setError(1,'THERE EXIST MORE THAN ONE ROLE WITH ID');
-            return false;
+        $roleData=$this->dbLink->squery('SELECT `ID` as \'i\',`Nazwa` as \'n\',`WSK_U` as \'u\',`create_user` as \'cu\',`create_user_email` as\'cue\',`create_date` as \'cd\' FROM `slo_rola` WHERE `ID`=:i',[':i'=>[$this->inpArray['id'],'INT']]);
+        if(count($roleData)!==1){
+            Throw New Exception ('FATAL DB ERROR. THERE EXIST MORE THAN ONE OR 0 ROLE WITH ID '.$this->inpArray['id'],1);
         }
-        if($roleData[0]['u']==='1')
-        {
-            $this->response->setError(0,'ROLA ZOSTAŁA USUNIĘTA<br/>');
-            return false;
+        if($roleData[0]['u']==='1'){
+            Throw New Exception ('ROLA ZOSTAŁA USUNIĘTA<br/>',0);
         }
         UNSET($roleData[0]['u']);
         return $roleData[0];
     }
     public function getRoleDetails()
     {
-        if($this->utilities->checkInputGetValInt('id')['status']===1)
-        {
-            $this->response->setError(1,$this->utilities->getInfo());
-        }
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->utilities->setGet('id',$this->inpArray);
         /* CHECK IS NOT REMOVED */
-        $v['role']=self::getRole($this->utilities->getData());
+        $v['role']=self::getRole();
         $v['perm']=self::getRolePerm();
-        return($this->response->setResponse(__METHOD__,$v,'sRole','POST',$this->getError()));
+        $this->utilities->jsonResponse(__METHOD__,$v,'sRole','POST');
     }
     private function getRolePerm()
     {
-        if($this->response->getError()!=='') { return false;}
-        $slo=$this->squery('SELECT `ID` as \'i\',`NAZWA` as \'n\' FROM `uprawnienia` WHERE ID>0');
-        $rolePerm=$this->query('SELECT `id_rola`as \'i\',`id_upr` as \'iu\' FROM `upr_i_slo_rola` WHERE `id_rola`=?',$this->utilities->getData());
+        $slo=$this->dbLink->squery('SELECT `ID` as \'i\',`NAZWA` as \'n\' FROM `uprawnienia` WHERE ID>0');
+        $rolePerm=$this->dbLink->squery('SELECT `id_rola`as \'i\',`id_upr` as \'iu\' FROM `upr_i_slo_rola` WHERE `id_rola`=:i',[':i'=>[$this->inpArray['id'],'INT']]);
         // COMBINE
        return($this->combineSlo($slo,'i',$rolePerm,'iu'));
     }
@@ -226,29 +243,33 @@ class ManageRole
     }
     protected function checkRoleValueLength()
     {
-        if($this->response->getError()!=='') {return false;}
-        if(strlen($this->inpArray['nazwa'])<3)
-        {
-            $this->response->setError(0,$this->infoArray['nazwa'][0]."<br/>");
-
+        $err='';
+        if(strlen($this->inpArray['nazwa'])<3){
+            $err.="Podana Nazwa jest za krótka<br/>";
         }
-        if(strlen($this->inpArray['nazwa'])>30)
-        {
-            $this->response->setError(0,$this->infoArray['nazwa'][1]."<br/>");
+        if(strlen($this->inpArray['nazwa'])>30){
+            $err.= "Podana Nazwa jest za długa<br/>";
+        }
+        if($err){
+            Throw New Excetion ($err,0);
         }
     }
     public function getRoleUsers()
     {
-        if($this->utilities->checkInputGetValInt('id')['status']===1)
-        {
-            $this->response->setError(1,$this->utilities->getInfo());
-            return false;
+        $this->utilities->setGet('id',$this->inpArray);
+        $v['role']=self::getRole();
+        /*
+         * TO DO ADD CHECK PERM SHOW_ROLE_USERS
+         */
+        $v['info']='[SHOW_ROLE_USERS] Brak uprawnienia aby zobaczyć listę przypisanych użytkowników.';
+        if(in_array('SHOW_ROLE_USERS',$_SESSION['perm'])){
+            $v['user']=$this->dbLink->squery('SELECT Imie,Nazwisko,Login,Email FROM v_all_user WHERE idRola=:idr AND wskU=\'0\' ORDER BY Nazwisko,Imie,ID ASC ',[':idr'=>[$this->inpArray['id'],'INT']]);
+            $v['info']='';
         }
-        $v['role']=self::getRole($this->utilities->getData());
-        if($this->response->getError()!=='') { return false; }
-        $v['user']=$this->query('SELECT Imie,Nazwisko,Login,Email FROM v_all_user WHERE idRola=? AND wskU=? ORDER BY Nazwisko,Imie,ID ASC ',$this->utilities->getData().',0');
-        return($this->response->setResponse(__METHOD__,$v,'rDelete','POST'));
+        else{
+            $v['user']=$this->dbLink->squery('SELECT \'XXX\' as Imie ,\'XXX\' as Nazwisko,\'XXX\' as Login, \'XXX\'as Email FROM v_all_user WHERE idRola=:idr AND wskU=\'0\' ORDER BY Nazwisko,Imie,ID ASC',[':idr'=>[$this->inpArray['id'],'INT']]);
+        }
+       $this->utilities->jsonResponse(__METHOD__,$v,'rDelete','POST');
     }
-    function __destruct()
-    {}
+    function __destruct(){}
 }

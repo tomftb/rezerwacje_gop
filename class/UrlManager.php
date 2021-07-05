@@ -47,7 +47,7 @@ final class UrlManager{
         ["getUsersWithPerm",'SHOW_PERM_USER','user'],
         ['rEdit','EDIT_ROLE','user'],
         ['getRoleDetails','SHOW_ROLE','user'],
-        ['getRoleUsers','SHOW_ROLE_USERS','sys'],
+        ['getRoleUsers','DEL_ROLE','uer'],
         ['rDelete','DEL_ROLE','user'],
         ["getUsersLike",'LOG_INTO_UZYT','user'],
         ["getNewUserSlo",'ADD_USER','user'],

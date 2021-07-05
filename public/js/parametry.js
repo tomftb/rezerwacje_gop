@@ -27,17 +27,20 @@ var defaultTableExceptionCol=new Array('i','md','mu','t','v');
 function runFunction(d)
 {
     /* d => array response */
-    //console.log('===runFunction()===');
-    //console.log(d);
+    console.log('===runFunction()===');
+    console.log(d);
     // RUN FUNCTION
     if(Error.checkStatusExist(d['status'])) { return ''; };
     console.log('FUNCTION TO RUN:\n'+d['data']['function']);
+
+
     switch(d['data']['function'])
     {
         case 'pUpdate':     
             /* update user and date */
             var ele=document.getElementById('info_'+d['data']['value']['i']);
-                ele.innerText='Update: '+d['data']['value']['u']+', '+d['data']['value']['d'];
+                ele.innerText='Update: '+d['data']['value']['u']+', '+d['data']['value']['d'];  
+               
             break;
         default:
                 //console.log('DEFAULT TASK');
@@ -50,7 +53,11 @@ function runFunction(d)
 function displayAll()
 {
     //console.log('===displayAll()===');
-    if(Error.checkStatusResponse(actParmData)) { return ''; };
+    if(Error.checkStatusResponse(actParmData)) { 
+         $('#AdaptedModal').modal('show'); return ''; 
+        return ''; 
+    };
+    
     /* SETUP DEFAULT TABLE COLUMN */
     var defaultTableCol=document.getElementById("colDefaultTable");
         removeHtmlChilds(defaultTableCol);

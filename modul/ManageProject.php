@@ -286,40 +286,28 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
     public function pEmail()
     {
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->setInpArray(filter_input_array(INPUT_POST));
-        if($this->utilities->checkKeyExistEmpty('id',$this->inpArray)['status']!==0)
-        {
-            $this->response->setError(1,$this->utilities->getInfo());
-            return false;
-        }
-        //$this->inpArray['id']=10000;
-        $data=$this->query('SELECT `create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=? AND `wsk_u`=? ',$this->inpArray['id'].",0");
-        if(count($data)!==1)
-        {
-            $this->response->setError(1,"[".__METHOD__."] THERE IS MORE THAN ONE OR NO PROJECT WITH `ID`=".$this->inpArray['id']." AND `wsk_u`=0");
-            return false;  
+        $this->inpArray=filter_input_array(INPUT_POST);
+        $this->utilities->validateKey($this->inpArray,'id',true,1);
+        $data=$this->dbLink->squery('SELECT `create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=:i AND `wsk_u`=0 ',[':i'=>[$this->inpArray['id'],'INT']]);
+        if(count($data)!==1){
+            Throw New Exception ("[".__METHOD__."] THERE IS MORE THAN ONE OR NO PROJECT WITH `ID`=".$this->inpArray['id']." AND `wsk_u`=0",1); 
         }
         self::setProjectEmailFields($data[0]);
         $this->Log->logMulti(0,$data[0],__METHOD__);
         $this->mail=NEW Email();
-        if($this->mail->sendMail(
+        $this->mail->sendMail(
                                 $data[0]['subject'],
                                 self::projectBodyMailTemplate($data[0]['subject'],$data[0]),
                                 self::getRecipient(),
                                 $this->infoArray['err_mail'][1],
                                 true
-        )!=='')
-        {
-            $this->response->setError(0, $this->mail->getErr()); 
-        }
-        //$this->response->setError(0,'TEST STOP');
-        return($this->response->setResponse(__METHOD__,'','cModal','POST')); 
+        );
+        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST'); 
     }
     private function getProjectDoc()
     {
-        $tmp='';
-        $doc=$this->query('SELECT `nazwa` FROM `projekt_dok` WHERE `id_projekt`=? AND `wsk_u`=? ',$this->inpArray['id'].",0");    
-        foreach($doc as $v)
+        $tmp=''; 
+        foreach($this->dbLink->squery('SELECT `nazwa` FROM `projekt_dok` WHERE `id_projekt`=:i AND `wsk_u`=\'0\' ',[':i'=>[$this->inpArray['id'],'INT']]) as $v)
         {
             $tmp.="-&nbsp;".$v['nazwa']."<br/>";
         }
@@ -977,18 +965,14 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
     public function getProjectEmailData()
     {
         $this->Log->log(0,"[".__METHOD__."]");
-        if($this->utilities->checkInputGetValInt('id')['status']===1)
-        {
-            Throw New Exception ($this->utilities->getInfo(),1);
-        }
+        $this->utilities->setGet('id',$this->inpArray);
         $sql=[
-            ':id'=>[$this->utilities->getData(),'INT']
+            ':id'=>[$this->inpArray['id'],'INT']
         ];
-        $v['id']=$this->utilities->getData();
-        $v['project']=self::getProjectData($v['id']);
+        $v['id']=$this->inpArray['id'];
+        $v['project']=self::getProjectData($this->inpArray['id']);
         $v['email']=$this->dbLink->squery('SELECT Pracownik,Pracownik_email AS Email FROM v_all_prac_proj_email WHERE Projekt_id=:id ORDER BY Projekt_id ASC',$sql);
-        return($this->response->setResponse(__METHOD__,$v,'pEmail','POST'));  
-          
+        $this->utilities->jsonResponse(__METHOD__,$v,'pEmail','POST');  
     }
      # RETURN ALL AVALIABLE MEMBERS
     public function getAllavaliableEmployee()

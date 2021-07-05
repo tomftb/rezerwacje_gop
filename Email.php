@@ -1,5 +1,8 @@
 <?php
-class Email extends PHPMailer\PHPMailer\PHPMailer
+
+use PHPMailer\PHPMailer;
+
+class Email extends PHPMailer\PHPMailer
 {
     protected $emailParm=array();
     protected $email='';
@@ -14,7 +17,7 @@ class Email extends PHPMailer\PHPMailer\PHPMailer
         $this->Log=Logger::init(__METHOD__);
 	$this->dbLink=LoadDb::load();
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->setMailParm();
+        self::setMailParm();
         $this->SN=filter_input(INPUT_SERVER,"SERVER_NAME");
     }
     private function setMailParm(){
@@ -24,7 +27,8 @@ class Email extends PHPMailer\PHPMailer\PHPMailer
     private function parseParm($data)
     {
         if(!is_array($data)){
-            Throw New Exception('NO EMAIL PARAMETERS IN DATABASE',1);
+            $this->Log->log(0,'NO EMAIL PARAMETERS IN DATABASE');  
+            Throw New \Exception('NO EMAIL PARAMETERS IN DATABASE',1);
         }
         $tmpArray=array();
         foreach($data as $value)
@@ -65,14 +69,14 @@ class Email extends PHPMailer\PHPMailer\PHPMailer
             array_push($recipient,array($_SESSION['mail'],$_SESSION['nazwiskoImie']));
         }
         if(!self::setRecipientAddresses($recipient)){
-            Throw New Exception ($this->err,0);
+            Throw New \Exception ($this->err,0);
         }
         $this->Subject  = $subject;
         $this->Body     = $body.$this->getFooter($html);
         if(!parent::send()){
             $this->Log->log(0,"[".__METHOD__."] ".$this->ErrorInfo);
             parent::SmtpClose(); 
-            Throw New Exception ('Projekt został założony, niestety pojawił się problem z wysyłką powiadomienia email.',0);
+            Throw New \Exception ('Projekt został założony, niestety pojawił się problem z wysyłką powiadomienia email.',0);
         }
         parent::SmtpClose(); 
         return '';

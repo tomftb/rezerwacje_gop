@@ -237,22 +237,30 @@ function pEmail()
     /* SET DATA */
     var colTitle=new Array('Pracownik','Email');
     var tBody=document.createElement("tbody");
+   
     for(var i=0;i<projectData['data']['value']['email'].length;i++)
     {
         var divInp=createTag('','div','input-group');
         var tr=document.createElement("tr");
-        var td=createTag(projectData['data']['value']['email'][i].Pracownik,'td','input-group');
+        var td=document.createElement("td");
+            td.appendChild(document.createTextNode(projectData['data']['value']['email'][i].Pracownik));
+         
         var td2=document.createElement("td");
             divInp.appendChild(createInput('text','e'+i,projectData['data']['value']['email'][i].Email,'form-control',''));  
             divInp.appendChild(functionBtn('rmEmail',createRemoveButton('r'+i,'n')),'');
             td2.appendChild(divInp);
+         
             tr.appendChild(td);
             tr.appendChild(td2);
+        
             tBody.appendChild(tr);
     };
+   
     form.appendChild(createInput('hidden','id',projectData['data']['value']['id'],'',''));
-    add.appendChild(createTable(colTitle,tBody));
+    form.appendChild(createTable(colTitle,tBody));
+
     add.appendChild(form);
+    console.log(add);
     /* BUTTONS */
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),''));
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(projectData['data']['function'],createBtn('Wyślij','btn btn-info','confirmData'),projectData['data']['function']));//projectData['data']['function']
@@ -274,8 +282,9 @@ function createTable(colTitle,tBody)
     var tr=document.createElement("tr");
     for(var i=0;i<colTitle.length;i++)
     {
-        var th=createTag(colTitle[i],'th','');
+        var th=document.createElement('th');
             th.setAttribute('scope','col');
+            th.appendChild(document.createTextNode(colTitle[i]));
             tr.appendChild(th);
     }
     tHead.appendChild(tr);

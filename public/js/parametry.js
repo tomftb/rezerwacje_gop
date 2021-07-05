@@ -54,6 +54,7 @@ function displayAll()
 {
     //console.log('===displayAll()===');
     if(Error.checkStatusResponse(actParmData)) { 
+        prepareModal('ERROR','bg-danger');
          $('#AdaptedModal').modal('show'); return ''; 
         return ''; 
     };

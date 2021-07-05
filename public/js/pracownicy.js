@@ -572,14 +572,14 @@ function functionBtn(f,btn,task)
                     removeHtmlChilds(document.getElementById('AdaptedDynamicData'));
                     removeHtmlChilds(document.getElementById('AdaptedButtonsBottom'));
                     setAlloacationEmployeeBodyContent('eEmployeeSpecOn',1,'Zatwierdź');
-                }
+                };
             break;
         case 'eEmployee':
                 btn.onclick = function() { 
                     removeHtmlChilds(document.getElementById('AdaptedDynamicData'));
                     removeHtmlChilds(document.getElementById('AdaptedButtonsBottom'));
                     setEmployeeBodyContent('eEmployeeOn',2,'Zatwierdź','btn-info'); 
-                }
+                };
             break
         case 'cancel':
                 btn.onclick = function() { closeModal('AdaptedModal'); };

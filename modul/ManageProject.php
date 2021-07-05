@@ -323,6 +323,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
                 array_push($patt,array($v,''));
             }
         }
+        $this->Log->logMulti(0,$patt,__METHOD__);
         return $patt;
     }
     private function setProjectEmailFields(&$d)

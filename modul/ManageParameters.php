@@ -3,8 +3,6 @@ class ManageParameters
 {
     private $inpArray=array();
     protected $filter='';
-    protected $valueToReturn=null;
-    protected $taskPerm= ['perm'=>'','type'=>''];
     private $parmSkrt='';
     private $Log;
     private $dbLink;
@@ -15,7 +13,6 @@ class ManageParameters
         $this->dbLink=LoadDb::load();
         $this->Log->log(0,"[".__METHOD__."]");
         $this->utilities=NEW Utilities();
-        $this->response=NEW Response('Parameters');
     }
     public function getAllParm()
     {
@@ -26,43 +23,55 @@ class ManageParameters
         ];
         $result=$this->dbLink->squery('SELECT `ID` as \'i\' ,`Skrót` as \'s\',`Nazwa` as \'n\',`Opis` as \'o\',`Wartość` as \'v\',`Typ` as \'t\',`ModDat` as \'md\',`ModUser` as \'mu\' FROM `v_parm_v2` WHERE ID LIKE (:f) OR Skrót LIKE (:f) OR Nazwa LIKE (:f) OR Opis LIKE (:f) OR Wartość LIKE (:f) ORDER BY ID asc'
                 ,$sql);
-        echo json_encode($this->response->setResponse(__METHOD__,$result,'showAll','GET'));
+        $this->utilities->jsonResponse(__METHOD__,$result,'showAll','GET');
     }
     public function updateParm()
     {
         $this->Log->log(0,"[".__METHOD__."]");
         $this->inpArray=filter_input_array(INPUT_POST);
-        $this->utilities->checkKeyExist('id',$this->inpArray,$this->response->error);
-        $this->utilities->checkKeyExist('value',$this->inpArray,$this->response->error);
-        self::checkParameterId();
+        $this->inpArray=filter_input_array(INPUT_POST);
+        $this->utilities->validateKey($this->inpArray,'id',true,1);
+        $this->utilities->validateKey($this->inpArray,'value',true,1);
+        $sql[':i']=[$this->inpArray['id'],'INT'];
+        self::checkParameterId($sql);
         // PARSE TAKE PARM SKROT
-        self::getParmSkrt();
+        self::getParmSkrt($sql);
         self::parseParm();
         self::update();
         //return(self::getAllParm());
         $v['i']=$this->inpArray['id'];
         $v['d']=date('Y-m-d H:i:s'); //2019-03-12 14:10:39
         $v['u']=$_SESSION['username'];
-        return($this->response->setResponse(__METHOD__,$v,'pUpdate','GET'));
+        $this->utilities->jsonResponse(__METHOD__,$v,'pUpdate','GET');
     }
-    private function checkParameterId()
+    private function checkParameterId($sql)
     {
-        if($this->response->getError()!=='') { return false;}
-        if(!$this->checkExistInDb('parametry','ID=?',$this->inpArray['id']))
-        {
-            $this->response->setError(1, "ERROR");
+        if(count($this->dbLink->squery("SELECT * FROM parametry WHERE ID=:i;",$sql))!=1){
+            Throw New Exception ('Parameter with ID => '.$this->inpArray['id'].' not exist or is more than one',1);
         }
     }
     private function update()
     {
-        if($this->response->getError()) { return '';}
-        $this->query('UPDATE parametry SET WARTOSC=?,MOD_DAT=?,MOD_USER=?,MOD_USER_ID=? WHERE ID=?',$this->inpArray['value'].','.$this->cDT.','.$_SESSION['username'].','.$_SESSION['userid'].','.$this->inpArray['id']);
+        try{
+            $this->dbLink->beginTransaction(); //PHP 5.1 and new
+            $sql=[
+                ':W'=>[$this->inpArray['value'],'STR'],
+                ':MD'=>[CDT,'STR'],
+                ':MU'=>[$_SESSION["username"],'STR'],
+                ':MUI'=>[$_SESSION["userid"],'STR'],
+                ':I'=>[$this->inpArray['id'],'INT']
+            ];
+            $this->dbLink->query('UPDATE parametry SET WARTOSC=:W,MOD_DAT=:MD,MOD_USER=:MU,MOD_USER_ID=:MUI WHERE ID=:I',$sql);
+            $this->dbLink->commit();  
+        }
+        catch (PDOException $e){
+            $this->dbLink->rollback();
+            Throw New Exception ("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1); 
+        } 
     }
-    public function getParmSkrt()
+    public function getParmSkrt($sql)
     {
-        if($this->response->getError()) { return '';}
-        $this->parmSkrt=$this->query('SELECT `SKROT` FROM parametry WHERE ID=?',$this->inpArray['id'])[0]['SKROT'];
-        
+        $this->parmSkrt=$this->dbLink->squery('SELECT `SKROT` FROM parametry WHERE ID=:i',$sql)[0]['SKROT'];
         $this->Log->logMulti(0,$this->parmSkrt);
     }
     private function parseParm()
@@ -80,38 +89,33 @@ class ManageParameters
                 {
                     if (!filter_var($email, FILTER_VALIDATE_EMAIL))
                     {
-                        $this->response->setError(0,"[LP. ".$lp."] BŁĘDNY ADRES EMAIL");
-                        //$this->err.="[LP. ".$lp."] BŁĘDNY ADRES EMAIL</br>";
+                        Throw New Exception ("[LP. ".$lp."] BŁĘDNY ADRES EMAIL",0); 
                     }
                 }
                 break;
             case 'MAIL_PORT_OUT':
                 if(!preg_match('/^\d{2,5}$/', $this->inpArray['value'], $matches))
                 {
-                    $this->response->setError(0,"BŁĘDNY PORT WYCHODZĄCY");
-                    //$this->err.="BŁĘDNY PORT WYCHODZĄCY</br>";
+                    Throw New Exception ("BŁĘDNY PORT WYCHODZĄCY",0); 
                 }
                 break;
             case 'MAIL_CHARSET':
                 if(!preg_match('/^[a-zA-Z][a-zA-Z\-\d]{2,9}$/', $this->inpArray['value'], $matches))
                 {
-                    $this->response->setError(0,"BŁĘDNE KODOWANIE ZNAKÓW");
-                    //$this->err.="BŁĘDNE KODOWANIE ZNAKÓW</br>";
+                    Throw New Exception ("BŁĘDNE KODOWANIE ZNAKÓW",0); 
                 }
                 break;
             case 'MAIL_USER':
                 if (!filter_var($this->inpArray['value'], FILTER_VALIDATE_EMAIL))
                 {
-                    $this->response->setError(0,"BŁĘDNY ADRES EMAIL");
-                    //$this->err.="BŁĘDNY ADRES EMAIL</br>";
+                    Throw New Exception ("BŁĘDNY ADRES EMAIL",0); 
                 }
                 break;
             case 'MAIL_SRV':
                 $tmp=explode('.',$this->inpArray['value']);
                 if(count($tmp)<3)
                 {
-                    $this->response->setError(0,"BŁĘDNY SERWER POCZTY");
-                    //$this->err.="BŁĘDNE SERWER POCZTY l </br>";
+                    Throw New Exception ("BŁĘDNY SERWER POCZTY",0); 
                 }
                 else
                 {
@@ -119,9 +123,7 @@ class ManageParameters
                     {
                         if(!preg_match('/^[a-zA-Z\d][a-zA-Z\_\-\d]{0,48}[a-zA-Z\d]{0,1}$/', $part, $matches))
                         {
-                            $this->response->setError(0,"BŁĘDNY SERWER POCZTY");
-                            //$this->err.="BŁĘDNY SERWER POCZTY</br>";
-                            break;
+                            Throw New Exception ("BŁĘDNY SERWER POCZTY",0); 
                         }
                     }
                 }
@@ -132,10 +134,8 @@ class ManageParameters
                     $plchar='\ą\Ą\c\Ć\ę\Ę\ł\Ł\ó\Ó\ś\Ś\ż\Ż\ź\Ź\ń\Ń';
                     if(!preg_match('/^[a-zA-Z\_\+\=\-\d'.$plchar.']{2,9}$/', $this->inpArray['value'], $matches))
                     {
-                        $this->response->setError(0,"BŁĘDNE HASŁO");
-                        //$this->err.="BŁĘDNE HASŁO</br>";
+                        Throw New Exception ("BŁĘDNE HASŁO",0); 
                     }
-                    //echo "PARSE PASSWORD\n";
                 }
                 break;
             case 'MAIL_RECV':
@@ -143,6 +143,5 @@ class ManageParameters
                 break;
         endswitch;
     }
-    function __destruct()
-    {}
+    function __destruct(){}
 }

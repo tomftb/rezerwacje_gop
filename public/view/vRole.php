@@ -1,5 +1,5 @@
 <?php if(!defined("APP_URL")){ die('Direct access not permitted');} ?>
-<body>
+<body onload="setBtnPerm()">
 <div class="w-100 "  style="margin-top:-55px;position:fixed; z-index:996;">
     <div class="row">
         <div class=" col-sm-4" >

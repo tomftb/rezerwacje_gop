@@ -132,30 +132,37 @@ function deleteRole(btnLabel,title,titleClass)
 function deleteRoleFields(ele)
 { 
     console.log('---deleteRoleFields()---');
-    if(responseData['data']['value']['user'].length>0)
-    {
+    
+    if(responseData['data']['value']['user'].length>0){ 
         ele.appendChild(createTag('Rola nie możne zostać usunięta!','h5','text-danger mb-3 text-center font-weight-bold'));
         ele.appendChild(createTag('Aktualnie do roli przypisani są użytkownicy:','h6','text-secondary mb-3 text-center font-weight-bold'));
-        var colTitle=new Array('Imię','Nazwisko','Login','Email');
-        var tBody=document.createElement("tbody");
-
-        for (const property in responseData['data']['value']['user'])
-        {
-            var tr=document.createElement("tr");  
-            for(const atr in responseData['data']['value']['user'][property])
-            {
-                var td=createTag(responseData['data']['value']['user'][property][atr],'td','');
-                    tr.appendChild(td);
-            } 
-            tBody.appendChild(tr);
-        }
-        ele.appendChild(createTable(colTitle,tBody)); 
-        return true;
+        createRoleUsersList(ele);
+        return true; 
     }
     ele.appendChild(createInput('hidden','id',responseData['data']['value']['role'].i,'','','n'));
     return false;
 }
+function createRoleUsersList(ele){
+    console.log('---createRoleUsersList()---');
+    if(responseData['data']['value']['info']!==''){
+        ele.appendChild(createTag(responseData['data']['value']['info'],'h6','text-warning mb-3 text-center font-weight-bold'));
+    }
+    var colTitle=new Array('Imię','Nazwisko','Login','Email');
+    var tBody=document.createElement("tbody");
 
+    for (const property in responseData['data']['value']['user'])
+    {
+        var tr=document.createElement("tr");  
+        for(const atr in responseData['data']['value']['user'][property])
+        {
+            var td=createTag(responseData['data']['value']['user'][property][atr],'td','');
+            tr.appendChild(td);
+        } 
+        tBody.appendChild(tr);
+    }
+    ele.appendChild(createTable(colTitle,tBody)); 
+
+}
 function roleManage(btnLabel,title,titleClass)
 {
     console.log('===roleManage()===');

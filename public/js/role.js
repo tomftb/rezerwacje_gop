@@ -46,9 +46,7 @@ var defaultTableBtnConfig={
             attributes : { 'data-toggle' : 'modal', 'data-target': '#AdaptedModal' }
         }
     };
-
 //console.log(loggedUserPerm);
-setButtonDisplay(document.getElementById('createData'),'ADD_PROJ');
 
 function runFunction(d)
 {
@@ -386,6 +384,10 @@ function createData()
 {
     clearAdaptedModalData();
     ajax.getData('getNewRoleSlo');
+}
+function setBtnPerm(){
+    console.log('setBTnPerm()');
+    setButtonDisplay(document.getElementById('createData'),'ADD_ROLE');
 }
 function findData(value)
 {

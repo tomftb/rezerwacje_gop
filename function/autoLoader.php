@@ -1,7 +1,10 @@
 <?php
-
+/*
+ * APP_ROOT => filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/..";
+ */
 function Autoload($className){
-    $DR=filter_input(INPUT_SERVER,"DOCUMENT_ROOT")."/..";
+    
+    
     $dir=array('modul','class','function','app_pages','lib');
     // 'lib/PHPWord-develop/src/PhpWord/Collection','lib/PHPWord-develop/src/PhpWord/Metadata'
     /*
@@ -13,7 +16,7 @@ function Autoload($className){
     //echo 'CLASS TO LOAD => '.$className."<br/>";
     foreach($dir as $dirName)
     {	
-        searchInDir($DR.'/'.$dirName,$class,$found);
+        searchInDir(APP_ROOT.'/'.$dirName,$class,$found);
         if($found!==''){
             //echo "FILE => ".$found."<br/>";
             break;
@@ -28,9 +31,9 @@ function Autoload($className){
     }
 }
 function searchInDir($d,$f,&$found){
-    //echo "LOOK FOR => ".$f."<br/>";
+    //echo "LOOK FOR => ".$f."\r\n";
     if(is_dir($d)){
-        //echo 'IS A DIR '.$d.' <br/>';
+        //echo "IS A DIR ".$d." \r\n";
         foreach (scandir($d) as $dirFile){
             if($dirFile!=='.' && $dirFile!=='..'){
                 //echo 'DIR HAVE FILES => '.$dirFile.'<br/>';
@@ -43,17 +46,16 @@ function searchInDir($d,$f,&$found){
     }
 }
 function compareFile($d,$f,&$found){
-    //echo 'NOT A DIR => '.$d.' <br/>';
+    //echo "NOT A DIR => ".$d."\r\n";
+    //echo "LOOK FOR CLASS => ".$f."\r\n";
     $tmpDirParts=explode('/',$d);
-    //$end=end($tmpDirParts);
-        //print_r($tmpDirParts);
-    //echo $end."<br/>";
-        //$tmpDirParts[]
     array_pop($tmpDirParts);
     array_push($tmpDirParts,$f.".php");
     $newF=implode('/',$tmpDirParts);
-    //echo "NEW FILE => ".$newF."<br/>";
-    if($d===$newF && is_readable($newF) && !class_exists($f, false)){
+    
+    //echo "NEW FILE => ".$newF."\r\n";
+    // TURN OF && !class_exists($f, false)
+    if($d===$newF && is_readable($newF)){
         //echo "FOUND FILE, RETURN => ".$d."<br/>";
         $found=$d;
     }

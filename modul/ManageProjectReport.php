@@ -23,17 +23,17 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         $this->Log->log(0,"[".__METHOD__."]");
         $this->inpArray=filter_input_array(INPUT_POST);
         /* parse data */
-        if(empty($this->inpArray)){ $this->response->setError(0,'NO STAGE SELECTED');}
+        if(empty($this->inpArray)){ Throw New Exception ('NO STAGE SELECTED',0);}
         /* parse file */
         self::uploadFiles(APP_ROOT.UPLOAD_DIR,UPLOAD_DIR); 
         /* create Report */
         self::createDocument();
-        return($this->response->setResponse(__METHOD__,$this->documentName,'downloadReportDoc','POST'));
+        $this->utilities->jsonResponse(__METHOD__,$this->documentName,'downloadReportDoc','POST');
     }
     public function setProjectReportImage(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::uploadFiles(APP_URL."router.php?task=showProjectReportFile&dir=".TMP_UPLOAD_DIR."&file=",TMP_UPLOAD_DIR); 
-        return($this->response->setResponse(__METHOD__,$this->files,'showStagePreview','POST')); 
+        $this->utilities->jsonResponse(__METHOD__,$this->files,'showStagePreview','POST'); 
     }
     public function getProjectReportData(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -41,7 +41,6 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         $this->utilities->jsonResponse(__METHOD__,['id'=>filter_input(INPUT_GET,'id'),'data'=>$stage->getAllStage()],'pReportOff','POST'); 
     }
     private function uploadFiles($linkToFile='',$uploadDir=''){
-        if($this->response->getError()) { return false;}
         $this->modul['FILE']=NEW file();
         $this->modul['FILE']->setUrl($linkToFile);
         $this->modul['FILE']->setNewFileName($_SESSION['uid']);
@@ -68,8 +67,8 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         self::checkIsInputEmpty();
         /* ADD DATA TO DB -> DatabaseProjectReport class*/
         parent::addReport($this->idProject,$this->reportData);
-        $this->response->setError(0,"[".__METHOD__."][".__LINE__."] TEST ERROR");
-        return($this->response->setResponse(__METHOD__,'','cModal','POST'));
+        // Throw New Exception('TST',0);
+        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
     }
     private function setReportData(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -87,11 +86,9 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         }
     }
     private function createDocument(){
-        if($this->response->getError()) { return false;}
         /* create doc */
         $doc=new createDoc($this->inpArray,$this->files,'ProjectReport1','.docx');
         $doc->createProjectStageReport();
-        $this->response->setError(0,$doc->getError());
         $this->documentName=$doc->getDocName();
     }
     private function setProjectId(){

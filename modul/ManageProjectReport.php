@@ -7,7 +7,6 @@ interface InterfaceProjectReport{
 }
 final class ManageProjectReport extends DatabaseProjectReport implements InterfaceProjectReport{
     private $files=[];
-    private $response;
     private $inpArray=[];
     private $documentName='';
     private $idProject=0;
@@ -16,8 +15,8 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
     private $Parser;
     
     public function __construct(){
+        parent::__construct();
         $this->Log=Logger::init(__METHOD__);
-        $this->response=NEW Response('Project');
         $this->utilities=NEW Utilities();
     }
     public function setProjectReportDoc(){
@@ -39,9 +38,7 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
     public function getProjectReportData(){
         $this->Log->log(0,"[".__METHOD__."]");
         $stage=new manageProjectStage();
-        $stDdata=$stage->getProjectAllStage();
-        $this->Log->logMulti(2,$stDdata['data']['value']);
-        return($this->response->setResponse(__METHOD__, ['id'=>filter_input(INPUT_GET,'id'),'data'=>$stDdata['data']['value']],'pReportOff','POST')); 
+        $this->utilities->jsonResponse(__METHOD__,['id'=>filter_input(INPUT_GET,'id'),'data'=>$stage->getAllStage()],'pReportOff','POST'); 
     }
     private function uploadFiles($linkToFile='',$uploadDir=''){
         if($this->response->getError()) { return false;}

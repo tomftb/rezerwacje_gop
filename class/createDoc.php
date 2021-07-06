@@ -33,29 +33,24 @@ class createDoc {
         $settings::setOutputEscapingEnabled(true);
         $this->phpWord = new \PhpOffice\PhpWord\PhpWord();
     }
+    private function throwError($d='',$l=0){
+        Throw New Exception ($d,$l);
+    }
     public function createProjectStageReport(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->mainSection = $this->phpWord->addSection();
-        empty($this->projectData) ? parent::setError(0,"NO STAGE DATA SELECTED") :  self::setUpData(); 
-       
-        //parent::setError(0,__LINE__.'TEST STOP');
-        if(parent::getError()){
-            /* ERROR EXIST, NO SAVE FILE */
-            return false;
-        }
-        else{
-            $this->Log->log(0,"[".__METHOD__.'] LOAD => \PhpOffice\PhpWord\IOFactory::createWriter()');
-            $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
-            /* check is file exist */
-            $this->Log->log(0,"[".__METHOD__.'] SAVE FILE => '.DR."/".self::docDir.$this->fileName);
-            //$objWriter->setOutputEscapingEnabled(true);
-            $objWriter->save(DR."/".self::docDir.$this->fileName);
-        }
+        empty($this->projectData) ? self::throwError("NO STAGE DATA SELECTED",0) :  self::setUpData(); 
+        $this->Log->log(0,"[".__METHOD__.'] LOAD => \PhpOffice\PhpWord\IOFactory::createWriter()');
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
+        /* check is file exist */
+        $this->Log->log(0,"[".__METHOD__.'] SAVE FILE => '.DR."/".self::docDir.$this->fileName);
+        //$objWriter->setOutputEscapingEnabled(true);
+        $objWriter->save(DR."/".self::docDir.$this->fileName);
     }
     public function createProjectReport(){
         $this->Log->log(0,"[".__METHOD__."]");
         
-         try {
+         
            /* Note: any element you append to a document must reside inside of a Section. */
 
         // Adding an empty Section to the document...
@@ -334,16 +329,7 @@ $row->addCell(1000)->addText('3');
     // Saving the document as HTML file...
     //$objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'HTML');
     //$objWriter->save('helloWorld.html');
-        } 
-        catch (Throwable $t) { // Executed only in PHP 7, will not match in PHP 5.x         
-            $this->response->setError(1,'PHP7 Caught exception: '.$t->getMessage()." in ".$t->getFile());
-        } 
-        catch (Exception $e) {// Executed only in PHP 5.x, will not be reached in PHP 7
-            $this->response->setError(1,'PHP5 Caught exception: '.$e->getMessage()." in ".$e->getFile());
-        }
-        finally{
-            
-        }
+        
         
         
      $this->Log->log(0,"[".__METHOD__."] END");
@@ -364,7 +350,6 @@ $row->addCell(1000)->addText('3');
                 self::writeData($convert,$v,$k);   
             }
         }
-        //parent::setError(1,'test error');
     }
     private function writeData($convert,$v,$id){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -372,7 +357,7 @@ $row->addCell(1000)->addText('3');
         $data=$convert->getHtmlArray();
         //$this->Log->log(0,$convert->getLog());
         if($convert->getError()){
-            parent::setError(0,$convert->getError());
+            Throw New Exception($convert->getError(),0);
         }
         else{
             foreach($data as $k => $v){
@@ -509,15 +494,12 @@ $row->addCell(1000)->addText('3');
     }
     private function checkStyleProperty($avaStyle,&$val){
         if(count($val)!=2){
-            parent::setError(0,'WRONG STYLE '.$val[0].' PARAMETER COUNT');
-            return false;
+            Throw New Exception('WRONG STYLE '.$val[0].' PARAMETER COUNT',0);
         }
         $val[0]=mb_strtolower(trim($val[0]));
         $val[1]=mb_strtolower(trim($val[1]));
         if(!array_key_exists($val[0], $avaStyle)){
-            parent::setError(0,'WRONG STYLE '.$val[0].' STYLE UNAVALIABLE');
-            //$this->Log->log(0,"[".__METHOD__."] UNAVALIABLE STYLE => ".$val[0]);   
-            return false;     
+            Throw New Exception('WRONG STYLE '.$val[0].' STYLE UNAVALIABLE',0);    
         }
         if(!array_key_exists($avaStyle[$val[0]], $this->FontStyle)){
             self::parseSizeType($avaStyle[$val[0]],$val[1]);
@@ -532,9 +514,7 @@ $row->addCell(1000)->addText('3');
         $avaTag=['b'=>['bold',true],'u'=>['underline','single'],'i'=>['italic',true],'span'=>''];
         $tag=mb_strtolower($tag);
         if(!array_key_exists($tag, $avaTag)){
-            parent::setError(0,'TAG '.$tag.' UNAVALIABLE');
-            //$this->Log->log(0,"[".__METHOD__."] UNAVALIABLE STYLE => ".$val[0]);   
-            return false;     
+           Throw New Exception('TAG '.$tag.' UNAVALIABLE',0);    
         }
         /* SPAN EXCEPTION */
         if($tag==='span'){
@@ -597,12 +577,10 @@ $row->addCell(1000)->addText('3');
                 'left'=>\PhpOffice\PhpWord\SimpleType\Jc::LEFT,
                 'right'=>\PhpOffice\PhpWord\SimpleType\Jc::RIGHT];
         if(!array_key_exists($align,$cssAlign)){
-            parent::setError(0,'WRONG STYLE ALIGN ATTRIBUTE => '.$align);
+            Throw New Exception('WRONG STYLE ALIGN ATTRIBUTE => '.$align,0);
         }
-        else{
-            $this->ParagraphStyle['align']=$cssAlign[$align];       
-            UNSET($this->FontStyle['align']);
-        }
+        $this->ParagraphStyle['align']=$cssAlign[$align];       
+        UNSET($this->FontStyle['align']);
     }
     public function getDocName(){
         return $this->fileName;

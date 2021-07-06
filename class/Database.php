@@ -4,12 +4,13 @@
 */
 class Database extends PDO{
     private static $dbLink;
-	private $pdoFetchAll=[
+    private $queryList=[];
+    private $pdoFetchAll=[
 			'FETCH_ASSOC'=>PDO::FETCH_ASSOC,
 			'FETCH_BOTH '=>PDO::FETCH_BOTH ,
 			'FETCH_OBJ'=>PDO::FETCH_OBJ
 		];
-	private $pdoParam=[
+    private $pdoParam=[
 		'BOOL'=>PDO::PARAM_BOOL, 	// Represents a boolean data type.
 		'NULL'=>PDO::PARAM_NULL, 	// Represents the SQL NULL data type.
 		'INT'=>PDO::PARAM_INT,		// Represents the SQL INTEGER data type.
@@ -142,6 +143,26 @@ class Database extends PDO{
                 break;
         }
         return $l;
+    }
+    public function setQuery($q,$p=[]){
+        array_push($this->queryList,[$q,$p]);
+    }
+    public function runQuery(){
+        //print_r($this->queryList);
+        try{
+            self::$dbLink->beginTransaction(); //PHP 5.1 and new
+            array_map(function($arg){
+                        self::query($arg[0],$arg[1]);
+            },$this->queryList);
+            self::$dbLink->commit();  //PHP 5 and new
+        }
+        catch (PDOException $e){
+            self::$dbLink->rollback(); 
+            Throw New Exception("[".__METHOD__."] DATABASE ERROR: ".$e->getMessage(),1);
+        }
+        finally{
+            $this->queryList=[];
+        }
     }
     function __destruct(){}
 }

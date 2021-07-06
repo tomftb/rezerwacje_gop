@@ -494,9 +494,8 @@ class ManageProjectStage
         self::setWskB(intval($_SESSION['userid'],10));
         $this->utilities->jsonResponse(__METHOD__,'','block','POST');
     }
-    public function getProjectAllStage(){
-        $this->Log->log(0,"[".__METHOD__."]");
-        $return=[];
+    public function getAllStage(){
+        $data=[];
         $head=$this->dbLink->squery("SELECT s.`id` as 'i',s.`number` as 'n',s.`title` as 't',s.`create_user_login` as 'cu' FROM `slo_projekt_etap` s WHERE s.`id`>0 AND s.`wsk_v`='0' AND s.`wsk_u`='0' ORDER BY s.`id`");   
         foreach($head as $v){
             /* GET STAGE BODY */
@@ -504,9 +503,9 @@ class ManageProjectStage
             foreach($body as $kb => $vb){
                 $body[$kb]['v']=html_entity_decode($body[$kb]['v']);
             }
-            array_push($return,array('i'=>$v['i'],'n'=>$v['n'],'t'=>html_entity_decode($v['t']),'cu'=>$v['cu'],'v'=>$body));
+            array_push($data,array('i'=>$v['i'],'n'=>$v['n'],'t'=>html_entity_decode($v['t']),'cu'=>$v['cu'],'v'=>$body));
         }
-        $this->utilities->jsonResponse(__METHOD__,$return,'','GET');
+        return $data;
     }
     function __destruct(){}
 }

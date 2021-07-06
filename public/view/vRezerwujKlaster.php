@@ -74,3 +74,22 @@ if(!defined("DR")){ die('Direct access not permitted'); }
     </form>
     </center>
 </div>
+<center>
+    <table class="t_main" id="clusterTable">	
+	<thead>
+            <tr>
+                <th colspan="2">
+                <h2 class="text-center pt-1">Aktualny przydział nodów:</h2>
+                </th>
+            </tr>
+            <tr>
+                <th class="th_main" width="200px">
+                    <h5 class="text-center pt-1">Pracownia :</h5>
+                </th>
+                <th class="th_main" width="600px">
+                    <h5 class="text-center pt-1">Przypisane nody :</h5>
+                </th>
+            </tr>
+	</thead>
+	</table>
+</center>

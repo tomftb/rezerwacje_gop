@@ -30,7 +30,7 @@ class ManageParameters
         $this->Log->log(0,"[".__METHOD__."]");
         $this->inpArray=filter_input_array(INPUT_POST);
         $this->utilities->validateKey($this->inpArray,'id',true,1);
-        $this->utilities->validateKey($this->inpArray,'value',true,1);
+        //$this->utilities->validateKey($this->inpArray,'value',true,1);
         $sql[':i']=[$this->inpArray['id'],'INT'];
         self::verifyParameterId($sql);
         // PARSE TAKE PARM SKROT

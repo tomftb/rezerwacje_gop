@@ -4,7 +4,7 @@ final class RezerwujKlaster extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_PROJ';
     private $view=['vRezerwujKlaster.php'];
-    private $js=[];
+    private $js=['Cluster.js'];
 
 	
     public function __construct(){

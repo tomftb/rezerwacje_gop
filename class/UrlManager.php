@@ -87,7 +87,8 @@ final class UrlManager{
         ['pGenDoc','GEN_DOC_PROJ','user'],
         ['downloadProjectDoc','GEN_DOC_PROJ','user','file'],
         ['showProjectReportFile','GEN_PROJ_REP_DOC','user','file'],
-        ['setProjectReport','SAVE_PROJ_REPORT','user','json']
+        ['setProjectReport','SAVE_PROJ_REPORT','user','json'],
+        ['getActClustrsUsage','LOG_INTO_CLASTR','']
     ];
         
     public function __construct(){
@@ -132,7 +133,7 @@ final class UrlManager{
             }   
         }
         if(!$found){
-            Throw New Exception(__METHOD__.'Task not exists => '.$this->urlData['task'],0);
+            Throw New Exception(__METHOD__.' Task not exists => '.$this->urlData['task'],0);
         }
        
     }

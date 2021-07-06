@@ -13,7 +13,7 @@
  */
 class DatabaseProject {
     private $dbLink;
-    private $utilities;
+    private $Utilities;
     private $Log;
     private $stageDbId=0;
     private $projectStageDb=[];

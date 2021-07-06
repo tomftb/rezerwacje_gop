@@ -18,8 +18,8 @@ var actData={
 
 
 var inputFieldCounter=0;
-setButtonDisplay(document.getElementById('createData'),'ADD_PROJ_STAGE');
-//console.log(loggedUserPerm);
+
+console.log(loggedUserPerm);
 var mainTableColumns={
     ID:{
         style:'width:70px;',
@@ -1379,6 +1379,10 @@ function showHidden(ele)
     changeBoxValue(ele);
     defaultTask='getprojectsstagelike&v='+ele.value;
     findData(document.getElementById('findData').value);
+}
+function setBtnPerm(){
+    console.log('setBTnPerm()');
+    setButtonDisplay(document.getElementById('createData'),'ADD_PROJ_STAGE');
 }
 ajax.getData(defaultTask);
 //document.getElementById('closeModal').onclick = function(){ reloadData(defaultTask); };

@@ -253,12 +253,17 @@ function createInputTextField(title,height)
     var fileSelected='0';
     var filePosition='top';
     var idv=inputFieldCounter;
-        if(actData['data']['value']['body'].hasOwnProperty(inputFieldCounter)){
-            textAreaValue=actData['data']['value']['body'][inputFieldCounter].v;
-            fileSelected=actData['data']['value']['body'][inputFieldCounter].f;
-            filePosition=actData['data']['value']['body'][inputFieldCounter].fp;
-            idv=actData['data']['value']['body'][inputFieldCounter].i;
+        console.log(inputFieldCounter);
+        console.log(actData);
+        if(actData['data']['value'].hasOwnProperty('body')){
+            if(actData['data']['value']['body'].hasOwnProperty(inputFieldCounter)){
+                textAreaValue=actData['data']['value']['body'][inputFieldCounter].v;
+                fileSelected=actData['data']['value']['body'][inputFieldCounter].f;
+                filePosition=actData['data']['value']['body'][inputFieldCounter].fp;
+                idv=actData['data']['value']['body'][inputFieldCounter].i;
+            }
         }
+        
 
     var textarea=createTag(textAreaValue,'textarea','form-control w-100'); //form-control    
     //var textarea=createTag('','div',' w-100'); //form-control

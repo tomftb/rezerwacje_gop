@@ -85,6 +85,7 @@ final class ModulManager{
         array_push($this->modul,new ManageProjectStage());
         array_push($this->modul,new ManageProjectReport());    
         array_push($this->modul,new ManageProjectTeam());  
+        array_push($this->modul,new ManageCluster());
     }
     
     public function loadMethod($method=''){

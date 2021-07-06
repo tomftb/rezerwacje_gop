@@ -144,16 +144,19 @@ class Database extends PDO{
         }
         return $l;
     }
-    public function setQuery($q,$p=[]){
+    public function setQuery($q='',$p=[]){
         array_push($this->queryList,[$q,$p]);
     }
     public function runQuery(){
+        array_map(function($arg){
+                        self::query($arg[0],$arg[1]);
+        },$this->queryList);
+    }
+    public function runTransaction(){
         //print_r($this->queryList);
         try{
             self::$dbLink->beginTransaction(); //PHP 5.1 and new
-            array_map(function($arg){
-                        self::query($arg[0],$arg[1]);
-            },$this->queryList);
+            self::runQuery();
             self::$dbLink->commit();  //PHP 5 and new
         }
         catch (PDOException $e){

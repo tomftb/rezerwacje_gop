@@ -1382,7 +1382,7 @@ function showHidden(ele)
 }
 function setBtnPerm(){
     console.log('setBTnPerm()');
-    setButtonDisplay(document.getElementById('createData'),'ADD_PROJ_STAGE');
+    setButtonDisplay(document.getElementById('createData'),'ADD_STAGE');
 }
 ajax.getData(defaultTask);
 //document.getElementById('closeModal').onclick = function(){ reloadData(defaultTask); };

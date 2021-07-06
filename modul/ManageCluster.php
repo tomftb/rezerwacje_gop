@@ -1,60 +1,45 @@
 <?php
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- * Description of ManageCluster
- *
- * @author tborczynski
- */
 class ManageCluster {
     //put your code here
-}
-/*
- * <?php
-if(!defined("DR")){
-    die('Direct access not permitted');
-}
-else{
-    require_once(DR."/function/redirectToLoginPage.php");
-    require_once(DR."/.cfg/config.php");
-} 
-$dbLink=NEW initialDb();
-/*
- * CREATE SELECT OPTION LIST
- */
-/*
-function createOption($tabDane)
-{
-    // Pracownie nazwa
-    // Klaster nod
-    $tmpId=(integer)0;
-    $tmpNazwa=(string)"";
-    $option=(string)"";
-
-    foreach($tabDane as $wartosc)
-    {
-        foreach($wartosc as $kluczTab => $wartoscTab)
-        {
-            //echo "kluczTab - ".$kluczTab." - ".$wartoscTab."<br/>";
-            if($kluczTab=='id') {$tmpId=$wartoscTab;} 
-            if($kluczTab=='nazwa' || $kluczTab=='nod') {$tmpNazwa=$wartoscTab;}
-        }
-        $option.="<option value=\"".$tmpId."|".$tmpNazwa."\">".$tmpNazwa."</option>";
+    private $Utilities;
+    private $Log;
+    private $db;
+    
+    public function __construct(){
+        $this->Log=Logger::init();
+        $this->db= LoadDb::load();
+        $this->Utilities=New Utilities();
     }
-    return $option;
+    public function getActClustrsUsage(){
+        
+        /* MERGE */
+        $this->Utilities->jsonResponse(__METHOD__,self::mergeLabClusters(),'','');
+    }
+    private function getAllClusters(){
+        return $this->db->squery('SELECT nod as \'n\',pracownia as \'p\' FROM klaster');
+    }
+    private function getAllLabs(){
+        return $this->db->squery('SELECT id as \'i\',nazwa as \'n\' FROM pracownia WHERE WSK_U=0 ORDER BY id');
+    }
+    private function mergeLabClusters(){
+        $clusters=self::getAllClusters();
+        $labs=self::getAllLabs();
+        
+        foreach($labs as $l => $lab){
+            
+            $labs[$l]['c']='';
+            foreach($clusters as $c => $clustr){
+                if($lab['i']===$clustr['p']){
+                    $labs[$l]['c'].=$clustr['n'].", ";
+                    //array_push($labs[$l]['c'],$clustr['n']);
+                    UNSET($clusters[$c]);
+                }
+            }
+            /* TO DO remove last two char */
+        }
+        return $labs;
+    }
+    public function updateClustr(){
+        $this->Utilities->jsonResponse(__METHOD__,'','','');
+    }
 }
-$dbLink->query('SELECT id,nod,pracownia FROM klaster WHERE 1=? group by id','1');
-$tablicaKlaster= $dbLink->queryReturnValue();
-
-$dbLink->query('SELECT id,nazwa FROM pracownia WHERE WSK_U=? ORDER BY id','0');
-$tablicaPrac=$dbLink->queryReturnValue();
-
-$optionKlaster=(string)createOption($tablicaKlaster);
-$optionPrac=(string)createOption($tablicaPrac);
-
- */

@@ -29,11 +29,10 @@ class ManageParameters
     {
         $this->Log->log(0,"[".__METHOD__."]");
         $this->inpArray=filter_input_array(INPUT_POST);
-        $this->inpArray=filter_input_array(INPUT_POST);
         $this->utilities->validateKey($this->inpArray,'id',true,1);
         $this->utilities->validateKey($this->inpArray,'value',true,1);
         $sql[':i']=[$this->inpArray['id'],'INT'];
-        self::checkParameterId($sql);
+        self::verifyParameterId($sql);
         // PARSE TAKE PARM SKROT
         self::getParmSkrt($sql);
         self::parseParm();
@@ -44,7 +43,7 @@ class ManageParameters
         $v['u']=$_SESSION['username'];
         $this->utilities->jsonResponse(__METHOD__,$v,'pUpdate','GET');
     }
-    private function checkParameterId($sql)
+    private function verifyParameterId($sql)
     {
         if(count($this->dbLink->squery("SELECT * FROM parametry WHERE ID=:i;",$sql))!=1){
             Throw New Exception ('Parameter with ID => '.$this->inpArray['id'].' not exist or is more than one',1);
@@ -77,71 +76,64 @@ class ManageParameters
     private function parseParm()
     {
         $this->Log->log(0,"[".__METHOD__."]");
+        $this->parmSkrt="check".$this->parmSkrt;
         $this->Log->logMulti(0,$this->parmSkrt);
-        //print_r($skrot);
-        //echo "SKROT: ".$skrot['SKROT']."<br/>";
-        switch($this->parmSkrt):
-            case 'MAIL_RECIPIENT':
-                //echo "MAIL_RECIPIENT\n";
-                $tmp=explode(';',$this->inpArray['value']);
-                //echo "\n";
-                foreach($tmp as $lp => $email)
-                {
-                    if (!filter_var($email, FILTER_VALIDATE_EMAIL))
-                    {
-                        Throw New Exception ("[LP. ".$lp."] BŁĘDNY ADRES EMAIL",0); 
-                    }
-                }
-                break;
-            case 'MAIL_PORT_OUT':
-                if(!preg_match('/^\d{2,5}$/', $this->inpArray['value'], $matches))
-                {
-                    Throw New Exception ("BŁĘDNY PORT WYCHODZĄCY",0); 
-                }
-                break;
-            case 'MAIL_CHARSET':
-                if(!preg_match('/^[a-zA-Z][a-zA-Z\-\d]{2,9}$/', $this->inpArray['value'], $matches))
-                {
-                    Throw New Exception ("BŁĘDNE KODOWANIE ZNAKÓW",0); 
-                }
-                break;
-            case 'MAIL_USER':
-                if (!filter_var($this->inpArray['value'], FILTER_VALIDATE_EMAIL))
-                {
-                    Throw New Exception ("BŁĘDNY ADRES EMAIL",0); 
-                }
-                break;
-            case 'MAIL_SRV':
-                $tmp=explode('.',$this->inpArray['value']);
-                if(count($tmp)<3)
-                {
-                    Throw New Exception ("BŁĘDNY SERWER POCZTY",0); 
-                }
-                else
-                {
-                    foreach($tmp as $part)
-                    {
-                        if(!preg_match('/^[a-zA-Z\d][a-zA-Z\_\-\d]{0,48}[a-zA-Z\d]{0,1}$/', $part, $matches))
-                        {
-                            Throw New Exception ("BŁĘDNY SERWER POCZTY",0); 
-                        }
-                    }
-                }
-                break;
-            case 'MAIL_PASS':
-                if(strlen($this->inpArray['value'])>0)
-                {
-                    $plchar='\ą\Ą\c\Ć\ę\Ę\ł\Ł\ó\Ó\ś\Ś\ż\Ż\ź\Ź\ń\Ń';
-                    if(!preg_match('/^[a-zA-Z\_\+\=\-\d'.$plchar.']{2,9}$/', $this->inpArray['value'], $matches))
-                    {
-                        Throw New Exception ("BŁĘDNE HASŁO",0); 
-                    }
-                }
-                break;
-            case 'MAIL_RECV':
-            default:
-                break;
-        endswitch;
+        $validators=array_filter(get_class_methods(__CLASS__),[$this,"getCheck"]);
+        if(in_array($this->parmSkrt,$validators)){
+            self::{$this->parmSkrt}();
+            //call_user_func(self::$this->parmSkrt);
+        }
+    }
+    private function getCheck($var){
+         if(preg_match('/^(check)/', $var)){
+            return $var;
+        }
+    }
+    private function checkMAIL_PASS(){
+        if(strlen($this->inpArray['value'])===0) { return false; }    
+        $plchar='\ą\Ą\c\Ć\ę\Ę\ł\Ł\ó\Ó\ś\Ś\ż\Ż\ź\Ź\ń\Ń';
+        if(!preg_match('/^[a-zA-Z\_\+\=\-\d'.$plchar.']{2,9}$/', $this->inpArray['value'])){
+            Throw New Exception ("BŁĘDNE HASŁO",0); 
+        }
+    }
+    private function checkMAIL_SRV(){
+        $tmp=explode('.',$this->inpArray['value']);
+        if(count($tmp)<3){
+            Throw New Exception ("BŁĘDNY SERWER POCZTY",0); 
+        }
+        foreach($tmp as $part){
+            if(!preg_match('/^[a-zA-Z\d][a-zA-Z\_\-\d]{0,48}[a-zA-Z\d]{0,1}$/', $part)){
+                Throw New Exception ("BŁĘDNY SERWER POCZTY",0); 
+            }
+        }
+    }
+    private function checkMAIL_USER(){
+        if (!filter_var($this->inpArray['value'], FILTER_VALIDATE_EMAIL)){
+            Throw New Exception ("BŁĘDNY ADRES EMAIL",0); 
+        }
+    }
+    private function checkMAIL_CHARSET(){
+        if(!preg_match('/^[a-zA-Z][a-zA-Z\-\d]{2,9}$/', $this->inpArray['value'])){
+            Throw New Exception ("BŁĘDNE KODOWANIE ZNAKÓW",0); 
+        }
+    }
+    private function checkMAIL_PORT_OUT(){
+        if(!preg_match('/^\d{2,5}$/', $this->inpArray['value'])){
+            Throw New Exception ("BŁĘDNY PORT WYCHODZĄCY",0); 
+        }
+    }
+    private function checkMAIL_RECIPIENT(){
+        $err='';
+        $tmp=explode(';',$this->inpArray['value']);
+        //echo "\n";
+        foreach($tmp as $lp => $email){
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)){
+               $err.="[LP. ".$lp."] BŁĘDNY ADRES EMAIL<br/>";
+            }
+        }
+        if($err){
+            Throw New Exception ($err,0); 
+        }
     }
     function __destruct(){}
 }

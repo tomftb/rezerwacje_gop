@@ -317,13 +317,6 @@ class Utilities
         $this->Log->logMultidimensional(2,$tmp,__LINE__."::".__METHOD__);
         return $tmp;
     }
-    public function setGetIntKey(&$var,$key){
-        $var=filter_input(INPUT_GET,$key,FILTER_VALIDATE_INT);
-        if($var===null || $var===false){
-            return false;
-        }
-        return true;
-    }
     public function checkValueLength($value,$label,$min,$max){
         if(strlen($value)<$min){
             return ("W ".$label." nie wprowadzono minimalnej ilości znaków");

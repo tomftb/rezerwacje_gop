@@ -114,7 +114,7 @@ class ManageProjectStage
     }
     private function getWskB($idProject=0){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->inpArray['wskb']=$this->dbLink->squery("select b.`login` as 'bl',`buffer_user_id` as bu FROM `slo_projekt_etap` as s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id` WHERE s.`id`=:id",[':id'=>[$idProject,'INT']]);    
+        $this->inpArray['wskb']=$this->dbLink->squery("select b.`login` as 'bl',`buffer_user_id` as bu FROM `slo_projekt_etap` as s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id` WHERE s.`id`=:id",[':id'=>[$idProject,'INT']])[0];    
     }
     private function releaseWskB($idStage){
         $this->Log->log(0,"[".__METHOD__."] idStage => ".$idStage);

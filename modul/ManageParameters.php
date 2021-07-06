@@ -16,13 +16,10 @@ class ManageParameters
     }
     public function getAllParm()
     {
-        $f="%".filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING)."%";
+        $f="%".filter_input(INPUT_GET,'f',FILTER_SANITIZE_STRING)."%";
         $this->Log->log(0,"[".__METHOD__."] filter => ".$f);
-        $sql=[
-            ':f'=>[$f,'STR']
-        ];
         $result=$this->dbLink->squery('SELECT `ID` as \'i\' ,`Skrót` as \'s\',`Nazwa` as \'n\',`Opis` as \'o\',`Wartość` as \'v\',`Typ` as \'t\',`ModDat` as \'md\',`ModUser` as \'mu\' FROM `v_parm_v2` WHERE ID LIKE (:f) OR Skrót LIKE (:f) OR Nazwa LIKE (:f) OR Opis LIKE (:f) OR Wartość LIKE (:f) ORDER BY ID asc'
-                ,$sql);
+                ,[':f'=>[$f,'STR']]);
         $this->utilities->jsonResponse(__METHOD__,$result,'showAll','GET');
     }
     public function updateParm()
@@ -37,7 +34,6 @@ class ManageParameters
         self::getParmSkrt($sql);
         self::parseParm();
         self::update();
-        //return(self::getAllParm());
         $v['i']=$this->inpArray['id'];
         $v['d']=date('Y-m-d H:i:s'); //2019-03-12 14:10:39
         $v['u']=$_SESSION['username'];
@@ -77,11 +73,8 @@ class ManageParameters
     {
         $this->Log->log(0,"[".__METHOD__."]");
         $this->parmSkrt="check".$this->parmSkrt;
-        $this->Log->logMulti(0,$this->parmSkrt);
-        $validators=array_filter(get_class_methods(__CLASS__),[$this,"getCheck"]);
-        if(in_array($this->parmSkrt,$validators)){
+        if(in_array($this->parmSkrt,array_filter(get_class_methods(__CLASS__),[$this,"getCheck"]))){
             self::{$this->parmSkrt}();
-            //call_user_func(self::$this->parmSkrt);
         }
     }
     private function getCheck($var){

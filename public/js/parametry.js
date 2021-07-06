@@ -152,6 +152,6 @@ function setEditedFieldFunction(inp,type)
 }
 function findData(value)
 {
-    ajax.getData(defaultTask+value);
+    ajax.getData(defaultTask+"&f="+value);
 }
 ajax.getData(defaultTask);

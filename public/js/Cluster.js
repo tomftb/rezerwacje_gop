@@ -3,7 +3,7 @@ class Cluster{
     static Ajax;
     defaultTask='';
     permissions;
-    data;
+    static data;
     static bookClusterNod0={
         i:0,
         n:''
@@ -50,7 +50,7 @@ class Cluster{
     allocationTable(){
         console.log('CLUSTER::allocationTable');
         
-        var all=this.data['data']['value']['all'];
+        var all=Cluster.data['data']['value']['all'];
             console.log(all);
         var tBody=document.getElementById('clusterTableBody');
             this.clear(tBody);
@@ -97,19 +97,19 @@ class Cluster{
     bookCluster(){
         console.log('CLUSTER::bookCluster');
         var mainDiv=document.getElementById('bookCluster');
-        this.createList('Aktualnie wskazana:','Dostępne :',document.getElementById('bookClusterLab'),this.data['data']['value']['labs'],[Cluster.bookClusterLab]);
-        this.createList('Aktualnie wskazany:','Dostępne :',document.getElementById('bookClusterNod0'),this.data['data']['value']['clusters'],[Cluster.bookClusterNod0]);
-        this.createList('Aktualnie wskazany:','Dostępne :',document.getElementById('bookClusterNod1'),this.data['data']['value']['clusters'],[Cluster.bookClusterNod1]);
+        this.createList('Aktualnie wskazana:','Dostępne :',document.getElementById('bookClusterLab'),Cluster.data['data']['value']['labs'],[Cluster.bookClusterLab]);
+        this.createList('Aktualnie wskazany:','Dostępne :',document.getElementById('bookClusterNod0'),Cluster.data['data']['value']['clusters'],[Cluster.bookClusterNod0]);
+        this.createList('Aktualnie wskazany:','Dostępne :',document.getElementById('bookClusterNod1'),Cluster.data['data']['value']['clusters'],[Cluster.bookClusterNod1]);
         this.update(document.getElementById('bookClusterBtn'));
         console.log(mainDiv);
     }
     setFirstBookClusterId(){
-        Cluster.bookClusterNod0.i=this.data['data']['value']['clusters'][0]['i'];
-        Cluster.bookClusterNod0.n=this.data['data']['value']['clusters'][0]['n'];
-        Cluster.bookClusterNod1.i=this.data['data']['value']['clusters'][0]['i'];
-        Cluster.bookClusterNod1.n=this.data['data']['value']['clusters'][0]['n'];
-        Cluster.bookClusterLab.i=this.data['data']['value']['labs'][0]['i'];
-        Cluster.bookClusterLab.n=this.data['data']['value']['labs'][0]['n'];
+        Cluster.bookClusterNod0.i=Cluster.data['data']['value']['clusters'][0]['i'];
+        Cluster.bookClusterNod0.n=Cluster.data['data']['value']['clusters'][0]['n'];
+        Cluster.bookClusterNod1.i=Cluster.data['data']['value']['clusters'][0]['i'];
+        Cluster.bookClusterNod1.n=Cluster.data['data']['value']['clusters'][0]['n'];
+        Cluster.bookClusterLab.i=Cluster.data['data']['value']['labs'][0]['i'];
+        Cluster.bookClusterLab.n=Cluster.data['data']['value']['labs'][0]['n'];
     }
     createNodeListGroup(label,data){
         var opt=document.createElement('optgroup');
@@ -156,7 +156,7 @@ class Cluster{
     }
     setResponseData(response){
         //console.log(response);
-        this.data=JSON.parse(response);
+        Cluster.data=JSON.parse(response);
     }
     update(btn){
         console.log('CLUSTER::update');
@@ -184,8 +184,8 @@ class Cluster{
         //console.log(errDiv);
     }
     checkResponseErr(){
-        if(this.data['status']===1){
-            throw this.data['info'];
+        if(Cluster.data['status']===1){
+            throw Cluster.data['info'];
         }
     }
 }

@@ -1,6 +1,7 @@
 class Response
 {
     response = new Array();
+    functionToRun;
     constructor() 
     {
         console.log('Response::constructor()');
@@ -41,5 +42,8 @@ class Response
             console.log(e); // error in the above string (in this case, yes)!
             alert('ERROR OCCURED');
         }
+    }
+    setFunctionToRun(){
+        
     }
 }

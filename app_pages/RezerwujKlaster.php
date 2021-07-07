@@ -2,7 +2,7 @@
 
 final class RezerwujKlaster extends Page{
     private $Log;
-    private $mainPerm='LOG_INTO_PROJ';
+    private $mainPerm='LOG_INTO_CLUSTR';
     private $view=['vRezerwujKlaster.php'];
     private $js=['Cluster.js'];
 

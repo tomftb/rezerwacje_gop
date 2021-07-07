@@ -10,12 +10,20 @@ class Ajax
     type="POST";
     form='';
     formName='';
+    static runTask='';
+    static runObject;
     
     constructor() 
     { 
         console.log('Ajax::constructor()');
         //console.log(this);
         this.setUrl();
+    }
+    setTask(object,task){
+        Ajax.runObject=object;
+        Ajax.runTask=task;
+        console.log(Ajax.runObject);
+        console.log(Ajax.runTask);
     }
     setUrl()
     {
@@ -116,13 +124,20 @@ class Ajax
     {
         //console.log('AJAX::xhrLoad()'); 
         var r= new Response();
+            r.setFunctionToRun();
         switch(this.status)
         {
             case 200:
+                    
                     //console.log("AJAX::runXhr() => 200");
                     //console.log(this.response);
                     //console.log(this.status);
-                    r.runTask(this.response);
+                    if(Ajax.runObject!==undefined){
+                        Ajax.runObject[Ajax.runTask](this.response);
+                    }
+                    else{
+                        r.runTask(this.response);
+                    }
                     break;
             default:
                     //console.log("AJAX::runXhr() =>"+this.status);

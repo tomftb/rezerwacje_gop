@@ -7,7 +7,7 @@ class PageManager
 {
     private static $Log;
     private static $pagePerm=[
-        1=>'LOG_INTO_KLAST',
+        1=>'LOG_INTO_CLUSTR',
         3=>'LOG_INTO_PROJ',
         4=>'LOG_INTO_PRAC',
         5=>'',

@@ -19,10 +19,12 @@ class Ajax
         //console.log(this);
         this.setUrl();
     }
-    setTask(object,task){
+    setModul(object){
         Ajax.runObject=object;
-        Ajax.runTask=task;
         console.log(Ajax.runObject);
+    }
+    setModulTask(task){
+        Ajax.runTask=task;
         console.log(Ajax.runTask);
     }
     setUrl()

@@ -89,4 +89,3 @@ function removeAttribute(ele,atr)
         if(log) {console.log("NO "+atr+" attribute");};
     }
 }
-setMenuActive();

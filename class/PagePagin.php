@@ -1,5 +1,5 @@
 <?php
-class page
+class PagePagin
 {
     private $recOnPage=0;
     private $pages=0;

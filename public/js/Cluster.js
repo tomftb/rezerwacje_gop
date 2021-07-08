@@ -2,8 +2,8 @@ class Cluster{
     
     static Ajax;
     defaultTask='';
-    permissions;
-    data;
+    static permissions;
+    static data;
     static bookClusterNod0={
         i:'0',
         i_old:'0',
@@ -34,21 +34,23 @@ class Cluster{
         Cluster.Ajax=Ajax;
         console.log(Cluster.Ajax);
         Cluster.Ajax.setModul(this);
-        Cluster.Ajax.setModulTask('runMain');
+        //Cluster.Ajax.setModulTask('runMain');
     }
     setDefaultTask(task){
         this.defaultTask=task;
     }
-    display(){
+    loadData(){
         Cluster.Ajax.setModulTask('runMain');
-        Cluster.Ajax.getData(this.defaultTask);
+        Cluster.Ajax.getData('getModulClusterDefaultData');
     }
+
     runMain(response){
         console.log('CLUSTER::runMain');
-        //console.log(response);
-        try{
-            this.setResponseData(response);
+        try{ 
+            Cluster.setUpJsonData(response);
             this.checkResponseErr();
+            this.setPermissions();
+            this.setClustrData();
             this.setFirstBookClusterId();
             this.bookCluster();
             this.allocationTable();
@@ -59,10 +61,15 @@ class Cluster{
         }
        
     }
+    static setUpJsonData(response){    
+        console.log(response);
+        Cluster.data=JSON.parse(response);
+        console.log(Cluster.data);
+    }
     allocationTable(){
         console.log('CLUSTER::allocationTable');
         
-        var all=this.data['data']['value']['all'];
+        var all=Cluster.data['data']['value']['all'];
             //console.log(all);
         var tBody=document.getElementById('clusterTableBody');
             Cluster.clear(tBody);
@@ -88,8 +95,9 @@ class Cluster{
     }
     updateAllocationTable(response){
         try{
-            this.setResponseData(response);
+            Cluster.setUpJsonData(response);
             this.checkResponseErr();
+            this.setClustrData();
             this.allocationTable();
             this.setErr('');
         }
@@ -117,12 +125,12 @@ class Cluster{
         this.update(document.getElementById('bookClusterBtn'));
     }
     setFirstBookClusterId(){
-        Cluster.bookClusterNod0.i=this.data['data']['value']['clusters'][0]['i'];
-        Cluster.bookClusterNod0.n=this.data['data']['value']['clusters'][0]['n'];
-        Cluster.bookClusterNod1.i=this.data['data']['value']['clusters'][0]['i'];
-        Cluster.bookClusterNod1.n=this.data['data']['value']['clusters'][0]['n'];
-        Cluster.bookClusterLab.i=this.data['data']['value']['labs'][0]['i'];
-        Cluster.bookClusterLab.n=this.data['data']['value']['labs'][0]['n'];
+        Cluster.bookClusterNod0.i=Cluster.data['data']['value']['clusters'][0]['i'];
+        Cluster.bookClusterNod0.n=Cluster.data['data']['value']['clusters'][0]['n'];
+        Cluster.bookClusterNod1.i=Cluster.data['data']['value']['clusters'][0]['i'];
+        Cluster.bookClusterNod1.n=Cluster.data['data']['value']['clusters'][0]['n'];
+        Cluster.bookClusterLab.i=Cluster.data['data']['value']['labs'][0]['i'];
+        Cluster.bookClusterLab.n=Cluster.data['data']['value']['labs'][0]['n'];
     }
     static createNodeListGroup(label,data){
         var opt=document.createElement('optgroup');
@@ -222,13 +230,15 @@ class Cluster{
                             n:data['n_old']
                         });
     }
-    setResponseData(response){
+    setPermissions(){
+        Cluster.permissions=Cluster.data['data']['value']['perm'];
+    }
+    setClustrData(){
         //console.log(response);
-        this.data=JSON.parse(response);
         //console.log(this.data);
-        Cluster.bookClusterNod0.d=this.data['data']['value']['clusters'];
-        Cluster.bookClusterNod1.d=this.data['data']['value']['clusters'];
-        Cluster.bookClusterLab.d=this.data['data']['value']['labs'];
+        Cluster.bookClusterNod0.d=Cluster.data['data']['value']['clusters'];
+        Cluster.bookClusterNod1.d=Cluster.data['data']['value']['clusters'];
+        Cluster.bookClusterLab.d=Cluster.data['data']['value']['labs'];
     }
     update(btn){
         console.log('CLUSTER::update');
@@ -238,15 +248,12 @@ class Cluster{
             Cluster.Ajax.getData('updateClustr&n0='+Cluster.bookClusterNod0.i+'&n1='+Cluster.bookClusterNod1.i+'&p='+Cluster.bookClusterLab.i);
         };
     }
-    setPermissions(perm){
-        this.permissions=perm;
-        //console.log(this.permissions);
-    }
     setErr(info){
         console.log('CLUSTER::setErr');
-        //console.log(info);
+        console.log(info);
         var errDiv=document.getElementById('bookClusterDivErr');
             errDiv.innerHTML=info;
+            //console.log(errDiv);
         if(info!==''){
                 errDiv.classList.remove("d-none");
         }
@@ -256,13 +263,14 @@ class Cluster{
         //console.log(errDiv);
     }
     checkResponseErr(){
-        if(this.data['status']===1){
-            throw this.data['info'];
+        console.log('CLUSTER::checkResponseErr');
+        console.log(Cluster.data);
+        if(Cluster.data['status']===1){
+            throw Cluster.data['info'];       
         }
     }
 }
 
 var Cl = new Cluster(new Ajax);
     Cl.setDefaultTask('getActClustrsUsage');
-    Cl.setPermissions(loggedUserPerm);
-    Cl.display();
+    Cl.loadData();

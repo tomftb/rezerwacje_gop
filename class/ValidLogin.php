@@ -86,14 +86,17 @@ class ValidLogin
         $this->logLink->log(0,"[".__METHOD__."]");
         /* GET FROM CONST */
         $ldap=new ldapAuth(ldapParm['host'],ldapParm['filter'],ldapParm['tree'],ldapParm['port'],ldapParm['user'],ldapParm['password']); 
-        $ldap->loginAd($this->userName,$this->userPassword);
-        if(!$ldap->getError()){
+        try{
+            $ldap->loginAd($this->userName,$this->userPassword);
             $_SESSION["mail"]=$ldap->getUserAdData('mail',0);
             $_SESSION["nazwiskoImie"]=$ldap->getUserAdData('name',0); 
-	}
-        else{
-            Throw New Exception($ldap->getError());
         }
+        catch(Throwable $t){
+            self::setError($t->getMessage(),$t->getCode());
+        }
+        finally {
+
+        }        
     }
     private function checkLogin(){
         $this->logLink->log(0,"[".__METHOD__."] ACCOUNT TYPE => ".$this->userData[0]['typ']);

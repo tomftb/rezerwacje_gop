@@ -1,5 +1,5 @@
 <?php if(!defined('APP_URL')){exit;}; ?>
-<header id="header" onload="setMenuActive()">
+<header id="header" onload="setMenuActive()" >
         <div class="row">
             <div class="col pr-0">
                 <div id="logo" class="float-right">
@@ -11,9 +11,9 @@
             <div class="col-sm-8 ml-0 ">
                 <nav id="nav-menu-container float-left">
                   <ul class="nav-menu" onclick="setMenuActive()">
-                       <li id="li-1"><i class="fa fa-server" aria-hidden="true"></i><a href="<?=APP_URL?>?id=1">Rezerwuj Klaster</a></li>
-                      <li id="li-3"><i class="fa fa-address-card-o" aria-hidden="true"></i><a href="<?=APP_URL?>?id=3">Projekty</a></li>
-                      <li id="li-4"><i class="fa fa-user-circle-o" aria-hidden="true"></i><a href="<?=APP_URL?>?id=4">Pracownicy</a></li>
+                    <li id="li-1"><i class="fa fa-server menu-active" aria-hidden="true"></i><a href="<?=APP_URL?>?id=1">Rezerwuj Klaster</a></li>
+                    <li id="li-3"><i class="fa fa-address-card-o" aria-hidden="true"></i><a href="<?=APP_URL?>?id=3">Projekty</a></li>
+                    <li id="li-4"><i class="fa fa-user-circle-o" aria-hidden="true"></i><a href="<?=APP_URL?>?id=4">Pracownicy</a></li>
                       <li id="li-5"><i class="fa fa-cog" aria-hidden="true"></i><a href="<?=APP_URL?>?id=5"> Administrator</a>
                           <ul  class="mt-0 ml-0 nav-menu" onclick="setMenuActive()">
                             <li id="li-6"><a href="<?=APP_URL?>?id=6">Użytkownicy</a></li>

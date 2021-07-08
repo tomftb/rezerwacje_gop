@@ -142,7 +142,7 @@ class ManagePermission
         // GET USERS WITH PERM
         $v['u']=$this->dbLink->squery('SELECT id, ImieNazwisko FROM `v_upr_i_uzyt_v3` WHERE idUprawnienie=:i',[':i'=>[$id,'INT']]);
         // GET ALL USERS
-        $v['a']=$this->dbLink->squery('SELECT ID as "id",CONCAT(Imie," ",Nazwisko) AS "ImieNazwisko" FROM `v_all_user` WHERE wskU=0 ORDER BY ID asc');
+        $v['a']=$this->dbLink->squery('SELECT ID as "id",CONCAT(Imie," ",Nazwisko) AS "ImieNazwisko" FROM `v_all_user` WHERE wskU=\'0\' ORDER BY ID asc');
         $this->utilities->jsonResponse(__METHOD__, $v,'uPermOff','POST');   
     }
     function __destruct(){}

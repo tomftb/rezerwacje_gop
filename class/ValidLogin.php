@@ -86,17 +86,9 @@ class ValidLogin
         $this->logLink->log(0,"[".__METHOD__."]");
         /* GET FROM CONST */
         $ldap=new ldapAuth(ldapParm['host'],ldapParm['filter'],ldapParm['tree'],ldapParm['port'],ldapParm['user'],ldapParm['password']); 
-        try{
-            $ldap->loginAd($this->userName,$this->userPassword);
-            $_SESSION["mail"]=$ldap->getUserAdData('mail',0);
-            $_SESSION["nazwiskoImie"]=$ldap->getUserAdData('name',0); 
-        }
-        catch(Throwable $t){
-            self::setError($t->getMessage(),$t->getCode());
-        }
-        finally {
-
-        }        
+        $ldap->loginAd($this->userName,$this->userPassword);
+        $_SESSION["mail"]=$ldap->getUserAdData('mail',0);
+        $_SESSION["nazwiskoImie"]=$ldap->getUserAdData('name',0);      
     }
     private function checkLogin(){
         $this->logLink->log(0,"[".__METHOD__."] ACCOUNT TYPE => ".$this->userData[0]['typ']);
@@ -174,10 +166,10 @@ class ValidLogin
         try{
             /* ROLE PERM */
             $this->userData['rolePerm']=$this->dbLink->squery("SELECT `SKROT` FROM v_upr_i_slo_rola_v2 WHERE `idRola`=:id_rola",$sqlData);
-            $this->logLink->logMulti(0,$this->userData['rolePerm'],__METHOD__."::ROLE PERM");
+            $this->logLink->logMulti(2,$this->userData['rolePerm'],__METHOD__."::ROLE PERM");
             /* USER PERM */
             $this->userData['userPerm']=$this->dbLink->squery("SELECT `SKROT` FROM `v_uzyt_i_upr_v2` WHERE `idUzytkownik`=:id",$sqlDataPerm);
-            $this->logLink->logMulti(0,$this->userData['userPerm'],__METHOD__."::USER PERM");
+            $this->logLink->logMulti(2,$this->userData['userPerm'],__METHOD__."::USER PERM");
             /* COMBINE PERM */
             self::combinePerm();
 	}

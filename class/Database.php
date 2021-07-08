@@ -15,17 +15,17 @@ class Database extends PDO{
 		'NULL'=>PDO::PARAM_NULL, 	// Represents the SQL NULL data type.
 		'INT'=>PDO::PARAM_INT,		// Represents the SQL INTEGER data type.
 		'STR'=>PDO::PARAM_STR,		// Represents the SQL CHAR, VARCHAR, or other string data type.
-		'STR_NATL'=>PDO::PARAM_STR_NATL, // Flag to denote a string uses the national character set. Available since PHP 7.2.0
-		'STR_CHAR'=>PDO::PARAM_STR_CHAR, // Flag to denote a string uses the regular character set. Available since PHP 7.2.0
+		//'STR_NATL'=>PDO::PARAM_STR_NATL, // Flag to denote a string uses the national character set. Available since PHP 7.2.0
+		//'STR_CHAR'=>PDO::PARAM_STR_CHAR, // Flag to denote a string uses the regular character set. Available since PHP 7.2.0
 		'LOB'=>PDO::PARAM_LOB,		// Represents the SQL large object data type.
 		'STMT'=>PDO::PARAM_STMT,	// Represents a recordset type. Not currently supported by any drivers.
 		'INPUT_OUTPUT'=>PDO::PARAM_INPUT_OUTPUT //  Specifies that the parameter is an INOUT parameter for a stored procedure. You must bitwise-OR this value with an explicit PDO::PARAM_* data type.
 	];
-    private function __construct($db){
+    public function __construct($db){
 		self::isPassCipher($db['pass'],$db['cipher']);
 		parent::__construct("mysql:host=".$db['host'].";dbname=".$db['db'].";port=".$db['port'].";encoding=utf8",$db['user'],$db['pass']);
-	}
-	protected static function init($dbParm){
+    }
+    protected static function init($dbParm){
 		if(!isset(self::$dbLink)){
 			/* INITIALISED NEW OBJECT */
 			self::$dbLink=new Database($dbParm);

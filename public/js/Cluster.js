@@ -108,9 +108,12 @@ class Cluster{
     }
     bookCluster(){
         console.log('CLUSTER::bookCluster');
-        Cluster.createList('bookClusterLab',this.data['data']['value']['labs']);
-        Cluster.createList('bookClusterNod0',this.data['data']['value']['clusters']);
-        Cluster.createList('bookClusterNod1',this.data['data']['value']['clusters']);
+        Cluster.rebuildDataObject(Cluster['bookClusterLab']);
+        Cluster.createList('bookClusterLab',Cluster['bookClusterLab'].d);
+        Cluster.rebuildDataObject(Cluster['bookClusterNod0']);
+        Cluster.createList('bookClusterNod0',Cluster['bookClusterNod0'].d);
+        Cluster.rebuildDataObject(Cluster['bookClusterNod1']);
+        Cluster.createList('bookClusterNod1',Cluster['bookClusterNod1'].d);
         this.update(document.getElementById('bookClusterBtn'));
     }
     setFirstBookClusterId(){
@@ -172,6 +175,7 @@ class Cluster{
         Cluster[ele.id]['n_old']=Cluster[ele.id]['n'];
         /* SET NEW VALUE */
         Cluster.getNewValue(ele);
+        Cluster.rebuildDataObject(Cluster[ele.id]);
         Cluster.clear(ele);
         /* REBUILD SELECT */
         Cluster.createList(ele.id,Cluster[ele.id]['d']);
@@ -185,12 +189,38 @@ class Cluster{
         //console.log( Cluster[ele.id]);
     }
     static getName(data,i){
+        console.log('CLUSTER::getName');
         for(const prop in data['d']){
             //console.log(data['d'][prop]);
             if(data['d'][prop]['i']=== i){
-               data['n']=data['d'][prop]['n'];
+                /* SET NEW NAME */
+                data['n']=data['d'][prop]['n']; 
             }
         }
+    }
+    static rebuildDataObject(data){
+        console.log('CLUSTER::rebuildDataObject');
+        console.log(data);
+        for(const prop in data['d']){
+            if(data['d'][prop]['i']=== data['i']){
+                console.log('FOUND TO REMOVE:');
+                console.log(data['d'][prop]);
+                data['d'].splice(prop,1);
+                break;
+            }
+        }
+        /* ADD OLD ON END */
+        console.log('ADD OLD VALUE:');
+        console.log("i:"+data['i_old']+"\nn:"+data['n_old']);
+        if(data['i_old']==='0'){
+            /* DO NOT ADD EMPTY ON END = FIRST ELE IS EMPTY */
+            return '';
+        }
+        data['d'].push(
+                        {
+                            i:data['i_old'],
+                            n:data['n_old']
+                        });
     }
     setResponseData(response){
         //console.log(response);

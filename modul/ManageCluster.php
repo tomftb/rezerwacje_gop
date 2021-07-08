@@ -10,12 +10,13 @@ class ManageCluster {
         $this->db= LoadDb::load();
         $this->Utilities=New Utilities();
     }
-    public function getActClustrsUsage(){
+    public function getModulClusterDefaultData(){
         
         /* MERGE */
         $v['labs']=self::getAllLabs();
         $v['clusters']=self::getAllClusters();
         $v['all']=self::mergeLabClusters($v['labs'],$v['clusters']);
+        $v['perm']=$_SESSION['perm'];
         $this->Utilities->jsonResponse(__METHOD__,$v,'','');
     }
     private function getAllClusters(){

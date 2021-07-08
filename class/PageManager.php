@@ -28,7 +28,7 @@ class PageManager
     }
     private function loadHead(){
         include (DR_PUBLIC.'/view/Main/Header.php');
-        include(DR_PUBLIC.'/view/infoHeader.php');
+        include(DR_PUBLIC.'/view/Main/PageLink.php');
     }
     private static function loadBody($idPage){
         switch ($idPage):

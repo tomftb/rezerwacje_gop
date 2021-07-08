@@ -2,7 +2,7 @@
 
 abstract class Page{
     private $Log;
-    private $mainPerm='LOG_INTO_PROJ';
+    private $mainPerm='LOG_INTO_APP';
     private $view=[];
     private $js=[];
     private $css=[];

@@ -3,7 +3,7 @@
 final class Projekty extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_PROJ';
-    private $view=['vProjekty.php'];
+    private $view=['/Main/AdaptedModal.html','vProjekty.php'];
     private $js=['projekty_raport.js','projekty.js','projekty_zespol.js'];
 
 	

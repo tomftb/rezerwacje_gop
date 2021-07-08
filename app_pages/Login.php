@@ -1,7 +1,7 @@
 <?php
 final class Login extends Page{
     private $Log;
-    private $mainPerm='LOG_INTO_UZYT';
+    private $mainPerm='LOG_INTO_APP';
     private $view=['vLogin.php'];
     private $js=[
                 'jquery-3.3.1.min.js',

@@ -21,14 +21,9 @@ class PageManager
     public static function load($idPage=0){
         self::$Log=Logger::init(__METHOD__);
         self::loadLoginPage();
-        self::loadHead();
         self::loadNoAccessPage($idPage);
         self::loadBody($idPage);
         self::loadFooter();
-    }
-    private function loadHead(){
-        include (DR_PUBLIC.'/view/Main/Header.php');
-        include(DR_PUBLIC.'/view/Main/PageLink.php');
     }
     private static function loadBody($idPage){
         switch ($idPage):
@@ -66,8 +61,7 @@ class PageManager
 	endswitch;
     }
     private function loadFooter(){
-         self::$Log->log(0,__METHOD__);
-        include (DR_PUBLIC.'/view/vBody.html');
+        self::$Log->log(0,__METHOD__);
         include (DR_PUBLIC.'/view/Main/Footer.php');
     }
     private function loadLoginPage(){

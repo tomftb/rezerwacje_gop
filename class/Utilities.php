@@ -347,7 +347,7 @@ class Utilities
          *
          */
         if(mb_strlen($tmp[1])!==2){
-            Throw New Exception ('WRONG DATE! LENGTH OF DATE CELL 1 != 2',0);
+            Throw New Exception ('WRONG DATE! LENGTH OF DATE CELL MONTH != 2',0);
         }
         
         $DayLength=strlen($tmp[0]);

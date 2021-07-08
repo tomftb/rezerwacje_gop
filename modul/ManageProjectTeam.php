@@ -62,8 +62,8 @@ final class ManageProjectTeam implements ManageProjectTeamCommand{
         $v['id']=$this->Utilities->getNumber($post['id']);
         $v['team']=self::getTeam($v['id']);
         $v['ava']=self::getAvaTeam($v['id']);  
-        $this->Log->logMulti(0,$v,__LINE__."::".__METHOD__."");
-        echo json_encode($this->Utilities->getResponse(__METHOD__,$v,'pTeam','POST'));  
+        $this->Log->logMulti(2,$v,__LINE__."::".__METHOD__."");
+        $this->Utilities->jsonResponse(__METHOD__,$v,'pTeam','POST');  
     }
     public function pTeam()
     {
@@ -78,7 +78,7 @@ final class ManageProjectTeam implements ManageProjectTeamCommand{
          * 
          */
         self::setTeam();
-        echo json_encode($this->Utilities->getResponse(__METHOD__,'','cModal','POST'));  
+        $this->Utilities->jsonResponse(__METHOD__,'','cModal','POST');  
     }
     public function getAvaTeam($idProject)
     {
@@ -176,10 +176,7 @@ final class ManageProjectTeam implements ManageProjectTeamCommand{
     private function checkDate($tmp,&$v)
     {
         if($tmp[0]==='ds' || $tmp[0]==='de'){
-            if($this->Utilities->setMysqlDate($v,'.')['status']!==0){
-                Throw New Exception('Nieprwidłowa data ('.$tmp[0].') w wierszu nr '.$tmp[1],0);
-            } 
-            $v=$this->Utilities->getData();
+            $v=$this->Utilities->getMysqlDate($v,'.');
         }
     }
     private function checkTeamMemberConsistency($teamMember)

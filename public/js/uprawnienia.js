@@ -193,7 +193,7 @@ function getAvaUser()
 }
 function createPermRow(ele,i,id,user)
 {
-    console.log('---createTeamRow()---\ni => '+i+' \nId => '+id+'\nImieNazwisko => '+user);
+    console.log('---createPermRow()---\ni => '+i+' \nId => '+id+'\nImieNazwisko => '+user);
 
     var divRow=createTag('','div','row');
     var divCol1=createTag('','div','col-11 pr-0');
@@ -201,12 +201,12 @@ function createPermRow(ele,i,id,user)
     var selectTeamWorker=createUsersArray(id,'user_'+i,user);
         selectTeamWorker.onclick=function()
         {
-            console.log('actual used team member');
+            console.log('actual used member');
             actTeamMember=parseInt(this.value,10);
         };
         selectTeamWorker.onchange=function()
         {
-            console.log('set new used team member');
+            console.log('set new used member');
             /* swap used team member */
             /* GET ROW i VALUE */
             console.log(this.name);
@@ -215,9 +215,6 @@ function createPermRow(ele,i,id,user)
             var tmp_member=correctAvaUsers(this.value,true);
             var tmpNode=this.parentNode;
             correctAvaUsers(actTeamMember,false);
-            /* REMOVE SET PERCENT SELECT */
-            removeHtmlChilds(this.parentNode.parentNode.childNodes[1]);
-            this.parentNode.parentNode.childNodes[1].appendChild(createSelectObject(createPercentArray(1,tmp_member.ava),'l','v','percent_'+tmp_name[1],'form-control ml-0 mr-0'));
             /* REMOVE SET WORKER SELECT */
             removeHtmlChilds(this.parentNode);
             tmpNode.appendChild(createUsersArray(this.value,'pers_'+tmp_name[1],tmp_member.ImieNazwisko));

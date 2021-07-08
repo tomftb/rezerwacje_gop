@@ -1,15 +1,15 @@
 <?php if(!defined('APP_URL')){exit;}; ?>
-<header id="header" style="border: 0px solid purple;">
+<header id="header" onload="setMenuActive()">
         <div class="row">
             <div class="col pr-0">
-                <div id="logo" class="pull-right" style="border: 0px solid orange;">
+                <div id="logo" class="float-right">
                   <h1>
                       <a href="<?=APP_URL?>?id=1" class="scrollto"><?=APP_NAME?></a>
                   </h1>
                 </div>
             </div>
-            <div class="col-sm-8 ml-0 " style="border:0px solid purple">
-                <nav id="nav-menu-container pull-left" style="border:0px solid black">
+            <div class="col-sm-8 ml-0 ">
+                <nav id="nav-menu-container float-left">
                   <ul class="nav-menu" onclick="setMenuActive()">
                        <li id="li-1"><i class="fa fa-server" aria-hidden="true"></i><a href="<?=APP_URL?>?id=1">Rezerwuj Klaster</a></li>
                       <li id="li-3"><i class="fa fa-address-card-o" aria-hidden="true"></i><a href="<?=APP_URL?>?id=3">Projekty</a></li>
@@ -29,4 +29,3 @@
             </div>
         </div>
 </header><!-- #header -->
-<SCRIPT type="text/javascript" src="<?=APP_URL?>/js/headerView.js?<?=uniqid()?>"></SCRIPT>

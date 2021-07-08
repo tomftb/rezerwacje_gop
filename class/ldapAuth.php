@@ -114,15 +114,15 @@ class ldapAuth{
                 if(@ldap_bind($ADLDAP_CON,$this->ADparm['AD_user'],$this->ADparm['AD_pass'])) //
                 {
                     $this->Log->log(1,"[".__METHOD__."] ldap_bind => ok");
-                    //$this->logMultidimensional(1,$this->ADparm['user'],__METHOD__." ADParm[user]",0);
-                    //$this->logMultidimensional(1,$this->ADparm['user'],__METHOD__." ADParm[filter]",0);
+                    //$this->Log->logMulti(1,$this->ADparm['user'],__METHOD__." ADParm[user]",0);
+                    //$this->Log->logMulti(1,$this->ADparm['user'],__METHOD__." ADParm[filter]",0);
                     $filter = str_replace('%u',$this->ADparm['user'],$this->ADparm['AD_filter']);
                     //$sr=ldap_search($ADLDAP_CON, $this->ADparm['AD_tree'], '(&(sAMAccountName=tborczynski)(objectcategory=person)(objectclass=user))');
                     $sr = @ldap_search($ADLDAP_CON, $this->ADparm['AD_tree'], $filter);
                     if(!$sr){
                         Throw New Exception ("[ERROR][ldap_search] Sprawdz parametr AD_tree i filtr.",1);
                     }
-                    $this->logMultidimensional(1,$sr,__METHOD__." sr",0);
+                    $this->Log->LogMulti(1,$sr,__METHOD__." sr");
                     //$this->logMultidimensional(1,$filter,__METHOD__." filter",0);
                     $result = @ldap_get_entries($ADLDAP_CON, $sr);
                     //var_dump($result);

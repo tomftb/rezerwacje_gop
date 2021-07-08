@@ -30,7 +30,7 @@ class Cluster{
     };
     
     constructor(Ajax) {
-        console.log('Cluster::constructor()');
+        //console.log('Cluster::constructor()');
         Cluster.Ajax=Ajax;
         console.log(Cluster.Ajax);
         Cluster.Ajax.setModul(this);
@@ -45,7 +45,7 @@ class Cluster{
     }
 
     runMain(response){
-        console.log('CLUSTER::runMain');
+        //console.log('CLUSTER::runMain');
         try{ 
             Cluster.setUpJsonData(response);
             this.checkResponseErr();
@@ -67,7 +67,7 @@ class Cluster{
         //console.log(Cluster.data);
     }
     allocationTable(){
-        console.log('CLUSTER::allocationTable');
+        //console.log('CLUSTER::allocationTable');
         
         var all=Cluster.data['data']['value']['all'];
             //console.log(all);
@@ -115,7 +115,7 @@ class Cluster{
         };
     }
     bookCluster(){
-        console.log('CLUSTER::bookCluster');
+        //console.log('CLUSTER::bookCluster');
         Cluster.rebuildDataObject(Cluster['bookClusterLab']);
         Cluster.createList('bookClusterLab',Cluster['bookClusterLab'].d);
         Cluster.rebuildDataObject(Cluster['bookClusterNod0']);
@@ -154,7 +154,7 @@ class Cluster{
         }
     }
     static createList(id,data){
-        console.log('CLUSTER::createList');
+        //console.log('CLUSTER::createList');
         var ele=document.getElementById(id);
         var first=Cluster[id];
         //console.log(first);
@@ -166,12 +166,12 @@ class Cluster{
     }
     static setOnChange(ele){
         ele.onchange = function(){
-            console.log('Cluster::setOnChange:run:onChange');
+            //console.log('Cluster::setOnChange:run:onChange');
             Cluster.updateList(this);
         };
     }
     static updateList(ele){
-        console.log('CLUSTER::updateList');
+        //console.log('CLUSTER::updateList');
         //console.log(ele.id);
         //console.log(ele.value);  
         /* CHECK I, IF THE SAME EXIT */
@@ -189,7 +189,7 @@ class Cluster{
         Cluster.createList(ele.id,Cluster[ele.id]['d']);
     }
     static getNewValue(ele){
-        console.log('CLUSTER::getNewValue');
+        //console.log('CLUSTER::getNewValue');
         Cluster[ele.id]['i']=ele.value;
         /* GET NAME FROM ARRAY */
         Cluster.getName(Cluster[ele.id],ele.value);
@@ -197,7 +197,7 @@ class Cluster{
         //console.log( Cluster[ele.id]);
     }
     static getName(data,i){
-        console.log('CLUSTER::getName');
+        //console.log('CLUSTER::getName');
         for(const prop in data['d']){
             //console.log(data['d'][prop]);
             if(data['d'][prop]['i']=== i){
@@ -207,19 +207,19 @@ class Cluster{
         }
     }
     static rebuildDataObject(data){
-        console.log('CLUSTER::rebuildDataObject');
-        console.log(data);
+        //console.log('CLUSTER::rebuildDataObject');
+        //console.log(data);
         for(const prop in data['d']){
             if(data['d'][prop]['i']=== data['i']){
-                console.log('FOUND TO REMOVE:');
-                console.log(data['d'][prop]);
+                //console.log('FOUND TO REMOVE:');
+                //console.log(data['d'][prop]);
                 data['d'].splice(prop,1);
                 break;
             }
         }
         /* ADD OLD ON END */
-        console.log('ADD OLD VALUE:');
-        console.log("i:"+data['i_old']+"\nn:"+data['n_old']);
+        //console.log('ADD OLD VALUE:');
+        //console.log("i:"+data['i_old']+"\nn:"+data['n_old']);
         if(data['i_old']==='0'){
             /* DO NOT ADD EMPTY ON END = FIRST ELE IS EMPTY */
             return '';
@@ -241,16 +241,16 @@ class Cluster{
         Cluster.bookClusterLab.d=Cluster.data['data']['value']['labs'];
     }
     update(btn){
-        console.log('CLUSTER::update');
+        //console.log('CLUSTER::update');
         btn.onclick = function (){
-            console.log('CLUSTER::update:click');
+            //console.log('CLUSTER::update:click');
             Cluster.Ajax.setModulTask('updateAllocationTable');
             Cluster.Ajax.getData('updateClustr&n0='+Cluster.bookClusterNod0.i+'&n1='+Cluster.bookClusterNod1.i+'&p='+Cluster.bookClusterLab.i);
         };
     }
     setErr(info){
-        console.log('CLUSTER::setErr');
-        console.log(info);
+        //console.log('CLUSTER::setErr');
+        //console.log(info);
         var errDiv=document.getElementById('bookClusterDivErr');
             errDiv.innerHTML=info;
             //console.log(errDiv);
@@ -263,8 +263,8 @@ class Cluster{
         //console.log(errDiv);
     }
     checkResponseErr(){
-        console.log('CLUSTER::checkResponseErr');
-        console.log(Cluster.data);
+        //console.log('CLUSTER::checkResponseErr');
+        //console.log(Cluster.data);
         if(Cluster.data['status']===1){
             throw Cluster.data['info'];       
         }

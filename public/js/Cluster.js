@@ -62,9 +62,9 @@ class Cluster{
        
     }
     static setUpJsonData(response){    
-        console.log(response);
+        //console.log(response);
         Cluster.data=JSON.parse(response);
-        console.log(Cluster.data);
+        //console.log(Cluster.data);
     }
     allocationTable(){
         console.log('CLUSTER::allocationTable');

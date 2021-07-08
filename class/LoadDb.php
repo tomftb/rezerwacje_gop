@@ -1,6 +1,6 @@
 <?php
 final class LoadDb extends Database{
-    private function __construct(){}
+    public function __construct(){}
 	public static function load($database=''){
 		$Log=Logger::init(__METHOD__);
 		try {

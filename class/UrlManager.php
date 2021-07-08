@@ -88,7 +88,7 @@ final class UrlManager{
         ['downloadProjectDoc','GEN_DOC_PROJ','user','file'],
         ['showProjectReportFile','GEN_PROJ_REP_DOC','user','file'],
         ['setProjectReport','SAVE_PROJ_REPORT','user','json'],
-        ['getActClustrsUsage','LOG_INTO_CLUSTR',''],
+        ['getModulClusterDefaultData','LOG_INTO_CLUSTR',''],
         ['updateClustr','EDIT_CLUSTR','']
     ];
         

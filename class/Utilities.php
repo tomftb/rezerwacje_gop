@@ -326,52 +326,49 @@ class Utilities
         }
         return '';
     }
-    public function setMysqlDate($date,$delimiter)
+    public function getMysqlDate($date,$delimiter)
     {
+        $this->Log->log(2,"[".__METHOD__."]");
         /* DEFAULT 0000-00-00 */
         $tmp=explode($delimiter,$date);
         $this->Log->logMulti(0,$tmp,__METHOD__);
-        $t='';
-        $h='';
-        if(count($tmp)!==3)
-        {
-            $this->setError(0,'WRONG DATE! COUNT != 3');
+        $Day='';
+        $DayLength=0;
+        $Year='';
+        $YearLength=0;
+        $c=count($tmp);
+        if($c!==3){
+            Throw New Exception('WRONG DATE! THERE SHOULD BE THREE CELLS ('.$c.')',0);
         }
-        if(mb_strlen($tmp[0])===mb_strlen($tmp[2]))
-        {
-            $this->setError(0,'WRONG DATE! LENGTH OF DATE[0] equal DATE[2]');
+        /*
+        if(mb_strlen($tmp[0])===mb_strlen($tmp[2])){
+            Throw New Exception('WRONG DATE! LENGTH OF DATE YEAR CELL EQUAL DATE DAY CELL',0);
         }
-        if(mb_strlen($tmp[1])!==2)
-        {
-            $this->setError(0,'WRONG DATE! LENGTH OF DATE[1] != 2');
+         *
+         */
+        if(mb_strlen($tmp[1])!==2){
+            Throw New Exception ('WRONG DATE! LENGTH OF DATE CELL 1 != 2',0);
         }
-        if(mb_strlen($tmp[0])==2)
-        {
-            $t=$tmp[0];
-        } 
-        else if(mb_strlen($tmp[0])===4)
-        {
-            $h=$tmp[0];
+        
+        $DayLength=strlen($tmp[0]);
+        $YearLength=strlen($tmp[2]);
+        
+        if($YearLength!==2 && $YearLength!==4){
+            Throw New Exception ('WRONG DATE! WRONG YEAR LENGTH ('.$YearLength.')',0);
         }
-        else
-        {
-            $this->setError(0,'WRONG DATE! LENGTH OF DATE[0] != 2 && != 4');
+        if($DayLength!==2 && $DayLength!==1 && $DayLength!==4){
+            Throw New Exception ('WRONG DATE! WRONG DAY LENGTH ('.$DayLength.')',0);
         }
-        if(mb_strlen($tmp[2])===2)
-        {
-            $t=$tmp[2];
-        } 
-        else if(mb_strlen($tmp[2])===4)
-        {
-            $h=$tmp[2];
+        $Day=$tmp[0];
+        $Year=$tmp[2];
+        if($DayLength===1){
+            $Day='0'.$Day;
         }
-        else
-        {
-            $this->setError(0,'WRONG DATE! LENGTH OF DATE[2] != 2 && != 4 OR DATE[0] THE SAME LENGTH');
+        if($YearLength===2){
+            $Year=substr(date('Y'),0,2).$Year;
         }
-        $this->Log->log(1,"[".__METHOD__."] DATE => ".$h.'-'.$tmp[1].'-'.$t);
-        $this->response['data']=$h.'-'.$tmp[1].'-'.$t;
-        return self::response();
+        $this->Log->log(1,"[".__METHOD__."] DATE => ".$Year.'-'.$tmp[1].'-'.$Day);
+        return ($Year.'-'.$tmp[1].'-'.$Day);
     }
     private function response()
     {

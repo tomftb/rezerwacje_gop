@@ -365,7 +365,8 @@ class Utilities
             $Day='0'.$Day;
         }
         if($YearLength===2){
-            $Year=substr(date('Y'),0,2).$Year;
+            //$Year=substr(date('Y'),0,2).$Year;
+            $Year='00'.$Year;
         }
         $this->Log->log(1,"[".__METHOD__."] DATE => ".$Year.'-'.$tmp[1].'-'.$Day);
         return ($Year.'-'.$tmp[1].'-'.$Day);

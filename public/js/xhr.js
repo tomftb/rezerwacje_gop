@@ -21,10 +21,12 @@ class Ajax
     }
     setModul(object){
         Ajax.runObject=object;
+        console.log('Ajax::setModul()');
         console.log(Ajax.runObject);
     }
     setModulTask(task){
         Ajax.runTask=task;
+        console.log('Ajax::setTask()');
         console.log(Ajax.runTask);
     }
     setUrl()

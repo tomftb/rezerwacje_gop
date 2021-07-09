@@ -40,7 +40,7 @@
                     </tr>
                     <tr height="40px;">
                         <td>&nbsp;</td>
-                        <td colspan="2" id="bookClusterInfo"></td>
+                        <td colspan="2" id="bookClusterInfo" class="bg-warning text-secondary rounded pl-3 d-none"></td>
                     </tr>
                     </table>
                 </div>

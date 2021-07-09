@@ -1,6 +1,7 @@
 var ajax = new Ajax();
 var error = new Error();
-    Error.set('errDiv-Adapted-overall');
+    //Error.set('errDiv-Adapted-overall');
+    
 var defaultTask='getUsersLike&u=0';
 var currentIdUser=0;
 var currentUserData={
@@ -53,7 +54,8 @@ function runFunction(d){
                 cUser(d);
                 break;
         case 'cModal':
-                cModal(defaultTask,d);
+                cModal('AdaptedModal');
+                reloadData();
                 break;
         case 'eUser':
                 eUser(d);
@@ -65,6 +67,9 @@ function runFunction(d){
         case 'uPermOff':
                 uPermOff(d);
                 break;
+        case 'runMain':
+                /* SET PERM */
+                loggedUserPerm=d['data']['value']['perm'];
         default:
                 setAllUsers(d);
             break;
@@ -75,6 +80,7 @@ function cUser(d)
     clearAdaptedModalData();
     console.log('---cUser()---');
     prepareModal('DODAJ UŻYTKOWNIKA:','bg-info');
+    Error.set('errDiv-Adapted-overall');
     setEmptyObject(currentUserData);
     userPermSlo=d['data']['value']['perm'];
     userRoleSlo=d['data']['value']['role'];
@@ -117,7 +123,7 @@ function setAllUsers(d)
 {
     console.log('---setAllUsers()---');
     if(Error.checkStatusResponse(d)) { return ''; };
-    var usersTab=d['data']['value'];
+    var usersTab=d['data']['value']['users'];
     // USER TABLE
     // usersTab
     var dataL=usersTab.length;
@@ -197,6 +203,7 @@ function clearAdaptedComponent()
     removeHtmlChilds(document.getElementById('AdaptedModalInfo'));
     document.getElementById('errDiv-Adapted-overall').innerText='';
     document.getElementById('errDiv-Adapted-overall').style.display='none';
+    
 }
 function setUserDeleteBodyContent(task,d,label)
 {
@@ -206,7 +213,8 @@ function setUserDeleteBodyContent(task,d,label)
     //document.getElementById('AdaptedButtonsBottom').appendChild(createBodyButtonContent(task));
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),''));
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(label,createBtn(label,'btn btn-danger','sendDataBtn'),task));
-    document.getElementById('AdaptedDynamicData').appendChild(form);
+    //document.getElementById('AdaptedDynamicData').appendChild(form);
+    console.log(document.getElementById('AdaptedDynamicData'));
 }
 function setUserPermBodyContent(task,status,label,btnCol)
 {
@@ -503,6 +511,7 @@ function functionBtn(f,btn,task)
     switch(f)
     {
         case 'uPermOff':
+                
                 btn.onclick = function() { 
                     removeHtmlChilds(document.getElementById('AdaptedDynamicData'));
                     removeHtmlChilds(document.getElementById('AdaptedButtonsBottom'));
@@ -510,6 +519,7 @@ function functionBtn(f,btn,task)
                 };
             break;
         case 'eUser':
+                
                 btn.onclick = function() { 
                     removeHtmlChilds(document.getElementById('AdaptedDynamicData'));
                     removeHtmlChilds(document.getElementById('AdaptedButtonsBottom'));
@@ -517,9 +527,14 @@ function functionBtn(f,btn,task)
                 };
             break
         case 'cancel':
-                btn.onclick = function() { closeModal('AdaptedModal'); };
+                btn.setAttribute('data-dismiss','modal');
+                btn.onclick = function() { 
+                    $('#AdaptedModal').modal('hide');
+                    reloadData();
+                };
             break;
         default:
+                
                 btn.onclick = function() { postData(this,task); };
             break;
     }
@@ -567,9 +582,14 @@ function findData(value)
 {
     ajax.getData(defaultTask+'&filter='+value);
 }
-
+function reloadData()
+{
+    console.log('---reloadData()---');
+    ajax.getData(defaultTask);
+}
 function loadData(){
     console.log('---loadData()---');
     //ajax.getData(defaultTask);
+    Error.set('overAllErr');
     ajax.getData('getModulUsersDefaults');
 }

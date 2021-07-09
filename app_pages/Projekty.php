@@ -3,10 +3,24 @@
 final class Projekty extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_PROJ';
-    private $view=['/Main/PageLink.php','/Main/AdaptedModal.html','vProjekty.php'];
-    private $js=['projekty_raport.js','projekty.js','projekty_zespol.js'];
-
-	
+    private $view=[
+        '/Main/PageLink.php',
+        '/Main/AdaptedModal.html',
+        'vProjekty.php'];
+    private $js=[
+        'bootstrap-datepicker.min.js',
+        'fontawesome.min.js',
+        'Main/Error.js',
+        'Main/createHtmlElement.js',
+        'Main/parseFieldValue.js',
+        'JSRESPONSE'=>'Main/response.js',
+        'JSXHR'=>'Main/xhr.js',
+        'Main/headerView.js',
+        'Main/Table.js',
+        'Page/projekty_raport.js',
+        'Page/projekty.js',
+        'Page/projekty_zespol.js'
+        ];
     public function __construct(){
         parent::__construct();	
         self::setPage();
@@ -20,5 +34,4 @@ final class Projekty extends Page{
         parent::setMainPerm($this->mainPerm);
     }
     public function __destruct(){}
-
 }

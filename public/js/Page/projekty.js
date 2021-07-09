@@ -1,7 +1,6 @@
 var ajax = new Ajax();
-var error = new Error();
-    Error.setDiv('errDiv-Adapted-overall');
-    Error.setModal('AdaptedModal');
+var MyError = new Error();
+    //MyError.setDiv('errDiv-Adapted-overall');
 var report = new Report();
 var table=new Table();
 var defaultTask='getprojectslike';
@@ -9,6 +8,7 @@ var fieldDisabled='y';
 var projectData=new Object();
 var actDay = getActDate();
 var actProject=new Object();
+var loggedUserPerm=new Array();
 /* 
  * TURN OFF 
  * setButtonDisplay(document.getElementById('pCreate'),'ADD_PROJ');
@@ -149,7 +149,7 @@ function runFunction(d)
     console.log('===runFunction()===');
     console.log(d);
     // RUN FUNCTION
-    if(Error.checkStatusExist(d['status'])) { return ''; };
+    if(MyError.checkStatusExist(d['status'])) { return ''; };
     projectData=d; 
     console.log(projectData);
     console.log('FUNCTION TO RUN:\n'+d['data']['function']);
@@ -357,7 +357,7 @@ function checkReason(t,id)
 function projectManage(btnLabel,title,titleClass)
 {
     console.log('===projectManage()===');
-    Error.checkStatusResponse(projectData);
+    MyError.checkStatusResponse(projectData);
     //console.log(projectData);
     /*
         * SLOWNIKI:
@@ -493,8 +493,8 @@ function createProjectRow(ele,pFields)
 function displayAll(d)
 {
     console.log('===displayAll()===');
-    if(Error.checkStatusResponse(d)) { return ''; };
-    console.log(Error.checkStatusResponse(d));
+    if(MyError.checkStatusResponse(d)) { return ''; };
+    console.log(MyError.checkStatusResponse(d));
     /* SETUP DEFAULT TABLE COLUMN */
     table.showTable(d);  
 }

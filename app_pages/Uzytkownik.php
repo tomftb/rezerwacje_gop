@@ -15,8 +15,8 @@ final class Uzytkownik extends Page{
         'fontawesome.min.js',
         'Main/createHtmlElement.js',
         'Main/parseFieldValue.js',
-        'Main/error.js',
-        'Main/response.js',
+        'Main/Error.js',
+        'Main/Response.js',
         'Main/xhr.js',
         'Page/uzytkownicy.js'
         ];

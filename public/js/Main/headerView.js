@@ -1,7 +1,5 @@
 var log=false;
 
-/* IT SHOULD BE AFTER PAGIN PAGE add listener ?? */
-
 function setMenuActive()
 {
     if(log) {console.log('setMenuActive()');};

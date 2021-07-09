@@ -460,20 +460,13 @@ function prepareModal(title,titleBg)
     document.getElementById("AdaptedBgTitle").classList.add(titleBg);
     //console.log(document.getElementById("AdaptedBgTitle"));
 }
-function cModal(task,d)
+function cModal(id)
 {
     console.log('cModal\nRESPONSE:');
-    console.log(task);
-    console.log(d);
-    console.log(document.getElementById('AdaptedModal'));
-    /*
-     * PARSE RESPONSE
-     * SET DIV ERROR
-    */ 
-    if(!Error.checkStatusResponse(d))
-    {
-        ajax.getData(task);
-    }
+    $('#'+id).modal('hide'); //or $('#modalId').modal('toggle');
+    $('body').removeClass('modal-open');
+    $('body').css('padding-right', '0px');
+    $('.modal-backdrop').remove();
 }
 function setButtonDisplay(element,perm)
 {
@@ -592,12 +585,6 @@ function createAddButton(id,disabled)
             //alert("Escape");
         }
     };
-
-function reloadData(task)
-{
-    console.log('---reloadData()---');
-    ajax.getData(task);
-}
 function checkNumber(elem)
 {
     console.log('---checkNumber()---');

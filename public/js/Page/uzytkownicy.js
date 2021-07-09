@@ -1,7 +1,6 @@
 var ajax = new Ajax();
 var error = new Error();
-    Error.setDiv('errDiv-Adapted-overall');
-    Error.setModal('AdaptedModal');
+    Error.set('errDiv-Adapted-overall');
 var defaultTask='getUsersLike&u=0';
 var currentIdUser=0;
 var currentUserData={
@@ -569,7 +568,8 @@ function findData(value)
     ajax.getData(defaultTask+'&filter='+value);
 }
 
-function getModulDefaults(){
-    console.log('---getModulDefaults()---');
+function loadData(){
+    console.log('---loadData()---');
     //ajax.getData(defaultTask);
+    ajax.getData('getModulUsersDefaults');
 }

@@ -1,10 +1,14 @@
 <?php if(!defined("APP_URL")){ die('Direct access not permitted');} ?>
-<body onload="getModulDefaults();">
+<body onload="loadData();">
 <div class="w-100 " style="margin-top:-55px;position:fixed;  z-index:996;">
+    <div class="row mb-1">
+            <div class="col-12 alert alert-danger mt-5" id="overAllErr">
+            </div>
+        </div>
     <div class="row">
         <div class="col-sm-4" >
             <div class="btn pull-left mt-0" > 
-                <button id='addNewUserButton' class="btn btn-info pull-left mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#AdaptedModal" onclick="create()">Dodaj użytkownika</button>
+                <button id='createData' class="btn btn-info pull-left mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#AdaptedModal" onclick="create()">Dodaj użytkownika</button>
             </div> 
         </div>
         <div class=" col-sm-4" >
@@ -22,28 +26,7 @@
         </div>
     </div>
 </div>
-<div class="w-100 position-static" style="margin-top:150px; " >
-    <div class="mr-3 ml-3">
-        <div>
-            <table class="table table-striped table-condensed">
-              <thead class="thead-dark">
-                <tr>
-                  <th scope="col">ID</th>
-                  <th scope="col">Imię</th>
-                  <th scope="col">Nazwisko</th>
-                  <th scope="col">Login</th>
-                  <th scope="col">Email</th>
-                  <th scope="col">Typ</th>
-                  <th scope="col">Rola</th>
-                  <th scope="col">Opcje</th>
-                </tr>
-              </thead>
-              <tbody id="allUsersData">
-              </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+
 <!-- END DETAIL TEMPLATE -->
 <!-- LEGEND -->
 <div class="modal fade mb-0 pb-0 col-sm-12" id="legendDiv">

@@ -872,7 +872,23 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
          //echo json_encode($this->modulData);
         /* OLD VERSION */
         //return ($this->response->setResponse(__METHOD__,$result,''));
-        echo (json_encode($this->response->setResponse(__METHOD__,$result,'')));
+        $this->utilities->jsonResponse(__METHOD__,$result,'');
+    }
+    private function getProjects(){
+        return($this->dbLink->squery('SELECT 
+                        `id` as "i",
+                        `numer_umowy` as "n",
+                        `klient` as "k",
+                        `temat_umowy` as "t",
+                        `typ` as "t2",
+                        `create_date` as "du",
+                        `nadzor` as "l",
+                        `kier_grupy` as "m",
+                        `term_realizacji` as "ds",
+                        `koniec_proj` as "dk",     
+                        (case when (`status` = "n") then "Nowy" when (`status` = "c") then "Zamknięty" when (`status` = "d") then "Usunięty" when (`status` = "m") then "W trakcie" else "Błąd" end) as "s"
+                 FROM `projekt_nowy` WHERE `wsk_u`=0 ORDER BY `id` desc'
+                ));
     }
     # GET PROJECT DETAILS
     public function pDetails()
@@ -1113,6 +1129,12 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
         $this->Log->log(0,"[".__METHOD__."]");
         $showFile=new showFile();
         $showFile->getFile(filter_input(INPUT_GET,"dir"),filter_input(INPUT_GET,"file"));
+    }
+    public function getModulProjectDefaults(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $v['perm']=$_SESSION['perm'];
+        $v['data']=self::getProjects();
+        $this->utilities->jsonResponse(__METHOD__,$v,'runMain','GET'); 
     }
     function __destruct(){}
 }

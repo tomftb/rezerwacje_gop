@@ -3,14 +3,13 @@
 final class Uzytkownik extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_UZYT';
-    private $view=['vUzytkownicy.php'];
+    private $view=['/Main/PageLink.php','vUzytkownicy.php'];
     private $js=['uzytkownicy.js'];
 
 	
     public function __construct(){
         parent::__construct();	
         self::setPage();
-		parent::loadMainJs();
         parent::load();
     }
     public function setPage(){

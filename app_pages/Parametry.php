@@ -3,14 +3,13 @@
 final class Parametry extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_PARM';
-    private $view=['vParametry.php'];
+    private $view=['/Main/PageLink.php','vParametry.php'];
     private $js=['parametry.js'];
 
 	
     public function __construct(){
         parent::__construct();	
         self::setPage();
-		parent::loadMainJs();
         parent::load();
     }
     public function setPage(){

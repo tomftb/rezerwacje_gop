@@ -31,9 +31,6 @@ abstract class Page{
         $this->uid=uniqid();	
         $this->Log=Logger::init();
     }
-    //public function loadMainJs(){
-     //   $this->loadJs($this->mainJs);
-    //}
     public function load(){
 	$this->Log->log(__METHOD__);
         $this->loadHead();

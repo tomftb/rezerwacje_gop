@@ -3,14 +3,13 @@
 final class Role extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_ROLE';
-    private $view=['vRole.php'];
+    private $view=['/Main/PageLink.php','vRole.php'];
     private $js=['role.js'];
 
 	
     public function __construct(){
         parent::__construct();	
         self::setPage();
-		parent::loadMainJs();
         parent::load();
     }
     public function setPage(){

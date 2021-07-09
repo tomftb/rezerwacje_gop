@@ -3,14 +3,13 @@
 final class Etapy extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_STAGE';
-    private $view=['vEtapy.php'];
+    private $view=['/Main/PageLink.php','vEtapy.php'];
     private $js=['projekty_etapy.js'];
 
 	
     public function __construct(){
         parent::__construct();	
         self::setPage();
-		parent::loadMainJs();
         parent::load();
     }
     public function setPage(){

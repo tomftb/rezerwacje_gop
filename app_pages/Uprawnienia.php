@@ -3,14 +3,13 @@
 final class Uprawnienia extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_UPR';
-    private $view=['vUprawnienia.php'];
+    private $view=['/Main/PageLink.php','vUprawnienia.php'];
     private $js=['uprawnienia.js'];
 
 	
     public function __construct(){
         parent::__construct();	
         self::setPage();
-		parent::loadMainJs();
         parent::load();
     }
     public function setPage(){

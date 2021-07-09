@@ -14,17 +14,11 @@
 class NoAccess extends Page{
     private $Log;
     private $perm='';
-    private $view=['vNoAccess.php','Main/Footer.php'];
+    private $view=['/Main/PageLink.php','vNoAccess.php','Main/Footer.php'];
     private $js=[];
-    private $css=[
-        'bootstrap.min.4.1.1.css',
-        'gt-admin.css'
-    ];
+    private $css=[];
 
-    private $meta=[
-                    'http-equiv="content-type" content="text/html; charset=UTF-8"',
-                    'name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"'
-            ];
+    private $meta=[];
     public function __construct($idPage=0,array $pagePerm){
         $this->Log=Logger::init();
         parent::__construct();

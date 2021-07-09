@@ -3,14 +3,13 @@
 final class Pracownicy extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_PRAC';
-    private $view=['vPracownicy.php'];
+    private $view=['/Main/PageLink.php','vPracownicy.php'];
     private $js=['pracownicy.js'];
 
 	
     public function __construct(){
         parent::__construct();	
         self::setPage();
-		parent::loadMainJs();
         parent::load();
     }
     public function setPage(){

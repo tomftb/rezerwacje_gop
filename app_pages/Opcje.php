@@ -3,7 +3,7 @@
 final class Opcje extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_OPCJ';
-    private $view=['vOpcje.php'];
+    private $view=['/Main/PageLink.php','vOpcje.php'];
     private $js=['opcje.js'];
 
 	

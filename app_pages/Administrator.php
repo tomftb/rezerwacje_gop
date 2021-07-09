@@ -3,7 +3,7 @@
 final class Administrator extends Page{
     private $Log;
     private $mainPerm='';
-    private $view=['vAdministrator.php'];
+    private $view=['/Main/PageLink.php','vAdministrator.php'];
     private $js=[];
 
 	

@@ -4,7 +4,7 @@ final class RezerwujKlaster extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_CLUSTR';
     private $view=['/Main/PageLink.php','vRezerwujKlaster.php'];
-    private $js=['JSRESPONSE'=>'Main/response.js','JSXHR'=>'xhr.js','Main/headerView.js','Page/Cluster.js'];//,
+    private $js=['JSRESPONSE'=>'Main/response.js','JSXHR'=>'Main/xhr.js','Main/headerView.js','Page/Cluster.js'];//,
     
     public function __construct(){
         parent::__construct();	

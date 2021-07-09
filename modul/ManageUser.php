@@ -349,7 +349,7 @@ class ManageUser
         $where='';
         $idWhere='';
         $query_data=array();
-        $result=[];
+        $result['users']=[];
         if(is_numeric($f)){
             $this->Log->log(0,"[".__METHOD__."] filter is numeric ");
             $f_int=intval($f,10);
@@ -365,13 +365,16 @@ class ManageUser
         $query_data[':wsk_u']=array($this->inpArray['u'],'STR');
         $query_data[':filtr']=array('%'.$f.'%','STR');
         try{
-            $result=$this->dbLink->squery($select.$where,$query_data);   
+            $result['users']=$this->dbLink->squery($select.$where,$query_data);   
 	}
 	catch (PDOException $e){
             Throw New Exception("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
 	}
         /* $this->dbLink->sth->fetchAll(PDO::FETCH_ASSOC) */
-        echo json_encode($this->utilities->getResponse(__METHOD__,$result,'','GET'));  
+        $this->utilities->jsonResponse(__METHOD__,$result,'','GET');  
+    }
+    private function getUsers(){
+        return $this->dbLink->squery("SELECT u.`id` as 'ID',u.`imie` as 'Imie',u.`nazwisko` as 'Nazwisko',u.`login` as 'Login',u.`email` as 'Email',a.`name` as 'TypKonta', (SELECT r.`NAZWA` FROM `slo_rola` as r WHERE  u.`id_rola`=r.`id` ) as `Rola` FROM `uzytkownik` u, `app_account_type` as a WHERE u.`typ`=a.`id`  AND u.`wsk_u`='0' ORDER BY u.Id");   
     }
     private function setGetWsk($wsk='u'){
         $this->inpArray[$wsk]=filter_input(INPUT_GET,$wsk);
@@ -501,6 +504,12 @@ class ManageUser
         $actData['accounttype']=$this->dbLink->squery("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`wsk_u`='0' ORDER BY a.`id`");
         array_push($actData['role'],array('ID'=>'0','NAZWA'=>'','DEFAULT'=>'t'));
         echo json_encode($this->utilities->getResponse(__METHOD__, $actData,'cUser','POST'));
+    }
+    public function getModulUsersDefaults(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $v['perm']=$_SESSION['perm'];
+        $v['users']=self::getUsers();
+        $this->utilities->jsonResponse(__METHOD__,$v,'runMain','GET');  
     }
     function __destruct(){}
 }

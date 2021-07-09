@@ -22,10 +22,9 @@ class PageManager
         self::$Log=Logger::init(__METHOD__);
         self::loadLoginPage();
         self::loadNoAccessPage($idPage);
-        self::loadBody($idPage);
-        self::loadFooter();
+        self::loadPage($idPage);
     }
-    private static function loadBody($idPage){
+    private static function loadPage($idPage){
         switch ($idPage):
                         default:  
                         case 1:
@@ -59,10 +58,6 @@ class PageManager
                                 New Etapy();
                             break;
 	endswitch;
-    }
-    private function loadFooter(){
-        self::$Log->log(0,__METHOD__);
-        include (DR_PUBLIC.'/view/Main/Footer.php');
     }
     private function loadLoginPage(){
         self::$Log->log(0,__METHOD__);

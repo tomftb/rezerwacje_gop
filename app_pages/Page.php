@@ -14,6 +14,7 @@ abstract class Page{
         'gt-admin.css',
         'bootstrap.min.4.5.3.css',
         'header.css',
+        'font-awesome.min.4.7.0.css',
     ];
     private $meta=[];
     private $uid='';

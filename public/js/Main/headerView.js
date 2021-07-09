@@ -1,4 +1,4 @@
-var log=true;
+var log=false;
 
 /* IT SHOULD BE AFTER PAGIN PAGE add listener ?? */
 
@@ -91,3 +91,9 @@ function removeAttribute(ele,atr)
         if(log) {console.log("NO "+atr+" attribute");};
     }
 }
+//window.onload = function() {
+ //   setMenuActive();
+//};
+document.addEventListener('DOMContentLoaded', function() {
+    setMenuActive();
+}, false);

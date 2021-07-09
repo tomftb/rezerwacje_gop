@@ -1,6 +1,6 @@
 <?php if(!defined('APP_URL')){exit;}; ?>
-<header id="header" onload="setMenuActive()" >
-        <div class="row">
+<header id="header">
+        <div class="row" >
             <div class="col pr-0">
                 <div id="logo" class="float-right">
                   <h1>

@@ -42,6 +42,7 @@ class Cluster{
     loadData(){
         Cluster.Ajax.setModulTask('runMain');
         Cluster.Ajax.getData('getModulClusterDefaultData');
+        
     }
 
     runMain(response){
@@ -149,8 +150,8 @@ class Cluster{
                 option.appendChild(document.createTextNode(data[prop]['n']));
                 ele.appendChild(option);
                 //option.setAttribute('value');
-            //console.log(data[prop]['i']);
-            //console.log(data[prop]['n']);
+                //console.log(data[prop]['i']);
+                //console.log(data[prop]['n']);
         }
     }
     static createList(id,data){
@@ -232,6 +233,25 @@ class Cluster{
     }
     setPermissions(){
         Cluster.permissions=Cluster.data['data']['value']['perm'];
+        this.setBlock(Cluster.data['data']['value']['perm'],'EDIT_CLUSTR');
+        
+    }
+    setBlock(permissions,permToCheck){
+        if(permissions.indexOf(permToCheck)!==-1){ return true;};
+        var ele=[
+            'bookClusterBtn','bookClusterNod0','bookClusterNod1','bookClusterLab'
+        ];
+        for (const prop in ele){
+            console.log(ele[prop]);
+            let e = document.getElementById(ele[prop]);
+                e.setAttribute('disabled','disabled');
+                e.classList.add('disabled');
+                e.classList.add('border');
+                e.classList.add('border-light');
+        };
+        var i = document.getElementById('bookClusterInfo');
+            i.innerText='['+permToCheck+'] NO PERMISSION';
+            i.classList.remove('d-none');
     }
     setClustrData(){
         //console.log(response);

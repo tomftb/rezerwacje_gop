@@ -3,8 +3,23 @@
 final class Uzytkownik extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_UZYT';
-    private $view=['/Main/PageLink.php','vUzytkownicy.php'];
-    private $js=['uzytkownicy.js'];
+    private $view=[
+        '/Main/PageLink.php',
+        '/Main/AdaptedModal.html',
+        'vUzytkownicy.php'];
+    private $js=[
+        'jquery-3.3.1.min.js',
+        'popper.min.js',
+        'bootstrap-4.5.3.min.js',
+        'bootstrap-datepicker.min.js',
+        'fontawesome.min.js',
+        'Main/createHtmlElement.js',
+        'Main/parseFieldValue.js',
+        'Main/error.js',
+        'Main/response.js',
+        'Main/xhr.js',
+        'Page/uzytkownicy.js'
+        ];
 
 	
     public function __construct(){

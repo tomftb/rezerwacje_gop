@@ -2,7 +2,7 @@ var ajax = new Ajax();
 var error = new Error();
     Error.setDiv('errDiv-Adapted-overall');
     Error.setModal('AdaptedModal');
-    var defaultTask='getUsersLike&u=0';
+var defaultTask='getUsersLike&u=0';
 var currentIdUser=0;
 var currentUserData={
         'ID':'',
@@ -18,7 +18,7 @@ var errInputValue= new Array();
 var userPermSlo=new Array();
 var userRoleSlo= new Array();
 var typKonta=new Array();
-
+var loggedUserPerm=new Array();
 var userFields=new Array(
         new Array('hidden','','ID'),
         new Array('t','Imię:','Imie'),
@@ -568,4 +568,8 @@ function findData(value)
 {
     ajax.getData(defaultTask+'&filter='+value);
 }
-ajax.getData(defaultTask);
+
+function getModulDefaults(){
+    console.log('---getModulDefaults()---');
+    //ajax.getData(defaultTask);
+}

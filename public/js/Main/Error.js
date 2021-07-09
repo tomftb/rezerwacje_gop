@@ -143,17 +143,17 @@ class Error
     static show = function (value)
     {
         console.log('Error::show()');
-        console.log(Error.div);
+        //console.log(Error.div);
         Error.div.innerHTML=value;
-        Error.classList.remove("d-none");
-        Error.classList.add("d-block");
+        Error.div.classList.remove("d-none");
+        Error.div.classList.add("d-block");
     }
     static clear = function ()
     {
         console.log('Error::clear()');
         Error.div.innerText='';
-        Error.classList.add("d-none");
-        Error.classList.remove("d-block");
+        Error.div.classList.add("d-none");
+        Error.div.classList.remove("d-block");
     }
 }
 

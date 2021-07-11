@@ -197,7 +197,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
     }
     public function getProjectDefaultValues(){
         $this->Log->log(0,"[".__METHOD__."]");
-        echo json_encode($this->utilities->getResponse(__METHOD__, parent::getProjectDefaultValues(),'pCreate','POST'));
+        $this->utilities->jsonResponse(parent::getProjectDefaultValues(),'pCreate');
     }
     private function getIdDataPost(&$v)
     {
@@ -257,7 +257,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
                         "Zgłoszenie na utworzenie Projektu :: ".$this->inpArray['klient'].', '.$this->inpArray['temat_umowy'].', '.$this->inpArray['typ_umowy'][1],
                         'Zarejestrowano zgłoszenie na utworzenie nowego projektu o specyfikacji:',
                                 $this->inpArray);
-        echo json_encode(($this->utilities->getResponse(__METHOD__,'','cModal','POST')));
+        $this->utilities->jsonResponse('','cModal');
     }
     private function setupInputValue($field='')
     {
@@ -302,7 +302,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
                                 $this->infoArray['err_mail'][1],
                                 true
         );
-        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST'); 
+        $this->utilities->jsonResponse('','cModal','POST'); 
     }
     private function getProjectDoc()
     {
@@ -490,7 +490,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
                         'Zarejestrowano zgłoszenie na aktualizację projektu o specyfikacji:',
                         $this->lastProjectData);
              
-        echo json_encode($this->utilities->getResponse(__METHOD__,'','cModal','POST'));
+        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
     }
     private function projectExist($field='',$id=0){
         $this->Log->log(0,"[".__METHOD__."] ".$field." => ".$this->inpArray[$field]);  
@@ -537,7 +537,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
         $v['id']= $this->idProject;
         $v['project']=self::getProjectData( $this->idProject);
         $v['dokPowiazane']=$this->dbLink->squery('SELECT ID,NAZWA as "Nazwa" FROM v_proj_dok WHERE ID_PROJEKT=:id ORDER BY id ASC',$sql);
-        echo json_encode($this->response->setResponse(__METHOD__,$v,'pDoc','POST'));      
+        $this->utilities->jsonResponse($v,'pDoc');      
     }
 
     private function setProjectDiff()
@@ -854,7 +854,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
         $sql=[
             ':f'=>[$f,'STR']
         ];
-        $result=$this->dbLink->squery('SELECT 
+        $result['data']=$this->dbLink->squery('SELECT 
                         `id` as "i",
                         `numer_umowy` as "n",
                         `klient` as "k",
@@ -872,7 +872,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
          //echo json_encode($this->modulData);
         /* OLD VERSION */
         //return ($this->response->setResponse(__METHOD__,$result,''));
-        $this->utilities->jsonResponse(__METHOD__,$result,'');
+        $this->utilities->jsonResponse($result,'');
     }
     private function getProjects(){
         return($this->dbLink->squery('SELECT 
@@ -1134,7 +1134,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
         $this->Log->log(0,"[".__METHOD__."]");
         $v['perm']=$_SESSION['perm'];
         $v['data']=self::getProjects();
-        $this->utilities->jsonResponse(__METHOD__,$v,'runMain','GET'); 
+        $this->utilities->jsonResponse($v,'runMain'); 
     }
     function __destruct(){}
 }

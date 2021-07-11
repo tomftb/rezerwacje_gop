@@ -144,16 +144,20 @@ table.setButtonsType('dropdown');
 
 function runFunction(d)
 {
+   
     /* d => array response */
     /* TO DO document.getElementById('AdaptedModalDialog'); */
     console.log('===runFunction()===');
-    console.log(d);
-    // RUN FUNCTION
-    if(MyError.checkStatusExist(d['status'])) { return ''; };
-    projectData=d; 
-    console.log(projectData);
-    console.log('FUNCTION TO RUN:\n'+d['data']['function']);
-    switch(d['data']['function'])
+    //console.log(d);
+    try{
+        var dJson=JSON.parse(d);
+        //console.log(dJson);
+        // RUN FUNCTION
+        if(MyError.checkStatusExist(dJson['status'])) { return ''; };
+        projectData=dJson; 
+        console.log(projectData);
+        console.log('FUNCTION TO RUN:\n'+dJson['data']['function']);
+    switch(dJson['data']['function'])
     {
         case 'pCreate':
                 fieldDisabled='n';
@@ -161,29 +165,20 @@ function runFunction(d)
             break;
         case 'pDetails':
                 //pDetails(d,'Edytuj');
-                actProject=d['data']['value']['project'];
+                actProject=dJson['data']['value']['project'];
                 fieldDisabled='y';
                 /* INFO */
                 document.getElementById('AdaptedModalInfo').appendChild(createTag("Project ID: "+actProject.i+", Create user: "+actProject.cu+" ("+actProject.cum+"), Create date: "+actProject.du,'small','text-left text-secondary ml-1'));
                 projectManage('Edytuj','SZCZEGÓŁY PROJEKTU:','info');
             break;
-        case 'pEdit':
-                fieldDisabled='n';
-                clearAdaptedModalData();
-                projectManage('Zatwierdź','EDYCJA PROJEKTU:','warning');
-            break;
         case 'pDoc':
-                actProject=d['data']['value']['project'];
+                actProject=dJson['data']['value']['project'];
                 fieldDisabled='y';
                 projectDocManage('Edytuj','DOKUMENTY PROJEKTU:','info');
                 break;
-        case 'pDocEdit':
-                fieldDisabled='n';
-                clearAdaptedModalData();
-                projectDocManage('Edytuj','EDYCJA DOKUMENTÓW PROJEKTU:','info');
-            break;
         case 'cModal':
-                cModal('getprojectslike',d);
+                cModal('AdaptedModal');
+                reloadData();
             break;
         case 'pEmail':
                 pEmail();
@@ -197,12 +192,12 @@ function runFunction(d)
         case 'downloadProjectPdf':
         case 'downloadProjectDoc':
         case 'downloadReportDoc':
-                console.log(d['data']['value']);
-                var win = window.open('router.php?task='+d['data']['function']+'&file='+d['data']['value'], '_blank');
+                console.log(dJson['data']['value']);
+                var win = window.open('router.php?task='+dJson['data']['function']+'&file='+dJson['data']['value'], '_blank');
                 win.focus();
             break;
         case 'pTeamOff':
-                actProject=d['data']['value']['project'];
+                actProject=dJson['data']['value']['project'];
                 pTeam(false);
                 break;
         case 'pTeam':
@@ -211,17 +206,26 @@ function runFunction(d)
                 pTeam(true);
                 break;
         case 'showStagePreview':
-                console.log(d);
-                report.showPreview(d['data']['value']);
+                console.log(dJson);
+                report.showPreview(dJson['data']['value']);
                 break;
         case 'pReportOff':
                 //pReport();
-                report.setData(d,loggedUserPerm);
+                report.setData(dJson,loggedUserPerm);
                 report.create();
                 break;
+        case 'runMain':
+            loggedUserPerm=dJson['data']['value']['perm'];
+            setButtonDisplay(document.getElementById('createData'),'ADD_PROJ');
         default:
-                displayAll(d);
+                
+                displayAll(dJson);
             break;
+    }
+    }
+    catch(e){
+        //this.setErr(e);
+        console.log(e);
     }
 }
 
@@ -357,7 +361,7 @@ function checkReason(t,id)
 function projectManage(btnLabel,title,titleClass)
 {
     console.log('===projectManage()===');
-    MyError.checkStatusResponse(projectData);
+    //MyError.checkStatusResponse(projectData);
     //console.log(projectData);
     /*
         * SLOWNIKI:
@@ -373,6 +377,7 @@ function projectManage(btnLabel,title,titleClass)
         * data[] = PARAMETRY
     */
     prepareModal(title,'bg-'+titleClass);
+    MyError.set('errDiv-Adapted-overall');
     var form=createForm('POST',projectData['data']['function'],'form-horizontal','OFF');
     var add=document.getElementById('AdaptedDynamicData'); 
     pCreateFields(form);
@@ -496,12 +501,12 @@ function displayAll(d)
     if(MyError.checkStatusResponse(d)) { return ''; };
     console.log(MyError.checkStatusResponse(d));
     /* SETUP DEFAULT TABLE COLUMN */
-    table.showTable(d);  
+    table.showTable(d['data']['value']['data']);  
 }
 
 function createProjectInput(type,value,label)
 {
-    console.log('===createProjectInput()===');
+    //console.log('===createProjectInput()===');
     var divAll=document.createElement('div');
     var divErr=createTag('','div','col-auto alert alert-danger mb-1');
         divErr.setAttribute('id','errDiv-'+label);
@@ -514,7 +519,7 @@ function createProjectInput(type,value,label)
         };
     divAll.appendChild(inp);
     divAll.appendChild(divErr);
-    console.log(divAll);
+    //console.log(divAll);
     return divAll;
 }
 function createQuota(q)
@@ -547,7 +552,7 @@ function createBaseFileInput(j_dane,r_dane)
     divA.appendChild(select);
     divG.appendChild(input);
     divG.appendChild(divA);
-    console.log(divG);
+    //console.log(divG);
     return (divG);
 }
 function createDocList(data)
@@ -555,7 +560,7 @@ function createDocList(data)
     /*
      * data => doc list
      */
-    console.log(data);
+    //console.log(data);
     var divAll=createTag('','div','col-auto');
     var divBtn=createTag('','div','row');
     var divInput=document.createElement('div'); 
@@ -619,8 +624,9 @@ function functionBtn(f,btn,task)
                     projectData['data']['function']='pEdit';
                     projectData['data']['task']='pEdit';
                     projectData['status']=0;
-                    projectData['type']='GET';
-                    runFunction(projectData);
+                    fieldDisabled='n';
+                    clearAdaptedModalData();
+                    projectManage('Zatwierdź','EDYCJA PROJEKTU:','warning');   
                 };
                 break;
         case 'cancel':
@@ -636,8 +642,9 @@ function functionBtn(f,btn,task)
                     projectData['data']['function']='pDocEdit';
                     projectData['data']['task']='pDocEdit';
                     projectData['status']=0;
-                    projectData['type']='GET';
-                    runFunction(projectData);
+                    fieldDisabled='n';
+                    clearAdaptedModalData();
+                    projectDocManage('Edytuj','EDYCJA DOKUMENTÓW PROJEKTU:','info');
                 };
             break;
              
@@ -649,7 +656,12 @@ function functionBtn(f,btn,task)
         case 'pDocEdit':
         case 'pEdit':
         case 'pCreate':
-            btn.onclick = function() { postData(this,task); };
+            btn.onclick = function() { 
+                console.log('onClick');
+                console.log(this); 
+                console.log(task); 
+                postData(this,task);
+            };
             break;
         default:
                 
@@ -711,10 +723,13 @@ function setButtonAvaliable()
 function search(value){
     ajax.getData(defaultTask+'&filter='+value);
 }
-function setBtnPerm(){
-    console.log('setBtnPerm()');
-    setButtonDisplay(document.getElementById('pCreate'),'ADD_PROJ');
+function loadData(){
+    console.log('---loadData()---');
+    console.log(MyError);
+    MyError.set('overAllErr');
+    ajax.getData('getModulProjectDefaults');
 }
-
-ajax.getData(defaultTask);
-//document.getElementById('closeModal').onclick = function(){ reloadData(defaultTask); };
+function reloadData(){
+    ajax.getData(defaultTask);
+}
+loadData();

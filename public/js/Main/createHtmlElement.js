@@ -464,9 +464,9 @@ function cModal(id)
 {
     console.log('cModal\nRESPONSE:');
     $('#'+id).modal('hide'); //or $('#modalId').modal('toggle');
-    $('body').removeClass('modal-open');
-    $('body').css('padding-right', '0px');
-    $('.modal-backdrop').remove();
+    //$('body').removeClass('modal-open');
+    //$('body').css('padding-right', '0px');
+    //$('.modal-backdrop').remove();
 }
 function setButtonDisplay(element,perm)
 {

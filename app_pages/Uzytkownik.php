@@ -4,9 +4,11 @@ final class Uzytkownik extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_UZYT';
     private $view=[
-        '/Main/PageLink.php',
-        '/Main/AdaptedModal.html',
-        'vUzytkownicy.php'];
+        'Main/PageLink.php',
+        'vUzytkownicy.php',
+        'Main/AdaptedModal.html',
+        'Main/Footer.php'
+        ];
     private $js=[
         'jquery-3.3.1.min.js',
         'popper.min.js',
@@ -16,8 +18,7 @@ final class Uzytkownik extends Page{
         'Main/createHtmlElement.js',
         'Main/parseFieldValue.js',
         'Main/Error.js',
-        'Main/Response.js',
-        'Main/xhr.js',
+        'Main/Ajax.js',
         'Page/uzytkownicy.js'
         ];
 

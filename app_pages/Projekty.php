@@ -4,17 +4,19 @@ final class Projekty extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_PROJ';
     private $view=[
-        '/Main/PageLink.php',
-        '/Main/AdaptedModal.html',
-        'vProjekty.php'];
+        'Main/PageLink.php',
+        'vProjekty.php',
+        'Main/Table.html',
+        'Main/AdaptedModal.html',
+        'Main/Footer.php'
+        ];
     private $js=[
         'bootstrap-datepicker.min.js',
         'fontawesome.min.js',
         'Main/Error.js',
         'Main/createHtmlElement.js',
         'Main/parseFieldValue.js',
-        'JSRESPONSE'=>'Main/response.js',
-        'JSXHR'=>'Main/xhr.js',
+        'JSXHR'=>'Main/Ajax.js',
         'Main/headerView.js',
         'Main/Table.js',
         'Page/projekty_raport.js',

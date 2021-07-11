@@ -90,7 +90,8 @@ final class UrlManager{
         ['setProjectReport','SAVE_PROJ_REPORT','user','json'],
         ['getModulClusterDefaultData','LOG_INTO_CLUSTR',''],
         ['updateClustr','EDIT_CLUSTR',''],
-        ['getModulUsersDefaults','LOG_INTO_UZYT','']
+        ['getModulUsersDefaults','LOG_INTO_UZYT',''],
+        ['getModulProjectDefaults','LOG_INTO_PROJ','']
     ];
         
     public function __construct(){

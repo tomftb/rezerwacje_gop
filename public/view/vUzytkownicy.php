@@ -1,7 +1,6 @@
 <?php if(!defined("APP_URL")){ die('Direct access not permitted');} ?>
 
-<div class="w-100" style="margin-top:-55px; position:fixed;  z-index:996;">
-    
+<div class="w-100" style="margin-top:-55px; position:fixed;  z-index:996; border:1px solid green;"> 
     <div class="row">
         <div class="col-4" >
             <div class="btn pull-left mt-0" > 
@@ -11,29 +10,27 @@
         <div class="col-4" >
             <h2 class="text-center mb-3 mt-1 text-info">Użytkownicy :</h2>
         </div>
-        <div class="col-4 " >
-            <div class="row float-right mr-4">
-                <div class="col-4 pr-0 mr-0">
-                    <h5 class="mt-2 text-secondary" >Szukaj : </h5>
+        <div class="col-4" style="border:0px solid pink;">
+            <div class="row float-right w-100 mr-0" style="border:0px solid purple;">
+                <div class="col-4 pr-0" style="border:0px solid black;">
+                    <h5 class="mt-3 text-secondary text-right"style="border:0px solid black;" >Szukaj :</h5>
                 </div>
-                <div class="col-8 pl-0 ml-0 pr-0 mr-0">
-                    <input class="ml-1 form-control mt-1" onchange="findData(this.value)"/>
+                <div class="col-8 pl-0" style="border:0px solid red;">
+                    <input class="ml-1 form-control mt-2"  onchange="findData(this.value)"/>
                 </div>
             </div>
         </div>
     </div>
-
 </div>
-<div class="w-100" style="margin-top:155px;">
-    <div class="row mb-1">
-        <div class="col-12 alert alert-danger  d-none mb-0" id="overAllErr">
+<div class=" w-100" style="margin-top:170px; border:1px solid red;">
+    <div class="row mb-1 w-100 mr-0 ml-0">
+        <div class="col-12 alert alert-danger  d-none mb-0 w-100 " id="overAllErr">
         </div>
     </div>
-    <div class="row">
-        <div class="col-12 mr-3 ml-3">
-            <div>
-                <table class="table table-striped table-condensed">
-                  <thead class="thead-dark">
+    <div class="row w-100 mr-0 ml-0">
+        <div class="col-12 pr-0 pl-0">
+                <table class="table table-striped table-condensed ">
+                  <thead class="thead-dark ">
                     <tr>
                       <th scope="col">ID</th>
                       <th scope="col">Imię</th>
@@ -48,7 +45,6 @@
                   <tbody id="allUsersData">
                   </tbody>
                 </table>
-            </div>
         </div>
     </div>
 </div>
@@ -72,5 +68,3 @@
             </ul>
 </div>    
 <!-- END LEGEND -->
-<div id="div-inputPdf7a" style="display:block;margin-bottom:50px;">
-</div>

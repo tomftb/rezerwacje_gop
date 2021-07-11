@@ -55,11 +55,12 @@ class Ajax
     }
     checkType(formName)
     {
-        //console.log('AJAX::checkType()\n'+formName);
-        //console.log(typeof(formName));
+        console.log('AJAX::checkType()\n'+formName);
+        console.log(typeof(formName));
         if(typeof(formName)==='string')
         {
             this.form=document.getElementById(formName);
+            console.log(this.form);
             this.formName=formName;
         }
         else if(typeof(formName)==='object')
@@ -127,8 +128,6 @@ class Ajax
     xhrLoad()
     {
         //console.log('AJAX::xhrLoad()'); 
-        var r= new Response();
-            r.setFunctionToRun();
         switch(this.status)
         {
             case 200:
@@ -140,7 +139,7 @@ class Ajax
                         Ajax.runObject[Ajax.runTask](this.response);
                     }
                     else{
-                        r.runTask(this.response);
+                        runFunction(this.response);
                     }
                     break;
             default:

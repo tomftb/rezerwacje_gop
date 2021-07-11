@@ -45,42 +45,52 @@ var inputAttribute= new Array(
 var inputStyle=new Array();
 function runFunction(d){
     console.log('===runFunction()===');
-    console.log(d);
-    if(Error.checkStatusExist(d['status'])) { return ''; };
-    console.log('FUNCTION TO RUN:\n'+d['data']['function']);
-    switch(d['data']['function'])
-    {
-        case 'cUser':
-                cUser(d);
+    try{
+        d=JSON.parse(d);
+        console.log(d);
+        console.log(error);
+        if(error.checkStatusExist(d['status'])) { return ''; };
+        console.log('FUNCTION TO RUN:');
+        console.log(d['data']['function']);
+        switch(d['data']['function'])
+        {
+            case 'cUser':
+                    cUser(d);
+                    break;
+            case 'cModal':
+                    cModal('AdaptedModal');
+                    reloadData();
+                    break;
+            case 'eUser':
+                    eUser(d);
+                    break;
                 break;
-        case 'cModal':
-                cModal('AdaptedModal');
-                reloadData();
+            case 'dUser':
+                    dUser(d);
+                    break;
+            case 'uPermOff':
+                    uPermOff(d);
+                    break;
+            case 'runMain':
+                    /* SET PERM */
+                    loggedUserPerm=d['data']['value']['perm'];
+            default:
+                    setAllUsers(d);
                 break;
-        case 'eUser':
-                eUser(d);
-                break;
-            break;
-        case 'dUser':
-                dUser(d);
-                break;
-        case 'uPermOff':
-                uPermOff(d);
-                break;
-        case 'runMain':
-                /* SET PERM */
-                loggedUserPerm=d['data']['value']['perm'];
-        default:
-                setAllUsers(d);
-            break;
+        }
     }
+    catch(e){
+        //this.setErr(e);
+        console.log(e);
+    }
+   
 }
 function cUser(d)
 {
     clearAdaptedModalData();
     console.log('---cUser()---');
     prepareModal('DODAJ UŻYTKOWNIKA:','bg-info');
-    Error.set('errDiv-Adapted-overall');
+    error.set('errDiv-Adapted-overall');
     setEmptyObject(currentUserData);
     userPermSlo=d['data']['value']['perm'];
     userRoleSlo=d['data']['value']['role'];
@@ -88,7 +98,7 @@ function cUser(d)
     setUserBodyContent(d['data']['function'],1,'Dodaj');
     setPassFieldState(document.getElementById('accounttype').value);
     addLegendDiv();
-    Error.checkStatusResponse(d);
+    error.checkStatusResponse(d);
 }
 function eUser(d)
 {
@@ -101,7 +111,7 @@ function eUser(d)
     typKonta=d['data']['value']['accounttype'];
     setUserBodyContent(d['data']['function'],0,'Edytuj');
     addLegendDiv();
-    Error.checkStatusResponse(d);
+    error.checkStatusResponse(d);
 }
 function dUser(d)
 { 
@@ -109,7 +119,7 @@ function dUser(d)
     console.log('---dUser()---');
     prepareModal('USUŃ UŻYTKOWNIKA:','bg-danger');
     setUserDeleteBodyContent('dUser',d['data']['value'],'Usuń');
-    Error.checkStatusResponse(d);
+    error.checkStatusResponse(d);
 }
 function uPermOff(d)
 {
@@ -122,16 +132,12 @@ function uPermOff(d)
 function setAllUsers(d)
 {
     console.log('---setAllUsers()---');
-    if(Error.checkStatusResponse(d)) { return ''; };
+    if(error.checkStatusResponse(d)) { return ''; };
     var usersTab=d['data']['value']['users'];
     // USER TABLE
     // usersTab
-    var dataL=usersTab.length;
-    var rowL=Object.keys(usersTab).length;
     var allUsersData=document.getElementById("allUsersData");
     removeHtmlChilds(allUsersData);
-    console.log('DATA LENGTH: '+dataL);
-    console.log('DATA ROW LENGTH: '+rowL);
     var divBtnGroupAtr=new Array(
                 Array('class','btn-group pull-left')
                 );
@@ -154,7 +160,7 @@ function setAllUsers(d)
     var td='';
     var tdOption='';
     var disabled='no-disabled';
-    for(var i = 0; i < dataL; i++)
+    for(const i in usersTab)
     {    
         tr=createHtmlElement('tr',null,null,null);
         for(var prop in usersTab[i])
@@ -590,6 +596,8 @@ function reloadData()
 function loadData(){
     console.log('---loadData()---');
     //ajax.getData(defaultTask);
-    Error.set('overAllErr');
+    console.log(error);
+    error.set('overAllErr');
     ajax.getData('getModulUsersDefaults');
 }
+loadData();

@@ -111,17 +111,14 @@ class Utilities
     public function getNumber($n,$base=10){
         return intval($n,$base);
     }
-    public function getResponse($t='',$v='',$f,$type=''){
+    public function getResponse($v='',$f=''){
         return ([
                 'data'=>[
-                            'task'=>$t,
                             'value'=>$v,
                             'function'=>$f
                         ],
-                'type'=>$type,
                 'status'=>0,
-                'info'=>'',
-                'modul'=>'',
+                'info'=>''
         ]);
     }
     public function setGet($key='id',&$input=[]){
@@ -136,8 +133,8 @@ class Utilities
             Throw New Exception("[".__METHOD__.'] Key is empty '.$key.' => '.$input[$key],1);
         }
     }
-    public function jsonResponse($t='',$v='',$f,$type='POST'){
-        echo json_encode(self::getResponse($t,$v,$f,$type));
+    public function jsonResponse($v='',$f=''){
+        echo json_encode(self::getResponse($v,$f));
     }
     public function getPost($trim=true,$date=false)
     {

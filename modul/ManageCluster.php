@@ -17,7 +17,7 @@ class ManageCluster {
         $v['clusters']=self::getAllClusters();
         $v['all']=self::mergeLabClusters($v['labs'],$v['clusters']);
         $v['perm']=$_SESSION['perm'];
-        $this->Utilities->jsonResponse(__METHOD__,$v,'','');
+        $this->Utilities->jsonResponse($v,'');
     }
     private function getAllClusters(){
         return $this->db->squery('SELECT id as \'i\',nod as \'n\',pracownia as \'p\' FROM klaster');
@@ -64,7 +64,7 @@ class ManageCluster {
         $this->db->setQuery("UPDATE `klaster` SET `pracownia`=:p WHERE `id`>=:n0 AND `id`<=:n1 ",$parm);
         $this->db->runQuery();
         //Throw New Exception ("test",0);
-        $this->Utilities->jsonResponse(__METHOD__,['all'=>self::mergeLabClusters(self::getAllLabs(),self::getAllClusters())],'','');
+        $this->Utilities->jsonResponse(['all'=>self::mergeLabClusters(self::getAllLabs(),self::getAllClusters())],'');
     }
     private function verifyUpdateKeys($input){
         $this->Utilities->validateKey($input,'n0',true,1);

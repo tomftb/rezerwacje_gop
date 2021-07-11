@@ -22,7 +22,7 @@ class ManageUser
         self::checkUserValueLength();
         self::checkUserData();
         self::addUser();
-        $this->utilities->jsonResponse(__METHOD__,'ok','cModal','POST');
+        $this->utilities->jsonResponse('ok','cModal');
     }
     protected function setActSessionPermRole(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -57,7 +57,7 @@ class ManageUser
         self::sqlGetUserFullData();
         self::checkUserData();
         self::updateUser();    
-        $this->utilities->jsonResponse(__METHOD__,'ok','cModal','POST');
+        $this->utilities->jsonResponse('ok','cModal');
     }
     private function checkUserData(){
         self::sqlCheckUserExist();
@@ -180,7 +180,7 @@ class ManageUser
         $this->inpArray=filter_input_array(INPUT_POST);
         self::setPerm();
         self::setActSessionPermRole();
-        echo json_encode($this->utilities->getResponse(__METHOD__,'ok','cModal','POST'));
+        $this->utilities->jsonResponse('ok','cModal');
     }
     private function sqlGetSloPerm(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -243,7 +243,7 @@ class ManageUser
         $check[2]=$this->utilities->checkValueLength($this->inpArray['Login'],'polu login',3,30);
         
         if($check[0]!=='' || $check[1]!=='' || $check[2]!==''){
-             Throw New Exception($check[0].$check[1].$check[2],0);
+            Throw New Exception($check[0].$check[1].$check[2],0);
         }
     }
     protected function addUser(){
@@ -337,7 +337,7 @@ class ManageUser
             $this->dbLink->rollback();
             Throw New Exception("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
         }
-        echo json_encode($this->utilities->getResponse(__METHOD__,'ok','cModal','POST'));
+        $this->utilities->jsonResponse('ok','cModal');
     }
     public function getUsersLike(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -371,7 +371,7 @@ class ManageUser
             Throw New Exception("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
 	}
         /* $this->dbLink->sth->fetchAll(PDO::FETCH_ASSOC) */
-        $this->utilities->jsonResponse(__METHOD__,$result,'','GET');  
+        $this->utilities->jsonResponse($result);  
     }
     private function getUsers(){
         return $this->dbLink->squery("SELECT u.`id` as 'ID',u.`imie` as 'Imie',u.`nazwisko` as 'Nazwisko',u.`login` as 'Login',u.`email` as 'Email',a.`name` as 'TypKonta', (SELECT r.`NAZWA` FROM `slo_rola` as r WHERE  u.`id_rola`=r.`id` ) as `Rola` FROM `uzytkownik` u, `app_account_type` as a WHERE u.`typ`=a.`id`  AND u.`wsk_u`='0' ORDER BY u.Id");   
@@ -387,7 +387,7 @@ class ManageUser
         $this->Log->log(0,"[".__METHOD__."]");    
         $this->utilities->setGet('id',$this->inpArray);
         /* TO DO GET USER DALA WITH DELETE SLO */
-        echo json_encode($this->utilities->getResponse(__METHOD__,$this->inpArray['id'],'dUser','POST'));
+        $this->utilities->jsonResponse($this->inpArray['id'],'dUser');
     }
     # RETURN ALL NOT DELETED DICTIONARY and other FROM DB
     public function getSlo($tableToSelect,$order='ID'){
@@ -400,7 +400,7 @@ class ManageUser
         $this->utilities->setGet('id',$this->inpArray);
         array_push($this->actData,$this->inpArray['id']);
         array_push($this->actData,self::sqlGetUserPerm());
-        echo json_encode($this->utilities->getResponse(__METHOD__,$this->actData,'uPermOff','POST'));
+        $this->utilities->jsonResponse($this->actData,'uPermOff');
     }
     private function sqlGetUserPerm(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -432,7 +432,7 @@ class ManageUser
         $this->Log->log(0,"[".__METHOD__."]");
         $this->utilities->setGet('id',$this->inpArray);
         self::getUserAllDetails(); 
-        echo json_encode($this->utilities->getResponse(__METHOD__,$this->actData,'eUser','POST'));
+        $this->utilities->jsonResponse($this->actData,'eUser');
     }
     private function getUserAllDetails(){
         try{
@@ -503,13 +503,13 @@ class ManageUser
         /* ACCOUNT TYPE */
         $actData['accounttype']=$this->dbLink->squery("SELECT a.`id`,a.`name` FROM `app_account_type` a WHERE a.`wsk_u`='0' ORDER BY a.`id`");
         array_push($actData['role'],array('ID'=>'0','NAZWA'=>'','DEFAULT'=>'t'));
-        echo json_encode($this->utilities->getResponse(__METHOD__, $actData,'cUser','POST'));
+        $this->utilities->jsonResponse($actData,'cUser');
     }
     public function getModulUsersDefaults(){
         $this->Log->log(0,"[".__METHOD__."]");
         $v['perm']=$_SESSION['perm'];
         $v['users']=self::getUsers();
-        $this->utilities->jsonResponse(__METHOD__,$v,'runMain','GET');  
+        $this->utilities->jsonResponse($v,'runMain');  
     }
     function __destruct(){}
 }

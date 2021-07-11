@@ -77,9 +77,9 @@ class Table
         removeHtmlChilds(pd);
        
        /* ASSIGN DATA TO ROW */
-        for(var i = 0; i < d['data']['value'].length; i++){    
+        for(var i = 0; i < d.length; i++){    
             var tr=createTag('','tr','');
-                this.assignData(tr,d['data']['value'][i]);
+                this.assignData(tr,d[i]);
             pd.appendChild(tr);
         }
         //console.log(pd);

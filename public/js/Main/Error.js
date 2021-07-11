@@ -2,12 +2,13 @@ class Error
 {
     static error=true;
     static div='';
+    static divId='';
     
     constructor() 
     {
         console.log('Error::constructor()');
     }
-    static checkStatusExist = function(s)
+    checkStatusExist(s)
     {
         /*
          * s => status
@@ -23,7 +24,7 @@ class Error
         }
         return e;
     }
-    static checkStatusResponse = function (d)
+    checkStatusResponse  (d)
     {
         /*
          * d => data
@@ -35,14 +36,13 @@ class Error
         //this.clearError();
         if(d['status']===1)
         {
-            Error.parseType(d);
+            Error.show(d['info']);
+            Error.error=true;
         }
         else if(d['status']===0)
         {
-            /*
-             * check type if POST, close modal, if get do nothing
-             */
-            Error.parseType(d);
+            Error.clear();
+            Error.error=false;
         }
         else
         {
@@ -65,8 +65,7 @@ class Error
             /*
              * check type if POST, close modal, if get do nothing
              */
-            console.log('INFO EMPTY');
-            
+            console.log('INFO EMPTY'); 
         }
         else
         {
@@ -78,72 +77,17 @@ class Error
     {
          Error.error=false;
     }
-    static parseType = function(d)
-    {
-        console.log('Error::parseType()');
-        if(d['type']==='undefined')
-        {
-            console.log('Error::parseType() => wrong type => '+d['type']);
-            Error.error=true;
-            alert('Error::ERROR OCCURED!'); 
-            
-        }
-        else if(d['type']==='POST' && d['status']===1)
-        {
-            /*
-             * close modal
-             */
-            console.log('type="POST" && status=1');
-            Error.error=true;
-            Error.checkInfoResponse(d);
-            Error.show(d['info']);
-        }
-        else if(d['type']==='POST' && d['status']===0)
-        {
-            /*
-             * close modal
-             */
-            console.log('type="POST" && status=0');
-            Error.clear();
-            Error.error=false;
-        }
-        // Error.checkInfoResponse(d);
-        else if(d['type']==='GET' && d['status']===1)
-        {
-            Error.error=true;
-            Error.checkInfoResponse(d);
-            alert(d['info']);
-            
-        }
-        else if(d['type']==='GET' && d['status']===0)
-        {
-            /*
-             * do nothing
-             */
-            Error.error=false;
-        }
-        else
-        {
-            /*
-             * ERROR => WRONG OR UNDEFINED STATUS
-             */
-            Error.error=true;
-            console.log('Error::parseType() => wrong type => '+d['type']);
-            alert('Error::ERROR OCCURED!'); 
-
-        }
-    }
-    static set = function (id)
+    set(id)
     {
         console.log('Error::set()');
-        console.log(id);
-        Error.div=document.getElementById(id);
-        console.log(Error.div);
+        Error.divId=id;
+        console.log(Error.divId);
     }
-    static show = function (value)
+    static show(value)
     {
         console.log('Error::show()');
-        //console.log(Error.div);
+        Error.getDiv();
+        console.log(Error.div);
         Error.div.innerHTML=value;
         Error.div.classList.remove("d-none");
         Error.div.classList.add("d-block");
@@ -151,9 +95,13 @@ class Error
     static clear = function ()
     {
         console.log('Error::clear()');
+        Error.getDiv();
         Error.div.innerText='';
         Error.div.classList.add("d-none");
         Error.div.classList.remove("d-block");
+    }
+    static getDiv(){
+        Error.div=document.getElementById(Error.divId);
     }
 }
 

@@ -8,21 +8,12 @@ class Error
     {
         console.log('Error::constructor()');
     }
-    checkStatusExist(s)
+    checkStatusExist(d)
     {
-        /*
-         * s => status
-         */
-        var e=false;
-        console.log('Error::checkStatusExist()\n STATUS: '+s);
-        console.log(s);
-        //this.clearError();
-        if(s==='undefined')
-        {
-            e=true;
-            alert('Error::ERROR OCCURED!');
+        console.log('Error::checkStatusExist()\n STATUS: '+d);
+        if (!d.hasOwnProperty("status")) {
+            throw 'Key `status` not exist';
         }
-        return e;
     }
     checkStatusResponse  (d)
     {

@@ -48,7 +48,7 @@ function runFunction(d){
     try{
         d=JSON.parse(d);
         checkResponseFunction(d);
-        if(error.checkStatusExist(d['status'])) { return ''; };
+        error.checkStatusExist(d);
         console.log('FUNCTION TO RUN:');
         console.log(d['data']['function']);
         switch(d['data']['function'])

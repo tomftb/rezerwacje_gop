@@ -47,8 +47,7 @@ function runFunction(d){
     console.log('===runFunction()===');
     try{
         d=JSON.parse(d);
-        console.log(d);
-        console.log(error);
+        checkResponseFunction(d);
         if(error.checkStatusExist(d['status'])) { return ''; };
         console.log('FUNCTION TO RUN:');
         console.log(d['data']['function']);
@@ -80,11 +79,27 @@ function runFunction(d){
         }
     }
     catch(e){
-        //this.setErr(e);
+        d['status']=1;
+        d['info']=e;
+        error.checkStatusResponse(d);
         console.log(e);
     }
    
 }
+function checkResponseFunction(d){
+    console.log(d);
+    if (!d.hasOwnProperty("data")) {
+        console.log('data NOT Exists');
+        error.checkStatusResponse(d);
+        throw 'Key `data` not exist';
+    }
+    if (!d['data'].hasOwnProperty("function")) {
+        console.log('data NOT Exists');
+        throw 'Key `data`.`function` not exist';
+    }
+    console.log('KEY `data`.`function` exist');
+}
+
 function cUser(d)
 {
     clearAdaptedModalData();

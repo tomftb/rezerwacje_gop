@@ -7,6 +7,7 @@ body{
 	border:0px solid white;
 	margin:1px;
         overflow: scroll !important;
+        padding-right: 0px!important;
 }
 .gt-no-rounded-left{
     border-bottom-left-radius:0%;
@@ -23,7 +24,7 @@ body{
   position: fixed;
   overflow: scroll;
   width: 100%;
-  padding-right: 0!important;
+  padding-right: 0px!important;
 }
 p.legendaLogin{
 	font-family: "Times New Roman";

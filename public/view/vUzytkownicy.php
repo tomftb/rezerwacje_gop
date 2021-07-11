@@ -1,6 +1,6 @@
 <?php if(!defined("APP_URL")){ die('Direct access not permitted');} ?>
 
-<div class="w-100" style="margin-top:-55px; position:fixed;  z-index:996; border:1px solid green;"> 
+<div class="container-fluid" style="margin-top:-55px; position:fixed; z-index:996;border:1px solid green;" id="mainHead"> 
     <div class="row">
         <div class="col-4" >
             <div class="btn pull-left mt-0" > 
@@ -22,7 +22,7 @@
         </div>
     </div>
 </div>
-<div class=" w-100" style="margin-top:170px; border:1px solid red;">
+<div class="container-fluid" style="margin-top:170px; border:1px solid red;" id="mainBody">
     <div class="row mb-1 w-100 mr-0 ml-0">
         <div class="col-12 alert alert-danger  d-none mb-0 w-100 " id="overAllErr">
         </div>

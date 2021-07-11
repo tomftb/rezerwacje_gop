@@ -10,7 +10,7 @@ class Error
     }
     checkStatusExist(d)
     {
-        console.log('Error::checkStatusExist()\n STATUS: '+d);
+        console.log('Error::checkStatusExist()');
         if (!d.hasOwnProperty("status")) {
             throw 'Key `status` not exist';
         }

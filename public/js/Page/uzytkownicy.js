@@ -54,6 +54,8 @@ function runFunction(d){
         switch(d['data']['function'])
         {
             case 'cUser':
+                    console.log(document.getElementById('mainHead').parentNode);
+                    console.log(document.getElementById('mainBody').parentNode);
                     cUser(d);
                     break;
             case 'cModal':
@@ -72,6 +74,7 @@ function runFunction(d){
                     break;
             case 'runMain':
                     /* SET PERM */
+                    
                     loggedUserPerm=d['data']['value']['perm'];
             default:
                     setAllUsers(d);
@@ -90,14 +93,13 @@ function checkResponseFunction(d){
     console.log(d);
     if (!d.hasOwnProperty("data")) {
         console.log('data NOT Exists');
-        error.checkStatusResponse(d);
         throw 'Key `data` not exist';
     }
     if (!d['data'].hasOwnProperty("function")) {
         console.log('data NOT Exists');
         throw 'Key `data`.`function` not exist';
     }
-    console.log('KEY `data`.`function` exist');
+    //console.log('KEY `data`.`function` exist');
 }
 
 function cUser(d)
@@ -114,6 +116,9 @@ function cUser(d)
     setPassFieldState(document.getElementById('accounttype').value);
     addLegendDiv();
     error.checkStatusResponse(d);
+    console.log(document.getElementById('AdaptedModal'));
+    console.log(document.getElementById('mainHead'));
+    console.log(document.getElementById('mainBody'));
 }
 function eUser(d)
 {
@@ -214,7 +219,7 @@ function setAllUsers(d)
         tr.appendChild(tdOption);
         allUsersData.appendChild(tr);
     };
-    console.log(allUsersData);
+    //console.log(allUsersData);
 }
 function clearAdaptedComponent()
 {
@@ -278,7 +283,7 @@ function setUserBodyContent(task,status,label)
     createUserRowContent(form,status);
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),''));
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(task,createBtn(label,'btn btn-info','sendDataBtn'),task));
-    console.log(form);
+    //console.log(form);
     document.getElementById('AdaptedDynamicData').appendChild(form);
 }
 function addLegendDiv()
@@ -402,11 +407,11 @@ function setPassFieldState(fieldValue)
 {
     console.log('---setPassFieldState()---');
     var passField=document.getElementById('Haslo');
-    console.log(passField);
-    console.log(fieldValue);
-    console.log(passField.attributes);
-    console.log(passField.hasAttribute('no-readonly'));
-    console.log(passField.hasAttribute('disabled'));
+    //console.log(passField);
+    //console.log(fieldValue);
+    //console.log(passField.attributes);
+    //console.log(passField.hasAttribute('no-readonly'));
+    //console.log(passField.hasAttribute('disabled'));
     if(fieldValue==='2|Local')
     //if(passField.hasAttribute('readonly') && passField.hasAttribute('disabled'))
     {
@@ -443,7 +448,7 @@ function getForm()
 function createCheckBoxList(data,status)
 {
     console.log('---createCheckBoxList()---');
-    console.log(data);
+    //console.log(data);
     console.log("LENGTH: "+data.length);
     /*
      * data - array of objects
@@ -606,7 +611,8 @@ function findData(value)
 function reloadData()
 {
     console.log('---reloadData()---');
-    ajax.getData(defaultTask);
+    cModal('AdaptedModal');
+    //ajax.getData(defaultTask);
 }
 function loadData(){
     console.log('---loadData()---');
@@ -615,4 +621,20 @@ function loadData(){
     error.set('overAllErr');
     ajax.getData('getModulUsersDefaults');
 }
+document.onkeydown = function(evt)
+    {
+        evt = evt || window.event;
+        var isEscape = false;
+        if ("key" in evt) {
+            isEscape = (evt.key === "Escape" || evt.key === "Esc");
+        } else {
+            isEscape = (evt.keyCode === 27);
+        }
+        if (isEscape)
+        {
+             cModal('AdaptedModal');
+            //ajax.getData(defaultTask);
+            console.log("Escape");
+        }
+    };
 loadData();

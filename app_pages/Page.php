@@ -11,10 +11,10 @@ abstract class Page{
     private $js=[];
     private $css=[];
     private $mainCss=[
-        'gt-admin.css',
         'bootstrap.min.4.5.3.css',
         'header.css',
         'font-awesome.min.4.7.0.css',
+        'gt-admin.css' // Must by at last on css list, it fixed some bootstrap bugs
     ];
     private $meta=[];
     private $uid='';
@@ -71,7 +71,7 @@ abstract class Page{
     }
     private function loadBody(){
         $this->Log->log(0,__METHOD__);
-        echo "<body>";
+        echo "<body>";//style=\"padding-right:17px;padding-left:17px;\">
         self::loadView($this->mainView);
         self::loadView($this->view);
         echo "</body>";

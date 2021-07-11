@@ -462,11 +462,12 @@ function prepareModal(title,titleBg)
 }
 function cModal(id)
 {
-    console.log('cModal\nRESPONSE:');
+    console.log('cModal()');
+   
+    $('body').removeClass('modal-open');
+    $('body').css('padding-right', '17px');
+    $('.modal-backdrop').remove();
     $('#'+id).modal('hide'); //or $('#modalId').modal('toggle');
-    //$('body').removeClass('modal-open');
-    //$('body').css('padding-right', '0px');
-    //$('.modal-backdrop').remove();
 }
 function setButtonDisplay(element,perm)
 {
@@ -570,21 +571,7 @@ function createAddButton(id,disabled)
 }
 
 
-    document.onkeydown = function(evt)
-    {
-        evt = evt || window.event;
-        var isEscape = false;
-        if ("key" in evt) {
-            isEscape = (evt.key === "Escape" || evt.key === "Esc");
-        } else {
-            isEscape = (evt.keyCode === 27);
-        }
-        if (isEscape)
-        {
-            ajax.getData(defaultTask);
-            //alert("Escape");
-        }
-    };
+
 function checkNumber(elem)
 {
     console.log('---checkNumber()---');

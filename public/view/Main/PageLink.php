@@ -1,14 +1,14 @@
 <?php if(!defined('APP_URL')){exit;}; ?>
 <header id="header">
         <div class="row" >
-            <div class="col pr-0">
+            <div class="col-4 pr-0">
                 <div id="logo" class="float-right">
                   <h1>
                       <a href="<?=APP_URL?>?id=1" class="scrollto"><?=APP_NAME?></a>
                   </h1>
                 </div>
             </div>
-            <div class="col-sm-8 ml-0 ">
+            <div class="col-8 ml-0 ">
                 <nav id="nav-menu-container float-left">
                   <ul class="nav-menu" onclick="setMenuActive()">
                     <li id="li-1"><i class="fa fa-server menu-active" aria-hidden="true"></i><a href="<?=APP_URL?>?id=1">Rezerwuj Klaster</a></li>

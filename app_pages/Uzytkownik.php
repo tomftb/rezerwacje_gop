@@ -4,10 +4,10 @@ final class Uzytkownik extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_UZYT';
     private $view=[
-        //'Main/PageLink.php',
+        'Main/PageLink.php',
         'vUzytkownicy.php',
         'Main/AdaptedModal.html',
-        //'Main/Footer.php'
+        'Main/Footer.php'
         ];
     private $js=[
         'jquery-3.3.1.min.js',

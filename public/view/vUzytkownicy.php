@@ -22,8 +22,8 @@
         </div>
     </div>
 </div>
-<div class="container-fluid" style="margin-top:170px; border:1px solid red;" id="mainBody">
-    <div class="row mb-1 w-100 mr-0 ml-0">
+<div class="container-fluid" style="margin-top:170px; border:1px solid red;padding-left:2px;padding-right:2px;" id="mainBody">
+    <div class="row mb-1 w-100 mr-0 ml-0 pr-0">
         <div class="col-12 alert alert-danger  d-none mb-0 w-100 " id="overAllErr">
         </div>
     </div>

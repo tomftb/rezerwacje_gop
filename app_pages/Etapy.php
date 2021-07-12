@@ -11,15 +11,8 @@ final class Etapy extends Page{
         'Main/Footer.php'
         ];
     private $js=[
-        'bootstrap-datepicker.min.js',
-        'fontawesome.min.js',
-        'Main/createHtmlElement.js',
-        'Main/parseFieldValue.js',
-        'Main/Error.js',
-        'Main/Ajax.js',
-        'Main/Utilities.js',
+       
         'Main/Table.js',
-        'Main/headerView.js',
         'Page/projekty_etapy.js'
         ];
 

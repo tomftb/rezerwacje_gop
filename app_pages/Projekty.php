@@ -11,13 +11,6 @@ final class Projekty extends Page{
         'Main/Footer.php'
         ];
     private $js=[
-        'bootstrap-datepicker.min.js',
-        'fontawesome.min.js',
-        'Main/Error.js',
-        'Main/createHtmlElement.js',
-        'Main/parseFieldValue.js',
-        'JSXHR'=>'Main/Ajax.js',
-        'Main/headerView.js',
         'Main/Table.js',
         'Page/projekty_raport.js',
         'Page/projekty.js',

@@ -10,13 +10,6 @@ final class Pracownicy extends Page{
         'Main/Footer.php'
         ];
     private $js=[
-        'bootstrap-datepicker.min.js',
-        'fontawesome.min.js',
-        'Main/headerView.js',
-        'Main/createHtmlElement.js',
-        'Main/parseFieldValue.js',
-        'Main/Error.js',
-        'Main/Ajax.js',
         'Main/Utilities.js',
         'Main/Table.js',
         'Page/pracownicy.js'

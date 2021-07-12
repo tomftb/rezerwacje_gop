@@ -11,13 +11,6 @@ final class Role extends Page{
         'Main/Footer.php'
         ];
     private $js=[
-        'bootstrap-datepicker.min.js',
-        'fontawesome.min.js',
-        'Main/createHtmlElement.js',
-        'Main/parseFieldValue.js',
-        'Main/Error.js',
-        'Main/Ajax.js',
-        'Main/headerView.js',
         'Page/role.js'
         ];
 

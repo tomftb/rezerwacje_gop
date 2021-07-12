@@ -10,12 +10,6 @@ final class Parametry extends Page{
         'Main/Footer.php'
         ];
     private $js=[
-        'bootstrap-datepicker.min.js',
-        'fontawesome.min.js',
-        'Main/createHtmlElement.js',
-        'Main/Error.js',
-        'Main/Ajax.js',
-        'Main/headerView.js',
         'Page/parametry.js'
         ];
 

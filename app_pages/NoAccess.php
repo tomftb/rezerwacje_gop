@@ -14,8 +14,14 @@
 class NoAccess extends Page{
     private $Log;
     private $perm='';
-    private $view=['Main/PageLink.php','vNoAccess.php','Main/Footer.php'];
-    private $js=['Main/headerView.js'];
+    private $view=[
+        'Main/PageLink.php',
+        'vNoAccess.php',
+        'Main/Footer.php'
+        ];
+    private $js=[
+        'Main/headerView.js'
+        ];
     private $css=[];
 
     private $meta=[];

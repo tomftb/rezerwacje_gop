@@ -12,7 +12,6 @@ final class Pracownicy extends Page{
     private $js=[
         'Main/Ajax.js',
         'Main/headerView.js',
-        'Main/Utilities.js',
         'Main/Table.js',
         'Page/pracownicy.js'
         ];

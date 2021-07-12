@@ -13,7 +13,6 @@ final class Uprawnienia extends Page{
     private $js=[
         'Main/Ajax.js',
         'Main/headerView.js',
-        'Main/Utilities.js',
         'Page/uprawnienia.js'
         ];
     public function __construct(){

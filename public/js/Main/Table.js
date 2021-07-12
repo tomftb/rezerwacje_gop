@@ -4,6 +4,9 @@ class Table
     buttons=new Object();
     columnsExceptions=new Array();
     idField=0; 
+    static ajaxLink;
+    static errorLink;
+    static errorDivId;
     btnInfo={
         'col':'',
         'text':'',
@@ -18,6 +21,19 @@ class Table
     constructor() { 
         //console.log('Table::constructor()');
         
+    }
+    setAjaxLink(alink){
+        console.log('TABLE::setAjaxLink()');
+        Table.ajaxLink=alink;
+        console.log(Table.ajaxLink);
+    }
+    setErrorLink(eLink,eDiv){
+        console.log('TABLE::setErrorLink()');
+        Table.errorLink=eLink;
+        Table.errorDivId=eDiv;
+        console.log(Table.errorLink);
+        console.log(Table.errorDivId);
+        //Table.errorDiv=eDiv;
     }
     setIdFiled(id){
         this.idField=id;
@@ -62,6 +78,7 @@ class Table
         }
     }
     showTable(d){
+        console.log(d);
         var defaultTableCol=document.getElementById("colDefaultTable");
             removeHtmlChilds(defaultTableCol);
         for (const c in this.columns){
@@ -77,8 +94,9 @@ class Table
         removeHtmlChilds(pd);
        
        /* ASSIGN DATA TO ROW */
-        for(var i = 0; i < d.length; i++){    
-            var tr=createTag('','tr','');
+        for (const i in d){
+        //for(var i = 0; i < d.length; i++){    
+            var tr=document.createElement('tr');//createTag('','tr','');
                 this.assignData(tr,d[i]);
             pd.appendChild(tr);
         }
@@ -92,7 +110,8 @@ class Table
         for (const property in d){        
             if(!this.columnsExceptions.includes(property)){
                 //console.log(d[property]);
-                var td=createTag(d[property],'td','');
+                var td=document.createElement('td');
+                    td.appendChild(document.createTextNode(d[property]));//createTag(d[property],'td','');
                 tr.appendChild(td);
             } 
         }
@@ -183,9 +202,12 @@ class Table
         }
         btn.onclick=function (){
             try {
+                console.log('Table::onclick()');
                 clearAdaptedModalData();
                 /* FROM EXTERNAL AJAX CLASS */
-                ajax.getData(this.name+'&id='+this.parentNode.id);
+                Table.errorLink.set([Table.errorDivId]);
+                console.log(Table.errorLink);
+                Table.ajaxLink.getData(this.name+'&id='+this.parentNode.id);
             }
             catch (error) {
                 console.error('ERROR: '+error);
@@ -203,7 +225,8 @@ class Table
             try {
                 clearAdaptedModalData();
                 /* FROM EXTERNAL AJAX CLASS */
-                ajax.getData(this.name+'&id='+this.parentNode.id);
+                 Table.errorLink.set([Table.errorDivId]);
+                Table.ajaxLink.getData(this.name+'&id='+this.parentNode.id);
             }
             catch (error) {
                 console.error('ERROR: '+error);

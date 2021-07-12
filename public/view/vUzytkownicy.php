@@ -1,6 +1,6 @@
 <?php if(!defined("APP_URL")){ die('Direct access not permitted');} ?>
 
-<div class="container-fluid" style="margin-top:-55px; position:fixed; z-index:996;border:1px solid green;" id="mainHead"> 
+<div class="container-fluid pl-0 pr-5 mr-5" style="margin-top:-55px; position:fixed; z-index:996;border:0px solid green;" id="mainHead"> 
     <div class="row">
         <div class="col-4" >
             <div class="btn pull-left mt-0" > 
@@ -15,14 +15,14 @@
                 <div class="col-4 pr-0" style="border:0px solid black;">
                     <h5 class="mt-3 text-secondary text-right"style="border:0px solid black;" >Szukaj :</h5>
                 </div>
-                <div class="col-8 pl-0" style="border:0px solid red;">
+                <div class="col-8 pl-0 pr-0" style="border:0px solid red;">
                     <input class="ml-1 form-control mt-2"  onchange="findData(this.value)"/>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<div class="container-fluid" style="margin-top:170px; border:1px solid red;padding-left:2px;padding-right:2px;" id="mainBody">
+<div class="container-fluid" style="margin-top:170px; border:0px solid red;padding-left:2px;padding-right:2px;" id="mainBody">
     <div class="row mb-1 w-100 mr-0 ml-0 pr-0">
         <div class="col-12 alert alert-danger  d-none mb-0 w-100 " id="overAllErr">
         </div>

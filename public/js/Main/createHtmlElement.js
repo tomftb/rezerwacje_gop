@@ -222,10 +222,6 @@ function changeBoxValue(input)
     };
     
 }
-function closeModal(modalId)
-{
-    $('#'+modalId).modal('hide');
-}
 function assignDataToField(obj,fieldId)
 {
     //console.log('---assignDataToField---\nfieldId => '+fieldId);

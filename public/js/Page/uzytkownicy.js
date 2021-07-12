@@ -47,7 +47,6 @@ function runFunction(d){
     console.log('===runFunction()===');
     try{
         d=JSON.parse(d);
-        checkResponseFunction(d);
         error.checkStatusExist(d);
         console.log('FUNCTION TO RUN:');
         console.log(d['data']['function']);
@@ -76,8 +75,10 @@ function runFunction(d){
                     /* SET PERM */
                     
                     loggedUserPerm=d['data']['value']['perm'];
+            case 'sAll':
+                 setAllUsers(d);
             default:
-                    setAllUsers(d);
+                   error.checkStatusResponse(d);
                 break;
         }
     }
@@ -108,6 +109,7 @@ function cUser(d)
     console.log('---cUser()---');
     prepareModal('DODAJ UŻYTKOWNIKA:','bg-info');
     error.set('errDiv-Adapted-overall');
+    checkResponseFunction(d);
     setEmptyObject(currentUserData);
     userPermSlo=d['data']['value']['perm'];
     userRoleSlo=d['data']['value']['role'];
@@ -124,6 +126,7 @@ function eUser(d)
 {
     clearAdaptedModalData();
     console.log('---eUser()---');
+    checkResponseFunction(d);
     prepareModal('EDYCJA UŻYTKOWNIKA:','bg-info');;
     currentUserData=d['data']['value']['user'];
     userPermSlo=d['data']['value']['perm'];

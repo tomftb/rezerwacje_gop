@@ -1,13 +1,11 @@
-//console.log(loggedUserPerm);
 var ajax = new Ajax();
 var error = new Error();
-    Error.setDiv('errDiv-Adapted-overall');
-    Error.setModal('AdaptedModal');
 var utilities=new Utilities();
 var defaultTask='getAllPerm';
 var fieldDisabled='n';
 var responseData=new Object();
 var avaUsers=new Array();
+var loggedUserPerm=new Array();
 var defaultTableColumns={
     Skrót:{
         style:'width:70px;',
@@ -36,33 +34,49 @@ var defaultTableBtnConfig={
         }
     };
 
-setButtonAvaliable();
+
 var defaultTableExceptionCol=new Array('i','md','mu','t','v');
 function runFunction(d)
 {
     /* d => array response */
     //console.log('===runFunction()===');
     //console.log(d);
-    // RUN FUNCTION
-    if(Error.checkStatusExist(d['status'])) { return ''; };
-    Error.checkStatusResponse(d);
-    console.log('FUNCTION TO RUN:\n'+d['data']['function']);
-    console.log(d);
-    switch(d['data']['function'])
-    {
-        case 'uPermOff':
-                responseData=d;
-                uPerm(false);
-            break;
-        case 'uPermUsers':
-                uPerm(true);
+    try{
+        d=JSON.parse(d);
+        // RUN FUNCTION
+        error.checkStatusExist(d);
+        error.checkStatusResponse(d);
+        console.log('FUNCTION TO RUN:\n'+d['data']['function']);
+        console.log(d);
+        switch(d['data']['function'])
+        {
+            case 'uPermOff':
+                    error.set('errDiv-Adapted-overall');
+                    responseData=d;
+                    uPerm(false);
                 break;
-        case 'showAll':
-                displayAll(d);
+            case 'uPermUsers':
+                    uPerm(true);
+                    break;
+            case 'cModal':
+                    cModal('AdaptedModal');
                 break;
-        default:
-                console.log('runFunction::DEFAULT TASK');
-            break;
+            case 'runMain':
+                    loggedUserPerm=d['data']['value']['perm'];
+                    setButtonAvaliable();
+            case 'showAll':
+                    displayAll(d['data']['value']['perms']);
+                    break;
+            default:
+                    console.log('runFunction::DEFAULT TASK');
+                break;
+        }
+    }
+    catch(e){
+        d['status']=1;
+        d['info']=e;
+        error.checkStatusResponse(d);
+        console.log(e);
     }
 }
 function uPerm(input)
@@ -283,7 +297,6 @@ function setAvaliableUsersList(ele,worker)
 function displayAll(d)
 {
     //console.log('===displayAll()===');
-    if(Error.checkStatusResponse(d)) { return ''; };
     /* SETUP DEFAULT TABLE COLUMN */
     var defaultTableCol=document.getElementById("colDefaultTable");
         removeHtmlChilds(defaultTableCol);
@@ -301,11 +314,10 @@ function displayAll(d)
     /* remove old data */
     removeHtmlChilds(pd);
     /* SET BUTTONS */
-    
-    for(var i = 0; i < d['data']['value'].length; i++)
+    for(const i in d)
     {    
-        var tr=createTag('','tr','');
-            assignDefaultTableData(tr,d['data']['value'][i]);
+        var tr=document.createElement('tr');
+            assignDefaultTableData(tr,d[i]);
         pd.appendChild(tr);
     }
     //console.log(pd);
@@ -390,17 +402,14 @@ function functionBtn(f,btn,task)
                 btn.onclick = function()
                 { 
                     responseData['data']['function']='uPermUsers';
-                    responseData['data']['task']='uPermUsers';
-                    responseData['status']=0;
-                    responseData['type']='GET';
                     setAvaUsers();
-                    runFunction(responseData);
+                    uPerm(true);
                 };
                 break;
         case 'cancel':
                 btn.onclick = function()
                 {
-                    closeModal('AdaptedModal');
+                    cModal('AdaptedModal');
                 };
             break;
         case 'uPermUsers':
@@ -426,4 +435,15 @@ function findData(value)
 {
     ajax.getData(defaultTask+'&filter='+value);
 }
-ajax.getData(defaultTask);
+function loadData(){
+    console.log('---loadData()---');
+    //ajax.getData(defaultTask);
+    console.log(error);
+    error.set('overAllErr');
+    ajax.getData('getModulPermissionsDefaults');
+    //ajax.getData(defaultTask);
+}
+function reloadData(){
+    
+}
+loadData();

@@ -5,9 +5,10 @@ body{
 	background-color:#F0F0F0;
 	font-family:Times, sans-serif;
 	border:0px solid white;
-	margin:1px;
+	margin:0px;
         overflow: scroll !important;
-        padding-right: 0px!important;
+        padding-right: 17px!important;
+        padding-left: 17px!important;
 }
 .gt-no-rounded-left{
     border-bottom-left-radius:0%;
@@ -24,7 +25,8 @@ body{
   position: fixed;
   overflow: scroll;
   width: 100%;
-  padding-right: 0px!important;
+  padding-left: 17px!important;
+  padding-right: 17px!important;
 }
 p.legendaLogin{
 	font-family: "Times New Roman";

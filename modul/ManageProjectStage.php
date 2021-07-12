@@ -54,12 +54,12 @@ class ManageProjectStage
          * 
          */
  
-        $return=array();
+        $return['data']=array();
         /* */
         foreach($this->dbLink->squery($select.$where,$query_data) as $v){
-            array_push($return,array($v['i'],$v['n'],html_entity_decode($v['t']),html_entity_decode($v['v']),'bl'=>$v['bl']));
+            array_push($return['data'],array($v['i'],$v['n'],html_entity_decode($v['t']),html_entity_decode($v['v']),'bl'=>$v['bl']));
         }
-        $this->utilities->jsonResponse(__METHOD__,$return,'','GET');
+        $this->utilities->jsonResponse($return,'sAll');
     }
     public function getProjectStageHideSlo(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -70,7 +70,7 @@ class ManageProjectStage
         self::checkWskB(intval($this->actProjectStageData['head']['bu'],10),$this->actProjectStageData['head']['bl']);
         self::setWskB(intval($_SESSION['userid'],10));
         self::getSlo('psHide');
-        $this->utilities->jsonResponse(__METHOD__,$this->actProjectStageData,'psHide','POST');  
+        $this->utilities->jsonResponse($this->actProjectStageData,'psHide');  
     }
     public function getProjectStageDelSlo(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -81,7 +81,7 @@ class ManageProjectStage
         self::checkWskB(intval($this->actProjectStageData['head']['bu'],10),$this->actProjectStageData['head']['bl']);
         self::setWskB(intval($_SESSION['userid'],10));
         self::getSlo('psDelete');
-        $this->utilities->jsonResponse(__METHOD__,$this->actProjectStageData,'psDelete','POST');  
+        $this->utilities->jsonResponse($this->actProjectStageData,'psDelete');  
     }
     private function setGetWsk($wsk='u'){
         $this->inpArray[$wsk]=filter_input(INPUT_GET,$wsk);
@@ -156,7 +156,7 @@ class ManageProjectStage
         $this->brTag='&lt;br /&gt;';
         $this->utilities->setGet('id',$this->inpArray);
         self::getProjectStageData($this->inpArray['id']);
-        $this->utilities->jsonResponse(__METHOD__,$this->actProjectStageData,'psDetails','POST');
+        $this->utilities->jsonResponse($this->actProjectStageData,'psDetails');
     }
     public function psHide(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -167,7 +167,7 @@ class ManageProjectStage
         self::checkWskB(intval($this->inpArray['wskb']['bu'],10),$this->inpArray['wskb']['bl']);
         self::sqlHideStage();
         self::setWskB();
-        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
+        $this->utilities->jsonResponse('','cModal');
     }
     public function psDelete(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -178,7 +178,7 @@ class ManageProjectStage
         self::checkWskB(intval($this->inpArray['wskb']['bu'],10),$this->inpArray['wskb']['bl']);
         self::sqlDeleteStage();
         self::setWskB();
-        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
+        $this->utilities->jsonResponse('','cModal');
     }
     private function sqlDeleteStage(){
         $query_data=[
@@ -219,7 +219,7 @@ class ManageProjectStage
         self::checkInputFieldsLength();
         self::createStage();
         self::addProjectStage();
-        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
+        $this->utilities->jsonResponse('','cModal');
     }
     private function checkInputFields(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -323,7 +323,7 @@ class ManageProjectStage
         self::checkStageData();
         self::checkWskB(intval($this->actProjectStageData['head']['bu'],10));
         self::updateProjectStage();
-        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
+        $this->utilities->jsonResponse('','cModal');
     }
     private function checkStageData(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -408,7 +408,7 @@ class ManageProjectStage
         $this->Log->log(0,"[".__METHOD__."] UPDATE PROJECT ID: ".$this->inpArray['id'] ); //
         self::manageStageElement();
         $this->dbLink->runTransaction();
-        Throw New Exception ("[".__METHOD__."] TEST: ",0);
+        //Throw New Exception ("[".__METHOD__."] TEST: ",0);
     }
     private function updateStageElement($value){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -479,7 +479,7 @@ class ManageProjectStage
         $this->utilities->mergeArray($data,$addOns);
     }
     public function getNewStageSlo(){
-        $this->utilities->jsonResponse(__METHOD__,'','psCreate','POST');
+        $this->utilities->jsonResponse('','psCreate');
     }
     protected function checkDataLength($value,$label,$min,$max){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -492,7 +492,7 @@ class ManageProjectStage
         $this->Log->log(0,"[".__METHOD__."]");
         $this->utilities->setGet('id',$this->inpArray);
         self::setWskB(intval($_SESSION['userid'],10));
-        $this->utilities->jsonResponse(__METHOD__,'','block','POST');
+        $this->utilities->jsonResponse('','block');
     }
     public function getAllStage(){
         $data=[];
@@ -506,6 +506,11 @@ class ManageProjectStage
             array_push($data,array('i'=>$v['i'],'n'=>$v['n'],'t'=>html_entity_decode($v['t']),'cu'=>$v['cu'],'v'=>$body));
         }
         return $data;
+    }
+    public function getModulStageDefaults(){
+        $v['perm']=$_SESSION['perm'];
+        $v['data']=$this->dbLink->squery("SELECT s.`id` as '0',s.`number` as '1',s.`title` as '2',(select e.`value` as '3' FROM `slo_projekt_etap_ele` as e WHERE e.`id_projekt_etap`=s.`id` and `wsk_u`='0' and `wsk_v`='0' ORDER BY e.`id` ASC LIMIT 0,1) as `v`,b.`login` as 'bl' FROM `slo_projekt_etap` s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id` WHERE s.`wsk_u`='0' and s.`wsk_v`='0' ORDER BY s.`id` ASC");
+        $this->utilities->jsonResponse($v,'runMain');
     }
     function __destruct(){}
 }

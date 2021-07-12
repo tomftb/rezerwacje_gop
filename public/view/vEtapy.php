@@ -1,26 +1,24 @@
 <?php if(!defined("APP_URL")){ die('Direct access not permitted');} ?>
-<body onload="setBtnPerm()">
-<div class="w-100 "  style="margin-top:-65px;position:fixed; z-index:996;">
+<div class="container-fluid pl-0 pr-5 mr-5"  style="margin-top:-65px; position:fixed; z-index:996;">
     <div class="row">
-        <div class=" col-sm-4" >
+        <div class="col-4" >
             <div class="btn pull-left mt-0" > 
                 <button id='createData' class="btn btn-info pull-left mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#AdaptedModal" onclick="createData()">Dodaj etap </button>
             </div> 
         </div>
-        <div class=" col-sm-4" >
+        <div class="col-4" >
             <h2 class="text-center mb-3 mt-1 text-info">Etapy projektu :</h2>
         </div>
-        <div class=" col-sm-4" >
-             <div class="row float-right mr-4">
-                <div class="sm-col-8">
-                    <h5 class="mt-2 text-secondary" > 
-                                <i class="fa fa-search"></i> Szukaj  </span>
-
+        <div class="col-4" >
+             <div class="row float-right w-100 mr-0">
+                <div class="col-4">
+                    <h5 class="mt-3 text-secondary text-right" > 
+                        <i class="fa fa-search"></i>Szukaj:</span>
                     </h5>
                 </div>
-                <div class="sm-col-4">
+                <div class="col-8 pl-0 pr-0">
                     <div class="form-group mb-0">
-                    <input class="ml-1 form-control mt-1" id='findData' onchange="findData(this.value)"/>
+                    <input class="ml-1 form-control mt-2" id='findData' onchange="findData(this.value)"/>
                     </div>
                     <div class="form-group form-check mt-0">
                     <label class="form-check-label"><input type="checkbox" class="form-check-input" value="0" onclick="showHidden(this)"><small>Pokaż ukryte</small></label></div>

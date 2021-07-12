@@ -34,7 +34,7 @@ class ManageEmployee
         self::checkEmployeeValueLength();
         self::employeeExist();
         self::addEmployee();     
-        $this->utilities->jsonResponse(__METHOD__,'ok','cModal');
+        $this->utilities->jsonResponse('','cModal');
     }
     private function employeeExist(){
         $this->Log->log(0,"[".__METHOD__."]");  
@@ -66,7 +66,7 @@ class ManageEmployee
         self::employeeExistId();
         self::updateEmployee();
 
-        $this->utilities->jsonResponse(__METHOD__,'ok','cModal');          
+        $this->utilities->jsonResponse('','cModal');          
     }
     protected function setEmployeeSpec($idEmployee)
     {
@@ -104,7 +104,7 @@ class ManageEmployee
         $this->inpArray=filter_input_array(INPUT_POST);
         $this->utilities->validateKey($this->inpArray,'ID',true,1);
         self::setEmployeeSpec($this->inpArray['ID']);
-        $this->utilities->jsonResponse(__METHOD__,'ok','cModal','POST');          
+        $this->utilities->jsonResponse('','cModal');          
     }
     protected function checkSpecInDb($t1,$t2)
     {
@@ -291,33 +291,31 @@ class ManageEmployee
             $this->dbLink->rollback();
             Throw New Exception("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
         }
-        $this->utilities->jsonResponse(__METHOD__,'ok','cModal');
+        $this->utilities->jsonResponse('','cModal');
     }
     public function getEmployeesSpecSlo()
     {
         $this->utilities->setGetString('function',$this->inpArray);
-        $this->utilities->jsonResponse(__METHOD__,$this->dbLink->squery('SELECT * FROM `v_slo_u_spec` ORDER BY `ID` ASC'),$this->inpArray['function']);
+        $this->utilities->jsonResponse($this->dbLink->squery('SELECT * FROM `v_slo_u_spec` ORDER BY `ID` ASC'),$this->inpArray['function']);
     }
     public function getEmployeesLike(){
         $this->Log->log(0,"[".__METHOD__."]");
         $f='%'.filter_input(INPUT_GET,'filter').'%';
         $this->Log->log(1,"[".__METHOD__."] filter => ".$f);
-        $data=$this->dbLink->squery('SELECT * FROM `v_all_prac_v5` WHERE ID LIKE (:f) OR ImieNazwisko LIKE (:f) OR Stanowisko LIKE (:f) OR Procent LIKE (:f) OR Email LIKE (:f)ORDER BY ID asc',[':f'=>[$f,'STR']]); 
-        $this->utilities->jsonResponse(__METHOD__,$data,'sEmployees','GET');
+        $data['data']=$this->dbLink->squery('SELECT * FROM `v_all_prac_v5` WHERE ID LIKE (:f) OR ImieNazwisko LIKE (:f) OR Stanowisko LIKE (:f) OR Procent LIKE (:f) OR Email LIKE (:f)ORDER BY ID asc',[':f'=>[$f,'STR']]); 
+        $this->utilities->jsonResponse($data,'sEmployees');
     }
      # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getEmployeeProjects()
-    {
-        $data=[];        
+    {      
         $this->utilities->setGet('id',$this->inpArray);
         $data[0]=$this->inpArray['id'];
         $data[1]=self::getEmplProj($this->inpArray['id']);
-        $this->utilities->jsonResponse(__METHOD__,$data,'projects');
+        $this->utilities->jsonResponse($data,'projects');
     }
      # RETURN ALL NOT DELETED PROJECT FROM DB FOR DELETING EMPLOYY
     public function getDeletedEmployeeProjects()
     {
-        $data=[];
         $this->utilities->setGet('id',$this->inpArray);
 
 
@@ -328,7 +326,7 @@ class ManageEmployee
              */
         $data[0]=$this->inpArray['id'];
         $data[1]=$this->dbLink->squery('SELECT ID_Projekt,Numer_umowy,Temat_umowy,Procent_udziału,Data_od,Data_do FROM v_proj_prac_v4 WHERE ID_Pracownik=:i ORDER BY ID_Projekt ASC',[':i'=>[$this->inpArray['id'],'INT']]);       
-        $this->utilities->jsonResponse(__METHOD__,$data,'dEmployee');
+        $this->utilities->jsonResponse($data,'dEmployee');
     }
     private function getEmplProj($id)
     {
@@ -347,12 +345,10 @@ class ManageEmployee
     }
     public function getEmployeeSpec()
     {
-        $data=[];
         $this->utilities->setGet('id',$this->inpArray);
         $data[0]=self::getEmpData($this->inpArray['id']);
         $data[1]=self::employeeSpec($this->inpArray['id']);
-        
-        $this->utilities->jsonResponse(__METHOD__,$data,'eEmployeeSpec');
+        $this->utilities->jsonResponse($data,'eEmployeeSpec');
     }
     protected function combineSloEmployeeSpec($slo,$empSol)
     {
@@ -379,7 +375,7 @@ class ManageEmployee
         $data[0]=self::getEmpData($this->inpArray['id']);
         $data[1]=self::employeeSpec($this->inpArray['id']);
         $this->Log->LogMulti(2,$data,__LINE__."::".__METHOD__." data");
-        $this->utilities->jsonResponse(__METHOD__,$data,'eEmployee');
+        $this->utilities->jsonResponse($data,'eEmployee');
     }
     private function getEmpData($id){
         $e=$this->dbLink->squery('SELECT * FROM v_all_prac_v4 WHERE ID=:i',[':i'=>[$id,'INT']]);
@@ -387,6 +383,11 @@ class ManageEmployee
             Throw New Exception ('Employee already deleted!',0);
         }
         return $e[0];  
+    }
+    public function getModulEmployeesDefaults(){
+        $v['perm']=$_SESSION['perm'];
+        $v['data']=$this->dbLink->squery('SELECT * FROM `v_all_prac_v5` ORDER BY ID asc'); 
+        $this->utilities->jsonResponse($v,'runMain');
     }
     function __destruct(){}
 }

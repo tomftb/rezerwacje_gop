@@ -2,9 +2,25 @@
 
 final class Pracownicy extends Page{
     private $Log;
-    private $mainPerm='LOG_INTO_PRAC';
-    private $view=['/Main/PageLink.php','vPracownicy.php'];
-    private $js=['pracownicy.js'];
+    private $mainPerm='LOG_INTO_EMPL';
+    private $view=[
+        'Main/PageLink.php',
+        'vPracownicy.php',
+        'Main/AdaptedModal.html',
+        'Main/Footer.php'
+        ];
+    private $js=[
+        'bootstrap-datepicker.min.js',
+        'fontawesome.min.js',
+        'Main/headerView.js',
+        'Main/createHtmlElement.js',
+        'Main/parseFieldValue.js',
+        'Main/Error.js',
+        'Main/Ajax.js',
+        'Main/Utilities.js',
+        'Main/Table.js',
+        'Page/pracownicy.js'
+        ];
 
 	
     public function __construct(){

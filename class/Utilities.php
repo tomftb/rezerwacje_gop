@@ -84,7 +84,10 @@ class Utilities
         }
         return (self::response());
     }
-    public function keyExist($a,$k){
+    public function keyExist($a=[],$k=''){
+        if(!is_array($a)){
+            Throw New Exception("[".__METHOD__.'] ARG 1 IS NOT ARRAY!',1);
+        }
         if (!array_key_exists($k,$a)){
             Throw New Exception("[".__METHOD__.'] No '.$k.' KEY in ARRAY!',1);
         }

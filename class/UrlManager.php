@@ -38,7 +38,7 @@ final class UrlManager{
         ['pEmail','EMAIL_PROJ','user'],
         ["getAllParm",'LOG_INTO_PARM','user'],
         ['updateParm','EDIT_PARM','user'],
-        ["getAllPerm",'LOG_INTO_UPR','user'],
+        ["getAllPerm",'LOG_INTO_PERM','user'],
         ["getUsersWithPerm",'SHOW_PERM_USER','user'],
         ['uPermUsers','EDIT_PERM_USER','user'],
         ["getAllRole",'LOG_INTO_ROLE','user'],
@@ -49,7 +49,7 @@ final class UrlManager{
         ['getRoleDetails','SHOW_ROLE','user'],
         ['getRoleUsers','DEL_ROLE','uer'],
         ['rDelete','DEL_ROLE','user'],
-        ["getUsersLike",'LOG_INTO_UZYT','user'],
+        ["getUsersLike",'LOG_INTO_USER','user'],
         ["getNewUserSlo",'ADD_USER','user'],
         ["getPermSlo",'','user'],
         ["cUser",'ADD_USER','user'],
@@ -60,7 +60,7 @@ final class UrlManager{
         ['getRoleSlo','','user'],
         ['eUserOn','EDIT_USER','user'],
         ['dUser','DEL_USER','user'],
-        ["getEmployeesLike","LOG_INTO_PRAC","user"],
+        ["getEmployeesLike","LOG_INTO_EMPL","user"],
         ["getEmployeesSpecSlo",'ADD_EMPL','user'],
         ["cEmployee",'ADD_EMPL','user'],
         ["getEmployeeProjects",'SHOW_PROJ_EMPL','user'],
@@ -90,8 +90,13 @@ final class UrlManager{
         ['setProjectReport','SAVE_PROJ_REPORT','user','json'],
         ['getModulClusterDefaultData','LOG_INTO_CLUSTR',''],
         ['updateClustr','EDIT_CLUSTR',''],
-        ['getModulUsersDefaults','LOG_INTO_UZYT',''],
-        ['getModulProjectDefaults','LOG_INTO_PROJ','']
+        ['getModulUsersDefaults','LOG_INTO_USER',''],
+        ['getModulProjectDefaults','LOG_INTO_PROJ',''],
+        ['getModulPermissionsDefaults','LOG_INTO_PERM',''],
+        ['getModulRoleDefaults','LOG_INTO_ROLE',''],
+        ['getModulEmployeesDefaults','LOG_INTO_EMPL',''],
+        ['getModulParametersDefaults','LOG_INTO_PARM',''],
+        ['getModulStageDefaults','LOG_INTO_STAGE','']
     ];
         
     public function __construct(){

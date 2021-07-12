@@ -183,7 +183,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
         $projectDoc=$this->dbLink->squery('SELECT `nazwa` FROM `projekt_dok` WHERE `id_projekt`=:id AND `wsk_u`=0 ',$sql);   
         $projectTeam=$this->dbLink->squery('SELECT `NazwiskoImie`,`DataOd`,`DataDo` FROM `v_proj_prac_v_pdf` WHERE `idProjekt`=:id',$sql); 
         $PDF = new createPdf($projectDetails,$projectDoc,$projectTeam);
-        echo json_encode($this->utilities->getResponse(__METHOD__,$PDF->getPdf(),'downloadProjectPdf','POST'));
+        $this->utilities->jsonResponse($PDF->getPdf(),'downloadProjectPdf');
     }
     public function pGenDoc(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -193,7 +193,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
         $projectDetails=$this->dbLink->squery('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`klient`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=:id AND `wsk_u`=0 ',$sql)[0];
         $doc = new createDoc($projectDetails,$_FILES,'Project_'.$this->utilities->getData(),'.docx');
         $doc->createProjectReport();
-        echo json_encode($this->utilities->getResponse(__METHOD__,$doc->getDocName(),'downloadProjectDoc','POST'));
+        $this->utilities->jsonResponse($doc->getDocName(),'downloadProjectDoc');
     }
     public function getProjectDefaultValues(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -490,7 +490,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
                         'Zarejestrowano zgłoszenie na aktualizację projektu o specyfikacji:',
                         $this->lastProjectData);
              
-        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
+        $this->utilities->jsonResponse('','cModal');
     }
     private function projectExist($field='',$id=0){
         $this->Log->log(0,"[".__METHOD__."] ".$field." => ".$this->inpArray[$field]);  
@@ -515,19 +515,14 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
     {
         $this->Log->log(0,"[".__METHOD__."]");
         $this->setInpArray(filter_input_array(INPUT_POST));
-        if(trim($this->inpArray['id'])==='')
-        {
-            $this->response->setError(1,' KEY ID in $_POST IS EMPTY');
-        }
-        else
-        {
-           self::parseResponse($this->modul['DOCUMENT']->updateDoc($this->inpArray['id'],$this->inpArrayDok)); 
-        }
+        $this->utilities->validateKey($this->inpArray,'id',true,1);
+        self::parseResponse($this->modul['DOCUMENT']->updateDoc($this->inpArray['id'],$this->inpArrayDok)); 
+        
         /*
          * IT IS POSSIBLE TO ADD EMAIL NOTYFICATION
          */
         //$this->response->setError(0,'TEST STOP');
-        return($this->response->setResponse(__METHOD__,'','cModal','POST'));
+        $this->utilities->jsonResponse('','cModal');
     }
     public function pDoc()
     {
@@ -872,7 +867,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
          //echo json_encode($this->modulData);
         /* OLD VERSION */
         //return ($this->response->setResponse(__METHOD__,$result,''));
-        $this->utilities->jsonResponse($result,'');
+        $this->utilities->jsonResponse($result,'sAll');
     }
     private function getProjects(){
         return($this->dbLink->squery('SELECT 
@@ -989,7 +984,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
         $v['id']=$this->inpArray['id'];
         $v['project']=self::getProjectData($this->inpArray['id']);
         $v['email']=$this->dbLink->squery('SELECT Pracownik,Pracownik_email AS Email FROM v_all_prac_proj_email WHERE Projekt_id=:id ORDER BY Projekt_id ASC',$sql);
-        $this->utilities->jsonResponse(__METHOD__,$v,'pEmail','POST');  
+        $this->utilities->jsonResponse($v,'pEmail');  
     }
      # RETURN ALL AVALIABLE MEMBERS
     public function getAllavaliableEmployee()
@@ -999,13 +994,12 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
     public function pDelete()
     {
         self::setNewProjectStatus('d');
-        if($this->response->getError()){ return false; }
-        echo json_encode($this->response->setResponse(__METHOD__, '','cModal','POST')); 
+        $this->utilities->jsonResponse('','cModal'); 
     }
     public function pClose(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::setNewProjectStatus('c');
-        echo json_encode($this->response->setResponse(__METHOD__, '','cModal','POST')); 
+        $this->utilities->jsonResponse('','cModal'); 
     }
     # SET NEW PROJECT STATUS
     private function setNewProjectStatus($status)
@@ -1040,7 +1034,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
             case 'd':# DELETED PROJECT IN DB
                 $sql[':status']=['d','STR'];
                 $sql[':wsk_u']=[1,'INT'];
-                 $this->dbLink->query('UPDATE `projekt_nowy` SET `wsk_u`=:wsk_u,`status`=:status,`dat_kor`=:dat_kor,`z_u_powod`=:z_u_powod,`mod_user`=:mod_user,`mod_user_id`=:mod_user_id,`mod_host`=:mod_host WHERE `id`=:id',$sql);
+                $this->dbLink->query('UPDATE `projekt_nowy` SET `wsk_u`=:wsk_u,`status`=:status,`dat_kor`=:dat_kor,`z_u_powod`=:z_u_powod,`mod_user`=:mod_user,`mod_user_id`=:mod_user_id,`mod_host`=:mod_host WHERE `id`=:id',$sql);
                 break;
             default:
                 Throw New Exception('WRONG TASK!',1);
@@ -1091,9 +1085,9 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
              */
             if($this->projectChange===0){
                 // ALREADY SETUP NO CHANGE
-                $this->response->setError(0,'BRAK ZMIAN !');
+                Throw New Exception('BRAK ZMIAN !',0);
             }
-             $this->projectDocList=$response['info'];
+            $this->projectDocList=$response['info'];
         }
         else if($response['status']===1){
             // CHANGE    

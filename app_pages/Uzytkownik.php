@@ -2,7 +2,7 @@
 
 final class Uzytkownik extends Page{
     private $Log;
-    private $mainPerm='LOG_INTO_UZYT';
+    private $mainPerm='LOG_INTO_USER';
     private $view=[
         'Main/PageLink.php',
         'vUzytkownicy.php',
@@ -10,9 +10,6 @@ final class Uzytkownik extends Page{
         'Main/Footer.php'
         ];
     private $js=[
-        'jquery-3.3.1.min.js',
-        'popper.min.js',
-        'bootstrap-4.5.3.min.js',
         'bootstrap-datepicker.min.js',
         'fontawesome.min.js',
         'Main/createHtmlElement.js',

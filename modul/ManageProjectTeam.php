@@ -27,7 +27,7 @@ final class ManageProjectTeam implements ManageProjectTeamCommand{
         $v['id']=intval($id,10);
         $v['team']=self::getTeam($v['id']);
         $v['project']=$this->dbLink->squery("SELECT * FROM `v_all_proj_v11` WHERE `i`=:id",[':id'=>[$v['id'],'INT']])[0];
-        echo json_encode($this->Utilities->getResponse(__METHOD__,$v,'pTeamOff','POST'));  
+        $this->Utilities->jsonResponse($v,'pTeamOff');  
     }
     private function getTeam($id=0){
         $this->Log->log(1,"[".__METHOD__."] ID => ".$id);
@@ -63,7 +63,7 @@ final class ManageProjectTeam implements ManageProjectTeamCommand{
         $v['team']=self::getTeam($v['id']);
         $v['ava']=self::getAvaTeam($v['id']);  
         $this->Log->logMulti(2,$v,__LINE__."::".__METHOD__."");
-        $this->Utilities->jsonResponse(__METHOD__,$v,'pTeam','POST');  
+        $this->Utilities->jsonResponse($v,'pTeam');  
     }
     public function pTeam()
     {
@@ -78,7 +78,7 @@ final class ManageProjectTeam implements ManageProjectTeamCommand{
          * 
          */
         self::setTeam();
-        $this->Utilities->jsonResponse(__METHOD__,'','cModal','POST');  
+        $this->Utilities->jsonResponse('','cModal');  
     }
     public function getAvaTeam($idProject)
     {

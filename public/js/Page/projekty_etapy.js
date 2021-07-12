@@ -1,13 +1,14 @@
 var ajax = new Ajax();
 var error = new Error();
-    Error.setDiv('errDiv-Adapted-overall');
-    Error.setModal('AdaptedModal');
 var table=new Table();
-var defaultTask='getprojectsstagelike';
+var defaultTask='getprojectsstagelike&u=0&v=1';
 var fieldDisabled='y';
 var projectData=new Object();
 var actDay = getActDate();
 var actData=new Object();
+var loggedUserPerm=new Array();
+table.setAjaxLink(ajax);
+table.setErrorLink(error,'errDiv-Adapted-overall');
 var actData={ 
             data: {},
             info: '',
@@ -18,8 +19,6 @@ var actData={
 
 
 var inputFieldCounter=0;
-
-console.log(loggedUserPerm);
 var mainTableColumns={
     ID:{
         style:'width:70px;',
@@ -70,7 +69,7 @@ var tableBtn=
     };
 var defaultTableExceptionCol=new Array('bl');
 
-setTableBtnAva();  
+ 
 table.setIdFiled(0);
 table.setButtons(tableBtn);
 table.setColumns(mainTableColumns);
@@ -87,9 +86,12 @@ function runFunction(d)
     console.log('===runFunction()===');
     console.log(d);
     // RUN FUNCTION
-    if(Error.checkStatusExist(d['status'])) { return ''; };
+    try{
+         d=JSON.parse(d);
+    error.checkStatusExist(d);
     actData=d;
-    console.log('FUNCTION TO RUN:\n'+d['data']['function']);
+    console.log('FUNCTION TO RUN:');
+    console.log(d['data']['function']);
     switch(d['data']['function'])
     {
         case 'psCreate':
@@ -128,14 +130,8 @@ function runFunction(d)
                 inputFieldCounter=0;
                 manageData('Edytuj','Szczegóły etapu projektu:','info','edit');
             break;
-        case 'psEdit':
-                fieldDisabled='n';
-                inputFieldCounter=0;
-                //clearAdaptedModalData();
-                manageData('Zatwierdź','Edycja etapu projektu:','info','psEdit');
-                break;
         case 'cModal':
-                cModal(defaultTask,d);
+                reloadData();
             break;
         case 'psHide':
                 changeDataState('Ukryj','UKRYJ ETAP PROJEKT:','secondary');
@@ -145,14 +141,29 @@ function runFunction(d)
             break;
         case 'block':
             break;
-        default:
-                displayAll(d);
+        case 'runMain':
+            loggedUserPerm=d['data']['value']['perm'];
+            setButtonDisplay(document.getElementById('createData'),'ADD_STAGE');
+            setTableBtnAva(); 
+        case 'sAll':
+                displayAll(d['data']['value']['data']);
             break;
+        default:
+                error.checkStatusResponse(d);
+            break;
+    }
+    }
+    catch(e){
+        d['status']=1;
+        d['info']=e;
+        error.checkStatusResponse(d);
+        console.log(e);
     }
 }
 function manageData(btnLabel,title,titleClass,task)
 {
     console.log('===manageData()===\n'+btnLabel);
+    error.set('errDiv-Adapted-overall');
     defaultTask='getprojectsstagelike&b='+actData['data']['value']['head']['i'];
     //Error.checkStatusResponse(actData);
     prepareModal(title,'bg-'+titleClass);  
@@ -1190,9 +1201,6 @@ function checkReason(t,id)
 function displayAll(d)
 {
     console.log('===displayAll()===');
-
-    if(Error.checkStatusResponse(d)) { return ''; };
-    console.log(Error.checkStatusResponse(d));
     /* SETUP DEFAULT TABLE COLUMN */
     table.showTable(d);  
 }
@@ -1238,8 +1246,7 @@ function functionBtn(f,btn,task)
         case 'cancel':
                 btn.onclick = function()
                 {
-                    closeModal('AdaptedModal'); 
-                    ajax.getData(defaultTask);
+                    reloadData();
                 };
             break;
         case 'edit':               
@@ -1247,10 +1254,14 @@ function functionBtn(f,btn,task)
                 {
                     clearAdaptedModalData();
                     actData['data']['function']='psEdit';
-                    actData['data']['task']='psEdit';
-                    runFunction(actData);
-                    console.log(actData);
+                    //actData['data']['task']='psEdit';
+                    //runFunction(actData);
+                    //console.log(actData);
                     ajax.getData('setProjectStageWskB&id='+actData['data']['value']['head']['i']);
+                    fieldDisabled='n';
+                    inputFieldCounter=0;
+                    //clearAdaptedModalData();
+                    manageData('Zatwierdź','Edycja etapu projektu:','info','psEdit');
                 };
                 break;
         case 'psHide':
@@ -1385,9 +1396,17 @@ function showHidden(ele)
     defaultTask='getprojectsstagelike&v='+ele.value;
     findData(document.getElementById('findData').value);
 }
-function setBtnPerm(){
-    console.log('setBTnPerm()');
-    setButtonDisplay(document.getElementById('createData'),'ADD_STAGE');
+function loadData(){
+    console.log('---loadData()---');
+    //ajax.getData(defaultTask);
+    console.log(error);
+    error.set('overAllErr');
+    ajax.getData('getModulStageDefaults');
 }
-ajax.getData(defaultTask);
-//document.getElementById('closeModal').onclick = function(){ reloadData(defaultTask); };
+function reloadData()
+{
+    console.log('---reloadData()---');
+    cModal('AdaptedModal');
+    ajax.getData(defaultTask);
+}
+loadData();

@@ -39,7 +39,7 @@ class ManagePermission
             $this->dbLink->rollback();
             Throw New Exception("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
         }
-        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');    
+        $this->utilities->jsonResponse('','cModal');    
     }
     private function deleteUserFromPerm($v)
     {
@@ -127,10 +127,10 @@ class ManagePermission
         $this->responseType='GET';
         $this->Log->log(0,"[".__METHOD__."] filter => ".$f);
         $sql=[':f'=>[$f,'STR']];
-        $result=$this->dbLink->squery('SELECT `ID` as \'i\',`SKROT` as \'s\',`NAZWA` as \'n\',`OPIS` as \'o\' FROM `uprawnienia` WHERE ID LIKE (:f) OR NAZWA LIKE (:f) OR SKROT LIKE (:f) OR OPIS LIKE (:f) ORDER BY ID asc'
+        $result['perms']=$this->dbLink->squery('SELECT `ID` as \'i\',`SKROT` as \'s\',`NAZWA` as \'n\',`OPIS` as \'o\' FROM `uprawnienia` WHERE ID LIKE (:f) OR NAZWA LIKE (:f) OR SKROT LIKE (:f) OR OPIS LIKE (:f) ORDER BY ID asc'
                 ,$sql);
         // $this->dbLink->sth->fetch(PDO::FETCH_ASSOC)
-       $this->utilities->jsonResponse(__METHOD__,$result,'showAll','GET');
+       $this->utilities->jsonResponse($result,'showAll');
     }
     public function getUsersWithPerm()
     {
@@ -143,7 +143,13 @@ class ManagePermission
         $v['u']=$this->dbLink->squery('SELECT id, ImieNazwisko FROM `v_upr_i_uzyt_v3` WHERE idUprawnienie=:i',[':i'=>[$id,'INT']]);
         // GET ALL USERS
         $v['a']=$this->dbLink->squery('SELECT ID as "id",CONCAT(Imie," ",Nazwisko) AS "ImieNazwisko" FROM `v_all_user` WHERE wskU=\'0\' ORDER BY ID asc');
-        $this->utilities->jsonResponse(__METHOD__, $v,'uPermOff','POST');   
+        $this->utilities->jsonResponse($v,'uPermOff');   
+    }
+     public function getModulPermissionsDefaults(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $v['perm']=$_SESSION['perm'];
+        $v['perms']=$this->dbLink->squery('SELECT `ID` as \'i\',`SKROT` as \'s\',`NAZWA` as \'n\',`OPIS` as \'o\' FROM `uprawnienia` ORDER BY ID asc');
+        $this->utilities->jsonResponse($v,'runMain');  
     }
     function __destruct(){}
 }

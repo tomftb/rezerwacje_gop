@@ -9,10 +9,10 @@ class PageManager
     private static $pagePerm=[
         1=>'LOG_INTO_CLUSTR',
         3=>'LOG_INTO_PROJ',
-        4=>'LOG_INTO_PRAC',
+        4=>'LOG_INTO_EMPL',
         5=>'',
-        6=>'LOG_INTO_UZYT',
-        7=>'LOG_INTO_UPR',
+        6=>'LOG_INTO_USER',
+        7=>'LOG_INTO_PERM',
         8=>'LOG_INTO_ROLE',
         9=>'LOG_INTO_OPCJ',
         10=>'LOG_INTO_PARM',

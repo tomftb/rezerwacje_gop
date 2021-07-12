@@ -28,17 +28,17 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         self::uploadFiles(APP_ROOT.UPLOAD_DIR,UPLOAD_DIR); 
         /* create Report */
         self::createDocument();
-        $this->utilities->jsonResponse(__METHOD__,$this->documentName,'downloadReportDoc','POST');
+        $this->utilities->jsonResponse($this->documentName,'downloadReportDoc');
     }
     public function setProjectReportImage(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::uploadFiles(APP_URL."router.php?task=showProjectReportFile&dir=".TMP_UPLOAD_DIR."&file=",TMP_UPLOAD_DIR); 
-        $this->utilities->jsonResponse(__METHOD__,$this->files,'showStagePreview','POST'); 
+        $this->utilities->jsonResponse($this->files,'showStagePreview'); 
     }
     public function getProjectReportData(){
         $this->Log->log(0,"[".__METHOD__."]");
         $stage=new manageProjectStage();
-        $this->utilities->jsonResponse(__METHOD__,['id'=>filter_input(INPUT_GET,'id'),'data'=>$stage->getAllStage()],'pReportOff','POST'); 
+        $this->utilities->jsonResponse(['id'=>filter_input(INPUT_GET,'id'),'data'=>$stage->getAllStage()],'pReportOff'); 
     }
     private function uploadFiles($linkToFile='',$uploadDir=''){
         $this->modul['FILE']=NEW file();
@@ -68,7 +68,7 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         /* ADD DATA TO DB -> DatabaseProjectReport class*/
         parent::addReport($this->idProject,$this->reportData);
         // Throw New Exception('TST',0);
-        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
+        $this->utilities->jsonResponse('','cModal');
     }
     private function setReportData(){
         $this->Log->log(0,"[".__METHOD__."]");

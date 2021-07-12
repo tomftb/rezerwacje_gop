@@ -1,8 +1,10 @@
 var ajax = new Ajax();
-var MyError = new Error();
+var error = new Error();
     //MyError.setDiv('errDiv-Adapted-overall');
 var report = new Report();
 var table=new Table();
+    table.setAjaxLink(ajax);
+    table.setErrorLink(error,'errDiv-Adapted-overall');
 var defaultTask='getprojectslike';
 var fieldDisabled='y';
 var projectData=new Object();
@@ -148,12 +150,12 @@ function runFunction(d)
     /* d => array response */
     /* TO DO document.getElementById('AdaptedModalDialog'); */
     console.log('===runFunction()===');
-    //console.log(d);
+    console.log(d);
     try{
         var dJson=JSON.parse(d);
         //console.log(dJson);
         // RUN FUNCTION
-        if(MyError.checkStatusExist(dJson['status'])) { return ''; };
+        error.checkStatusExist(dJson);
         projectData=dJson; 
         console.log(projectData);
         console.log('FUNCTION TO RUN:\n'+dJson['data']['function']);
@@ -177,7 +179,6 @@ function runFunction(d)
                 projectDocManage('Edytuj','DOKUMENTY PROJEKTU:','info');
                 break;
         case 'cModal':
-                cModal('AdaptedModal');
                 reloadData();
             break;
         case 'pEmail':
@@ -215,17 +216,21 @@ function runFunction(d)
                 report.create();
                 break;
         case 'runMain':
-            loggedUserPerm=dJson['data']['value']['perm'];
-            setButtonDisplay(document.getElementById('createData'),'ADD_PROJ');
-        default:
-                
+               
+                loggedUserPerm=dJson['data']['value']['perm'];
+                setButtonDisplay(document.getElementById('createData'),'ADD_PROJ');
+        case 'sAll':
                 displayAll(dJson);
+            break;
+        default:
+                error.checkStatusResponse(dJson);
             break;
     }
     }
     catch(e){
-        //this.setErr(e);
-        console.log(e);
+        d['status']=1;
+        d['info']=e;
+        error.checkStatusResponse(d);
     }
 }
 
@@ -377,7 +382,8 @@ function projectManage(btnLabel,title,titleClass)
         * data[] = PARAMETRY
     */
     prepareModal(title,'bg-'+titleClass);
-    MyError.set('errDiv-Adapted-overall');
+    error.set('errDiv-Adapted-overall');
+    checkResponseFunction(projectData);
     var form=createForm('POST',projectData['data']['function'],'form-horizontal','OFF');
     var add=document.getElementById('AdaptedDynamicData'); 
     pCreateFields(form);
@@ -498,8 +504,8 @@ function createProjectRow(ele,pFields)
 function displayAll(d)
 {
     console.log('===displayAll()===');
-    if(MyError.checkStatusResponse(d)) { return ''; };
-    console.log(MyError.checkStatusResponse(d));
+    console.log(d);
+    error.checkStatusResponse(d);
     /* SETUP DEFAULT TABLE COLUMN */
     table.showTable(d['data']['value']['data']);  
 }
@@ -632,18 +638,16 @@ function functionBtn(f,btn,task)
         case 'cancel':
                 btn.onclick = function()
                 {
-                    closeModal('AdaptedModal'); 
-                    reloadData('getprojectslike');
+                   reloadData();
                 };
             break;
         case 'pDoc':
                 btn.onclick = function()
                 { 
                     projectData['data']['function']='pDocEdit';
-                    projectData['data']['task']='pDocEdit';
-                    projectData['status']=0;
                     fieldDisabled='n';
                     clearAdaptedModalData();
+                    error.set('errDiv-Adapted-overall');
                     projectDocManage('Edytuj','EDYCJA DOKUMENTÓW PROJEKTU:','info');
                 };
             break;
@@ -725,11 +729,28 @@ function search(value){
 }
 function loadData(){
     console.log('---loadData()---');
-    console.log(MyError);
-    MyError.set('overAllErr');
+    console.log(error);
+    error.set('overAllErr');
     ajax.getData('getModulProjectDefaults');
 }
 function reloadData(){
+    cModal('AdaptedModal');
     ajax.getData(defaultTask);
+}
+function findData(value)
+{
+    ajax.getData(defaultTask+'&filter='+value);
+}
+function checkResponseFunction(d){
+    console.log(d);
+    if (!d.hasOwnProperty("data")) {
+        console.log('data NOT Exists');
+        throw 'Key `data` not exist';
+    }
+    if (!d['data'].hasOwnProperty("function")) {
+        console.log('data NOT Exists');
+        throw 'Key `data`.`function` not exist';
+    }
+    //console.log('KEY `data`.`function` exist');
 }
 loadData();

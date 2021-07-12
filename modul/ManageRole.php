@@ -19,16 +19,15 @@ class ManageRole
         $f="%".filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING)."%";
         $this->Log->log(0,"[".__METHOD__."] filter => ".$f);
         $this->utilities->jsonResponse(
-                __METHOD__,
-                $this->dbLink->squery('SELECT `ID` as \'i\',`Nazwa` as \'n\' FROM `v_slo_rola_all` WHERE `WSK_U`=\'0\' AND (`ID` LIKE (:f) OR `Nazwa` LIKE (:f)) ORDER BY ID ASC',[':f'=>[$f,'STR']]),
-                '',
-                'GET');
+                ['role'=>$this->dbLink->squery('SELECT `ID` as \'i\',`Nazwa` as \'n\' FROM `v_slo_rola_all` WHERE `WSK_U`=\'0\' AND (`ID` LIKE (:f) OR `Nazwa` LIKE (:f)) ORDER BY ID ASC',[':f'=>[$f,'STR']])],
+                'sAll'
+                );
     }
     public function getNewRoleSlo()
     {
         $v['rola']=$this->dbLink->squery('select * from v_slo_rola');
         $v['perm']=$this->dbLink->squery('select `ID` as \'i\',`NAZWA` as \'n\' from v_slo_upr');
-        $this->utilities->jsonResponse(__METHOD__,$v,'cRole');
+        $this->utilities->jsonResponse($v,'cRole');
     }
     public function rDelete()
     {
@@ -45,7 +44,7 @@ class ManageRole
             $this->dbLink->rollback();
             Throw New Exception("[".__METHOD__."] Wystąpił błąd zapytania bazy danych: ".$e->getMessage(),1);
         }  
-        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
+        $this->utilities->jsonResponse('','cModal');
     }
     public function cRole()
     {
@@ -55,7 +54,7 @@ class ManageRole
         self::checkRoleName();
         UNSET($this->inpArray['id']);
         self::addRole();
-        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
+        $this->utilities->jsonResponse('','cModal');
     }
     public function rEdit()
     {
@@ -72,7 +71,7 @@ class ManageRole
         self::checkRoleValueLength();
         self::checkEditedRoleName($sql);
         self::updateRole($sql);
-        $this->utilities->jsonResponse(__METHOD__,'','cModal','POST');
+        $this->utilities->jsonResponse('','cModal');
     }
     protected function addRole()
     {
@@ -212,7 +211,7 @@ class ManageRole
         /* CHECK IS NOT REMOVED */
         $v['role']=self::getRole();
         $v['perm']=self::getRolePerm();
-        $this->utilities->jsonResponse(__METHOD__,$v,'sRole','POST');
+        $this->utilities->jsonResponse($v,'sRole');
     }
     private function getRolePerm()
     {
@@ -269,7 +268,13 @@ class ManageRole
         else{
             $v['user']=$this->dbLink->squery('SELECT \'XXX\' as Imie ,\'XXX\' as Nazwisko,\'XXX\' as Login, \'XXX\'as Email FROM v_all_user WHERE idRola=:idr AND wskU=\'0\' ORDER BY Nazwisko,Imie,ID ASC',[':idr'=>[$this->inpArray['id'],'INT']]);
         }
-       $this->utilities->jsonResponse(__METHOD__,$v,'rDelete','POST');
+       $this->utilities->jsonResponse($v,'rDelete');
+    }
+    public function getModulRoleDefaults(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $v['perm']=$_SESSION['perm'];
+        $v['role']=$this->dbLink->squery('SELECT `ID` as \'i\',`Nazwa` as \'n\' FROM `v_slo_rola_all` WHERE `WSK_U`=\'0\' ORDER BY ID ASC');
+        $this->utilities->jsonResponse($v,'runMain');  
     }
     function __destruct(){}
 }

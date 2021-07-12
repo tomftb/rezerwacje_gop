@@ -3,8 +3,20 @@
 final class Parametry extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_PARM';
-    private $view=['/Main/PageLink.php','vParametry.php'];
-    private $js=['parametry.js'];
+    private $view=[
+        'Main/PageLink.php',
+        'vParametry.php',
+        'Main/Table.html',
+        'Main/Footer.php'
+        ];
+    private $js=[
+        'bootstrap-datepicker.min.js',
+        'fontawesome.min.js',
+        'Main/createHtmlElement.js',
+        'Main/Error.js',
+        'Main/Ajax.js',
+        'Page/parametry.js'
+        ];
 
 	
     public function __construct(){

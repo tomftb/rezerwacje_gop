@@ -3,8 +3,22 @@
 final class Role extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_ROLE';
-    private $view=['/Main/PageLink.php','vRole.php'];
-    private $js=['role.js'];
+    private $view=[
+        '/Main/PageLink.php',
+        'vRole.php',
+        'Main/Table.html',
+        'Main/AdaptedModal.html',
+        'Main/Footer.php'
+        ];
+    private $js=[
+        'bootstrap-datepicker.min.js',
+        'fontawesome.min.js',
+        'Main/createHtmlElement.js',
+        'Main/parseFieldValue.js',
+        'Main/Error.js',
+        'Main/Ajax.js',
+        'Page/role.js'
+        ];
 
 	
     public function __construct(){

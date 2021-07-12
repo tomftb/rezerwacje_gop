@@ -1,10 +1,7 @@
 var ajax = new Ajax();
 var error = new Error();
-    Error.setDiv('errDiv-Adapted-overall');
-    Error.setModal('AdaptedModal');
 var defaultTask='getAllParm';
 var fieldDisabled='n';
-var actParmData=new Object();
 var defaultTableColumns={
     Skrót:{
         style:'width:70px;',
@@ -28,37 +25,42 @@ function runFunction(d)
 {
     /* d => array response */
     console.log('===runFunction()===');
-    console.log(d);
-    // RUN FUNCTION
-    if(Error.checkStatusExist(d['status'])) { return ''; };
-    console.log('FUNCTION TO RUN:\n'+d['data']['function']);
-
-
-    switch(d['data']['function'])
-    {
-        case 'pUpdate':     
-            /* update user and date */
-            var ele=document.getElementById('info_'+d['data']['value']['i']);
-                ele.innerText='Update: '+d['data']['value']['u']+', '+d['data']['value']['d'];  
-               
-            break;
-        default:
-                //console.log('DEFAULT TASK');
-                actParmData=d;
-            displayAll();
-            break;
+    //console.log(d);
+    try{
+        // RUN FUNCTION
+        d=JSON.parse(d);
+        error.checkStatusExist(d); 
+        console.log('FUNCTION TO RUN:\n'+d['data']['function']);
+         console.log(d['data']['function']);
+        switch(d['data']['function'])
+        {
+            case 'pUpdate':     
+                /* update user and date */
+                error.checkStatusResponse(d);
+                var ele=document.getElementById('info_'+d['data']['value']['i']);
+                    ele.innerText='Update: '+d['data']['value']['u']+', '+d['data']['value']['d'];  
+                break;
+            case 'runMain':
+                if(d['data']['value']['perm'].indexOf('EDIT_PARM')===-1){
+                    fieldDisabled='y';
+                };
+            case 'sAll': 
+                displayAll(d['data']['value']['parm']);
+                break;
+            default:
+                error.checkStatusResponse(d);
+                break;
+        }
     }
-    //displayAll(d);
+    catch(e){
+        d['status']=1;
+        d['info']=e;
+        error.checkStatusResponse(d);
+        console.log(e);
+    }
 }
-function displayAll()
-{
-    //console.log('===displayAll()===');
-    if(Error.checkStatusResponse(actParmData)) { 
-        prepareModal('ERROR','bg-danger');
-         $('#AdaptedModal').modal('show'); return ''; 
-        return ''; 
-    };
-    
+function displayAll(d)
+{ 
     /* SETUP DEFAULT TABLE COLUMN */
     var defaultTableCol=document.getElementById("colDefaultTable");
         removeHtmlChilds(defaultTableCol);
@@ -75,10 +77,10 @@ function displayAll()
     var pd=document.getElementById("defaultTableRows");
     /* remove old data */
     removeHtmlChilds(pd);
-    for(var i = 0; i < actParmData['data']['value'].length; i++)
+    for(var i = 0; i < d.length; i++)
     {    
         var tr=createTag('','tr','');
-            assignDefaultTableData(tr,actParmData['data']['value'][i]);
+            assignDefaultTableData(tr,d[i]);
         pd.appendChild(tr);
     }
     //console.log(pd);
@@ -154,4 +156,11 @@ function findData(value)
 {
     ajax.getData(defaultTask+"&f="+value);
 }
-ajax.getData(defaultTask);
+function loadData(){
+    console.log('---loadData()---');
+    //ajax.getData(defaultTask);
+    console.log(error);
+    error.set('overAllErr');
+    ajax.getData('getModulParametersDefaults');
+}
+loadData();

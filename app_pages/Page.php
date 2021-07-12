@@ -25,7 +25,7 @@ abstract class Page{
         'jquery-3.3.1.min.js',
         'jquery-ui-1.10.1.custom/jquery-ui-1.10.1.custom.min.js',
         'popper.min.js',
-        'bootstrap-4.1.3.min.js',
+        'bootstrap-4.5.3.min.js',
     ];
     public function __construct(){
         $this->uid=uniqid();	

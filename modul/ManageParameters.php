@@ -18,9 +18,9 @@ class ManageParameters
     {
         $f="%".filter_input(INPUT_GET,'f',FILTER_SANITIZE_STRING)."%";
         $this->Log->log(0,"[".__METHOD__."] filter => ".$f);
-        $result=$this->dbLink->squery('SELECT `ID` as \'i\' ,`Skrót` as \'s\',`Nazwa` as \'n\',`Opis` as \'o\',`Wartość` as \'v\',`Typ` as \'t\',`ModDat` as \'md\',`ModUser` as \'mu\' FROM `v_parm_v2` WHERE ID LIKE (:f) OR Skrót LIKE (:f) OR Nazwa LIKE (:f) OR Opis LIKE (:f) OR Wartość LIKE (:f) ORDER BY ID asc'
+        $result['parm']=$this->dbLink->squery('SELECT `ID` as \'i\' ,`Skrót` as \'s\',`Nazwa` as \'n\',`Opis` as \'o\',`Wartość` as \'v\',`Typ` as \'t\',`ModDat` as \'md\',`ModUser` as \'mu\' FROM `v_parm_v2` WHERE ID LIKE (:f) OR Skrót LIKE (:f) OR Nazwa LIKE (:f) OR Opis LIKE (:f) OR Wartość LIKE (:f) ORDER BY ID asc'
                 ,[':f'=>[$f,'STR']]);
-        $this->utilities->jsonResponse(__METHOD__,$result,'showAll','GET');
+        $this->utilities->jsonResponse($result,'sAll');
     }
     public function updateParm()
     {
@@ -37,7 +37,7 @@ class ManageParameters
         $v['i']=$this->inpArray['id'];
         $v['d']=date('Y-m-d H:i:s'); //2019-03-12 14:10:39
         $v['u']=$_SESSION['username'];
-        $this->utilities->jsonResponse(__METHOD__,$v,'pUpdate','GET');
+        $this->utilities->jsonResponse($v,'pUpdate');
     }
     private function verifyParameterId($sql)
     {
@@ -127,6 +127,11 @@ class ManageParameters
         if($err){
             Throw New Exception ($err,0); 
         }
+    }
+    public function getModulParametersDefaults(){
+        $result['perm']=$_SESSION['perm'];
+        $result['parm']=$this->dbLink->squery('SELECT `ID` as \'i\' ,`Skrót` as \'s\',`Nazwa` as \'n\',`Opis` as \'o\',`Wartość` as \'v\',`Typ` as \'t\',`ModDat` as \'md\',`ModUser` as \'mu\' FROM `v_parm_v2` ORDER BY ID asc');
+        $this->utilities->jsonResponse($result,'runMain');
     }
     function __destruct(){}
 }

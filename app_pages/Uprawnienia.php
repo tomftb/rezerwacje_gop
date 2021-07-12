@@ -3,10 +3,23 @@
 final class Uprawnienia extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_UPR';
-    private $view=['/Main/PageLink.php','vUprawnienia.php'];
-    private $js=['uprawnienia.js'];
-
-	
+    private $view=[
+        'Main/PageLink.php',
+        'vUprawnienia.php',
+        'Main/Table.html',
+        'Main/AdaptedModal.html',
+        'Main/Footer.php'
+        ];
+    private $js=[
+        'bootstrap-datepicker.min.js',
+        'fontawesome.min.js',
+        'Main/createHtmlElement.js',
+        'Main/parseFieldValue.js',
+        'Main/Error.js',
+        'Main/Ajax.js',
+        'Main/Utilities.js',
+        'Page/uprawnienia.js'
+        ];
     public function __construct(){
         parent::__construct();	
         self::setPage();

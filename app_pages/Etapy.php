@@ -3,8 +3,24 @@
 final class Etapy extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_STAGE';
-    private $view=['/Main/PageLink.php','vEtapy.php'];
-    private $js=['projekty_etapy.js'];
+    private $view=[
+        'Main/PageLink.php',
+        'vEtapy.php',
+        'Main/Table.html',
+        'Main/AdaptedModal.html',
+        'Main/Footer.php'
+        ];
+    private $js=[
+        'bootstrap-datepicker.min.js',
+        'fontawesome.min.js',
+        'Main/createHtmlElement.js',
+        'Main/parseFieldValue.js',
+        'Main/Error.js',
+        'Main/Ajax.js',
+        'Main/Utilities.js',
+        'Main/Table.js',
+        'Page/projekty_etapy.js'
+        ];
 
 	
     public function __construct(){

@@ -1,7 +1,5 @@
 var ajax = new Ajax();
 var error = new Error();
-    Error.setDiv('errDiv-Adapted-overall');
-    Error.setModal('AdaptedModal');
 var defaultTask='getAllRole';
 var fieldDisabled='y';
 /* ACTUAL DATA FROM RESPOSNE */
@@ -16,7 +14,7 @@ var actUsedData={
         
     }
 };
-// new Array('ID','Nazwa','Opcje');
+var loggedUserPerm=new Array();
 var defaultTableColumns={
     ID : {
         style:'width:100px',
@@ -46,52 +44,61 @@ var defaultTableBtnConfig={
             attributes : { 'data-toggle' : 'modal', 'data-target': '#AdaptedModal' }
         }
     };
-//console.log(loggedUserPerm);
-
 function runFunction(d)
 {
     /* d => array response */
     console.log('===runFunction()===');
-    console.log(d);
+    //console.log(d);
     // RUN FUNCTION
-    if(Error.checkStatusExist(d['status'])) { return ''; };
-    responseData=d; 
-    console.log('FUNCTION TO RUN:\n'+d['data']['function']);
-    switch(d['data']['function'])
-    {
-        case 'cRole':
-                actUsedData['role'].i='';
-                actUsedData['role'].n='';
-                actUsedData['perm']=d['data']['value']['perm'];
-                fieldDisabled='n';
-                roleManage('Dodaj','DODAJ ROLE:','info');
-            break;
-        case 'sRole':
-                //pDetails(d,'Edytuj');
-                actUsedData=d['data']['value'];
-                console.log(actUsedData);
-                fieldDisabled='y';
+    try{
+        d=JSON.parse(d);
+        error.checkStatusExist(d);
+        responseData=d; 
+        console.log('FUNCTION TO RUN:');
+        //console.log(d['data']['function']);
+        switch(d['data']['function'])
+        {
+            case 'cRole':
+                    actUsedData['role'].i='';
+                    actUsedData['role'].n='';
+                    actUsedData['perm']=d['data']['value']['perm'];
+                    fieldDisabled='n';
+                    roleManage('Dodaj','DODAJ ROLE:','info');
+                break;
+            case 'sRole':
+                    //pDetails(d,'Edytuj');
+                    actUsedData=d['data']['value'];
+                    console.log(actUsedData);
+                    fieldDisabled='y';
                     /* INFO */
-                document.getElementById('AdaptedModalInfo').appendChild(createTag("Role ID: "+actUsedData['role'].i+", Create user: "+actUsedData['role'].cu+" ("+actUsedData['role'].cue+"), Create date: "+actUsedData['role'].cd,'small','text-left text-secondary ml-1'));
-                roleManage('Edytuj','SZCZEGÓŁY ROLI:','info');
-            break;
-        case 'rEdit':
-                fieldDisabled='n';
-                clearAdaptedModalData();
-                roleManage('Zatwierdź','EDYCJA ROLI:','warning');
-                document.getElementById('AdaptedModalInfo').appendChild(createTag("Role ID: "+actUsedData['role'].i+", Create user: "+actUsedData['role'].cu+" ("+actUsedData['role'].cue+"), Create date: "+actUsedData['role'].cd,'small','text-left text-secondary ml-1'));
-            break;
-        case 'cModal':
-                /* RUN CLOSE MODAL FROM createHtmlElement.js */
-                cModal(defaultTask,d);
-            break;
-        case 'rDelete':
-                deleteRole('Usuń','USUŃ ROLE:','danger');
-            break;
-        default:
-                console.log('DEFAULT TASK');
-                displayAll();
-            break;
+                    document.getElementById('AdaptedModalInfo').appendChild(createTag("Role ID: "+actUsedData['role'].i+", Create user: "+actUsedData['role'].cu+" ("+actUsedData['role'].cue+"), Create date: "+actUsedData['role'].cd,'small','text-left text-secondary ml-1'));
+                    roleManage('Edytuj','SZCZEGÓŁY ROLI:','info');
+                break;
+            case 'cModal':
+                    /* RUN CLOSE MODAL FROM createHtmlElement.js */
+                    cModal('AdaptedModal');
+                    reloadData();
+                break;
+            case 'rDelete':
+                    deleteRole('Usuń','USUŃ ROLE:','danger');
+                break;
+            case 'runMain':
+                    loggedUserPerm=d['data']['value']['perm'];
+                    setButtonDisplay(document.getElementById('createData'),'ADD_ROLE');
+            case 'sAll':
+                    displayAll(d['data']['value']['role']);
+                    break;
+            default:
+                    console.log('DEFAULT TASK');
+                    error.checkStatusResponse(d);
+                break;
+        }
+    }
+    catch(e){
+        d['status']=1;
+        d['info']=e;
+        error.checkStatusResponse(d);
+        console.log(e);
     }
 }
 function createTable(colTitle,tBody)
@@ -166,7 +173,8 @@ function createRoleUsersList(ele){
 function roleManage(btnLabel,title,titleClass)
 {
     console.log('===roleManage()===');
-    Error.checkStatusResponse(responseData);
+    error.set('errDiv-Adapted-overall');
+    error.checkStatusResponse(responseData);
     /*
         * SLOWNIKI:
         * data[] = ROLE
@@ -242,10 +250,9 @@ function createRoleRow(ele,pFields)
         ele.appendChild(dRow);  
     }
 }
-function displayAll()
+function displayAll(d)
 {
     console.log('===displayAll()===');
-    if(Error.checkStatusResponse(responseData)) { return ''; };
     /* SETUP DEFAULT TABLE COLUMN */
     var defaultTableCol=document.getElementById("colDefaultTable");
         removeHtmlChilds(defaultTableCol);
@@ -262,13 +269,13 @@ function displayAll()
     var pd=document.getElementById("defaultTableRows");
     /* remove old data */
     removeHtmlChilds(pd);
-    for(var i = 0; i < responseData['data']['value'].length; i++)
+    for (const i in d)
     {    
         var tr=createTag('','tr','');
-            assignDefaultTableData(tr,responseData['data']['value'][i]);
+            assignDefaultTableData(tr,d[i]);
             /* i => ID DATA */
         var td=document.createElement('td');
-            td.appendChild(setBtn(defaultTableBtnConfig,responseData['data']['value'][i].i));
+            td.appendChild(setBtn(defaultTableBtnConfig,d[i].i));
         tr.appendChild(td);
         pd.appendChild(tr);       
     }
@@ -344,17 +351,18 @@ function functionBtn(f,btn,task)
                 btn.onclick = function()
                 { 
                     responseData['data']['function']='rEdit';
-                    responseData['data']['task']='rEdit';
-                    responseData['status']=0;
-                    responseData['type']='GET';
-                    runFunction(responseData);
+                    fieldDisabled='n';
+                    clearAdaptedModalData();
+                    roleManage('Zatwierdź','EDYCJA ROLI:','warning');
+                    document.getElementById('AdaptedModalInfo').appendChild(createTag("Role ID: "+actUsedData['role'].i+", Create user: "+actUsedData['role'].cu+" ("+actUsedData['role'].cue+"), Create date: "+actUsedData['role'].cd,'small','text-left text-secondary ml-1'));
+               
                 };
                 break;
         case 'cancel':
                 btn.onclick = function()
                 {
-                    closeModal('AdaptedModal'); 
-                    reloadData(defaultTask);
+                    cModal('AdaptedModal'); 
+                    reloadData();
                 };
             break;
         case 'rEdit':
@@ -390,14 +398,21 @@ function postData(btn,nameOfForm)
 function createData()
 {
     clearAdaptedModalData();
+    
+    error.set('errDiv-Adapted-overall');
     ajax.getData('getNewRoleSlo');
-}
-function setBtnPerm(){
-    console.log('setBTnPerm()');
-    setButtonDisplay(document.getElementById('createData'),'ADD_ROLE');
 }
 function findData(value)
 {
     ajax.getData('getAllRole&filter='+value);
 }
-ajax.getData(defaultTask);
+function loadData(){
+    console.log('---loadData()---');
+    console.log(error);
+    error.set('overAllErr');
+    ajax.getData('getModulRoleDefaults');
+}
+function reloadData(){
+    ajax.getData(defaultTask);
+}
+loadData();

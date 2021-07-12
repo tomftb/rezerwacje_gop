@@ -2,7 +2,7 @@
 
 final class Uprawnienia extends Page{
     private $Log;
-    private $mainPerm='LOG_INTO_UPR';
+    private $mainPerm='LOG_INTO_PERM';
     private $view=[
         'Main/PageLink.php',
         'vUprawnienia.php',

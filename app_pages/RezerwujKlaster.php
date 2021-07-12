@@ -3,7 +3,10 @@
 final class RezerwujKlaster extends Page{
     private $Log;
     private $mainPerm='LOG_INTO_CLUSTR';
-    private $view=['/Main/PageLink.php','vRezerwujKlaster.php','Main/Footer.php'];
+    private $view=[
+        'Main/PageLink.php',
+        'vRezerwujKlaster.php',
+        'Main/Footer.php'];
     private $js=['JSXHR'=>'Main/Ajax.js','Main/headerView.js','Page/Cluster.js'];//,
     
     public function __construct(){

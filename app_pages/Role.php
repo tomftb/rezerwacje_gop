@@ -17,6 +17,7 @@ final class Role extends Page{
         'Main/parseFieldValue.js',
         'Main/Error.js',
         'Main/Ajax.js',
+        'Main/headerView.js',
         'Page/role.js'
         ];
 

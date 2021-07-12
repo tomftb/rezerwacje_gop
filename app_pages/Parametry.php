@@ -15,6 +15,7 @@ final class Parametry extends Page{
         'Main/createHtmlElement.js',
         'Main/Error.js',
         'Main/Ajax.js',
+        'Main/headerView.js',
         'Page/parametry.js'
         ];
 

@@ -18,6 +18,7 @@ final class Uprawnienia extends Page{
         'Main/Error.js',
         'Main/Ajax.js',
         'Main/Utilities.js',
+        'Main/headerView.js',
         'Page/uprawnienia.js'
         ];
     public function __construct(){

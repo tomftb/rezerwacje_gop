@@ -16,6 +16,7 @@ final class Uzytkownik extends Page{
         'Main/parseFieldValue.js',
         'Main/Error.js',
         'Main/Ajax.js',
+        'Main/headerView.js',
         'Page/uzytkownicy.js'
         ];
 

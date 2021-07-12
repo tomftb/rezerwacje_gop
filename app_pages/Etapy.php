@@ -11,7 +11,8 @@ final class Etapy extends Page{
         'Main/Footer.php'
         ];
     private $js=[
-       
+        'Main/Ajax.js',
+        'Main/headerView.js',
         'Main/Table.js',
         'Page/projekty_etapy.js'
         ];

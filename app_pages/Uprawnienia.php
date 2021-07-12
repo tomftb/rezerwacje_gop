@@ -11,6 +11,8 @@ final class Uprawnienia extends Page{
         'Main/Footer.php'
         ];
     private $js=[
+        'Main/Ajax.js',
+        'Main/headerView.js',
         'Main/Utilities.js',
         'Page/uprawnienia.js'
         ];

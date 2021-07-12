@@ -8,6 +8,8 @@ final class RezerwujKlaster extends Page{
         'vRezerwujKlaster.php',
         'Main/Footer.php'];
     private $js=[
+        'Main/Ajax.js',
+        'Main/headerView.js',
         'Page/Cluster.js'
         ];
     public function __construct(){

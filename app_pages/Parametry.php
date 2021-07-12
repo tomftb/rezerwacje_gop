@@ -10,6 +10,8 @@ final class Parametry extends Page{
         'Main/Footer.php'
         ];
     private $js=[
+        'Main/Ajax.js',
+        'Main/headerView.js',
         'Page/parametry.js'
         ];
 

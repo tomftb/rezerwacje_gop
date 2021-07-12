@@ -11,6 +11,8 @@ final class Role extends Page{
         'Main/Footer.php'
         ];
     private $js=[
+        'Main/Ajax.js',
+        'Main/headerView.js',
         'Page/role.js'
         ];
 

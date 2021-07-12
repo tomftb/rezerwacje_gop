@@ -31,9 +31,7 @@ abstract class Page{
         'Main/createHtmlElement.js',
         'Main/parseFieldValue.js',
         'Main/Error.js',
-        'Main/Ajax.js',
-        'Main/Utilities.js',
-        'Main/headerView.js'
+        'Main/Utilities.js'
     ];
     public function __construct(){
         $this->uid=uniqid();	

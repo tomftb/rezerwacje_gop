@@ -86,6 +86,7 @@ final class UrlManager{
         ['downloadReportDoc','GEN_PROJ_REP_DOC','user','file'],
         ['pGenDoc','GEN_DOC_PROJ','user'],
         ['downloadProjectDoc','GEN_DOC_PROJ','user','file'],
+        ['downloadProjectReportImage','GEN_PROJ_REP_DOC','user','file'],
         ['showProjectReportFile','GEN_PROJ_REP_DOC','user','file'],
         ['setProjectReport','SAVE_PROJ_REPORT','user','json'],
         ['getModulClusterDefaultData','LOG_INTO_CLUSTR',''],

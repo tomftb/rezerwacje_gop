@@ -37,8 +37,12 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
     }
     public function getProjectReportData(){
         $this->Log->log(0,"[".__METHOD__."]");
+        $this->utilities->setGet('id',$this->inpArray);
         $stage=new manageProjectStage();
-        $this->utilities->jsonResponse(['id'=>filter_input(INPUT_GET,'id'),'data'=>$stage->getAllStage()],'pReportOff'); 
+        $v['id']=$this->inpArray['id'];
+        $v['data']=$stage->getAllStage();
+        $v['act']=parent::getProjectStage(['idp'=>[$this->inpArray['id'],'INT']]);
+        $this->utilities->jsonResponse($v,'pReportOff'); 
     }
     private function uploadFiles($linkToFile='',$uploadDir=''){
         $this->modul['FILE']=NEW file();
@@ -73,7 +77,7 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
     private function setReportData(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->inpArray=filter_input_array(INPUT_POST);
-        $this->Log->logMulti(2,$this->inpArray,"POST");  
+        $this->Log->logMulti(0,$this->inpArray,"POST");  
         /* SET PROJECT ID */
         self::setProjectId();
         if(empty($this->inpArray)){ throw New Exception('NO STAGE SELECTED',0);}

@@ -1106,19 +1106,20 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
     }
     public function downloadProjectPdf(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $download=new downloadFile();
-        $download->getFile(filter_input(INPUT_GET,"file"));
+        downloadFile::getFile(filter_input(INPUT_GET,"file"));
     }
     public function downloadProjectDoc(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $download=new downloadFile();
-        $download->getFile(filter_input(INPUT_GET,"file"));
+        downloadFile::getFile(filter_input(INPUT_GET,"file"));
     }
     public function downloadReportDoc(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $download=new downloadFile();
-        $download->getFile(filter_input(INPUT_GET,"file"));
-    }     
+        downloadFile::getFile(filter_input(INPUT_GET,"file"));
+    } 
+    public function downloadProjectReportImage(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        downloadFile::getFile(filter_input(INPUT_GET,"file"));
+    }
     public function showProjectReportFile(){
         $this->Log->log(0,"[".__METHOD__."]");
         $showFile=new showFile();

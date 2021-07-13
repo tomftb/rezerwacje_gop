@@ -13,15 +13,17 @@ class DatabaseProjectReport{
         $this->dbLink=LoadDb::load();
         $this->utilities=NEW Utilities();
     }
-    protected function addReport($idProject,$dataProject){
+    protected function addReport($ProjectId=0,$ProjectData=[]){
         $this->Log->log(0,"[".__METHOD__."]"); 
         try{
             /* GET ALL STAGE VALUE */
-            $sql[':idproject']=[$idProject,'INT'];
-            $this->idProject=$idProject;
+            $this->Log->LogMulti(0,$ProjectId,'PROJECT ID');
+            $sql[':idp']=[$ProjectId,'INT'];
+            $this->idProject=$ProjectId;
             self::getProjectStage($sql);
             self::setAddOns($sql);
-            array_walk($dataProject,array($this,'manageStage'),$sql);
+            /* LOOP EVERY PROJCT STAGE */
+            array_walk($ProjectData,array($this,'manageStage'),$sql);
         }
 	catch (PDOException $e){
             $this->dbLink->rollback(); 
@@ -44,11 +46,12 @@ class DatabaseProjectReport{
     /*
      * GET PROJECT ALL STAGE AND STAGE VALUE FROM DATABASE
      */
-    private function getProjectStage($sql){
+    public function getProjectStage($sql){
         $this->Log->log(0,"[".__METHOD__."]"); 
-        $this->projectStageDb=$this->dbLink->squery("SELECT `id`,`stageId`,`number`,`title`,'n' as 'inserted' FROM `projekt_etap` WHERE idProject=:idproject AND wsk_u='0'",$sql);
+        $this->projectStageDb=$this->dbLink->squery("SELECT `id`,`stageId` as 'i',`number` as 'n',`title` as 't' FROM `projekt_etap` WHERE idProject=:idp AND wsk_u='0'",$sql);
         array_walk($this->projectStageDb,[$this,'getProjectStageValue']);
         $this->Log->logMulti(2,$this->projectStageDb,__METHOD__); 
+        return $this->projectStageDb;
     }
     /*
      * GET PROJECT ALL STAGE VALUE FROM DATABASE
@@ -56,59 +59,72 @@ class DatabaseProjectReport{
     private function getProjectStageValue(&$stage){
         $this->Log->log(2,"[".__METHOD__."]"); 
         $sql[':id']=[$stage['id'],'INT'];
-        $stage['data']=$this->dbLink->squery("SELECT `id`,`valueId`,`value`,`fileposition`,`file`,'n' as 'inserted' FROM `projekt_etap_wartosc` WHERE idProjectStage=:id AND wsk_u='0'",$sql);
+        $stage['data']=$this->dbLink->squery("SELECT `id`,`valueId`,`value` as 'v',`fileposition` as 'fp',`file` as 'f' FROM `projekt_etap_wartosc` WHERE idProjectStage=:id AND wsk_u='0'",$sql);
     }
     /*
-     * CHECK AND UPDATE OD INSERT STAGE TO PROJECT
+     * CHECK AND UPDATE OR INSERT STAGE TO PROJECT
      */
-    private function manageStage($value,$key,$sql){
-        $this->Log->log(0,"[".__METHOD__."]"); 
-        $sql[':stageId']=[$key,'INT'];
-        $sql[':number']=[$value['n'],'INT'];
-        $sql[':title']=[$value['t'],'STR'];
+    private function manageStage($ProjectDataValue,$ProjectDataId,$sql){
+        $this->Log->log(0,"[".__METHOD__."][POST] PROJECT STAGE ID ${ProjectDataId}"); 
+        $sql[':i']=[$ProjectDataId,'INT'];
+        $sql[':n']=[$ProjectDataValue['n'],'INT'];
+        $sql[':t']=[$ProjectDataValue['t'],'STR'];
         /* CHECK PROJECT REPORT STAGE EXIST IN DATABASE => IF EXIST => UPDATE OTHERWISE => INSERT*/
-        self::checkStageExist($key,$value,$this->stageDbId);
+        /* SET DEFUALT Stage Db id */
+        $this->stageDbId=0;
+        self::checkStageExist($ProjectDataId,$ProjectDataValue);
         if($this->stageDbId){
-            self::updateStage($value,$key,$sql);
+            self::updateStage($ProjectDataValue,$ProjectDataId,$sql);
         }
         else{
-            self::insertStage($value,$key,$sql);
+            self::insertStage($ProjectDataValue,$ProjectDataId,$sql);
         }
         $this->Log->logMulti(0,$this->projectStageDb,__METHOD__); 
         //Throw new ErrorException('test stop',0);
     }
-    private function checkStageExist($stageId,$stageData,$idStageDb){
+    private function checkStageExist($PostStageId,$PostStageData){
         $this->Log->log(0,"[".__METHOD__."]"); 
-        $this->Log->logMulti(0,$stageId,"STAGE POST ID"); 
-        $this->Log->logMulti(0,$stageData['d'],"STAGE POST DATA"); 
+        $this->Log->logMulti(0,$PostStageData['d'],"POST PROJECT STAGE DATA"); 
         $iStage=0;
-        $iStageValue=0;
+
         $idStageValue=0;
+        /* LOOP OVER DATABASE PROJECT STAGE DATA */ 
         foreach($this->projectStageDb as $k => $v){
-            if(intval($stageId,10)===intval($v['stageId'],10)){
-                $this->Log->log(0,"FOUND stageId => ".$v['id']);
+            if(intval($PostStageId,10)===intval($v['i'],10)){
+                $this->Log->log(0,"PROJECT DB FOUND POST STAGE ID => ".$PostStageId." (UPDATE)");
+                $this->Log->log(0,"DB ID => ".$v['id']);
                 $iStage++;
-                $idStageDb=$v['id'];
-                $this->projectStageDb[$k]['inserted']='y';
+                /* FOUND AND SETUP */
+                $this->stageDbId=$v['id'];
                 /* CHECK STAGE VALUE */
-                $this->Log->log(0,"LOOP OVER DATA");
-                foreach($v['data'] as $kData => $vData){
-                    //$this->Log->logMulti(0,$vData,"[".__METHOD__."]"); 
-                    $this->Log->log(0,"VALUE ID => ".$vData['valueId']);
-                    if(array_key_exists($vData['valueId'],$stageData['d'])){
-                        $this->Log->log(0,"FOUND valueId => ".$v['id']);
-                        $this->projectStageDb[$k]['data'][$kData]['inserted']='y';
-                        $iStageValue++;
-                        $idStageValue=$vData['valueId'];
-                    }
-                }
+                self::checkStageValueExist($v,$PostStageData['d']);
             }
         }
+ 
         //Throw new ErrorException('test stop',0);
         $this->Log->log(0,"[".__METHOD__."] iStage => ".$iStage); 
-        $this->Log->log(0,"[".__METHOD__."] iStageValue => ".$iStageValue); 
-        self::checkFound($iStage,"THERE IS MORE THAT ONE STAGE IN PROJECT => ".$this->idProject." WITH STAGE ID ".$stageId);
-        self::checkFound($iStageValue,"THERE IS MORE THAT ONE STAGE VALUE IN PROJECT STAGE OF PROJECT => ".$this->idProject." WITH STAGE VALUE ID".$idStageValue);
+        self::checkFound($iStage,"THERE IS MORE THAT ONE STAGE IN PROJECT => ".$this->idProject." WITH STAGE ID ".$PostStageId);
+    }
+    private function checkStageValueExist($v,$PostStageData){
+        $this->Log->log(0,"[".__METHOD__."]LOOP OVER STAGE DATA VALUE");
+        $TestStageValue=[];
+        foreach($v['data'] as $vData){
+            //$this->Log->logMulti(0,$vData,"[".__METHOD__."]"); 
+            $this->Log->log(0,"STAGE VALUE ID => ".$vData['valueId']);
+            self::updateCheckStageValueArray($TestStageValue,$vData['valueId'],$PostStageData);
+            
+        }
+    }
+    private function updateCheckStageValueArray(&$TestStageValue,$valueId,$PostStageData){
+        if(!array_key_exists($valueId,$PostStageData)){
+            return false;
+        }
+        $this->Log->log(0,"FOUND VALUE FOR PROJECT STAGE ID => ".$valueId);
+        if(in_array($valueId,$TestStageValue)){
+            Throw New Exception ("THERE IS MORE THAT ONE STAGE VALUE ID => ".$valueId." IN PROJECT STAGE => ".$this->idProject,1);
+        }
+        /* FILL TEST ARRAY */
+        array_push($TestStageValue,$valueId);
     }
     private function checkFound($iFound,$info=''){
         if($iFound>1){
@@ -137,6 +153,7 @@ class DatabaseProjectReport{
     }
     private function insertStage($value,$key,$sql){
         $this->Log->log(0,"[".__METHOD__."]KEY => ${key}");
+        $this->Log->logMulti(0,$sql);
         $this->dbLink->beginTransaction(); //PHP 5.1 and new
         $this->dbLink->query("INSERT INTO `projekt_etap` ("
                 . "`idProject`,"
@@ -150,10 +167,10 @@ class DatabaseProjectReport{
                 . "`create_date`,"
                 . "`create_host`"
                 . ") VALUES ("
-                . ":idproject,"
-                . ":stageId,"
-                . ":number,"
-                . ":title,"
+                . ":idp,"
+                . ":i,"
+                . ":n,"
+                . ":t,"
                 . ":userid,"
                 . ":userlogin,"
                 . ":userfullname,"
@@ -168,8 +185,8 @@ class DatabaseProjectReport{
         $this->Log->log(0,"[".__METHOD__."]KEY => ${key}");
         $this->dbLink->beginTransaction(); //PHP 5.1 and new //(`idProject`,`stageId`,
         $this->dbLink->query("UPDATE `projekt_etap` SET "
-                . "`number`=:number,"
-                . "`title`=:title,"
+                . "`number`=:n,"
+                . "`title`=:t,"
                 . "`mod_user_id`=:userid,"
                 . "`mod_user_login`=:userlogin,"
                 . "`mod_user_full_name`=:userfullname,"
@@ -177,8 +194,8 @@ class DatabaseProjectReport{
                 . "`mod_date`=:date,"
                 . "`mod_host`=:host "
                 . "WHERE "
-                . "`idProject`=:idproject "
-                . "AND `stageId`=:stageId"
+                . "`idProject`=:idp "
+                . "AND `stageId`=:i"
                 ,$sql);
         self::manageStageValue($value['d'],$this->stageDbId);
         $this->dbLink->commit();  //PHP 5 and new
@@ -229,9 +246,9 @@ class DatabaseProjectReport{
                 . ") VALUES ("
                 . ":idProjectStage,"
                 . ":valueId,"
-                . ":value,"
-                . ":fileposition,"
-                . ":file,"
+                . ":v,"
+                . ":fp,"
+                . ":f,"
                 . ":userid,"
                 . ":userlogin,"
                 . ":userfullname,"
@@ -246,9 +263,9 @@ class DatabaseProjectReport{
         $this->Log->logMulti(2,$value);
         self::addValueAddOns($value,$key,$sql);
         $this->dbLink->query("UPDATE `projekt_etap_wartosc` SET "
-                . "`value`=:value,"
-                . "`fileposition`=:fileposition,"
-                . "`file`=:file,"
+                . "`value`=:v,"
+                . "`fileposition`=:fp,"
+                . "`file`=:f,"
                 . "`mod_user_id`=:userid,"
                 . "`mod_user_login`=:userlogin,"
                 . "`mod_user_full_name`=:userfullname,"
@@ -262,8 +279,8 @@ class DatabaseProjectReport{
     }
     private function addValueAddOns($v,$k,&$sql){
         $sql[':valueId']=[$k,'INT'];
-        $sql[':fileposition']=[$v['fileposition'],'STR'];
-        $sql[':value']=[$v['value'],'STR'];
-        $sql[':file']=[$v['fileData'],'STR']; 
+        $sql[':fp']=[$v['fileposition'],'STR'];
+        $sql[':v']=[$v['value'],'STR'];
+        $sql[':f']=[$v['fileData'],'STR']; 
     }
 }

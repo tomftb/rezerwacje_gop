@@ -2,18 +2,15 @@
 
 final class downloadFile{
     //put your code here
-    private static $FileExtension=[
-        'docx'=>['DOC','application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-        'pdf'=>['PDF','application/pdf'],
-        'jpg'=>['upload','image/jpeg'],
-        'jpeg'=>['upload','image/jpeg'],
-        'bmp'=>['upload','image/bmp'],
-        'gif'=>['upload','image/gif'],
-        'png'=>['upload','image/png']
+    private static $FileExtensionContentType=[
+        'docx'=>['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        'pdf'=>['application/pdf'],
+        'jpg'=>['image/jpeg'],
+        'jpeg'=>['image/jpeg'],
+        'bmp'=>['image/bmp'],
+        'gif'=>['image/gif'],
+        'png'=>['image/png']
     ];
-    /*
-     * 'extension name' => ['file directory','html meta ']
-     */
     private function __construct(){}
     public static function getFile($file){
         
@@ -28,30 +25,30 @@ final class downloadFile{
            die('NO FILE EXTENSION'); 
         }
         $ext=strtolower(end($tmp));
-        if(!array_key_exists($ext, self::$FileExtension)){
+        if(!array_key_exists($ext, self::$FileExtensionContentType)){
             die('NOT AVAILABLE FILE EXTENSION'); 
         }
-        self::checkFileExist(self::$FileExtension[$ext][0]."/".$file);
-        self::checkFileReadable(self::$FileExtension[$ext][0]."/".$file);
-        return [$file,$ext,self::$FileExtension[$ext]];
+        self::checkFileExist($file);
+        self::checkFileReadable($file);
+        return [$file,self::$FileExtensionContentType[$ext]];
     }
     private function setUpHeader($file=[]){
         
-        if(!$file[1] || !$file[0] || !$file[2]){
+        if(!$file[1] || !$file[0]){
             var_dump($file);
             die('WRONG FILE'); 
         }
-        header('Content-Type: '.$file[2][1]);
+        header('Content-Type: '.$file[1]);
         header("Content-Disposition:attachment;filename=".$file[0]."");
-        readfile(APP_ROOT."/".$file[2][0]."/" . $file[0]);
+        readfile($file[0]);
     }
     private function checkFileExist($file){
-        if(!file_exists(APP_ROOT."/".$file)){
+        if(!file_exists($file)){
              die('FILE NOT EXIST'); 
         }
     }
     private function checkFileReadable($file){
-        if(!is_readable(APP_ROOT."/".$file)){
+        if(!is_readable($file)){
              die('FILE NOT READABLE'); 
         }
     }

@@ -18,7 +18,7 @@ class file {
     private $acceptedFileExtension=array();
     private $maxFileSize=0;
     private $err='';
-    private $uploadFiles=array();
+    private $files=array();
     private $url='';
 
     public function __construct(){
@@ -60,7 +60,7 @@ class file {
     }
     public function getUploadFiles(){
         self::log(__METHOD__);
-        return ($this->uploadFiles);
+        return ($this->files);
     }
     public function getErr(){
         return ($this->err);
@@ -156,7 +156,10 @@ class file {
         self::log(__METHOD__);
         if($this->err){ return false;}
         move_uploaded_file($tmpFile["tmp_name"], $this->uploadDir.$this->newFileName.'_'.$n.'.jpeg');
-        $this->uploadFiles[$k]=$this->url.$this->newFileName.'_'.$n.'.jpeg';
+        $this->files[$k]=[
+                            $this->url.$this->newFileName.'_'.$n.'.jpeg',
+                            $tmpFile
+        ];
     }
     public function __destruct(){
         

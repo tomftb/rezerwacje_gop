@@ -19,6 +19,12 @@ class Report
         final:new Object(),
         form:new Object()
     }
+    static fileProp={
+        max:20971520, /* 20 MB 1024 * 1024 * 20 */
+        type:[
+            'image/jpeg','image/bmp','image/png','image/gif','image/jpg'
+        ]
+    };
     static actStage=new Object();
     /*
     static actStage={
@@ -313,58 +319,144 @@ class Report
         divInputRow.appendChild(div3);
         divInput.appendChild(divInputRow);
         for(const prop in Report.actStage[Report.fieldCounter].v){
-            var textarea=createTag(Report.actStage[Report.fieldCounter].v[prop]['v'],'textarea','form-control w-100 mt-2 ml-2 mr-2'); //form-control    
-            //var textarea=createTag('','div',' w-100'); //form-control
-            textarea.setAttribute('name',Report.fieldCounter+'-'+counter+'-value');
-            textarea.setAttribute('id',Report.fieldCounter+'-'+counter+'-data-stage-value');
-            textarea.setAttribute('style','height:200px; ');//
-            textarea.setAttribute('contenteditable','true');
-            divInputRow.appendChild(textarea);
-            var divFile=createTag('','div','col-12');
-                divFile.setAttribute('id','divFile-'+Report.fieldCounter);
-            var divFormFile0=createTag('','div','row  ml-1 mt-1 mb-1');
-           
-            var inputFile=createInput('file',Report.fieldCounter+'-'+counter+'-fileData','','form-control-file','','n');
-                inputFile.onchange = function (e){
-                    console.log('INPUT FILE');
-                    console.log(e);
-                    console.log(e.srcElement.files);
-                    console.log(e.srcElement.value);
-                    console.log(e.srcElement.size);
-                    //console.log(e.size);
-                    console.log(this);
-                };
-                divFormFile0.appendChild(inputFile);
-                divFile.appendChild(divFormFile0);
-            if(Report.actStage[Report.fieldCounter].v[prop]['f']){
-                var divFormFile1=document.createElement('div');
-                    divFormFile1.setAttribute('class','row  ml-1 mt-1 mb-1');
-                /* ADD DATA ABOUT INSERTED FILE */   
-                var actFile=document.createElement('a');
-                    actFile.setAttribute('href','router.php?task=downloadProjectReportImage&file='+Report.actStage[Report.fieldCounter].v[prop]['f']);
-                    actFile.setAttribute('target','_blank');
-                    actFile.appendChild(document.createTextNode(Report.actStage[Report.fieldCounter].v[prop]['f']));
-                    divFormFile1.appendChild(actFile);
-                /* ADD REMOVE FILE BUTTON CHECKBOX */
-                    divFile.appendChild(divFormFile1);
-            }
-            
-            
-            divFile.appendChild(Report.createFilePositionElement(Report.fieldCounter,counter,Report.actStage[Report.fieldCounter].v[prop]['fp']));
-            divInputRow.appendChild(divFile);
-            counter++;
+            var textarea=document.createElement('textarea');
+                textarea.setAttribute('class','form-control w-100 mt-2 ml-2 mr-2');
+                textarea.setAttribute('name',Report.fieldCounter+'-'+counter+'-value');
+                textarea.setAttribute('id',Report.fieldCounter+'-'+counter+'-data-stage-value');
+                textarea.setAttribute('style','height:200px; ');//
+                textarea.setAttribute('contenteditable','true');
+                textarea.appendChild(document.createTextNode(Report.actStage[Report.fieldCounter].v[prop]['v']));
+                divInputRow.appendChild(textarea);
+                divInputRow.appendChild(Report.createFileInputDiv(prop,counter));
+                counter++;
         }
         Report.fieldCounter++;
         
         //console.log(divInput);
         return divInput;
     }
+    static createFileInputDiv(prop,counter){
+        var divFile=document.createElement('div');
+            divFile.setAttribute('class','col-12 pl-1 border border-success');
+            divFile.setAttribute('id','divFile-'+Report.fieldCounter);
+            Report.createNewFileDiv(divFile,counter);
+            
+            Report.createActuallFileDiv(divFile,prop,counter);
+            divFile.appendChild(Report.createFilePositionElement(Report.fieldCounter,counter,Report.actStage[Report.fieldCounter].v[prop]['fp']));
+        return divFile;
+    }
+    static createNewFileDiv(ele,counter){
+        var divRow=document.createElement('div');
+            divRow.setAttribute('class','row ml-0 mt-1 mb-1 border border-secondary');
+        var divRowErr=document.createElement('div');
+            divRowErr.setAttribute('class','row ml-0 mt-1 mb-1 alert alert-danger d-none');  
+            divRowErr.setAttribute('id',Report.fieldCounter+'-'+counter+'-fileDataErr');  
+        var divCol1=document.createElement('div');
+            divCol1.setAttribute('class','col-sm-11 pl-0 pt-1 border border-info'); 
+        var divCol2=document.createElement('div');
+            divCol2.setAttribute('class','col-sm-1 pl-0 pr-0 form-check border border-primary'); 
+        var input=createInput('file',Report.fieldCounter+'-'+counter+'-fileData','','form-control-file','','n');
+            input.onchange = function (e){
+                var divErr=this.parentNode.parentNode.parentNode.childNodes[1];
+                var errSize=document.createTextNode('');
+                var errType=document.createTextNode('');
+                console.log('INPUT FILE');
+                console.log('MAX: '+Report.fileProp.max);
+                console.log(e);
+                console.log(e.srcElement.files[0].size);
+                console.log(e.srcElement.files[0].type);
+                console.log(e.srcElement.value);
+                console.log(e.srcElement.size);
+                //console.log(e.size);
+                console.log(this);
+                console.log(this.parentNode.parentNode.parentNode);
+                console.log(this.parentNode.parentNode.parentNode.childNodes[1]);
+                if(e.srcElement.files[0].size>Report.fileProp.max){
+                    errSize.nodeValue='File larger than 20MB! ';
+                }
+                else{
+                    errSize.nodeValue='';
+                }
+                console.log(Report.fileProp.type);
+                if(Report.fileProp.type.indexOf(e.srcElement.files[0].type)===-1){
+                    errType.nodeValue='Wrong file extension! ';
+                }
+                else{
+                    errType.nodeValue='';
+                }
+                if(errSize.nodeValue!=='' || errType.nodeValue!==''){
+                    divErr.appendChild(errSize);
+                    divErr.appendChild(errType);
+                    divErr.classList.remove("d-none");
+                    divErr.classList.add("d-block");
+                }
+                else{
+                    divErr.classList.remove("d-block");
+                    divErr.classList.add("d-none");
+                }
+                
+            };
+            divCol1.appendChild(input);
+        var i=createTag('','i','fa fa-minus');
+            i.setAttribute('aria-hidden','true');
+            i.setAttribute('style','color:#ffffff;');
+        var button=document.createElement('button');
+            button.setAttribute('class','btn btn-danger')
+            button.onclick=function(){
+                console.log(this.parentNode.parentNode.childNodes[0].childNodes[0].value='');
+            };
+            button.appendChild(i);
+            divCol2.appendChild(button);
+            
+            divRow.appendChild(divCol1);
+            divRow.appendChild(divCol2);
+            ele.appendChild(divRow);
+            ele.appendChild(divRowErr);
+    }
+    static createActuallFileDiv(ele,prop,counter){
+        if(Report.actStage[Report.fieldCounter].v[prop]['f']){
+            var divRow=document.createElement('div');
+                divRow.setAttribute('class','row ml-0 mt-1 mb-1 border border-danger');
+                divRow.setAttribute('id',Report.fieldCounter+'-'+prop+'-actFileDiv');
+            var divCol1=document.createElement('div');
+                divCol1.setAttribute('class','col-sm-10 pl-0 border border-info'); 
+            var divCol2=document.createElement('div');
+                divCol2.setAttribute('class','col-sm-2 form-check border border-primary'); 
+                    
+                var box=document.createElement('input');
+                    box.setAttribute('class','form-check-input');
+                    box.setAttribute('type','checkbox');
+                    /* box.setAttribute('checked','checked'); */
+                    box.setAttribute('name',Report.fieldCounter+'-'+counter+'-actFile');
+                    box.setAttribute('id',Report.fieldCounter+'-'+counter+'-actFile');
+                var label=document.createElement('label');
+                    label.setAttribute('class','form-check-label');
+                    label.setAttribute('for',Report.fieldCounter+'-'+counter+'-actFile');
+                    label.appendChild(document.createTextNode('Usunąć?'));
+               
+                    /* ADD DATA ABOUT INSERTED FILE */   
+                var actFile=document.createElement('a');
+                    actFile.setAttribute('href','router.php?task=downloadProjectReportImage&file='+Report.actStage[Report.fieldCounter].v[prop]['f']);
+                    actFile.setAttribute('target','_blank');
+                    actFile.appendChild(document.createTextNode(Report.actStage[Report.fieldCounter].v[prop]['f']));
+                    divCol2.appendChild(box);
+                    divCol2.appendChild(label);
+                    divCol1.appendChild(actFile);
+                    divRow.appendChild(divCol1);
+                    divRow.appendChild(divCol2);
+                /* ADD REMOVE FILE BUTTON CHECKBOX */
+                console.log(divRow);
+                    ele.appendChild(divRow);
+        }  
+    }
     static createFilePositionElement(counter,fileCounter,defFilePosition){
         //console.log('Report::createFilePositionElement('+fileCounter+')');
         //var fpCounter=0;
         var div=document.createElement('div');
-            div.setAttribute('class','row ml-1');
-        var divFormFile1=createTag('','div','form-check form-check-inline mt-1 mb-1');
+            div.setAttribute('class','row ml-0 border border-warning');
+            div.setAttribute('id',Report.fieldCounter+'-'+fileCounter+'-filepositionDiv');
+        var divFormFile1=document.createElement('div');
+            divFormFile1.setAttribute('div','form-check form-check-inline mt-1 mb-1');
         var inputFileLabel=createTag('Wskazana pozycja obrazu:','label','form-check-label mr-3');
             inputFileLabel.setAttribute('for',counter+'-'+fileCounter+'-file');
             divFormFile1.appendChild(inputFileLabel);
@@ -483,7 +575,9 @@ class Report
         //console.log(property);
         //console.log(fpCounter);
         
-        var divFormFile=createTag('','div','form-check form-check-inline mt-1 mb-1');
+        var div=document.createElement('div');
+            div.setAttribute('class','form-check form-check-inline mt-1 mb-1');
+            
         var inputRadioFileTop=createInput('radio',Report.fieldCounter+'-'+fileCounter+'-fileposition',property,'form-check-input','','n');
             inputRadioFileTop.setAttribute('id',Report.fieldCounter+'-'+fileCounter+'-fileposition-'+property);
             inputRadioFileTop.onclick=function(){ 
@@ -513,10 +607,10 @@ class Report
         
         var inputRadioFileTopLabel=createTag(value,'label','form-check-label');
         inputRadioFileTopLabel.setAttribute('for',Report.fieldCounter+'-'+fileCounter+'-fileposition-'+property);
-        divFormFile.appendChild(inputRadioFileTop);
-        divFormFile.appendChild(inputRadioFileTopLabel);
+        div.appendChild(inputRadioFileTop);
+        div.appendChild(inputRadioFileTopLabel);
         
-        return divFormFile;
+        return div;
     }
     static btnShowReport(){
         console.log('Report::btnShowReport()');   

@@ -44,15 +44,22 @@ class ParserProjectReport{
             }
         }
     }
-	public function assignFileFromFiles($k,$v,&$reportData){
-		$this->Log->log(2,"[".__METHOD__."]KEY => ${k}");
-		$this->Log->log(2,"[".__METHOD__."]VALUE => ${v}");
-		$fileId=explode('-',$k);
-		if(preg_match('/^\d*\d+-\d*\d+-fileData/',$k) && isset($reportData[$fileId[0]]['d'][$fileId[1]])){
-            $this->Log->log(2,"FOUND FILE AND reportData key Exist => ${k} => ${v}");   
-			return true;
+    public function assignFileFromFiles($k,$v,&$reportData){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->Log->log(0,"[".__METHOD__."]KEY => ${k}");
+	$this->Log->log(0,"[".__METHOD__."]VALUE:");
+        $this->Log->logMulti(0,$v);
+	$fileId=explode('-',$k);
+	if(preg_match('/^\d*\d+-\d*\d+-fileData/',$k) && isset($reportData[$fileId[0]]['d'][$fileId[1]])){
+            $this->Log->log(0,"FOUND FILE AND reportData key Exist => ${k}");   
+            //$reportData[$fileId[0]]['d'][$fileId[1]]=$v;
+            $reportData[$fileId[0]]['d'][$fileId[1]]['fileName']=$v[0];
+            $reportData[$fileId[0]]['d'][$fileId[1]]['fileData']=$v[1];
+            $this->Log->logMulti(0,$reportData,'Report Data');
+            $this->Log->logMulti(0,$reportData[$fileId[0]]['d'][$fileId[1]],'Report Data FILE');
+            return true;
         }
-		return false;
+	return false;
     }
 	private function __clone() { 
 		throw new \Exception("Cannot clone a singleton.");

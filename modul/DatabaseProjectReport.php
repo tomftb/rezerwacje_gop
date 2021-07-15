@@ -27,7 +27,8 @@ class DatabaseProjectReport{
         }
 	catch (PDOException $e){
             $this->dbLink->rollback(); 
-            throw New Exception("DATABASE ERROR: ".$e->getMessage(),1); 
+            $this->Log->logMulti(0,$e->errorInfo);
+            throw New Exception("DATABASE ERROR: ".$e->getMessage()."\nIN".$e->getTraceAsString(),1); 
 	} 
     }
     /*
@@ -57,9 +58,33 @@ class DatabaseProjectReport{
      * GET PROJECT ALL STAGE VALUE FROM DATABASE
      */
     private function getProjectStageValue(&$stage){
+        /* GET VALUE AND LAST IMAGE */
         $this->Log->log(2,"[".__METHOD__."]"); 
         $sql[':id']=[$stage['id'],'INT'];
-        $stage['data']=$this->dbLink->squery("SELECT `id`,`valueId`,`value` as 'v',`fileposition` as 'fp',`file` as 'f' FROM `projekt_etap_wartosc` WHERE idProjectStage=:id AND wsk_u='0'",$sql);
+        $stage['data']=$this->dbLink->squery("SELECT 
+                `w`.`id`,
+		`w`.`idProjectStage`,
+                `w`.`valueId`,
+                `w`.`value` as v,
+                `pl`.`fileposition` as fp,
+                `pl`.`filename` as f
+                 FROM 
+                `projekt_etap_wartosc` as w left outer join (
+                                                            SELECT 
+                    						`idProjectStageValue`,
+                    						max(`id`) as max_id
+                                                            FROM 
+								`projekt_etap_wartosc_plik` 
+                                                            WHERE `wsk_u`='0'
+                                                            GROUP by `idProjectStageValue`
+				) as p ON `w`.`id`=`p`.`idProjectStageValue`
+				LEFT outer JOIN `projekt_etap_wartosc_plik`  as pl
+				ON pl.`idProjectStageValue`=p.`idProjectStageValue`
+				AND p.`max_id`=pl.`id`
+                WHERE
+                `w`.`idProjectStage`=:id
+                AND `w`.`wsk_u`='0'"
+                ,$sql);
     }
     /*
      * CHECK AND UPDATE OR INSERT STAGE TO PROJECT
@@ -235,8 +260,6 @@ class DatabaseProjectReport{
                 . "`idProjectStage`,"
                 . "`valueId`,"
                 . "`value`,"
-                . "`fileposition`,"
-                . "`file`,"
                 . "`create_user_id`,"
                 . "`create_user_login`,"
                 . "`create_user_full_name`,"
@@ -247,8 +270,54 @@ class DatabaseProjectReport{
                 . ":idProjectStage,"
                 . ":valueId,"
                 . ":v,"
-                . ":fp,"
+                . ":userid,"
+                . ":userlogin,"
+                . ":userfullname,"
+                . ":useremail,"
+                . ":date,"
+                . ":host)"
+                ,$sql);
+        /*
+         *  . "`fileposition`,"
+            . "`file`,"
+         * . ":fp,"
                 . ":f,"
+         */
+        $this->stageValueDbId=$this->dbLink->lastInsertId();
+        $this->Log->log(0,"[".__METHOD__."]INSERTED STAGE VALUE DB ID => ".$this->stageValueDbId);
+        self::insertStageValueFile($this->stageValueDbId,$value,$sql);
+    }
+    private function insertStageValueFile($id=0,$value,$sql){
+        $this->Log->log(0,"[".__METHOD__."]");
+        if(!is_array($value['fileData'])){
+            $this->Log->log(0,"[".__METHOD__."] FILE NOT PRESENT FOR STAGE DB ID => ".$id);
+            return '';
+        }
+        UNSET($sql[':idProjectStage']);
+        UNSET($sql[':valueId']);
+        UNSET($sql[':v']);
+        self::addValueFileAddOns($value,$id,$sql);
+        $this->Log->logMulti(0,$sql,__METHOD__);
+        $this->dbLink->query("INSERT INTO `projekt_etap_wartosc_plik` ("
+                . "`idProjectStageValue`,"
+                . "`filename`,"
+                . "`fileposition`,"
+                . "`originalname`,"
+                . "`size`,"
+                . "`type`,"
+                . "`create_user_id`,"
+                . "`create_user_login`,"
+                . "`create_user_full_name`,"
+                . "`create_user_email`,"
+                . "`create_date`,"
+                . "`create_host`"
+                . ") VALUES ("
+                . ":idProjectStageValue,"
+                . ":f,"
+                . ":fp,"
+                . ":o,"
+                . ":s,"
+                . ":t,"
                 . ":userid,"
                 . ":userlogin,"
                 . ":userfullname,"
@@ -279,8 +348,15 @@ class DatabaseProjectReport{
     }
     private function addValueAddOns($v,$k,&$sql){
         $sql[':valueId']=[$k,'INT'];
-        $sql[':fp']=[$v['fileposition'],'STR'];
         $sql[':v']=[$v['value'],'STR'];
-        $sql[':f']=[$v['fileData'],'STR']; 
+    }
+    private function addValueFileAddOns($v,$id,&$sql){
+        $this->Log->logMulti(0,$v,'FILE');
+        $sql[':idProjectStageValue']=[$id,'INT'];
+        $sql[':fp']=[$v['fileposition'],'STR'];
+        $sql[':f']=[$v['fileName'],'STR']; 
+        $sql[':o']=[$v['fileData']['name'],'STR'];
+        $sql[':s']=[$v['fileData']['size'],'INT']; 
+        $sql[':t']=[$v['fileData']['type'],'STR']; 
     }
 }

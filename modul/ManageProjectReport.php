@@ -48,8 +48,8 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         $this->modul['FILE']=NEW file();
         $this->modul['FILE']->setUrl($linkToFile);
         $this->modul['FILE']->setNewFileName($_SESSION['uid']);
-        $this->modul['FILE']->setUploadDir(APP_ROOT.$uploadDir);
-        $this->modul['FILE']->setAcceptedFileExtension(array('image/jpeg'));
+        $this->modul['FILE']->setUploadDir($uploadDir);
+        $this->modul['FILE']->setAcceptedFileExtension(['image/jpeg','image/png','image/jpg']);
         $this->modul['FILE']->setMaxFileSize(100000);
         $this->modul['FILE']->uploadFiles();
         $this->Log->log(0,$this->modul['FILE']->getLog());
@@ -60,7 +60,7 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
     public function setProjectReport(){
         $this->Log->log(0,"[".__METHOD__."]");
         /* GET FILES */
-        self::uploadFiles('',UPLOAD_DIR); 
+        self::uploadFiles('',UPLOAD_PROJECT_REPORT_IMG_DIR); 
         /* SET POST */
         self::setReportData();
         /* PARSE POST DATA */
@@ -71,7 +71,7 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         self::checkIsInputEmpty();
         /* ADD DATA TO DB -> DatabaseProjectReport class*/
         parent::addReport($this->idProject,$this->reportData);
-        // Throw New Exception('TST',0);
+        Throw New Exception('TEST',0);
         $this->utilities->jsonResponse('','cModal');
     }
     private function setReportData(){
@@ -120,10 +120,20 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
                 $this->reportData[$id]['d'][$key]['fileData']='';
             }  
         } 
+        $this->Log->logMulti(0,$this->files,"FILE");
         foreach($this->files as $k => $v){
+            
             if($this->Parser->assignFileFromFiles($k,$v,$this->reportData)){
                 UNSET($this->files[$k]);
             }
         }
+    }
+    public function downloadProjectReportDoc(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        downloadFile::getFile(UPLOAD_PROJECT_REPORT_DOC_DIR.filter_input(INPUT_GET,"file"));
+    } 
+    public function downloadProjectReportImage(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        downloadFile::getFile(UPLOAD_PROJECT_REPORT_IMG_DIR.filter_input(INPUT_GET,"file"));
     }
 }

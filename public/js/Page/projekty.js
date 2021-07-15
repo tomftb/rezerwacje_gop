@@ -144,20 +144,14 @@ table.setColumns(mainTableColumns);
 table.setColExceptions(defaultTableExceptionCol);
 table.setButtonsType('dropdown');
 
-function runFunction(d)
+function runFunction(response)
 {
-   
-    /* d => array response */
-    /* TO DO document.getElementById('AdaptedModalDialog'); */
     console.log('===runFunction()===');
-    //console.log(d);
     try{
-        var dJson=JSON.parse(d);
-        //console.log(dJson);
+        var dJson=JSON.parse(response);
         // RUN FUNCTION
         error.checkStatusExist(dJson);
         projectData=dJson; 
-        //console.log(projectData);
         console.log('FUNCTION TO RUN:\n'+dJson['data']['function']);
     switch(dJson['data']['function'])
     {
@@ -228,13 +222,13 @@ function runFunction(d)
     }
     }
     catch(e){
+        console.log(response);
         console.log(e);
-        d['status']=1;
-        d['info']=e;
-        error.checkStatusResponse(d);
+        response['status']=1;
+        response['info']=e;
+        error.checkStatusResponse(response);
     }
 }
-
 function pEmail()
 {
     prepareModal('RĘCZNE WYSŁANIE POWIADOMIENIA EMAIL:','bg-info');
@@ -677,7 +671,7 @@ function functionBtn(f,btn,task)
 function postData(btn,nameOfForm)
 {
     console.log('---postData()---');
-    console.log(nameOfForm);
+    //console.log(nameOfForm);
     var err=false;
     switch(nameOfForm)
     {

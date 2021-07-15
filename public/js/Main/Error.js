@@ -38,6 +38,7 @@ class Error
         else
         {
             console.log('Error::checkStatusResponse() => wrong status => '+d['status']);
+            //console.log(d);
             alert('Error::ERROR OCCURED!');
             Error.error=true;
         }

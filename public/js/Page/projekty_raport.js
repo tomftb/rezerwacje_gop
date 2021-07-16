@@ -14,7 +14,7 @@ class Report
     static perm=new Array();
     static link={
         stage:new Object(),
-        dynamicData:new Object(),
+        previewReportData:new Object(),
         buttons:new Object(),
         final:new Object(),
         form:new Object()
@@ -145,7 +145,7 @@ class Report
     var rowDiv=createTag('','div','row');/* ALL */
         rowDiv.setAttribute('id','staticData');
     var rowDivResult=createTag('','div','row');/* ALL */
-        rowDivResult.setAttribute('id','dynamicData');
+        rowDivResult.setAttribute('id','previewReportData');
     var optionDiv=createTag('','div','col-md-6');
     var rowLabel=createTag('','div','row pl-1 pr-1');
     var rowData=createTag('','div','row pl-1 pr-1');
@@ -174,12 +174,12 @@ class Report
        /* APPEND CURRENT STAGE DATA */
         this.addCurrentStageData(Report.link.form.childNodes[1].childNodes[0].childNodes[1].childNodes[1]);
         /* ADD STAGE SHORTCUT */
-        Report.link.stage=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0];
+        Report.link.stage=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0].childNodes[1];
         
         console.log(rowDiv);
     }
     createLinks(){
-        Report.link.dynamicData=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1];
+        Report.link.previewReportData=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1];
         Report.link.buttons=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[5].childNodes[1].childNodes[1];
        
     }
@@ -197,9 +197,9 @@ class Report
     setForm(){
         console.log('Report::setForm()');
         //console.log(Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3]);
-        Report.link.dynamicData.appendChild(createForm('POST',Report.getFormName(),'form-horizontal','OFF'));
-        Report.link.dynamicData.childNodes[0].appendChild(createInput('hidden','id',Report.projectId,'form-control','','n'));
-        Report.link.dynamicData.childNodes[0].appendChild(createTag('','div','')); 
+        Report.link.previewReportData.appendChild(createForm('POST',Report.getFormName(),'form-horizontal','OFF'));
+        Report.link.previewReportData.childNodes[0].appendChild(createInput('hidden','id',Report.projectId,'form-control','','n'));
+        Report.link.previewReportData.childNodes[0].appendChild(createTag('','div','')); 
         Report.link.form=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0];
         console.log(  Report.link.form);
         //console.log(Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0]);
@@ -627,8 +627,10 @@ class Report
     }
     static btnShowReport(){
         console.log('Report::btnShowReport()');   
+        
         var btn=createBtn('Podgląd','btn btn-info','psShowStage');
             btn.onclick= function() {
+                console.log(Report.link.stage);
                 if(Report.link.stage.childNodes[0].classList.contains("d-none")){
                     Report.link.stage.childNodes[0].classList.remove("d-none");
                     Report.link.stage.childNodes[0].classList.add("block");
@@ -697,12 +699,13 @@ class Report
     }
     static showReportDetails(){
         console.log('Report::showReportDetails()');  
-        
+        console.log(Report.link.stage.childNodes[0].childNodes[1].childNodes[1]);
         var mainLink=Report.link.stage.childNodes[0].childNodes[1].childNodes[1];
         var subLink=new Object();
         var fieldName=new Array();
         //var fileInputid=null;
         var textAreaInputid=null;
+        //console.log(Report.link.stage.childNodes[1].childNodes[1]);
         removeHtmlChilds(Report.link.stage.childNodes[1]);
         //console.log(Report.link.stage.childNodes[0].childNodes[1].childNodes[1]);
         //console.log(Report.link.stage.childNodes[0].childNodes[1].childNodes[1].childElementCount);
@@ -736,7 +739,7 @@ class Report
                         case 'divFile':
                           //console.log('divFile');
                           //fileInputid=subLink.childNodes[j].childNodes[0].childNodes[0].id;
-                          Report.updActStageFile(subLink.childNodes[j].childNodes[0].childNodes[0]);
+                          //Report.updActStageFile(subLink.childNodes[j].childNodes[0].childNodes[0]);
                           //console.log(subLink.childNodes[j].childNodes[0].childNodes[0].id);
                          
                           /* console.log(subLink.childNodes[j].childNodes[2]); file position*/

@@ -450,7 +450,7 @@ class Report
                 var actFile=document.createElement('a');
                     actFile.setAttribute('href','router.php?task=downloadProjectReportImage&file='+Report.actStage[Report.fieldCounter].v[prop]['f']);
                     actFile.setAttribute('target','_blank');
-                    actFile.appendChild(document.createTextNode(Report.actStage[Report.fieldCounter].v[prop]['f']));
+                    actFile.appendChild(document.createTextNode(Report.actStage[Report.fieldCounter].v[prop]['fo']));
                     divCol2.appendChild(box);
                     divCol2.appendChild(label);
                     divCol1.appendChild(actFile);

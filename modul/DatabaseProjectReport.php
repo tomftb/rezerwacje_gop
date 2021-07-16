@@ -300,6 +300,7 @@ class DatabaseProjectReport{
         $this->Log->logMulti(0,$sql,__METHOD__);
         $this->dbLink->query("INSERT INTO `projekt_etap_wartosc_plik` ("
                 . "`idProjectStageValue`,"
+                . "`fileId`,"
                 . "`filename`,"
                 . "`fileposition`,"
                 . "`originalname`,"
@@ -313,6 +314,7 @@ class DatabaseProjectReport{
                 . "`create_host`"
                 . ") VALUES ("
                 . ":idProjectStageValue,"
+                . ":fid,"
                 . ":f,"
                 . ":fp,"
                 . ":o,"
@@ -333,19 +335,22 @@ class DatabaseProjectReport{
         self::addValueAddOns($value,$key,$sql);
         $this->dbLink->query("UPDATE `projekt_etap_wartosc` SET "
                 . "`value`=:v,"
-                . "`fileposition`=:fp,"
-                . "`file`=:f,"
                 . "`mod_user_id`=:userid,"
                 . "`mod_user_login`=:userlogin,"
                 . "`mod_user_full_name`=:userfullname,"
                 . "`mod_user_email`=:useremail,"
-                . "`create_date`=:date,"
-                . "`create_host`=:host "
+                . "`mod_date`=:date,"
+                . "`mod_host`=:host "
                 . "WHERE `"
                 . "idProjectStage`=:idProjectStage "
                 . "AND `valueId`=:valueId"
-                ,$sql);       
+                ,$sql);   
+        /* $this->stageValueDbId=$this->dbLink->lastInsertId(); */
+        $this->Log->log(0,"[".__METHOD__."]INSERTED STAGE VALUE DB ID => ".$this->stageValueDbId);
+        /* IN FUTERE DO UPDATE NOW INSERT, DB RETURN LAST */
+        self::insertStageValueFile($this->stageValueDbId,$value,$sql);
     }
+
     private function addValueAddOns($v,$k,&$sql){
         $sql[':valueId']=[$k,'INT'];
         $sql[':v']=[$v['value'],'STR'];
@@ -353,6 +358,7 @@ class DatabaseProjectReport{
     private function addValueFileAddOns($v,$id,&$sql){
         $this->Log->logMulti(0,$v,'FILE');
         $sql[':idProjectStageValue']=[$id,'INT'];
+        $sql[':fid']=[$v['fileId'],'STR']; 
         $sql[':fp']=[$v['fileposition'],'STR'];
         $sql[':f']=[$v['fileName'],'STR']; 
         $sql[':o']=[$v['fileData']['name'],'STR'];

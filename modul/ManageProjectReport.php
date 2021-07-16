@@ -130,10 +130,10 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
     }
     public function downloadProjectReportDoc(){
         $this->Log->log(0,"[".__METHOD__."]");
-        downloadFile::getFile(UPLOAD_PROJECT_REPORT_DOC_DIR.filter_input(INPUT_GET,"file"));
+        downloadFile::getFile(UPLOAD_PROJECT_REPORT_DOC_DIR,filter_input(INPUT_GET,"file"));
     } 
     public function downloadProjectReportImage(){
         $this->Log->log(0,"[".__METHOD__."]");
-        downloadFile::getFile(UPLOAD_PROJECT_REPORT_IMG_DIR.filter_input(INPUT_GET,"file"));
+        downloadFile::getFile(UPLOAD_PROJECT_REPORT_IMG_DIR,filter_input(INPUT_GET,"file"));
     }
 }

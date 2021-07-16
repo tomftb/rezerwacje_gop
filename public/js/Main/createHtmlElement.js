@@ -460,9 +460,9 @@ function cModal(id)
 {
     console.log('cModal()');
    
-    $('body').removeClass('modal-open');
-    $('body').css('padding-right', '17px');
-    $('.modal-backdrop').remove();
+   // $('body').removeClass('modal-open');
+   // $('body').css('padding-right', '17px');
+  //  $('.modal-backdrop').remove();
     $('#'+id).modal('hide'); //or $('#modalId').modal('toggle');
 }
 function setButtonDisplay(element,perm)

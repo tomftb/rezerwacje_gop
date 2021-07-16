@@ -40,6 +40,8 @@ final class downloadFile{
         }       
         header('Content-Type: '.$file[2]);
         header('Content-Length: '.filesize($file[0].$file[1]));
+        header("Content-Disposition:filename=\"".basename($file[1])."\"");
+
         //header("Content-Disposition:attachment;filename=\"".basename($file[1])."\"");
         readfile($file[0].$file[1]);
         //print file_get_contents($file[0].$file[1]);

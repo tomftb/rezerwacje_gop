@@ -270,7 +270,8 @@ class Report
          /* GET NUMBER, TITLE, VALUE */
         for(const prop in Report.stageData){
             if(parseInt(Report.stageData[prop]['i'],10)===parseInt(idp,10)){
-                //console.log('FOUND');
+                console.log(Report.stageData[prop]['v']);
+                
                 Report.setActStageData(idp,Report.stageData[prop]['n'],Report.stageData[prop]['t'],Report.stageData[prop]['v']);
                 return true;
             }
@@ -342,7 +343,12 @@ class Report
             Report.createNewFileDiv(divFile,counter);
             
             Report.createActuallFileDiv(divFile,prop,counter);
-            divFile.appendChild(Report.createFilePositionElement(Report.fieldCounter,counter,Report.actStage[Report.fieldCounter].v[prop]['fp']));
+        var defaultFilePosition=Report.actStage[Report.fieldCounter].v[prop]['fp'];
+            /* IF NO FILE, THEN SETUP FILEPOSTION TO DEFAULT TOP */
+            if(defaultFilePosition===null){
+                defaultFilePosition='top';
+            }
+            divFile.appendChild(Report.createFilePositionElement(Report.fieldCounter,counter,defaultFilePosition));
         return divFile;
     }
     static createNewFileDiv(ele,counter){
@@ -371,6 +377,10 @@ class Report
                 console.log(this);
                 console.log(this.parentNode.parentNode.parentNode);
                 console.log(this.parentNode.parentNode.parentNode.childNodes[1]);
+                
+                /* CLEAR DIV */
+                removeHtmlChilds(divRowErr);
+                
                 if(e.srcElement.files[0].size>Report.fileProp.max){
                     errSize.nodeValue='File larger than 20MB! ';
                 }
@@ -378,8 +388,9 @@ class Report
                     errSize.nodeValue='';
                 }
                 console.log(Report.fileProp.type);
+                
                 if(Report.fileProp.type.indexOf(e.srcElement.files[0].type)===-1){
-                    errType.nodeValue='Wrong file extension! ';
+                    errType.nodeValue='Wrong file extension ('+e.srcElement.files[0].type+') ! ';
                 }
                 else{
                     errType.nodeValue='';
@@ -414,6 +425,7 @@ class Report
             ele.appendChild(divRowErr);
     }
     static createActuallFileDiv(ele,prop,counter){
+        console.log(Report.actStage[Report.fieldCounter].v[prop]['f']);
         if(Report.actStage[Report.fieldCounter].v[prop]['f']){
             var divRow=document.createElement('div');
                 divRow.setAttribute('class','row ml-0 mt-1 mb-1 border border-danger');
@@ -572,7 +584,8 @@ class Report
     }
     static createFilePosition(property,value,checked,fileCounter)
     {
-        //console.log(property);
+        console.log('Report::createFilePosition()');   
+        console.log(checked);
         //console.log(fpCounter);
         
         var div=document.createElement('div');

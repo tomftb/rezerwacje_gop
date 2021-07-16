@@ -285,6 +285,7 @@ class DatabaseProjectReport{
          */
         $this->stageValueDbId=$this->dbLink->lastInsertId();
         $this->Log->log(0,"[".__METHOD__."]INSERTED STAGE VALUE DB ID => ".$this->stageValueDbId);
+        
         self::insertStageValueFile($this->stageValueDbId,$value,$sql);
     }
     private function insertStageValueFile($id=0,$value,$sql){
@@ -345,12 +346,42 @@ class DatabaseProjectReport{
                 . "idProjectStage`=:idProjectStage "
                 . "AND `valueId`=:valueId"
                 ,$sql);   
+        
+        /* ADD CHECK KEY actFile exists */
+        self::updateWskStageValueFile($key,$value,$sql);
         /* $this->stageValueDbId=$this->dbLink->lastInsertId(); */
-        $this->Log->log(0,"[".__METHOD__."]INSERTED STAGE VALUE DB ID => ".$this->stageValueDbId);
+        $this->Log->log(0,"[".__METHOD__."]UPDATED STAGE VALUE DB ID => ".$this->stageValueDbId);
         /* IN FUTERE DO UPDATE NOW INSERT, DB RETURN LAST */
+       
+        
         self::insertStageValueFile($this->stageValueDbId,$value,$sql);
     }
-
+    private function updateWskStageValueFile($key,$value,$sql){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->Log->logMulti(0,$value,"VALUE");
+        UNSET($sql[':idProjectStage']);
+        UNSET($sql[':valueId']);
+        UNSET($sql[':v']);
+        $sql[':idProjectStageValue']=[$this->stageValueDbId,'INT'];
+        $this->Log->logMulti(0,$sql,"SQL");
+        
+        /* IN FUTURE CHECK id projekt_etap_wartosc_plik, NOW SET WSK_U ON ALL STAgE VALUE */
+        
+        if(array_key_exists('actFile', $value)){
+            $this->Log->log(0,"KEY actFile exist => SET WSK_U = 1");
+            $this->dbLink->query("UPDATE `projekt_etap_wartosc_plik` SET "
+                . "`wsk_u`='1',"
+                . "`mod_user_id`=:userid,"
+                . "`mod_user_login`=:userlogin,"
+                . "`mod_user_full_name`=:userfullname,"
+                . "`mod_user_email`=:useremail,"
+                . "`mod_date`=:date,"
+                . "`mod_host`=:host "
+                . "WHERE `"
+                . "idProjectStageValue`=:idProjectStageValue"
+                ,$sql);    
+        }
+    }
     private function addValueAddOns($v,$k,&$sql){
         $sql[':valueId']=[$k,'INT'];
         $sql[':v']=[$v['value'],'STR'];

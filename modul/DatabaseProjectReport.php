@@ -67,7 +67,8 @@ class DatabaseProjectReport{
                 `w`.`valueId`,
                 `w`.`value` as v,
                 `pl`.`fileposition` as fp,
-                `pl`.`filename` as f
+                `pl`.`filename` as f,
+                `pl`.`originalname` as fo
                  FROM 
                 `projekt_etap_wartosc` as w left outer join (
                                                             SELECT 

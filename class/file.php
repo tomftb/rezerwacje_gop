@@ -155,9 +155,12 @@ class file {
     private function moveFile($tmpFile,$k,$n){
         self::log(__METHOD__);
         if($this->err){ return false;}
-        move_uploaded_file($tmpFile["tmp_name"], $this->uploadDir.$this->newFileName.'_'.$n.'.jpeg');
+        
+        $ext=explode('.',$tmpFile["name"]);
+        $newExt=strtolower(end($ext));
+        move_uploaded_file($tmpFile["tmp_name"], $this->uploadDir.$this->newFileName.'_'.$n.'.'.$newExt);
         $this->files[$k]=[
-                            $this->url.$this->newFileName.'_'.$n.'.jpeg',
+                            $this->url.$this->newFileName.'_'.$n.'.'.$newExt,
                             $tmpFile
         ];
     }

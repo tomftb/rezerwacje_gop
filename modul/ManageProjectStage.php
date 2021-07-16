@@ -143,7 +143,7 @@ class ManageProjectStage
         $this->Log->log(0,"[".__METHOD__."]");
         $head=$this->dbLink->squery("SELECT s.`id` as 'i',s.`id_dzial` as 'id',s.`number` as 'n',s.`title` as 't',s.`create_user_fullname` as 'cu',s.`create_user_login` as 'cul',s.`create_date` as 'cd',s.`mod_login` as 'mu',s.`mod_date` as 'md',s.`buffer_user_id` as 'bu',s.`wsk_u` as 'wu',s.`delete_fullname` as 'du',b.`login` as 'bl' FROM `slo_projekt_etap` as s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id` WHERE s.`id`=:id LIMIT 0,1",[':id'=>[$id,'INT']]);
         $this->actProjectStageData['head']=array_map(array($this,'preapareProjectStageData'),$head[0]);
-        $body=$this->dbLink->squery("SELECT `id` as 'i',`value` as 'v',`file_selected` as 'f',`file_position` as 'fp',`wsk_v` as 'wsk_v' FROM `slo_projekt_etap_ele` WHERE `id_projekt_etap`=:id AND `wsk_u`='0' ",[':id'=>[$id,'INT']]);
+        $body=$this->dbLink->squery("SELECT `id` as 'i',`value` as 'v',`asdasdas` as 'f',`file_position` as 'fp',`wsk_v` as 'wsk_v' FROM `slo_projekt_etap_ele` WHERE `id_projekt_etap`=:id AND `wsk_u`='0' ",[':id'=>[$id,'INT']]);
         $this->actProjectStageData['body']=array_map(array($this,'preapareProjectStageData'),$body);
        
     }
@@ -499,7 +499,8 @@ class ManageProjectStage
         $head=$this->dbLink->squery("SELECT s.`id` as 'i',s.`number` as 'n',s.`title` as 't',s.`create_user_login` as 'cu' FROM `slo_projekt_etap` s WHERE s.`id`>0 AND s.`wsk_v`='0' AND s.`wsk_u`='0' ORDER BY s.`id`");   
         foreach($head as $v){
             /* GET STAGE BODY */
-            $body=$this->dbLink->squery("SELECT s.`value` as 'v',s.`file_selected` as 'f',s.`file_position` as 'fp' FROM `slo_projekt_etap_ele` s WHERE s.`id_projekt_etap`=".$v['i']." AND s.`wsk_v`='0' AND s.`wsk_u`='0' ORDER BY s.`id`");   
+            /* REMOVE s.`file_selected` */
+            $body=$this->dbLink->squery("SELECT s.`value` as 'v', null as 'f',s.`file_position` as 'fp' FROM `slo_projekt_etap_ele` s WHERE s.`id_projekt_etap`=".$v['i']." AND s.`wsk_v`='0' AND s.`wsk_u`='0' ORDER BY s.`id`");   
             foreach($body as $kb => $vb){
                 $body[$kb]['v']=html_entity_decode($body[$kb]['v']);
             }

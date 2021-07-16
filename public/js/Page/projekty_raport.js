@@ -271,7 +271,6 @@ class Report
         for(const prop in Report.stageData){
             if(parseInt(Report.stageData[prop]['i'],10)===parseInt(idp,10)){
                 console.log(Report.stageData[prop]['v']);
-                
                 Report.setActStageData(idp,Report.stageData[prop]['n'],Report.stageData[prop]['t'],Report.stageData[prop]['v']);
                 return true;
             }
@@ -425,6 +424,7 @@ class Report
             ele.appendChild(divRowErr);
     }
     static createActuallFileDiv(ele,prop,counter){
+        console.log('Report::createActuallFileDiv() FILE:');
         console.log(Report.actStage[Report.fieldCounter].v[prop]['f']);
         if(Report.actStage[Report.fieldCounter].v[prop]['f']){
             var divRow=document.createElement('div');
@@ -584,8 +584,8 @@ class Report
     }
     static createFilePosition(property,value,checked,fileCounter)
     {
-        console.log('Report::createFilePosition()');   
-        console.log(checked);
+        //console.log('Report::createFilePosition()');   
+        //console.log(checked);
         //console.log(fpCounter);
         
         var div=document.createElement('div');

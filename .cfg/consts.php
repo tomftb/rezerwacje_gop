@@ -5,7 +5,7 @@ define('APP_TITLE',"Rezerwacje GOP");
 define('APP_PORT',8080);
 define('APP_URL','http://rezerwacje-gop.local:'.APP_PORT);
 define('APP_ROOT',mb_substr(filter_input(INPUT_SERVER,"DOCUMENT_ROOT"),0,-7));
-define('TMP_UPLOAD_DIR','/tmp_upload/');
+define('TMP_UPLOAD_DIR',APP_ROOT.'/tmp_upload/');
 define('UPLOAD_DIR',APP_ROOT.'/upload/');
 define('UPLOAD_PROJECT_DOC_DIR',UPLOAD_DIR.'project_doc/');
 define('UPLOAD_PROJECT_PDF_DIR',UPLOAD_DIR.'project_pdf/');

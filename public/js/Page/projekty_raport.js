@@ -644,7 +644,7 @@ class Report
                     console.log(Report.link.form.name);
                     postData(this,Report.link.form);
                     
-                    Report.showReportDetails();
+                    Report.showReportPreview();
                     Report.link.stage.childNodes[0].classList.add("d-none");
                     Report.link.stage.childNodes[0].classList.remove("block");
                     Report.link.stage.childNodes[1].classList.add("block");
@@ -697,8 +697,8 @@ class Report
         /* REMOVE TMP FILES */
         return functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),'');
     }
-    static showReportDetails(){
-        console.log('Report::showReportDetails()');  
+    static showReportPreview(){
+        console.log('Report::showReportPreview()');  
         console.log(Report.link.stage.childNodes[0].childNodes[1].childNodes[1]);
         var mainLink=Report.link.stage.childNodes[0].childNodes[1].childNodes[1];
         var subLink=new Object();
@@ -714,7 +714,7 @@ class Report
             subLink=mainLink.childNodes[i].childNodes[0];
             for(var j=0;j<subLink.childElementCount;j++){
                 //console.log(subLink.childNodes[j]);
-                //console.log(subLink.childNodes[j].nodeName);
+                console.log(subLink.childNodes[j].nodeName);
                 //console.log(subLink.childNodes[j].id);
                 //console.log(subLink.childNodes[j].hasOwnProperty('id'));
                 
@@ -737,10 +737,11 @@ class Report
                             Report.updActStageData(subLink.childNodes[j].childNodes[0].id,subLink.childNodes[j].childNodes[0].value);
                             break;
                         case 'divFile':
-                          //console.log('divFile');
+                          console.log('divFile');
                           //fileInputid=subLink.childNodes[j].childNodes[0].childNodes[0].id;
                           //Report.updActStageFile(subLink.childNodes[j].childNodes[0].childNodes[0]);
-                          //console.log(subLink.childNodes[j].childNodes[0].childNodes[0].id);
+                          
+                          console.log(subLink.childNodes[j]);
                          
                           /* console.log(subLink.childNodes[j].childNodes[2]); file position*/
                           break;
@@ -749,7 +750,9 @@ class Report
                             //console.log(fieldName);
                     }
                 }
+                
                 else if(subLink.childNodes[j].nodeName==='TEXTAREA'){
+                    //console.log(subLink.childNodes[j].id,subLink.childNodes[j].value);
                     textAreaInputid=subLink.childNodes[j].id;
                     Report.updActStageTextArea(subLink.childNodes[j].id,subLink.childNodes[j].value);
                 }

@@ -53,6 +53,10 @@ class ParserProjectReport{
 	if(preg_match('/^\d*\d+-\d*\d+-fileData/',$k) && isset($reportData[$fileId[0]]['d'][$fileId[1]])){
             $this->Log->log(0,"FOUND FILE AND reportData key Exist => ${k}");   
             //$reportData[$fileId[0]]['d'][$fileId[1]]=$v;
+            $k=substr($k,0,-9);
+            $tmpk=explode('-',$k);
+            $k=$tmpk[1];
+            $reportData[$fileId[0]]['d'][$fileId[1]]['fileId']=$k;
             $reportData[$fileId[0]]['d'][$fileId[1]]['fileName']=$v[0];
             $reportData[$fileId[0]]['d'][$fileId[1]]['fileData']=$v[1];
             $this->Log->logMulti(0,$reportData,'Report Data');

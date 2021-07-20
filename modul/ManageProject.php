@@ -182,7 +182,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
         $projectDetails=$this->dbLink->squery('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=:id AND `wsk_u`=0',$sql)[0];
         $projectDoc=$this->dbLink->squery('SELECT `nazwa` FROM `projekt_dok` WHERE `id_projekt`=:id AND `wsk_u`=0 ',$sql);   
         $projectTeam=$this->dbLink->squery('SELECT `NazwiskoImie`,`DataOd`,`DataDo` FROM `v_proj_prac_v_pdf` WHERE `idProjekt`=:id',$sql); 
-        $PDF = new createPdf($projectDetails,$projectDoc,$projectTeam);
+        $PDF = new createPdf($projectDetails,$projectDoc,$projectTeam,APP_ROOT,UPLOAD_PROJECT_PDF_DIR);
         $this->utilities->jsonResponse($PDF->getPdf(),'downloadProjectPdf');
     }
     public function pGenDoc(){
@@ -191,7 +191,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
         $this->utilities->isValueEmpty($id);
         $sql[':id']=[$id,'INT'];
         $projectDetails=$this->dbLink->squery('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`klient`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=:id AND `wsk_u`=0 ',$sql)[0];
-        $doc = new createDoc($projectDetails,$_FILES,'Project_'.$this->utilities->getData(),'.docx');
+        $doc = new createDoc($projectDetails,$_FILES,'Project_'.$this->utilities->getData(),'.docx',APP_ROOT.UPLOAD_PROJECT_DOC_DIR);
         $doc->createProjectReport();
         $this->utilities->jsonResponse($doc->getDocName(),'downloadProjectDoc');
     }
@@ -1106,11 +1106,11 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
     }
     public function downloadProjectPdf(){
         $this->Log->log(0,"[".__METHOD__."]");
-        downloadFile::getFile(filter_input(INPUT_GET,"file"));
+        downloadFile::getFile(APP_ROOT.UPLOAD_PROJECT_PDF_DIR,filter_input(INPUT_GET,"file"));
     }
     public function downloadProjectDoc(){
         $this->Log->log(0,"[".__METHOD__."]");
-        downloadFile::getFile(filter_input(INPUT_GET,"file"));
+        downloadFile::getFile(APP_ROOT.UPLOAD_PROJECT_DOC_DIR,filter_input(INPUT_GET,"file"));
     }
     public function showProjectReportFile(){
         $this->Log->log(0,"[".__METHOD__."]");

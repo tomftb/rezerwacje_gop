@@ -71,15 +71,15 @@ class Error
     }
     set(id)
     {
-        console.log('Error::set()');
+        console.log('Error::set(id)');
         Error.divId=id;
-        console.log(Error.divId);
+        //console.log(Error.divId);
     }
     static show(value)
     {
-        console.log('Error::show()');
+        console.log('Error::show(value)');
         Error.getDiv();
-        console.log(Error.div);
+        //console.log(Error.div);
         Error.div.innerHTML=value;
         Error.div.classList.remove("d-none");
         Error.div.classList.add("d-block");

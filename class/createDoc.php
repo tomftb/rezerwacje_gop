@@ -18,16 +18,17 @@ class createDoc {
      */
     private $FontStyle=[];
     private $ParagraphStyle=[];
-    const docDir='DOC/';
+    private $docDir='';
     
-    function __construct($projectDetails,$files,$fileName,$ext=''){
+    function __construct($projectDetails,$files,$fileName,$ext='',$dir=''){
         $this->Log=Logger::init();
         $this->Log->log(0,"[".__METHOD__."] FILENAME => ".$fileName);
         $this->Log->log(0,"[".__METHOD__."] EXTENSION => ".$ext);
         $this->projectData=$projectDetails;
         $this->fileName=$fileName."_".uniqid().$ext;
         $this->files=$files;
-        require_once DR.'/bootstrap.php';
+        $this->docDir=$dir;
+        require_once APP_ROOT.'/bootstrap.php';
         // Creating the new document...
         $settings=new \PhpOffice\PhpWord\Settings();
         $settings::setOutputEscapingEnabled(true);
@@ -43,9 +44,9 @@ class createDoc {
         $this->Log->log(0,"[".__METHOD__.'] LOAD => \PhpOffice\PhpWord\IOFactory::createWriter()');
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
         /* check is file exist */
-        $this->Log->log(0,"[".__METHOD__.'] SAVE FILE => '.DR."/".self::docDir.$this->fileName);
+        $this->Log->log(0,"[".__METHOD__."] SAVE FILE => ".$this->docDir.$this->fileName);
         //$objWriter->setOutputEscapingEnabled(true);
-        $objWriter->save(DR."/".self::docDir.$this->fileName);
+        $objWriter->save($this->docDir.$this->fileName);
     }
     public function createProjectReport(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -321,7 +322,7 @@ $row->addCell(1000)->addText('3');
     $this->Log->log(0,"[".__METHOD__."] BEFORE createWriter");
     $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
     $this->Log->log(0,"[".__METHOD__."] BEFORE SAVE FILE");
-    $objWriter->save(DR."/".self::docDir.$this->fileName);
+    $objWriter->save($this->docDir.$this->fileName);
    // Saving the document as ODF file...
     //$objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'ODText');
     //$objWriter->save('helloWorld.odt');

@@ -219,7 +219,9 @@ function runFunction(response)
                 console.log('DEFAULT');
                 console.log(response);
                 dJson['status']=1;
-                dJson['info']='Wrong function to run '+dJson['data']['function'];
+                if(dJson['info']===''){
+                    dJson['info']='Wrong function to run '+dJson['data']['function'];
+                };
                 error.checkStatusResponse(dJson);
             break;
     }

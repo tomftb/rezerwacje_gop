@@ -33,8 +33,8 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         $this->inpArray=$this->Parser->getPost();
         $this->files=$this->Parser->getFiles();    
         $this->Log->LogMulti(0,$this->inpArray,__METHOD__);
-        //sleep(10);
-        //Throw New Exception (__METHOD__.__LINE__.'TEST ERROR',0);
+        sleep(10);
+        Throw New Exception (__METHOD__.__LINE__.'TEST ERROR',0);
         self::createDocument();
         $this->utilities->jsonResponse($this->documentName,'downloadProjectReportDoc');
     }

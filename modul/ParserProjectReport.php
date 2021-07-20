@@ -1,7 +1,9 @@
 <?php
 class ParserProjectReport{
-	private static $Link;
+    private static $Link;
     private $Log;
+    private $post=[];
+    private $files=[];
     private function __construct(){
         $this->Log=Logger::init(__METHOD__);
     }
@@ -75,7 +77,67 @@ class ParserProjectReport{
     }
     public function parseDocImage($post=[],$files=[]){
         $this->Log->log(0,"[".__METHOD__."]"); 
+        $this->post=$post;
+        $this->files=$files;
         $this->Log->logMulti(0,$post,'POST');
         $this->Log->logMulti(0,$files,'FILES');
+        /* CLEAR ACTUALL POST FILES */
+        array_walk($this->files,array('self','checkInsertedFiles')); 
+        /* CLEAR POST FILES TO REMOVE */
+        array_walk($this->post,['self','unsetPostFilesToRemove']);
+        
+        $this->Log->logMulti(0,$this->post,'POST 2');
+        $this->Log->logMulti(0,$this->files,'FILES 2');
+        /* ADD POST FILES TO FILES */
+        array_walk($this->post,['self','addPostActFilesToFiles']);
+        $this->Log->logMulti(0,$this->files,'FILES 3');
+        //array_map(['self','addPostActFilesToFiles'],[$id[0].'-'.$id[1].'-actFile',$id[0].'-'.$id[1].'-actFileRemove']);
+        //Throw New Exception (__LINE__.'TEST ERROR',0);
+    }
+    private function checkInsertedFiles($v,$k){
+        $this->Log->log(0,"[".__METHOD__."] KEY => ".$k); 
+        $id=explode('-',$k);
+        $this->Log->log(0,"[".__METHOD__."] ID => ".$id[0].'-'.$id[1]); 
+        $this->Log->logMulti(0,$v,'FILE');
+        $this->Log->logMulti(0,$this->post,'POST');
+        array_map(['self','unsetPostFiles'],[$id[0].'-'.$id[1].'-actFile',$id[0].'-'.$id[1].'-actFileRemove']);
+    }
+    private function unsetPostFiles($v){
+        $this->Log->log(0,"[".__METHOD__."]KEY ${v} => UNSET");
+        /* NO NEED TO CHECK => UNSET CAN REMOVE NOT EXIST KEY */
+        UNSET($this->post[$v]);    
+    }
+    private function unsetPostFilesToRemove($v,$k){
+        $this->Log->log(0,"[".__METHOD__."] KEY => ".$k);
+        $id=explode('-',$k);
+        if(!array_key_exists(2,$id)){
+            /* KEY 2 NOT EXIST => EXIST */
+            return false;
+        }
+        if($id[2]==='actFileRemove'){
+            $this->Log->log(0,"[".__METHOD__."] KEY ${k} EXIST => UNSET KEY ".$id[0].'-'.$id[1].'-actFile AND '.$k);
+            UNSET($this->post[$k]);
+            UNSET($this->post[$id[0].'-'.$id[1].'-actFile']);
+        }
+    }
+    private function addPostActFilesToFiles($v,$k){
+        $this->Log->log(0,"[".__METHOD__."] KEY => ".$k);
+        $id=explode('-',$k);
+        if(!array_key_exists(2,$id)){
+            /* KEY 2 NOT EXIST => EXIST */
+            return false;
+        }
+        if($id[2]==='actFile'){
+            $this->Log->log(0,"[".__METHOD__."] KEY ${k} EXIST => ADD KEY ".$id[0].'-'.$id[1].'-fileData');
+            $this->files[$id[0].'-'.$id[1].'-fileData'][0]=APP_ROOT.UPLOAD_PROJECT_REPORT_IMG_DIR.$v;
+            $this->files[$id[0].'-'.$id[1].'-fileData'][1]['name']='ActuallFile';
+            UNSET($this->post[$k]);
+        }
+    }
+    public function getPost(){
+        return $this->post;
+    }
+    public function getFiles(){
+        return $this->files;
     }
 }

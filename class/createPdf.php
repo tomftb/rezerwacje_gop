@@ -12,7 +12,8 @@ class createPdf extends tFPDF
     protected $prTeam=array();
     protected $prMainManager=array();
     protected $prMainTech=array();
-    protected $DOC_ROOT='';
+    private $ROOT='';
+    private $createDir='';
     private $log;
     /*
      * I -> OPEN
@@ -20,10 +21,11 @@ class createPdf extends tFPDF
      */
     
     protected $outputType='S';
-    function __construct($projectDetails,$projectDoc,$projectTeam)
+    function __construct($projectDetails,$projectDoc,$projectTeam,$root='',$createDir='')
     {
         parent::__construct();
-        $this->DOC_ROOT=DR;
+        $this->ROOT=$root;
+        $this->createDir=$createDir;
         $this->log=Logger::init();
         $this->prDetails=$projectDetails;
         $this->prDocs=$projectDoc;
@@ -48,7 +50,7 @@ class createPdf extends tFPDF
         $this->Cell(0,3,'',0,1,'C');
         $this->Cell(0,0,'WYDANIE: 6',0,0,'R');
         $this->Cell(0,3,'',0,1,'C');
-        $this->Image($this->DOC_ROOT.'/lib/fpdf181/gt_line_header.png',20,22,0);
+        $this->Image($this->ROOT.'/lib/fpdf181/gt_line_header.png',20,22,0);
         $this->Ln(5);
     }
     // Page footer
@@ -249,7 +251,7 @@ class createPdf extends tFPDF
     }
     public function getPdf(){
         $pdfName='projekt.pdf';
-        $this->Output($this->DOC_ROOT.'/PDF/'.$pdfName,'F');
+        $this->Output($this->ROOT.$this->createDir.$pdfName,'F');
         return ($pdfName);
     }
     function __destruct(){}

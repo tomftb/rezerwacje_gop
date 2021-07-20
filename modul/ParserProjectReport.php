@@ -16,14 +16,14 @@ class ParserProjectReport{
 		}
 		return self::$Link;
 	}
-	public function parseKeyValue($k,$v,&$reportData){
+    public function parseKeyValue($k,$v,&$reportData){
         if(preg_match('/^\d*\d+-n$/',$k) || preg_match('/^\d*\d+-t$/',$k)){
             $this->Log->log(2,"FOUND NUMBER / TITLE => ${k} => ${v}");
             $id=explode('-',$k);
             $reportData[$id[0]][$id[1]]=$v;//$id[1]
             return true;
         }
-        if(preg_match('/^\d*\d+-\d*\d+-fileposition$/',$k) || preg_match('/^\d*\d+-\d*\d+-value/',$k) || preg_match('/^\d*\d+-\d*\d+-actFile/',$k)){
+        if(preg_match('/^\d*\d+-\d*\d+-fileposition$/',$k) || preg_match('/^\d*\d+-\d*\d+-value/',$k) || preg_match('/^\d*\d+-\d*\d+-actFileRemove/',$k)|| preg_match('/^\d*\d+-\d*\d+-actFile/',$k)){
             $this->Log->log(0,"FOUND FILEPOSITION / VALUE / ACTUALL FILE => ${k} => ${v}");
             $id=explode('-',$k);
             $reportData[$id[0]]['d'][$id[1]][$id[2]]=$v;
@@ -31,7 +31,7 @@ class ParserProjectReport{
         }
         return false;
     }
-	public function checkReportKeys($v){
+    public function checkReportKeys($v){
         $this->Log->log(1,"[".__METHOD__."]");
         if(count($v)!==3){
             $this->Log->logMulti(0,$v,__METHOD__);
@@ -39,9 +39,9 @@ class ParserProjectReport{
         }
         foreach($v['d'] as $data){
             $c=count($data);
-            if($c!==2 && $c!==3){
+            if($c<2 && $c>4){
                 $this->Log->logMulti(0,$v['d'],__METHOD__);
-                throw New Exception('WRONG INPUT FILEPOSITION/VALUE/ACTUALL FILE POST COUNT ('.$c.'), WRONG KEYS NAME?',1); 
+                throw New Exception('WRONG INPUT FILEPOSITION/VALUE/ACTUALL-FILE/ACTUALL-REMOVE FILE POST COUNT ('.$c.'), WRONG KEYS NAME?',1); 
             }
             
         }
@@ -67,11 +67,15 @@ class ParserProjectReport{
         }
 	return false;
     }
-	private function __clone() { 
-		throw new \Exception("Cannot clone a singleton.");
-	}
+    private function __clone() { 
+    	throw new \Exception("Cannot clone a singleton.");
+    }
     private function __wakeup(){
         throw new \Exception("Cannot unserialize a singleton.");
     }
-
+    public function parseDocImage($post=[],$files=[]){
+        $this->Log->log(0,"[".__METHOD__."]"); 
+        $this->Log->logMulti(0,$post,'POST');
+        $this->Log->logMulti(0,$files,'FILES');
+    }
 }

@@ -50,14 +50,6 @@ CREATE TABLE `projekt_etap_wartosc_plik` (
   `mod_host` varchar(100) COLLATE utf8_polish_ci DEFAULT NULL,
   `wsk_u` enum('0','1') COLLATE utf8_polish_ci NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;
-
---
--- Zrzut danych tabeli `projekt_etap_wartosc_plik`
---
-
-INSERT INTO `projekt_etap_wartosc_plik` (`id`, `idProjectStageValue`, `fileId`, `filename`, `fileposition`, `originalname`, `size`, `type`, `create_user_id`, `create_user_login`, `create_user_full_name`, `create_user_email`, `create_date`, `create_host`, `mod_user_id`, `mod_user_login`, `mod_user_full_name`, `mod_user_email`, `mod_date`, `mod_host`, `wsk_u`) VALUES
-(1, 1, 0, '60f13e2e02754_0.jpeg', 'top', '217806108_2896186200', 80558, 'image/jpeg', 1, 'tborczynski', 'Borczyński Tomasz', 'tomasz.borczynski@geofizyka.pl', '2021-07-16 10:08:01', '127.0.0.1', NULL, NULL, NULL, NULL, NULL, NULL, '0');
-
 --
 -- Indeksy dla zrzutów tabel
 --
@@ -69,16 +61,6 @@ ALTER TABLE `projekt_etap_wartosc_plik`
   ADD PRIMARY KEY (`id`),
   ADD KEY `FK_projekt_etap3_projekt_id` (`idProjectStageValue`),
   ADD KEY `FK_projekt_etap3_cuser_id` (`create_user_id`);
-
---
--- AUTO_INCREMENT dla zrzuconych tabel
---
-
---
--- AUTO_INCREMENT dla tabeli `projekt_etap_wartosc_plik`
---
-ALTER TABLE `projekt_etap_wartosc_plik`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Ograniczenia dla zrzutów tabel

@@ -407,8 +407,10 @@ $row->addCell(1000)->addText('3');
     }
     private function setFile($id,&$filePostion,&$file){
         if(array_key_exists($id."fileData", $this->files)){
-            $this->Log->log(0,"FOUND FILE => ".$this->files[$id."fileData"]);
-            $file=$this->files[$id."fileData"];
+            $this->Log->log(0,"[name] FOUND FILE => ".$this->files[$id."fileData"][1]['name']);
+            $this->Log->log(0,"[location] FOUND FILE => ".$this->files[$id."fileData"][0]);
+            //$file=$this->files[$id."fileData"];
+            $file=$this->files[$id."fileData"][0];
             UNSET($this->files[$id."fileData"]);
         }
         else{

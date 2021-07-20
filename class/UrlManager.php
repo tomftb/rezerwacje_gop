@@ -83,7 +83,7 @@ final class UrlManager{
         ['setProjectStageWskB','EDIT_STAGE'],
         ['setProjectReportImage','GEN_PROJECT_REPORT'],
         ['setProjectReportDoc','GEN_PROJ_REP_DOC'],
-        ['downloadReportDoc','GEN_PROJ_REP_DOC'],
+        ['downloadProjectReportDoc','GEN_PROJ_REP_DOC'],
         ['pGenDoc','GEN_DOC_PROJ','user'],
         ['downloadProjectDoc','GEN_DOC_PROJ'],
         ['downloadProjectReportImage','GEN_PROJ_REP_DOC'],

@@ -25,15 +25,22 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         /* parse data */
         if(empty($this->inpArray)){ Throw New Exception ('NO STAGE SELECTED',0);}
         /* parse file */
-        self::uploadFiles(APP_ROOT.UPLOAD_DIR,UPLOAD_DIR); 
+        self::uploadFiles(APP_ROOT.UPLOAD_PROJECT_REPORT_IMG_DIR,UPLOAD_PROJECT_REPORT_IMG_DIR); 
         /* create Report */
+        /* PARSE ACTUALL FILE WITH DELETE CHECKBOX AND INSERTED FILE*/
+        $this->Parser=ParserProjectReport::init();
+        $this->Parser->parseDocImage($this->inpArray,$this->files);
+        $this->inpArray=$this->Parser->getPost();
+        $this->files=$this->Parser->getFiles();    
+        $this->Log->LogMulti(0,$this->inpArray,__METHOD__);
+        //Throw New Exception (__METHOD__.__LINE__.'TEST ERROR',0);
         self::createDocument();
-        $this->utilities->jsonResponse($this->documentName,'downloadReportDoc');
+        $this->utilities->jsonResponse($this->documentName,'downloadProjectReportDoc');
     }
     public function setProjectReportImage(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::uploadFiles(APP_URL."router.php?task=showProjectReportFile&dir=".TMP_UPLOAD_DIR."&file=",TMP_UPLOAD_DIR); 
-        $this->utilities->jsonResponse($this->files,'showStagePreview'); 
+        $this->utilities->jsonResponse($this->files,'showReportPreview'); 
     }
     public function getProjectReportData(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -48,7 +55,7 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         $this->modul['FILE']=NEW file();
         $this->modul['FILE']->setUrl($linkToFile);
         $this->modul['FILE']->setNewFileName($_SESSION['uid']);
-        $this->modul['FILE']->setUploadDir($uploadDir);
+        $this->modul['FILE']->setUploadDir(APP_ROOT.$uploadDir);
         $this->modul['FILE']->setAcceptedFileExtension(['image/jpeg','image/png','image/jpg']);
         $this->modul['FILE']->setMaxFileSize(100000);
         $this->modul['FILE']->uploadFiles();
@@ -71,7 +78,7 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         self::checkIsInputEmpty();
         /* ADD DATA TO DB -> DatabaseProjectReport class*/
         parent::addReport($this->idProject,$this->reportData);
-        Throw New Exception('TEST',0);
+        /* Throw New Exception('TEST',0); */
         $this->utilities->jsonResponse('','cModal');
     }
     private function setReportData(){
@@ -90,8 +97,9 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         }
     }
     private function createDocument(){
+        $this->Log->log(0,"[".__METHOD__."]");
         /* create doc */
-        $doc=new createDoc($this->inpArray,$this->files,'ProjectReport1','.docx');
+        $doc=new createDoc($this->inpArray,$this->files,'ProjectReport1','.docx',APP_ROOT.UPLOAD_PROJECT_REPORT_DOC_DIR);
         $doc->createProjectStageReport();
         $this->documentName=$doc->getDocName();
     }
@@ -130,10 +138,10 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
     }
     public function downloadProjectReportDoc(){
         $this->Log->log(0,"[".__METHOD__."]");
-        downloadFile::getFile(UPLOAD_PROJECT_REPORT_DOC_DIR,filter_input(INPUT_GET,"file"));
+        downloadFile::getFile(APP_ROOT.UPLOAD_PROJECT_REPORT_DOC_DIR,filter_input(INPUT_GET,"file"));
     } 
     public function downloadProjectReportImage(){
         $this->Log->log(0,"[".__METHOD__."]");
-        downloadFile::getFile(UPLOAD_PROJECT_REPORT_IMG_DIR,filter_input(INPUT_GET,"file"));
+        downloadFile::getFile(APP_ROOT.UPLOAD_PROJECT_REPORT_IMG_DIR,filter_input(INPUT_GET,"file"));
     }
 }

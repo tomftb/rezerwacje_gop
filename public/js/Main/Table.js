@@ -78,7 +78,8 @@ class Table
         }
     }
     showTable(d){
-        console.log(d);
+        console.log('Table::showTable(data)');
+        // console.log(d);
         var defaultTableCol=document.getElementById("colDefaultTable");
             removeHtmlChilds(defaultTableCol);
         for (const c in this.columns){

@@ -1,9 +1,3 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-console.log('xhr.js => AJAX');
 class Ajax
 {
     link='';
@@ -13,10 +7,8 @@ class Ajax
     static runTask='';
     static runObject;
     
-    constructor() 
-    { 
+    constructor(){ 
         console.log('Ajax::constructor()');
-        //console.log(this);
         this.setUrl();
     }
     setModul(object){
@@ -39,18 +31,10 @@ class Ajax
     }
     sendData(formName,type)
     {
-        //console.log('AJAX::sendData()\n'+formName);
-        
+        //console.log('AJAX::sendData()\n'+formName);  
         this.checkType(formName);
-       
-        //console.log(form);
         this.type=type;
-        
         var fd = new FormData(this.form);
-        /*
-         * WE WANT TEXT TO CHECK RETURNED VALUE
-         */
-        //console.log(fd);
         this.runXhr(fd,'router.php?task='+this.formName);
     }
     checkType(formName)
@@ -82,7 +66,7 @@ class Ajax
         }
     }
     getData (task){
-        console.log('AJAX::getData('+task+')');
+        console.log('Ajax::getData('+task+')');
         //console.log("TASK : "+task);
         this.type='GET';
         this.runXhr(null,'router.php?task='+task);
@@ -122,16 +106,15 @@ class Ajax
     }
     xhrError()
     {
-        //console.log('AJAX::xhrError()'); 
-        //console.log("error:: Niestety nie udało się nawiązać połączenia");
+        console.log('Ajax::xhrError()'); 
+        console.log("error:: Niestety nie udało się nawiązać połączenia"); 
     }
     xhrLoad()
     {
-        //console.log('AJAX::xhrLoad()'); 
+        console.log('Ajax::xhrLoad()'); 
         switch(this.status)
         {
             case 200:
-                    
                     //console.log("AJAX::runXhr() => 200");
                     //console.log(this.response);
                     //console.log(this.status);
@@ -145,7 +128,6 @@ class Ajax
             default:
                     //console.log("AJAX::runXhr() =>"+this.status);
                     //console.log(this.response);
-                    r.runTask(this.response);
                     break;
         }
     }

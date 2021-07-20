@@ -483,9 +483,14 @@ class Report
                     actFile.setAttribute('href','router.php?task=downloadProjectReportImage&file='+Report.actStage[Report.fieldCounter].v[prop]['fa']);
                     actFile.setAttribute('target','_blank');
                     actFile.appendChild(document.createTextNode(Report.actStage[Report.fieldCounter].v[prop]['fo']));
+                var actFileInput=document.createElement('input');
+                    actFileInput.setAttribute('name',Report.fieldCounter+'-'+counter+'-actFile');
+                    actFileInput.setAttribute('type','hidden');
+                    actFileInput.setAttribute('value',Report.actStage[Report.fieldCounter].v[prop]['fa']);
                     divCol2.appendChild(box);
                     divCol2.appendChild(label);
                     divCol1.appendChild(actFile);
+                    divCol1.appendChild(actFileInput);
                     divRow.appendChild(divCol1);
                     divRow.appendChild(divCol2);
                 /* ADD REMOVE FILE BUTTON CHECKBOX */

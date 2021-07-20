@@ -1,4 +1,4 @@
-var log=true;
+var log=false;
 
 function setMenuActive()
 {

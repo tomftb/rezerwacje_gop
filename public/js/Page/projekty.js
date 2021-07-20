@@ -186,7 +186,7 @@ function runFunction(response)
             break;
         case 'downloadProjectPdf':
         case 'downloadProjectDoc':
-        case 'downloadReportDoc':
+        case 'downloadProjectReportDoc':
                 console.log(dJson['data']['value']);
                 var win = window.open('router.php?task='+dJson['data']['function']+'&file='+dJson['data']['value'], '_blank');
                 win.focus();
@@ -200,9 +200,9 @@ function runFunction(response)
                 setAvaTeam();
                 pTeam(true);
                 break;
-        case 'showStagePreview':
+        case 'showReportPreview':
                 console.log(dJson);
-                report.showPreview(dJson['data']['value']);
+                report.showReportPreview(dJson['data']['value']);
                 break;
         case 'pReportOff':
                 //pReport();
@@ -210,13 +210,16 @@ function runFunction(response)
                 report.create();
                 break;
         case 'runMain':
-               
                 loggedUserPerm=dJson['data']['value']['perm'];
                 setButtonDisplay(document.getElementById('createData'),'ADD_PROJ');
         case 'sAll':
                 displayAll(dJson);
             break;
         default:
+                console.log('DEFAULT');
+                console.log(response);
+                dJson['status']=1;
+                dJson['info']='Wrong function to run '+dJson['data']['function'];
                 error.checkStatusResponse(dJson);
             break;
     }

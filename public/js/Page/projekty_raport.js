@@ -471,8 +471,8 @@ class Report
                     box.setAttribute('class','form-check-input');
                     box.setAttribute('type','checkbox');
                     /* box.setAttribute('checked','checked'); */
-                    box.setAttribute('name',Report.fieldCounter+'-'+counter+'-actFile');
-                    box.setAttribute('id',Report.fieldCounter+'-'+counter+'-actFile');
+                    box.setAttribute('name',Report.fieldCounter+'-'+counter+'-actFileRemove');
+                    box.setAttribute('id',Report.fieldCounter+'-'+counter+'-actFileRemove');
                 var label=document.createElement('label');
                     label.setAttribute('class','form-check-label');
                     label.setAttribute('for',Report.fieldCounter+'-'+counter+'-actFile');

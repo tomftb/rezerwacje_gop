@@ -12,6 +12,8 @@ class Report
     static projectId='';
     static fieldCounter=0;
     static perm=new Array();
+    static defaultFilePostion='top';
+    static imgUrl='http://rezerwacje-gop.local:8080/router.php?task=downloadProjectReportImage&file=';
     static link={
         stage:new Object(),
         previewReportData:new Object(),
@@ -53,14 +55,21 @@ class Report
         /* TO DO +. DYNAMIC CHANGE */
         //Report.formName=projectStageData['data']['function'];
     }
-    showPreview(f){
-        console.log('Report::createPreview(f)');
+    static showReportPreview(){
+        console.log('Report::showReportPreview()');
         /*
          * PREVIEW DIV
          * f => files
          */
         console.log(Report.link.stage.childNodes[1]);
         console.log(Report.actStage);
+        /* SET DATA */
+        Report.setReportPreviewData();
+        Report.link.stage.childNodes[0].classList.add("d-none");
+        Report.link.stage.childNodes[0].classList.remove("block");
+        Report.link.stage.childNodes[1].classList.add("block");
+        Report.link.stage.childNodes[1].classList.remove("d-none");
+        
         /* CREATE AVAILABLE STAGE DATA */
         for(const prop in Report.actStage){
                 Report.link.stage.childNodes[1].appendChild(Report.createDiv(Report.actStage[prop].t,'col-12'));
@@ -71,26 +80,23 @@ class Report
                     switch (Report.actStage[prop].v[prop2].fp) {
                         case 'top':
                             console.log('top');
-                            Report.setupPreviewImage(f,Report.actStage[prop].v[prop2].ins,Report.link.stage.childNodes[1],'col-12 text-center');
+                            Report.setupPreviewImage(Report.actStage[prop].v[prop2],Report.link.stage.childNodes[1],'col-12 text-center');
                             Report.link.stage.childNodes[1].appendChild(Report.createDiv(Report.actStage[prop].v[prop2].v,'col-12'));
                             break;
                         case 'bottom':
                             console.log('bottom');
                             Report.link.stage.childNodes[1].appendChild(Report.createDiv(Report.actStage[prop].v[prop2].v,'col-12'));
-                            Report.setupPreviewImage(f,Report.actStage[prop].v[prop2].ins,Report.link.stage.childNodes[1],'col-12 text-center');
+                            Report.setupPreviewImage(Report.actStage[prop].v[prop2],Report.link.stage.childNodes[1],'col-12 text-center');
                             break;
                         case 'left':
                             console.log('left');
-                            Report.setupPreviewImage(f,Report.actStage[prop].v[prop2].ins,Report.link.stage.childNodes[1],'col-6 text-center');
-                           
+                            Report.setupPreviewImage(Report.actStage[prop].v[prop2],Report.link.stage.childNodes[1],'col-6 text-center');
                             Report.link.stage.childNodes[1].appendChild(Report.createDiv(Report.actStage[prop].v[prop2].v,'col-6'));
-                            
                             break;
                         case 'right':
                             console.log('right');
                             Report.link.stage.childNodes[1].appendChild(Report.createDiv(Report.actStage[prop].v[prop2].v,'col-6'));
-                            Report.setupPreviewImage(f,Report.actStage[prop].v[prop2].ins,Report.link.stage.childNodes[1],'col-6 text-center');
-                           
+                            Report.setupPreviewImage(Report.actStage[prop].v[prop2],Report.link.stage.childNodes[1],'col-6 text-center');              
                             break;
                         default:
                             console.log(`WRONG POSITION ${Report.actStage[prop].v[prop2].fp}`);
@@ -99,20 +105,24 @@ class Report
         }
         console.log(Report.link.stage.childNodes[1]);     
     }
-    static setupPreviewImage(f,ins,ele,colClass){
+    static setupPreviewImage(v,ele,colClass){
         console.log('Report::setupPreviewImage()');
-        console.log(f);
-        console.log(ins);
-        if(!ins){
-            console.log('FILE NOT INSERTED -> EXIT');
-            return false;
+        console.log(v);
+         /*
+         * FIRST CHECK NEW INSERTED FILE
+         * SECOND CHECK ACTUALL FILE
+         */
+        if(v.f){
+            console.log('FILE INSERTED');
+            var eleImg=document.getElementById(v['f']).files[0];
+            var src=URL.createObjectURL(eleImg);
+            ele.appendChild(Report.addImg(src,eleImg.name,colClass));
+            return true;
         }
-        console.log(f[ins]);
-        if(f.hasOwnProperty(ins)){
-            ele.appendChild(Report.addImg(f[ins],ins,colClass));
-        }
-        else{
-            alert('[ERROR]');
+        if(v.fa){
+            console.log('FILE ACTUALL');
+            ele.appendChild(Report.addImg(Report.imgUrl+v.fa,v.fo,colClass));  
+            return true;
         }
     }
     static addImg(imgSrc,imgKey,colClass){
@@ -337,9 +347,9 @@ class Report
     }
     static createFileInputDiv(prop,counter){
         var divFile=document.createElement('div');
-            divFile.setAttribute('class','col-12 pl-1 border border-success');
+            divFile.setAttribute('class','col-12 pl-1 ');//border border-success
             divFile.setAttribute('id','divFile-'+Report.fieldCounter);
-            Report.createNewFileDiv(divFile,counter);
+            Report.createNewFileDiv(divFile,prop,counter);
             
             Report.createActuallFileDiv(divFile,prop,counter);
         var defaultFilePosition=Report.actStage[Report.fieldCounter].v[prop]['fp'];
@@ -350,16 +360,17 @@ class Report
             divFile.appendChild(Report.createFilePositionElement(Report.fieldCounter,counter,defaultFilePosition));
         return divFile;
     }
-    static createNewFileDiv(ele,counter){
+    static createNewFileDiv(ele,prop,counter){
         var divRow=document.createElement('div');
-            divRow.setAttribute('class','row ml-0 mt-1 mb-1 border border-secondary');
+            divRow.setAttribute('class','row ml-0 mr-0 mt-1 mb-1 ');//border border-info rounded
+            divRow.setAttribute('id',Report.fieldCounter+'-'+counter+'-newFileDiv');
         var divRowErr=document.createElement('div');
-            divRowErr.setAttribute('class','row ml-0 mt-1 mb-1 alert alert-danger d-none');  
+            divRowErr.setAttribute('class','row ml-0 mr-0 mt-1 mb-1 alert alert-danger d-none');  
             divRowErr.setAttribute('id',Report.fieldCounter+'-'+counter+'-fileDataErr');  
         var divCol1=document.createElement('div');
-            divCol1.setAttribute('class','col-sm-11 pl-0 pt-1 border border-info'); 
+            divCol1.setAttribute('class','col-sm-11 pl-0 pt-1  '); //border border-danger
         var divCol2=document.createElement('div');
-            divCol2.setAttribute('class','col-sm-1 pl-0 pr-0 form-check border border-primary'); 
+            divCol2.setAttribute('class','col-sm-1 pl-0 pr-0 form-check '); //border border-primary
         var input=createInput('file',Report.fieldCounter+'-'+counter+'-fileData','','form-control-file','','n');
             input.onchange = function (e){
                 var divErr=this.parentNode.parentNode.parentNode.childNodes[1];
@@ -397,43 +408,64 @@ class Report
                 if(errSize.nodeValue!=='' || errType.nodeValue!==''){
                     divErr.appendChild(errSize);
                     divErr.appendChild(errType);
-                    divErr.classList.remove("d-none");
-                    divErr.classList.add("d-block");
+                    Report.showEle(divErr);
                 }
                 else{
-                    divErr.classList.remove("d-block");
-                    divErr.classList.add("d-none");
+                    Report.updActStageValue(this.id,'f',this.id);//this.value
+                    Report.hiddeEle(divErr);
                 }
-                
+                console.log(Report.actStage);
             };
             divCol1.appendChild(input);
         var i=createTag('','i','fa fa-minus');
             i.setAttribute('aria-hidden','true');
             i.setAttribute('style','color:#ffffff;');
         var button=document.createElement('button');
-            button.setAttribute('class','btn btn-danger')
+            button.setAttribute('class','btn btn-warning');
             button.onclick=function(){
-                console.log(this.parentNode.parentNode.childNodes[0].childNodes[0].value='');
+                console.log(this.parentNode.parentNode.childNodes[1].childNodes[0]);
+                 /*
+                 * CLEAR input value
+                 */
+                this.parentNode.parentNode.childNodes[1].childNodes[0].value='';
+                /*
+                 * UPDATE Report.actStage
+                 */
+                Report.updActStageValue(this.parentNode.parentNode.childNodes[1].childNodes[0].id,'f',null);
+                //console.log();
+                /*
+                 * HIDDE error
+                 */
+                //console.log(this.parentNode.parentNode.parentNode.childNodes[1]);
+                Report.hiddeEle(this.parentNode.parentNode.parentNode.childNodes[1]);
             };
             button.appendChild(i);
             divCol2.appendChild(button);
             
-            divRow.appendChild(divCol1);
             divRow.appendChild(divCol2);
+            divRow.appendChild(divCol1);
             ele.appendChild(divRow);
             ele.appendChild(divRowErr);
     }
+    static hiddeEle(ele){
+        ele.classList.remove("d-block");
+        ele.classList.add("d-none");
+    }
+    static showEle(ele){
+        ele.classList.remove("d-none");
+        ele.classList.add("d-block");
+    }
     static createActuallFileDiv(ele,prop,counter){
         console.log('Report::createActuallFileDiv() FILE:');
-        console.log(Report.actStage[Report.fieldCounter].v[prop]['f']);
-        if(Report.actStage[Report.fieldCounter].v[prop]['f']){
+        console.log(Report.actStage[Report.fieldCounter].v[prop]['fa']);
+        if(Report.actStage[Report.fieldCounter].v[prop]['fa']){
             var divRow=document.createElement('div');
-                divRow.setAttribute('class','row ml-0 mt-1 mb-1 border border-danger');
+                divRow.setAttribute('class','row ml-0 mt-1 mb-1 mr-0 border border-info rounded');//border border-danger
                 divRow.setAttribute('id',Report.fieldCounter+'-'+prop+'-actFileDiv');
             var divCol1=document.createElement('div');
-                divCol1.setAttribute('class','col-sm-10 pl-0 border border-info'); 
+                divCol1.setAttribute('class','col-sm-10 '); //border border-info
             var divCol2=document.createElement('div');
-                divCol2.setAttribute('class','col-sm-2 form-check border border-primary'); 
+                divCol2.setAttribute('class','col-sm-2 form-check '); //border border-primary
                     
                 var box=document.createElement('input');
                     box.setAttribute('class','form-check-input');
@@ -448,7 +480,7 @@ class Report
                
                     /* ADD DATA ABOUT INSERTED FILE */   
                 var actFile=document.createElement('a');
-                    actFile.setAttribute('href','router.php?task=downloadProjectReportImage&file='+Report.actStage[Report.fieldCounter].v[prop]['f']);
+                    actFile.setAttribute('href','router.php?task=downloadProjectReportImage&file='+Report.actStage[Report.fieldCounter].v[prop]['fa']);
                     actFile.setAttribute('target','_blank');
                     actFile.appendChild(document.createTextNode(Report.actStage[Report.fieldCounter].v[prop]['fo']));
                     divCol2.appendChild(box);
@@ -460,12 +492,16 @@ class Report
                 console.log(divRow);
                     ele.appendChild(divRow);
         }  
+        else{
+            /* SETUP DEFAULT */
+            Report.actStage[Report.fieldCounter].v[prop]['fp']=Report.defaultFilePostion;
+        }
     }
     static createFilePositionElement(counter,fileCounter,defFilePosition){
         //console.log('Report::createFilePositionElement('+fileCounter+')');
         //var fpCounter=0;
         var div=document.createElement('div');
-            div.setAttribute('class','row ml-0 border border-warning');
+            div.setAttribute('class','row ml-0 ');//border border-warning
             div.setAttribute('id',Report.fieldCounter+'-'+fileCounter+'-filepositionDiv');
         var divFormFile1=document.createElement('div');
             divFormFile1.setAttribute('div','form-check form-check-inline mt-1 mb-1');
@@ -584,7 +620,7 @@ class Report
     }
     static createFilePosition(property,value,checked,fileCounter)
     {
-        //console.log('Report::createFilePosition()');   
+        console.log('Report::createFilePosition()');   
         //console.log(checked);
         //console.log(fpCounter);
         
@@ -603,18 +639,12 @@ class Report
                  * 3 -> position value
                  * 
                  */
-                //this.setAttribute('checked','checked');
-                console.log(this.parentNode);
-                console.log(this);
-                console.log(Report.actStage);
-                console.log(Report.actStage[id[0]].v[id[1]].fp);
                 /*
                  * UPDATE
                  */
-                Report.actStage[id[0]].v[id[1]].fp=id[3];
+                Report.updActStageValue(this.id,'fp',id[3]);
             };
-        if(checked===property)
-        {
+        if(checked===property){
             inputRadioFileTop.setAttribute('checked','checked');
         }
         
@@ -622,6 +652,7 @@ class Report
         inputRadioFileTopLabel.setAttribute('for',Report.fieldCounter+'-'+fileCounter+'-fileposition-'+property);
         div.appendChild(inputRadioFileTop);
         div.appendChild(inputRadioFileTopLabel);
+        /* SETUP DEFAULT */
         
         return div;
     }
@@ -640,16 +671,12 @@ class Report
                 }
                 else{
                     //Report.formName=Report.formName+'Image';
-                    Report.link.form.name=Report.getFormName()+'Image'
-                    console.log(Report.link.form.name);
-                    postData(this,Report.link.form);
-                    
-                    Report.showReportPreview();
-                    Report.link.stage.childNodes[0].classList.add("d-none");
-                    Report.link.stage.childNodes[0].classList.remove("block");
-                    Report.link.stage.childNodes[1].classList.add("block");
-                    Report.link.stage.childNodes[1].classList.remove("d-none");
+                    //Report.link.form.name=Report.getFormName()+'Image';
+                    //console.log(Report.link.form.name);
                     this.innerText='Edytuj';
+                    //postData(this,Report.link.form);
+                    Report.showReportPreview();
+                   
                 }
                 //console.log(Report.link.stage);     
         };     
@@ -697,8 +724,8 @@ class Report
         /* REMOVE TMP FILES */
         return functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),'');
     }
-    static showReportPreview(){
-        console.log('Report::showReportPreview()');  
+    static setReportPreviewData(){
+        console.log('Report::setReportPreviewData()');  
         console.log(Report.link.stage.childNodes[0].childNodes[1].childNodes[1]);
         var mainLink=Report.link.stage.childNodes[0].childNodes[1].childNodes[1];
         var subLink=new Object();
@@ -724,40 +751,36 @@ class Report
                     fieldName=subLink.childNodes[j].id.split("-");
                     switch (fieldName[0]) {
                         case 'divNumber':
-                            //console.log('divNumber');
+                            console.log('divNumber');
                             //console.log(subLink.childNodes[j].childNodes[0].id);
                             //console.log(subLink.childNodes[j].childNodes[0].value);
                             Report.updActStageData(subLink.childNodes[j].childNodes[0].id,subLink.childNodes[j].childNodes[0].value);
                             break;
                         case 'divTitle':
-                            //console.log('divTitle');
+                            console.log('divTitle');
                             //console.log();
                             //console.log();
                             //Report.link.stage.childNodes[1].appendChild(Report.createDiv(subLink.childNodes[j].childNodes[0].value));
                             Report.updActStageData(subLink.childNodes[j].childNodes[0].id,subLink.childNodes[j].childNodes[0].value);
                             break;
                         case 'divFile':
-                          console.log('divFile');
-                          //fileInputid=subLink.childNodes[j].childNodes[0].childNodes[0].id;
-                          //Report.updActStageFile(subLink.childNodes[j].childNodes[0].childNodes[0]);
-                          
-                          console.log(subLink.childNodes[j]);
-                         
-                          /* console.log(subLink.childNodes[j].childNodes[2]); file position*/
+                            console.log('divFile');
+                            //Report.setPreviewImageData(subLink.childNodes[j]);
                           break;
                         default:
-                            //console.log('REST:');
-                            //console.log(fieldName);
+                            console.log('REST:');
+                            console.log(fieldName);
                     }
                 }
                 
                 else if(subLink.childNodes[j].nodeName==='TEXTAREA'){
+                     console.log('TEXTAREA');
                     //console.log(subLink.childNodes[j].id,subLink.childNodes[j].value);
                     textAreaInputid=subLink.childNodes[j].id;
-                    Report.updActStageTextArea(subLink.childNodes[j].id,subLink.childNodes[j].value);
+                    Report.updActStageValue(subLink.childNodes[j].id,'v',subLink.childNodes[j].value);
                 }
                 else{
-                    //console.log('WRONG FIELD');
+                    console.log('WRONG FIELD');
                 }
                 //Report.setNewDataFromInput();
                 //Report.setImageTextPosition(subLink,i,j,textAreaInputid,fileInputid);
@@ -766,32 +789,15 @@ class Report
             }
         }
     }
-    static checkFile(file,id){
-        //console.log('Report::checkFile(file,id)');
-         /*
-            * CHECK SIZE
-            * CHECK TYPE
-        */
-        //console.log(id);
-        if(!file){
-            //console.log('FILE NOT PRESENT');
-            Report.actStage[id[0]].v[id[1]]['ins']=false;
-        }
-        else{
-            //console.log(file);
-            Report.actStage[id[0]].v[id[1]]['ins']=id[0]+'-'+id[1]+'-'+id[2];
-        }
-        //console.log(Report.actStage[id[0]].v[id[1]]);
-    }
-    static updActStageTextArea(id,value){
+    static updActStageValue(id,key,value){
         //console.log('Report::setNewDataFromInput(id,value)');
         //console.log(id);
         //console.log(value);
         var inputId=id.split('-');
             //console.log(inputId);
             //console.log(Report.actStage[inputId[0]].v[inputId[1]].v);
-            Report.actStage[inputId[0]].v[inputId[1]].v=value;
-        //Report.actStage[inputId[0]].v[inputId[1]]
+            Report.actStage[inputId[0]].v[inputId[1]][key]=value;
+            console.log(Report.actStage[inputId[0]]['v']);
     }
     static updActStageData(id,value){
         console.log('Report::setActStageTitle(id,value)');
@@ -803,22 +809,7 @@ class Report
         Report.actStage[inputId[0]][inputId[1]]=value;
         //console.log(Report.actStage);
     }
-    static updActStageFile(ele){
-        //console.log('Report::setActStageFile(id,value)');
-        //console.log(ele);
-        //console.log(ele.id);
-        var inputId=ele.id.split('-');
-            //console.log(inputId);
-        Report.checkFile(ele.files[0],inputId);
-         
-        //
-        //console.log(value);
-       // 
-           // console.log(inputId);
-           // console.log(Report.actStage[inputId[0]].v[inputId[1]].v);
-            //Report.actStage[inputId[0]].v[inputId[1]].v=value;
-        //Report.actStage[inputId[0]].v[inputId[1]]
-    }
+
     static setImageTextPosition(subLink,i,j,textAreaId,fileExist){
         console.log(subLink);
         console.log(Report.actStage);

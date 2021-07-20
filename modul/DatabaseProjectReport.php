@@ -67,7 +67,8 @@ class DatabaseProjectReport{
                 `w`.`valueId`,
                 `w`.`value` as v,
                 `pl`.`fileposition` as fp,
-                `pl`.`filename` as f,
+                `pl`.`filename` as fa,
+                null as f,
                 `pl`.`originalname` as fo
                  FROM 
                 `projekt_etap_wartosc` as w left outer join (
@@ -368,8 +369,8 @@ class DatabaseProjectReport{
         
         /* IN FUTURE CHECK id projekt_etap_wartosc_plik, NOW SET WSK_U ON ALL STAgE VALUE */
         
-        if(array_key_exists('actFile', $value)){
-            $this->Log->log(0,"KEY actFile exist => SET WSK_U = 1");
+        if(array_key_exists('actFileRemove', $value)){
+            $this->Log->log(0,"KEY actFileRemove exist => SET WSK_U = 1");
             $this->dbLink->query("UPDATE `projekt_etap_wartosc_plik` SET "
                 . "`wsk_u`='1',"
                 . "`mod_user_id`=:userid,"

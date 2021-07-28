@@ -32,7 +32,7 @@ class Report
     
     constructor() {
         console.log('Report::constructor()');
-        ErrorStack.setStackName('Report');
+       
     }
     static getFormName(){
         /* SIMILAR TO CONST */
@@ -138,6 +138,7 @@ class Report
     }
     create(){
         console.log('Report::create()');
+        ErrorStack.setStackName('Report');
         this.setDefaultData();
         prepareModal('Raport:','bg-primary');
         this.setModal(document.getElementById('AdaptedModal'));
@@ -933,6 +934,10 @@ class ErrorStack{
         if(name.trim()===''){
             alert('ErrorStack::setStackName() Wrong name.trim()!');
             return false;
+        }
+        if(ErrorStack.stack.hasOwnProperty(name)){  
+            console.log('ErrorStack::setStackName '+name+' exist => delete');
+            delete ErrorStack.stack[name];  
         }
         ErrorStack.stack[name]=new Object();
         ErrorStack.name=name;

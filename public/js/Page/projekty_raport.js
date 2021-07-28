@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 class Report
 {
     static modal=new Object();
@@ -139,6 +138,7 @@ class Report
     create(){
         console.log('Report::create()');
         ErrorStack.setStackName('Report');
+      
         this.setDefaultData();
         prepareModal('Raport:','bg-primary');
         this.setModal(document.getElementById('AdaptedModal'));
@@ -182,6 +182,7 @@ class Report
         Report.link.stage=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0].childNodes[1];
         
         console.log(rowDiv);
+        ErrorStack.setBlockBtn(Report.confirmBtn);
     }
     createLinks(){
         Report.link.previewReportData=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1];

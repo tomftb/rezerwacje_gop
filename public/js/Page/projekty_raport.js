@@ -28,17 +28,11 @@ class Report
         ]
     };
     static actStage=new Object();
-    /*
-    static actStage={
-        i:0,
-        n:0,
-        t:'',
-        v:new Array()
-    };
-    */
+    static confirmBtn;
     
     constructor() {
         console.log('Report::constructor()');
+        ErrorStack.setStackName('Report');
     }
     static getFormName(){
         /* SIMILAR TO CONST */
@@ -211,7 +205,7 @@ class Report
         Report.link.previewReportData.childNodes[0].appendChild(createInput('hidden','id',Report.projectId,'form-control','','n'));
         Report.link.previewReportData.childNodes[0].appendChild(createTag('','div','')); 
         Report.link.form=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0];
-        console.log(  Report.link.form);
+        //console.log(  Report.link.form);
         //console.log(Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0]);
         
     }
@@ -259,9 +253,9 @@ class Report
     }
 
     addCurrentStageData(ele){
-        console.log('Report::addCurrentStageData()');
-        console.log(ele);
-        console.log(this.stageActData);
+        //console.log('Report::addCurrentStageData()');
+        //console.log(ele);
+        //console.log(this.stageActData);
         
         for(const prop in this.stageActData ){
             /* SET DATA */
@@ -299,11 +293,11 @@ class Report
             't':t,
             'v':v
         };
-        console.log(Report.actStage);
+        //console.log(Report.actStage);
     }
     static editedStageField(){
-        console.log('Report::editedStageField()');
-        console.log(Report.actStage[Report.fieldCounter]);
+        //console.log('Report::editedStageField()');
+        //console.log(Report.actStage[Report.fieldCounter]);
         var counter=0;
         
         var divInput=createTag('','div','col-12');
@@ -373,48 +367,10 @@ class Report
             divCol2.setAttribute('class','col-sm-1 pl-0 pr-0 form-check '); //border border-primary
         var input=createInput('file',Report.fieldCounter+'-'+counter+'-fileData','','form-control-file','','n');
             input.onchange = function (e){
-                var divErr=this.parentNode.parentNode.parentNode.childNodes[1];
-                var errSize=document.createTextNode('');
-                var errType=document.createTextNode('');
-                console.log('INPUT FILE');
-                console.log('MAX: '+Report.fileProp.max);
                 console.log(e);
-                console.log(e.srcElement.files[0].size);
-                console.log(e.srcElement.files[0].type);
-                console.log(e.srcElement.value);
-                console.log(e.srcElement.size);
-                //console.log(e.size);
                 console.log(this);
-                console.log(this.parentNode.parentNode.parentNode);
-                console.log(this.parentNode.parentNode.parentNode.childNodes[1]);
-                
-                /* CLEAR DIV */
-                removeHtmlChilds(divRowErr);
-                
-                if(e.srcElement.files[0].size>Report.fileProp.max){
-                    errSize.nodeValue='File larger than 20MB! ';
-                }
-                else{
-                    errSize.nodeValue='';
-                }
-                console.log(Report.fileProp.type);
-                
-                if(Report.fileProp.type.indexOf(e.srcElement.files[0].type)===-1){
-                    errType.nodeValue='Wrong file extension ('+e.srcElement.files[0].type+') ! ';
-                }
-                else{
-                    errType.nodeValue='';
-                }
-                if(errSize.nodeValue!=='' || errType.nodeValue!==''){
-                    divErr.appendChild(errSize);
-                    divErr.appendChild(errType);
-                    Report.showEle(divErr);
-                }
-                else{
-                    Report.updActStageValue(this.id,'f',this.id);//this.value
-                    Report.hiddeEle(divErr);
-                }
-                console.log(Report.actStage);
+                Report.parseFile(this,e,divRowErr);
+               
             };
             divCol1.appendChild(input);
         var i=createTag('','i','fa fa-minus');
@@ -447,6 +403,56 @@ class Report
             ele.appendChild(divRow);
             ele.appendChild(divRowErr);
     }
+    static parseFile(t,e,divRowErr){
+        var divErr=t.parentNode.parentNode.parentNode.childNodes[1];
+        var errSize=document.createTextNode('');
+        var errType=document.createTextNode('');
+            
+                console.log('INPUT FILE');
+                console.log('MAX: '+Report.fileProp.max);
+                console.log(e);
+                console.log(e.srcElement.files[0].size);
+                console.log(e.srcElement.files[0].type);
+                console.log(e.srcElement.value);
+                console.log(e.srcElement.size);
+                //console.log(e.size);
+                console.log(t);
+                console.log(t.parentNode.parentNode.parentNode);
+                console.log(t.parentNode.parentNode.parentNode.childNodes[1]);
+                
+                /* CLEAR DIV */
+                removeHtmlChilds(divRowErr);
+                
+                if(e.srcElement.files[0].size>Report.fileProp.max){
+                    errSize.nodeValue='File larger than 20MB! ';
+                    ErrorStack.add(t.id+'-size','File larger than 20MB! ');
+                }
+                else{
+                    errSize.nodeValue='';
+                    ErrorStack.remove(t.id+'-size');
+                }
+                console.log('Report',Report.fileProp.type);
+                
+                if(Report.fileProp.type.indexOf(e.srcElement.files[0].type)===-1){
+                    errType.nodeValue='Wrong file extension ('+e.srcElement.files[0].type+') ! ';
+                    ErrorStack.add(t.id+"-ext",'Wrong file extension ('+e.srcElement.files[0].type+') ! ');
+                }
+                else{
+                    errType.nodeValue='';
+                    ErrorStack.remove(t.id+'-ext');
+                }
+                if(errSize.nodeValue!=='' || errType.nodeValue!==''){
+                    divErr.appendChild(errSize);
+                    divErr.appendChild(errType);
+                    Report.showEle(divErr);
+                }
+                else{
+                    Report.updActStageValue(t.id,'f',t.id);//this.value
+                    Report.hiddeEle(divErr);
+                }
+                console.log(Report.actStage);
+                console.log(Report.confirmBtn);
+    }
     static hiddeEle(ele){
         ele.classList.remove("d-block");
         ele.classList.add("d-none");
@@ -457,7 +463,7 @@ class Report
     }
     static createActuallFileDiv(ele,prop,counter){
         console.log('Report::createActuallFileDiv() FILE:');
-        console.log(Report.actStage[Report.fieldCounter].v[prop]['fa']);
+        //console.log(Report.actStage[Report.fieldCounter].v[prop]['fa']);
         if(Report.actStage[Report.fieldCounter].v[prop]['fa']){
             var divRow=document.createElement('div');
                 divRow.setAttribute('class','row ml-0 mt-1 mb-1 mr-0 border border-info rounded');//border border-danger
@@ -494,8 +500,8 @@ class Report
                     divRow.appendChild(divCol1);
                     divRow.appendChild(divCol2);
                 /* ADD REMOVE FILE BUTTON CHECKBOX */
-                console.log(divRow);
-                    ele.appendChild(divRow);
+                //console.log(divRow);
+                ele.appendChild(divRow);
         }  
         else{
             /* SETUP DEFAULT */
@@ -625,7 +631,7 @@ class Report
     }
     static createFilePosition(property,value,checked,fileCounter)
     {
-        console.log('Report::createFilePosition()');   
+        //console.log('Report::createFilePosition()');   
         //console.log(checked);
         //console.log(fpCounter);
         
@@ -703,6 +709,8 @@ class Report
         else{
             btn.classList.add("disabled");
         }
+        Report.confirmBtn=btn;
+        console.log(Report.confirmBtn);
         return btn;
     }
      static btnExportToDoc(){
@@ -844,5 +852,71 @@ class Report
             div.setAttribute('class',c);
             div.innerHTML=value;
         return div;
+    }
+}
+
+class ErrorStack{
+    
+    static stack=new Object();
+    static name='';
+    
+    constructor() {
+        console.log('ErrorStack::constructor()');
+    }
+    static add(id,info){
+        console.log('ErrorStack::add(id,info)');
+        console.log(id);
+        console.log(info);
+        if(!ErrorStack.stack.hasOwnProperty(ErrorStack.name)){  
+            alert('ErrorStack::Set ErrorStack name!');
+            return false;
+        }
+        ErrorStack.stack[ErrorStack.name][id]=info;
+        console.log(ErrorStack.stack);
+    }
+    static remove(id){
+        console.log('ErrorStack::remove(id)');
+         //ErrorStack.stack[id]
+         console.log(id);
+        if(!ErrorStack.stack.hasOwnProperty(ErrorStack.name)){  
+            alert('ErrorStack::Set ErrorStack name!');
+            return false;
+        }
+        if(id===undefined || id === null){
+            alert('ErrorStack::Wrong id!');
+            return false;
+        }
+        if(id.trim()===''){
+            alert('ErrorStack::Wrong id.trim()!');
+            return false;
+        }
+        console.log(ErrorStack.stack.id);
+        //if(ErrorStack.stack.[id]!==undefined && ErrorStack.stack[id]!==null){
+        if(ErrorStack.stack[ErrorStack.name].hasOwnProperty(id)){  
+            delete ErrorStack.stack[ErrorStack.name][id];  
+        }
+    }
+    static check(){
+        
+    }
+    static show(){
+        
+    }
+    static setBlock(){
+        
+    }
+    static setStackName(name){
+        console.log('ErrorStack::setStackName(name)');
+         if(name===undefined || name === null){
+            alert('ErrorStack::setStackName() Wrong name!');
+            return false;
+        }
+        if(name.trim()===''){
+            alert('ErrorStack::setStackName() Wrong name.trim()!');
+            return false;
+        }
+        ErrorStack.stack[name]=new Object();
+        ErrorStack.name=name;
+        console.log(ErrorStack.stack);
     }
 }

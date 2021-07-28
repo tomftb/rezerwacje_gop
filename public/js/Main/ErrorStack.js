@@ -2,6 +2,7 @@ class ErrorStack{
     
     static stack=new Object();
     static name='';
+    static blockBtn;
     
     constructor() {
         console.log('ErrorStack::constructor()');
@@ -18,6 +19,7 @@ class ErrorStack{
         console.log(ErrorStack.stack);
         console.log(Object.keys(ErrorStack.stack[ErrorStack.name]).length);
         console.log(ErrorStack.get());
+        ErrorStack.block();  
     }
     static remove(id){
         console.log('ErrorStack::remove(id)');
@@ -41,6 +43,9 @@ class ErrorStack{
         if(ErrorStack.stack[ErrorStack.name].hasOwnProperty(id)){  
             delete ErrorStack.stack[ErrorStack.name][id];  
         }
+        if(!ErrorStack.check()){
+            ErrorStack.unblock();
+        }
     }
     static check(){
         console.log('ErrorStack::check()');
@@ -60,12 +65,9 @@ class ErrorStack{
         }
         return info;
     }
-    static setBlock(){
-        
-    }
     static setStackName(name){
         console.log('ErrorStack::setStackName(name)');
-         if(name===undefined || name === null){
+        if(name===undefined || name === null){
             alert('ErrorStack::setStackName() Wrong name!');
             return false;
         }
@@ -81,5 +83,23 @@ class ErrorStack{
         ErrorStack.name=name;
         console.log(ErrorStack.stack);
     }
+    static setBlockBtn(btn){
+        console.log('ErrorStack::setBlockBtn(btn)');
+        console.log();
+        if(typeof btn !== 'object'){
+            alert('ErrorStack::setBlockBtn() Wrong btn!');
+            return false; 
+        }
+        console.log(btn);
+        ErrorStack.blockBtn=btn;
+    }
+    static block(){
+        ErrorStack.blockBtn.classList.add("disabled");
+        ErrorStack.blockBtn.setAttribute("disabled",'');
+       
+    }
+    static unblock(){
+        ErrorStack.blockBtn.classList.remove("disabled");
+        ErrorStack.blockBtn.removeAttribute('disabled');
+    }
 }
-

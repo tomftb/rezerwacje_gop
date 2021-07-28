@@ -700,10 +700,14 @@ class Report
         if(Report.perm.includes('GEN_PROJECT_REPORT')){
             /* POST DATA */
             btn.onclick= function() {
-                //postData(this,Report.formName);
+                /* CHECK IS ERROR */
+                if(ErrorStack.check()){
+                    alert('ErrorStack exist errors');
+                    return false;
+                }
                 Report.link.form.name=Report.getFormName();
                 console.log(Report.link.form.name);
-                postData(this,Report.link.form);
+                postData(this,Report.link.form); 
             };
         }
         else{
@@ -873,6 +877,8 @@ class ErrorStack{
         }
         ErrorStack.stack[ErrorStack.name][id]=info;
         console.log(ErrorStack.stack);
+        console.log(Object.keys(ErrorStack.stack[ErrorStack.name]).length);
+        console.log(ErrorStack.get());
     }
     static remove(id){
         console.log('ErrorStack::remove(id)');
@@ -890,17 +896,30 @@ class ErrorStack{
             alert('ErrorStack::Wrong id.trim()!');
             return false;
         }
-        console.log(ErrorStack.stack.id);
+        console.log(ErrorStack.stack[ErrorStack.name]);
+        console.log(Object.keys(ErrorStack.stack[ErrorStack.name]).length);
         //if(ErrorStack.stack.[id]!==undefined && ErrorStack.stack[id]!==null){
         if(ErrorStack.stack[ErrorStack.name].hasOwnProperty(id)){  
             delete ErrorStack.stack[ErrorStack.name][id];  
         }
     }
     static check(){
-        
+        console.log('ErrorStack::check()');
+        console.log(Object.keys(ErrorStack.stack[ErrorStack.name]).length);
+        if(Object.keys(ErrorStack.stack[ErrorStack.name]).length>0){
+            return true;
+        }
+        return false;
     }
-    static show(){
-        
+    static get(){
+        console.log('ErrorStack::get()');
+        var info='';
+        for(const prop in ErrorStack.stack[ErrorStack.name]){
+            //console.log(prop);
+            //console.log(ErrorStack.stack[ErrorStack.name][prop]);
+            info+=ErrorStack.stack[ErrorStack.name][prop];
+        }
+        return info;
     }
     static setBlock(){
         

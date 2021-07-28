@@ -94,11 +94,23 @@ class ErrorStack{
         ErrorStack.blockBtn=btn;
     }
     static block(){
+        if(typeof ErrorStack.blockBtn !== 'object'){
+            console.log('ErrorStack::block():');
+            console.log(typeof ErrorStack.blockBtn);
+            alert('ErrorStack::block() Wrong btn!');
+            return false; 
+        }
         ErrorStack.blockBtn.classList.add("disabled");
         ErrorStack.blockBtn.setAttribute("disabled",'');
        
     }
     static unblock(){
+        if(typeof ErrorStack.blockBtn !== 'object'){
+            console.log('ErrorStack::unblock():');
+            console.log(typeof ErrorStack.blockBtn);
+            alert('ErrorStack::unblock() Wrong btn!');
+            return false; 
+        }
         ErrorStack.blockBtn.classList.remove("disabled");
         ErrorStack.blockBtn.removeAttribute('disabled');
     }

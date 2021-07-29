@@ -29,6 +29,7 @@ class Report
     static actStage=new Object();
     static confirmBtn;
     static ErrorStack=new Object();
+    static Ajax=new Object();
     
     constructor() {
         console.log('Report::constructor()');
@@ -38,6 +39,11 @@ class Report
         console.log('Report::setErrorStack(obj)');
         Report.ErrorStack=obj;
         console.log(Report.ErrorStack);
+    }
+    setAjax(obj){
+        console.log('Report::setAjax(obj)');
+        Report.Ajax=obj;
+        console.log(Report.Ajax);
     }
     static getFormName(){
         /* SIMILAR TO CONST */
@@ -713,7 +719,8 @@ class Report
                 }
                 Report.link.form.name=Report.getFormName();
                 console.log(Report.link.form.name);
-                postData(this,Report.link.form); 
+                console.log(Report.link.form);
+                Report.Ajax.sendData(Report.link.form,'POST'); 
             };
         }
         else{
@@ -733,7 +740,7 @@ class Report
                 console.log(this);
                 console.log(Report.getFormName());
                 Report.link.form.name=Report.getFormName()+'Doc';
-                postData(this,Report.link.form);
+                Report.Ajax.sendData(Report.link.form,'POST');
                 //var win = window.open('test', '_blank');
                 //    win.focus();
             };

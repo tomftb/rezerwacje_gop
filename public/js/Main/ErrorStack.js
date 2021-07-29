@@ -1,131 +1,92 @@
 class ErrorStack{
     
-    static stack=new Object();
+    stack=new Object();
     
     constructor() {
         console.log('ErrorStack::constructor()');
+        this.setStack();
     }
-    static add(name,id,info){
-        console.log('ErrorStack::add(name,id,info)');
-        console.log(name);
+    add(id,info){
+        console.log('ErrorStack::add(id,info)');
         console.log(id);
         console.log(info);
-        
-        if(!ErrorStack.stack.hasOwnProperty(name)){  
-            alert('ErrorStack::Set ErrorStack name!');
-            return false;
-        }
-        ErrorStack.stack[name].info[id]=info;
-        console.log(ErrorStack.stack);
-        console.log(Object.keys(ErrorStack.stack[name].info).length);
-        console.log(ErrorStack.get(name));
-        ErrorStack.block(name);  
+        this.stack.info[id]=info;
+        console.log(this.stack);
+        this.block();  
     }
-    static remove(name,id){
+    remove(id){
         console.log('ErrorStack::remove(id)');
-         //ErrorStack.stack[id]
-         console.log(id);
-        if(!ErrorStack.stack.hasOwnProperty(name)){  
-            alert('ErrorStack::remove() ErrorStack name!');
-            return false;
-        }
+        console.log(id);
         if(id===undefined || id === null){
-            alert('ErrorStack::Wrong id!');
+            alert('ErrorStack::remove() Wrong id!');
             return false;
         }
         if(id.trim()===''){
-            alert('ErrorStack::Wrong id.trim()!');
+            alert('ErrorStack::remove() Wrong id.trim()!');
             return false;
         }
-        console.log(ErrorStack.stack[name]);
-        console.log(Object.keys(ErrorStack.stack[name].info).length);
         //if(ErrorStack.stack.[id]!==undefined && ErrorStack.stack[id]!==null){
-        if(ErrorStack.stack[name].info.hasOwnProperty(id)){  
-            delete ErrorStack.stack[name].info[id];  
+        if(this.stack.info.hasOwnProperty(id)){  
+            delete this.stack.info[id];  
         }
-        if(!ErrorStack.check(name)){
-            ErrorStack.unblock(name);
+        if(!this.check()){
+            this.unblock();
         }
     }
-    static check(name){
+    check(){
         console.log('ErrorStack::check()');
-        if(!ErrorStack.stack.hasOwnProperty(name)){  
-            alert('ErrorStack::check() ErrorStack name!');
-            return false;
-        }
-        console.log(Object.keys(ErrorStack.stack[name]).length);
-        if(Object.keys(ErrorStack.stack[name].info).length>0){
+        if(Object.keys(this.stack.info).length>0){
             return true;
         }
         return false;
     }
-    static get(name){
+    get(){
         console.log('ErrorStack::get()');
-        if(!ErrorStack.stack.hasOwnProperty(name)){  
-            alert('ErrorStack::get() ErrorStack name!');
-            return false;
-        }
         var info='';
-        for(const prop in ErrorStack.stack[name].info){
+        for(const prop in this.stack.info){
             //console.log(prop);
             //console.log(ErrorStack.stack[ErrorStack.name][prop]);
-            info+=ErrorStack.stack[name].info[prop];
+            info+=this.stack.info[prop];
         }
         return info;
     }
-    static setStackName(name){
-        console.log('ErrorStack::setStackName(name)');
-        if(name===undefined || name === null){
-            alert('ErrorStack::setStackName() Wrong name!');
-            return false;
-        }
-        if(name.trim()===''){
-            alert('ErrorStack::setStackName() Wrong name.trim()!');
-            return false;
-        }
-        if(ErrorStack.stack.hasOwnProperty(name)){  
-            console.log('ErrorStack::setStackName '+name+' exist => delete');
-            delete ErrorStack.stack[name];  
-        }
-        ErrorStack.stack[name]={
+    setStack(){
+        this.stack={
             info:{},
             block:new Object()
         };
-        console.log(ErrorStack.stack);
+        console.log(this.stack);
     }
-    static setBlock(name,btn){
+    setBlock(btn){
         console.log('ErrorStack::setBlockBtn(btn)');
-        console.log(name);
-        if(!ErrorStack.stack.hasOwnProperty(name)){  
-            alert('ErrorStack::check() ErrorStack name!');
-            return false;
-        }
         if(typeof btn !== 'object'){
             alert('ErrorStack::setBlockBtn() Wrong btn!');
             return false; 
         }
         console.log(btn);
-        ErrorStack.stack[name].block=btn;
+        this.stack.block=btn;
     }
-    static block(name){
-        if(typeof ErrorStack.stack[name].block !== 'object'){
+    block(){
+        var type=typeof this.stack.block;
+        if( type !== 'object'){
             console.log('ErrorStack::block():');
-            console.log(typeof ErrorStack.stack[name].block);
+            console.log(type);
             alert('ErrorStack::block() Wrong block element!');
             return false; 
         }
-        ErrorStack.stack[name].block.classList.add("disabled");
-        ErrorStack.stack[name].block.setAttribute("disabled",'');
+        this.stack.block.classList.add("disabled");
+        this.stack.block.setAttribute("disabled",'');
        
     }
-    static unblock(name){
-        if(typeof ErrorStack.stack[name].block !== 'object'){
+    unblock(){
+        var type=typeof this.stack.block;
+        if(type !== 'object'){
             console.log('ErrorStack::unblock():');
-            console.log(typeof ErrorStack.stack[name].block);
+            console.log(type);
             alert('ErrorStack::unblock() Wrong block element!');
             return false; 
         }
-        ErrorStack.stack[name].block.classList.remove("disabled");
-        ErrorStack.stack[name].block.removeAttribute('disabled');
+        this.stack.block.classList.remove("disabled");
+        this.stack.block.removeAttribute('disabled');
     }
 }

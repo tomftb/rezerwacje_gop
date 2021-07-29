@@ -2,6 +2,7 @@ var ajax = new Ajax();
 var error = new Error();
     //MyError.setDiv('errDiv-Adapted-overall');
 var report = new Report();
+    report.setAjax(ajax);
 var table=new Table();
     table.setAjaxLink(ajax);
     table.setErrorLink(error,'errDiv-Adapted-overall');
@@ -207,6 +208,7 @@ function runFunction(response)
         case 'pReportOff':
                 //pReport();
                 report.setData(dJson,loggedUserPerm);
+                report.setErrorStack(new ErrorStack());
                 report.create();
                 break;
         case 'runMain':

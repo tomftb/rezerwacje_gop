@@ -183,7 +183,7 @@ class Report
         Report.link.stage=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0].childNodes[1];
         
         console.log(rowDiv);
-        ErrorStack.setBlockBtn(Report.confirmBtn);
+        ErrorStack.setBlock(Report.stackName,Report.confirmBtn);
     }
     createLinks(){
         Report.link.previewReportData=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1];

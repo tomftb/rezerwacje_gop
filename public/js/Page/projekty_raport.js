@@ -15,7 +15,9 @@ class Report
     static imgUrl='http://rezerwacje-gop.local:8080/router.php?task=downloadProjectReportImage&file=';
     static link={
         stage:new Object(),
+        dynamicData:new Object(),
         previewReportData:new Object(),
+        adaptedDynamicData:new Object(),
         buttons:new Object(),
         final:new Object(),
         overAllErr:new Object(),
@@ -156,17 +158,19 @@ class Report
         prepareModal('Raport:','bg-primary');
         this.setModal(document.getElementById('AdaptedModal'));
         this.createLinks();
-        this.setForm();
+        //Report.link.previewReportData=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0];
+        
         this.createButtons();   
 
     var rowDiv=document.createElement('div');/* ALL */
         rowDiv.setAttribute('class','row');
-        rowDiv.setAttribute('id','staticData');
+        rowDiv.setAttribute('id','allReportData');
     var rowDivResult=document.createElement('div');/* ALL */
         rowDivResult.setAttribute('class','row');
         rowDivResult.setAttribute('id','previewReportData');
     var optionDiv=document.createElement('div');
         optionDiv.setAttribute('class','col-md-6');
+        optionDiv.setAttribute('id','staticData');
     var rowLabel=document.createElement('div');
         rowLabel.setAttribute('class','row pl-1 pr-1');
     var rowData=document.createElement('div');
@@ -179,6 +183,7 @@ class Report
         
     var dataDiv=document.createElement('div');
         dataDiv.setAttribute('class','col-md-6');
+        dataDiv.setAttribute('id','dynamicData');
     var dataDivRowLabel=document.createElement('div');
         dataDivRowLabel.setAttribute('class','row pl-1 pr-1');
     var dataDivRow=document.createElement('div');
@@ -186,15 +191,20 @@ class Report
     var dataLabel=createTag('Aktualny raport:','h5','text-center text-info'); 
         dataDivRowLabel.appendChild(dataLabel);
         dataDiv.appendChild(dataDivRowLabel);
-        dataDiv.appendChild(dataDivRow);
+        dataDiv.appendChild(this.setForm());
+        
+        dataDiv.childNodes[1].appendChild(dataDivRow);
         
         rowDiv.appendChild(optionDiv);
         rowDiv.appendChild(dataDiv);
         
-        Report.link.form.appendChild(rowDiv);
-        Report.link.form.appendChild(rowDivResult);
+        Report.link.adaptedDynamicData.appendChild(rowDiv);
+        /* ADD FORM TO DIV RESULT */
+        Report.link.adaptedDynamicData.appendChild(rowDivResult);
         /* APPEND CURRENT STAGE DATA */
-        this.addCurrentStageData(Report.link.form.childNodes[0].childNodes[1].childNodes[1]);
+        Report.link.form=Report.link.adaptedDynamicData.childNodes[0].childNodes[1].childNodes[1];
+        Report.link.dynamicData=Report.link.adaptedDynamicData.childNodes[0].childNodes[1].childNodes[1].childNodes[1];
+        this.addCurrentStageData();
         /* ADD STAGE SHORTCUT */
         console.log(Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[1]);
         Report.link.stage=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[1];
@@ -205,8 +215,8 @@ class Report
     createLinks(){
         console.log('Report::createLinks()');
         console.log(Report.modal);
-        console.log(Report.modal.childNodes[0].childNodes[0].childNodes[2].childNodes[0]);
-        Report.link.previewReportData=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0];
+        console.log(Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0]); 
+        Report.link.adaptedDynamicData=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0];
         Report.link.buttons=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[2].childNodes[0].childNodes[0];
         Report.link.extra=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[4];
         Report.link.overAllErr=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[3];
@@ -224,12 +234,9 @@ class Report
     }
     setForm(){
         console.log('Report::setForm()');
-        console.log(Report.link.previewReportData);
-        Report.link.previewReportData.appendChild(createForm('POST',Report.getFormName(),'form-horizontal','OFF'));
-        Report.link.previewReportData.childNodes[0].appendChild(createInput('hidden','id',Report.projectId,'form-control','','n'));
-        Report.link.previewReportData.childNodes[0].appendChild(document.createElement('div'));
-        Report.link.form=Report.link.previewReportData.childNodes[0].childNodes[1];
-        //console.log(Report.link.form);
+        var form = createForm('POST',Report.getFormName(),'form-horizontal','OFF');  
+        form.appendChild(createInput('hidden','id',Report.projectId,'form-control','','n'));
+        return form;
     }
     createAvaliableStage(ele){
         for(const prop in Report.stageData){
@@ -274,21 +281,22 @@ class Report
         ele.appendChild(div);
     }
 
-    addCurrentStageData(ele){
-        //console.log('Report::addCurrentStageData()');
-        //console.log(ele);
+    addCurrentStageData(){
+        console.log('Report::addCurrentStageData()');
+        console.log( Report.link.dynamicData);
         //console.log(this.stageActData);
+        /* ADD FORM */
         
         for(const prop in this.stageActData ){
             /* SET DATA */
             Report.setActStageData(Report.fieldCounter,this.stageActData[prop]['n'],this.stageActData[prop]['t'],this.stageActData[prop]['data']);
-            ele.appendChild(Report.editedStageField());
+            Report.link.dynamicData.appendChild(Report.editedStageField());
         }
     }
-    static addStageData(ele,idp){
+    static addStageData(idp){
         Report.getStageData(idp);
         //console.log(ele);
-        ele.appendChild(Report.editedStageField());
+        Report.link.dynamicData.appendChild(Report.editedStageField());
     }
     static getStageData(idp){
         console.log('Report::getStageData('+idp+')');
@@ -598,9 +606,7 @@ class Report
             btn.setAttribute('type','button');
             btn.setAttribute('id',idp);
             btn.onclick = function(){    
-                //console.log(this);
-                //console.log(this.parentNode.parentNode.parentNode.parentNode.children[1]);
-                Report.addStageData(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.childNodes[0].childNodes[1].childNodes[1],this.id);
+                Report.addStageData(this.id);
             }; 
         var text=document.createTextNode(' ');
         var arrow=createTag('','i','fa fa-caret-right');

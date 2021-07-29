@@ -28,11 +28,16 @@ class Report
     };
     static actStage=new Object();
     static confirmBtn;
-    static stackName='Report';
+    static ErrorStack=new Object();
     
     constructor() {
         console.log('Report::constructor()');
        
+    }
+    setErrorStack(obj){
+        console.log('Report::setErrorStack(obj)');
+        Report.ErrorStack=obj;
+        console.log(Report.ErrorStack);
     }
     static getFormName(){
         /* SIMILAR TO CONST */
@@ -138,7 +143,7 @@ class Report
     }
     create(){
         console.log('Report::create()');
-        ErrorStack.setStackName(Report.stackName);
+        //ErrorStack.setStackName(Report.stackName);
       
         this.setDefaultData();
         prepareModal('Raport:','bg-primary');
@@ -172,7 +177,6 @@ class Report
         dataDiv.appendChild(dataDivRow);
         
         rowDiv.appendChild(optionDiv);
-        
         rowDiv.appendChild(dataDiv);
         
         Report.link.form.childNodes[1].appendChild(rowDiv);
@@ -183,7 +187,8 @@ class Report
         Report.link.stage=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0].childNodes[1];
         
         console.log(rowDiv);
-        ErrorStack.setBlock(Report.stackName,Report.confirmBtn);
+        Report.ErrorStack.setBlock(Report.confirmBtn);
+        //ErrorStack.setBlock(Report.stackName,Report.confirmBtn);
     }
     createLinks(){
         Report.link.previewReportData=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1];
@@ -428,21 +433,22 @@ class Report
                 
                 if(e.srcElement.files[0].size>Report.fileProp.max){
                     errSize.nodeValue='File larger than 20MB! ';
-                    ErrorStack.add(Report.stackName,t.id+'-size','File larger than 20MB! ');
+                    Report.ErrorStack.add(t.id+'-size','File larger than 20MB! ');
+                    //ErrorStack.add(Report.stackName,t.id+'-size','File larger than 20MB! ');
                 }
                 else{
                     errSize.nodeValue='';
-                    ErrorStack.remove(Report.stackName,t.id+'-size');
+                    Report.ErrorStack.remove(t.id+'-size');
                 }
                 console.log('Report',Report.fileProp.type);
                 
                 if(Report.fileProp.type.indexOf(e.srcElement.files[0].type)===-1){
                     errType.nodeValue='Wrong file extension ('+e.srcElement.files[0].type+') ! ';
-                    ErrorStack.add(Report.stackName,t.id+"-ext",'Wrong file extension ('+e.srcElement.files[0].type+') ! ');
+                    Report.ErrorStack.add(t.id+"-ext",'Wrong file extension ('+e.srcElement.files[0].type+') ! ');
                 }
                 else{
                     errType.nodeValue='';
-                    ErrorStack.remove(Report.stackName,t.id+'-ext');
+                    Report.ErrorStack.remove(t.id+'-ext');
                 }
                 if(errSize.nodeValue!=='' || errType.nodeValue!==''){
                     divErr.appendChild(errSize);
@@ -700,7 +706,8 @@ class Report
             /* POST DATA */
             btn.onclick= function() {
                 /* CHECK IS ERROR */
-                if(ErrorStack.check(Report.stackName)){
+                //if(ErrorStack.check(Report.stackName)){
+                if(Report.ErrorStack.check()){
                     alert('ErrorStack exist errors');
                     return false;
                 }

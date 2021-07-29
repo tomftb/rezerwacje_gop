@@ -7,26 +7,28 @@ class ErrorStack{
     constructor() {
         console.log('ErrorStack::constructor()');
     }
-    static add(id,info){
-        console.log('ErrorStack::add(id,info)');
+    static add(name,id,info){
+        console.log('ErrorStack::add(name,id,info)');
+        console.log(name);
         console.log(id);
         console.log(info);
-        if(!ErrorStack.stack.hasOwnProperty(ErrorStack.name)){  
+        
+        if(!ErrorStack.stack.hasOwnProperty(name)){  
             alert('ErrorStack::Set ErrorStack name!');
             return false;
         }
-        ErrorStack.stack[ErrorStack.name][id]=info;
+        ErrorStack.stack[name][id]=info;
         console.log(ErrorStack.stack);
-        console.log(Object.keys(ErrorStack.stack[ErrorStack.name]).length);
-        console.log(ErrorStack.get());
-        ErrorStack.block();  
+        console.log(Object.keys(ErrorStack.stack[name]).length);
+        console.log(ErrorStack.get(name));
+        ErrorStack.block(name);  
     }
-    static remove(id){
+    static remove(name,id){
         console.log('ErrorStack::remove(id)');
          //ErrorStack.stack[id]
          console.log(id);
-        if(!ErrorStack.stack.hasOwnProperty(ErrorStack.name)){  
-            alert('ErrorStack::Set ErrorStack name!');
+        if(!ErrorStack.stack.hasOwnProperty(name)){  
+            alert('ErrorStack::remove() ErrorStack name!');
             return false;
         }
         if(id===undefined || id === null){
@@ -37,31 +39,39 @@ class ErrorStack{
             alert('ErrorStack::Wrong id.trim()!');
             return false;
         }
-        console.log(ErrorStack.stack[ErrorStack.name]);
-        console.log(Object.keys(ErrorStack.stack[ErrorStack.name]).length);
+        console.log(ErrorStack.stack[name]);
+        console.log(Object.keys(ErrorStack.stack[name]).length);
         //if(ErrorStack.stack.[id]!==undefined && ErrorStack.stack[id]!==null){
-        if(ErrorStack.stack[ErrorStack.name].hasOwnProperty(id)){  
-            delete ErrorStack.stack[ErrorStack.name][id];  
+        if(ErrorStack.stack[name].hasOwnProperty(id)){  
+            delete ErrorStack.stack[name][id];  
         }
-        if(!ErrorStack.check()){
-            ErrorStack.unblock();
+        if(!ErrorStack.check(name)){
+            ErrorStack.unblock(name);
         }
     }
-    static check(){
+    static check(name){
         console.log('ErrorStack::check()');
-        console.log(Object.keys(ErrorStack.stack[ErrorStack.name]).length);
-        if(Object.keys(ErrorStack.stack[ErrorStack.name]).length>0){
+        if(!ErrorStack.stack.hasOwnProperty(name)){  
+            alert('ErrorStack::check() ErrorStack name!');
+            return false;
+        }
+        console.log(Object.keys(ErrorStack.stack[name]).length);
+        if(Object.keys(ErrorStack.stack[name]).length>0){
             return true;
         }
         return false;
     }
-    static get(){
+    static get(name){
         console.log('ErrorStack::get()');
+        if(!ErrorStack.stack.hasOwnProperty(name)){  
+            alert('ErrorStack::get() ErrorStack name!');
+            return false;
+        }
         var info='';
-        for(const prop in ErrorStack.stack[ErrorStack.name]){
+        for(const prop in ErrorStack.stack[name]){
             //console.log(prop);
             //console.log(ErrorStack.stack[ErrorStack.name][prop]);
-            info+=ErrorStack.stack[ErrorStack.name][prop];
+            info+=ErrorStack.stack[name][prop];
         }
         return info;
     }
@@ -80,7 +90,6 @@ class ErrorStack{
             delete ErrorStack.stack[name];  
         }
         ErrorStack.stack[name]=new Object();
-        ErrorStack.name=name;
         console.log(ErrorStack.stack);
     }
     static setBlockBtn(btn){
@@ -93,7 +102,7 @@ class ErrorStack{
         console.log(btn);
         ErrorStack.blockBtn=btn;
     }
-    static block(){
+    static block(name){
         if(typeof ErrorStack.blockBtn !== 'object'){
             console.log('ErrorStack::block():');
             console.log(typeof ErrorStack.blockBtn);
@@ -104,7 +113,7 @@ class ErrorStack{
         ErrorStack.blockBtn.setAttribute("disabled",'');
        
     }
-    static unblock(){
+    static unblock(name){
         if(typeof ErrorStack.blockBtn !== 'object'){
             console.log('ErrorStack::unblock():');
             console.log(typeof ErrorStack.blockBtn);

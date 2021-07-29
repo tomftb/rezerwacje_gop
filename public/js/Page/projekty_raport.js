@@ -28,6 +28,7 @@ class Report
     };
     static actStage=new Object();
     static confirmBtn;
+    static stackName='Report';
     
     constructor() {
         console.log('Report::constructor()');
@@ -137,7 +138,7 @@ class Report
     }
     create(){
         console.log('Report::create()');
-        ErrorStack.setStackName('Report');
+        ErrorStack.setStackName(Report.stackName);
       
         this.setDefaultData();
         prepareModal('Raport:','bg-primary');
@@ -427,21 +428,21 @@ class Report
                 
                 if(e.srcElement.files[0].size>Report.fileProp.max){
                     errSize.nodeValue='File larger than 20MB! ';
-                    ErrorStack.add(t.id+'-size','File larger than 20MB! ');
+                    ErrorStack.add(Report.stackName,t.id+'-size','File larger than 20MB! ');
                 }
                 else{
                     errSize.nodeValue='';
-                    ErrorStack.remove(t.id+'-size');
+                    ErrorStack.remove(Report.stackName,t.id+'-size');
                 }
                 console.log('Report',Report.fileProp.type);
                 
                 if(Report.fileProp.type.indexOf(e.srcElement.files[0].type)===-1){
                     errType.nodeValue='Wrong file extension ('+e.srcElement.files[0].type+') ! ';
-                    ErrorStack.add(t.id+"-ext",'Wrong file extension ('+e.srcElement.files[0].type+') ! ');
+                    ErrorStack.add(Report.stackName,t.id+"-ext",'Wrong file extension ('+e.srcElement.files[0].type+') ! ');
                 }
                 else{
                     errType.nodeValue='';
-                    ErrorStack.remove(t.id+'-ext');
+                    ErrorStack.remove(Report.stackName,t.id+'-ext');
                 }
                 if(errSize.nodeValue!=='' || errType.nodeValue!==''){
                     divErr.appendChild(errSize);
@@ -601,34 +602,30 @@ class Report
         };
     }
     static mvUp(ele){
-        
-        ele.onclick=function()
-        {
+        ele.onclick=function(){
+            console.log(Report.actStage);
+            console.log(this.parentNode.parentNode.parentNode.parentNode);
+            console.log(this.parentNode.parentNode.parentNode.parentNode.id);
             //console.log(this.parentNode.parentNode.parentNode.parentNode);
-            if(this.parentNode.parentNode.parentNode.parentNode.previousSibling!==null)
-            {
+            if(this.parentNode.parentNode.parentNode.parentNode.previousSibling!==null){
                 console.log('previousSibling exist');
                 console.log(this.parentNode.parentNode.parentNode.parentNode.previousSibling);
                 this.parentNode.parentNode.parentNode.parentNode.parentNode.insertBefore(this.parentNode.parentNode.parentNode.parentNode,this.parentNode.parentNode.parentNode.parentNode.previousSibling);
             }
             else{
                 console.log('previousSibling NOT exist');
-            }
-           
+            }    
         };
     }
     static mvDown(ele){
-        ele.onclick=function()
-        {
-            if(this.parentNode.parentNode.parentNode.parentNode.nextSibling!==null)
-            {
+        ele.onclick=function(){
+            if(this.parentNode.parentNode.parentNode.parentNode.nextSibling!==null){
                 console.log('nextSibling exist');
                 this.parentNode.parentNode.parentNode.parentNode.parentNode.insertBefore(this.parentNode.parentNode.parentNode.parentNode.nextSibling,this.parentNode.parentNode.parentNode.parentNode);
             }
             else{
                 console.log('nextSibling NOT exist');
             }
-           
         };
     }
     static createFilePosition(property,value,checked,fileCounter)
@@ -703,7 +700,7 @@ class Report
             /* POST DATA */
             btn.onclick= function() {
                 /* CHECK IS ERROR */
-                if(ErrorStack.check()){
+                if(ErrorStack.check(Report.stackName)){
                     alert('ErrorStack exist errors');
                     return false;
                 }

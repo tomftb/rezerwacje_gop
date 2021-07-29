@@ -18,6 +18,9 @@ class Report
         previewReportData:new Object(),
         buttons:new Object(),
         final:new Object(),
+        overAllErr:new Object(),
+        info:new Object(),
+        extra:new Object(),
         form:new Object()
     }
     static fileProp={
@@ -149,34 +152,37 @@ class Report
     }
     create(){
         console.log('Report::create()');
-        //ErrorStack.setStackName(Report.stackName);
-      
         this.setDefaultData();
         prepareModal('Raport:','bg-primary');
         this.setModal(document.getElementById('AdaptedModal'));
         this.createLinks();
         this.setForm();
-        this.createButtons();
-        console.log(Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[5].childNodes[1].childNodes[1]);
+        this.createButtons();   
 
-    var rowDiv=createTag('','div','row');/* ALL */
+    var rowDiv=document.createElement('div');/* ALL */
+        rowDiv.setAttribute('class','row');
         rowDiv.setAttribute('id','staticData');
-    var rowDivResult=createTag('','div','row');/* ALL */
+    var rowDivResult=document.createElement('div');/* ALL */
+        rowDivResult.setAttribute('class','row');
         rowDivResult.setAttribute('id','previewReportData');
-    var optionDiv=createTag('','div','col-md-6');
-    var rowLabel=createTag('','div','row pl-1 pr-1');
-    var rowData=createTag('','div','row pl-1 pr-1');
+    var optionDiv=document.createElement('div');
+        optionDiv.setAttribute('class','col-md-6');
+    var rowLabel=document.createElement('div');
+        rowLabel.setAttribute('class','row pl-1 pr-1');
+    var rowData=document.createElement('div');
+        rowLabel.setAttribute('class','row pl-1 pr-1');
     var optionLabel=createTag('Dostępne etapy projektu:','h5','text-info');
         rowLabel.appendChild(optionLabel);
-
         optionDiv.appendChild(rowLabel);
-     
         this.createAvaliableStage(rowData);
         optionDiv.appendChild(rowData);
         
-    var dataDiv=createTag('','div','col-md-6');
-    var dataDivRowLabel=createTag('','div','row pl-1 pr-1');//align-content-right
-    var dataDivRow=createTag('','div','row pl-1 pr-1');
+    var dataDiv=document.createElement('div');
+        dataDiv.setAttribute('class','col-md-6');
+    var dataDivRowLabel=document.createElement('div');
+        dataDivRowLabel.setAttribute('class','row pl-1 pr-1');
+    var dataDivRow=document.createElement('div');
+        dataDivRow.setAttribute('class','row pl-1 pr-1');
     var dataLabel=createTag('Aktualny raport:','h5','text-center text-info'); 
         dataDivRowLabel.appendChild(dataLabel);
         dataDiv.appendChild(dataDivRowLabel);
@@ -185,21 +191,27 @@ class Report
         rowDiv.appendChild(optionDiv);
         rowDiv.appendChild(dataDiv);
         
-        Report.link.form.childNodes[1].appendChild(rowDiv);
-        Report.link.form.childNodes[1].appendChild(rowDivResult);
-       /* APPEND CURRENT STAGE DATA */
-        this.addCurrentStageData(Report.link.form.childNodes[1].childNodes[0].childNodes[1].childNodes[1]);
+        Report.link.form.appendChild(rowDiv);
+        Report.link.form.appendChild(rowDivResult);
+        /* APPEND CURRENT STAGE DATA */
+        this.addCurrentStageData(Report.link.form.childNodes[0].childNodes[1].childNodes[1]);
         /* ADD STAGE SHORTCUT */
-        Report.link.stage=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0].childNodes[1];
-        
+        console.log(Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[1]);
+        Report.link.stage=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[1];
         console.log(rowDiv);
         Report.ErrorStack.setBlock(Report.confirmBtn);
         //ErrorStack.setBlock(Report.stackName,Report.confirmBtn);
     }
     createLinks(){
-        Report.link.previewReportData=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1];
-        Report.link.buttons=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[5].childNodes[1].childNodes[1];
-       
+        console.log('Report::createLinks()');
+        console.log(Report.modal);
+        console.log(Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0]);
+        Report.link.previewReportData=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0];
+
+        Report.link.buttons=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[2].childNodes[0].childNodes[0];
+        //Report.link.extra=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[9];
+        //Report.link.overAllErr=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[7];
+        //Report.link.info=Report.modal.childNodes[1].childNodes[1].childNodes[5].childNodes[1].childNodes[1];
     }
     createButtons(){
         Report.link.buttons.appendChild(Report.btnCancelReport());
@@ -210,18 +222,15 @@ class Report
     setModal(modal){
         console.log('Report::setModal()');
         Report.modal=modal;
-        //console.log(this.modal);
     }
     setForm(){
         console.log('Report::setForm()');
-        //console.log(Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3]);
+        console.log(Report.link.previewReportData);
         Report.link.previewReportData.appendChild(createForm('POST',Report.getFormName(),'form-horizontal','OFF'));
         Report.link.previewReportData.childNodes[0].appendChild(createInput('hidden','id',Report.projectId,'form-control','','n'));
-        Report.link.previewReportData.childNodes[0].appendChild(createTag('','div','')); 
-        Report.link.form=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0];
-        //console.log(  Report.link.form);
-        //console.log(Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[3].childNodes[1].childNodes[0]);
-        
+        Report.link.previewReportData.childNodes[0].appendChild(document.createElement('div'));
+        Report.link.form=Report.link.previewReportData.childNodes[0].childNodes[1];
+        //console.log(Report.link.form);
     }
     createAvaliableStage(ele){
         for(const prop in Report.stageData){
@@ -730,7 +739,7 @@ class Report
         console.log(Report.confirmBtn);
         return btn;
     }
-     static btnExportToDoc(){
+    static btnExportToDoc(){
         console.log('Report::btnExportToDoc()');   
         var btn=createBtn('DOC','btn btn-primary','btnExportToDoc');
         /* CHECK PERMISSIONS */
@@ -750,12 +759,16 @@ class Report
         }
         return btn;
     }
+    static setLoadGif(){
+        
+    }
     static btnCancelReport(){
         /* REMOVE TMP FILES */
         return functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),'');
     }
     static setReportPreviewData(){
         console.log('Report::setReportPreviewData()');  
+        console.log(Report.link.stage);  
         console.log(Report.link.stage.childNodes[0].childNodes[1].childNodes[1]);
         var mainLink=Report.link.stage.childNodes[0].childNodes[1].childNodes[1];
         var subLink=new Object();

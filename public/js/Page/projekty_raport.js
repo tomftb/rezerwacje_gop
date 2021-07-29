@@ -205,13 +205,12 @@ class Report
     createLinks(){
         console.log('Report::createLinks()');
         console.log(Report.modal);
-        console.log(Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0]);
+        console.log(Report.modal.childNodes[0].childNodes[0].childNodes[2].childNodes[0]);
         Report.link.previewReportData=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0];
-
         Report.link.buttons=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[2].childNodes[0].childNodes[0];
-        //Report.link.extra=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[9];
-        //Report.link.overAllErr=Report.modal.childNodes[1].childNodes[1].childNodes[3].childNodes[7];
-        //Report.link.info=Report.modal.childNodes[1].childNodes[1].childNodes[5].childNodes[1].childNodes[1];
+        Report.link.extra=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[4];
+        Report.link.overAllErr=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[3];
+        Report.link.info=Report.modal.childNodes[0].childNodes[0].childNodes[2].childNodes[0];
     }
     createButtons(){
         Report.link.buttons.appendChild(Report.btnCancelReport());

@@ -5,7 +5,7 @@ final class Login extends Page{
     private $view=['vLogin.php'];
     private $js=[
                 'jquery-3.3.1.min.js',
-                'jquery-ui-1.10.1.custom/jquery-ui-1.10.1.custom.min.js',
+                'jquery-ui-1.10.1.custom.min.js',
                 'bootstrap-4.5.3.min.js'];
     private $css=[
         'bootstrap.min.4.5.3.css',

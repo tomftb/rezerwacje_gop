@@ -14,15 +14,15 @@ class Report
     static defaultFilePostion='top';
     static imgUrl='http://rezerwacje-gop.local:8080/router.php?task=downloadProjectReportImage&file=';
     static link={
-        stage:new Object(),
         dynamicData:new Object(),
-        previewReportData:new Object(),
         adaptedDynamicData:new Object(),
         buttons:new Object(),
         final:new Object(),
         overAllErr:new Object(),
         info:new Object(),
         extra:new Object(),
+        allReportData:new Object(),
+        previewReportData:new Object(),
         form:new Object()
     }
     static fileProp={
@@ -71,18 +71,15 @@ class Report
          * PREVIEW DIV
          * f => files
          */
-        console.log(Report.link.stage.childNodes[1]);
+        console.log(Report.link.dynamicData);
         console.log(Report.actStage);
         /* SET DATA */
         Report.setReportPreviewData();
-        Report.link.stage.childNodes[0].classList.add("d-none");
-        Report.link.stage.childNodes[0].classList.remove("block");
-        Report.link.stage.childNodes[1].classList.add("block");
-        Report.link.stage.childNodes[1].classList.remove("d-none");
+        
         
         /* CREATE AVAILABLE STAGE DATA */
         for(const prop in Report.actStage){
-                Report.link.stage.childNodes[1].appendChild(Report.createDiv(Report.actStage[prop].t,'col-12'));
+                Report.link.previewReportData.appendChild(Report.createDiv(Report.actStage[prop].t,'col-12'));
                 for(const prop2 in Report.actStage[prop].v){
                     /*
                      * CHECK FILE POSITION
@@ -90,30 +87,29 @@ class Report
                     switch (Report.actStage[prop].v[prop2].fp) {
                         case 'top':
                             console.log('top');
-                            Report.setupPreviewImage(Report.actStage[prop].v[prop2],Report.link.stage.childNodes[1],'col-12 text-center');
-                            Report.link.stage.childNodes[1].appendChild(Report.createDiv(Report.actStage[prop].v[prop2].v,'col-12'));
+                            Report.setupPreviewImage(Report.actStage[prop].v[prop2],Report.link.previewReportData,'col-12 text-center');
+                            Report.link.previewReportData.appendChild(Report.createDiv(Report.actStage[prop].v[prop2].v,'col-12'));
                             break;
                         case 'bottom':
                             console.log('bottom');
-                            Report.link.stage.childNodes[1].appendChild(Report.createDiv(Report.actStage[prop].v[prop2].v,'col-12'));
-                            Report.setupPreviewImage(Report.actStage[prop].v[prop2],Report.link.stage.childNodes[1],'col-12 text-center');
+                            Report.link.previewReportData.appendChild(Report.createDiv(Report.actStage[prop].v[prop2].v,'col-12'));
+                            Report.setupPreviewImage(Report.actStage[prop].v[prop2],Report.link.previewReportData,'col-12 text-center');
                             break;
                         case 'left':
                             console.log('left');
-                            Report.setupPreviewImage(Report.actStage[prop].v[prop2],Report.link.stage.childNodes[1],'col-6 text-center');
-                            Report.link.stage.childNodes[1].appendChild(Report.createDiv(Report.actStage[prop].v[prop2].v,'col-6'));
+                            Report.setupPreviewImage(Report.actStage[prop].v[prop2],Report.link.previewReportData,'col-6 text-center');
+                            Report.link.previewReportData.appendChild(Report.createDiv(Report.actStage[prop].v[prop2].v,'col-6'));
                             break;
                         case 'right':
                             console.log('right');
-                            Report.link.stage.childNodes[1].appendChild(Report.createDiv(Report.actStage[prop].v[prop2].v,'col-6'));
-                            Report.setupPreviewImage(Report.actStage[prop].v[prop2],Report.link.stage.childNodes[1],'col-6 text-center');              
+                            Report.link.previewReportData.appendChild(Report.createDiv(Report.actStage[prop].v[prop2].v,'col-6'));
+                            Report.setupPreviewImage(Report.actStage[prop].v[prop2],Report.link.previewReportData,'col-6 text-center');              
                             break;
                         default:
                             console.log(`WRONG POSITION ${Report.actStage[prop].v[prop2].fp}`);
                       }
                 }
-        }
-        console.log(Report.link.stage.childNodes[1]);     
+        } 
     }
     static setupPreviewImage(v,ele,colClass){
         console.log('Report::setupPreviewImage()');
@@ -158,15 +154,13 @@ class Report
         prepareModal('Raport:','bg-primary');
         this.setModal(document.getElementById('AdaptedModal'));
         this.createLinks();
-        //Report.link.previewReportData=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0];
-        
         this.createButtons();   
 
     var rowDiv=document.createElement('div');/* ALL */
-        rowDiv.setAttribute('class','row');
+        rowDiv.setAttribute('class','row block');
         rowDiv.setAttribute('id','allReportData');
     var rowDivResult=document.createElement('div');/* ALL */
-        rowDivResult.setAttribute('class','row');
+        rowDivResult.setAttribute('class','row d-none');
         rowDivResult.setAttribute('id','previewReportData');
     var optionDiv=document.createElement('div');
         optionDiv.setAttribute('class','col-md-6');
@@ -196,18 +190,20 @@ class Report
         dataDiv.childNodes[1].appendChild(dataDivRow);
         
         rowDiv.appendChild(optionDiv);
-        rowDiv.appendChild(dataDiv);
-        
+        rowDiv.appendChild(dataDiv); 
         Report.link.adaptedDynamicData.appendChild(rowDiv);
-        /* ADD FORM TO DIV RESULT */
         Report.link.adaptedDynamicData.appendChild(rowDivResult);
+        Report.link.allReportData=Report.link.adaptedDynamicData.childNodes[0];
+        Report.link.previewReportData=Report.link.adaptedDynamicData.childNodes[1];
+        console.log(Report.link.adaptedDynamicData);
+        /* ADD FORM TO DIV RESULT */
         /* APPEND CURRENT STAGE DATA */
         Report.link.form=Report.link.adaptedDynamicData.childNodes[0].childNodes[1].childNodes[1];
+         /* ADD DYNAMIC STAGE SHORTCUT */
         Report.link.dynamicData=Report.link.adaptedDynamicData.childNodes[0].childNodes[1].childNodes[1].childNodes[1];
         this.addCurrentStageData();
-        /* ADD STAGE SHORTCUT */
-        console.log(Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[1]);
-        Report.link.stage=Report.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[1];
+       
+        
         console.log(rowDiv);
         Report.ErrorStack.setBlock(Report.confirmBtn);
         //ErrorStack.setBlock(Report.stackName,Report.confirmBtn);
@@ -332,6 +328,7 @@ class Report
         
         var divInput=createTag('','div','col-12');
             divInput.setAttribute('id','div-'+Report.fieldCounter);
+            /* ADD DIV ROW FOR REMOVE BUTTON */
         var divInputRow=createTag('','div','row border border-primary rounded mt-1 mb-1 pt-2 pb-2');  
             divInputRow.setAttribute('id','divAll-'+Report.fieldCounter);
         var div0=createTag('','div','col-1 pr-0 pl-2');  
@@ -697,24 +694,23 @@ class Report
         
         var btn=createBtn('Podgląd','btn btn-info','psShowStage');
             btn.onclick= function() {
-                console.log(Report.link.stage);
-                if(Report.link.stage.childNodes[0].classList.contains("d-none")){
-                    Report.link.stage.childNodes[0].classList.remove("d-none");
-                    Report.link.stage.childNodes[0].classList.add("block");
-                    Report.link.stage.childNodes[1].classList.remove("block");
-                    Report.link.stage.childNodes[1].classList.add("d-none");
-                    this.innerText='Podgląd';
+                console.log(Report.link.allReportData);
+                console.log(Report.link.previewReportData);
+                if(Report.link.previewReportData.classList.contains("d-none")){
+                    Report.link.previewReportData.classList.remove("d-none");
+                    Report.link.previewReportData.classList.add("block");
+                    Report.link.allReportData.classList.remove("block");
+                    Report.link.allReportData.classList.add("d-none");
+                    this.innerText='Edytuj';
+                    Report.showReportPreview();
                 }
                 else{
-                    //Report.formName=Report.formName+'Image';
-                    //Report.link.form.name=Report.getFormName()+'Image';
-                    //console.log(Report.link.form.name);
-                    this.innerText='Edytuj';
-                    //postData(this,Report.link.form);
-                    Report.showReportPreview();
-                   
-                }
-                //console.log(Report.link.stage);     
+                    Report.link.previewReportData.classList.remove("block");
+                    Report.link.previewReportData.classList.add("d-none");
+                    Report.link.allReportData.classList.remove("d-none");
+                    Report.link.allReportData.classList.add("block");
+                    this.innerText='Podgląd'; 
+                } 
         };     
         return btn;
     }
@@ -773,20 +769,17 @@ class Report
     }
     static setReportPreviewData(){
         console.log('Report::setReportPreviewData()');  
-        console.log(Report.link.stage);  
-        console.log(Report.link.stage.childNodes[0].childNodes[1].childNodes[1]);
-        var mainLink=Report.link.stage.childNodes[0].childNodes[1].childNodes[1];
+        //console.log(Report.link.dynamicData);  
+
         var subLink=new Object();
         var fieldName=new Array();
         //var fileInputid=null;
         var textAreaInputid=null;
-        //console.log(Report.link.stage.childNodes[1].childNodes[1]);
-        removeHtmlChilds(Report.link.stage.childNodes[1]);
-        //console.log(Report.link.stage.childNodes[0].childNodes[1].childNodes[1]);
-        //console.log(Report.link.stage.childNodes[0].childNodes[1].childNodes[1].childElementCount);
-        for (var i=0;i<mainLink.childElementCount;i++){
-            //console.log(mainLink.childNodes[i]);
-            subLink=mainLink.childNodes[i].childNodes[0];
+        removeHtmlChilds(Report.link.previewReportData);
+        for (var i=0;i<Report.link.dynamicData.childElementCount;i++){
+            //console.log(Report.link.dynamicData.childNodes[i]);
+            subLink=Report.link.dynamicData.childNodes[i].childNodes[0];
+            //console.log(subLink);
             for(var j=0;j<subLink.childElementCount;j++){
                 //console.log(subLink.childNodes[j]);
                 console.log(subLink.childNodes[j].nodeName);
@@ -808,7 +801,6 @@ class Report
                             console.log('divTitle');
                             //console.log();
                             //console.log();
-                            //Report.link.stage.childNodes[1].appendChild(Report.createDiv(subLink.childNodes[j].childNodes[0].value));
                             Report.updActStageData(subLink.childNodes[j].childNodes[0].id,subLink.childNodes[j].childNodes[0].value);
                             break;
                         case 'divFile':
@@ -871,14 +863,8 @@ class Report
             console.log('textAreaId: '+textAreaId);
             inputId=textAreaId.split('-');
             console.log(Report.actStage[inputId[0]].v[inputId[1]]);
-            //Report.link.stage.childNodes[1].appendChild(Report.createDiv(subLink.childNodes[j].childNodes[0].wholeText));
         }
         if(fileExist){
-            //console.log('file:'+fileExist);
-            //inputId=textAreaId.split('-')
-            //console.log(Report.actStage[inputId[0]].v[inputId[1]]);
-           
-            //console.log(subLink.childNodes[j].childNodes);
         }
         
     }

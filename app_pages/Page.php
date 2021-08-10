@@ -32,8 +32,7 @@ abstract class Page{
         'Main/createHtmlElement.js',
         'bootstrap-datepicker.pl-PL.min.js',
         'Main/parseFieldValue.js',
-        'Main/Error.js',
-        'Main/Utilities.js'
+        'Main/Error.js'
     ];
     public function __construct(){
         $this->uid=uniqid();	

@@ -390,6 +390,7 @@ function projectManage(btnLabel,title,titleClass)
     var add=document.getElementById('AdaptedDynamicData'); 
     pCreateFields(form);
     add.appendChild(form);
+    console.log(add);
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),''));
     document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(projectData['data']['function'],createBtn(btnLabel,'btn btn-'+titleClass,'confirmData'),projectData['data']['function']));//projectData['data']['function']
 }

@@ -12,6 +12,7 @@ abstract class Page{
     private $css=[];
     private $mainCss=[
         'bootstrap.min.4.5.3.css',
+        'bootstrap-datepicker.min.css',
         'header.css',
         'font-awesome.min.4.7.0.css',
         'gt-admin.css' // Must by at last on css list, it fixed some bootstrap bugs
@@ -29,6 +30,7 @@ abstract class Page{
         'bootstrap-datepicker.min.js',
         'fontawesome.min.js',
         'Main/createHtmlElement.js',
+        'bootstrap-datepicker.pl-PL.min.js',
         'Main/parseFieldValue.js',
         'Main/Error.js',
         'Main/Utilities.js'

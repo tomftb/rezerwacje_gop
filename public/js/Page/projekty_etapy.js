@@ -243,8 +243,7 @@ function manageData(btnLabel,title,titleClass,task)
     else{
         document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(task,confirmBtn,task));
     }
-    
-        /* INFO */
+    /* INFO */
     document.getElementById('AdaptedModalInfo').appendChild(info);
     document.getElementById('AdaptedModalInfo').appendChild(actBlockInfo);
 }

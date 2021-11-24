@@ -740,6 +740,8 @@ class Report
         console.log(Report.confirmBtn);
         return btn;
     }
+    /* TO DO -> WYSKAKUJACE OKIENKA W PRZEGLADARCE */
+    
     static btnExportToDoc(){
         console.log('Report::btnExportToDoc()');   
         var btn=createBtn('DOC','btn btn-primary','btnExportToDoc');
@@ -759,6 +761,20 @@ class Report
             btn.classList.add("disabled");
         }
         return btn;
+    }
+    static xhr(PersonId){
+        console.log('---static show()---\r\nID:'+PersonId);
+        /* AJAX GET */
+       var xhr=new XMLHttpRequest();
+            //xhr.addEventListener("error",PersonShow.runErrorView,false);
+            //xhr.addEventListener("load", PersonShow.runView, false);
+            //xhr.addEventListener("progress",this.xhrProgress,false);
+            //xhr.addEventListener("timeout", this.xhrTimeout, false);
+            //xhr.addEventListener("loadstart",this.xhrLoadStart,false);
+            //xhr.addEventListener("loadend", PersonShow.runView, false);
+            //xhr.open('POST', APP_URL+LANG+'/showperson', true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.send('id='+PersonId);
     }
     static setLoadGif(){
         

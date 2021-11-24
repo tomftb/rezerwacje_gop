@@ -36,6 +36,7 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         //sleep(10);
         //Throw New Exception (__METHOD__.__LINE__.' TEST ERROR',0);
         self::createDocument();
+        
         $this->utilities->jsonResponse($this->documentName,'downloadProjectReportDoc');
     }
     public function setProjectReportImage(){

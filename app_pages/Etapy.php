@@ -14,7 +14,8 @@ final class Etapy extends Page{
         'Main/Ajax.js',
         'Main/headerView.js',
         'Main/Table.js',
-        'Page/projekty_etapy.js'
+        'Page/projekty_etapy.js',
+        'Page/projekty_etapy_stale.js',
         ];
 
 	

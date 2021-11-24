@@ -381,19 +381,23 @@ $row->addCell(1000)->addText('3');
         $this->Log->log(0,"FONT STYLE:");
         $this->Log->logMulti(0,$this->FontStyle);
         /* PARSE FILE */
-        $filePostion='bottom';
-        $file='';
+        $file=[
+            'position'=>'bottom',
+            'name'=>'',
+            'url'=>''
+        ];
+        
         if(preg_match('/value$/',$id)){
             $this->Log->log(0,"FOUND VALUE");
             /* GET ID */
             $tmpId=mb_substr($id,0,-5);
             $this->Log->log(0,"VALUE ID => ".$tmpId);
             /* SET FILE POSITION */
-            self::setFilePosition($tmpId,$filePostion);
+            self::setFilePosition($tmpId,$file['position']);
             /* SET FILE */
-            self::setFile($tmpId,$filePostion,$file);
+            self::setFile($tmpId,$file);
         }
-        self::addTextFile($v,$filePostion,$file);   
+        self::addTextFile($v,$file);   
     }
     private function setFilePosition($id,&$filePostion){
         if(array_key_exists($id."fileposition", $this->projectData)){
@@ -405,47 +409,58 @@ $row->addCell(1000)->addText('3');
         }
         $this->Log->log(0,"FILE POSITION => ".$filePostion);
     }
-    private function setFile($id,&$filePostion,&$file){
+    private function setFile($id,&$file){
         if(array_key_exists($id."fileData", $this->files)){
             $this->Log->log(0,"[name] FOUND FILE => ".$this->files[$id."fileData"][1]['name']);
             $this->Log->log(0,"[location] FOUND FILE => ".$this->files[$id."fileData"][0]);
             //$file=$this->files[$id."fileData"];
-            $file=$this->files[$id."fileData"][0];
+            $file['url']=$this->files[$id."fileData"][0];
+            $file['name']=$this->files[$id."fileData"][1]['name'];
             UNSET($this->files[$id."fileData"]);
         }
         else{
             /* SETUP DEFAULT TEXT POSITION */
-            $filePostion='bottom';
+            $file['position']='bottom';
         }
     }
-    private function addTextFile($tekstArray,$filePosition,$file){
-        $this->Log->log(0,"[".__METHOD__."] FILE POSITION => ".$filePosition);
+    private function addTextFile($tekstArray,$file){
+        $this->Log->log(0,"[".__METHOD__."] FILE NAME => ".$file['name']);
+        $this->Log->log(0,"[".__METHOD__."] FILE POSITION => ".$file['position']);
+        $this->Log->log(0,"[".__METHOD__."] FILE URL => ".$file['url']);
         $this->mainSection = $this->phpWord->addSection(array('breakType' => 'continuous'));
+        //var_dump($this->mainSection);
         //$this->mainSection->addTextBreak();
         /* NO FILE */
-        if($file===''){
+        if($file['url']===''){
             array_map(array($this, 'writeTekst'), $tekstArray);
             return '';
         }
-        $imageProperties=getimagesize($file);
-        $this->Log->logMulti(0,$imageProperties);
-        switch($filePosition):
+        /* DEFAULT UNIT PT */
+        $imageProperties=self::setWordImageSize(getimagesize($file['url']));
+        switch($file['position']):
             default:
             case 'bottom':    
                 /* ADD TEXT */
                 array_map(array($this, 'writeTekst'), $tekstArray);
-                /* ADD FILE - IMAGE */
-                $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+                /* 
+                 * ADD FILE - IMAGE
+                 * FILE
+                 * STYLE
+                 * WATERMARK
+                 * NAME
+                 */
+                
+                $this->mainSection->addImage($file['url'], array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER),null,$file['name']);
                 break;
             case 'top':
                 /* ADD FILE */
-                 $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+                 $this->mainSection->addImage($file['url'], array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'unit'=>'px','alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER),null,$file['name']);
                 /* ADD TEXT */
                 array_map(array($this, 'writeTekst'), $tekstArray);
                 break;
             case 'left':
                 self::setMultiColumnSection();
-                $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+                $this->mainSection->addImage($file['url'], array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER),null,$file['name']);
                 array_map(array($this, 'writeTekst'), $tekstArray);
                 self::setMultiColumnSection();
                 break;
@@ -455,10 +470,40 @@ $row->addCell(1000)->addText('3');
                 //$this->mainSection->addText($tekstArray[0],$this->FontStyle,$this->ParagraphStyle);    
                 //$this->mainSection->addText($tekstArray[0],$this->FontStyle,$this->ParagraphStyle);  
                 
-                $this->mainSection->addImage($file, array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+                $this->mainSection->addImage($file['url'], array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER),null,$file['name']);
                 self::setMultiColumnSection();
                 break;
         endswitch;
+    }
+    private function setWordImageSize($img){
+        $this->Log->log(0,"[".__METHOD__."] IMAGE PROPERTIES:");
+        /* MAX WIDTH FOR WORD 450 px */
+        $this->Log->logMulti(0,$img);
+        /*
+         * [0] => WITDH
+         * [1] => HEIGHT
+         * [2] => image constant type
+         * [3] => width="xxx" height="yyy"
+         * [bits] => example -> 8 
+         * [mime] => example -> image/png
+         */
+        $orgWidth=$img[0];
+        $orgHeight=$img[1];
+        $maxWidth=602;
+        /* 450 PT, 602 PX */
+        if(intval($orgWidth)>$maxWidth){
+            $img[0]=$maxWidth;
+            //$img[1]=602;
+            /* 
+             * RESIZE PERCENT 
+             * (100-(($maxWidth*100)/$orgWidth))/100)
+             */
+            $img[1]=round($orgHeight-($orgHeight*((100-(($maxWidth*100)/$orgWidth))/100)),2);
+            
+            $this->Log->log(0,"[".__METHOD__."] NEW WIDTH => ".$img[0]." NEW HEIGHT => ".$img[1]);
+        }
+        
+        return $img;
     }
     private function writeTekst($tekst){
          $this->mainSection->addText($tekst,$this->FontStyle,$this->ParagraphStyle);//array('underline' => 'single') //$fontStyleName          

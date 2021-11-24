@@ -4,6 +4,7 @@
         <div class="col-4" >
             <div class="btn pull-left mt-0" > 
                 <button id='createData' class="btn btn-info pull-left mr-0 mb-0 mt-0 ml-1"  data-toggle="modal" data-target="#AdaptedModal" onclick="createData()">Dodaj etap </button>
+                <button id="stageConstBtn" class="btn btn-warning pull-left mr-0 mb-0 mt-0 ml-1" onclick="StageConst.show()">Stałe</button>
             </div> 
         </div>
         <div class="col-4" >

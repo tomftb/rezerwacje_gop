@@ -122,6 +122,8 @@ class ParserProjectReport{
     }
     private function addPostActFilesToFiles($v,$k){
         $this->Log->log(0,"[".__METHOD__."] KEY => ".$k);
+        $this->Log->log(0,"[".__METHOD__."] VALUE => ".$v);
+        //$this->Log->logMulti(0,$v);
         $id=explode('-',$k);
         if(!array_key_exists(2,$id)){
             /* KEY 2 NOT EXIST => EXIST */
@@ -130,8 +132,9 @@ class ParserProjectReport{
         if($id[2]==='actFile'){
             $this->Log->log(0,"[".__METHOD__."] KEY ${k} EXIST => ADD KEY ".$id[0].'-'.$id[1].'-fileData');
             $this->files[$id[0].'-'.$id[1].'-fileData'][0]=APP_ROOT.UPLOAD_PROJECT_REPORT_IMG_DIR.$v;
-            $this->files[$id[0].'-'.$id[1].'-fileData'][1]['name']='ActuallFile';
+            $this->files[$id[0].'-'.$id[1].'-fileData'][1]['name']=$v;
             UNSET($this->post[$k]);
+            //die(__LINE__);
         }
     }
     public function getPost(){

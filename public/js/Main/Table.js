@@ -186,7 +186,6 @@ class Table
         
         return btnGroup;
     }
-
     setBtnAtr(btn,property,btnConfig){
         if(!btnConfig[property].perm) { return false; }
         if(btnConfig[property].hasOwnProperty('attributes')){   

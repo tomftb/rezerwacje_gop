@@ -1,7 +1,7 @@
 var ajax = new Ajax();
 var error = new Error();
     //MyError.setDiv('errDiv-Adapted-overall');
-var report = new Report();
+var report = new ProjectReport();
     report.setAjax(ajax);
 var table=new Table();
     table.setAjaxLink(ajax);

@@ -393,55 +393,56 @@ $row->addCell(1000)->addText('3');
             $tmpId=mb_substr($id,0,-5);
             $this->Log->log(0,"VALUE ID => ".$tmpId);
             /* SET FILE POSITION */
-            self::setFilePosition($tmpId,$file['position']);
+            self::setImagePosition($tmpId,$file['position']);
             /* SET FILE */
-            self::setFile($tmpId,$file);
+            self::setImage($tmpId,$file);
         }
-        self::addTextFile($v,$file);   
+        self::addTextImage($v,$file);   
     }
-    private function setFilePosition($id,&$filePostion){
+    private function setImagePosition($id,&$filePostion){
         if(array_key_exists($id."fileposition", $this->projectData)){
             $filePostion=$this->projectData[$id."fileposition"];
             UNSET($this->projectData[$id."fileposition"]);
         }
         else{
-            $this->Log->log(0,"NO FILE POSITION => STAY DEFAULT ");
+            $this->Log->log(0,"NO FILE-IMAGE POSITION => STAY DEFAULT ");
         }
-        $this->Log->log(0,"FILE POSITION => ".$filePostion);
+        $this->Log->log(0,"FILE-IMAGE POSITION => ".$filePostion);
     }
-    private function setFile($id,&$file){
+    private function setImage($id,&$image){
         if(array_key_exists($id."fileData", $this->files)){
-            $this->Log->log(0,"[name] FOUND FILE => ".$this->files[$id."fileData"][1]['name']);
-            $this->Log->log(0,"[location] FOUND FILE => ".$this->files[$id."fileData"][0]);
+            $this->Log->log(0,"[".__METHOD__."]\r\nFOUND IMAGE\r\nNAME: ".$this->files[$id."fileData"][1]['name']."\r\nLOCATION: ".$this->files[$id."fileData"][0]);
             //$file=$this->files[$id."fileData"];
-            $file['url']=$this->files[$id."fileData"][0];
-            $file['name']=$this->files[$id."fileData"][1]['name'];
+            $image['url']=$this->files[$id."fileData"][0];
+            $image['name']=$this->files[$id."fileData"][1]['name'];
             UNSET($this->files[$id."fileData"]);
         }
         else{
             /* SETUP DEFAULT TEXT POSITION */
-            $file['position']='bottom';
+            $image['position']='bottom';
         }
     }
-    private function addTextFile($tekstArray,$file){
-        $this->Log->log(0,"[".__METHOD__."] FILE NAME => ".$file['name']);
-        $this->Log->log(0,"[".__METHOD__."] FILE POSITION => ".$file['position']);
-        $this->Log->log(0,"[".__METHOD__."] FILE URL => ".$file['url']);
+    private function addTextImage($tekstArray,$image){
+        
+         /* ADD PAGE HEAD */
+        
+        $this->Log->log(0,"[".__METHOD__."]\r\nIMAGE NAME: ".$image['name']."\r\nIMAGE POSITION: ".$image['position']."\r\nIMAGE URL: ".$image['url']);
         $this->mainSection = $this->phpWord->addSection(array('breakType' => 'continuous'));
-        //var_dump($this->mainSection);
+        self::addPageHeader();
         //$this->mainSection->addTextBreak();
         /* NO FILE */
-        if($file['url']===''){
-            array_map(array($this, 'writeTekst'), $tekstArray);
+        if($image['url']===''){
+            array_map(array($this, 'addText'), $tekstArray);
             return '';
         }
         /* DEFAULT UNIT PT */
-        $imageProperties=self::setWordImageSize(getimagesize($file['url']));
-        switch($file['position']):
+        $imageProperties=self::setWordImageSize(getimagesize($image['url']));
+        
+        switch($image['position']):
             default:
             case 'bottom':    
                 /* ADD TEXT */
-                array_map(array($this, 'writeTekst'), $tekstArray);
+                array_map(array($this, 'addText'), $tekstArray);
                 /* 
                  * ADD FILE - IMAGE
                  * FILE
@@ -450,35 +451,123 @@ $row->addCell(1000)->addText('3');
                  * NAME
                  */
                 
-                $this->mainSection->addImage($file['url'], array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER),null,$file['name']);
+                $this->mainSection->addImage($image['url'], array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER),null,$image['name']);
                 break;
             case 'top':
                 /* ADD FILE */
-                 $this->mainSection->addImage($file['url'], array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'unit'=>'px','alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER),null,$file['name']);
+                 $this->mainSection->addImage($image['url'], array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'unit'=>'px','alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER),null,$image['name']);
                 /* ADD TEXT */
-                array_map(array($this, 'writeTekst'), $tekstArray);
+                array_map(array($this, 'addText'), $tekstArray);
                 break;
             case 'left':
                 self::setMultiColumnSection();
-                $this->mainSection->addImage($file['url'], array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER),null,$file['name']);
-                array_map(array($this, 'writeTekst'), $tekstArray);
+                $this->mainSection->addImage($image['url'], array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER),null,$image['name']);
+                array_map(array($this, 'addText'), $tekstArray);
                 self::setMultiColumnSection();
                 break;
             case 'right':
                 self::setMultiColumnSection();
-                array_map(array($this, 'writeTekst'), $tekstArray);
+                array_map(array($this, 'addText'), $tekstArray);
                 //$this->mainSection->addText($tekstArray[0],$this->FontStyle,$this->ParagraphStyle);    
                 //$this->mainSection->addText($tekstArray[0],$this->FontStyle,$this->ParagraphStyle);  
-                
-                $this->mainSection->addImage($file['url'], array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER),null,$file['name']);
+                $this->mainSection->addImage($image['url'], array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER),null,$image['name']);
                 self::setMultiColumnSection();
                 break;
         endswitch;
+        /* ADD PAGE FOOTER (STOPKA) */
+        self::addPageFooter();
+    }
+    private function addPageFooter(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $footer = $this->mainSection->addFooter();
+        //var_dump($footer);
+        //die(__LINE__);
+        /*
+        $footer->addImage(
+                'D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\gt_line.png',
+                array(
+                    'width' => 602,
+                    'height' => 1,
+                    'unit'=>'px',
+                    'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
+                    'positioning'=> 'absolute',
+                    'marginTop' => 0,
+                    'marginBottom' => 0
+                ));*/
+         $footer->addImage('D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\gt_line.png', array('width' => 602, 'height' => 1,'unit'=>'px','alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+   
+
+        
+
+        $footer->addPreserveText('STRONA {PAGE} z {NUMPAGES}', array('name' => 'Lato','bold'=>true, 'size'=>7), array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+       
+        //$footer->addLink('https://github.com/PHPOffice/PHPWord', 'PHPWord on GitHub');
+    }
+    private function addPageHeader(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $FontStyle= array('name' => 'Lato', 'size' => 7, 'color' => '#000000', 'bold' => true,'italic'=>false,'underline' => false);// underline -> single
+        $ParagraphStyle=array('alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER,'spaceAfter'=>0);
+        $this->Log->logMulti(0,$this->ParagraphStyle);
+        $this->Log->log(0,"[".__METHOD__."]");
+        $subsequent = $this->mainSection->addHeader();
+       
+        //$subsequent->addText('Subsequent pages in Section 1 will Have this!');
+        
+        
+        /*
+        $subsequent->addImage(
+            'D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\small_header_gt_logo.jpg',
+            array(
+                //'width'            => \PhpOffice\PhpWord\Shared\Converter::cmToPixel(3),
+                //'height'           => \PhpOffice\PhpWord\Shared\Converter::cmToPixel(3),
+                'width' => 77, 
+                'height' => 49,
+                'unit'=>'px',
+                'positioning'      => \PhpOffice\PhpWord\Style\Image::POSITION_ABSOLUTE,
+                'posHorizontal'    => \PhpOffice\PhpWord\Style\Image::POSITION_HORIZONTAL_LEFT, // POSITION_HORIZONTAL_CENTER
+                //'posHorizontalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_COLUMN,
+                'posVertical'      => \PhpOffice\PhpWord\Style\Image::POSITION_VERTICAL_TOP,
+                'posVerticalRel'   => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_LINE ,//POSITION_RELATIVE_TO_LINE
+            )
+        );
+         * 
+        */
+        
+        $subsequent->addText("OPRACOWANIE BADAŃ SEJSMICZNYCH",$FontStyle,$ParagraphStyle);   
+        $subsequent->addText("PRZETWARZANIE DANYCH SEJSMICZNYCH 3D WIELKIE OCZY",$FontStyle,$ParagraphStyle); 
+        $subsequent->addImage(
+            'D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\small_header_gt_logo.jpg',
+            array(
+                //'width'            => \PhpOffice\PhpWord\Shared\Converter::cmToPixel(3),
+                //'height'           => \PhpOffice\PhpWord\Shared\Converter::cmToPixel(3),
+                'width' => 77, 
+                'height' => 49,
+                'unit'=>'px',
+                'wrappingStyle' => 'behind',
+                'positioning'=>'relative',
+                //'posVertical'      => \PhpOffice\PhpWord\Style\Image::POSITION_VERTICAL_TOP,
+                //'positioning'      => \PhpOffice\PhpWord\Style\Image::POSITION_ABSOLUTE,
+                //'posHorizontal'    => \PhpOffice\PhpWord\Style\Image::POSITION_HORIZONTAL_LEFT,//POSITION_HORIZONTAL_RIGHT
+                //'posHorizontalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_PAGE,
+                //'posVerticalRel'   => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_PAGE,
+                //'marginright'       => \PhpOffice\PhpWord\Shared\Converter::cmToPixel(15.5),
+                //'marginTop'        => \PhpOffice\PhpWord\Shared\Converter::cmToPixel(1.5),
+                //'marginLeft'       => 200,
+                //'marginTop'        => 10,
+                //'marginBottom'=>1000
+            )
+);
+          
+          
+         
+       // $subsequent->addImage('D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\small_header_gt_logo.jpg', array('width' => 77, 'height' => 49,'unit'=>'px'));
+        $subsequent->addImage('D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\gt_line.png', array('width' => 602, 'height' => 1,'unit'=>'px','alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
     }
     private function setWordImageSize($img){
-        $this->Log->log(0,"[".__METHOD__."] IMAGE PROPERTIES:");
+        $maxWidth=602;
+        $this->Log->log(0,"[".__METHOD__."] MAX WIDTH => $maxWidth");
         /* MAX WIDTH FOR WORD 450 px */
-        $this->Log->logMulti(0,$img);
+        $this->Log->logMulti(2,$img);
         /*
          * [0] => WITDH
          * [1] => HEIGHT
@@ -489,7 +578,7 @@ $row->addCell(1000)->addText('3');
          */
         $orgWidth=$img[0];
         $orgHeight=$img[1];
-        $maxWidth=602;
+        
         /* 450 PT, 602 PX */
         if(intval($orgWidth)>$maxWidth){
             $img[0]=$maxWidth;
@@ -505,7 +594,7 @@ $row->addCell(1000)->addText('3');
         
         return $img;
     }
-    private function writeTekst($tekst){
+    private function addText($tekst){
          $this->mainSection->addText($tekst,$this->FontStyle,$this->ParagraphStyle);//array('underline' => 'single') //$fontStyleName          
     }
     private function setMultiColumnSection($colNum=2,$colSpace=10,$breakType='continuous'){

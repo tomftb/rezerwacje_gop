@@ -514,7 +514,7 @@ class ProjectReport
                
                     /* ADD DATA ABOUT INSERTED FILE */   
                 var actFile=document.createElement('a');
-                    actFile.setAttribute('href','router.php?task=downloadProjectProjectReportImage&file='+ProjectReport.actStage[ProjectReport.fieldCounter].v[prop]['fa']);
+                    actFile.setAttribute('href','router.php?task=downloadProjectReportImage&file='+ProjectReport.actStage[ProjectReport.fieldCounter].v[prop]['fa']);
                     actFile.setAttribute('target','_blank');
                     actFile.appendChild(document.createTextNode(ProjectReport.actStage[ProjectReport.fieldCounter].v[prop]['fo']));
                 var actFileInput=document.createElement('input');

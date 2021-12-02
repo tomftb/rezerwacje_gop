@@ -338,7 +338,7 @@ $row->addCell(1000)->addText('3');
     private function setUpData(){
         $this->Log->log(0,"[".__METHOD__."]");
         $convert=new convertHtmlToArray();     
-        
+         self::addTitlePage();
         foreach($this->projectData as $k => $v){
             /* EXPLDOE -> p */
             //$this->Log->log(0,"KEY => ".$k);
@@ -361,6 +361,7 @@ $row->addCell(1000)->addText('3');
             Throw New Exception($convert->getError(),0);
         }
         else{
+           
             foreach($data as $k => $v){
                 /* KEY v[0] VALUE ARRAY */
                 /* KEY v[1] STYLE */
@@ -397,7 +398,56 @@ $row->addCell(1000)->addText('3');
             /* SET FILE */
             self::setImage($tmpId,$file);
         }
+        
         self::addTextImage($v,$file);   
+    }
+    private function addTitlePage(){
+        $this->mainSection = $this->phpWord->addSection(array('breakType' => 'continuous'));
+        $FontStyle= array(
+            'name' => 'Lato Light',
+            'size' => 18,
+            'color' => '#595959',
+            'bold' => false,
+            'italic'=>false,
+            'underline' => false
+        );// underline -> single
+        $ParagraphStyle=array(
+            'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER,
+            'spaceAfter'=>300,
+            'spaceBefore'=>2500
+        );
+        $this->mainSection->addText('OPRACOWANIE BADAŃ SEJSMICZNYCH',$FontStyle,$ParagraphStyle);
+        $FontStyle['name']='Lato Black';
+        $ParagraphStyle['spaceAfter']=0;
+        $ParagraphStyle['spaceBefore']=0;
+        //$FontStyle= array('name' => , 'size' => 7, 'color' => '#000000', 'bold' => true,'italic'=>false,'underline' => false);// underline -> single
+       
+        $this->mainSection->addText('PRZETWARZANIE DANYCH SEJSMICZNYCH 3D WIELKIE OCZY',$FontStyle,$ParagraphStyle);
+        self::setMultiColumnSection();
+        $this->mainSection->addText('col1',$FontStyle,$ParagraphStyle);
+                $this->mainSection->addImage(
+            'D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\main_tlo.jpg',
+            array(
+                'width'            => \PhpOffice\PhpWord\Shared\Converter::cmToPixel(20.98),
+                'height'           => \PhpOffice\PhpWord\Shared\Converter::cmToPixel(29.76),
+                //'width' => 77, 
+                //'height' => 49,
+                'unit'=>'px',
+                'wrappingStyle' => 'behind',
+                'positioning'=>'relative',
+                //'posVertical'      => \PhpOffice\PhpWord\Style\Image::POSITION_VERTICAL_CENTER,
+                //'positioning'      => \PhpOffice\PhpWord\Style\Image::POSITION_ABSOLUTE,
+                //'posHorizontal'    => \PhpOffice\PhpWord\Style\Image::POSITION_HORIZONTAL_LEFT,//POSITION_HORIZONTAL_RIGHT
+                'posHorizontalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_PAGE,
+                'posVerticalRel'   => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_PAGE, // POSITION_RELATIVE_TO_PAGE
+                //'marginright'       => \PhpOffice\PhpWord\Shared\Converter::cmToPixel(15.5),
+                //'marginTop'        => \PhpOffice\PhpWord\Shared\Converter::cmToPixel(1.5),
+                //'marginLeft'       => 200,
+                //'marginTop'        => 30,
+                //'marginBottom'=>1000
+            )
+);
+        $this->mainSection->addPageBreak();
     }
     private function setImagePosition($id,&$filePostion){
         if(array_key_exists($id."fileposition", $this->projectData)){
@@ -505,7 +555,7 @@ $row->addCell(1000)->addText('3');
     }
     private function addPageHeader(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $FontStyle= array('name' => 'Lato', 'size' => 7, 'color' => '#000000', 'bold' => true,'italic'=>false,'underline' => false);// underline -> single
+        $FontStyle= array('name' => 'Lato', 'size' => 7, 'color' => '#595959', 'bold' => true,'italic'=>false,'underline' => false);// underline -> single
         $ParagraphStyle=array('alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER,'spaceAfter'=>0);
         $this->Log->logMulti(0,$this->ParagraphStyle);
         $this->Log->log(0,"[".__METHOD__."]");
@@ -545,15 +595,15 @@ $row->addCell(1000)->addText('3');
                 'unit'=>'px',
                 'wrappingStyle' => 'behind',
                 'positioning'=>'relative',
-                //'posVertical'      => \PhpOffice\PhpWord\Style\Image::POSITION_VERTICAL_TOP,
+                'posVertical'      => \PhpOffice\PhpWord\Style\Image::POSITION_VERTICAL_CENTER,
                 //'positioning'      => \PhpOffice\PhpWord\Style\Image::POSITION_ABSOLUTE,
-                //'posHorizontal'    => \PhpOffice\PhpWord\Style\Image::POSITION_HORIZONTAL_LEFT,//POSITION_HORIZONTAL_RIGHT
+                'posHorizontal'    => \PhpOffice\PhpWord\Style\Image::POSITION_HORIZONTAL_LEFT,//POSITION_HORIZONTAL_RIGHT
                 //'posHorizontalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_PAGE,
-                //'posVerticalRel'   => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_PAGE,
+                'posVerticalRel'   => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_TMARGIN, // POSITION_RELATIVE_TO_PAGE
                 //'marginright'       => \PhpOffice\PhpWord\Shared\Converter::cmToPixel(15.5),
                 //'marginTop'        => \PhpOffice\PhpWord\Shared\Converter::cmToPixel(1.5),
                 //'marginLeft'       => 200,
-                //'marginTop'        => 10,
+                //'marginTop'        => 30,
                 //'marginBottom'=>1000
             )
 );
@@ -561,7 +611,16 @@ $row->addCell(1000)->addText('3');
           
          
        // $subsequent->addImage('D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\small_header_gt_logo.jpg', array('width' => 77, 'height' => 49,'unit'=>'px'));
-        $subsequent->addImage('D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\gt_line.png', array('width' => 602, 'height' => 1,'unit'=>'px','alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+        $subsequent->addImage(
+                'D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\gt_line.png',
+                array(
+                    'width' => 602,
+                    'height' => 1,
+                    'unit'=>'px',
+                    'positioning'      => \PhpOffice\PhpWord\Style\Image::POSITION_ABSOLUTE,
+                    'posVertical'      => \PhpOffice\PhpWord\Style\Image::POSITION_VERTICAL_CENTER
+                )
+        );
     }
     private function setWordImageSize($img){
         $maxWidth=602;
@@ -712,7 +771,9 @@ $row->addCell(1000)->addText('3');
         $cssAlign=[
                 'center'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER,
                 'left'=>\PhpOffice\PhpWord\SimpleType\Jc::LEFT,
-                'right'=>\PhpOffice\PhpWord\SimpleType\Jc::RIGHT];
+                'right'=>\PhpOffice\PhpWord\SimpleType\Jc::RIGHT
+                //,'justify'=>\PhpOffice\PhpWord\SimpleType\Jc::JUSTIFY
+        ];
         if(!array_key_exists($align,$cssAlign)){
             Throw New Exception('WRONG STYLE ALIGN ATTRIBUTE => '.$align,0);
         }

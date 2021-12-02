@@ -423,9 +423,17 @@ $row->addCell(1000)->addText('3');
         //$FontStyle= array('name' => , 'size' => 7, 'color' => '#000000', 'bold' => true,'italic'=>false,'underline' => false);// underline -> single
        
         $this->mainSection->addText('PRZETWARZANIE DANYCH SEJSMICZNYCH 3D WIELKIE OCZY',$FontStyle,$ParagraphStyle);
-        self::setMultiColumnSection();
-        $this->mainSection->addText('col1',$FontStyle,$ParagraphStyle);
-                $this->mainSection->addImage(
+        // Three columns
+        $section = $this->phpWord->addSection(
+            array(
+                'colsNum'   => 3,
+                'colsSpace' => 720,
+                'breakType' => 'continuous',
+            )
+        );
+        $filler='asdasdas';
+        $section->addText("Three columns, half inch (720 twips) spacing. {$filler}");
+        $this->mainSection->addImage(
             'D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\main_tlo.jpg',
             array(
                 'width'            => \PhpOffice\PhpWord\Shared\Converter::cmToPixel(20.98),

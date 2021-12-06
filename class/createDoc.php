@@ -424,15 +424,47 @@ $row->addCell(1000)->addText('3');
        
         $this->mainSection->addText('PRZETWARZANIE DANYCH SEJSMICZNYCH 3D WIELKIE OCZY',$FontStyle,$ParagraphStyle);
         // Three columns
-        $section = $this->phpWord->addSection(
+        $this->mainSection = $this->phpWord->addSection(
             array(
                 'colsNum'   => 3,
                 'colsSpace' => 720,
                 'breakType' => 'continuous',
             )
         );
-        $filler='asdasdas';
-        $section->addText("Three columns, half inch (720 twips) spacing. {$filler}");
+        $FontStyle['name']='Lato Light';
+        $FontStyle['size']=12;
+        $ParagraphStyle['spaceBefore']=8430;
+        $ParagraphStyle['alignment']=\PhpOffice\PhpWord\SimpleType\Jc::LEFT;
+        $this->mainSection->addText("Na zlecenie:",$FontStyle,$ParagraphStyle);
+        $this->mainSection = $this->phpWord->addSection(
+            array(
+                'colsNum'   => 3,
+                'colsSpace' => 720,
+                'breakType' => 'continuous',
+            )
+        );
+        $FontStyle['name']='Lato';
+        $FontStyle['bold']=true;
+         $ParagraphStyle['spaceBefore']=0;
+        $this->mainSection->addText("PGNiG SA",$FontStyle,$ParagraphStyle);
+        $this->mainSection = $this->phpWord->addSection(
+            array(
+                'colsNum'   => 3,
+                'colsSpace' => 720,
+                'breakType' => 'continuous',
+            )
+        );
+        $FontStyle['name']='Lato Light';
+        $FontStyle['bold']=false;
+        $this->mainSection->addText("Data: październik 2021",$FontStyle,$ParagraphStyle);
+        $this->mainSection = $this->phpWord->addSection(
+            array(
+                'colsNum'   => 3,
+                'colsSpace' => 720,
+                'breakType' => 'continuous',
+            )
+        );
+        $this->mainSection->addText("Egz. nr  1/2",$FontStyle,$ParagraphStyle);
         $this->mainSection->addImage(
             'D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\main_tlo.jpg',
             array(
@@ -455,7 +487,72 @@ $row->addCell(1000)->addText('3');
                 //'marginBottom'=>1000
             )
 );
+        //$ParagraphStyle['pageBreakBefore']='true';
+        //$this->mainSection->addText("Egz. nr  1/2",$FontStyle,$ParagraphStyle);
         $this->mainSection->addPageBreak();
+        $this->mainSection = $this->phpWord->addSection(array('breakType' => 'continuous'));
+        $FontStyle['name']='Lato Light';
+        $FontStyle['size']=18;
+        $ParagraphStyle['spaceBefore']=1000;
+        $ParagraphStyle['spaceAfter']=500;
+        $ParagraphStyle['alignment']=\PhpOffice\PhpWord\SimpleType\Jc::CENTER;
+        $this->mainSection->addText('OPRACOWANIE BADAŃ SEJSMICZNYCH',$FontStyle,$ParagraphStyle);
+        $FontStyle['name']='Lato Black';
+        $ParagraphStyle['spaceAfter']=1000;
+        $ParagraphStyle['spaceBefore']=0;
+        $this->mainSection->addText('PRZETWARZANIE DANYCH SEJSMICZNYCH 3D WIELKIE OCZY',$FontStyle,$ParagraphStyle);
+        $ParagraphStyle['spaceAfter']=0;
+        $ParagraphStyle['spaceBefore']=0;
+        $ParagraphStyle['alignment']=\PhpOffice\PhpWord\SimpleType\Jc::LEFT;
+        $this->mainSection = $this->phpWord->addSection(
+            array(
+                'colsNum'   => 2,
+                'colsSpace' => 0,
+                'breakType' => 'continuous',
+            )
+        );
+        $FontStyle['name']='Lato';
+        $FontStyle['size']=11;
+        $this->mainSection->addText("Opracowanie:",$FontStyle,$ParagraphStyle);
+        $this->mainSection->addTextBreak();
+        $this->mainSection->addTextBreak();
+        $this->mainSection->addTextBreak();
+         $FontStyle['bold']=true;
+        $this->mainSection->addText("mgr Anna Zduniak",$FontStyle,$ParagraphStyle);
+        $this->mainSection->addText("mgr Jacek Biesaga",$FontStyle,$ParagraphStyle);
+         $FontStyle['bold']=false;
+        $this->mainSection->addTextBreak();
+        $this->mainSection->addText("Nadzór technologiczny:",$FontStyle,$ParagraphStyle);
+        $this->mainSection->addText("GŁÓWNY TECHNOLOG",$FontStyle,$ParagraphStyle);
+        $this->mainSection->addTextBreak();
+         $FontStyle['bold']=true;
+        $this->mainSection->addText("mgr Serweryn Tlałka",$FontStyle,$ParagraphStyle);
+         $FontStyle['bold']=false;
+        $this->mainSection->addTextBreak();
+        $this->mainSection->addTextBreak();
+        $this->mainSection->addText("Weryfikował:",$FontStyle,$ParagraphStyle);
+        $this->mainSection->addText("KIEROWNIK OŚRODKA",$FontStyle,$ParagraphStyle);
+        $this->mainSection->addText("PRZETWARZANIA DANYCH",$FontStyle,$ParagraphStyle);
+        $this->mainSection->addText("SEJSMICZNYCH",$FontStyle,$ParagraphStyle);
+        $this->mainSection->addTextBreak();
+         $FontStyle['bold']=true;
+        $this->mainSection->addText("mgr Krzysztof Kolasiński",$FontStyle,$ParagraphStyle);
+         $FontStyle['bold']=false;
+        $this->mainSection->addText("(nr upr. IX-0511)",$FontStyle,$ParagraphStyle);
+        $this->mainSection->addTextBreak();
+        $this->mainSection->addText("Zatwierdził:",$FontStyle,$ParagraphStyle);
+        $this->mainSection->addText("I WICEPREZES ZARZĄDU ds.",$FontStyle,$ParagraphStyle);
+        $this->mainSection->addText("GEOFIZYKI",$FontStyle,$ParagraphStyle);
+         $this->mainSection->addTextBreak();
+          $FontStyle['bold']=true;
+        $this->mainSection->addText("mgr inż. Jerzy Trela",$FontStyle,$ParagraphStyle);
+         $FontStyle['bold']=false;
+        $this->mainSection->addText("(nr upr. IX-0374)",$FontStyle,$ParagraphStyle);
+        /* */
+       $this->mainSection = $this->phpWord->addSection(array('breakType' => 'continuous'));
+       $this->mainSection->addPageBreak();
+       //
+        
     }
     private function setImagePosition($id,&$filePostion){
         if(array_key_exists($id."fileposition", $this->projectData)){

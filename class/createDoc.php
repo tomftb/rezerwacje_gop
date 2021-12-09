@@ -549,10 +549,213 @@ $row->addCell(1000)->addText('3');
          $FontStyle['bold']=false;
         $this->mainSection->addText("(nr upr. IX-0374)",$FontStyle,$ParagraphStyle);
         /* */
-       $this->mainSection = $this->phpWord->addSection(array('breakType' => 'continuous'));
-       $this->mainSection->addPageBreak();
-       //
+        $this->mainSection = $this->phpWord->addSection(array('breakType' => 'continuous'));
+        $this->mainSection->addText("Na zlecenie:",$FontStyle,$ParagraphStyle);
+        $this->mainSection->addTextBreak();
+        $this->mainSection->addTextBreak();
+        $this->mainSection->addImage(
+            'D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\pgnig_small_logo.png',
+            array(
+                'width'            => 130,
+                'height'           => 50,
+                'unit'=>'px',
+                'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::LEFT
+            ),
+            null,
+            "PGING_small_logo"    
+        );
+        $FontStyle['bold']=true;
+        /* pt. */
+        $ParagraphStyle['spaceAfter']=0;
+        $ParagraphStyle['spaceBefore']=0;
+        /* 180 => 18 pt. */
+        $ParagraphStyle['space']=array('line' => 180, 'rule' => 'auto');
+        //$ParagraphStyle['spacing']=15;
+        $this->mainSection->addText("Polskie Górnictwo Naftowe i Gazownictwo SA",$FontStyle,$ParagraphStyle);
+        $this->mainSection->addText("Oddział Geologii i Eksploatacji",$FontStyle,$ParagraphStyle);
+        $FontStyle['bold']=false;
+        $this->mainSection->addText("ul. Kasprzaka 25, 01-224 Warszawa",$FontStyle,$ParagraphStyle);
+        unset($ParagraphStyle['space']);
+        self::testList();
+        self::testTabulation();
+        self::testListTabulation();
+        $this->mainSection->addPageBreak();
+    }
+    private function testList(){
+        $this->mainSection->addPageBreak();
+        /* CREATE LIST */
         
+        $fontStyleName = 'myOwnStyle';
+        $this->phpWord->addFontStyle($fontStyleName, array('color' => 'FF0000'));
+        $paragraphStyleName = 'P-Style';
+        $this->phpWord->addParagraphStyle($paragraphStyleName, array('spaceAfter' => 95));
+        
+        $multilevelNumberingStyleName = 'multilevel';
+        $this->phpWord->addNumberingStyle(
+            $multilevelNumberingStyleName,
+            array(
+                'type'   => 'multilevel',
+                'levels' => array(
+                    array('format' => 'decimal', 'text' => '%1.', 'left' => 360, 'hanging' => 360, 'tabPos' => 360),
+                    array('format' => 'upperLetter', 'text' => '%2.', 'left' => 720, 'hanging' => 360, 'tabPos' => 720),
+                ),
+            )
+        );
+        $predefinedMultilevelStyle = array('listType' => \PhpOffice\PhpWord\Style\ListItem::TYPE_NUMBER_NESTED);
+        // New section
+        $this->mainSection->addSection();
+       
+        // Lists
+        $this->mainSection->addText('Multilevel list.');
+        $this->mainSection->addListItem('List Item I', 0, null, $multilevelNumberingStyleName);
+        $this->mainSection->addListItem('List Item I.a', 1, null, $multilevelNumberingStyleName);
+        $this->mainSection->addListItem('List Item I.b', 1, null, $multilevelNumberingStyleName);
+        $this->mainSection->addListItem('List Item II', 0, null, $multilevelNumberingStyleName);
+        $this->mainSection->addListItem('List Item II.a', 1, null, $multilevelNumberingStyleName);
+        $this->mainSection->addListItem('List Item III', 0, null, $multilevelNumberingStyleName);
+        $this->mainSection->addTextBreak(2);
+        $this->mainSection->addText('Basic simple bulleted list.');
+        $this->mainSection->addListItem('List Item 1');
+        $this->mainSection->addListItem('List Item 2');
+        $this->mainSection->addListItem('List Item 3');
+        $this->mainSection->addText('Continue from multilevel list above.');
+        $this->mainSection->addListItem('List Item IV', 0, null, $multilevelNumberingStyleName);
+        $this->mainSection->addListItem('List Item IV.a', 1, null, $multilevelNumberingStyleName);
+        $this->mainSection->addTextBreak(2);
+        $this->mainSection->addText('Multilevel predefined list.');
+        $this->mainSection->addListItem('List Item 1', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $this->mainSection->addListItem('List Item 2', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $this->mainSection->addListItem('List Item 3', 1, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $this->mainSection->addListItem('List Item 4', 1, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $this->mainSection->addListItem('List Item 5', 2, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $this->mainSection->addListItem('List Item 6', 1, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $this->mainSection->addListItem('List Item 7', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $this->mainSection->addTextBreak(2);
+        $this->mainSection->addText('List with inline formatting.');
+        $listItemRun = $this->mainSection->addListItemRun();
+        $listItemRun->addText('List item 1');
+        $listItemRun->addText(' in bold', array('bold' => true));
+        $listItemRun = $this->mainSection->addListItemRun(1, $predefinedMultilevelStyle, $paragraphStyleName);
+        $listItemRun->addText('List item 2');
+        $listItemRun->addText(' in italic', array('italic' => true));
+        $footnote = $this->mainSection->addFootnote();
+        $footnote->addText('this is a footnote on a list item');
+        $listItemRun = $this->mainSection->addListItemRun();
+        $listItemRun->addText('List item 3');
+        $listItemRun->addText(' underlined', array('underline' => 'dash'));
+        $this->mainSection->addTextBreak(2);
+
+        // Numbered heading
+        $headingNumberingStyleName = 'headingNumbering';
+        $this->phpWord->addNumberingStyle(
+            $headingNumberingStyleName,
+            array('type'   => 'multilevel',
+                  'levels' => array(
+                      array('pStyle' => 'Heading1', 'format' => 'decimal', 'text' => '%1'),
+                      array('pStyle' => 'Heading2', 'format' => 'decimal', 'text' => '%1.%2'),
+                      array('pStyle' => 'Heading3', 'format' => 'decimal', 'text' => '%1.%2.%3'),
+                  ),
+            )
+        );
+        $this->phpWord->addTitleStyle(1, array('size' => 16), array('numStyle' => $headingNumberingStyleName, 'numLevel' => 0));
+        $this->phpWord->addTitleStyle(2, array('size' => 14), array('numStyle' => $headingNumberingStyleName, 'numLevel' => 1));
+        $this->phpWord->addTitleStyle(3, array('size' => 12), array('numStyle' => $headingNumberingStyleName, 'numLevel' => 2));
+
+        $this->mainSection->addTitle('Heading 1', 1);
+        $this->mainSection->addTitle('Heading 2', 2);
+        $this->mainSection->addTitle('Heading 3', 3);
+    }
+    private function testTabulation(){
+        $this->mainSection->addPageBreak();
+        // Define styles
+        $multipleTabsStyleName = 'multipleTab';
+        $this->phpWord->addParagraphStyle(
+            $multipleTabsStyleName,
+            array(
+                'tabs' => array(
+                    new \PhpOffice\PhpWord\Style\Tab('left', 1550),
+                    new \PhpOffice\PhpWord\Style\Tab('center', 3200),
+                    new \PhpOffice\PhpWord\Style\Tab('right', 5300),
+                ),
+            )
+        );
+
+        $rightTabStyleName = 'rightTab';
+        $this->phpWord->addParagraphStyle($rightTabStyleName, array('tabs' => array(new \PhpOffice\PhpWord\Style\Tab('right', 9090,'dot'))));
+
+        $leftTabStyleName = 'centerTab';
+        $this->phpWord->addParagraphStyle($leftTabStyleName, array('tabs' => array(new \PhpOffice\PhpWord\Style\Tab('center', 4680))));
+
+        // New portrait section
+        $this->mainSection->addSection();
+
+        // Add listitem elements
+        $this->mainSection->addText("Multiple Tabs:\tOne\tTwo\tThree", null, $multipleTabsStyleName);
+        $this->mainSection->addText("Left Aligned\tRight Aligned", null, $rightTabStyleName);
+        $this->mainSection->addText("\tCenter Aligned", null, $leftTabStyleName);
+    }
+    private function testListTabulation(){
+        
+        $this->mainSection->addPageBreak();
+        $fontStyleName = 'myOwnStyle2';
+        $this->phpWord->addFontStyle($fontStyleName, array('color' => 'FF0000'));
+        $paragraphStyleName = 'P-Style2';
+        $this->phpWord->addParagraphStyle($paragraphStyleName, array('spaceAfter' => 95,'tabs' => array(new \PhpOffice\PhpWord\Style\Tab('right', 9090,'dot'))));
+        
+        $predefinedMultilevelStyle = array(
+            'listType' => \PhpOffice\PhpWord\Style\ListItem::TYPE_NUMBER_NESTED,
+                'start'=>20
+                );
+        $multilevelNumberingStyleName = 'multilevel2';
+        $this->phpWord->addNumberingStyle(
+            $multilevelNumberingStyleName,
+            array(
+                'type'   => 'multilevel',
+                'levels' => array(
+                    array('format' => 'decimal', 'text' => '%1.', 'left' => 360, 'hanging' => 360, 'tabPos' => 360),
+                    array('format' => 'decimal', 'text' => '%1.%2.', 'left' => 792, 'hanging' => 432, 'tabPos' => 792),
+                    array('format' => 'decimal', 'text' => '%1.%2.%3.', 'left' => 1224, 'hanging' => 504, 'tabPos' => 1224),
+                    array('format' => 'decimal', 'text' => '%1.%2.%3.%4.', 'left' => 1728, 'hanging' => 648, 'tabPos' => 1800),
+                    array('format' => 'decimal', 'text' => '%1.%2.%3.%4.%5.', 'left' => 2232, 'hanging' => 792, 'tabPos' => 2520),
+                    array('format' => 'decimal', 'text' => '%1.%2.%3.%4.%5.%6.', 'left' => 2736 , 'hanging' => 936, 'tabPos' => 2880),
+                    array('format' => 'decimal', 'text' => '%1.%2.%3.%4.%5.%6.%7.', 'left' => 3240, 'hanging' => 1080, 'tabPos' => 3600),
+                    array('format' => 'decimal', 'text' => '%1.%2.%3.%4.%5.%6.%7.%8.', 'left' => 3744, 'hanging' => 1224, 'tabPos' => 3960),
+                    array('format' => 'decimal', 'text' => '%1.%2.%3.%4.%5.%6.%7.%8.%9.', 'left' => 4320, 'hanging' => 1440, 'tabPos' => 4680)
+                ),
+            )
+        );
+        $this->mainSection->addText('Spis treści');
+        $rightTabStyleName = 'rightTab2';
+        $this->phpWord->addParagraphStyle($rightTabStyleName, array('tabs' => array(new \PhpOffice\PhpWord\Style\Tab('right', 9090,'dot'))));
+        $this->mainSection->addText("Wstęp\t1", null, $rightTabStyleName);
+        //$this->mainSection->addText('Wstęp');
+        
+        $listItemRun =$this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Cel prac oraz podstawowe zadania\t 1");
+        //$listItemRun->addText("\t1", null, $rightTabStyleName);
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
+        $listItemRun = $this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
+        $listItemRun = $this->mainSection->addListItemRun(3, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
+        $listItemRun = $this->mainSection->addListItemRun(4, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
+        $listItemRun = $this->mainSection->addListItemRun(5, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
+        //$this->mainSection->addListItem('Cel prac oraz podstawowe zadania\t1', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        //$this->mainSection->addListItem('Zakres prac i terminy realizacji\t2', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        //$this->mainSection->addListItem('List Item 3', 1, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        //$this->mainSection->addListItem('List Item 4', 1, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        //$this->mainSection->addListItem('List Item 5', 2, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        //$this->mainSection->addListItem('List Item 6', 1, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        //$this->mainSection->addListItem('List Item 7', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
     }
     private function setImagePosition($id,&$filePostion){
         if(array_key_exists($id."fileposition", $this->projectData)){

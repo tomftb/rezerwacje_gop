@@ -706,15 +706,21 @@ $row->addCell(1000)->addText('3');
             'listType' => \PhpOffice\PhpWord\Style\ListItem::TYPE_NUMBER_NESTED,
                 'start'=>20
                 );
+        /*
+         * left - wcięcie pierwszego wiersza (od lewej strony)
+         * hanging - odstęp od wcięcia, przeznaczony na numerację
+         * tabPos - tabulacja
+         * hanging - create function to dynamic calculate. function should check font size and count elements of list - only for numeric etc.
+         */
         $multilevelNumberingStyleName = 'multilevel2';
         $this->phpWord->addNumberingStyle(
             $multilevelNumberingStyleName,
             array(
                 'type'   => 'multilevel',
                 'levels' => array(
-                    array('format' => 'decimal', 'text' => '%1.', 'left' => 360, 'hanging' => 360, 'tabPos' => 360),
-                    array('format' => 'decimal', 'text' => '%1.%2.', 'left' => 792, 'hanging' => 432, 'tabPos' => 792),
-                    array('format' => 'decimal', 'text' => '%1.%2.%3.', 'left' => 1224, 'hanging' => 504, 'tabPos' => 1224),
+                    array('format' => 'decimal', 'text' => '%1.', 'left' => 360, 'hanging' => 390, 'tabPos' => 360),
+                    array('format' => 'decimal', 'text' => '%1.%2.', 'left' => 792, 'hanging' => 482, 'tabPos' => 792), // ... - 432 - ...
+                    array('format' => 'decimal', 'text' => '%1.%2.%3.', 'left' => 1224, 'hanging' => 624, 'tabPos' => 1224),//1224 - 504 1224
                     array('format' => 'decimal', 'text' => '%1.%2.%3.%4.', 'left' => 1728, 'hanging' => 648, 'tabPos' => 1800),
                     array('format' => 'decimal', 'text' => '%1.%2.%3.%4.%5.', 'left' => 2232, 'hanging' => 792, 'tabPos' => 2520),
                     array('format' => 'decimal', 'text' => '%1.%2.%3.%4.%5.%6.', 'left' => 2736 , 'hanging' => 936, 'tabPos' => 2880),
@@ -727,28 +733,102 @@ $row->addCell(1000)->addText('3');
         $this->mainSection->addText('Spis treści');
         $rightTabStyleName = 'rightTab2';
         $this->phpWord->addParagraphStyle($rightTabStyleName, array('tabs' => array(new \PhpOffice\PhpWord\Style\Tab('right', 9090,'dot'))));
-        $this->mainSection->addText("Wstęp\t1", null, $rightTabStyleName);
+        $this->mainSection->addText("Wstęp\t7", null, $rightTabStyleName);
         //$this->mainSection->addText('Wstęp');
-        
         $listItemRun =$this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
-        $listItemRun->addText("Cel prac oraz podstawowe zadania\t 1");
+        $listItemRun->addText("Cel prac oraz podstawowe zadania\t9");
         //$listItemRun->addText("\t1", null, $rightTabStyleName);
-        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
-        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
-        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
-        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
         $listItemRun = $this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
-        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
+        $listItemRun->addText("Zakres prac i terminy realizacji\t11");
+        $listItemRun = $this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Ocena danych wejściowych\t15");
+        $listItemRun = $this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Sekwencja przetwarzania danych sejsmicznych\t27");
         $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
-        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
+        $listItemRun->addText("Sekwencja przetwarzania podstawowego z migracją czasową po składaniu (PoSTM))\t27");
+        
+        
+        
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Sekwencja przetwarzania z migracją czasową przed składaniem (PreSTM))\t29");
+        $listItemRun = $this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Procedury i parametry przetwarzania\t31");
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Omówienie procedur sekwencji przetwarzania podstawowego\t 31");
         $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
-        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
-        $listItemRun = $this->mainSection->addListItemRun(3, $multilevelNumberingStyleName, $paragraphStyleName);
-        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
-        $listItemRun = $this->mainSection->addListItemRun(4, $multilevelNumberingStyleName, $paragraphStyleName);
-        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
-        $listItemRun = $this->mainSection->addListItemRun(5, $multilevelNumberingStyleName, $paragraphStyleName);
-        $listItemRun->addText("Zakres prac i terminy realizacji\t 2");
+        $listItemRun->addText("Redakcja rekordów i tras sejsmicznych\t31");
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Obliczanie bazowych poprawek statystycznych\t31");
+        
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Tłumienie zakłóceń\t43");
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Kompensacja zaniku amplitud tras sejsmicznych z czasem\t48");
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Skalowanie amplitud tras sejsmicznych\t49");
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Formowanie elementarnego sygnału sejsmicznego - etap 1 - standaryzacja sygnału\t52");
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Formowanie elementarnego sygnału sejsmicznego - etap 2 - dekonwolucja\t54");
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Analiza prędkości\t55");
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Autmatyczna korekta poprawek statystycznych\t58");
+        
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Interpolacja i regularyzacja zapisu sejsmicznego w binach offsetowych przed migracją czasową przed składaniem\t65");
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Składanie tras wg WPG\t65");
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Migracja czasowa po składaniu\t65");
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Omówienie procedur sekwencji przetwarzania z migracją czasową przed skladaniem\t67");
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Migracja czasowa przed składaniem oraz analizy prędkości\t67");
+        
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Tłumienie odbić wielokrotnych\t67");
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Składanie tras dla wersji z migracją czasową przed składaniem\t68");
+        $listItemRun = $this->mainSection->addListItemRun(2, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Konwersja zero-fazowa sygnału, resztkowa rotacja fazy\t69");
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Kontrola jakości procesów przetwarzania\t70");
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Porównanie końcowych wyników migracji czasowej po składaniu z danymi archiwalnymi\t75");
+        
+        /* TESTOWE ROW */
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Porównanie końcowych wyników migracji czasowej po składaniu z danymi archiwalnymi\t75");
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Porównanie końcowych wyników migracji czasowej po składaniu z danymi archiwalnymi\t75");
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Porównanie końcowych wyników migracji czasowej po składaniu z danymi archiwalnymi\t75");
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Porównanie końcowych wyników migracji czasowej po składaniu z danymi archiwalnymi\t75");
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Porównanie końcowych wyników migracji czasowej po składaniu z danymi archiwalnymi\t75");
+        $listItemRun = $this->mainSection->addListItemRun(1, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Porównanie końcowych wyników migracji czasowej po składaniu z danymi archiwalnymi\t75");
+        
+        
+        $listItemRun = $this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Ilustracja produktów przetwarzania\t83");
+        $listItemRun = $this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Wnioski i ocena rezultatów przetwarzania\t93");
+        $listItemRun = $this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Wykaz danych przekazanych Zleceniodawcy\t95");
+        $listItemRun = $this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Spis rycin\t98");
+        $listItemRun = $this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Notatki ze spotkania\t103");
+        /* TESTOWE ROW */
+        for ($i=0; $i<200; $i++){
+            $listItemRun = $this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
+            $listItemRun->addText($i."Sekwencja przetwarzania podstawowego z migracją czasową po składaniu (PoSTM))\t27");
+        }
+        $listItemRun = $this->mainSection->addListItemRun(0, $multilevelNumberingStyleName, $paragraphStyleName);
+        $listItemRun->addText("Sekwencja przetwarzania podstawowego z migracją czasową po składaniu (PoSTM))\t27");
         //$this->mainSection->addListItem('Cel prac oraz podstawowe zadania\t1', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
         //$this->mainSection->addListItem('Zakres prac i terminy realizacji\t2', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
         //$this->mainSection->addListItem('List Item 3', 1, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);

@@ -338,7 +338,7 @@ $row->addCell(1000)->addText('3');
     private function setUpData(){
         $this->Log->log(0,"[".__METHOD__."]");
         $convert=new convertHtmlToArray();     
-         self::addTitlePage();
+        //self::addTitlePage();
         foreach($this->projectData as $k => $v){
             /* EXPLDOE -> p */
             //$this->Log->log(0,"KEY => ".$k);
@@ -346,17 +346,24 @@ $row->addCell(1000)->addText('3');
                 $this->Log->log(0,"FOUND TITLE ".$k);
                 self::writeData($convert,$v,$k);   
             }
+            
+            
+            
             if(preg_match("/^\d\d*-\d\d*-value$/",$k)){
-                $this->Log->log(0,"FOUND TEXTAREA ".$k);
+                $this->Log->log(0,"FOUND TEXTAREA\r\nKEY => $k\r\nVALUE:\r\n$v");
                 self::writeData($convert,$v,$k);   
             }
         }
+        die( $this->Log->log(0,"DIE at ".__LINE__));
     }
     private function writeData($convert,$v,$id){
         $this->Log->log(0,"[".__METHOD__."]");
         $convert->addHtml($v);
         $data=$convert->getHtmlArray();
+        $this->Log->log(0,"HTML ARRAY:");
+        $this->Log->logMulti(0,$data);
         //$this->Log->log(0,$convert->getLog());
+        
         if($convert->getError()){
             Throw New Exception($convert->getError(),0);
         }
@@ -369,6 +376,7 @@ $row->addCell(1000)->addText('3');
                 //parent::logMwriteTekstulti(0, $v);       
             }
         }
+        
     }
 
         
@@ -398,7 +406,6 @@ $row->addCell(1000)->addText('3');
             /* SET FILE */
             self::setImage($tmpId,$file);
         }
-        
         self::addTextImage($v,$file);   
     }
     private function addTitlePage(){
@@ -888,7 +895,6 @@ $row->addCell(1000)->addText('3');
                  * WATERMARK
                  * NAME
                  */
-                
                 $this->mainSection->addImage($image['url'], array('width'=>$imageProperties[0], 'height'=>$imageProperties[1],'alignment'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER),null,$image['name']);
                 break;
             case 'top':
@@ -1095,13 +1101,13 @@ $row->addCell(1000)->addText('3');
     }
     private function parseTag($tag){
         $this->Log->log(0,"[".__METHOD__."]");
-        $avaTag=['b'=>['bold',true],'u'=>['underline','single'],'i'=>['italic',true],'span'=>''];
+        $avaTag=['b'=>['bold',true],'u'=>['underline','single'],'i'=>['italic',true],'span'=>'','li'=>'','ul'=>''];
         $tag=mb_strtolower($tag);
         if(!array_key_exists($tag, $avaTag)){
            Throw New Exception('TAG '.$tag.' UNAVALIABLE',0);    
         }
-        /* SPAN EXCEPTION */
-        if($tag==='span'){
+        /* SPAN UL LI EXCEPTION */
+        if($tag==='span' || $tag==='ul' || $tag==='li'){
             $this->Log->log(0,"[".__METHOD__."] SPAN => SKIP");
             return true;
         }

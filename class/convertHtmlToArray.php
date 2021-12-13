@@ -5,7 +5,7 @@ final class convertHtmlToArray{
 	
 	private $html='',$htmlArray=[],$openTagStack=[],$closeTagStack=[],$err='';
 	private $logData='';
-	private $avaliableTags=['p','span','b','i','u','strong'];
+	private $avaliableTags=['p','span','b','i','u','strong','u','li'];
 	
 	public function __construct(){}
 	public function __destruct(){}

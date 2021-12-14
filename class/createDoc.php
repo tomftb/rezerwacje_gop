@@ -362,10 +362,11 @@ $row->addCell(1000)->addText('3');
         $data=$convert->getHtmlArray();
         $this->Log->log(0,"HTML ARRAY:");
         $this->Log->logMulti(0,$data);
-        //$this->Log->log(0,$convert->getLog());
+        $this->Log->log(0,$convert->getLog());
         
         if($convert->getError()){
-            Throw New Exception($convert->getError(),0);
+            
+            Throw New Exception("CONVERT ERROR: ".$convert->getError(),0);
         }
         else{
            

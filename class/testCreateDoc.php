@@ -65,6 +65,7 @@ class testCreateDoc {
     private function writeText($text=''){
         echo __METHOD__."\r\n".$text."\r\n";
         //$this->mainSection->addText($text,$this->fontStyle,$this->paragraphStyle);
+        print_r($this->fontStyle);
         $this->textRun->addText($text,$this->fontStyle,$this->paragraphStyle);
     }
     private function setTextAttribute($element=array()){
@@ -73,32 +74,76 @@ class testCreateDoc {
          * attrbiute = HTML tag attribute
          */
        
-        print_r();
-        //self::setUpTag($tag);
+        print_r($element);
+        self::setUpTag($element['type'],$element['value']);
         
-        //self::setUpAttribute();
+        self::setUpAttribute($element['attribute']);
     }
-    private function setUpTag($tag=''){
+    private function setUpTag($type='',$tag=''){
+        if($type==='otag'){
+            self::setUpOpenTag($tag);
+        }
+        else if($type==='ctag'){
+            self::setUpCloseTag($tag);
+        }
+        else if($type==='octag'){
+            self::setUpOpenCloseTag($tag);
+        }
+        else{
+            /* UNAVAILABLE TAB*/
+        }
+    }
+    private function setUpOpenTag($tag=''){
         echo __METHOD__."\r\n".$tag."\r\n";
         switch($tag){
-            case 'p':
+            case 'P':
                 break;
-            case 'span':
+            case 'SPAN':
                 break;
-            case 'ul':
+            case 'UL':
                 break;
-            case 'i':
+            case 'I':
                 break;
-            case 'u':
+            case 'U':
+                $this->fontStyle['underline']='single';
                 break;
-            case 'b':
+            case 'B':
+                $this->fontStyle['bold']=true;
                 break;
-            case 'br':
+            case 'BR':
                 break;
             default:
                 /* UNAVAILABLE TAG */
                 break;
         }
+    }
+    private function setUpCloseTag($tag=''){
+        echo __METHOD__."\r\n".$tag."\r\n";
+        switch($tag){
+            case 'P':
+                break;
+            case 'SPAN':
+                break;
+            case 'UL':
+                break;
+            case 'I':
+                break;
+            case 'U':
+                //$this->fontStyle['underline']='single';
+                UNSET($this->fontStyle['underline']);
+                break;
+            case 'B':
+                $this->fontStyle['bold']=false;
+                break;
+            case 'BR':
+                break;
+            default:
+                /* UNAVAILABLE TAG */
+                break;
+        }
+    }
+    private function setUpOpenCloseTag($tag=''){
+        echo __METHOD__."\r\n".$tag."\r\n";
     }
     private function setUpAttribute($attr=array()){
         

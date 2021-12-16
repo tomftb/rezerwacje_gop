@@ -60,21 +60,23 @@ class testCreateDoc {
         echo __METHOD__."\r\n";
         //print_r($element);
         
-        $element['type']==='text' ? self::writeText($element['value']) : self::setTextAttribute($element['value'],$element['attribute']); 
+        $element['type']==='text' ? self::writeText($element['value']) : self::setTextAttribute($element); 
     }
     private function writeText($text=''){
         echo __METHOD__."\r\n".$text."\r\n";
         //$this->mainSection->addText($text,$this->fontStyle,$this->paragraphStyle);
         $this->textRun->addText($text,$this->fontStyle,$this->paragraphStyle);
     }
-    private function setTextAttribute($tag='',$attribute=array()){
+    private function setTextAttribute($element=array()){
         /*
          * tag = HTML otag/ctag => otag => open tag, ctag => close tag
          * attrbiute = HTML tag attribute
          */
        
-        self::setUpTag($tag);
-        self::setUpAttribute();
+        print_r();
+        //self::setUpTag($tag);
+        
+        //self::setUpAttribute();
     }
     private function setUpTag($tag=''){
         echo __METHOD__."\r\n".$tag."\r\n";

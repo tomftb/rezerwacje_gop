@@ -24,17 +24,10 @@ final class convertHtmlToArray{
 	public function getHtmlArray(){
             /* COUNT P */
             self::parseData();
-            self::checkTagStack();
-            if($this->err){
-                return [];
-            }
-            else{
-                self::log("FINALLY TEXT:","[".__METHOD__."]");
-                //self::logA($this->htmlArray,"[".__METHOD__."]");
-                self::logA($this->elementStack,"[".__METHOD__."]");
-                //return $this->htmlArray;
-                return $this->elementStack;
-            }
+            if($this->err){ return []; }
+            self::log("FINALLY TEXT:","[".__METHOD__."]");
+            self::logA($this->elementStack,"[".__METHOD__."]");
+            return $this->elementStack;
 	}
 	private function parseData(){
      
@@ -100,8 +93,7 @@ final class convertHtmlToArray{
                             //if()
                     }
                     if($value['type']==='ctag'){
-                        echo "FIND CLOSE TAG\r\n";
-                        self::log("CLOSE TAG:\r\n".$value['value'],'');
+                        self::log("FIND CLOSE TAG:\r\n".$value['value'],'');
                         /* CHANGE TO FIX WRoNG NEST ORDER OF HTML TAG, CHANGE PUSH TO OVERWRITE */
                         //array_push($closeStack,array('tag'=>$value['value'],'order'=>$key));
                         $closeStack=array('tag'=>$value['value'],'order'=>$key);
@@ -110,15 +102,15 @@ final class convertHtmlToArray{
                     $lOpen=end($openStack);
                     /* CHANGE TO FIX WRoNG NEST ORDER OF HTML TAG, CHANGE PUSH TO OVERWRITE */
                     //$lClose=end($closeStack);
-                    echo "ACT OPEN: ".$lOpen['tag']."\r\n";
-                    echo "ACT CLOSE: ".$closeStack['tag']."\r\n";
-                    //echo "CLOSE: ".$lClose['tag']."\r\n";
+                    self::log("ACT OPEN TAG:\r\n".$lOpen['tag'],'');
+                    self::log("ACT CLOSE TAG:\r\n".$closeStack['tag'],'');
+                   
                     if($lOpen['tag']===$closeStack['tag']){
                     //if($lOpen['tag']===$lClose['tag']){
-                        echo "ACT TAG ".$lOpen['tag']." EQUAL\r\n";
+                        self::log("ACT TAG ".$lOpen['tag']." EQUAL",'');
+                      
                         if($lOpen['order']>$closeStack['order']){
                         //if($lOpen['order']>$lClose['order']){
-                            echo "WRONG TAG ORDER\r\n";
                             //self::log("WRONG HTML TAG ".$lOpen['tag']." ORDER OPEN ".$lOpen['order']." > CLOSE ".$lClose['order'],'');
                             //self::setError("WRONG HTML TAG ".$lOpen['tag']." ORDER OPEN = ".$lOpen['order']." > CLOSE = ".$lClose['order']);
                             self::log("WRONG HTML TAG ".$lOpen['tag']." ORDER OPEN ".$lOpen['order']." > CLOSE ".$closeStack['order'],'');
@@ -126,15 +118,15 @@ final class convertHtmlToArray{
                             return false;
                         }
                         else{
-                             echo "REMOVE\r\n";
+                            self::log("TAG ".$lOpen['tag']." REMOVE",'');
                              /* REMOVE */
                             array_pop($openStack);
-                                    /* CHANGE TO FIX WRoNG NEST ORDER OF HTML TAG, CHANGE PUSH TO OVERWRITE */
+                            /* CHANGE TO FIX WRoNG NEST ORDER OF HTML TAG, CHANGE PUSH TO OVERWRITE */
                             //array_pop($closeStack);
+                            /* SET DEFAULT */
                             $closeStack['tag']='';
                             $closeStack['order']=0;
-                        }
-                        
+                        }  
                     }
                     if($value['type']==='octag'){
                         self::log("OPEN CLOSE TAG => OMIT:\r\n".$value['value'],'');
@@ -145,10 +137,10 @@ final class convertHtmlToArray{
             $cOpen=count($openStack);
             /* CHANGE TO FIX WRoNG NEST ORDER OF HTML TAG, CHANGE PUSH TO OVERWRITE */
             //$cClose=count($closeStack);
-            echo "OPEN STACK\r\n";
-            print_r($openStack);
-            echo "CLOSE STACK\r\n";
-            print_r($closeStack);
+            //echo "OPEN STACK\r\n";
+            //print_r($openStack);
+            //echo "CLOSE STACK\r\n";
+            //print_r($closeStack);
            
             //if($cOpen===0 && $closeStack['tag']===''){
             if($cOpen===0 && $cClose===0){

@@ -4,6 +4,7 @@
 final class convertHtmlToArray{
 	private $logData='';
         private $elementStack=array();
+        private $html='';
         //private $unavailableTags=['script'];
 	
 	public function __construct(){}
@@ -17,19 +18,14 @@ final class convertHtmlToArray{
             $this->logData='';
             /* clear htmlArrray() */
             $this->htmlArray=[];
-            /* clear open/closetagStack */
-            $this->openTagStack=[];
-            $this->closeTagStack=[];
 	}
 	public function getHtmlArray(){
-            /* COUNT P */
-            self::parseData();
-            if($this->err){ return []; }
+            //if($this->err){ return []; }
             self::log("FINALLY TEXT:","[".__METHOD__."]");
             self::logA($this->elementStack,"[".__METHOD__."]");
             return $this->elementStack;
 	}
-	private function parseData(){
+	public function createHtmlArray(){
      
             $part='';
             $openTagChar=false;
@@ -374,8 +370,6 @@ final class convertHtmlToArray{
 	public function getError(){
 		if($this->err){
 			self::log('ERROR EXIST: '.$this->err,"[".__METHOD__."]");
-			self::logA($this->openTagStack);
-			self::logA($this->closeTagStack);
 		}
 		else{
 			self::log('NO ERROR',"[".__METHOD__."]");
@@ -419,6 +413,7 @@ $testTekst='<<ul  style=" list-style-type: decimal;"><li>asdasda</li></ul>sdfdsf
 
 $convert=new convertHtmlToArray();
 $convert->addHtml($testTekst);
-$convert->getHtmlArray();
+$convert->createHtmlArray();
 echo $convert->getError();
-printf("LOG:\n%s",$convert->getLog());
+$convert->getHtmlArray();
+//printf("LOG:\n%s",$convert->getLog());

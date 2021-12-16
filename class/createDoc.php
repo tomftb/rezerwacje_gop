@@ -49,11 +49,8 @@ class createDoc {
         $objWriter->save($this->docDir.$this->fileName);
     }
     public function createProjectReport(){
-        $this->Log->log(0,"[".__METHOD__."]");
-        
-         
-           /* Note: any element you append to a document must reside inside of a Section. */
-
+        $this->Log->log(0,"[".__METHOD__."]"); 
+        /* Note: any element you append to a document must reside inside of a Section. */
         // Adding an empty Section to the document...
         $this->Log->log(0,"[".__METHOD__."] BEFORE SECTION");
         $section = $this->phpWord->addSection();

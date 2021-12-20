@@ -322,6 +322,9 @@ class testCreateDoc {
 
 
 //$testTekst='<<ul  style=" list-style-type: decimal;"><li>asdasda</li></ul>sdfdsfdsf<p></p>...';
-$testTekst='<p style="font-size:24;font-family:Lato;"> SIZE 24 <p style="font-size:18">SIZE 18 <p style="font-size:16">SIZE 16 </p><b style="font-size:14;FONT-FAMILY:Tahoma;">BOLD TEXT - asdasda</b><b style="font-size:13;FONT-FAMILY:Tahoma;">BOLD TEXT 2 - asdasda</b><b style="font-size:16;FONT-FAMILY:Tahoma;">BOLD TEXT 3 - asdasda</b><u style="color:#ff0000;"> UNDERLINE TEXT - sdfdsfdsf</u><i>1 italic text 4</i><p> Normal text </p> SIZE 18 </p> SIEZE 24 </p>';
+//$testTekst='<p style="font-size:24;font-family:Lato;"> SIZE 24 <p style="font-size:18">SIZE 18 <p style="font-size:16">SIZE 16 </p><b style="font-size:14;FONT-FAMILY:Tahoma;">BOLD TEXT - asdasda</b><b style="font-size:13;FONT-FAMILY:Tahoma;">BOLD TEXT 2 - asdasda</b><b style="font-size:16;FONT-FAMILY:Tahoma;">BOLD TEXT 3 - asdasda</b><u style="color:#ff0000;"> UNDERLINE TEXT - sdfdsfdsf</u><i>1 italic text 4</i><p> Normal text </p> SIZE 18 </p> SIEZE 24 </p>';
+
+$testTekst='<p style="font-size:44;font-family:Lato;"> 44 <p style="font-size:24"> 24 <p style="font-size:16"> 16 </p><b style="font-size:14;FONT-FAMILY:Tahoma;"> BOLD 14 </b><b style="font-size:13;FONT-FAMILY:Tahoma;"> BOLD 13 </b><b style="font-size:16;FONT-FAMILY:Tahoma;"> BOLD 16 </b><u style="color:#ff0000;"> UNDERLINE 24</u><i> italic 24 </i><p> P 24 </p> 24 </p> 44 </p>';
+
 $test=NEW testCreateDoc();
 $test->createProjectReport($testTekst);

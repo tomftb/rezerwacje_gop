@@ -55,7 +55,8 @@ class PageManager
                                 New Parametry();
                             break;
                         case 11:
-                                New Etapy();
+                                //New Etapy();
+                                New ProjectItems();
                             break;
 	endswitch;
     }

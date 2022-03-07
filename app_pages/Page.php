@@ -72,13 +72,14 @@ abstract class Page{
         echo "<title>".APP_TITLE."</title>";
         $this->loadCss($this->mainCss);
         $this->loadCss($this->css);
+        self::loadVariable();
         $this->loadJs($this->mainJs);
         $this->loadJs($this->js);
         echo '</head>';
     }
     private function loadBody(){
         $this->Log->log(0,__METHOD__);
-        echo "<body>";//style=\"padding-right:17px;padding-left:17px;\">
+        echo "<body id\"pageBody\">";//style=\"padding-right:17px;padding-left:17px;\">
         self::loadView($this->mainView);
         self::loadView($this->view);
         echo "</body>";
@@ -108,6 +109,20 @@ abstract class Page{
     }
     public function setBody(){
         
+    }
+    private function loadVariable(){
+        echo '<script>'
+            .'window.appUrl ="'.APP_URL.'";'
+            .'window.perm ='.self::getPerm().';'
+            .'</script>';
+    }
+    private function getPerm(){
+        if(array_key_exists('perm', $_SESSION)){
+            return json_encode($_SESSION['perm']);
+        }
+        else{
+            return json_encode([]);
+        }
     }
     public function __destruct(){}
 }

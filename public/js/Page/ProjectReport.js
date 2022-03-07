@@ -161,7 +161,12 @@ class ProjectReport
         rowDiv.setAttribute('id','allProjectReportData');
     var rowDivResult=document.createElement('div');/* ALL */
         rowDivResult.setAttribute('class','row d-none');
+        rowDivResult.setAttribute('style','border:1px solid #b3b3b3; width:800px;margin-left:150px;margin-bottom:10px;');
         rowDivResult.setAttribute('id','previewProjectReportData');
+    //var rowDivResultInside=document.createElement('div');/* ALL */
+    //    rowDivResultInside.setAttribute('class','row d-none');
+    //    rowDivResultInside.setAttribute('style','width:400px;');
+    //    rowDivResultInside.setAttribute('id','previewProjectReportData');   
     var optionDiv=document.createElement('div');
         optionDiv.setAttribute('class','col-md-6');
         optionDiv.setAttribute('id','staticData');
@@ -191,6 +196,7 @@ class ProjectReport
         
         rowDiv.appendChild(optionDiv);
         rowDiv.appendChild(dataDiv); 
+        //rowDivResult.appendChild(rowDivResultInside);
         ProjectReport.link.adaptedDynamicData.appendChild(rowDiv);
         ProjectReport.link.adaptedDynamicData.appendChild(rowDivResult);
         ProjectReport.link.allProjectReportData=ProjectReport.link.adaptedDynamicData.childNodes[0];

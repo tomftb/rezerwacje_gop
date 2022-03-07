@@ -79,7 +79,7 @@ final class UrlManager{
         ['getProjectStageDelSlo','DEL_STAGE'],
         ['getProjectStageHideSlo','DEL_STAGE'],
         ['psDetails','SHOW_STAGE','user'],
-        ['getNewStageSlo','ADD_STAGE'],
+        ['getNewStageDefaults','ADD_STAGE'],
         ['setProjectStageWskB','EDIT_STAGE'],
         ['setProjectReportImage','GEN_PROJECT_REPORT'],
         ['setProjectReportDoc','GEN_PROJ_REP_DOC'],
@@ -97,7 +97,17 @@ final class UrlManager{
         ['getModulRoleDefaults','LOG_INTO_ROLE'],
         ['getModulEmployeesDefaults','LOG_INTO_EMPL'],
         ['getModulParametersDefaults','LOG_INTO_PARM'],
-        ['getModulStageDefaults','LOG_INTO_STAGE']
+        ['getModulStageDefaults','LOG_INTO_STAGE'],
+        ['getProjectConstList','LOG_INTO_STAGE'],
+        ['confirmProjectConst','LOG_INTO_STAGE'],
+        ['getprojectsconstslike','LOG_INTO_STAGE'],
+        ['getProjectConstHideSlo','LOG_INTO_STAGE'],
+        ['getProjectConstDelSlo','LOG_INTO_STAGE'],
+        ['pcDetails','LOG_INTO_STAGE'],
+        ['pcHide','LOG_INTO_STAGE'],
+        ['pcDelete','LOG_INTO_STAGE'],
+        ['getProjectConstDetails','LOG_INTO_STAGE'],
+        ['confirmProjectStageText','LOG_INTO_STAGE']
     ];
         
     public function __construct(){

@@ -225,7 +225,7 @@ class Table
             try {
                 clearAdaptedModalData();
                 /* FROM EXTERNAL AJAX CLASS */
-                 Table.errorLink.set([Table.errorDivId]);
+                Table.errorLink.set([Table.errorDivId]);
                 Table.ajaxLink.getData(this.name+'&id='+this.parentNode.id);
             }
             catch (error) {

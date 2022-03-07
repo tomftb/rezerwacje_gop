@@ -18,6 +18,8 @@ final class convertHtmlToArray{
             $this->logData='';
             /* clear htmlArrray() */
             $this->htmlArray=[];
+            /* clear HTML ARRAY STACk */
+            self::clearElementStack();
 	}
 	public function getHtmlArray(){
             //if($this->err){ return []; }
@@ -25,31 +27,33 @@ final class convertHtmlToArray{
             self::logA($this->elementStack,"[".__METHOD__."]");
             return $this->elementStack;
 	}
+        public function clearElementStack(){
+            $this->elementStack=array();
+        }
 	public function createHtmlArray(){
      
-            $part='';
-            $openTagChar=false;
-            $closeTagChar=false;
-            $currentChar='';
-            $element='';
-            self::log("ORIGINAL TEXT: \n".$this->html,"[".__METHOD__."]");
+        $part='';
+        $openTagChar=false;
+        $closeTagChar=false;
+        $currentChar='';
+        $element='';
+        self::log("ORIGINAL TEXT: \n".$this->html,"[".__METHOD__."]");
 		//self::clearWhiteCharacters();
 		//self::swapHtmlTags();
  		
 		for($i=0;$i<mb_strlen($this->html,'UTF-8');$i++){
 			$part=mb_substr($this->html,$i,mb_strlen($this->html,'UTF-8')-$i,'UTF-8');
-                        $currentChar=mb_substr($part,0,1,'UTF-8');
-                        //self::log("[${tagCount}]PART: ".$part,"[".__METHOD__."]");
-                        //self::log("[${tagCount}]CHAR: ".$currentChar,"[".__METHOD__."]");
+            $currentChar=mb_substr($part,0,1,'UTF-8');
+            //self::log("[${tagCount}]PART: ".$part,"[".__METHOD__."]");
+            //self::log("[${tagCount}]CHAR: ".$currentChar,"[".__METHOD__."]");
 			self::checkOpenChar($currentChar,$openTagChar,$element);
-                        self::checkCloseChar($currentChar,$closeTagChar);
-                        self::setupElement($openTagChar,$closeTagChar,$element,$currentChar);
-                       
+            self::checkCloseChar($currentChar,$closeTagChar);
+            self::setupElement($openTagChar,$closeTagChar,$element,$currentChar);   
 		}
-                /* CHECK IS NOTHING LEFT, IF LEFT ADD AS ELEMENT */
-                self::addElementToStack($element);
-                /* CHECK FOR PROPER HTML OPEN - CLOSE */
-                self::checkOpenCloseTag();    
+        /* CHECK IS NOTHING LEFT, IF LEFT ADD AS ELEMENT */
+        self::addElementToStack($element);
+        /* CHECK FOR PROPER HTML OPEN - CLOSE */
+        self::checkOpenCloseTag();    
 	}
         private function checkOpenCloseTag(){
             self::log("","[".__METHOD__."]");
@@ -66,14 +70,14 @@ final class convertHtmlToArray{
             //self::log("FINALLY ELEMENTS STACK","[".__METHOD__."]");
                 //print_r($this->elementStack);
                 foreach($this->elementStack as $key => $value){
-                    self::log("[".$key."]:\r\nTYPE:".$value['type']."\r\nVALUE:".$value['value'],'');
+                    self::log("[".$key."]:\r\nTYPE:".$value['type']."\r\nTAG:".$value['tag'],'');
                     
-                    if(array_key_exists('attribute', $value)){
-                        if(count($value['attribute'])>0){
+                    if(array_key_exists('style', $value)){
+                        if(count($value['style'])>0){
                             self::log("ATTRIBUTE:",''); 
-                            foreach($value['attribute'] as $atr){
+                            foreach($value['style'] as $atr){
                                 //self::log("PROPERTY:".$atr['property'],'');     
-                                //self::log("VALUE:".$atr['value'],'');
+                                //self::log("VALUE:".$atr['tag'],'');
                             } 
                         }
                         else{
@@ -84,15 +88,15 @@ final class convertHtmlToArray{
                         //self::log("NO ATTRIBUTE PROPERTY",''); 
                     }
                     if($value['type']==='otag'){
-                        self::log("OPEN TAG:\r\n".$value['value'],'');
-                        array_push($openStack,array('tag'=>$value['value'],'order'=>$key));
+                        self::log("OPEN TAG:\r\n".$value['tag'],'');
+                        array_push($openStack,array('tag'=>$value['tag'],'order'=>$key));
                             //if()
                     }
                     if($value['type']==='ctag'){
-                        self::log("FIND CLOSE TAG:\r\n".$value['value'],'');
+                        self::log("FIND CLOSE TAG:\r\n".$value['tag'],'');
                         /* CHANGE TO FIX WRoNG NEST ORDER OF HTML TAG, CHANGE PUSH TO OVERWRITE */
-                        //array_push($closeStack,array('tag'=>$value['value'],'order'=>$key));
-                        $closeStack=array('tag'=>$value['value'],'order'=>$key);
+                        //array_push($closeStack,array('tag'=>$value['tag'],'order'=>$key));
+                        $closeStack=array('tag'=>$value['tag'],'order'=>$key);
                     }
                     /* CHECK IF THE SAME, IF IS => POP LAST ELEMENT FROM BOTH ARRAY'S */
                     $lOpen=end($openStack);
@@ -125,7 +129,7 @@ final class convertHtmlToArray{
                         }  
                     }
                     if($value['type']==='octag'){
-                        self::log("OPEN CLOSE TAG => OMIT:\r\n".$value['value'],'');
+                        self::log("OPEN CLOSE TAG => OMIT:\r\n".$value['tag'],'');
                             //if()
                     }
                 }
@@ -194,7 +198,7 @@ final class convertHtmlToArray{
         }
         private function addElementToStack(&$element=''){
             if($element!==''){
-                array_push($this->elementStack,array("type"=>'text','value'=>$element));
+                array_push($this->elementStack,array("type"=>'text','tag'=>$element));
                 $element='';
             } 
         }
@@ -219,7 +223,7 @@ final class convertHtmlToArray{
                 $element.=$char;
                 $type='otag';
                 $attribute=self::parseTag($element,$type);
-                array_push($this->elementStack,array('type'=>$type,'value'=>$element,'attribute'=>$attribute));
+                array_push($this->elementStack,array('type'=>$type,'tag'=>$element,'style'=>$attribute));
                 self::log("COMPLETE TAG WITH ATTRIBUTE:\r\n".$element,"[".__METHOD__."]");
                 $element='';
                 $openTagChar=false;
@@ -251,6 +255,14 @@ final class convertHtmlToArray{
                 $type='ctag';
                 return array();
             }
+	
+			/* CHECK IS OPEN CLOSE TAG */
+			if(mb_substr($element,-1)==='/'){
+				self::log("FOUND OPEN CLOSE TAG","[".__METHOD__."]");
+				$type='octag';
+				$element=mb_substr($element,0,mb_strlen($element)-1);
+			}
+           
             $element=self::getTagName($element,$attribute);
             return self::getTagAttribute(mb_strtoupper($attribute));
         }
@@ -359,7 +371,7 @@ final class convertHtmlToArray{
                     self::log("FOUND COMPLETE STYLE PROPERTY => ADD TO LIST","[".__METHOD__."]");
                     self::log("PROPERTY:\r\n".$tmp_2[0],'');
                     self::log("VALUE:\r\n".$tmp_2[1],'');
-                    array_push($list,array('property'=>$tmp_2[0],'value'=>$tmp_2[1]));
+                    array_push($list,array('property'=>$tmp_2[0],'tag'=>$tmp_2[1]));
                 }
                 else
                 {
@@ -384,6 +396,7 @@ final class convertHtmlToArray{
             return $this->logData;
 	}
 	private function log($d='',$m=''){
+            //echo $d."\r\n";
             return $this->logData.=$m.$d."\n";
 	}
 	private function logA($d='',$m='',$lvl=0){
@@ -409,11 +422,11 @@ final class convertHtmlToArray{
 /* USAGE */
 /**/
 //$testTekst='11< br / ><p style="font-weight: bold; color:red;font-size:12px">1<strong style="font-weight:bold;color:red;font-size:12px">2</strong>3< b >adam< span   > tomek</span>4<strong>5</strong>6<u>7</u>8</b>9</p>10';
-$testTekst='<<ul  style=" list-style-type: decimal;"><li>asdasda</li></ul>sdfdsfdsf<p></p>...';
+//$testTekst='<<ul  style=" list-style-type: decimal;"><li>asdasda</li></ul>sdfdsfdsf<p></p>...';
 
-$convert=new convertHtmlToArray();
-$convert->addHtml($testTekst);
-$convert->createHtmlArray();
-echo $convert->getError();
-$convert->getHtmlArray();
+//$convert=new convertHtmlToArray();
+//$convert->addHtml($testTekst);
+//$convert->createHtmlArray();
+//echo $convert->getError();
+//$convert->getHtmlArray();
 //printf("LOG:\n%s",$convert->getLog());

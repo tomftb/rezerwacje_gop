@@ -154,12 +154,13 @@ class ManageEmployee
                 ':imie'=>[$this->inpArray['Imie'],'STR'],
                 ':nazwisko'=>[$this->inpArray['Nazwisko'],'STR'],
                 ':stanowisko'=>[$this->inpArray['Stanowisko'],'STR'],
+				':email'=>[$this->inpArray['Email'],'STR'],
                 ':mod_user'=>[$_SESSION["username"],'STR'],
                 ':mod_user_id'=>[$_SESSION["userid"],'STR']
             ];
-            $this->dbLink->query('INSERT INTO `pracownik` (imie,nazwisko,stanowisko,mod_user,mod_user_id) 
+            $this->dbLink->query('INSERT INTO `pracownik` (imie,nazwisko,stanowisko,email,mod_user,mod_user_id) 
 		VALUES
-		(:imie,:nazwisko,:stanowisko,:mod_user,:mod_user_id)'
+		(:imie,:nazwisko,:stanowisko,:email,:mod_user,:mod_user_id)'
             ,$sql);
             self::setEmployeeSpec($this->dbLink->lastInsertId()); 
             $this->dbLink->commit();  

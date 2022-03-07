@@ -58,20 +58,22 @@ class Database extends PDO{
         }
     }
     public function squery($sth,$param=[],$result='FETCH_ASSOC'){ 
-        $task=strtoupper(substr(trim($sth),0,6));
-	$result=strtoupper(trim($result));
+        /*
+         * PARAMETER MUST BY INSERTED WITHOUT CHAR => ' " IN STATEMATE TO PROPER BIND VALUE
+         */
         self::checkParamIsArray($param);
         try{
             self::$dbLink->sth = self::$dbLink->prepare($sth);
+            array_walk($param,array($this,'pdoBindParam')); 
             array_walk($param,array($this,'pdoBindValue')); 
             self::$dbLink->sth->execute();
         }
         catch (PDOException $e){
-			throw New Exception(__METHOD__.$e,1);
-		}
-        return(self::$dbLink->sth->fetchAll(self::parseResultType($result)));  
+            throw New Exception(__METHOD__.$e,1);
+	}
+        return(self::$dbLink->sth->fetchAll(self::parseResultType(strtoupper(trim($result)))));  
     }
-	private function parseResultType($t){
+    private function parseResultType($t){
 		if(array_key_exists($t,$this->pdoFetchAll)){
 			return $this->pdoFetchAll[$t];
 		}
@@ -79,6 +81,17 @@ class Database extends PDO{
 		return $this->pdoFetchAll['FETCH_ASSOC'];	
     }
     public function query($sql,$param=[]){
+        try{
+            self::$dbLink->sth = self::$dbLink->prepare($sql);
+            self::checkParamIsArray($param);
+            array_walk($param,array($this,'pdoBindValue')); 
+            self::$dbLink->sth->execute();
+        }
+        catch (PDOException $e){
+            throw New Exception(__METHOD__.$e."\r\n".$sql,1);
+	}
+    }
+    public function query2($sql,$param=[]){
         self::$dbLink->sth = self::$dbLink->prepare($sql);
         self::checkParamIsArray($param);
         array_walk($param,array($this,'pdoBindValue')); 
@@ -86,13 +99,23 @@ class Database extends PDO{
     }
     private function pdoBindValue($param,$key){
         /* 
-			EXAMPLE:
-			$sqlParm[':id']=['id','INT'];
+            EXAMPLE:
+            $sqlParm[':id']=['id','INT'];
         */
-		if(!array_key_exists($param[1],$this->pdoParam)){
-			throw New Exception(__METHOD__."WRONG PDO PARAMETER => ".$param[1],1);
-		}
-        self::$dbLink->sth->bindValue($key,$param[0],$this->pdoParam[$param[1]]);
+	if(!array_key_exists($param[1],$this->pdoParam)){
+            throw New Exception(__METHOD__."WRONG PDO VALUE => ".$param[1],1);
+	}
+       if(!self::$dbLink->sth->bindValue($key,$param[0],$this->pdoParam[$param[1]])){
+             throw New Exception(__METHOD__."WRONG PDO BIND VALUE => ".$param[1],1);
+       }
+    }
+    private function pdoBindParam($param,$key){
+        if(!array_key_exists($param[1],$this->pdoParam)){
+            throw New Exception(__METHOD__."WRONG PDO PARAMETER => ".$param[1],1);
+	}
+        if(!self::$dbLink->sth->bindParam($key,$param[0],$this->pdoParam[$param[1]])){
+            throw New Exception(__METHOD__."WRONG PDO BIND PDO PARAMETER => ".$param[1],1);
+        }
     }
     private function checkParamIsArray($param=[]){
         if(!is_array($param)){

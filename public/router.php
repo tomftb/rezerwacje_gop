@@ -24,7 +24,8 @@ final class Router
             $ModulManager->loadMethod($UrlManager->getUrlTask());
         }
         catch(Throwable $t){
-            $this->Log->log(0,$t->getMessage()."\r\nFILE:".$t->getFile()."\r\nLINE:".$t->getLine());
+            //$this->Log->log(0,$t->getMessage()."\r\nFILE:".$t->getFile()."\r\nLINE:".$t->getLine());
+            $this->Log->log(0,"ERROR IN:\r\nFILE:".$t->getFile()."\r\nLINE:".$t->getLine());
             $this->Error->setError($t->getMessage(),$t->getCode());
         }
         finally {

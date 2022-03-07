@@ -6,16 +6,20 @@ class createDoc {
     private $mainSection;
     private $files=[];
     private $Log;
+    private $ActFontStyle=array();
+    private $paragraphStyle=array();
+    private $styleStack=array();
+    private $textRun;
     /*
-    private $css=[
-        'name'=>'Arial',// Arial
-        'size'=>'10',//10
-        'color'=>'#000000',//#000000
-        'bold'=>false,
-        'italic'=>false
-    ];
-     *
+     * VARIABLE DETERMINATES ADD NEW SECTION FOR EACH ELEMENT LINK TITIE, TEXTAREA...
+     * false - the same section
+     * true - new section
      */
+    private $newSection=true;
+    /*
+     * VARAIBLE DETERMINATES NEW PAGE
+     */
+    private $newPage=false;
     private $FontStyle=[];
     private $ParagraphStyle=[];
     private $docDir='';
@@ -24,23 +28,35 @@ class createDoc {
         $this->Log=Logger::init();
         $this->Log->log(0,"[".__METHOD__."] FILENAME => ".$fileName);
         $this->Log->log(0,"[".__METHOD__."] EXTENSION => ".$ext);
+        /*
+         * SETUP DOCUMENT DATA
+         */
         $this->projectData=$projectDetails;
         $this->fileName=$fileName."_".uniqid().$ext;
         $this->files=$files;
         $this->docDir=$dir;
+        /*
+         *  Creating the new document...
+         */
         require_once APP_ROOT.'/bootstrap.php';
-        // Creating the new document...
         $settings=new \PhpOffice\PhpWord\Settings();
         $settings::setOutputEscapingEnabled(true);
         $this->phpWord = new \PhpOffice\PhpWord\PhpWord();
     }
+
     private function throwError($d='',$l=0){
         Throw New Exception ($d,$l);
     }
     public function createProjectStageReport(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->mainSection = $this->phpWord->addSection();
+        /*
+         * RUN CREATE DOCUMENT
+         */
         empty($this->projectData) ? self::throwError("NO STAGE DATA SELECTED",0) :  self::setUpData(); 
+        /*
+         * CREATE DOC WRITER
+         */
         $this->Log->log(0,"[".__METHOD__.'] LOAD => \PhpOffice\PhpWord\IOFactory::createWriter()');
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
         /* check is file exist */
@@ -334,50 +350,303 @@ $row->addCell(1000)->addText('3');
     }
     private function setUpData(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $convert=new convertHtmlToArray();     
+        /*
+         * CREATE CONVERTER OBJECT
+         */
+        $convert=new convertHtmlToArray(); 
+        $this->textRun = $this->mainSection->addTextRun();
         //self::addTitlePage();
+        self::addPageHeader();
+        self::addPageFooter();
         foreach($this->projectData as $k => $v){
             /* EXPLDOE -> p */
-            //$this->Log->log(0,"KEY => ".$k);
+            $this->Log->log(0,"KEY => ".$k);
+            $this->Log->log(0,"VALUE:\r\n".$v);
+            /**/
             if(preg_match("/^\d\d*-t$/",$k)){
-                $this->Log->log(0,"FOUND TITLE ".$k);
+                $this->Log->log(0,"FOUND TITLE FIELD:\r\nKEY => ".$k."\r\nVALUE:\r\n".$v);
                 self::writeData($convert,$v,$k);   
             }
-            
-            
-            
             if(preg_match("/^\d\d*-\d\d*-value$/",$k)){
-                $this->Log->log(0,"FOUND TEXTAREA\r\nKEY => $k\r\nVALUE:\r\n$v");
+                $this->Log->log(0,"FOUND TEXTAREA FIELD:\r\nKEY => $k\r\nVALUE:\r\n$v");
                 self::writeData($convert,$v,$k);   
             }
+            
+            /* CLEAR TEXT RUN */
+            //$this->textRun=false;
+            //$this->mainSection = $this->phpWord->addSection(array('breakType' => 'continuous'));
         }
-        die( $this->Log->log(0,"DIE at ".__LINE__));
+        //die( $this->Log->log(0,"DIE at ".__LINE__));
     }
     private function writeData($convert,$v,$id){
-        $this->Log->log(0,"[".__METHOD__."]");
+        $this->Log->log(0,"[".__METHOD__."][".$id."]VALUE:\r\n".$v);
         $convert->addHtml($v);
-        $data=$convert->getHtmlArray();
-        $this->Log->log(0,"HTML ARRAY:");
-        $this->Log->logMulti(0,$data);
-        $this->Log->log(0,$convert->getLog());
-        
+        /*
+         * GET DATA FROM CONVERTER
+         */
+        $convert->createHtmlArray();
+        //$data=$convert->getHtmlArray();
+        //$this->Log->log(0,"HTML ARRAY:");
+        //$this->Log->logMulti(0,$data);
+        //$this->Log->log(0,$convert->getLog());
+        //$this->Log->log(0,"DIE:".__LINE__);
+       
         if($convert->getError()){
-            
             Throw New Exception("CONVERT ERROR: ".$convert->getError(),0);
         }
         else{
+            
            
-            foreach($data as $k => $v){
-                /* KEY v[0] VALUE ARRAY */
-                /* KEY v[1] STYLE */
+            $this->Log->logMulti(0,$convert->getHtmlArray());
+            
+            //self::writeElementReport($convert->getHtmlArray());
+            //die(__METHOD__.__LINE__); 
+            array_map(array($this, 'writeElementReport'), $convert->getHtmlArray());
+            /* 
+             * WILL GIVE US BREAK LINE
+             * IF method run in this position
+             * 
+             *  $this->textRun = $this->mainSection->addTextRun();
+             * 
+             */
+            self::setUpNewSection();
+            /*
+             * TURN OF
+               foreach($data as $k => $v){
+                 KEY v[0] VALUE ARRAY
+                 KEY v[1] STYLE
                 self::writeDataToFile($v[0],$v[1],$id);
-                //parent::logMwriteTekstulti(0, $v);       
-            }
+                parent::logMwriteTekstulti(0, $v);       
+                }
+             */
+           
         }
-        
+        //die(__METHOD__.__LINE__);
     }
-
-        
+    private function setUpNewSection(){
+        if($this->newSection){
+            $this->textRun = $this->mainSection->addTextRun();
+        }
+    }
+    private function writeElementReport($element=array()){
+        $this->Log->log(0,__METHOD__);
+        //if(!is_array($element)){
+        //    self::throwError(__METHOD__.'WRONG ELEMENT => NOT ARRAY',0);
+        //}
+        $element['type']==='text' ? self::writeText($element['tag']) : self::checkTag($element); 
+    }
+    private function writeText($text=''){
+        $this->Log->log(0,__METHOD__."\r\n ".$text."\r\nCURRENT STYLE:");
+        $this->Log->logMulti(2,$this->ActFontStyle);
+        $this->textRun->addText($text,$this->ActFontStyle,$this->paragraphStyle);
+    }
+    private function checkTag($element=array()){
+        $this->Log->log(0,__METHOD__."\r\nTYPE => ".$element['type']."\r\nTAG => ".$element['tag']);
+         /*
+         * tag = HTML otag/ctag => otag => open tag, ctag => close tag
+         * attrbiute = HTML tag attribute
+         */
+        if($element['type']==='otag'){
+            self::setOpenTag($element['tag']);
+            self::setOpenAttribute($element['tag'],$element['style']);
+        }
+        else if($element['type']==='ctag'){
+            self::setCloseTag($element['tag']);
+            self::setCloseAttribute($element['tag']);
+        }
+        else if($element['type']==='octag'){
+            self::setOpenCloseTag($element['tag']);
+        }
+        else{
+            self::throwError("UNAVAILABLE TAG TYPE!",0);	
+        }
+    }
+      private function setOpenTag($tag=''){
+        $this->Log->log(0,__METHOD__." ".$tag);
+        switch($tag){
+            case 'P':
+                break;
+            case 'SPAN':
+                break;
+            case 'UL':
+                break;
+            case 'I':
+                $this->ActFontStyle['italic']=true;
+                break;
+            case 'U':
+                $this->ActFontStyle['underline']='single';
+                break;
+            case 'B':
+                $this->ActFontStyle['bold']=true;
+                break;
+            default:/* UNAVAILABLE TAG */
+                //self::throwError("UNAVAILABLE TAG!",0);	
+                break;
+        }
+    }
+    private function setCloseTag($tag=''){
+        $this->Log->log(0,__METHOD__." ".$tag);
+        switch($tag){
+            case 'P':
+		/* ADD BREAK LINE */
+                $this->Log->log(0,"ADD TEXT BREAK");
+		$this->textRun->addTextBreak();
+                break;
+            case 'SPAN':
+                break;
+            case 'UL':
+                break;
+            case 'I':
+                //UNSET($this->ActFontStyle['underline']);
+                $this->ActFontStyle['italic']=false;
+                break;
+            case 'U':
+                //$this->fontStyle['underline']='single';
+                UNSET($this->ActFontStyle['underline']);
+                break;
+            case 'B':
+                $this->ActFontStyle['bold']=false;
+                break;
+            default: /* UNAVAILABLE TAG */
+                //self::throwError("UNAVAILABLE TAG!",0);	
+                self::throwError("UNAVAILABLE TAG - <b>".$tag."</b>",0);
+                break;
+        }
+    }
+    private function setOpenCloseTag($tag=''){
+        $this->Log->log(0,__METHOD__." ".$tag);
+        switch($tag){
+            case 'BR':
+                $this->Log->log(0,"ADD TEXT BREAK");
+                $this->textRun->addTextBreak();
+                break;
+            default:/* UNAVAILABLE TAG */
+                //self::throwError("UNAVAILABLE TAG!",0);	
+                self::throwError("UNAVAILABLE TAG - <b>".$tag."</b>",0);
+                break;
+        }
+    }
+    private function setOpenAttribute($tag='',$attr=array()){
+        $this->Log->log(0,__METHOD__." ADD TO STACK => ".$tag);
+        array_push($this->styleStack,array('tag'=>$tag,'attr'=>$attr));
+	//echo "CURRENT STACK:\r\n";
+        //print_r($this->styleStack);
+	self::updateActFontStyle($attr);	
+    }
+    private function updateActFontStyle($attr=array()){
+        $this->Log->log(0,__METHOD__);
+		foreach($attr as $a){
+			switch($a['property']){
+				case 'FONT-SIZE':
+					$this->ActFontStyle['size']=$a['tag'];
+					break;
+				case 'COLOR':
+					$this->ActFontStyle['color']=$a['tag'];
+					break;
+				case 'FONT-FAMILY':
+					$this->ActFontStyle['name']=$a['tag'];
+					break;
+				case 'FONT-WEIGHT':
+					/* bold / normal */
+					//$this->ActFontStyle['bold']=true;
+					break;
+				case 'BACKGROUND-COLOR':
+					//$this->ActFontStyle['fgColor']=$a['tag'];
+					break; 
+				case 'TEXT-ALIGN':
+					//$this->ActFontStyle['fgColor']=$a['tag'];
+					break;
+				default:
+					/* UNAVAILABLE TAG */
+                                    self::throwError("UNAVAILABLE STYLE - <b>".$a['property']."</b>",0);
+                                    break;
+			}
+        }
+	}
+    private function setCloseAttribute($tag=''){
+        $this->Log->log(0,__METHOD__." ".$tag);
+	self::checkLastStyleStackElement($tag);
+	self::updateStyleStack(self::findLastOpenTag($tag));
+	/* UPDATE CURRENT FONT STYLE => TAG AND ATTRIBUTE */
+	self::updateCurrentFontStyle();	
+    }
+    private function checkLastStyleStackElement($tag=''){
+		$this->Log->log(0,__METHOD__);
+		//$last='';
+		//print_r(end($this->styleStack));
+		if(count($this->styleStack)===0){
+                    self::throwError("STACK IS EMPTY!",0);	
+		}
+		$last=end($this->styleStack)['tag'];
+		if($last!==$tag){
+                    self::throwError("LAST STACK ELEMENT ".$last." NOT EQUAL CLOSE TAG ".$tag,0);
+		}
+		else{
+                    $this->Log->log(0,"LAST STACK ELEMENT ".$last." EQUAL CURRENT CLOSE TAG ".$tag);
+		}
+	}
+        private function findLastOpenTag($tag=''){
+            $this->Log->log(0,__METHOD__);
+            $key=0;
+            if(count($this->styleStack)===0){
+                self::throwError(__METHOD__." STACK IS EMPTY",0);
+            }
+            /* LOOP FROM END */
+            for($i=count($this->styleStack);$i>0;$i--){
+                /* 
+                * FIND LAST TAG
+                * IF FOUND
+                * GET LAST TAG ATTRIBUTE
+                * OMMIT WRTIE TO NEW ARRAY
+                */
+                $key=$i-1;
+                //echo "[KEY:".$key."]\r\n";
+                //echo "[TAG:".$this->styleStack[$key]['tag']."]\r\n";
+                //echo "[ATTR]\r\n";
+		//print_r($this->styleStack[$key]['attr']);
+		if($this->styleStack[$key]['tag']===$tag){
+                    //echo "FOUND OPEN TAG => RETURN STYLE STACK KEY => ".$key."\r\n";
+                    return $key;
+		}
+            }
+            return -1;
+	}
+        private function updateStyleStack($key=-1){
+		//echo __METHOD__."\r\nKEY TO REMOVE => ".$key."\r\n";
+		$tmpStyleStack=array();
+		if($key===-1){
+			/* KEY NOT FOUND -> THROWN ERROR */
+                        self::throwError(__METHOD__." KEY NOT FOUND",0);
+			
+		}
+		foreach($this->styleStack as $k => $v){
+			//echo "K:".$k."\r\n";
+			//print_r($v['attr']);
+			if($k!==$key){
+				array_push($tmpStyleStack,$v);
+			}
+		}
+		//echo "NEW STYLE STACK:\r\n";
+		//print_r($tmpStyleStack);
+		/* UPDATE CURRENT STYLE STACK */
+		$this->styleStack=$tmpStyleStack;
+		//echo "UPDATED STYLE STACK:\r\n";
+		//print_r($this->styleStack);
+	}
+        private function updateCurrentFontStyle(){
+            $this->Log->log(0,__METHOD__);
+            /* CLEAR */
+            $this->ActFontStyle=array();
+            //$ActFontStyle=array();
+            foreach($this->styleStack as $k => $v){
+		//echo "K:".$k."\r\n";
+		//print_r($v['attr']);
+		self::setOpenTag($v['tag']);
+		self::updateActFontStyle($v['attr']);	
+            }
+            $this->Log->log(0,"CURRENT FONT STYLE:");
+            $this->Log->logMulti(0,$this->ActFontStyle);
+	}
     private function writeDataToFile($v,$tag,$id){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->FontStyle=[];

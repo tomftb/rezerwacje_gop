@@ -1,65 +1,64 @@
 <?php
-class ManageProjectStage 
+class ManageProjectStage extends ManageProjectStageDatabase
 {
-    private $inpArray=array();
     protected $filter='';
     private $stageData=array();
     private $lastStageId=0;
     private $dbLink;
     private $actProjectStageData=array();
     private $brTag='';
-    private $Log;
+    private $Items;
+    
 
     function __construct(){
-        $this->Log=Logger::init(__METHOD__);
-        $this->Log->log(0,"[".__METHOD__."]");
+        parent::__construct();
         $this->utilities=NEW Utilities();
+        $this->Items=NEW ManageProjectItems();
+        /* TO DO -> MOVE dbLink tasks to get data from abstract class database */
         $this->dbLink=LoadDb::load();
+    }
+    function __destruct(){
+        parent::__destruct();
     }
     # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getprojectsstagelike(){ 
+        $this->Log->log(0,"[".__METHOD__."]");
         /*FILTER_SANITIZE_STRING => Remove all HTML tags from a string:*/
         //$f="%".filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING)."%";
         $f=htmlentities(nl2br(filter_input(INPUT_GET,'filter')), ENT_QUOTES,'UTF-8',FALSE);
-        //$f=filter_input(INPUT_GET,'filter');
-        //$f='a';
         $this->Log->log(0,"[".__METHOD__."] filter => ".$f);
         $this->Log->logMulti(0,filter_input_array(INPUT_GET));
-        $select="SELECT s.`id` as 'i',s.`number` as 'n',s.`title` as 't',(select e.`value` FROM `slo_projekt_etap_ele` as e WHERE e.`id_projekt_etap`=s.`id` and `wsk_u`='0' and `wsk_v`='0' ORDER BY e.`id` ASC LIMIT 0,1) as `v`,b.`login` as 'bl' FROM `slo_projekt_etap` s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id`";
         $where='';
-        $query_data=[];
+        $parm=[];
 
         if(is_numeric($f)){
             $this->Log->log(0,"[".__METHOD__."] filter is numeric ");
             $f_int=intval($f,10);
-            $query_data[':id']=array($f_int,'INT');
-            $query_data[':number']=array($f_int,'INT');
+            $parm[':id']=array($f_int,'INT');
+            $parm[':number']=array($f_int,'INT');
             $where="WHERE s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`id` LIKE (:id) OR s.`number` LIKE (:number) OR s.`title` LIKE :title) ORDER BY s.`id` ASC";
         }
         else{
             $this->Log->log(0,"[".__METHOD__."] filter not numeric ");
             $where="WHERE s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`title` LIKE :title) ORDER BY s.`id` ASC";
         }
-        self::setGetWsk('u');
-        self::setGetWsk('v');
-        self::setGetWsk('b');
-        self::releaseWskB($this->inpArray['b']);
-        $query_data[':wsk_u']=array($this->inpArray['u'],'STR');
-        $query_data[':wsk_v']=array($this->inpArray['v'],'STR');
-        $query_data[':title']=array('%'.$f.'%','STR');
+        $this->inpArray['u']=$this->Items->setGetWsk('u');
+        $this->inpArray['b']=$this->Items->setGetWsk('b');
+        $this->inpArray['v']=$this->Items->setGetWsk('v');
+        $this->inpArray['wskb']=$this->Items->unsetBlock($this->inpArray['b'],'SLO_PROJEKT_ETAP','buffer_user_id',$_SESSION['userid']);
+
+        $parm[':wsk_u']=array($this->inpArray['u'],'STR');
+        $parm[':wsk_v']=array($this->inpArray['v'],'STR');
+        $parm[':title']=array('%'.$f.'%','STR');
         
         /* 
          * TO DO => SEARCH IN VALUE (LEFT JOIN)
            $query_data[':value']=array('%'.$f.'%','STR');
          * 
          */
- 
-        $return['data']=array();
-        /* */
-        foreach($this->dbLink->squery($select.$where,$query_data) as $v){
-            array_push($return['data'],array($v['i'],$v['n'],html_entity_decode($v['t']),html_entity_decode($v['v']),'bl'=>$v['bl']));
-        }
-        $this->utilities->jsonResponse($return,'sAll');
+        $return['data']=parent::getStages($where,$parm);
+        $return['headTitle']='Etapy';
+        $this->utilities->jsonResponse($return,'runModal');
     }
     public function getProjectStageHideSlo(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -67,9 +66,9 @@ class ManageProjectStage
         $this->brTag='&lt;br /&gt;';
         $this->utilities->setGet('id',$this->inpArray);
         self::getProjectStageData($this->inpArray['id']);
-        self::checkWskB(intval($this->actProjectStageData['head']['bu'],10),$this->actProjectStageData['head']['bl']);
-        self::setWskB(intval($_SESSION['userid'],10));
-        self::getSlo('psHide');
+        $this->Items->checkBlock($this->actProjectStageData['head']['bu'],$this->actProjectStageData['head']['bl'],$_SESSION['userid']);
+        $this->Items->setBlock($this->inpArray['id'],"SLO_PROJEKT_ETAP","buffer_user_id",$_SESSION['userid']);
+        $this->actProjectStageData['slo']=$this->Items->getSlo('psHide');
         $this->utilities->jsonResponse($this->actProjectStageData,'psHide');  
     }
     public function getProjectStageDelSlo(){
@@ -78,67 +77,12 @@ class ManageProjectStage
         $this->brTag='&lt;br /&gt;';
         $this->utilities->setGet('id',$this->inpArray);
         self::getProjectStageData($this->inpArray['id']);
-        self::checkWskB(intval($this->actProjectStageData['head']['bu'],10),$this->actProjectStageData['head']['bl']);
-        self::setWskB(intval($_SESSION['userid'],10));
-        self::getSlo('psDelete');
+        $this->Items->checkBlock($this->actProjectStageData['head']['bu'],$this->actProjectStageData['head']['bl'],$_SESSION['userid']);
+        $this->Items->setBlock($this->inpArray['id'],"SLO_PROJEKT_ETAP","buffer_user_id",$_SESSION['userid']);
+        $this->actProjectStageData['slo']=$this->Items->getSlo('psDelete');
         $this->utilities->jsonResponse($this->actProjectStageData,'psDelete');  
     }
-    private function setGetWsk($wsk='u'){
-        $this->inpArray[$wsk]=filter_input(INPUT_GET,$wsk);
-        if($this->inpArray[$wsk]===null || $this->inpArray[$wsk]===false){
-            $this->Log->log(0,"[".__METHOD__."] wsk_".$wsk." NOT EXIST, SET DEFAULT 0");
-            $this->inpArray[$wsk]='0';
-        }
-    }
-    private function setPostId(){
-        $this->inpArray=filter_input_array(INPUT_POST);
-        $this->utilities->validateKey(filter_input_array(INPUT_POST),'id',true,1);
-    }
-    private function checkWskB($wskb=0,$blogin=''){
-        $this->Log->log(0,"[".__METHOD__."]");
-        $this->Log->log(0,"[".__METHOD__."] user wskb => ".$wskb);
-        $this->Log->log(0,"[".__METHOD__."] session userid => ".$_SESSION['userid']);
-        if($wskb>0 && $wskb!==intval($_SESSION['userid'],10)){
-            Throw New Exception("[ERROR] Aktualnie etap projektu jest aktualizowany przez - ${blogin}.",0);
-        }
-        /* $_SESSION['id']*/
-    }
-    private function setWskB($userid=0){
-        $this->Log->log(0,"[".__METHOD__."] SET BUFFER USER ID => ".$userid);
-        $query_data=[
-            ':id'=>[$this->inpArray['id'],'INT'],
-            ':buffer_user_id'=>[$userid,'INT'],
-        ];
-        $this->dbLink->setQuery("UPDATE `slo_projekt_etap` SET `buffer_user_id`=:buffer_user_id WHERE `id`=:id",$query_data);
-        $this->dbLink->runTransaction();
-    }
-    private function getWskB($idProject=0){
-        $this->Log->log(0,"[".__METHOD__."]");
-        $this->inpArray['wskb']=$this->dbLink->squery("select b.`login` as 'bl',`buffer_user_id` as bu FROM `slo_projekt_etap` as s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id` WHERE s.`id`=:id",[':id'=>[$idProject,'INT']])[0];    
-    }
-    private function releaseWskB($idStage){
-        $this->Log->log(0,"[".__METHOD__."] idStage => ".$idStage);
-        $this->Log->log(0,"[".__METHOD__."] session userid => ".$_SESSION['userid']);
-        if($idStage==='0'){
-            $this->Log->log(0,"[".__METHOD__."] idStage not defined, nothing to do");
-        }
-        else{
-            /* check */
-            self::getWskB($idStage);
-            $this->Log->log(0,"[".__METHOD__."] buffer user id => ".$this->inpArray['wskb']['bu']);
-            $userid=intval($_SESSION['userid'],10);
-            if(intval($this->inpArray['wskb']['bu'],10)===$userid){
-                $this->inpArray['id']=$idStage;
-                self::setWskB();
-            }
-            else{
-                $this->Log->log(0,"[".__METHOD__."] blocked by different user ".$this->inpArray['wskb']['bl']." (".$this->inpArray['wskb']['bu'].")");
-            }
-        }
-    }
-    private function getSlo($slo='psDelete'){
-        $this->actProjectStageData['slo']=$this->dbLink->squery("SELECT s.`id` as ID,s.`nazwa` AS Nazwa FROM `slo` s,`app_task` a WHERE s.`id_app_task`=a.`id` AND s.id>0 AND s.wsk_u='0' AND a.`name`=:n ORDER BY s.`id` ASC",[':n'=>[$slo,'STR']]);  
-    }
+
     private function getProjectStageData($id=0){
         $this->Log->log(0,"[".__METHOD__."] ID => $id");
         $head=$this->dbLink->squery("SELECT s.`id` as 'i',s.`id_dzial` as 'id',s.`number` as 'n',s.`title` as 't',s.`create_user_fullname` as 'cu',s.`create_user_login` as 'cul',s.`create_date` as 'cd',s.`mod_login` as 'mu',s.`mod_date` as 'md',s.`buffer_user_id` as 'bu',s.`wsk_u` as 'wu',s.`delete_fullname` as 'du',b.`login` as 'bl' FROM `slo_projekt_etap` as s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id` WHERE s.`id`=:id LIMIT 0,1",[':id'=>[$id,'INT']]);
@@ -160,24 +104,22 @@ class ManageProjectStage
     }
     public function psHide(){
         $this->Log->log(0,"[".__METHOD__."]");
-        self::setPostId();
-        self::setReason();
-        /* CHECK wsk_b */
-        self::getWskB($this->inpArray['id']);
-        self::checkWskB(intval($this->inpArray['wskb']['bu'],10),$this->inpArray['wskb']['bl']);
+        $this->inpArray=$this->Items->setPostId();
+        $this->inpArray['reason']=$this->Items->setReason();
+        $this->inpArray['wskb']= $this->Items->getBufferUserId($this->inpArray['id'],'SLO_PROJEKT_ETAP','buffer_user_id');
+        $this->Items->checkBlock($this->inpArray['wskb']['bu'],$this->inpArray['wskb']['bl'],$_SESSION['userid']);
         self::sqlHideStage();
-        self::setWskB();
+        $this->Items->setBlock($this->inpArray['id'],"SLO_PROJEKT_ETAP","buffer_user_id",'');
         $this->utilities->jsonResponse('','cModal');
     }
     public function psDelete(){
         $this->Log->log(0,"[".__METHOD__."]");
-        self::setPostId();
-        self::setReason();
-        /* CHECK wsk_b */
-        self::getWskB($this->inpArray['id']);
-        self::checkWskB(intval($this->inpArray['wskb']['bu'],10),$this->inpArray['wskb']['bl']);
+        $this->inpArray=$this->Items->setPostId();
+        $this->inpArray['reason']=$this->Items->setReason();
+        $this->inpArray['wskb']= $this->Items->getBufferUserId($this->inpArray['id'],'SLO_PROJEKT_ETAP','buffer_user_id');
+        $this->Items->checkBlock($this->inpArray['wskb']['bu'],$this->inpArray['wskb']['bl'],$_SESSION['userid']);
         self::sqlDeleteStage();
-        self::setWskB();
+        $this->Items->setBlock($this->inpArray['id'],"SLO_PROJEKT_ETAP","buffer_user_id",'');
         $this->utilities->jsonResponse('','cModal');
     }
     private function sqlDeleteStage(){
@@ -204,13 +146,7 @@ class ManageProjectStage
         $this->dbLink->setQuery("UPDATE `slo_projekt_etap` SET `wsk_v`=:wsk_v,`mod_user_id`=:mod_user_id,`mod_login`=:mod_login,`mod_date`=:mod_date,`hide_reason`=:hide_reason,`mod_host`=:mod_host WHERE `id`=:id",$sqlParm);
         $this->dbLink->runTransaction();
     }
-    private function setReason(){
-        $this->inpArray['reason']=explode('|',filter_input(INPUT_POST,'reason'));
-        if(count($this->inpArray['reason'])!==2){
-            $this->response->setError(1,"[".__METHOD__."] WRONG ARRAY MEMBERS, SHOULD BE 2:");
-            $this->Log->logMulti(0,$this->inpArray['reason'],__METHOD__);
-        }
-    }
+
     public function psCreate()
     {
         $this->Log->log(0,"[".__METHOD__."]");
@@ -321,7 +257,7 @@ class ManageProjectStage
         self::checkInputFieldsLength();
         self::createStage();
         self::checkStageData();
-        self::checkWskB(intval($this->actProjectStageData['head']['bu'],10));
+        $this->Items->checkBlock($this->actProjectStageData['head']['bu'],'',$_SESSION['userid']);
         self::updateProjectStage();
         $this->utilities->jsonResponse('','cModal');
     }
@@ -478,8 +414,19 @@ class ManageProjectStage
         );
         $this->utilities->mergeArray($data,$addOns);
     }
-    public function getNewStageSlo(){
-        $this->utilities->jsonResponse('','psCreate');
+    public function getNewStageDefaults(){
+        $type=htmlentities(nl2br(filter_input(INPUT_GET,'type')), ENT_QUOTES,'UTF-8',FALSE);
+        $this->Log->log(0,"[".__METHOD__."]\r\nTYPE - ".$type);
+        /* GET DEFAULT PARAMETERS */
+        $value['glossary'] = parent::getStageGlossary();
+        /* SETUP PARAMETER */
+        $parm=[];
+        foreach($value['glossary']['parameter'] as $v){
+            //print_r($v);
+            $parm[$v['s']]=['n'=>$v['n'],'v'=>$v['v']];
+        }
+        $value['glossary']['parameter']=$parm;
+        $this->utilities->jsonResponse($value,'createText');
     }
     protected function checkDataLength($value,$label,$min,$max){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -491,7 +438,7 @@ class ManageProjectStage
     public function setProjectStageWskB(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->utilities->setGet('id',$this->inpArray);
-        self::setWskB(intval($_SESSION['userid'],10));
+        $this->Items->setBlock($this->inpArray['id'],"SLO_PROJEKT_ETAP","buffer_user_id",$_SESSION['userid']);
         $this->utilities->jsonResponse('','block');
     }
     public function getAllStage(){
@@ -509,9 +456,26 @@ class ManageProjectStage
         return $data;
     }
     public function getModulStageDefaults(){
-        $v['perm']=$_SESSION['perm'];
+        /*
+         * NOT USED 04.02.2022
+         */
+        //$v['perm']=$_SESSION['perm'];
+        //Throw New Exception (json_encode(['showTable','adasdasds']),0);
         $v['data']=$this->dbLink->squery("SELECT s.`id` as '0',s.`number` as '1',s.`title` as '2',(select e.`value` as '3' FROM `slo_projekt_etap_ele` as e WHERE e.`id_projekt_etap`=s.`id` and `wsk_u`='0' and `wsk_v`='0' ORDER BY e.`id` ASC LIMIT 0,1) as `v`,b.`login` as 'bl' FROM `slo_projekt_etap` s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id` WHERE s.`wsk_u`='0' and s.`wsk_v`='0' ORDER BY s.`id` ASC");
-        $this->utilities->jsonResponse($v,'runMain');
+        $v['headTitle']='Etapy';
+        $this->utilities->jsonResponse($v,'showTable');
     }
-    function __destruct(){}
+    public function confirmProjectStageText(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        //$input=filter_input_array(INPUT_POST);
+        $this->Log->logMulti(0,filter_input(INPUT_POST,'stage'));
+        $this->data=json_decode(filter_input(INPUT_POST,'stage'));
+        
+        $this->Log->logMulti(0,$this->data);
+        
+        parent::manageStage();
+        $this->utilities->jsonResponse('','cModal');
+     
+        
+    }
 }

@@ -474,7 +474,7 @@ function pCreateFields(ele)
             'input' : createBaseFileInput(projectData['data']['value']['unitSlo'],projectData['data']['value']['r_dane'])
         },
         'quota' : {
-            'label' : 'Quota:',
+            'label' : 'Współczynnik quota:',
             'input' : createQuota(projectData['data']['value']['quota'])
         },
         'dokPowiazane' : {

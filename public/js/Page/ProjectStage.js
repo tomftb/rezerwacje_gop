@@ -1,103 +1,239 @@
-var ajax = new Ajax();
-var error = new Error();
-var table=new Table();
-var defaultTask='getprojectsstagelike&u=0&v=1';
-var fieldDisabled='y';
-var projectData=new Object();
-var actDay = getActDate();
-var actData=new Object();
-var loggedUserPerm=new Array();
-table.setAjaxLink(ajax);
-table.setErrorLink(error,'errDiv-Adapted-overall');
-var actData={ 
-            data: {},
-            info: '',
-            modul: '',
-            status:0,
-            type:'POST'
-    };
+console.log('ProjectStage');
+class ProjectStage{
+    static fieldDisabled='y';
+    static projectData=new Object();
+    static actDay = getActDate();
+    static actStageData=new Object();
+    static loggedUserPerm=new Array();
+    static errorStatus=false;
+    static data={};
+    static Xhr;
+    static Modal;
+    static Html;
+    static Items;
+    static defaultTask='getprojectsstagelike&u=0&v=0&b=';
+    static inputFieldCounter=0;
+    static fieldDisabled='n';
+    static ProjectStageTable;
+    static CreateText;
+    static CreateImage;
+    static CreateTable;
+    static CreateList;
 
-
-var inputFieldCounter=0;
-var mainTableColumns={
-    ID:{
-        style:'width:70px;',
-        scope:'col'
-    },
-    Numer:{
-        style:'width:70px;',
-        scope:'col'
-    },
-    Tytuł:{
-        style:'',
-        scope:'col'
-    },
-    Zawartość:{
-        style:'',
-        scope:'col'
-    },
-    "":{
-        style:'width:200px;',
-        scope:'col'
+    static show(){
+        console.log('ProjectStage::show()');  
+         /* FIRST RUN -> PREVENT IF ELE NOT EXIST */
+        if(ProjectStage.Modal.exist){
+            /* CLEAR AND SET MODAL DATA */
+            ProjectStage.Items.setDefaultModal();
+        };
+        ProjectStage.ProjectStageTable.defaultTask=ProjectStage.defaultTask;
+        ProjectStage.Xhr.setRun(ProjectStage.ProjectStageTable,'runTable');
+        ProjectStage.Xhr.run('GET',null,ProjectStage.Items.router+ProjectStage.defaultTask);
     }
-};
-
-/* OBJECT ELEMENT IS A NAME OF PERMISSION */
-var tableBtn=
-        {
-        SHOW_STAGE : {
-            label : 'Wyświetl',
-            task : 'psDetails',
-            class : 'btn-info',
-            perm :true,
-            attributes : { 'data-toggle' : 'modal', 'data-target': '#AdaptedModal' }
-        },
-        HIDE_STAGE : {
-            label : 'Ukryj',
-            task : 'getProjectStageHideSlo',
-            class : 'btn-secondary',
-            perm :true,
-            attributes : { 'data-toggle' : 'modal', 'data-target': '#AdaptedModal' }
-        },
-        DEL_STAGE : {
-            label : 'Usuń',
-            task : 'getProjectStageDelSlo',
-            class : 'btn-danger',
-            perm :true,
-            attributes : { 'data-toggle' : 'modal', 'data-target': '#AdaptedModal' }
+    static runModal(response){//can be var response
+        console.log('ProjectStage::runModal()');
+        //console.log(response);
+        ProjectStage.Modal.setLink();
+        try{
+            
+            ProjectStage.Modal.hideLoad();
+            ProjectStage.Xhr.runObject=ProjectStage;
         }
-    };
-var defaultTableExceptionCol=new Array('bl');
+        catch(error){
+            console.log(error);
+            alert('ProjectStage::runModal() Error occured!');
+            return false;
+        };
+        ProjectStage.data=ProjectStage.Items.getJsonResponse(ProjectStage.Modal.link['error'],response);
+        if(ProjectStage.data){
+            try {
+                if (!('status' in ProjectStage.data) || !('info' in ProjectStage.data)){
+                    ProjectStage.Items.setCloseModal(ProjectStage.ProjectStageTable,'runTable',ProjectStage.defaultTask+'0');
+                    ProjectStage.Items.setError(ProjectStage.Modal.link['error'],'Application error occurred! Contact with Administrator!');
+                }
+                else if(ProjectStage.data.status===1){
+                    ProjectStage.Items.setCloseModal(ProjectStage.ProjectStageTable,'runTable',ProjectStage.defaultTask+'0');
+                    ProjectStage.Items.setError(ProjectStage.Modal.link['error'],ProjectStage.data.info);
+                }
+                else{
+                    /* SET MODAL ACTION */
+                    ProjectStage[ProjectStage.data['data']['function']]();
+                }  
+            }
+            catch (error) {
+                console.log(error);
+                ProjectStage.Xhr.runObject=ProjectStage;
+                ProjectStage.Items.setError(ProjectStage.Modal.link['error'],error);
+            } 
+        }
+    }
+    static psHide(){
+        console.log('ProjectStage::psHide()');
+        ProjectStage.Items.prepareModal('Ukrywanie Etapu Projektu','bg-secondary');
+        ProjectStage.Items.setCloseModal(ProjectStage.ProjectStageTable,'runTable',ProjectStage.defaultTask+ProjectStage.data['data']['value']['head'].i);
+        ProjectStage.setChangeDataState('Ukryj','secondary');
+    }
+    static psDelete(){
+        console.log('ProjectStage::psDelete()');
+        ProjectStage.Items.prepareModal('Usuwanie Etapu Projektu','bg-danger');
+        ProjectStage.Items.setCloseModal(ProjectStage.ProjectStageTable,'runTable',ProjectStage.defaultTask+ProjectStage.data['data']['value']['head'].i);
+        ProjectStage.setChangeDataState('Usuń','danger');       
+    }
+    static setChangeDataState(btnLabel,titleClass){
+        console.log('ProjectStage::setChangeDataState()');
+        console.log(ProjectStage.data['data']);
+        
+        //ProjectStage.Items.defaultTask='getprojectsstagelike&b='+ProjectStage.data['data']['value']['head'].i;
+        
+        var form=ProjectStage.Html.getForm();
+        var h=document.createElement('H5');
+            h.setAttribute('class','text-'+titleClass+' mb-3 text-center font-weight-bold');
+            h.innerHTML=ProjectStage.data['data']['value']['head'].t;
+        
+        form.appendChild(ProjectStage.Html.getInput('id',ProjectStage.data['data']['value']['head'].i,'hidden'));
+        
+        ProjectStage.Items.setChangeStateFields(form,ProjectStage.data['data']['value']['slo']);
 
- 
-table.setIdFiled(0);
-table.setButtons(tableBtn);
-table.setColumns(mainTableColumns);
-table.setColExceptions(defaultTableExceptionCol);
-table.setBtnInfo('<i class="fa fa-info"></i> Actual blocked by user: ','small','text-danger');
-table.setbtnInfoCol('bl');
-//table.setBtnInfoEle(createTag('asdasd','p'));
-table.setButtonsType('btn-group');
-
-function runFunction(d)
-{
-    /* d => array response */
-    /* TO DO document.getElementById('AdaptedModalDialog'); */
-    console.log('===runFunction()===');
-    console.log(d);
-    // RUN FUNCTION
-    try{
-         d=JSON.parse(d);
-    error.checkStatusExist(d);
-    actData=d;
-    console.log('FUNCTION TO RUN:');
-    console.log(d['data']['function']);
-    switch(d['data']['function'])
+        ProjectStage.Modal.link['form']=form; 
+        ProjectStage.Modal.link['adapted'].appendChild(h);
+        ProjectStage.Modal.link['adapted'].appendChild(form);
+        var confirmButton=ProjectStage.Html.confirmButton(btnLabel,'btn btn-'+titleClass,ProjectStage.data['data']['function']);   
+            confirmButton.onclick = function () {
+                console.log(this.id);
+                console.log(ProjectStage.Modal.link['form']);
+                const fd = new FormData(ProjectStage.Modal.link['form']);
+                
+                if(confirm('Potwierdź wykonanie akcji')){   
+                    //ProjectStage.Xhr.setRun(ProjectStage.Items,'cModal');
+                    ProjectStage.Modal.link['extra'].innerHTML='<center><img src="/img/loading_60_60.gif"/></center>';
+                    //Modal.link['extra']
+                    ProjectStage.Xhr.run('POST',fd,ProjectStage.Items.router+this.id);
+                };
+            };
+        ProjectStage.Modal.link['button'].appendChild(ProjectStage.Items.getCancelButton(ProjectStage.ProjectStageTable,'runTable',ProjectStage.defaultTask+ProjectStage.data['data']['value']['head'].i));
+        ProjectStage.Modal.link['button'].appendChild(confirmButton);
+        
+        //ProjectStage.Modal.link['button'].appendChild(ProjectStage.functionBtn(ProjectStage.data['data']['function'],,ProjectStage.data['data']['function']));
+        /*
+         * INFO
+         */
+        ProjectStage.Items.setModalInfo("Project Stage ID: "+ProjectStage.data['data']['value']['head'].i+", Create user: "+ProjectStage.data['data']['value']['head'].cu+" ("+ProjectStage.data['data']['value']['head'].cul+"), Create date: "+ProjectStage.data['data']['value']['head'].cd);
+        
+        }
+    static  functionBtn(f,btn,task)
     {
-        case 'psCreate':
-                inputFieldCounter=0;
-                fieldDisabled='n';
-                actData['data']={
+        console.log('ProjectStage::functionBtn()');
+        console.log(f);
+        switch(f)
+        {
+            case 'psShowStage':
+                    btn.onclick = function(){ 
+                        
+                    };
+                    break;
+            case 'edit':               
+                    btn.onclick = function()
+                    {
+                        clearAdaptedModalData();
+                        actData['data']['function']='psEdit';
+                        //actData['data']['task']='psEdit';
+                        //runFunction(actData);
+                        //console.log(actData);
+                        ajax.getData('setProjectStageWskB&id='+actData['data']['value']['head']['i']);
+                        fieldDisabled='n';
+                        inputFieldCounter=0;
+                        //clearAdaptedModalData();
+                        manageData('Zatwierdź','Edycja etapu projektu:','info','psEdit',ProjectStage.actStageData['value']['head']['i']);
+                    };
+                    break;
+            case 'psEdit':
+            case 'psCreate':
+            //case 'psDelete':
+                btn.onclick = function() { postData(this,task); };
+                break;
+            default: 
+                break;
+        }
+        return btn;
+    }
+    static cModal(){
+        console.log('ProjectStage::cModal()');
+        ProjectStage.Items.reloadData(ProjectStage.ProjectStageTable,'runTable',ProjectStage.defaultTask+'0');
+        $(ProjectStage.Items.Modal.link['main']).modal('hide');
+    }
+    //static reloadData(idb){
+    //    console.log('ProjectStage::reloadData()\r\n ID BLOCK: ');
+     //   console.log(idb);
+    //    ProjectStage.Xhr.setRun(ProjectStageTable,'runTable');
+     //   ProjectStage.Xhr.run('GET',null,ProjectStage.Items.router+ProjectStage.defaultTask+idb);
+   // }
+    static createData(){
+        console.log('ProjectStage::createData()');
+        ProjectStage.Items.setDefaultModal();
+        ProjectStage.Xhr.setRun(ProjectStage,'runModal');
+        ProjectStage.Xhr.run('GET',null,ProjectStage.Items.router+'getNewStageDefaults');
+        
+        
+    }
+    static createText(){
+        console.log('ProjectStage::createText()');
+        /* SET DEFAULT XHR */
+        /* BUILD TEXT */
+        ProjectStage.CreateText.Modal=ProjectStage.Modal;
+        ProjectStage.CreateText.Items=ProjectStage.Items;
+        ProjectStage.CreateText.Stage=ProjectStage;
+        ProjectStage.CreateText.Html=ProjectStage.Html;
+        ProjectStage.CreateText.create(ProjectStage.data);
+    }
+    static createImage(){
+        console.log('ProjectStage::createImage()');
+    }
+    static createTable(){
+        console.log('ProjectStage::createTable()');
+    }
+    static createList(){
+        console.log('ProjectStage::createList()');
+    }
+    static prepareData(type){
+        console.log('ProjectStage::prepareData()');
+        /* CHECK IS DATA NOT ALREADY SETUP */ 
+        /*
+            console.log(ProjectStage.CreateText.glossary);
+            console.log(Object.keys(ProjectStage.CreateText.glossary).length);
+            console.log(Object.getPrototypeOf(ProjectStage.CreateText.glossary));
+            console.log(Object.prototype);
+            console.log(Object.getPrototypeOf(ProjectStage.CreateText.glossary) === Object.prototype);
+            && Object.keys(ProjectStage.CreateText.glossary).length === 0
+            && Object.getPrototypeOf(obj) === Object.prototype
+         */      
+        switch(type)
+        {
+            case 'tx':
+                    if(Object.keys(ProjectStage.CreateText.glossary).length === 0){
+                        ProjectStage.Xhr.setRun( ProjectStage,'runModal');
+                        ProjectStage.Xhr.run('GET',null,ProjectStage.Items.router+'getNewStageDefaults&type='+type);
+                        break;
+                    }
+                    ProjectStage.createText(ProjectStage.CreateText.glossary);
+                break;
+            case 'i':   
+                break;
+            case 't':
+                break;
+            case 'l':   
+                break;
+            default:
+                    console.log('UNAVAILABLE TYPE');
+                    console.log(type);
+                break;
+        }
+    }
+    static psCreate(){
+        console.log('ProjectStage::psCreate()');
+        ProjectStage.inputFieldCounter=0;
+        ProjectStage.fieldDisabled='n';
+        ProjectStage.actStageData={
                     'value':{
                         'head':{
                             t:'',
@@ -119,62 +255,22 @@ function runFunction(d)
                                             'v':'',
                                             wsk_v:'1'
                                         }
-                                           )
-                                
-                    }
-                };
-                manageData('Dodaj','Dodaj etap projektu:','info','psCreate');
-                break;
-        case 'psDetails':   
-                fieldDisabled='y';
-                inputFieldCounter=0;
-                manageData('Edytuj','Szczegóły etapu projektu:','info','edit');
-            break;
-        case 'cModal':
-                reloadData();
-            break;
-        case 'psHide':
-                changeDataState('Ukryj','UKRYJ ETAP PROJEKT:','secondary');
-            break;
-        case 'psDelete':
-                changeDataState('Usuń','USUŃ ETAP PROJEKT:','danger');
-            break;
-        case 'block':
-            break;
-        case 'runMain':
-            loggedUserPerm=d['data']['value']['perm'];
-            setButtonDisplay(document.getElementById('createData'),'ADD_STAGE');
-            setTableBtnAva(); 
-        case 'sAll':
-                displayAll(d['data']['value']['data']);
-            break;
-        default:
-                error.checkStatusResponse(d);
-            break;
+                                )}
+                    };
+                
+        ProjectStage.manageStageData('Dodaj','Dodaj etap projektu:','bg-info','psCreate',null);
     }
-    }
-    catch(e){
-        d['status']=1;
-        d['info']=e;
-        error.checkStatusResponse(d);
-        console.log(e);
-    }
-}
-function manageData(btnLabel,title,titleClass,task)
-{
-    console.log('===manageData()===\n'+btnLabel);
-    error.set('errDiv-Adapted-overall');
-    defaultTask='getprojectsstagelike&b='+actData['data']['value']['head']['i'];
-    //Error.checkStatusResponse(actData);
-    prepareModal(title,'bg-'+titleClass);  
+    static manageStageData(btnLabel,title,titleClass,task,idRecord){
+        console.log('ProjectStage::manageData()\r\n'+btnLabel);
+        ProjectStage.Items.prepareModal(title,titleClass);
+        ProjectStage.Items.setCloseModal(ProjectStage.ProjectStageTable,'runTable',ProjectStage.defaultTask+idRecord);
+        var form=ProjectStage.Html.getForm();
 
-    var form=createForm('POST',task,'form-horizontal','OFF');
-    var dynamicData=document.getElementById('AdaptedDynamicData'); 
-    var inputRow=createTag('','div','row');
-    var inputDynamicData=createTag('','div','col-12');
-        inputDynamicData.setAttribute('id','dynamicInput');
+        var inputRow=createTag('','div','row');
+        var inputDynamicData=createTag('','div','col-12');
+            inputDynamicData.setAttribute('id','dynamicInput');
     
-    var resultRow=createTag('','div','row');
+        var resultRow=createTag('','div','row');
 
     var pLabel1=createTag('Podaj numer:','h5','text-left font-weight-normal');
     var pLabel2=createTag('Wprowadź tytuł:','h5','text-left font-weight-normal');
@@ -194,8 +290,8 @@ function manageData(btnLabel,title,titleClass,task)
     
     var p=createTag('','p','');
         p.setAttribute('id','data-stage-result');
-    var input1=createInput('number','number',actData['data']['value']['head']['n'],'form-control','',fieldDisabled);
-    var input2=createInput('text','title',actData['data']['value']['head']['t'],'form-control','',fieldDisabled);
+    var input1=createInput('number','number',ProjectStage.actStageData['value']['head']['n'],'form-control','',ProjectStage.fieldDisabled);
+    var input2=createInput('text','title',ProjectStage.actStageData['value']['head']['t'],'form-control','',ProjectStage.fieldDisabled);
   
         divInput0.appendChild(pLabel1);
         divInput0.appendChild(input1);
@@ -208,9 +304,9 @@ function manageData(btnLabel,title,titleClass,task)
         inputRow.appendChild(divInput1);
         var firstLabel='Edytor HTML:';
         var firstDescriptionHeight=200;
-        for (const property in actData['data']['value']['body'])
+        for (const property in ProjectStage.actStageData['value']['body'])
         {
-            inputDynamicData.appendChild(createInputTextField(firstLabel,firstDescriptionHeight));
+            inputDynamicData.appendChild(ProjectStage.createInputTextField(firstLabel,firstDescriptionHeight));
             firstLabel='Wprowadź opis::';
             firstDescriptionHeight=50;
         } 
@@ -224,31 +320,56 @@ function manageData(btnLabel,title,titleClass,task)
         divResult.appendChild(pLabelResult);
         divResult.appendChild(p);
         resultRow.appendChild(divResult);
-        form.appendChild(createInput('hidden','id',actData['data']['value']['head'].i,'form-check-input','',''));
+        form.appendChild(createInput('hidden','id',ProjectStage.actStageData['value']['head']['i'],'form-check-input','',''));
         form.appendChild(inputRow);
-        form.appendChild(createNewField(inputDynamicData));
+        form.appendChild(ProjectStage.createNewField(inputDynamicData));
         form.appendChild(resultRow);
     
-    dynamicData.appendChild(form);
-    
-    document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),''));
-    document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn('psShowStage',createBtn('Podgląd','btn btn-info','psShowStage'),'psShowStage'));
-    var confirmBtn=createBtn(btnLabel,'btn btn-info',task);
-    var actBlockInfo=createTag('','small','text-left text-danger ml-1');
-    var info=createTag("Project Stage ID: "+actData['data']['value']['head'].i+", Create user: "+actData['data']['value']['head'].cu+" ("+actData['data']['value']['head'].cul+"), Create date: "+actData['data']['value']['head'].cd,'small','text-left text-secondary ml-1');
-    if(parseInt(actData['data']['value']['head']['bu'],10)>0){
-        actBlockInfo.innerText =' Actual blocked by user: '+actData['data']['value']['head']['bl'];
-   
+        ProjectStage.Modal.link['adapted'].appendChild(form);        
+        var preview=document.createElement('button');
+            preview.setAttribute('class','btn btn-info');
+            preview.innerText='Podgląd';
+            preview.onclick = function () {
+                //var ta=document.getElementById('data-stage-value');
+                console.log(document.querySelectorAll('[id$="-data-stage-value"]'));
+                var ta=document.querySelectorAll('[id$="-data-stage-value"]');
+                console.log(ta.length);
+                var value='';
+                for(var i=0;i<ta.length;i++){
+                    console.log(ta[i].value);
+                    value+=ta[i].value+'<br/>';
+                }
+                var p=document.getElementById('data-stage-result');
+                p.innerHTML=value;
+            };
+        var confirm=document.createElement('button');
+            confirm.setAttribute('class','btn btn-info');
+            confirm.innerText=btnLabel;
+            
+        
+        var actBlockInfo="";
+        if(parseInt(ProjectStage.actStageData['value']['head']['bu'],10)>0){
+            actBlockInfo="<span class=\"text-danger\"> Actual blocked by user: "+ProjectStage.actStageData['value']['head']['bl']+"</span>";
+        }
+        else{
+            confirm.onclick = function () {
+                postData(this,task);
+            };
+           
+        }
+        /*
+         * BUTTONS
+         */
+        ProjectStage.Modal.link['button'].appendChild(ProjectStage.Items.getCancelButton(ProjectStageTable,'runTable',ProjectStage.defaultTask+ProjectStage.actStageData['value']['head'].i));
+        ProjectStage.Modal.link['button'].appendChild(preview); 
+        ProjectStage.Modal.link['button'].appendChild(confirm); 
+        /*
+         * INFO
+         */
+        ProjectStage.Items.setModalInfo("Project Stage ID: "+ProjectStage.actStageData['value']['head']['i']+", Create user: "+ProjectStage.actStageData['value']['head'].cu+" ("+ProjectStage.actStageData['value']['head'].cul+"), Create date: "+ProjectStage.actStageData['value']['head'].cd+actBlockInfo);
     }
-    else{
-        document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(task,confirmBtn,task));
-    }
-    /* INFO */
-    document.getElementById('AdaptedModalInfo').appendChild(info);
-    document.getElementById('AdaptedModalInfo').appendChild(actBlockInfo);
-}
-function createInputTextField(title,height)
-{
+    static createInputTextField(title,height)
+    {
     /*
      * 
      * REMOVE BUTTON
@@ -256,32 +377,32 @@ function createInputTextField(title,height)
     //console.log(this);
      var divInput=createTag('','div','row ml-1 mr-1');
      
-    var rmBTN=createRmBtn(fieldDisabled,divInput);
+    var rmBTN=createRmBtn(ProjectStage.fieldDisabled,divInput);
         
     var pLabel=createTag(title,'h5','text-left font-weight-normal mt-2 ml-3');
     var textAreaValue='';
     var fileSelected='0';
     var filePosition='top';
-    var idv=inputFieldCounter;
-        console.log(inputFieldCounter);
-        console.log(actData);
-        if(actData['data']['value'].hasOwnProperty('body')){
-            if(actData['data']['value']['body'].hasOwnProperty(inputFieldCounter)){
-                textAreaValue=actData['data']['value']['body'][inputFieldCounter].v;
-                fileSelected=actData['data']['value']['body'][inputFieldCounter].f;
-                filePosition=actData['data']['value']['body'][inputFieldCounter].fp;
-                idv=actData['data']['value']['body'][inputFieldCounter].i;
+    var idv=ProjectStage.inputFieldCounter;
+        console.log(ProjectStage.inputFieldCounter);
+        console.log(ProjectStage.actStageData);
+        if(ProjectStage.actStageData['value'].hasOwnProperty('body')){
+            if(ProjectStage.actStageData['value']['body'].hasOwnProperty(ProjectStage.inputFieldCounter)){
+                textAreaValue=ProjectStage.actStageData['value']['body'][ProjectStage.inputFieldCounter].v;
+                fileSelected=ProjectStage.actStageData['value']['body'][ProjectStage.inputFieldCounter].f;
+                filePosition=ProjectStage.actStageData['value']['body'][ProjectStage.inputFieldCounter].fp;
+                idv=ProjectStage.actStageData['value']['body'][ProjectStage.inputFieldCounter].i;
             }
         }
         
 
     var textarea=createTag(textAreaValue,'textarea','form-control w-100'); //form-control    
     //var textarea=createTag('','div',' w-100'); //form-control
-        textarea.setAttribute('name',inputFieldCounter+'-value');
-        textarea.setAttribute('id',inputFieldCounter+'-data-stage-value');
+        textarea.setAttribute('name',ProjectStage.inputFieldCounter+'-value');
+        textarea.setAttribute('id',ProjectStage.inputFieldCounter+'-data-stage-value');
         textarea.setAttribute('style','height:'+height+'px; ');//
         textarea.setAttribute('contenteditable','true');
-        if(fieldDisabled==='y')
+        if(ProjectStage.fieldDisabled==='y')
         {
             textarea.setAttribute('disabled','');
         }
@@ -299,28 +420,28 @@ function createInputTextField(title,height)
     
     var divFile=createTag('','div','col-12');
     var divFormFile=createTag('','div','form-check form-check-inline mt-1 mb-1');
-    var inputCheckBoxFile=createCheckBox('Czy do opisu ma być zawarty obraz? ',inputFieldCounter+'-file',fieldDisabled,fileSelected);
+    var inputCheckBoxFile=createCheckBox('Czy do opisu ma być zawarty obraz? ',ProjectStage.inputFieldCounter+'-file',fieldDisabled,fileSelected);
    
     var inputFileLabel=createTag('&nbsp;Wskaż pozycję dla obrazu:','label','form-check-label');
         inputFileLabel.setAttribute('for',inputFieldCounter+'-file');
     var btnGroup=createTag('','div','btn-group pull-left');
     var btnBold=createTag('B','button','btn btn-dark');
-        btnBold.setAttribute('id',inputFieldCounter+'-B');
+        btnBold.setAttribute('id',ProjectStage.inputFieldCounter+'-B');
         btnBold.onclick=function(){   fixText(this.id);   };
     var btnItalic=createTag('I','button','btn btn-dark');
-        btnItalic.setAttribute('id',inputFieldCounter+'-I');
+        btnItalic.setAttribute('id',ProjectStage.inputFieldCounter+'-I');
         btnItalic.onclick=function(){   fixText(this.id);   };
     var btnUnderline=createTag('U','button','btn btn-dark');
-        btnUnderline.setAttribute('id',inputFieldCounter+'-U');
+        btnUnderline.setAttribute('id',ProjectStage.inputFieldCounter+'-U');
         btnUnderline.onclick=function(){   fixText(this.id);   };
     var btnLeft=createTag('LEFT','button','btn btn-dark');
-        btnLeft.setAttribute('id',inputFieldCounter+'-text-left');
+        btnLeft.setAttribute('id',ProjectStage.inputFieldCounter+'-text-left');
         btnLeft.onclick=function(){   fixText(this.id);   };
     var btnRight=createTag('RIGHT','button','btn btn-dark');
-        btnRight.setAttribute('id',inputFieldCounter+'-text-right');
+        btnRight.setAttribute('id',ProjectStage.inputFieldCounter+'-text-right');
         btnRight.onclick=function(){   fixText(this.id);   };
     var btnCenter=createTag('CENTER','button','btn btn-dark');
-        btnCenter.setAttribute('id',inputFieldCounter+'-text-center');
+        btnCenter.setAttribute('id',ProjectStage.inputFieldCounter+'-text-center');
         btnCenter.onclick=function(){   fixText(this.id);   };
       
         btnGroup.appendChild(btnBold);
@@ -335,7 +456,7 @@ function createInputTextField(title,height)
         divOption.appendChild(btnGroup);
         optionRow.appendChild(divOption);
 
-        divInput.appendChild(createInput('hidden',inputFieldCounter+'-id',idv,'form-check-input','',''));
+        divInput.appendChild(createInput('hidden',ProjectStage.inputFieldCounter+'-id',idv,'form-check-input','',''));
         
        
         divInput.appendChild(rmBTN);
@@ -360,9 +481,129 @@ function createInputTextField(title,height)
             divFile.appendChild(createFilePosition(property,filePositionData[property],filePosition));
         }
         divInput.appendChild(divFile);
-    inputFieldCounter++;
-    return divInput;
+        ProjectStage.inputFieldCounter++;
+        return divInput;
+    }
+    static createNewField(dynamicField)
+    {
+        console.log('ProjectStage::createNewField()');
+        console.log(dynamicField);
+        var divAll=createTag('','div','col-auto');
+        var divBtn=createTag('','div','row');
+        var divInput=document.createElement('div'); 
+
+        // ADD BUTTON
+        var addBtn=createAddButton('addBtn',ProjectStage.fieldDisabled);
+            if(ProjectStage.fieldDisabled!=='y')
+            {
+                addBtn.onclick=function()
+                {
+                    //inputFieldCounter++;
+                    dynamicField.appendChild(createInputTextField('Wprowadź opis:',100,ProjectStage.inputFieldCounter));
+                };
+            }
+        divBtn.appendChild(addBtn);
+        divAll.appendChild(divInput);
+        divAll.appendChild(divBtn);
+        console.log(divAll);
+        return (divAll);
+    }
 }
+/*
+ * 
+ * CLASS END
+ */
+
+
+var defaultTask='getprojectsstagelike&u=0&v=1';
+var fieldDisabled='y';
+var projectData=new Object();
+var actDay = getActDate();
+var actData=new Object();
+var loggedUserPerm=new Array();
+
+//table.setAjaxLink(ajax);
+//table.setErrorLink(error,'errDiv-Adapted-overall');
+var actData={ 
+            data: {},
+            info: '',
+            modul: '',
+            status:0,
+            type:'POST'
+    };
+
+
+var inputFieldCounter=0;
+
+
+/* OBJECT ELEMENT IS A NAME OF PERMISSION */
+
+var defaultTableExceptionCol=new Array('bl');
+
+ 
+//table.setIdFiled(0);
+//table.setButtons(tableBtn);
+//table.setColumns(mainTableColumns);
+//table.setColExceptions(defaultTableExceptionCol);
+//table.setBtnInfo('<i class="fa fa-info"></i> Actual blocked by user: ','small','text-danger');
+//table.setbtnInfoCol('bl');
+//table.setBtnInfoEle(createTag('asdasd','p'));
+//table.setButtonsType('btn-group');
+
+function runFunction(d)
+{
+    /* d => array response */
+    /* TO DO document.getElementById('AdaptedModalDialog'); */
+    console.log('===runFunction()===');
+    console.log(d);
+    // RUN FUNCTION
+    try{
+        
+    console.log('FUNCTION TO RUN:');
+    console.log(d['data']['function']);
+    switch(d['data']['function'])
+    {
+        case 'psCreate':
+                
+                break;
+        case 'psDetails':   
+                fieldDisabled='y';
+                inputFieldCounter=0;
+                manageData('Edytuj','Szczegóły etapu projektu:','info','edit');
+            break;
+        case 'cModal':
+                reloadData();
+            break;
+        case 'psHide':
+                changeDataState('Ukryj','UKRYJ ETAP PROJEKT:','secondary');
+            break;
+        case 'psDelete':
+                changeDataState('Usuń','USUŃ ETAP PROJEKT:','danger');
+            break;
+        case 'block':
+            break;
+        case 'runMain':
+            loggedUserPerm=d['data']['value']['perm'];
+            setButtonDisplay(document.getElementById('createData'),'ADD_STAGE');
+            setTableBtnAva(); 
+        case 'sAll':
+                setHeadTitle(d['data']['value']['headTitle']);
+                displayAll(d['data']['value']['data']);
+            break;
+        default:
+                error.checkStatusResponse(d);
+            break;
+    }
+    }
+    catch(e){
+        d['status']=1;
+        d['info']=e;
+        error.checkStatusResponse(d);
+        console.log(e);
+    }
+}
+
+
 function createFilePosition(property,value,checked)
 {
     var divFormFile=createTag('','div','form-check form-check-inline mt-1 mb-1');
@@ -1145,57 +1386,9 @@ function createTable(colTitle,tBody)
     return table;
 }
 
-function changeDataState(btnLabel,title,titleClass)
-{
-    console.log('===changeDataState()===');
-     /*
-        * SLOWNIKI:
-        * data[0] = DATA
-        * data[1] = SLO
-    */
-    defaultTask='getprojectsstagelike&b='+actData['data']['value']['head'].i;
-    prepareModal(title,'bg-'+titleClass);
-    var form=createForm('POST',actData['data']['function'],'form-horizontal','OFF');
-    var add=document.getElementById('AdaptedDynamicData'); 
-    removeFields(form);
-    add.appendChild(createTag(actData['data']['value']['head'].t,'h5','text-'+titleClass+' mb-3 text-center font-weight-bold'));
-    add.appendChild(form);
-    document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),''));
-    document.getElementById('AdaptedButtonsBottom').appendChild(functionBtn(actData['data']['function'],createBtn(btnLabel,'btn btn-'+titleClass,actData['data']['function']),actData['data']['function']));
-    /* INFO */
-    document.getElementById('AdaptedModalInfo').appendChild(createTag("Project Stage ID: "+actData['data']['value']['head'].i+", Create user: "+actData['data']['value']['head'].cu+" ("+actData['data']['value']['head'].cul+"), Create date: "+actData['data']['value']['head'].cd,'small','text-left text-secondary ml-1'));
-}
-function removeFields(ele)
-{ 
-    console.log('---removeFields()---');
-    ele.appendChild(createInput('hidden','id',actData['data']['value']['head'].i,'','','n'));
-    var p=createTag('Podaj Powód: ','p','text-left');
-    var inp=createInput('text','extra','','form-control mb-1','Wprowadź powód','n');
-        inp.style.display = "none";
-    actData['data']['value']['slo'].push({
-                                                'ID' : "0",
-                                                'Nazwa' : 'Inny:'
-                                            });
-    var select=createSelectFromObject(actData['data']['value']['slo'],'Nazwa','reason','form-control mb-1');
-        select.onchange = function() { checkReason(this,'extra'); };
-    ele.appendChild(p); 
-    ele.appendChild(select); 
-    ele.appendChild(inp); 
-    return '';
-}
-function checkReason(t,id)
-{
-    console.log('---checkReason()---');
-    var splitValue=t.value.split("|");
-    if(splitValue[0]==='0')
-    {
-        document.getElementById(id).style.display = "block";
-    }
-    else
-    {
-         document.getElementById(id).style.display = "none";
-    };
-}
+
+
+
 
 function displayAll(d)
 {
@@ -1221,64 +1414,7 @@ function createProjectInput(type,value,label)
     divAll.appendChild(divErr);
     return divAll;
 }
-function functionBtn(f,btn,task)
-{
-    console.log('---functionBtn()---');
-    console.log(f);
-    switch(f)
-    {
-        case 'psShowStage':
-                btn.onclick = function(){ 
-                    //var ta=document.getElementById('data-stage-value');
-                    console.log(document.querySelectorAll('[id$="-data-stage-value"]'));
-                    var ta=document.querySelectorAll('[id$="-data-stage-value"]');
-                    console.log(ta.length);
-                    var value='';
-                    for(var i=0;i<ta.length;i++){
-                        console.log(ta[i].value);
-                        value+=ta[i].value+'<br/>';
-                    }
-                    var p=document.getElementById('data-stage-result');
-                    p.innerHTML=value;
-                };
-                break;
-        case 'cancel':
-                btn.onclick = function()
-                {
-                    reloadData();
-                };
-            break;
-        case 'edit':               
-                btn.onclick = function()
-                {
-                    clearAdaptedModalData();
-                    actData['data']['function']='psEdit';
-                    //actData['data']['task']='psEdit';
-                    //runFunction(actData);
-                    //console.log(actData);
-                    ajax.getData('setProjectStageWskB&id='+actData['data']['value']['head']['i']);
-                    fieldDisabled='n';
-                    inputFieldCounter=0;
-                    //clearAdaptedModalData();
-                    manageData('Zatwierdź','Edycja etapu projektu:','info','psEdit');
-                };
-                break;
-        case 'psHide':
-                assignConfirmBtn(btn,"Potwierdź ukrycie etapu projektu",task);
-                break;
-        case 'psDelete':
-                assignConfirmBtn(btn,"Potwierdź usunięcie etapu projektu",task);
-                break;
-        case 'psEdit':
-        case 'psCreate':
-        //case 'psDelete':
-            btn.onclick = function() { postData(this,task); };
-            break;
-        default: 
-            break;
-    }
-    return btn;
-}
+
 function assignConfirmBtn(btn,confirmlabel,task){
     btn.onclick = function() {
         if(confirm(confirmlabel))
@@ -1355,46 +1491,8 @@ function createUnsignedNumber(q,inputName)
         input.onblur=function(){checkNumber(this);};
         return input;
 }
-function createNewField(dynamicField)
-{
-    console.log('===createNewField()===');
-    console.log(dynamicField);
-    var divAll=createTag('','div','col-auto');
-    var divBtn=createTag('','div','row');
-    var divInput=document.createElement('div'); 
 
-    // ADD BUTTON
-    var addBtn=createAddButton('addBtn',fieldDisabled);
-        if(fieldDisabled!=='y')
-        {
-            addBtn.onclick=function()
-            {
-                //inputFieldCounter++;
-                dynamicField.appendChild(createInputTextField('Wprowadź opis:',100,inputFieldCounter));
-            };
-        }
-    divBtn.appendChild(addBtn);
-    divAll.appendChild(divInput);
-    divAll.appendChild(divBtn);
-    console.log(divAll);
-    return (divAll);
-}
-function findData(value)
-{
-    ajax.getData(defaultTask+'&filter='+value);
-}
-function createData()
-{
-    clearAdaptedModalData();
-    ajax.getData('getNewStageSlo');
-}
-function showHidden(ele)
-{
-    console.log('===showHidden()===\n'+ele.value);
-    changeBoxValue(ele);
-    defaultTask='getprojectsstagelike&v='+ele.value;
-    findData(document.getElementById('findData').value);
-}
+
 function loadData(){
     console.log('---loadData()---');
     //ajax.getData(defaultTask);
@@ -1402,10 +1500,9 @@ function loadData(){
     error.set('overAllErr');
     ajax.getData('getModulStageDefaults');
 }
-function reloadData()
-{
-    console.log('---reloadData()---');
-    cModal('AdaptedModal');
-    ajax.getData(defaultTask);
+
+function setHeadTitle(title){
+    console.log('---setHeadTitle()---\r\n'+title);
+    document.getElementById('headTitle').innerText=title;
 }
-loadData();
+//loadData();

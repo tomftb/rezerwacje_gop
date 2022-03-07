@@ -3,10 +3,10 @@
  * SINGLETON
  */
 final class Logger{
-	private static $logLink;
-	private static $filename='';
-	private static $logName='';
-	private static $dir=APP_ROOT."/log";
+    private static $logLink;
+    private static $filename='';
+    private static $logName='';
+    private static $dir=APP_ROOT."/log";
     
     private function __construct($from){
         self::setLogName();

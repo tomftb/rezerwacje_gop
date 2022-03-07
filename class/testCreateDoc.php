@@ -1,23 +1,13 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- * Description of testCreateDoc
- *
- * @author tborczynski
- */
 require('convertHtmlToArray.php');
 
 class testCreateDoc {
     private $phpWord;
     private $attribute=array();
     private $word;/* Word 2007 OBJECT */
-    private $fontStyle=array();
+	/* ACTUALL FONT STYLE */
+    private $ActFontStyle=array();
     private $paragraphStyle=array();
     private $mainSection;
     private $textRun;
@@ -52,6 +42,8 @@ class testCreateDoc {
         $convert=new convertHtmlToArray();
         $convert->addHtml($text);
         $convert->createHtmlArray();
+	print_r($convert->getHtmlArray());
+	//die(__LINE__."\r\n");
         if($convert->getError()){
             echo $convert->getError()."\r\n";
             return false;
@@ -65,44 +57,38 @@ class testCreateDoc {
     }
     private function writeElementReport($element){
         echo __METHOD__."\r\n";
-        //print_r($element);
-        
-        $element['type']==='text' ? self::writeText($element['value']) : self::setTextAttribute($element); 
+        $element['type']==='text' ? self::writeText($element['tag']) : self::checkTag($element['type'],$element['tag'],$element['style']); 
     }
     private function writeText($text=''){
-        echo __METHOD__."\r\n".$text."\r\n";
-        //$this->mainSection->addText($text,$this->fontStyle,$this->paragraphStyle);
-        print_r($this->fontStyle);
-        $this->textRun->addText($text,$this->fontStyle,$this->paragraphStyle);
-        
+        echo __METHOD__."()\r\n".$text."\r\n";
+        //die("DIE:".__LINE__."\r\n");
+        //$this->mainSection->addText($text,$this->ActFontStyle,$this->paragraphStyle);
+		echo "CURRENT FONT STYLE FOR TEXT:\r\n";
+        print_r($this->ActFontStyle);
+        $this->textRun->addText($text,$this->ActFontStyle,$this->paragraphStyle);
     }
-    private function setTextAttribute($element=array()){
-        /*
+    private function checkTag($type='',$tag='',$attribute=array()){
+         echo __METHOD__."\r\nTYPE => ".$type."\r\nTAG => ".$tag."\r\n";
+         /*
          * tag = HTML otag/ctag => otag => open tag, ctag => close tag
          * attrbiute = HTML tag attribute
          */
-       
-        print_r($element);
-        self::setUpTag($element['type'],$element['value'],$element['attribute']);
-       
-    }
-    private function setUpTag($type='',$tag='',$attribute=array()){
         if($type==='otag'){
-            self::setUpOpenTag($tag);
-            self::setUpAttribute($tag,$attribute);
+            self::setOpenTag($tag);
+            self::setOpenAttribute($tag,$attribute);
         }
         else if($type==='ctag'){
-            self::setUpCloseTag($tag);
-            self::setDownAttribute($tag);
+            self::setCloseTag($tag);
+            self::setCloseAttribute($tag);
         }
         else if($type==='octag'){
-            self::setUpOpenCloseTag($tag);
+            self::setOpenCloseTag($tag);
         }
         else{
             /* UNAVAILABLE TAB*/
         }
     }
-    private function setUpOpenTag($tag=''){
+    private function setOpenTag($tag=''){
         echo __METHOD__."\r\n".$tag."\r\n";
         switch($tag){
             case 'P':
@@ -112,100 +98,144 @@ class testCreateDoc {
             case 'UL':
                 break;
             case 'I':
-                $this->fontStyle['italic']=true;
+                $this->ActFontStyle['italic']=true;
                 break;
             case 'U':
-                $this->fontStyle['underline']='single';
+                $this->ActFontStyle['underline']='single';
                 break;
             case 'B':
-                $this->fontStyle['bold']=true;
-                break;
-            case 'BR':
+                $this->ActFontStyle['bold']=true;
                 break;
             default:
                 /* UNAVAILABLE TAG */
                 break;
         }
     }
-    private function setUpCloseTag($tag=''){
+    private function setCloseTag($tag=''){
         echo __METHOD__."\r\n".$tag."\r\n";
         switch($tag){
             case 'P':
+				/* ADD BREAK LINE */
+				$this->textRun->addTextBreak();
                 break;
             case 'SPAN':
                 break;
             case 'UL':
                 break;
             case 'I':
-                //UNSET($this->fontStyle['underline']);
-                $this->fontStyle['italic']=false;
+                //UNSET($this->ActFontStyle['underline']);
+                $this->ActFontStyle['italic']=false;
                 break;
             case 'U':
                 //$this->fontStyle['underline']='single';
-                UNSET($this->fontStyle['underline']);
+                UNSET($this->ActFontStyle['underline']);
                 break;
             case 'B':
-                $this->fontStyle['bold']=false;
+                $this->ActFontStyle['bold']=false;
                 break;
-            case 'BR':
-                break;
+           
             default:
                 /* UNAVAILABLE TAG */
                 break;
         }
     }
-    private function setUpOpenCloseTag($tag=''){
+    private function setOpenCloseTag($tag=''){
         echo __METHOD__."\r\n".$tag."\r\n";
-    }
-    private function setUpAttribute($tag='',$attr=array()){
-        echo __METHOD__." => ${tag}\r\n";
-        if(count($attr)>0){
-            /* CREATE STYLE STACK */
-            echo __METHOD__."\r\nCREATE STACK FOR => ".$tag."\r\n";
-            array_push($this->styleStack,array('tag'=>$tag,'attr'=>$attr));
-            print_r($this->styleStack);
-        }
-        foreach($attr as $a){
-            switch($a['property']){
-                case 'FONT-SIZE':
-                    $this->fontStyle['size']=$a['value'];
-                    break;
-                case 'COLOR':
-                    $this->fontStyle['color']=$a['value'];
-                    break;
-                case 'FONT-FAMILY':
-                    $this->fontStyle['name']=$a['value'];
-                    break;
-                case 'FONT-WEIGHT':
-                    /* bold / normal */
-                    //$this->fontStyle['bold']=true;
-                    break;
-                case 'BACKGROUND-COLOR':
-                    //$this->fontStyle['fgColor']=$a['value'];
-                    break; 
-                case 'TEXT-ALIGN':
-                    //$this->fontStyle['fgColor']=$a['value'];
-                    break;
-                default:
-                    /* UNAVAILABLE TAG */
-                    break;
-            }
-            
+        switch($tag){
+            case 'BR':
+		/* ADD BREAK LINE */
+		$this->textRun->addTextBreak();
+            break;
+            default:
+                /* UNAVAILABLE TAG */
+                break;
         }
     }
-    private function setDownAttribute($tag=''){
+    private function setOpenAttribute($tag='',$attr=array()){
         echo __METHOD__." => ${tag}\r\n";
-        /* LOOP FROM END */
-        $key=0;
-        $tmpAttr=array();
-        $found=false;
-        $foundKey=0;
-        $tmpStyleStack=array();
-        $foundI=0;
-        $foundIdKey=0;
-        $foundId=false;
-        $foundIdNumber=0;
-        for($i=count($this->styleStack);$i>0;$i--){
+		/* TAG ADD TO STACK */
+        //if(count($attr)===0){ return false; }
+        /* ADD TO STYLE STACK */
+        echo "ADD TO STACK => ".$tag."\r\n";
+        array_push($this->styleStack,array('tag'=>$tag,'attr'=>$attr));
+		echo "CURRENT STACK:\r\n";
+        print_r($this->styleStack);
+		self::updateActFontStyle($attr);	
+    }
+	private function updateActFontStyle($attr=array()){
+		echo __METHOD__."\r\n";
+		foreach($attr as $a){
+			switch($a['property']){
+				case 'FONT-SIZE':
+					$this->ActFontStyle['size']=$a['tag'];
+					break;
+				case 'COLOR':
+					$this->ActFontStyle['color']=$a['tag'];
+					break;
+				case 'FONT-FAMILY':
+					$this->ActFontStyle['name']=$a['tag'];
+					break;
+				case 'FONT-WEIGHT':
+					/* bold / normal */
+					//$this->ActFontStyle['bold']=true;
+					break;
+				case 'BACKGROUND-COLOR':
+					//$this->ActFontStyle['fgColor']=$a['tag'];
+					break; 
+				case 'TEXT-ALIGN':
+					//$this->ActFontStyle['fgColor']=$a['tag'];
+					break;
+				default:
+					/* UNAVAILABLE TAG */
+					break;
+			}
+        }
+	}
+    private function setCloseAttribute($tag=''){
+        echo __METHOD__." => ${tag}\r\n";
+		/* 
+		THERE IS TWO OPTIONS:
+		- check with last stack element -> if not equal -> thrown ERRO -> MUST BECAUSE FOR EXMAPLE <b><table><tr></td></b> ... IS POSSIBLE!!!
+		- check is there exist open tag equal close tak -> if not exists -> thrown error
+		*/
+		
+		self::checkLastStyleStackElement($tag);
+		self::updateStyleStack(self::findLastOpenTag($tag));
+		/* UPDATE CURRENT FONT STYLE => TAG AND ATTRIBUTE */
+		self::updateCurrentFontStyle();
+		
+		//die(__LINE__);
+		return true; 
+    }
+	private function checkLastStyleStackElement($tag=''){
+		echo __METHOD__."\r\n";
+		$last='';
+		print_r(end($this->styleStack));
+		if(count($this->styleStack)===0){
+			echo "STACK IS EMPTY - THROWN ERROR\r\n";
+			die(__LINE__);
+		}
+		$last=end($this->styleStack)['tag'];
+		if($last!==$tag){
+			echo "LAST STACK ELEMENT ".$last." NOT EQUAL CLOSE TAG ".$tag." => THROWN ERROR\r\n";
+			die(__LINE__);
+		}
+		else{
+			echo "LAST STACK ELEMENT ".$last." EQUAL CURRENT CLOSE TAG ".$tag."\r\n";
+			
+			
+			return true;
+		}
+	}
+	private function findLastOpenTag($tag=''){
+		echo __METHOD__."\r\n";
+		$key=0;
+		if(count($this->styleStack)===0){
+			echo "STACK IS EMPTY - THROWN ERROR\r\n";
+			die(__LINE__);
+		}
+		/* LOOP FROM END */
+		for($i=count($this->styleStack);$i>0;$i--){
             /* 
              * FIND LAST TAG
              * IF FOUND
@@ -213,103 +243,67 @@ class testCreateDoc {
              * OMMIT WRTIE TO NEW ARRAY
              */
             $key=$i-1;
-            echo "[ID:".$i."]\r\n";
             echo "[KEY:".$key."]\r\n";
             echo "[TAG:".$this->styleStack[$key]['tag']."]\r\n";
-            /* IF FOUND FIRST occurrence => NO MORE RMEOVE */
-            // if($tag===$this->styleStack[$key]['tag']){
-            if($tag===$this->styleStack[$key]['tag'] && $found===false){
-                
-                echo "FOUND TAG\r\n";
-                $tmpAttr=$this->styleStack[$key]['attr'];
-                $found=true;
-                $foundKey=$key;
-                //$foundI=$i;
-                $foundI=$i;
-                continue;
-            }
-            array_push($tmpStyleStack,$this->styleStack[$key]);
+			echo "[ATTR]\r\n";
+			print_r($this->styleStack[$key]['attr']);
+			if($this->styleStack[$key]['tag']===$tag){
+				echo "FOUND OPEN TAG => RETURN STYLE STACK KEY => ".$key."\r\n";
+				return $key;
+			}
         }
-        /* NOT FOUND => RETURN */
-        if(!$found){ return false;}
-        
-        
-        echo "[FOUND] KEY:".$foundKey." - TAG:".$tag."\r\n";
-        print_r($tmpAttr);
-        
-        if($foundKey>0){
-            /* CHECK KEYS BEFORE */
-            echo "[FOUND] KEY GREATER THAN 0 => CHECK KEYS BEFORE\r\n";
-            
-            for($i=count($this->styleStack)-1;$i>0;$i--){
-                $key=$i-1;
-                /* 
-                 * FIND LAST TAG
-                 * IF FOUND
-                 * GET LAST TAG ATTRIBUTE
-                 * OMMIT WRTIE TO NEW ARRAY
-                 */
-                //$key=$i-1;
-                echo "[ID:".$i."]\r\n";
-                echo "[KEY:".$key."]\r\n";
-                echo "[TAG:".$this->styleStack[$key]['tag']."]\r\n";
-                //print_r($this->styleStack[$key]['attr']);
-                /* CHECK ONLY ATTRIBUTE FROM TMP */
-                foreach($this->styleStack[$key]['attr'] as $attr){
-                    echo $attr['property']." - ".$attr['value']."\r\n";
-                    /* LOOP OVER TMP ATTRIBUTE */
-                    foreach($tmpAttr as $id => $attr2){
-                        if($attr2['property'] === $attr['property']){
-                            echo "[ID:$id]TMP ARRAY FOUND BEFORE ATTRIBUTE => ".$attr2['property']."\r\n";
-                            $foundId=true;
-                            $foundIdNumber=$id;
-                            switch($attr['property']){
-                                case 'FONT-SIZE':
-                                    $this->fontStyle['size']=$attr['value']; /* DEFAULT */
-                                    break;
-                                case 'FONT-FAMILY':
-                                    $this->fontStyle['name']=$attr['value']; /* DEFAULT */
-                                    break;
-                                case 'COLOR':
-                                    $this->fontStyle['color']=$attr['value']; /* DEFAULT */
-                                    break;
-                                default:
-                                    /* UNAVAILABLE STYLE ATTRIBUTE */
-                                    break;
-                            }
-                            break;
-                        }
-                    }
-                    if($foundId){ UNSET($tmpAttr[$foundIdNumber]); };
-                }
-                /* FOR ALL NOT FOUND => SET DEFAULT */
-                self::setDefaultAttribute($tmpAttr);
-            }
-            //die(__LINE__);
-        }
-        else{
-           //echo "FKEY EQUAL 0\r\n";
-            /* IF FIRST ELEMENT => SET DEFAULT FOR ALL ATTRIBUTES */
-            self::setDefaultAttribute($tmpAttr);
-        }
-        /* REWRITE FOR NEW ARRAY WITHOUT FOUND ELEMENT */  
-            $this->styleStack=$tmpStyleStack;
-            return true; 
-    }
+		return -1;
+	}
+	private function updateStyleStack($key=-1){
+		echo __METHOD__."\r\nKEY TO REMOVE => ".$key."\r\n";
+		$tmpStyleStack=array();
+		if($key===-1){
+			/* KEY NOT FOUND -> THROWN ERROR */
+			die(__LINE__);
+		}
+		foreach($this->styleStack as $k => $v){
+			echo "K:".$k."\r\n";
+			print_r($v['attr']);
+			if($k!==$key){
+				array_push($tmpStyleStack,$v);
+			}
+		}
+		//echo "NEW STYLE STACK:\r\n";
+		//print_r($tmpStyleStack);
+		/* UPDATE CURRENT STYLE STACK */
+		$this->styleStack=$tmpStyleStack;
+		echo "UPDATED STYLE STACK:\r\n";
+		print_r($this->styleStack);
+		
+		
+	}
+	private function updateCurrentFontStyle(){
+		/* CLEAR */
+		$this->ActFontStyle=array();
+		//$ActFontStyle=array();
+		foreach($this->styleStack as $k => $v){
+			echo "K:".$k."\r\n";
+			print_r($v['attr']);
+			self::setOpenTag($v['tag']);
+			self::updateActFontStyle($v['attr']);	
+		}
+		echo "CURRENT FONT STYLE:\r\n";
+		print_r($this->ActFontStyle);
+	}
     private function setDefaultAttribute($tmpAttr){
         echo __METHOD__."\r\n";
         foreach($tmpAttr as $attr){
                 switch($attr['property']){
                     case 'FONT-SIZE':
-                        UNSET($this->fontStyle['size']);
+                        UNSET($this->ActFontStyle['size']);
                         //$this->fontStyle['size']=10; /* DEFAULT */
                         break;
                     case 'FONT-FAMILY':
-                        UNSET($this->fontStyle['name']);
+                        UNSET($this->ActFontStyle['name']);
                         //$this->fontStyle['name']='Arial'; /* DEFAULT */
                         break;
                     case 'COLOR':
-                        UNSET($this->fontStyle['color']);
+                        UNSET($this->ActFontStyle['color']);
                         //$this->fontStyle['color']='#000000'; /* DEFAULT */
                         break;
                     default:
@@ -319,12 +313,22 @@ class testCreateDoc {
             } 
     }
 }
-
-
+$testTekst='ALA MA KOTA';
+//$testTekst='<p style="font-size:24;font-family:Lato;">P-TEXT<br/></p><img style="margin-left:10px;" src="asdasd.jpg"/>';
 //$testTekst='<<ul  style=" list-style-type: decimal;"><li>asdasda</li></ul>sdfdsfdsf<p></p>...';
-//$testTekst='<p style="font-size:24;font-family:Lato;"> SIZE 24 <p style="font-size:18">SIZE 18 <p style="font-size:16">SIZE 16 </p><b style="font-size:14;FONT-FAMILY:Tahoma;">BOLD TEXT - asdasda</b><b style="font-size:13;FONT-FAMILY:Tahoma;">BOLD TEXT 2 - asdasda</b><b style="font-size:16;FONT-FAMILY:Tahoma;">BOLD TEXT 3 - asdasda</b><u style="color:#ff0000;"> UNDERLINE TEXT - sdfdsfdsf</u><i>1 italic text 4</i><p> Normal text </p> SIZE 18 </p> SIEZE 24 </p>';
-
-$testTekst='<p style="font-size:44;font-family:Lato;"> 44 <p style="font-size:24"> 24 <p style="font-size:16"> 16 </p><b style="font-size:14;FONT-FAMILY:Tahoma;"> BOLD 14 </b><b style="font-size:13;FONT-FAMILY:Tahoma;"> BOLD 13 </b><b style="font-size:16;FONT-FAMILY:Tahoma;"> BOLD 16 </b><u style="color:#ff0000;"> UNDERLINE 24</u><i> italic 24 </i><p> P 24 </p> 24 </p> 44 </p>';
-
+//$testTekst='<p style="font-size:24;font-family:Lato;"><br/><br/> SIZE 24 <p style="font-size:18">SIZE 18 <p style="font-size:16">SIZE 16 </p><b style="font-size:14;FONT-FAMILY:Tahoma;">BOLD TEXT - asdasda</b><b style="font-size:13;FONT-FAMILY:Tahoma;">BOLD TEXT 2 - asdasda</b><b style="font-size:16;FONT-FAMILY:Tahoma;">BOLD TEXT 3 - asdasda</b><u style="color:#ff0000;"> UNDERLINE TEXT - sdfdsfdsf</u><i>1 italic text 4</i><p> Normal text </p> SIZE 18 </p> SIEZE 24 </p>';
+//$testTekst='<p style="font-size:44;font-family:Lato;"> 44 <p style="font-size:24"> 24 <p style="font-size:16"> 16 </p><b style="font-size:14;FONT-FAMILY:Tahoma;"> BOLD 14 </b><b style="font-size:13;FONT-FAMILY:Tahoma;"> BOLD 13 </b><b style="font-size:16;FONT-FAMILY:Tahoma;"> BOLD 16 </b><u style="color:#ff0000;"> UNDERLINE 24</u><i> italic 24 </i><p> P 24 </p> 24 </p> 44 </p>';
+/*
+$testTekst='<p style="font-size:44;font-family:Lato;"> 44'
+				.'<p style="font-size:24"> 24 '
+					.'<p style="font-size:16"> 16 </p>'
+					.'<u style="color:#ff0000;"> UNDERLINE 24</u>'
+					.'<i> italic 24 </i>'
+					.'<p> P 24 </p>'
+					.'24'
+				.'</p>'
+				.'44'
+			.'</p>';
+*/
 $test=NEW testCreateDoc();
 $test->createProjectReport($testTekst);

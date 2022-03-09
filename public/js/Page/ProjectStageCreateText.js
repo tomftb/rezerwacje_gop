@@ -1,71 +1,71 @@
 class ProjectStageCreateText{
-    static Modal;
-    static Items;
-    static Stage;
-    static Html;
+    Modal;
+    Items;
+    Stage;
+     Html;
     /* FIELD COUNTER */
-    static i=0;
+    i=0;
     /* FIELD COUNTER */
-    static iField=1;
-    static sectionCount=1;
-    static link={};
-    static helplink={};
-    static resonse; 
-    static Glossary={};
+    iField=1;
+    sectionCount=1;
+    link={};
+    helplink={};
+    resonse; 
+    Glossary={};
     
-    static create(response){
+    create(response){
         console.log('ProjectStageCreateText::create()');
         console.log(response);
-        ProjectStageCreateText.setUpGlossary(response);
+        this.setUpGlossary(response);
         /* 
          * TEST GET 
-        console.log(ProjectStageCreateText.Glossary.getKey('parameter'));
-        console.log(ProjectStageCreateText.Glossary.getKeyProperty('parameter','STAGE_TEXT_BACKGROUND_COLOR'));
-        console.log(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'));
+        console.log(this.Glossary.getKey('parameter'));
+        console.log(this.Glossary.getKeyProperty('parameter','STAGE_TEXT_BACKGROUND_COLOR'));
+        console.log(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'));
         return true;
         */
-        ProjectStageCreateText.Items.prepareModal('Dodaj etap projektu - tekst','bg-info');
-        ProjectStageCreateText.Items.setCloseModal(ProjectStageCreateText.Stage.ProjectStageTable,'runTable',ProjectStageCreateText.Stage.defaultTask+'0');
+        this.Items.prepareModal('Dodaj etap projektu - tekst','bg-info');
+        this.Items.setCloseModal(this.Stage.ProjectStageTable,'runTable',this.Stage.defaultTask+'0');
         
         /* SET DEFAULT (EMPTY) LINK TO DATA*/
-        ProjectStageCreateText.link=ProjectStageCreateText.getEmptyLink();
+        this.link=this.getEmptyLink();
         /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
-        ProjectStageCreateText.helplink=ProjectStageCreateText.getEmptyHelpLink();
+        this.helplink=this.getEmptyHelpLink();
        
-        var form=ProjectStageCreateText.Html.getForm();
+        var form=this.Html.getForm();
         /* ASSIGN TITLE FIELD */
-        ProjectStageCreateText.createHead(form,'','GOP');
+        this.createHead(form,'','GOP');
         /* ASSING PREVIEW FIELD */
-        form.appendChild(ProjectStageCreateText.createPreview());
+        form.appendChild(this.createPreview());
          /* ASSING WORKING FIELD */
-        form.appendChild(ProjectStageCreateText.createDynamicView());
+        form.appendChild(this.createDynamicView());
    
-        ProjectStageCreateText.Modal.link['adapted'].appendChild(form);
+        this.Modal.link['adapted'].appendChild(form);
          /* ASSING ACTION BUTTONS */
-        ProjectStageCreateText.createButtons();
-        console.log(ProjectStageCreateText.Modal.link['adapted']);
-        console.log(ProjectStageCreateText.Modal.link['button']); 
-        console.log(ProjectStageCreateText.Modal.link['error']); 
-        ProjectStageCreateText.createManageButton('Dodaj');
+        this.createButtons();
+        console.log(this.Modal.link['adapted']);
+        console.log(this.Modal.link['button']); 
+        console.log(this.Modal.link['error']); 
+        this.createManageButton('Dodaj');
     }
-    static setUpGlossary(response){
+      setUpGlossary(response){
         console.log('ProjectStageCreateText::setUpGlossary()');
-        if(ProjectStageCreateText.Stage.Items.ManageGlossary.exist('text')) {
+        if(this.Stage.Items.ManageGlossary.exist('text')) {
             console.log('Gloassary text exist');
-            console.log(ProjectStageCreateText.Glossary);
+            console.log(this.Glossary);
             return true;
         }
         console.log('Gloassary text not exist');
-        ProjectStageCreateText.Glossary=ProjectStageCreateText.Stage.Items.ManageGlossary.create('text');
-        ProjectStageCreateText.Glossary.add('color',response.data.value.glossary.color);
-        ProjectStageCreateText.Glossary.add('align',response.data.value.glossary.align);
-        ProjectStageCreateText.Glossary.add('decoration',response.data.value.glossary.decoration);
-        ProjectStageCreateText.Glossary.add('fontfamily',response.data.value.glossary.fontfamily);
-        ProjectStageCreateText.Glossary.add('measurement',response.data.value.glossary.measurement);
-        ProjectStageCreateText.Glossary.add('parameter',response.data.value.glossary.parameter);
-        console.log(ProjectStageCreateText.Glossary);
+        this.Glossary=this.Stage.Items.ManageGlossary.create('text');
+        this.Glossary.add('color',response.data.value.glossary.color);
+        this.Glossary.add('align',response.data.value.glossary.align);
+        this.Glossary.add('decoration',response.data.value.glossary.decoration);
+        this.Glossary.add('fontfamily',response.data.value.glossary.fontfamily);
+        this.Glossary.add('measurement',response.data.value.glossary.measurement);
+        this.Glossary.add('parameter',response.data.value.glossary.parameter);
+        console.log(this.Glossary);
     }
-    static getEmptyLink(){
+      getEmptyLink(){
         console.log('ProjectStageCreateText::getEmptyLink()');
         var link={
             department:'',
@@ -74,7 +74,7 @@ class ProjectStageCreateText{
         };
         return link;
     }
-    static getEmptyHelpLink(){
+      getEmptyHelpLink(){
         console.log('ProjectStageCreateText::getEmptyHelpLink()');
         var link={
             previewDiv:{
@@ -88,33 +88,33 @@ class ProjectStageCreateText{
         };
         return link;
     }
-    static createPreview(){
+      createPreview(){
         console.log('ProjectStageCreateText::createPreview()');
-        var mainDiv=ProjectStageCreateText.Html.getRow();
+        var mainDiv=this.Html.getRow();
             mainDiv.classList.add('d-none');
-            ProjectStageCreateText.helplink['previewDiv'].all=mainDiv;
-            ProjectStageCreateText.helplink.previewDiv.pageBackgroundColor=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v');
+            this.helplink['previewDiv'].all=mainDiv;
+            this.helplink.previewDiv.pageBackgroundColor=this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v');
         return mainDiv;
     }
-    static createHead(ele,title,department){
-        var titleDiv=ProjectStageCreateText.Html.getRow();
-        var departmentDiv=ProjectStageCreateText.Html.getRow();
+      createHead(ele,title,department){
+        var titleDiv=this.Html.getRow();
+        var departmentDiv=this.Html.getRow();
             //mainDiv.classList.add('bg-info');
-            ProjectStageCreateText.helplink['titleDiv']=titleDiv;
+            this.helplink['titleDiv']=titleDiv;
         
-        var titleLabelDiv=ProjectStageCreateText.Html.getCol(1);
-        var titleInputDiv=ProjectStageCreateText.Html.getCol(11);
+        var titleLabelDiv=this.Html.getCol(1);
+        var titleInputDiv=this.Html.getCol(11);
         
       
-            titleLabelDiv.appendChild(ProjectStageCreateText.createLabel('h3','Tytuł'));
+            titleLabelDiv.appendChild(this.createLabel('h3','Tytuł'));
             
-        var input=ProjectStageCreateText.Html.getInput('title',title,'text');
+        var input=this.Html.getInput('title',title,'text');
             input.classList.add('form-control');
             input.setAttribute('placeholder','Enter title');
             input.setAttribute('aria-describedby',"titleHelp" );
             titleInputDiv.appendChild(input);
         
-        ProjectStageCreateText.helplink['title']=input;
+        this.helplink['title']=input;
         
         var helpValue=document.createTextNode('Staraj sie wprowadzić jednoznaczy tytuł.');     
          
@@ -133,19 +133,19 @@ class ProjectStageCreateText{
             }
         };
        
-        var departmentLabelDiv=ProjectStageCreateText.Html.getCol(1);
-        var departmentInputDiv=ProjectStageCreateText.Html.getCol(11);
-            departmentLabelDiv.appendChild(ProjectStageCreateText.createLabel('h3','Dział:'));
-        var department=ProjectStageCreateText.createSelect('department','department');
+        var departmentLabelDiv=this.Html.getCol(1);
+        var departmentInputDiv=this.Html.getCol(11);
+            departmentLabelDiv.appendChild(this.createLabel('h3','Dział:'));
+        var department=this.createSelect('department','department');
             department.setAttribute('aria-describedby',"departmentHelp" );
-            department.appendChild(ProjectStageCreateText.createSelectOption('Domyślny:',departmentData));  
-            department.appendChild(ProjectStageCreateText.createSelectOption('Dostępne:',departmentData)); 
+            department.appendChild(this.createSelectOption('Domyślny:',departmentData));  
+            department.appendChild(this.createSelectOption('Dostępne:',departmentData)); 
             department.onchange = function () {
                 //console.log(this);
                 //console.log(this.value);
-                ProjectStageCreateText.link['department']=this.value;
+                this.link['department']=this.value;
             };
-            ProjectStageCreateText.link['department']=departmentData[0].value;
+            this.link['department']=departmentData[0].value;
         
         var departmentHelpValue=document.createTextNode('Wskaż dział.');     
          
@@ -166,43 +166,44 @@ class ProjectStageCreateText{
         ele.appendChild(titleDiv);
         ele.appendChild(departmentDiv);
     }
-    static createLabel(h,value){
+      createLabel(h,value){
         var titleLabelValue=document.createTextNode(value);
         var titleLabel=document.createElement(h);
             titleLabel.classList.add('text-center','font-weight-bold');
             titleLabel.appendChild(titleLabelValue);
             return titleLabel;
     }
-    static createDynamicView(){
+      createDynamicView(){
         console.log('ProjectStageCreateText::createDynamicView()');
        
-        var mainDiv=ProjectStageCreateText.Html.getRow();
+        var mainDiv=this.Html.getRow();
             mainDiv.classList.add('d-block');
             
-        var mainDivSection=ProjectStageCreateText.Html.getCol(12);
+        var mainDivSection=this.Html.getCol(12);
             
             /* CREATE TEXT SECTION */
-            mainDivSection.appendChild(ProjectStageCreateText.createSection(0,0,0));
+            mainDivSection.appendChild(this.createSection(0,0,0));
             mainDiv.appendChild(mainDivSection);
              /* CREATE ADD BUTTON */
-            mainDiv.appendChild(ProjectStageCreateText.createButtonCol(ProjectStageCreateText.createAddSectionButton('section-0')));
+            mainDiv.appendChild(this.createButtonCol(this.createAddSectionButton()));
+            //mainDiv.appendChild(this.createButtonCol(this.createAddSectionButton('section-0')));
             /* CREATE TEXT SECTION PAGE TOOL*/
-            mainDiv.appendChild(ProjectStageCreateText.createTextPageTool());
+            mainDiv.appendChild(this.createTextPageTool());
             
-            ProjectStageCreateText.helplink['dynamicDiv']=mainDiv;
-            ProjectStageCreateText.helplink['dynamicSection']=mainDivSection;
+            this.helplink['dynamicDiv']=mainDiv;
+            this.helplink['dynamicSection']=mainDivSection;
             
         return mainDiv;
     }
-    static setPreviewData(mainDiv){
+      setPreviewData(mainDiv){
         console.log('ProjectStageCreateText::setPreviewData()');
-        ProjectStageCreateText.setPreviewPage(mainDiv);
-        //ProjectStageCreateText.setPreviewPageText(mainDiv.childNodes[0].childNodes[0].childNodes[0]);
+        this.setPreviewPage(mainDiv);
+        //this.setPreviewPageText(mainDiv.childNodes[0].childNodes[0].childNodes[0]);
     }
-    static setPreviewPage(mainDiv){
+      setPreviewPage(mainDiv){
         console.log('ProjectStageCreateText::setPreviewPage()');
         console.log('ALL SECTION');
-        console.log(ProjectStageCreateText.link.section);
+        console.log(this.link.section);
         /*
          * ADD GREY TO MAIN DIV
          */
@@ -218,7 +219,7 @@ class ProjectStageCreateText{
             blankPage.style.width='791px';
             blankPage.style.height='1120px';   
             blankPage.style.border='1px solid rgb(198,198,198)'; 
-            blankPage.style.backgroundColor=ProjectStageCreateText.helplink.previewDiv.pageBackgroundColor;
+            blankPage.style.backgroundColor=this.helplink.previewDiv.pageBackgroundColor;
         var writePageSectionWidth=607;
         var writePage=document.createElement('div');
             writePage.style.width='699px';
@@ -228,18 +229,18 @@ class ProjectStageCreateText{
             /* DEFAULT LEFT MARGIN 2,5 cm */ 
             writePage.style.paddingLeft='92px'; /* ALL 314, MAIN 10 */
             /* TO DO */
-            //writePage.style.textAlign=ProjectStageCreateText.helplink.previewDiv.pageTextAlign
+            //writePage.style.textAlign=this.helplink.previewDiv.pageTextAlign
             
         /* LOOP OVER  SECTION */    
 
-        for(const property in ProjectStageCreateText.link.section){
-            console.log(ProjectStageCreateText.link.section[property]);
+        for(const property in this.link.section){
+            console.log(this.link.section[property]);
             
             /* CHECK AND SETUP COLUMNS NUMBER */
-            writePageSectionWidth=Math.floor(607/ProjectStageCreateText.link.section[property].subsectionvisible); /* minus padding left 92px */
+            writePageSectionWidth=Math.floor(607/this.link.section[property].subsectionvisible); /* minus padding left 92px */
             /* LOOP OVER SUBSECTION */   
-            for(var i=0;i<ProjectStageCreateText.link.section[property].subsectionvisible;i++){
-                console.log(ProjectStageCreateText.link.section[property].subsection[i]);
+            for(var i=0;i<this.link.section[property].subsectionvisible;i++){
+                console.log(this.link.section[property].subsection[i]);
                 
                 var writePageSection=document.createElement('div');
                     writePageSection.style.width=writePageSectionWidth+'px';
@@ -248,16 +249,16 @@ class ProjectStageCreateText{
                     writePageSection.style.cssFloat='LEFT';
                 
                  /* LOOP OVER SUBSECTION ROW */
-                for(const propSubsectionRow in ProjectStageCreateText.link.section[property].subsection[i]){
+                for(const propSubsectionRow in this.link.section[property].subsection[i]){
                     
                     /* CHECK BREAKLINE */
-                    ProjectStageCreateText.setPreviewPageBreakLine(writePageSection,ProjectStageCreateText.link.section[property].subsection[i][propSubsectionRow]);
+                    this.setPreviewPageBreakLine(writePageSection,this.link.section[property].subsection[i][propSubsectionRow]);
                     /* SIMPLE TEXT */
-                    //writePageSection.innerText=ProjectStageCreateText.link.section[property].subsection[i][propSubsectionRow].value.value;
+                    //writePageSection.innerText=this.link.section[property].subsection[i][propSubsectionRow].value.value;
                     /* SIMPLE HTML */
-                    //writePageSection.innerHTML=ProjectStageCreateText.link.section[property].subsection[i][propSubsectionRow].value.value;                   
+                    //writePageSection.innerHTML=this.link.section[property].subsection[i][propSubsectionRow].value.value;                   
                     /* ADVANCED WITH STYLE */
-                    writePageSection.appendChild(ProjectStageCreateText.setPreviewTextHtml(ProjectStageCreateText.link.section[property].subsection[i][propSubsectionRow]));
+                    writePageSection.appendChild(this.setPreviewTextHtml(this.link.section[property].subsection[i][propSubsectionRow]));
                 }
                 writePage.appendChild(writePageSection);
             }
@@ -267,19 +268,19 @@ class ProjectStageCreateText{
         wholePage.appendChild(blankPage);
         mainDiv.appendChild(wholePage);       
     }
-    static setPreviewPageBreakLine(ele,textProperty){
+      setPreviewPageBreakLine(ele,textProperty){
         var br=document.createElement('br');
             if(textProperty.valuenewline==='1'){
                 console.log('VALUE NEW LINE === 1 ADD BREAK LINE');
                 ele.appendChild(br);
             }
     }
-    static setPreviewPageValue(ele,subsectionrow){
+      setPreviewPageValue(ele,subsectionrow){
         console.log('ProjectStageCreateText::setPreviewPageValue()');
         console.log(ele);
         console.log(subsectionrow);
     }
-    static getEmptyText(){
+      getEmptyText(){
         var textObject={
                 value:'',
                 fontsize:'',
@@ -294,7 +295,7 @@ class ProjectStageCreateText{
         };
         return textObject;
     }
-    static setPreviewTextObject(key,value,all){
+      setPreviewTextObject(key,value,all){
         console.log('ProjectStageCreateText::setPreviewTextObject()');
         const field = key.split('-');
         //console.log(field[0]);
@@ -302,14 +303,14 @@ class ProjectStageCreateText{
         //console.log(value);
         if(!all.hasOwnProperty(field[1])){
             //console.log('create new object - '+field[1]);
-            all[field[1]]=ProjectStageCreateText.getEmptyText();//new Object();
+            all[field[1]]=this.getEmptyText();//new Object();
             all[field[1]][field[0]]=value;
         }
         else{
             all[field[1]][field[0]]=value;          
         }
     }
-    static setPreviewTextHtml(textProperty){
+      setPreviewTextHtml(textProperty){
         console.log('ProjectStageCreateText::setPreviewTextHtml()');
         console.log(textProperty);
         var html=document.createElement('span');
@@ -352,12 +353,12 @@ class ProjectStageCreateText{
         html.appendChild(text);
         return html;
     }
-    static createSection(isection,id,idSection){
+      createSection(isection,id,idSection){
         console.log('ProjectStageCreateText::createSection()');
-        console.log(ProjectStageCreateText.link);
-        var mainDiv=ProjectStageCreateText.Html.getRow(); 
-        var mainDivHeader=ProjectStageCreateText.Html.getCol(12); 
-        var mainDivBody=ProjectStageCreateText.Html.getCol(12); 
+        console.log(this.link);
+        var mainDiv=this.Html.getRow(); 
+        var mainDivHeader=this.Html.getCol(12); 
+        var mainDivBody=this.Html.getCol(12); 
         var hr=document.createElement('hr');
             hr.setAttribute('class','w-100 border-1 border-secondary mt-2');//
         var h=document.createElement('h3');    
@@ -365,20 +366,20 @@ class ProjectStageCreateText{
             h.innerHTML='<span class="text-muted">[WIERSZ]</span> Sekcja  nr '+isection;
             mainDivHeader.appendChild(hr);
             mainDivHeader.appendChild(h);
-            ProjectStageCreateText.link.section['section-'+isection]={
+            this.link.section['section-'+isection]={
                 subsectionvisible:0,
                 //ele:mainDivBody,
                 subsection:{},
                 db:idSection
             };
-            ProjectStageCreateText.helplink.section['section-'+isection]={
+            this.helplink.section['section-'+isection]={
                 main:{},
                 subsection:{}
             };
 
-            for(var i=0;i<ProjectStageCreateText.getMaxSubSectionCount();i++){
+            for(var i=0;i<this.getMaxSubSectionCount();i++){
                 
-                ProjectStageCreateText.helplink.section['section-'+isection]['subsection'][i]={
+                this.helplink.section['section-'+isection]['subsection'][i]={
                     /* FOR SHOW/HIDE */
                     all:{},
                     /* FOR ADD */
@@ -386,34 +387,34 @@ class ProjectStageCreateText{
                     /* FOR REMOVE */
                     row:{}
                 };
-                ProjectStageCreateText.link.section['section-'+isection].subsection[i]={};
+                this.link.section['section-'+isection].subsection[i]={};
                 /* ADD SUBSECTION */
-                var mainDivSubsection=ProjectStageCreateText.Html.getRow();
-                var mainDivSubsectionBtn=ProjectStageCreateText.Html.getCol(12);
-                var mainDivSubsectionBody=ProjectStageCreateText.Html.getCol(12);
+                var mainDivSubsection=this.Html.getRow();
+                var mainDivSubsectionBtn=this.Html.getCol(12);
+                var mainDivSubsectionBody=this.Html.getCol(12);
                     
-                    mainDivSubsectionBody.appendChild(ProjectStageCreateText.createSubsection(isection,i,0,0,0));
-                    ProjectStageCreateText.helplink.section['section-'+isection]['subsection'][i].dynamic=mainDivSubsectionBody;
-                    mainDivSubsectionBtn.appendChild(ProjectStageCreateText.createButtonRow(ProjectStageCreateText.createAddSubsectionButton('subsection-'+isection+'-'+i+'-'+0)));
+                    mainDivSubsectionBody.appendChild(this.createSubsection(isection,i,0,0,0));
+                    this.helplink.section['section-'+isection]['subsection'][i].dynamic=mainDivSubsectionBody;
+                    mainDivSubsectionBtn.appendChild(this.createButtonRow(this.createAddSubsectionButton(isection,i,0)));
                     mainDivSubsection.appendChild(mainDivSubsectionBody);
                     mainDivSubsection.appendChild(mainDivSubsectionBtn);
                     
-                    ProjectStageCreateText.helplink.section['section-'+isection]['subsection'][i].all=mainDivSubsection;
+                    this.helplink.section['section-'+isection]['subsection'][i].all=mainDivSubsection;
                     mainDivBody.appendChild(mainDivSubsection);
             }
-            mainDivHeader.appendChild(ProjectStageCreateText.createSectionTool(isection)); 
+            mainDivHeader.appendChild(this.createSectionTool(isection)); 
 
             mainDiv.appendChild(mainDivHeader);  
             mainDiv.appendChild(mainDivBody);   
-            ProjectStageCreateText.helplink.section['section-'+isection].main=mainDiv;
+            this.helplink.section['section-'+isection].main=mainDiv;
             console.log(mainDiv);
             return mainDiv;
     }
-    static createSubsection(isection,isub,isubrow,newLine,idSubsectionRow){
+    createSubsection(isection,isub,isubrow,newLine,idSubsectionRow){
         console.log('ProjectStageCreateText::createSubsection()');
-        var mainDiv=ProjectStageCreateText.Html.getRow();
+        var mainDiv=this.Html.getRow();
             /* APPEND SUBSECTION ROW + ELE */
-            ProjectStageCreateText.link.section['section-'+isection].subsection[isub][isubrow]={
+            this.link.section['section-'+isection].subsection[isub][isubrow]={
                         //ele:mainDiv, 
                         style:{},
                         property:{
@@ -424,45 +425,45 @@ class ProjectStageCreateText{
                         db:idSubsectionRow
                 };
               
-            
-            ProjectStageCreateText.createSubsectionRow(mainDiv,isection,isub,isubrow);
-            mainDiv.appendChild(ProjectStageCreateText.createTextError('error-'+isection+'-'+isub+'-'+isubrow));  
-            mainDiv.appendChild(ProjectStageCreateText.createTextTool(isection,isub,isubrow));  
-            ProjectStageCreateText.helplink.section['section-'+isection]['subsection'][isub]['row'][isubrow]=mainDiv;
+            this.helplink.section['section-'+isection]['subsection'][isub]['row'][isubrow]=mainDiv;
+            this.createSubsectionRow(mainDiv,isection,isub,isubrow);
+            mainDiv.appendChild(this.createTextError('error-'+isection+'-'+isub+'-'+isubrow));  
+            mainDiv.appendChild(this.createTextTool(isection,isub,isubrow));  
+           
             
            
         return mainDiv;
     }
-    static createExtendedSubsection(isection,isub,isubrow){
-        var mainDiv=ProjectStageCreateText.createSubsection(isection,isub,isubrow);
-            mainDiv.appendChild(ProjectStageCreateText.createExtendedTextTool(isection,isub,isubrow));
+    createExtendedSubsection(isection,isub,isubrow){
+        var mainDiv=this.createSubsection(isection,isub,isubrow);
+            mainDiv.appendChild(this.createExtendedTextTool(isection,isub,isubrow));
         return mainDiv;
     }
-    static createSubsectionRow(mainDivText,isection,isub,isubrow){
+      createSubsectionRow(mainDivText,isection,isub,isubrow){
         console.log('ProjectStageCreateText::createSubsectionRow()\r\nSECTION - '+isection+'\r\nSUBSECTION - '+isub+'\r\nROW - '+isubrow);
         /*
          * 
          * isection = section number
          */
-        //var mainDivCol=ProjectStageCreateText.Html.getCol(12);
+        //var mainDivCol=this.Html.getCol(12);
         /*
          * 
          * SET DEFAULT ATTRIBUTE d-none
          */
-        var mainDivCol=ProjectStageCreateText.Html.getCol(12);
-        var mainDiv=ProjectStageCreateText.Html.getRow();
+        var mainDivCol=this.Html.getCol(12);
+        var mainDiv=this.Html.getRow();
         
-        var mainDivSectionLabel=ProjectStageCreateText.Html.getRow();
+        var mainDivSectionLabel=this.Html.getRow();
         var sectionLabel=document.createElement('h4');
             sectionLabel.setAttribute('class','text-center w-100');
             sectionLabel.innerHTML='<span class="text-muted">[KOLUMNA]</span> Podsekcja - '+isub+' wiersz - '+isubrow;
-        var labelDiv=ProjectStageCreateText.Html.getCol(1);
+        var labelDiv=this.Html.getCol(1);
             labelDiv.classList.add('mr-0','pr-0');
-        var valueDiv=ProjectStageCreateText.Html.getCol(10);
-        var removeDiv=ProjectStageCreateText.Html.getCol(1);
+        var valueDiv=this.Html.getCol(10);
+        var removeDiv=this.Html.getCol(1);
             //removeDiv.classList.add('float-right');
-            //removeDiv.appendChild(ProjectStageCreateText.getRemoveButton("rmsubsection-"+isection+'-'+isub+'-'+isubrow));
-            removeDiv.appendChild(ProjectStageCreateText.getRemoveButton(isection,isub,isubrow));
+            //removeDiv.appendChild(this.getRemoveButton("rmsubsection-"+isection+'-'+isub+'-'+isubrow));
+            removeDiv.appendChild(this.getRemoveButton(isection,isub,isubrow));
         /* LABEL */
         var label=document.createElement('LABEL');
             label.setAttribute('class','col-form-label');
@@ -477,21 +478,21 @@ class ProjectStageCreateText{
             input.setAttribute('value','');
             
             /* SET TEXT STYLE FROM PARAMETER */
-            //console.log(ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_SIZE_MEASUREMENT'].v);
+            //console.log(this.glossary.parameter['STAGE_TEXT_FONT_SIZE_MEASUREMENT'].v);
             //input.style.fontSize='12pt';
-            input.style.fontSize=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v')+ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v');
-            input.style.color=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v');
-            input.style.backgroundColor=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v');
-            input.style.fontFamily=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v');
-            input.style.fontWeight=ProjectStageCreateText.setValueStyleFontWeight(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v'));
-            input.style.fontStyle=ProjectStageCreateText.setValueStyleFontStyle(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v'));
-            input.style.textDecoration=ProjectStageCreateText.setValueStyleTextDecoration(input.style.textDecoration,ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_UNDERLINE','v'),'underline');
-            input.style.textDecoration=ProjectStageCreateText.setValueStyleTextDecoration(input.style.textDecoration,ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),'line-through');
+            input.style.fontSize=this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v')+this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v');
+            input.style.color=this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v');
+            input.style.backgroundColor=this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v');
+            input.style.fontFamily=this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v');
+            input.style.fontWeight=this.setValueStyleFontWeight(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v'));
+            input.style.fontStyle=this.setValueStyleFontStyle(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v'));
+            input.style.textDecoration=this.setValueStyleTextDecoration(input.style.textDecoration,this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_UNDERLINE','v'),'underline');
+            input.style.textDecoration=this.setValueStyleTextDecoration(input.style.textDecoration,this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),'line-through');
             /* CREATE LINK TO FIELD INPUT VALUE */
-            //ProjectStageCreateText.link.value[isection+'-'+isub+'-'+isubrow]=input;
+            //this.link.value[isection+'-'+isub+'-'+isubrow]=input;
             
-            ProjectStageCreateText.link.section['section-'+isection]['subsection'][isub][isubrow]['property']['valueEle']=input;
-            ProjectStageCreateText.helplink.section['section-'+isection]['subsection'][isub]['row'][isubrow]=input;
+            this.link.section['section-'+isection]['subsection'][isub][isubrow]['property']['valueEle']=input;
+            this.helplink.section['section-'+isection]['subsection'][isub]['row'][isubrow]=input;
             
             labelDiv.appendChild(label);
             valueDiv.appendChild(input);
@@ -509,24 +510,24 @@ class ProjectStageCreateText{
             mainDivCol.appendChild(mainDiv);
             mainDivText.appendChild(mainDivCol);
             mainDivText.appendChild(mainDivCol);
-            ProjectStageCreateText.helplink.section['section-'+isection]['subsection'][isub]['row'][isubrow]=mainDivText;
+            this.helplink.section['section-'+isection]['subsection'][isub]['row'][isubrow]=mainDivText;
         //return mainDiv;
     }
-    static createSectionTool(isection){
+      createSectionTool(isection){
         console.log('ProjectStageCreateText::createSectionTool()');
-        //var mainDiv=ProjectStageCreateText.Html.getCol(12);
-        var mainDivSection=ProjectStageCreateText.Html.getRow();
-        var tool1=ProjectStageCreateText.Html.getCol(3);
-        var tool2=ProjectStageCreateText.Html.getCol(3);    
-        var tool3=ProjectStageCreateText.Html.getCol(3);
-        var tool4=ProjectStageCreateText.Html.getCol(3);  
-        var sectioncount=ProjectStageCreateText.createTextToolSelect('section-'+isection,'Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',ProjectStageCreateText.getSelectKey(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_DEFAULT','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_DEFAULT','v')),ProjectStageCreateText.getSectionCount(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_DEFAULT','v')));
-            
-            sectioncount.childNodes[1].onchange = function () { ProjectStageCreateText.manageSubsection(this); };
+        //var mainDiv=this.Html.getCol(12);
+        var mainDivSection=this.Html.getRow();
+        var tool1=this.Html.getCol(3);
+        var tool2=this.Html.getCol(3);    
+        var tool3=this.Html.getCol(3);
+        var tool4=this.Html.getCol(3);  
+        var sectioncount=this.createTextToolSelect('section-'+isection,'Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',this.getSelectKey(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_DEFAULT','v'),this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_DEFAULT','v')),this.getSectionCount(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_DEFAULT','v')));
+        var classObject=this;    
+            sectioncount.childNodes[1].onchange = function () { classObject.manageSubsection(this); };
             /* FIRST RUN TO SETUP SECTION DEFAULT COUNT */
-            ProjectStageCreateText.manageSubsection(sectioncount.childNodes[1]);
+            this.manageSubsection(sectioncount.childNodes[1]);
             tool1.appendChild(sectioncount);
-            tool4.appendChild(ProjectStageCreateText.createRemoveSectionButton(isection));
+            tool4.appendChild(this.createRemoveSectionButton(isection));
             //console.log( tool4);
         mainDivSection.appendChild(tool1);
         mainDivSection.appendChild(tool2);
@@ -534,39 +535,39 @@ class ProjectStageCreateText{
         mainDivSection.appendChild(tool4);
         return mainDivSection;
     }
-    static createTextError(id){
+      createTextError(id){
         //console.log('ProjectStageCreateText::createTextError()');
-        var mainDiv=ProjectStageCreateText.Html.getCol(12); 
-        //var mainDiv=ProjectStageCreateText.Html.getRow(); 
+        var mainDiv=this.Html.getCol(12); 
+        //var mainDiv=this.Html.getRow(); 
             mainDiv.classList.add('alert','alert-danger','d-none','mt-1','mb-0');//d-block
             mainDiv.setAttribute('id',id);
-        var errorDiv=ProjectStageCreateText.Html.getCol(12);
-        //var errorDiv=ProjectStageCreateText.Html.getRow();
+        var errorDiv=this.Html.getCol(12);
+        //var errorDiv=this.Html.getRow();
             errorDiv.innerText='Test ERROR';
             mainDiv.appendChild(errorDiv);  
            //mainDivCol.appendChild(mainDiv);
         return mainDiv;
     }
-    static createTextTool(isection,isub,isubrow){
+      createTextTool(isection,isub,isubrow){
         /*
         console.log('ProjectStageCreateText::createTextTool()');
         console.log(isection);
         console.log(isub);
         console.log(isubrow);
         */
-        var mainDivCol=ProjectStageCreateText.Html.getCol(12);
-        var mainDiv=ProjectStageCreateText.Html.getRow();
-        var tool1=ProjectStageCreateText.Html.getCol(2);
-        var tool2=ProjectStageCreateText.Html.getCol(3);
-        var tool3=ProjectStageCreateText.Html.getCol(3);
-        //var tool2=ProjectStageCreateText.Html.getCol(5);
-        var tool4=ProjectStageCreateText.Html.getCol(4);
+        var mainDivCol=this.Html.getCol(12);
+        var mainDiv=this.Html.getRow();
+        var tool1=this.Html.getCol(2);
+        var tool2=this.Html.getCol(3);
+        var tool3=this.Html.getCol(3);
+        //var tool2=this.Html.getCol(5);
+        var tool4=this.Html.getCol(4);
             tool4.classList.add('pt-4');
-        var fontsize=ProjectStageCreateText.createTextToolSelectExtend('fontsize-'+isection+'-'+isub+'-'+isubrow,'Rozmiar tekstu:',ProjectStageCreateText.getDefaultFontSize(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v')),ProjectStageCreateText.getFontSizeList(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v')));
-        var fontcolor=ProjectStageCreateText.createTextToolSelectExtend('fontcolor-'+isection+'-'+isub+'-'+isubrow,'Kolor tekstu:',ProjectStageCreateText.getDefaultColor(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','n')),ProjectStageCreateText.getColorList(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v')));
-        var fontfamily=ProjectStageCreateText.createTextToolSelectExtend('fontfamily-'+isection+'-'+isub+'-'+isubrow,'Czcionka:',ProjectStageCreateText.getDefaultFont(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v')),ProjectStageCreateText.getFontList(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v')));
-        var textalign=ProjectStageCreateText.createTextToolSelectExtend('textalign-'+isection+'-'+isub+'-'+isubrow,'Wskaż kierunek tekstu:',ProjectStageCreateText.getSelectKey(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','n')),ProjectStageCreateText.getFontAlignList(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v')));
-        var fontbackgroundcolor=ProjectStageCreateText.createTextToolSelectExtend('fontbackgroundcolor-'+isection+'-'+isub+'-'+isubrow,'Kolor tła:',ProjectStageCreateText.getDefaultBackgroundColor(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),ProjectStageCreateText.getBackgroundColorList(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'))); 
+        var fontsize=this.createTextToolSelectExtend('fontsize-'+isection+'-'+isub+'-'+isubrow,'Rozmiar tekstu:',this.getDefaultFontSize(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v')),this.getFontSizeList(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v')));
+        var fontcolor=this.createTextToolSelectExtend('fontcolor-'+isection+'-'+isub+'-'+isubrow,'Kolor tekstu:',this.getDefaultColor(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','n')),this.getColorList(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v')));
+        var fontfamily=this.createTextToolSelectExtend('fontfamily-'+isection+'-'+isub+'-'+isubrow,'Czcionka:',this.getDefaultFont(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v')),this.getFontList(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v')));
+        var textalign=this.createTextToolSelectExtend('textalign-'+isection+'-'+isub+'-'+isubrow,'Wskaż kierunek tekstu:',this.getSelectKey(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','n')),this.getFontAlignList(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v')));
+        var fontbackgroundcolor=this.createTextToolSelectExtend('fontbackgroundcolor-'+isection+'-'+isub+'-'+isubrow,'Kolor tła:',this.getDefaultBackgroundColor(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),this.getBackgroundColorList(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'))); 
             
         tool1.appendChild(fontsize);
         tool1.appendChild(fontcolor);
@@ -574,16 +575,16 @@ class ProjectStageCreateText{
         tool2.appendChild(textalign);
         tool3.appendChild(fontbackgroundcolor);
         
-        ProjectStageCreateText.link.section['section-'+isection]['subsection'][isub][isubrow]['style']={
-            fontsize:ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v')+ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v'),
-            fontcolor:ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),
-            fontfamily:ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),
-            textalign:ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),
-            fontbackgroundcolor:ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v')
+        this.link.section['section-'+isection]['subsection'][isub][isubrow]['style']={
+            fontsize:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v')+this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v'),
+            fontcolor:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),
+            fontfamily:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),
+            textalign:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),
+            fontbackgroundcolor:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v')
         };
         
-        ProjectStageCreateText.createTextDecorationTool(tool4,isection,isub,isubrow); 
-        //console.log(ProjectStageCreateText.link);
+        this.createTextDecorationTool(tool4,isection,isub,isubrow); 
+        //console.log(this.link);
         mainDiv.appendChild(tool1);
         mainDiv.appendChild(tool2);
         mainDiv.appendChild(tool3);
@@ -592,28 +593,28 @@ class ProjectStageCreateText{
         return mainDivCol;
         //return mainDiv;
     }
-    static createTextDecorationTool(tool4,isection,isub,isubrow){
+      createTextDecorationTool(tool4,isection,isub,isubrow){
         //console.log('ProjectStageCreateText::createTextDecorationTool()');
-        for(const prop of ProjectStageCreateText.Glossary.getKey('decoration').entries()) { 
+        for(const prop of this.Glossary.getKey('decoration').entries()) { 
             //console.log(prop[0],prop[1]);
             //pageProperties[pair[0]]=pair[1];
-            ProjectStageCreateText.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow);  
+            this.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow);  
             /* SET DEFAULT */
-            //ProjectStageCreateText.link.section['section-'+isection]['subsection'][isub][isubrow]['style'][prop.inputName]=input.childNodes[0];
+            //this.link.section['section-'+isection]['subsection'][isub][isubrow]['style'][prop.inputName]=input.childNodes[0];
         }
     }
-    static setTextDecorationToolEntry(decorationProp,tool4,isection,isub,isubrow){
+      setTextDecorationToolEntry(decorationProp,tool4,isection,isub,isubrow){
         /*
          * decorationProp.n. - name
          * decorationProp.v - value
          */
-        var prop=ProjectStageCreateText.setTextDecorationToolEntryProperties(decorationProp,isection,isub,isubrow);
-        var input = ProjectStageCreateText.createTextToolCheckBox(prop.inputName+'-'+isection+'-'+isub+'-'+isubrow,prop.label,prop.check);
+        var prop=this.setTextDecorationToolEntryProperties(decorationProp,isection,isub,isubrow);
+        var input = this.createTextToolCheckBox(prop.inputName+'-'+isection+'-'+isub+'-'+isubrow,prop.label,prop.check);
         tool4.appendChild(input);
-        //ProjectStageCreateText.link.section['section-'+isection]['subsection'][isub][isubrow]['style'][prop.inputName]=input.childNodes[0];
-        ProjectStageCreateText.link.section['section-'+isection]['subsection'][isub][isubrow]['style'][prop.inputName]=prop.check;
+        //this.link.section['section-'+isection]['subsection'][isub][isubrow]['style'][prop.inputName]=input.childNodes[0];
+        this.link.section['section-'+isection]['subsection'][isub][isubrow]['style'][prop.inputName]=prop.check;
     }
-    static setTextDecorationToolEntryCheck(input,check){
+      setTextDecorationToolEntryCheck(input,check){
         /*
          * console.log('ProjectStageCreateText::setTextDecorationToolEntryCheck()');
          * console.log(check);
@@ -631,7 +632,7 @@ class ProjectStageCreateText{
            input.setAttribute('value','0');
         }     
     }
-     static setTextDecorationToolEntryProperties(decorationProp){
+       setTextDecorationToolEntryProperties(decorationProp){
         /*
          * console.log('ProjectStageCreateText::setTextDecorationToolEntryProperties()');
          * console.log(decorationProp);
@@ -648,22 +649,22 @@ class ProjectStageCreateText{
         };
         switch(decorationProp.v){
             case 'BOLD':
-                fullProp.check=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v');
+                fullProp.check=this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v');
                 fullProp.inputName='fontbold';
                 fullProp.label='<b>'+decorationProp.n+'</b>';
                 break;
             case 'UNDERLINE':
-                fullProp.check=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_UNDERLINE','v');
+                fullProp.check=this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_UNDERLINE','v');
                 fullProp.inputName='fontunderline';
                 fullProp.label='<u>'+decorationProp.n+'</u>';
                 break;
             case 'ITALIC':
-                fullProp.check=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v');
+                fullProp.check=this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v');
                 fullProp.inputName='fontitalic';
                 fullProp.label='<i>'+decorationProp.n+'</i>';
                 break;
             case 'line-through':
-                fullProp.check=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v');
+                fullProp.check=this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v');
                 fullProp.inputName='fontlinethrough';
                 fullProp.label='<span style="text-decoration:line-through;">'+decorationProp.n+'</span>';
                 break;
@@ -674,27 +675,28 @@ class ProjectStageCreateText{
         
         return fullProp;
     }
-    static createExtendedTextTool(isection,isub,isubrow){
+    createExtendedTextTool(isection,isub,isubrow){
         console.log('ProjectStageCreateText::createExtendedTextTool()');
-        var mainDivCol=ProjectStageCreateText.Html.getCol(12);
-        var mainDiv=ProjectStageCreateText.Html.getRow();
-        var tool1=ProjectStageCreateText.Html.getCol(5);
-        var tool2=ProjectStageCreateText.Html.getCol(5);
-        var tool3=ProjectStageCreateText.Html.getCol(2);
-        var radio = ProjectStageCreateText.createTextToolRadioButton('valuenewline-'+isection+'-'+isub+'-'+isubrow,'Tekst od nowej lini?',ProjectStageCreateText.getYesNowRadio('valuenewline-'+isection+'-'+isub+'-'+isubrow));
+        var mainDivCol=this.Html.getCol(12);
+        var mainDiv=this.Html.getRow();
+        var tool1=this.Html.getCol(5);
+        var tool2=this.Html.getCol(5);
+        var tool3=this.Html.getCol(2);
+        var radio = this.createTextToolRadioButton('valuenewline-'+isection+'-'+isub+'-'+isubrow,'Tekst od nowej lini?',this.getYesNowRadio('valuenewline-'+isection+'-'+isub+'-'+isubrow));
+        var classObject=this;    
             /* SET DEFAULT VALUE FOR BREAK LINE */
-            ProjectStageCreateText.link.section['section-'+isection]['subsection'][isub][isubrow]['valuenewline']='1';
+            this.link.section['section-'+isection]['subsection'][isub][isubrow]['valuenewline']='1';
             /* ADD ACTION */
             console.log(radio.childNodes[1]);
             /* YES */
             console.log(radio.childNodes[1].childNodes[0].childNodes[0]);
             radio.childNodes[1].childNodes[0].childNodes[0].onclick = function (){   
-                ProjectStageCreateText.changeNewLineValue(this);
+                classObject.changeNewLineValue(this);
             };
              /* NO */
             console.log(radio.childNodes[1].childNodes[1].childNodes[0]);
             radio.childNodes[1].childNodes[1].childNodes[0].onclick = function (){
-                ProjectStageCreateText.changeNewLineValue(this);
+                classObject.changeNewLineValue(this);
             };
             
             
@@ -707,7 +709,7 @@ class ProjectStageCreateText{
         mainDivCol.appendChild(mainDiv);
         return mainDivCol;
     }
-    static changeNewLineValue(ele){
+      changeNewLineValue(ele){
         console.log(ele);
         console.log(ele.id);
         console.log(ele.value);
@@ -719,18 +721,19 @@ class ProjectStageCreateText{
          * tmpid[3] - subsection row
          * tmpid[4] - value
          */
-        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['valuenewline']=tmpid[4];
+        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['valuenewline']=tmpid[4];
     }
-    static createTextToolCheckBox(id,title,defaultvalue){
+      createTextToolCheckBox(id,title,defaultvalue){
         
-        if(defaultvalue)
-            
+        //if(defaultvalue)
+          
+        var classObject=this;
+        
         var div=document.createElement('div');
             div.setAttribute('class','form-check mt-1');
         var input=document.createElement('input');
             input.setAttribute('name',id);
             input.setAttribute('id',id);
-            
             input.setAttribute('type','checkbox');
             input.classList.add('form-check-input');
             input.onclick = function (){
@@ -741,9 +744,9 @@ class ProjectStageCreateText{
                 else{
                     this.value='0';
                 }
-                ProjectStageCreateText.setValueStyle(this.id,this.value);
+                classObject.setValueStyle(this.id,this.value);
             };
-            ProjectStageCreateText.setTextDecorationToolEntryCheck(input,defaultvalue);
+            this.setTextDecorationToolEntryCheck(input,defaultvalue);
             
         var label=document.createElement('label');
             label.setAttribute('class','form-check-label');
@@ -753,28 +756,28 @@ class ProjectStageCreateText{
        div.appendChild(label);
        return div;
     }
-    static createTextToolSelect(id,title,actdata,alldata){
+      createTextToolSelect(id,title,actdata,alldata){
         //console.log('ProjectStageCreateText::createTextToolSelect()');
         var div=document.createElement('div');
             div.setAttribute('class','w-100 mt-2');
         var label=document.createElement('span');
             label.setAttribute('class','text-info');
             label.innerHTML=title;
-        var select=ProjectStageCreateText.createSelect(id,id);
-            select.appendChild(ProjectStageCreateText.createTextToolSelectOption('Domyślny:',actdata));  
-            select.appendChild(ProjectStageCreateText.createTextToolSelectOption('Dostępne:',alldata)); 
+        var select=this.createSelect(id,id);
+            select.appendChild(this.createTextToolSelectOption('Domyślny:',actdata));  
+            select.appendChild(this.createTextToolSelectOption('Dostępne:',alldata)); 
             div.appendChild(label);
             div.appendChild(select);
         return div;
     }
-    static createSelect(id,name){
+      createSelect(id,name){
         var select=document.createElement('select');
             select.setAttribute('class','form-control');
             select.setAttribute('id',id);
             select.setAttribute('name',name);
             return select;
     }
-    static createSelectOption(title,data){
+      createSelectOption(title,data){
         var optionGroup=document.createElement('optgroup');
             optionGroup.setAttribute('label',title);
             optionGroup.setAttribute('class','bg-info text-white');
@@ -788,14 +791,14 @@ class ProjectStageCreateText{
             };
         return optionGroup;
     }
-    static createTextToolSelectExtend(id,title,actdata,alldata){
+      createTextToolSelectExtend(id,title,actdata,alldata){
         //console.log('ProjectStageCreateText::createTextToolSelectExtend()');
-        var select = ProjectStageCreateText.createTextToolSelect(id,title,actdata,alldata);
+        var select = this.createTextToolSelect(id,title,actdata,alldata);
         //console.log(select.childNodes[1]);
         
 
         /* CLOSURE - DOMKNIĘCIE*/
-        
+        var classObject=this; 
         select.childNodes[1].onchange = function(a){
             console.log('ProjectStageCreateText::createTextToolSelectExtend()');
             //console.log(a);
@@ -807,7 +810,7 @@ class ProjectStageCreateText{
             //console.log(this.childNodes[0]);
             //console.log(this.childNodes[1]);
             /* SET NEW VALUE STYLE ATR */
-            ProjectStageCreateText.setValueStyle(this.id,this.value);  
+            classObject.setValueStyle(this.id,this.value);  
             /* RECALCULATE SELECT */
             /* 
              * REMOVE EXIST ACT AND AVA 
@@ -818,7 +821,7 @@ class ProjectStageCreateText{
         return select;
     }
    
-    static setValueStyle(id,value){
+      setValueStyle(id,value){
         /*
         console.log('ProjectStageCreateText::setValueStyle()');
         console.log(id);
@@ -843,52 +846,52 @@ class ProjectStageCreateText{
             throw 'An Application Error Has Occurred!';
             return false;
         }
-        console.log(ProjectStageCreateText.link);
+        console.log(this.link);
                 switch(tmpid[0]){
                     case 'fontsize':
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value+'pt'; 
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.fontSize=value+'pt';
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value+'pt'; 
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.fontSize=value+'pt';
                         break;
                     case 'fontcolor':
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.color=value;
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.color=value;
                         break;   
                     case 'fontbackgroundcolor':
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.backgroundColor=value;
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.backgroundColor=value;
                         break;
                     case 'fontfamily':
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.fontFamily=value;
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.fontFamily=value;
                         break;
                     case 'textalign':
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textAlign=value;
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textAlign=value;
                         break;
                     case 'fontbold':
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.fontWeight =ProjectStageCreateText.setValueStyleFontWeight(value);
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.fontWeight =this.setValueStyleFontWeight(value);
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
                         break;
                     case 'fontunderline':
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textDecoration=ProjectStageCreateText.setValueStyleTextDecoration(ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textDecoration,value,'underline');
-                        console.log(ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textDecoration);
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textDecoration=this.setValueStyleTextDecoration(this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textDecoration,value,'underline');
+                        console.log(this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textDecoration);
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
                         break;
                     case 'fontitalic':
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.fontStyle =ProjectStageCreateText.setValueStyleFontStyle(value);           
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.fontStyle =this.setValueStyleFontStyle(value);           
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
                         break;
                     case 'fontlinethrough':
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textDecoration=ProjectStageCreateText.setValueStyleTextDecoration(ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textDecoration,value,'line-through');
-                        console.log(ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textDecoration);
-                        ProjectStageCreateText.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textDecoration=this.setValueStyleTextDecoration(this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textDecoration,value,'line-through');
+                        console.log(this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['property']['valueEle'].style.textDecoration);
+                        this.link.section['section-'+tmpid[1]]['subsection'][tmpid[2]][tmpid[3]]['style'][tmpid[0]]=value;
                         break;
                     default:
                         console.log('unavailable');
                         break;
                 }
     }
-    static setValueStyleFontStyle(value){
+      setValueStyleFontStyle(value){
         if(value==='1'){
             return 'italic';
         }
@@ -896,7 +899,7 @@ class ProjectStageCreateText{
             return 'normal';
         }
     }
-    static setValueStyleFontWeight(value){
+      setValueStyleFontWeight(value){
         if(value==='1'){
             return 'bold';
         }
@@ -904,7 +907,7 @@ class ProjectStageCreateText{
             return 'normal';
         }
     }
-    static setValueStyleTextDecoration(actEleTextDecoration,value,styleToSetUp){
+      setValueStyleTextDecoration(actEleTextDecoration,value,styleToSetUp){
         var tmpvalue=actEleTextDecoration;
         var tmpvaluearray=tmpvalue.split(' ');
             if(value==='1'){
@@ -921,7 +924,7 @@ class ProjectStageCreateText{
                 return tmpvalue;
             }
     }
-     static createTextToolSelectOption(title,data){
+       createTextToolSelectOption(title,data){
         var optionGroup2=document.createElement('optgroup');
             optionGroup2.setAttribute('label',title);
             optionGroup2.setAttribute('class','bg-info text-white');
@@ -939,10 +942,10 @@ class ProjectStageCreateText{
             };
         return optionGroup2;
      }
-    static createTextToolRadioButton(id,title,value){
-        var maindiv=ProjectStageCreateText.Html.getRow();
-        var collabel=ProjectStageCreateText.Html.getCol(12);
-        var colvalue=ProjectStageCreateText.Html.getCol(12);
+      createTextToolRadioButton(id,title,value){
+        var maindiv=this.Html.getRow();
+        var collabel=this.Html.getCol(12);
+        var colvalue=this.Html.getCol(12);
         var mainlabel=document.createElement('p');
             mainlabel.setAttribute('class','text-info mt-1 mb-0 pb-0 w-100');
             mainlabel.innerHTML=title;  
@@ -950,7 +953,7 @@ class ProjectStageCreateText{
             /*console.log(`${property}: ${value[property]}`);
             console.log(`${property}: ${value[property].check}`);
             console.log(`${property}: ${value[property].id}`);*/
-            var div=ProjectStageCreateText.Html.getRow();
+            var div=this.Html.getRow();
                 div.setAttribute('class','form-check form-check-inline');
             var input=document.createElement('input');
                 input.setAttribute('class','form-check-input');
@@ -959,9 +962,6 @@ class ProjectStageCreateText{
                 input.setAttribute('value',value[property].value);
                 input.setAttribute(value[property].check,'');
                 input.setAttribute('name',id);
-                //input.onclick = function(){
-                //    console.log(this);
-                //};
             var label=document.createElement('label');
                 label.setAttribute('class','form-check-label '+value[property].fontcolor);
                 label.setAttribute('for',value[property].id);
@@ -975,7 +975,7 @@ class ProjectStageCreateText{
         maindiv.appendChild(colvalue);  
         return maindiv;
     }
-    static getYesNowRadio(id){
+      getYesNowRadio(id){
         const value={
             'y':{
                 check:'checked',
@@ -996,17 +996,17 @@ class ProjectStageCreateText{
     }
 
    
-    static getSelectKey(value,title){
+      getSelectKey(value,title){
         var selectKey={};
-            selectKey[0]=ProjectStageCreateText.getSelectKeyProperties(value,title);
+            selectKey[0]=this.getSelectKeyProperties(value,title);
         return selectKey;
     }
-    static getExtendedSelectKey(value,title,key){
+      getExtendedSelectKey(value,title,key){
         var selectKey={};
-            selectKey[key]=ProjectStageCreateText.getSelectKeyProperties(value,title);
+            selectKey[key]=this.getSelectKeyProperties(value,title);
         return selectKey;
     }
-    static getSelectKeyProperties(value,title){
+      getSelectKeyProperties(value,title){
         var selectKeyProp={
                 value:value,
                 title:title,
@@ -1016,120 +1016,120 @@ class ProjectStageCreateText{
             };
         return selectKeyProp;
     }
-    static getExtendedSelectKeyProperties(value,title,fontcolor,backgroundcolor,fontfamily){
-        var selectKeyProp=ProjectStageCreateText.getSelectKeyProperties(value,title);
+      getExtendedSelectKeyProperties(value,title,fontcolor,backgroundcolor,fontfamily){
+        var selectKeyProp=this.getSelectKeyProperties(value,title);
             selectKeyProp.fontcolor=fontcolor;
             selectKeyProp.backgroundcolor=backgroundcolor;
             selectKeyProp.fontfamily=fontfamily;
         return selectKeyProp;
     }
-    static getDefaultFont(value,title){
+      getDefaultFont(value,title){
         //console.log('ProjectStageCreateText::getDefaultFont()');
-        var defaultValue=ProjectStageCreateText.getSelectKey(value,title);
+        var defaultValue=this.getSelectKey(value,title);
             defaultValue[0].fontfamily=value;
         return defaultValue;
     }
-     static getDefaultColor(value,title){
-        var defaultValue=ProjectStageCreateText.getSelectKey(value,title);
+       getDefaultColor(value,title){
+        var defaultValue=this.getSelectKey(value,title);
             defaultValue[0].fontcolor=value;
             //defaultValue.backgroundcolor=value; TO DO => DYNAMIC CHANGE
         return defaultValue;
     }
-    static getDefaultBackgroundColor(value,title){
-        var defaultValue=ProjectStageCreateText.getSelectKey(value,title);
+      getDefaultBackgroundColor(value,title){
+        var defaultValue=this.getSelectKey(value,title);
             defaultValue[0].backgroundcolor=value;
             //defaultValue.fontcolor=value; TO DO => DYNAMIC CHANGE
         return defaultValue;
     }
-    static getDefaultFontSize(value,title){
-        var defaultValue=ProjectStageCreateText.getExtendedSelectKey(value,title,value);
+      getDefaultFontSize(value,title){
+        var defaultValue=this.getExtendedSelectKey(value,title,value);
         return defaultValue;
     }
-    static getSectionCount(exception){
+      getSectionCount(exception){
         exception=parseInt(exception,10);
         var value={};
         var j=1;
-        for(var i=0;i<ProjectStageCreateText.getMaxSubSectionCount();i++){
+        for(var i=0;i<this.getMaxSubSectionCount();i++){
             if(exception!==j){
-                value[i]=ProjectStageCreateText.getSelectKeyProperties(j,j);
+                value[i]=this.getSelectKeyProperties(j,j);
             }
             j++;
         }
         return value;
     }
-    static getColorList(exception){
+      getColorList(exception){
         var value={};
-        for(var i=0;i<ProjectStageCreateText.Glossary.getKeyCount('color');i++){
-            if(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'v')!==exception){
-                value[i]=ProjectStageCreateText.getExtendedSelectKeyProperties(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'n'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'v'),'#FFFFFF','');
+        for(var i=0;i<this.Glossary.getKeyCount('color');i++){
+            if(this.Glossary.getKeyPropertyAttribute('color',i,'v')!==exception){
+                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('color',i,'v'),this.Glossary.getKeyPropertyAttribute('color',i,'n'),this.Glossary.getKeyPropertyAttribute('color',i,'v'),'#FFFFFF','');
             }
         }
         return value;
     }
-    static getBackgroundColorList(exception){
+      getBackgroundColorList(exception){
         var value={};
-        for(var i=0;i<ProjectStageCreateText.Glossary.getKeyCount('color');i++){
+        for(var i=0;i<this.Glossary.getKeyCount('color');i++){
               /* TO DO -> CALCULATE FONT COLOR */
-            if(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'v')!==exception){
-                value[i]=ProjectStageCreateText.getExtendedSelectKeyProperties(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'n'),'#FFFFFF',ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'v'),'');
+            if(this.Glossary.getKeyPropertyAttribute('color',i,'v')!==exception){
+                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('color',i,'v'),this.Glossary.getKeyPropertyAttribute('color',i,'n'),'#FFFFFF',this.Glossary.getKeyPropertyAttribute('color',i,'v'),'');
             }
         }
         return value;
     }
-     static getFontAlignList(exception){
+       getFontAlignList(exception){
         var value={};        
-        for(var i=0;i<ProjectStageCreateText.Glossary.getKeyCount('align');i++){
-            if(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('align',i,'v')!==exception){
-                value[i]=ProjectStageCreateText.getSelectKeyProperties(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('align',i,'v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('align',i,'n'));
+        for(var i=0;i<this.Glossary.getKeyCount('align');i++){
+            if(this.Glossary.getKeyPropertyAttribute('align',i,'v')!==exception){
+                value[i]=this.getSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('align',i,'v'),this.Glossary.getKeyPropertyAttribute('align',i,'n'));
             }
         }
         return value;
     }
-    static getFontSizeList(exception){
+      getFontSizeList(exception){
         exception=parseInt(exception,10);
         var value={};
         for(var i=2;i<57;){
             if(i!==exception){
-                value[i]=ProjectStageCreateText.getSelectKeyProperties(i,i);  
+                value[i]=this.getSelectKeyProperties(i,i);  
             }
             i=i+2;
         }
         return value;
     }
-    static getFontList(exception){
+      getFontList(exception){
         //console.log('ProjectStageCreateText::getFontList()');
         var value={};
-        for(var i=0;i<ProjectStageCreateText.Glossary.getKeyCount('fontfamily');i++){
-            if(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('fontfamily',i,'v')!==exception){
-                value[i]=ProjectStageCreateText.getExtendedSelectKeyProperties(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('fontfamily',i,'v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('fontfamily',i,'v'),'#000000','#FFFFFF',ProjectStageCreateText.Glossary.getKeyPropertyAttribute('fontfamily',i,'v'));
+        for(var i=0;i<this.Glossary.getKeyCount('fontfamily');i++){
+            if(this.Glossary.getKeyPropertyAttribute('fontfamily',i,'v')!==exception){
+                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('fontfamily',i,'v'),this.Glossary.getKeyPropertyAttribute('fontfamily',i,'v'),'#000000','#FFFFFF',this.Glossary.getKeyPropertyAttribute('fontfamily',i,'v'));
             }
         }
         return value;
     }
-    static createTextPageTool(){
+    createTextPageTool(){
         console.log('ProjectStageCreateText::createTextPageTool()');
-        var mainDivCol=ProjectStageCreateText.Html.getCol(12);
+        var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('bg-light');
-        var mainDiv=ProjectStageCreateText.Html.getRow();
-        var mainDiv3=ProjectStageCreateText.Html.getRow();
+        var mainDiv=this.Html.getRow();
+        var mainDiv3=this.Html.getRow();
         var h5=document.createElement('h5');
             h5.setAttribute('class','w-100 text-center pt-0 pb-1 mt-0 bg-secondary');// 
             h5.innerHTML='<small class="text-white">Opcje odnoszące się do całej strony:</small>';
-        var toolMain1=ProjectStageCreateText.Html.getCol(3);
-        var toolMain2=ProjectStageCreateText.Html.getCol(3);    
-        var toolMain3=ProjectStageCreateText.Html.getCol(3);
-        var toolMain4=ProjectStageCreateText.Html.getCol(3);    
+        var toolMain1=this.Html.getCol(3);
+        var toolMain2=this.Html.getCol(3);    
+        var toolMain3=this.Html.getCol(3);
+        var toolMain4=this.Html.getCol(3);    
 
-        var pageBackgroundcolor=ProjectStageCreateText.createTextToolSelect('backgroundcolor','Wskaż kolor tła strony:',ProjectStageCreateText.getDefaultBackgroundColor(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),ProjectStageCreateText.getBackgroundColorList());
+        var pageBackgroundcolor=this.createTextToolSelect('backgroundcolor','Wskaż kolor tła strony:',this.getDefaultBackgroundColor(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),this.getBackgroundColorList());
             pageBackgroundcolor.onchange = function (){
                 console.log(this.childNodes[1].value);
-                console.log(ProjectStageCreateText.helplink);
-                ProjectStageCreateText.helplink.previewDiv.pageBackgroundColor=this.childNodes[1].value;
+                console.log(this.helplink);
+                this.helplink.previewDiv.pageBackgroundColor=this.childNodes[1].value;
             };
         toolMain1.appendChild(pageBackgroundcolor);
-        toolMain1.appendChild(ProjectStageCreateText.createTextToolRadioButton('newpage','Etap od nowej strony?',ProjectStageCreateText.getYesNowRadio('newpage')));    
+        toolMain1.appendChild(this.createTextToolRadioButton('newpage','Etap od nowej strony?',this.getYesNowRadio('newpage')));    
         
-        toolMain2.appendChild(ProjectStageCreateText.createTextToolSelectExtend('backgroundimage','Wskaż obraz tła strony:'));
+        toolMain2.appendChild(this.createTextToolSelectExtend('backgroundimage','Wskaż obraz tła strony:'));
 
         mainDiv.appendChild(h5);
         
@@ -1142,26 +1142,28 @@ class ProjectStageCreateText{
         mainDivCol.appendChild(mainDiv3);
         return mainDivCol;
     }
-    static createButtons(){
+      createButtons(){
         /* CANCEL */
-        //ProjectStageCreateText.Modal.link['button'].appendChild();
-        //var mainDiv=ProjectStageCreateText.Html.getRow();
+        //this.Modal.link['button'].appendChild();
+        //var mainDiv=this.Html.getRow();
         //return mainDiv;
     }
-    static  getRemoveButton(isection,isub,isubrow){
+    getRemoveButton(isection,isub,isubrow){
+        console.log('ProjectStageCreateText::getRemoveButton()');
         var i=document.createElement('i');
             i.setAttribute('class','fa fa-minus');
             i.setAttribute('aria-hidden','true');
             i.setAttribute('style','color:#ffffff;');         
         var div=document.createElement('div');
             div.setAttribute('class','btn btn-danger ');//float-right
+        var classObject=this;    
             /* CLOSURE */
             div.onclick=function(){
                 /* TO DO */
                 if (confirm('Potwierdź usunięcie podsekcji') === true) {
-                    ProjectStageCreateText.helplink.section['section-'+isection]['subsection'][isub]['row'][isubrow].remove();
-                    delete ProjectStageCreateText.helplink.section['section-'+isection]['subsection'][isub]['row'][isubrow];
-                    delete ProjectStageCreateText.link.section['section-'+isection]['subsection'][isub][isubrow];
+                    classObject.helplink.section['section-'+isection]['subsection'][isub]['row'][isubrow].remove();
+                    delete classObject.helplink.section['section-'+isection]['subsection'][isub]['row'][isubrow];
+                    delete classObject.link.section['section-'+isection]['subsection'][isub][isubrow];
                 } else {
                     // NOTHING TO DO
                 }
@@ -1169,52 +1171,53 @@ class ProjectStageCreateText{
         div.appendChild(i);
         return(div); 
     }
-    static createRemoveSectionButton(isection){
+      createRemoveSectionButton(isection){
         // i PARAMETERS      
         var div=document.createElement('div');
             div.setAttribute('class','btn btn-danger float-right');
             div.innerText='Usuń sekcję';
+        var classObject=this;
             /* CLOSURE */
             div.onclick=function(){
                 if (confirm('Potwierdź usunięcie sekcji') === true) {
-                    ProjectStageCreateText.helplink.section['section-'+isection].main.remove();
-                    delete ProjectStageCreateText.helplink.section['section-'+isection];
-                    delete ProjectStageCreateText.link.section['section-'+isection];   
+                    classObject.helplink.section['section-'+isection].main.remove();
+                    delete classObject.helplink.section['section-'+isection];
+                    delete classObject.link.section['section-'+isection];   
                 } else {
                     // NOTHING TO DO
                 }
-                //ProjectStageCreateText.updateErrorStack(id);      
+                //this.updateErrorStack(id);      
             };
         return(div); 
     }
-    static createButtonCol(button){
+      createButtonCol(button){
         console.log('ProjectStageCreateText::createButtonCol()');
         /*
          * ADD BUTTON ROW
          */
-        var mainDiv=ProjectStageCreateText.Html.getCol(12);
+        var mainDiv=this.Html.getCol(12);
             mainDiv.classList.add('mt-2','pb-2');
-        var row=ProjectStageCreateText.Html.getRow();
-        var col=ProjectStageCreateText.Html.getCol(2);
+        var row=this.Html.getRow();
+        var col=this.Html.getCol(2);
             /* ADD BUTTON */
             col.appendChild(button);
-        var col1=ProjectStageCreateText.Html.getCol(10);
+        var col1=this.Html.getCol(10);
             row.appendChild(col);
             row.appendChild(col1);
             mainDiv.appendChild(row);
         return mainDiv;
     }
-    static createButtonRow(button){
+      createButtonRow(button){
         /*
          * ADD BUTTON ROW
          */
-        //var mainDivCol=ProjectStageCreateText.Html.getCol(12);
-        var mainDiv=ProjectStageCreateText.Html.getRow();
+        //var mainDivCol=this.Html.getCol(12);
+        var mainDiv=this.Html.getRow();
             mainDiv.classList.add('mt-2');
-        var col=ProjectStageCreateText.Html.getCol(2);
+        var col=this.Html.getCol(2);
             /* ADD BUTTON */
             col.appendChild(button);
-        var col1=ProjectStageCreateText.Html.getCol(10);
+        var col1=this.Html.getCol(10);
             mainDiv.appendChild(col);
             mainDiv.appendChild(col1);
             //mainDivCol.appendChild(mainDiv);
@@ -1222,69 +1225,39 @@ class ProjectStageCreateText{
         //return mainDivCol;
         return mainDiv;
     }
-    static createAddSubsectionButton(id){
+    createAddSubsectionButton(isection,isubsection,irow){
         //console.log('ProjectStageCreateText::createAddSubsectionButton()');
         var i=document.createElement('i');
             i.setAttribute('class','fa fa-plus');
             i.setAttribute("aria-hidden","true");
         var div=document.createElement('div');
             div.setAttribute('class','btn btn-success btn-add float-left');
-            div.setAttribute('id',id);
             div.appendChild(i);
-            div.onclick=function(){
-               
+        /* SET CLASS OBJECT */
+        var classObject=this;
+            div.onclick=function(){       
                 console.log('ProjectStageCreateText::createAddSubsectionButton() click');
-                console.log('ACT ID:');
-                console.log(this.id);
-                
-                console.log(ProjectStageCreateText.link.section);
-                console.log(ProjectStageCreateText.helplink);
-                var tmpid=this.id.split('-');
-                /* 
-                 * tmpid[0] - ID NAME
-                 * tmpid[1] - SECTION
-                 * tmpid[2] - SUBSECTION
-                 * tmpid[3] - SUBSECTION ROW
-                 */
-
-                /* INCREMENT SUBSECTION ROW + 1 AND CHANGE ID */
-                tmpid[3]=parseInt(tmpid[3],10)+1;
-                this.id=tmpid[0]+'-'+tmpid[1]+'-'+tmpid[2]+'-'+tmpid[3];
-
-                //console.log(this.parentNode.parentNode.parentNode.childNodes[0]);
-                console.log(ProjectStageCreateText.helplink.section['section-'+tmpid[1]]['subsection'][tmpid[2]].dynamic);
-                console.log(ProjectStageCreateText.helplink.section['section-'+tmpid[1]]['subsection'][tmpid[2]].all.parentNode);
-                ProjectStageCreateText.helplink.section['section-'+tmpid[1]]['subsection'][tmpid[2]].dynamic.appendChild(ProjectStageCreateText.createExtendedSubsection(tmpid[1],tmpid[2],tmpid[3]));
+                /* INCREMENT SUBSECTION ROW */
+                irow++;
+                classObject.helplink.section['section-'+isection]['subsection'][isubsection].dynamic.appendChild(classObject.createExtendedSubsection(isection,isubsection,irow));
             };
-           
         return (div);
     }
-    static createAddSectionButton(id){
+      createAddSectionButton(){
         //console.log('ProjectStageCreateText::createAddSectionButton()');
         var div=document.createElement('div');
             div.setAttribute('class','btn btn-success btn-add');
-            div.setAttribute('id',id);
+
+        var classObject=this;
             div.innerText='Dodaj sekcję';
             div.onclick=function(){
-                ProjectStageCreateText.i++;
-                ProjectStageCreateText.iField++;
-                
-                console.log('ACT ID:');
-                console.log(this.id);
-                var tmpid=this.id.split('-');
-                /* 
-                 * tmpid[0] - ID NAME
-                 * tmpid[1] - SECTION
-                 */
-                
-                 /* INCREMENT SUBSECTION ROW + 1 AND CHANGE ID */
-                tmpid[1]=parseInt(tmpid[1],10)+1;
-                this.id=tmpid[0]+'-'+tmpid[1];
+                classObject.i++;
+                classObject.iField++;
                 
                 /* TO DO
                  * CHECK IS THERE ANY ROW -> IF NO -> SWAP TO createSimleRow()
                  * */
-                ProjectStageCreateText.helplink['dynamicSection'].appendChild(ProjectStageCreateText.createSection(tmpid[1],0,0));
+                classObject.helplink['dynamicSection'].appendChild(classObject.createSection(classObject.iField,0,0));
                 //ProjectConst.setInputConst(ProjectConst.Modal.link['form'],'','','0',ProjectConst.getRemoveButtonCol(ProjectConst.iField));
                 /* UNSET MAIN ERROR */
                 //ProjectConst.Items.unsetError(ProjectConst.Modal.link['error']);
@@ -1293,27 +1266,27 @@ class ProjectStageCreateText{
            
         return (div);
     }
-    static createManageButton(btnLabel){
+      createManageButton(btnLabel){
         var preview=document.createElement('button');
             preview.setAttribute('class','btn btn-warning');
         var previewLabel = document.createTextNode('Podgląd');
             preview.appendChild(previewLabel);
-            ProjectStageCreateText.setPreviewButtonAction(preview);
+            this.setPreviewButtonAction(preview);
         var confirm=document.createElement('button');
             confirm.setAttribute('class','btn btn-info');
             confirm.innerText=btnLabel;
-            ProjectStageCreateText.setSendDataAction(confirm);
+            this.setSendDataAction(confirm);
             /* SET SEND DATA */
             
         /*
          * BUTTONS
          */
         
-        ProjectStageCreateText.Modal.link['button'].appendChild(ProjectStageCreateText.Items.getCancelButton(ProjectStageCreateText.Stage.ProjectStageTable,'runTable',ProjectStageCreateText.Stage.defaultTask+'0'));
-        ProjectStageCreateText.Modal.link['button'].appendChild(preview);
-        ProjectStageCreateText.Modal.link['button'].appendChild(confirm);
+        this.Modal.link['button'].appendChild(this.Items.getCancelButton(this.Stage.ProjectStageTable,'runTable',this.Stage.defaultTask+'0'));
+        this.Modal.link['button'].appendChild(preview);
+        this.Modal.link['button'].appendChild(confirm);
     }
-    static swapPreviewButton(ele)
+      swapPreviewButton(ele)
     {
         /*
         console.log('ProjectStageCreateText::swapPreviewButton()');
@@ -1327,93 +1300,96 @@ class ProjectStageCreateText{
         if(ele.childNodes[0].textContent==='Podgląd'){
             //ele.childNodes[0].textContent='Edytuj';
             ele.innerText='Edytuj';
-            ProjectStageCreateText.setEditButtonAction(ele);
+            this.setEditButtonAction(ele);
         }
         else{
             ele.innerText='Podgląd';
-            ProjectStageCreateText.setPreviewButtonAction(ele);
+            this.setPreviewButtonAction(ele);
         }
     }
-    static setEditButtonAction(ele){
+      setEditButtonAction(ele){
         /* console.log('ProjectStageCreateText::setEditButtonAction()'); */
+        var classObject=this; 
         ele.onclick = function (){
-            console.log(ProjectStageCreateText.helplink.dynamicDiv);
-            console.log(ProjectStageCreateText.helplink.previewDiv);
-            ProjectStageCreateText.swapPreviewButton(this);
-            ProjectStageCreateText.Html.showField(ProjectStageCreateText.helplink.dynamicDiv);
-            ProjectStageCreateText.Html.removeChilds(ProjectStageCreateText.helplink.previewDiv.all);
-            ProjectStageCreateText.Html.hideField(ProjectStageCreateText.helplink.previewDiv.all);  
+            console.log(classObject.helplink.dynamicDiv);
+            console.log(classObject.helplink.previewDiv);
+            classObject.swapPreviewButton(this);
+            classObject.Html.showField(classObject.helplink.dynamicDiv);
+            classObject.Html.removeChilds(classObject.helplink.previewDiv.all);
+            classObject.Html.hideField(classObject.helplink.previewDiv.all);  
         };
     }
-    static setPreviewButtonAction(ele){
+    setPreviewButtonAction(ele){
         /* CHANGE LABEL */
         /* console.log('ProjectStageCreateText::setPreviewButtonAction()'); */
+        var classObject=this; 
         ele.onclick = function (){
-            console.log(ProjectStageCreateText.helplink);
-            ProjectStageCreateText.swapPreviewButton(this);
-            ProjectStageCreateText.Html.hideField(ProjectStageCreateText.helplink.dynamicDiv);
-            ProjectStageCreateText.setPreviewData(ProjectStageCreateText.helplink.previewDiv.all);
-            ProjectStageCreateText.Html.showField(ProjectStageCreateText.helplink.previewDiv.all);
+            console.log(classObject.helplink);
+            classObject.swapPreviewButton(this);
+            classObject.Html.hideField(classObject.helplink.dynamicDiv);
+            classObject.setPreviewData(classObject.helplink.previewDiv.all);
+            classObject.Html.showField(classObject.helplink.previewDiv.all);
         };
     }
-    static setSendDataAction(ele){
+    setSendDataAction(ele){
+        var classObject=this; 
         ele.onclick = function (){
             var fd = new FormData();
-            fd.append('stage',ProjectStageCreateText.setInputData());
-            ProjectStageCreateText.checkInputData(fd);
-            ProjectStageCreateText.sendInputData(fd);
+            fd.append('stage',classObject.setInputData());
+            classObject.checkInputData(fd);
+            classObject.sendInputData(fd);
         };
     }
-    static checkInputData(fd){
+      checkInputData(fd){
         
     }
-    static setInputData(){
+      setInputData(){
         var data={
             db:'0',
             sec:{},
-            title:ProjectStageCreateText.helplink['title'].value,
-            department:ProjectStageCreateText.link['department']
+            title:this.helplink['title'].value,
+            department:this.link['department']
         };
-        for(const property in ProjectStageCreateText.link.section){
+        for(const property in this.link.section){
             console.log('SECTION - '+property);
-            console.log(ProjectStageCreateText.link.section[property]);
-            console.log(ProjectStageCreateText.helplink.section[property]);
+            console.log(this.link.section[property]);
+            console.log(this.helplink.section[property]);
             data.sec[property]={
-                //count:ProjectStageCreateText.link.section[property].subsectionvisible,
-                db:ProjectStageCreateText.link.section[property].db,
+                //count:this.link.section[property].subsectionvisible,
+                db:this.link.section[property].db,
                 sub:{}        
-                //subsectionvisible:ProjectStageCreateText.link.section[property].subsectionvisible
+                //subsectionvisible:this.link.section[property].subsectionvisible
             };
             
             /* LOOP OVER SUBSECTION */   
-            for(var i=0;i<ProjectStageCreateText.link.section[property].subsectionvisible;i++){
+            for(var i=0;i<this.link.section[property].subsectionvisible;i++){
                 console.log('SUBSECTION - '+i);
-                console.log(ProjectStageCreateText.link.section[property].subsection[i]);    
+                console.log(this.link.section[property].subsection[i]);    
                 data.sec[property].sub[i]={
                     db:'0',
                     row:{}
                 };
                  /* LOOP OVER SUBSECTION ROW */
-                for(const propSubsectionRow in ProjectStageCreateText.link.section[property].subsection[i]){
+                for(const propSubsectionRow in this.link.section[property].subsection[i]){
                     console.log('SUBSECTION ROW - '+propSubsectionRow);
-                    console.log(ProjectStageCreateText.link.section[property].subsection[i][propSubsectionRow]);
+                    console.log(this.link.section[property].subsection[i][propSubsectionRow]);
                     data.sec[property].sub[i].row[propSubsectionRow]={
                         style:{},
                         property:{},
                         newline:'',
                         db:'0'
                     };
-                    data.sec[property].sub[i].row[propSubsectionRow]['property']=ProjectStageCreateText.setInputDataParseProperty(ProjectStageCreateText.link.section[property].subsection[i][propSubsectionRow].property);              
-                    data.sec[property].sub[i].row[propSubsectionRow]['style']=ProjectStageCreateText.link.section[property].subsection[i][propSubsectionRow].style;
-                    data.sec[property].sub[i].row[propSubsectionRow].newline=ProjectStageCreateText.link.section[property].subsection[i][propSubsectionRow].valuenewline;
-                    data.sec[property].sub[i].row[propSubsectionRow].db=ProjectStageCreateText.link.section[property].subsection[i][propSubsectionRow].db;
+                    data.sec[property].sub[i].row[propSubsectionRow]['property']=this.setInputDataParseProperty(this.link.section[property].subsection[i][propSubsectionRow].property);              
+                    data.sec[property].sub[i].row[propSubsectionRow]['style']=this.link.section[property].subsection[i][propSubsectionRow].style;
+                    data.sec[property].sub[i].row[propSubsectionRow].newline=this.link.section[property].subsection[i][propSubsectionRow].valuenewline;
+                    data.sec[property].sub[i].row[propSubsectionRow].db=this.link.section[property].subsection[i][propSubsectionRow].db;
                 }
             }
         }
         console.log(data);
         return JSON.stringify(data);
     }
-    static setInputDataParseProperty(property){
+      setInputDataParseProperty(property){
         var newProp={};
         for(const p in property){
             if(p!=='valueEle'){
@@ -1421,99 +1397,67 @@ class ProjectStageCreateText{
             }
             if(p==='valueEle'){
                 /* FIX AND SET VALUE => ELE VALUE */
-               //data.section[property].subsection[i].subsectionrow[propSubsectionRow]['property']['value']=ProjectStageCreateText.link.section[property].subsection[i][propSubsectionRow].property.valueEle.value; 
+               //data.section[property].subsection[i].subsectionrow[propSubsectionRow]['property']['value']=this.link.section[property].subsection[i][propSubsectionRow].property.valueEle.value; 
                newProp['value']=property[p].value;
             }
         }
         return newProp;
     }
-    static sendInputData(fd){
+      sendInputData(fd){
         console.log('ProjectStageCreateText::sendInputData()');
         console.log(fd);
-        if(ProjectStageCreateText.errorStatus){
-            console.log(ProjectStageCreateText.errorStatus);
+        if(this.errorStatus){
+            console.log(this.errorStatus);
             console.log('ERROR EXIST NO SEND DATA');
             return false;
         }
         //Xhr.loadNotify=Modal.link['extra'];
-        console.log(ProjectStageCreateText.Items.appurl);
-        ProjectStageCreateText.Modal.loadNotify='<img src="'+ProjectStageCreateText.Items.appurl+'/img/loading_60_60.gif" alt="load_gif">';
-        ProjectStageCreateText.Modal.showLoad();
-        ProjectStageCreateText.Items.Xhr.setRun(ProjectStageCreateText.Stage,'runModal');
-        ProjectStageCreateText.Items.Xhr.run('POST',fd,ProjectStageCreateText.Items.router+'confirmProjectStageText');
+        console.log(this.Items.appurl);
+        this.Modal.loadNotify='<img src="'+this.Items.appurl+'/img/loading_60_60.gif" alt="load_gif">';
+        this.Modal.showLoad();
+        this.Items.Xhr.setRun(this.Stage,'runModal');
+        this.Items.Xhr.run('POST',fd,this.Items.router+'confirmProjectStageText');
     }
-    static manageSubsection(ele){
+      manageSubsection(ele){
         
         console.log('ProjectStageCreateText::manageSubsection()');
         console.log(ele);
         /**/
         var sectionSetUp=parseInt(ele.value,10);
-        //console.log(ProjectStageCreateText.link.section[ele.id]);
+        //console.log(this.link.section[ele.id]);
         
         /* CHANGE TO REMOVE => PROBLEM IN SEND POST*/
         
-        for(var i=0;i<ProjectStageCreateText.getMaxSubSectionCount();i++){
+        for(var i=0;i<this.getMaxSubSectionCount();i++){
             /* REMOVE NAME => JS FORM DATA APPEND INPUT ONLY WITH NAME */
             
-            //console.log(ProjectStageCreateText.helplink.section[ele.id]['subsection'][i]['all']);
-            ProjectStageCreateText.helplink.section[ele.id]['subsection'][i]['all'].classList.remove('d-line');
-            ProjectStageCreateText.helplink.section[ele.id]['subsection'][i]['all'].classList.add('d-none');
+            //console.log(this.helplink.section[ele.id]['subsection'][i]['all']);
+            this.helplink.section[ele.id]['subsection'][i]['all'].classList.remove('d-line');
+            this.helplink.section[ele.id]['subsection'][i]['all'].classList.add('d-none');
           
            
-            //ProjectStageCreateText.link.section[ele.id]['ele'].childNodes[i].classList.remove('d-line');
-           // ProjectStageCreateText.link.section[ele.id]['ele'].childNodes[i].classList.add('d-none');
+            //this.link.section[ele.id]['ele'].childNodes[i].classList.remove('d-line');
+           // this.link.section[ele.id]['ele'].childNodes[i].classList.add('d-none');
         } 
         for(var i=0;i<sectionSetUp;i++){
              /* ADD NAME => JS FORM DATA APPEND INPUT ONLY WITH NAME */
-            ProjectStageCreateText.helplink.section[ele.id]['subsection'][i]['all'].classList.remove('d-none');
-            ProjectStageCreateText.helplink.section[ele.id]['subsection'][i]['all'].classList.add('d-line');
-           // ProjectStageCreateText.link.section[ele.id]['ele'].childNodes[i].classList.remove('d-none');
-           // ProjectStageCreateText.link.section[ele.id]['ele'].childNodes[i].classList.add('d-line');
+            this.helplink.section[ele.id]['subsection'][i]['all'].classList.remove('d-none');
+            this.helplink.section[ele.id]['subsection'][i]['all'].classList.add('d-line');
+           // this.link.section[ele.id]['ele'].childNodes[i].classList.remove('d-none');
+           // this.link.section[ele.id]['ele'].childNodes[i].classList.add('d-line');
         }   
         
         /* UPDATE SUBSECTION VISIBLE */
         
-        ProjectStageCreateText.link.section[ele.id].subsectionvisible=sectionSetUp;
+        this.link.section[ele.id].subsectionvisible=sectionSetUp;
         /*
-        console.log(ProjectStageCreateText.link.section[ele.id]);
+        console.log(this.link.section[ele.id]);
         console.log('ALL');
-        console.log(ProjectStageCreateText.link.section);
+        console.log(this.link.section);
         */
     }
-    static getMaxSubSectionCount(){
+      getMaxSubSectionCount(){
         //console.log('ProjectStageCreateText::getMaxSubSectionCount()');
-        return parseInt(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MAX','v'),10);
+        return parseInt(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MAX','v'),10);
     }
 }
-/*
-        var row=document.createElement('DIV');
-            row.setAttribute('class','form-group row');
-        var label=document.createElement('LABEL');
-            label.setAttribute('class','col-sm-1 col-form-label ');
-            label.setAttribute('for',id);
-            label.innerHTML=title+'<br/><small class=" text-muted ">['+id+']</small>';
-        var input=document.createElement('INPUT');
-            input.setAttribute('type','text');
-            input.setAttribute('class','form-control');
-            input.setAttribute('id',id);
-            input.setAttribute('name',id);
-            input.setAttribute('placeholder',placeholder);
-            input.setAttribute('VALUE',value);
-            if(ProjectConst.fieldDisabled){
-
-                input.setAttribute('readonly','');
-            }
-            else{
-
-                input.onblur=function(){
-                    ProjectConst.checkInputConst(this.id,this.value);
-                };
-            }
-            
-        var col=document.createElement('DIV');
-            col.setAttribute('class','col-sm-10');
-            col.appendChild(input);
-            row.appendChild(label);
-            row.appendChild(col);
-        return row;
-        */

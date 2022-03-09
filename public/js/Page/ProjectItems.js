@@ -146,8 +146,9 @@ class ProjectItems{
         };
          /* SET CLOSE VIA MOUSE */
         ProjectItems.Modal.link['main'].onclick = function (e){
-            console.log('outside');
+            
             if(e.target.id === 'AdaptedModal'){
+                console.log('outside');
                 if (confirm('Wyjść?') === true) {
                     /* TO DO -> TURN OFF CLOSE MODAL */
                     ProjectItems.Modal.closeModal();
@@ -216,15 +217,6 @@ class ProjectItems{
  */
 
 Modal.Html=new Html();
-//TableNew.perm=window.perm;
-//TableNew.Xhr=Xhr;
-//TableNew.Html=new Html();
-//TableNew.Modal=Modal;
-//TableNew.router=window.appUrl+'/router.php?task=';
-//TableNew.appurl=window.appUrl;
-
-
-
 ProjectItems.Html=new Html();
 ProjectItems.Modal=Modal;
 ProjectItems.Xhr=Xhr;
@@ -233,25 +225,17 @@ ProjectItems.appurl=window.appUrl;
 ProjectItems.Stage=ProjectStage;
 ProjectItems.ManageGlossary=new ManageGlossary;
 
-//ProjectStageTable.Xhr=Xhr;
-//ProjectStageTable.Table=TableNew;
-//ProjectStageTable.Modal=Modal;
-//ProjectStageTable.Html=Html;
-//ProjectStageTable.Items=ProjectItems;
-//ProjectStageTable.Stage=ProjectStage;
+
 
 ProjectStage.Xhr=Xhr;
 ProjectStage.ProjectStageTable=new ProjectStageTable(ProjectStage,new Xhr2(),new Html());
 ProjectStage.Modal=Modal;
 ProjectStage.Html=new Html();
 ProjectStage.Items=ProjectItems;
-ProjectStage.CreateText=ProjectStageCreateText;
+ProjectStage.CreateText=new ProjectStageCreateText();
 ProjectStage.CreateImage=ProjectStageCreateImage;
 ProjectStage.CreateTable=ProjectStageCreateTable;
 ProjectStage.CreateList=ProjectStageCreateList;
-
-
-
 
 ProjectConst.Xhr=Xhr;
 //ProjectConst.Table=TableNew;
@@ -261,15 +245,6 @@ ProjectConst.Items=ProjectItems;
 //ProjectConst.ProjectConstTable=ProjectConstTable;
 ProjectConst.ProjectConstTable=new ProjectConstTable(ProjectConst,new Xhr2(),new Html());
 
-//ProjectConstTable.Xhr=Xhr;
-//ProjectConstTable.Table=TableNew;
-//ProjectConstTable.Modal=Modal;
-//ProjectConstTable.Html=new Html();
-//ProjectConstTable.Items=ProjectItems;
-//ProjectConstTable.Const=ProjectConst;
-
-
-
 /*
  * SET DEFAULT TASK TO RUN
  */
@@ -277,17 +252,6 @@ ProjectConst.ProjectConstTable=new ProjectConstTable(ProjectConst,new Xhr2(),new
 ProjectItems.Stage.show();
 /* MUST BE SECOND */
 
-/*
-document.addEventListener('click', function (e) {
-    console.log(e.target.id);
-    // if(e.target.className === 'modal-content'){
-  if(e.target.id === 'AdaptedModal'){
-     alert('clicked in');
-  }else {
-    alert('clicked out');
-  }
-}, false);
- */
 window.addEventListener('load', (event) => {
   console.log('page is fully loaded');
   //alert('page is fully loaded');

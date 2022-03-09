@@ -11,21 +11,19 @@ class ProjectStageCreateText{
     static link={};
     static helplink={};
     static resonse; 
-    static glossary={
-    };   
-    /* GLOSSARY KEYS:
-        color={},
-        fontfamily:{},
-        decoration:{},
-        align:{},
-        measurement:{},
-        parameter:{}
-     */
+    static Glossary={};
     
     static create(response){
         console.log('ProjectStageCreateText::create()');
         console.log(response);
         ProjectStageCreateText.setUpGlossary(response);
+        /* 
+         * TEST GET 
+        console.log(ProjectStageCreateText.Glossary.getKey('parameter'));
+        console.log(ProjectStageCreateText.Glossary.getKeyProperty('parameter','STAGE_TEXT_BACKGROUND_COLOR'));
+        console.log(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'));
+        return true;
+        */
         ProjectStageCreateText.Items.prepareModal('Dodaj etap projektu - tekst','bg-info');
         ProjectStageCreateText.Items.setCloseModal(ProjectStageCreateText.Stage.ProjectStageTable,'runTable',ProjectStageCreateText.Stage.defaultTask+'0');
         
@@ -52,14 +50,20 @@ class ProjectStageCreateText{
     }
     static setUpGlossary(response){
         console.log('ProjectStageCreateText::setUpGlossary()');
-        if(Object.keys(ProjectStageCreateText.glossary).length > 0){ return true;}
-        ProjectStageCreateText.glossary['color']=response.data.value.glossary.color;
-        ProjectStageCreateText.glossary['align']=response.data.value.glossary.align;
-        ProjectStageCreateText.glossary['decoration']=response.data.value.glossary.decoration;
-        ProjectStageCreateText.glossary['fontfamily']=response.data.value.glossary.fontfamily;
-        ProjectStageCreateText.glossary['measurement']=response.data.value.glossary.measurement;
-        ProjectStageCreateText.glossary['parameter']=response.data.value.glossary.parameter;
-        //console.log(ProjectStageCreateText.glossary['color']);
+        if(ProjectStageCreateText.Stage.Items.ManageGlossary.exist('text')) {
+            console.log('Gloassary text exist');
+            console.log(ProjectStageCreateText.Glossary);
+            return true;
+        }
+        console.log('Gloassary text not exist');
+        ProjectStageCreateText.Glossary=ProjectStageCreateText.Stage.Items.ManageGlossary.create('text');
+        ProjectStageCreateText.Glossary.add('color',response.data.value.glossary.color);
+        ProjectStageCreateText.Glossary.add('align',response.data.value.glossary.align);
+        ProjectStageCreateText.Glossary.add('decoration',response.data.value.glossary.decoration);
+        ProjectStageCreateText.Glossary.add('fontfamily',response.data.value.glossary.fontfamily);
+        ProjectStageCreateText.Glossary.add('measurement',response.data.value.glossary.measurement);
+        ProjectStageCreateText.Glossary.add('parameter',response.data.value.glossary.parameter);
+        console.log(ProjectStageCreateText.Glossary);
     }
     static getEmptyLink(){
         console.log('ProjectStageCreateText::getEmptyLink()');
@@ -85,10 +89,11 @@ class ProjectStageCreateText{
         return link;
     }
     static createPreview(){
+        console.log('ProjectStageCreateText::createPreview()');
         var mainDiv=ProjectStageCreateText.Html.getRow();
             mainDiv.classList.add('d-none');
             ProjectStageCreateText.helplink['previewDiv'].all=mainDiv;
-            ProjectStageCreateText.helplink.previewDiv.pageBackgroundColor=ProjectStageCreateText.glossary.parameter['STAGE_TEXT_BACKGROUND_COLOR'].v;
+            ProjectStageCreateText.helplink.previewDiv.pageBackgroundColor=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v');
         return mainDiv;
     }
     static createHead(ele,title,department){
@@ -474,14 +479,14 @@ class ProjectStageCreateText{
             /* SET TEXT STYLE FROM PARAMETER */
             //console.log(ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_SIZE_MEASUREMENT'].v);
             //input.style.fontSize='12pt';
-            input.style.fontSize=ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_SIZE'].v+ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_SIZE_MEASUREMENT'].v;
-            input.style.color=ProjectStageCreateText.glossary.parameter['STAGE_TEXT_COLOR'].v;
-            input.style.backgroundColor=ProjectStageCreateText.glossary.parameter['STAGE_TEXT_BACKGROUND_COLOR'].v;
-            input.style.fontFamily=ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_FAMILY'].v;
-            input.style.fontWeight=ProjectStageCreateText.setValueStyleFontWeight(ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_BOLD'].v);
-            input.style.fontStyle=ProjectStageCreateText.setValueStyleFontStyle(ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_ITALIC'].v);
-            input.style.textDecoration=ProjectStageCreateText.setValueStyleTextDecoration(input.style.textDecoration,ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_UNDERLINE'].v,'underline');
-            input.style.textDecoration=ProjectStageCreateText.setValueStyleTextDecoration(input.style.textDecoration,ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_LINETHROUGH'].v,'line-through');
+            input.style.fontSize=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v')+ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v');
+            input.style.color=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v');
+            input.style.backgroundColor=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v');
+            input.style.fontFamily=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v');
+            input.style.fontWeight=ProjectStageCreateText.setValueStyleFontWeight(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v'));
+            input.style.fontStyle=ProjectStageCreateText.setValueStyleFontStyle(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v'));
+            input.style.textDecoration=ProjectStageCreateText.setValueStyleTextDecoration(input.style.textDecoration,ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_UNDERLINE','v'),'underline');
+            input.style.textDecoration=ProjectStageCreateText.setValueStyleTextDecoration(input.style.textDecoration,ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),'line-through');
             /* CREATE LINK TO FIELD INPUT VALUE */
             //ProjectStageCreateText.link.value[isection+'-'+isub+'-'+isubrow]=input;
             
@@ -515,7 +520,7 @@ class ProjectStageCreateText{
         var tool2=ProjectStageCreateText.Html.getCol(3);    
         var tool3=ProjectStageCreateText.Html.getCol(3);
         var tool4=ProjectStageCreateText.Html.getCol(3);  
-        var sectioncount=ProjectStageCreateText.createTextToolSelect('section-'+isection,'Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',ProjectStageCreateText.getSelectKey(ProjectStageCreateText.glossary['parameter']['STAGE_TEXT_SUBSECTION_DEFAULT'].v,ProjectStageCreateText.glossary['parameter']['STAGE_TEXT_SUBSECTION_DEFAULT'].v),ProjectStageCreateText.getSectionCount(ProjectStageCreateText.glossary['parameter']['STAGE_TEXT_SUBSECTION_DEFAULT'].v));
+        var sectioncount=ProjectStageCreateText.createTextToolSelect('section-'+isection,'Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',ProjectStageCreateText.getSelectKey(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_DEFAULT','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_DEFAULT','v')),ProjectStageCreateText.getSectionCount(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_DEFAULT','v')));
             
             sectioncount.childNodes[1].onchange = function () { ProjectStageCreateText.manageSubsection(this); };
             /* FIRST RUN TO SETUP SECTION DEFAULT COUNT */
@@ -557,11 +562,11 @@ class ProjectStageCreateText{
         //var tool2=ProjectStageCreateText.Html.getCol(5);
         var tool4=ProjectStageCreateText.Html.getCol(4);
             tool4.classList.add('pt-4');
-        var fontsize=ProjectStageCreateText.createTextToolSelectExtend('fontsize-'+isection+'-'+isub+'-'+isubrow,'Rozmiar tekstu:',ProjectStageCreateText.getDefaultFontSize(ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_SIZE'].v,ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_SIZE'].v),ProjectStageCreateText.getFontSizeList(ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_SIZE'].v));
-        var fontcolor=ProjectStageCreateText.createTextToolSelectExtend('fontcolor-'+isection+'-'+isub+'-'+isubrow,'Kolor tekstu:',ProjectStageCreateText.getDefaultColor(ProjectStageCreateText.glossary.parameter['STAGE_TEXT_COLOR'].v,ProjectStageCreateText.glossary.parameter['STAGE_TEXT_COLOR'].n),ProjectStageCreateText.getColorList(ProjectStageCreateText.glossary.parameter['STAGE_TEXT_COLOR'].v));
-        var fontfamily=ProjectStageCreateText.createTextToolSelectExtend('fontfamily-'+isection+'-'+isub+'-'+isubrow,'Czcionka:',ProjectStageCreateText.getDefaultFont(ProjectStageCreateText.glossary['parameter']['STAGE_TEXT_FONT_FAMILY'].v,ProjectStageCreateText.glossary['parameter']['STAGE_TEXT_FONT_FAMILY'].v),ProjectStageCreateText.getFontList(ProjectStageCreateText.glossary['parameter']['STAGE_TEXT_FONT_FAMILY'].v));
-        var textalign=ProjectStageCreateText.createTextToolSelectExtend('textalign-'+isection+'-'+isub+'-'+isubrow,'Wskaż kierunek tekstu:',ProjectStageCreateText.getSelectKey(ProjectStageCreateText.glossary['parameter']['STAGE_TEXT_ALIGN'].v,ProjectStageCreateText.glossary['parameter']['STAGE_TEXT_ALIGN'].n),ProjectStageCreateText.getFontAlignList(ProjectStageCreateText.glossary['parameter']['STAGE_TEXT_ALIGN'].v));
-        var fontbackgroundcolor=ProjectStageCreateText.createTextToolSelectExtend('fontbackgroundcolor-'+isection+'-'+isub+'-'+isubrow,'Kolor tła:',ProjectStageCreateText.getDefaultBackgroundColor(ProjectStageCreateText.glossary.parameter['STAGE_TEXT_BACKGROUND_COLOR'].v,ProjectStageCreateText.glossary.parameter['STAGE_TEXT_BACKGROUND_COLOR'].n),ProjectStageCreateText.getBackgroundColorList(ProjectStageCreateText.glossary.parameter['STAGE_TEXT_BACKGROUND_COLOR'].v)); 
+        var fontsize=ProjectStageCreateText.createTextToolSelectExtend('fontsize-'+isection+'-'+isub+'-'+isubrow,'Rozmiar tekstu:',ProjectStageCreateText.getDefaultFontSize(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v')),ProjectStageCreateText.getFontSizeList(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v')));
+        var fontcolor=ProjectStageCreateText.createTextToolSelectExtend('fontcolor-'+isection+'-'+isub+'-'+isubrow,'Kolor tekstu:',ProjectStageCreateText.getDefaultColor(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','n')),ProjectStageCreateText.getColorList(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v')));
+        var fontfamily=ProjectStageCreateText.createTextToolSelectExtend('fontfamily-'+isection+'-'+isub+'-'+isubrow,'Czcionka:',ProjectStageCreateText.getDefaultFont(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v')),ProjectStageCreateText.getFontList(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v')));
+        var textalign=ProjectStageCreateText.createTextToolSelectExtend('textalign-'+isection+'-'+isub+'-'+isubrow,'Wskaż kierunek tekstu:',ProjectStageCreateText.getSelectKey(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','n')),ProjectStageCreateText.getFontAlignList(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v')));
+        var fontbackgroundcolor=ProjectStageCreateText.createTextToolSelectExtend('fontbackgroundcolor-'+isection+'-'+isub+'-'+isubrow,'Kolor tła:',ProjectStageCreateText.getDefaultBackgroundColor(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),ProjectStageCreateText.getBackgroundColorList(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'))); 
             
         tool1.appendChild(fontsize);
         tool1.appendChild(fontcolor);
@@ -570,11 +575,11 @@ class ProjectStageCreateText{
         tool3.appendChild(fontbackgroundcolor);
         
         ProjectStageCreateText.link.section['section-'+isection]['subsection'][isub][isubrow]['style']={
-            fontsize:ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_SIZE'].v+ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_SIZE_MEASUREMENT'].v,
-            fontcolor:ProjectStageCreateText.glossary.parameter['STAGE_TEXT_COLOR'].v,
-            fontfamily:ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_FAMILY'].v,
-            textalign:ProjectStageCreateText.glossary['parameter']['STAGE_TEXT_ALIGN'].v,
-            fontbackgroundcolor:ProjectStageCreateText.glossary.parameter['STAGE_TEXT_BACKGROUND_COLOR'].v
+            fontsize:ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v')+ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v'),
+            fontcolor:ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),
+            fontfamily:ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),
+            textalign:ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),
+            fontbackgroundcolor:ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v')
         };
         
         ProjectStageCreateText.createTextDecorationTool(tool4,isection,isub,isubrow); 
@@ -589,7 +594,7 @@ class ProjectStageCreateText{
     }
     static createTextDecorationTool(tool4,isection,isub,isubrow){
         //console.log('ProjectStageCreateText::createTextDecorationTool()');
-        for(const prop of ProjectStageCreateText.glossary.decoration.entries()) { 
+        for(const prop of ProjectStageCreateText.Glossary.getKey('decoration').entries()) { 
             //console.log(prop[0],prop[1]);
             //pageProperties[pair[0]]=pair[1];
             ProjectStageCreateText.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow);  
@@ -643,22 +648,22 @@ class ProjectStageCreateText{
         };
         switch(decorationProp.v){
             case 'BOLD':
-                fullProp.check=ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_BOLD'].v;
+                fullProp.check=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v');
                 fullProp.inputName='fontbold';
                 fullProp.label='<b>'+decorationProp.n+'</b>';
                 break;
             case 'UNDERLINE':
-                fullProp.check=ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_UNDERLINE'].v;
+                fullProp.check=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_UNDERLINE','v');
                 fullProp.inputName='fontunderline';
                 fullProp.label='<u>'+decorationProp.n+'</u>';
                 break;
             case 'ITALIC':
-                fullProp.check=ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_ITALIC'].v;
+                fullProp.check=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v');
                 fullProp.inputName='fontitalic';
                 fullProp.label='<i>'+decorationProp.n+'</i>';
                 break;
             case 'line-through':
-                fullProp.check=ProjectStageCreateText.glossary.parameter['STAGE_TEXT_FONT_LINETHROUGH'].v;
+                fullProp.check=ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v');
                 fullProp.inputName='fontlinethrough';
                 fullProp.label='<span style="text-decoration:line-through;">'+decorationProp.n+'</span>';
                 break;
@@ -1054,28 +1059,28 @@ class ProjectStageCreateText{
     }
     static getColorList(exception){
         var value={};
-        for(var i=0;i<ProjectStageCreateText.glossary.color.length;i++){
-            if(ProjectStageCreateText.glossary['color'][i].v!==exception){
-                value[i]=ProjectStageCreateText.getExtendedSelectKeyProperties(ProjectStageCreateText.glossary.color[i].v,ProjectStageCreateText.glossary.color[i].n,ProjectStageCreateText.glossary.color[i].v,'#FFFFFF','');
+        for(var i=0;i<ProjectStageCreateText.Glossary.getKeyCount('color');i++){
+            if(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'v')!==exception){
+                value[i]=ProjectStageCreateText.getExtendedSelectKeyProperties(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'n'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'v'),'#FFFFFF','');
             }
         }
         return value;
     }
     static getBackgroundColorList(exception){
         var value={};
-        for(var i=0;i<ProjectStageCreateText.glossary.color.length;i++){
+        for(var i=0;i<ProjectStageCreateText.Glossary.getKeyCount('color');i++){
               /* TO DO -> CALCULATE FONT COLOR */
-            if(ProjectStageCreateText.glossary['color'][i].v!==exception){
-                value[i]=ProjectStageCreateText.getExtendedSelectKeyProperties(ProjectStageCreateText.glossary.color[i].v,ProjectStageCreateText.glossary.color[i].n,'#FFFFFF',ProjectStageCreateText.glossary.color[i].v,'');
+            if(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'v')!==exception){
+                value[i]=ProjectStageCreateText.getExtendedSelectKeyProperties(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'n'),'#FFFFFF',ProjectStageCreateText.Glossary.getKeyPropertyAttribute('color',i,'v'),'');
             }
         }
         return value;
     }
      static getFontAlignList(exception){
         var value={};        
-        for(var i=0;i<ProjectStageCreateText.glossary['align'].length;i++){
-            if(ProjectStageCreateText.glossary['align'][i].v!==exception){
-                value[i]=ProjectStageCreateText.getSelectKeyProperties(ProjectStageCreateText.glossary['align'][i].v,ProjectStageCreateText.glossary['align'][i].n);
+        for(var i=0;i<ProjectStageCreateText.Glossary.getKeyCount('align');i++){
+            if(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('align',i,'v')!==exception){
+                value[i]=ProjectStageCreateText.getSelectKeyProperties(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('align',i,'v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('align',i,'n'));
             }
         }
         return value;
@@ -1094,9 +1099,9 @@ class ProjectStageCreateText{
     static getFontList(exception){
         //console.log('ProjectStageCreateText::getFontList()');
         var value={};
-        for(var i=0;i<ProjectStageCreateText.glossary.fontfamily.length;i++){
-            if(ProjectStageCreateText.glossary['fontfamily'][i].v!==exception){
-                value[i]=ProjectStageCreateText.getExtendedSelectKeyProperties(ProjectStageCreateText.glossary.fontfamily[i].v,ProjectStageCreateText.glossary.fontfamily[i].v,'#000000','#FFFFFF',ProjectStageCreateText.glossary.fontfamily[i].v);
+        for(var i=0;i<ProjectStageCreateText.Glossary.getKeyCount('fontfamily');i++){
+            if(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('fontfamily',i,'v')!==exception){
+                value[i]=ProjectStageCreateText.getExtendedSelectKeyProperties(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('fontfamily',i,'v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('fontfamily',i,'v'),'#000000','#FFFFFF',ProjectStageCreateText.Glossary.getKeyPropertyAttribute('fontfamily',i,'v'));
             }
         }
         return value;
@@ -1115,7 +1120,7 @@ class ProjectStageCreateText{
         var toolMain3=ProjectStageCreateText.Html.getCol(3);
         var toolMain4=ProjectStageCreateText.Html.getCol(3);    
 
-        var pageBackgroundcolor=ProjectStageCreateText.createTextToolSelect('backgroundcolor','Wskaż kolor tła strony:',ProjectStageCreateText.getDefaultBackgroundColor(ProjectStageCreateText.glossary.parameter['STAGE_TEXT_BACKGROUND_COLOR'].v,ProjectStageCreateText.glossary.parameter['STAGE_TEXT_BACKGROUND_COLOR'].n),ProjectStageCreateText.getBackgroundColorList());
+        var pageBackgroundcolor=ProjectStageCreateText.createTextToolSelect('backgroundcolor','Wskaż kolor tła strony:',ProjectStageCreateText.getDefaultBackgroundColor(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),ProjectStageCreateText.getBackgroundColorList());
             pageBackgroundcolor.onchange = function (){
                 console.log(this.childNodes[1].value);
                 console.log(ProjectStageCreateText.helplink);
@@ -1477,8 +1482,7 @@ class ProjectStageCreateText{
     }
     static getMaxSubSectionCount(){
         //console.log('ProjectStageCreateText::getMaxSubSectionCount()');
-        //console.log(ProjectStageCreateText.glossary.parameter['STAGE_TEXT_SUBSECTION_NUMBER'].v);
-        return parseInt(ProjectStageCreateText.glossary.parameter['STAGE_TEXT_SUBSECTION_MAX'].v,10);
+        return parseInt(ProjectStageCreateText.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MAX','v'),10);
     }
 }
 /*

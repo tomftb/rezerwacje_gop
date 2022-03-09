@@ -1,5 +1,8 @@
 class Html{
-    static showField(ele,info){
+    construct(){
+        console.log('Html::construct()');
+    }
+    showField(ele,info){
         /*
         console.log('Html::showField()');
         console.log(ele);
@@ -13,16 +16,16 @@ class Html{
         }
        
     }
-    static hideField(ele){
+    hideField(ele){
         ele.classList.remove("d-block");
         ele.classList.add("d-none");
         //ele.innerHTML="";
     }
-     static hideAndClearField(ele){
-        Html.hideField(ele);
+    hideAndClearField(ele){
+        this.hideField(ele);
         ele.innerHTML="";
     }
-    static removeChilds(htmlElement)
+    removeChilds(htmlElement)
     {
         //console.log('---removeHtmlChilds()---');
         while (htmlElement.firstChild)
@@ -31,12 +34,12 @@ class Html{
             htmlElement.firstChild.remove(); 
         };
     }
-    static setDisabled(ele){
+     setDisabled(ele){
         ele.classList.add("disabled");
         ele.setAttribute('disabled','');
         console.log(ele);
     }
-    static confirmButton(label,c,id){    
+     confirmButton(label,c,id){    
         var button=document.createElement('button');
             button.setAttribute('class',c);
             button.setAttribute('id',id);
@@ -44,13 +47,13 @@ class Html{
             button.innerHTML=label;
         return button;
     }
-    static getForm(){
+     getForm(){
         var form=document.createElement('FORM');
             form.setAttribute("ENCETYPE","multipart/form-data");
             form.setAttribute("autocomplete",'OFF');
         return form;
     }
-    static cancelButton(label){
+     cancelButton(label){
         var cancel=document.createElement('button');
             cancel.setAttribute('class','btn btn-secondary');
             cancel.setAttribute('type','button');
@@ -58,7 +61,7 @@ class Html{
             cancel.innerText=label;
         return cancel;
     }
-    static createSelectFromObject(d,n,sId,sC)
+     createSelectFromObject(d,n,sId,sC)
     {
         /*
          *  d => data
@@ -68,7 +71,7 @@ class Html{
          */
         //console.log('Html::createSelectFromObject---\n'+sId);
         //console.log(d);
-        var s=Html.select(sC,sId);
+        var s=this.select(sC,sId);
 
         for (const property in d)
         {      
@@ -80,7 +83,7 @@ class Html{
         //console.log(s);
         return s;
     }
-    static select(c,n)
+     select(c,n)
     {
         var s=document.createElement("select");
             s.setAttribute("CLASS",c);  
@@ -88,24 +91,24 @@ class Html{
             s.setAttribute("ID",n);  
             return s;
     }
-    static getGroupButton(){
+     getGroupButton(){
         var group=document.createElement('div');
             group.setAttribute('class','btn-group');
             group.setAttribute('role','group');
             group.setAttribute('aria-label','Action buttons');
         return group;
     }
-    static getRow(){
+     getRow(){
         var div=document.createElement('div');
             div.setAttribute('class','row');
         return div;
     }
-    static getCol(columnNumber){
+     getCol(columnNumber){
         var div=document.createElement('div');
             div.setAttribute('class','col-'+columnNumber);
         return div;
     }
-    static getInput(name,value,type){
+     getInput(name,value,type){
         
         var input=document.createElement('INPUT');
             input.setAttribute('value',value);
@@ -114,7 +117,7 @@ class Html{
             input.setAttribute('type',type);
         return input;
     }
-    static getEmpty(value){
+     getEmpty(value){
         if(value===null || value===undefined){
             return '';
         }

@@ -14,12 +14,12 @@ class ProjectItems{
     static Stage;
     static const;
     static loadModal;
+    static ManageGlossary;
     static XhrAction={
         classToRun:{},
         methodToRun:'',
         taskToRun:''
     };
-    
     static setError(ele,error){
         console.log('ProjectStage::setError()');
         console.log(ele);
@@ -81,25 +81,25 @@ class ProjectItems{
             p.setAttribute('class','text-left');
             p.innerText='Podaj Powód:';
             
-        var inputHiddenSelect=document.createElement('INPUT');
-            inputHiddenSelect.setAttribute('type','text');
-            inputHiddenSelect.setAttribute('id','extra');
-            inputHiddenSelect.setAttribute('name','extra');
-            inputHiddenSelect.setAttribute('class','form-control mb-1');
-            inputHiddenSelect.setAttribute('PLACEHOLDER','Wprowadź powód');
-            inputHiddenSelect.style.display = "none";
+        var extraSelect=document.createElement('INPUT');
+            extraSelect.setAttribute('type','text');
+            extraSelect.setAttribute('id','extra');
+            extraSelect.setAttribute('name','extra');
+            extraSelect.setAttribute('class','form-control mb-1');
+            extraSelect.setAttribute('PLACEHOLDER','Wprowadź powód');
+            extraSelect.style.display = "none";
             
             sloData.push({
-                                                    'ID' : "0",
-                                                    'Nazwa' : 'Inny:'
-                                                });
+                            'ID' : "0",
+                            'Nazwa' : 'Inny:'
+                        });
         var select=ProjectItems.Html.createSelectFromObject(sloData,'Nazwa','reason','form-control mb-1');
             select.onchange = function() { 
                 ProjectItems.checkReason(this,'extra'); 
             };
         ele.appendChild(p); 
         ele.appendChild(select); 
-        ele.appendChild(inputHiddenSelect); 
+        ele.appendChild(extraSelect); 
         return '';
     }
     static  checkReason(t,id){
@@ -187,18 +187,13 @@ class ProjectItems{
     }
     static getCancelButton(classToRun,methodToRun,taskToRun){
         console.log('ProjectItems::getCancelButton()');
-        /*console.log(classToRun);
+        console.log(classToRun);
         console.log(methodToRun);
-        console.log(taskToRun);*/
-        ProjectItems.XhrAction.classToRun=classToRun;
-        ProjectItems.XhrAction.methodToRun=methodToRun;
-        ProjectItems.XhrAction.taskToRun=taskToRun;
+        console.log(taskToRun);
         var cancel=ProjectItems.Html.cancelButton('Anuluj');
             cancel.onclick=function(){
-                /* CLEAR AND CLOSE MODAL */
                 ProjectItems.Modal.closeModal();
-                /* CLEAR CONST OBJECT */
-                ProjectItems.reloadData(ProjectItems.XhrAction.classToRun,ProjectItems.XhrAction.methodToRun,ProjectItems.XhrAction.taskToRun);
+                ProjectItems.reloadData(classToRun,methodToRun,taskToRun);
             };
         return cancel;
     }
@@ -220,35 +215,35 @@ class ProjectItems{
  * SET CLASS
  */
 
-Modal.Html=Html;
-
-TableNew.perm=window.perm;
-TableNew.Xhr=Xhr;
-TableNew.Html=Html;
-TableNew.Modal=Modal;
-TableNew.router=window.appUrl+'/router.php?task=';
-TableNew.appurl=window.appUrl;
-
+Modal.Html=new Html();
+//TableNew.perm=window.perm;
+//TableNew.Xhr=Xhr;
+//TableNew.Html=new Html();
+//TableNew.Modal=Modal;
+//TableNew.router=window.appUrl+'/router.php?task=';
+//TableNew.appurl=window.appUrl;
 
 
-ProjectItems.Html=Html;
+
+ProjectItems.Html=new Html();
 ProjectItems.Modal=Modal;
 ProjectItems.Xhr=Xhr;
 ProjectItems.router=window.appUrl+'/router.php?task=';
 ProjectItems.appurl=window.appUrl;
 ProjectItems.Stage=ProjectStage;
+ProjectItems.ManageGlossary=new ManageGlossary;
 
-ProjectStageTable.Xhr=Xhr;
-ProjectStageTable.Table=TableNew;
-ProjectStageTable.Modal=Modal;
-ProjectStageTable.Html=Html;
-ProjectStageTable.Items=ProjectItems;
-ProjectStageTable.Stage=ProjectStage;
+//ProjectStageTable.Xhr=Xhr;
+//ProjectStageTable.Table=TableNew;
+//ProjectStageTable.Modal=Modal;
+//ProjectStageTable.Html=Html;
+//ProjectStageTable.Items=ProjectItems;
+//ProjectStageTable.Stage=ProjectStage;
 
 ProjectStage.Xhr=Xhr;
-ProjectStage.ProjectStageTable=ProjectStageTable;
+ProjectStage.ProjectStageTable=new ProjectStageTable(ProjectStage,new Xhr2(),new Html());
 ProjectStage.Modal=Modal;
-ProjectStage.Html=Html;
+ProjectStage.Html=new Html();
 ProjectStage.Items=ProjectItems;
 ProjectStage.CreateText=ProjectStageCreateText;
 ProjectStage.CreateImage=ProjectStageCreateImage;
@@ -261,16 +256,17 @@ ProjectStage.CreateList=ProjectStageCreateList;
 ProjectConst.Xhr=Xhr;
 //ProjectConst.Table=TableNew;
 ProjectConst.Modal=Modal;
-ProjectConst.Html=Html;
+ProjectConst.Html=new Html();
 ProjectConst.Items=ProjectItems;
-ProjectConst.ProjectConstTable=ProjectConstTable;
+//ProjectConst.ProjectConstTable=ProjectConstTable;
+ProjectConst.ProjectConstTable=new ProjectConstTable(ProjectConst,new Xhr2(),new Html());
 
-ProjectConstTable.Xhr=Xhr;
-ProjectConstTable.Table=TableNew;
-ProjectConstTable.Modal=Modal;
-ProjectConstTable.Html=Html;
-ProjectConstTable.Items=ProjectItems;
-ProjectConstTable.Const=ProjectConst;
+//ProjectConstTable.Xhr=Xhr;
+//ProjectConstTable.Table=TableNew;
+//ProjectConstTable.Modal=Modal;
+//ProjectConstTable.Html=new Html();
+//ProjectConstTable.Items=ProjectItems;
+//ProjectConstTable.Const=ProjectConst;
 
 
 

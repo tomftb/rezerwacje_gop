@@ -23,9 +23,9 @@ final class ProjectItems extends Page{
         ];
     private $js=[
         'Main/Html.js',
-        'Main/TableNew.js',
         'Main/Modal.js',
         'Main/Xhr.js',
+        'Main/Glossary.js',
         'Main/headerView.js',
         'Page/ProjectStageCreateText.js',
         'Page/ProjectStageCreateTable.js',

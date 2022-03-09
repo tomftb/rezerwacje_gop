@@ -39,9 +39,47 @@ abstract class ManageProjectStageDatabase {
          /* */
         foreach($this->dbLink->squery($select.$where,$parm) as $v){
             //array_push($data,array($v['i'],$v['n'],html_entity_decode($v['t']),html_entity_decode($v['v']),'bl'=>$v['bl']));
-            array_push($data,array($v['i'],html_entity_decode($v['t']),'bl'=>$v['bl']));
+            array_push($data,['i'=>$v['i'],'t'=>html_entity_decode($v['t']),'bl'=>$v['bl']]);
         }
         return $data;
+    }
+    protected function getStageFullData($id=0){
+        $this->Log->log(0,"[".__METHOD__."] ID => ".$id);
+        
+        /* GET STAGE */
+        /* GET SECTION */
+        /* GET SUBSECTION */
+        /* GET SUBSECTION ROW */
+        ///$head=$this->dbLink->squery("SELECT s.`id` as 'i',s.`id_dzial` as 'id',s.`number` as 'n',s.`title` as 't',s.`create_user_fullname` as 'cu',s.`create_user_login` as 'cul',s.`create_date` as 'cd',s.`mod_login` as 'mu',s.`mod_date` as 'md',s.`buffer_user_id` as 'bu',s.`wsk_u` as 'wu',s.`delete_fullname` as 'du',b.`login` as 'bl' FROM `slo_projekt_etap` as s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id` WHERE s.`id`=:id LIMIT 0,1",[':id'=>[$id,'INT']]);
+        //$this->actProjectStageData['head']=array_map(array($this,'preapareProjectStageData'),$head[0]);
+       // $body=$this->dbLink->squery("SELECT `id` as 'i',`value` as 'v',`file_selected` as 'f',`file_position` as 'fp',`wsk_v` as 'wsk_v' FROM `slo_projekt_etap_ele` WHERE `id_projekt_etap`=:id AND `wsk_u`='0' ",[':id'=>[$id,'INT']]);
+        //$this->actProjectStageData['body']=array_map(array($this,'preapareProjectStageData'),$body);
+        return [];
+    }
+    protected function getStage($id=0){
+        $this->Log->log(0,"[".__METHOD__."] ID => ".$id);
+        /* GET STAGE */ 
+        $data=$this->dbLink->squery("SELECT s.`id` as 'i',s.`title` as 't',d.`name` as 'd',s.`create_user_full_name` as 'cu',s.`create_user_login` as 'cul',s.`create_date` as 'cd',s.`mod_user_login` as 'mu',s.`mod_date` as 'md',s.`buffer_user_id` as 'bu',s.`wsk_u` as 'wu',b.`login` as 'bl' FROM `SLO_PROJECT_STAGE` as s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id`, `department` as d WHERE s.`id_department`=d.`id` AND s.`id`=:id LIMIT 0,1",[':id'=>[$id,'INT']]);
+        return $data[0];
+    }
+    protected function hideStage(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->Log->logMulti(0,$this->data);
+        $this->dbLink->query("UPDATE `SLO_PROJECT_STAGE` SET `wsk_v`=:wsk,`hide_reason`=:reason,".$this->dbUtilities->getAlterSql()." WHERE `id`=:id",
+                array_merge(self::setChangeStageParm(),$this->dbUtilities->getAlterParm()));
+    }
+    protected function deleteStage(){
+        $parm=self::setChangeStageParm();
+        $parm[':delete_date']=[$this->dbUtilities->getDate(),'STR'];
+        $this->dbLink->query("UPDATE `SLO_PROJECT_STAGE` SET `wsk_u`=:wsk,`delete_reason`=:reason,`delete_date`=:delete_date,".$this->dbUtilities->getAlterSql()." WHERE `id`=:id",
+                array_merge($parm,$this->dbUtilities->getAlterParm()));
+    }
+    private function setChangeStageParm(){
+        return [
+            ':id'=>[$this->data['id'],'INT'],
+            ':wsk'=>['1','STR'],
+            ':reason'=>[$this->data['reason'],'STR']
+        ];
     }
     protected function manageStage(){
         $this->Log->log(0,"[".__METHOD__."]");

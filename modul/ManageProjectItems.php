@@ -83,10 +83,17 @@ class ManageProjectItems{
         $this->Utilities->validateKey(filter_input_array(INPUT_POST),'id',true,1);
         return (filter_input_array(INPUT_POST));
     }
-    public function setReason(){
-        $reason=explode('|',filter_input(INPUT_POST,'reason'));
+    public function setReason(&$post){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $reason=explode('|',$post['reason']);
+        $extra=$post['extra'];
+        UNSET($post['extra']);
         if(count($reason)!==2){
             Throw New Exception("[".__METHOD__."] WRONG ARRAY MEMBERS, SHOULD BE 2",1);
         }
+        if(0===intval($reason[0],10)){
+            return $extra;
+        }
+        return $reason[1];
     }
 }

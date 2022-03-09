@@ -24,11 +24,14 @@ class ProjectConst{
     }
     static show(){
         console.log('ProjectConst::show()');
-        ProjectConst.Items.setDefaultModal();
-        ProjectConst.ProjectConstTable.defaultTask=ProjectConst.defaultTask;
-        //console.log(ProjectConst.ProjectConstTable);
+        /* FIRST RUN -> PREVENT IF ELE NOT EXIST */
+        if(ProjectConst.Modal.exist){
+            /* CLEAR AND SET MODAL DATA */
+            ProjectConst.Items.setDefaultModal();
+        };
         ProjectConst.Items.Xhr.setRun(ProjectConst.ProjectConstTable,'runTable');
         ProjectConst.Items.Xhr.run('GET',null,ProjectConst.Items.router+ProjectConst.defaultTask);
+        ProjectConst.ProjectConstTable.setProperties(ProjectConst.Items.appurl,ProjectConst.Items.router,ProjectConst.defaultTask);
     }
     static new(){
         console.log('ProjectConst::new()');  

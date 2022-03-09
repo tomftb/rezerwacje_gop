@@ -27,6 +27,8 @@ class DatabaseUtilities {
         /* SQL UPDATE */
         'mu'=>'`mod_user_id`=:mod_user_id,`mod_user_login`=:mod_user_login,`mod_user_full_name`=:mod_user_full_name,`mod_user_email`=:mod_user_email,`mod_date`=:mod_date,`mod_host`=:mod_host',
     ];
+    private $date='';
+    private $RA='';
     public function __construct(){
         $this->Log=Logger::init(__METHOD__);
         $this->dbLink=LoadDb::load();
@@ -79,5 +81,11 @@ class DatabaseUtilities {
     }
     public function getCreateAlterSql(){
         return $this->sqlAddOn['mi'];
+    }
+    public function getDate(){
+        return $this->date;
+    }
+     public function RA(){
+        return $this->RA;
     }
 }

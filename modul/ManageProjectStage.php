@@ -42,14 +42,10 @@ class ManageProjectStage extends ManageProjectStageDatabase
             $this->Log->log(0,"[".__METHOD__."] filter not numeric ");
             $where="WHERE s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`title` LIKE :title) ORDER BY s.`id` ASC";
         }
-        $this->inpArray['u']=$this->Items->setGetWsk('u');
-        $this->inpArray['b']=$this->Items->setGetWsk('b');
-        $this->inpArray['v']=$this->Items->setGetWsk('v');
-        $this->inpArray['wskb']=$this->Items->unsetBlock($this->inpArray['b'],'SLO_PROJEKT_ETAP','buffer_user_id',$_SESSION['userid']);
-
-        $parm[':wsk_u']=array($this->inpArray['u'],'STR');
-        $parm[':wsk_v']=array($this->inpArray['v'],'STR');
-        $parm[':title']=array('%'.$f.'%','STR');
+        $this->inpArray['wskb']=$this->Items->unsetBlock($this->Items->setGetWsk('b'),'SLO_PROJECT_STAGE','buffer_user_id',$_SESSION['userid']);
+        $parm[':wsk_u']=[$this->Items->setGetWsk('d'),'STR'];
+        $parm[':wsk_v']=[$this->Items->setGetWsk('v'),'STR'];
+        $parm[':title']=['%'.$f.'%','STR'];
         
         /* 
          * TO DO => SEARCH IN VALUE (LEFT JOIN)
@@ -59,37 +55,27 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $return['data']=parent::getStages($where,$parm);
         $return['headTitle']='Etapy';
         $this->utilities->jsonResponse($return,'runModal');
+        //echo true;
+    }
+    private function getProjectStage(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->brTag='&lt;br /&gt;';
+        $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+        $this->data['stage']=parent::getStage($id);
+        $this->Items->checkBlock($this->data['stage']['bu'],$this->data['stage']['bl'],$_SESSION['userid']);
+        $this->Items->setBlock($id,"SLO_PROJECT_STAGE","buffer_user_id",$_SESSION['userid']);
     }
     public function getProjectStageHideSlo(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->actProjectStageData=array();
-        $this->brTag='&lt;br /&gt;';
-        $this->utilities->setGet('id',$this->inpArray);
-        self::getProjectStageData($this->inpArray['id']);
-        $this->Items->checkBlock($this->actProjectStageData['head']['bu'],$this->actProjectStageData['head']['bl'],$_SESSION['userid']);
-        $this->Items->setBlock($this->inpArray['id'],"SLO_PROJEKT_ETAP","buffer_user_id",$_SESSION['userid']);
-        $this->actProjectStageData['slo']=$this->Items->getSlo('psHide');
-        $this->utilities->jsonResponse($this->actProjectStageData,'psHide');  
+        self::getProjectStage();
+        $this->data['slo']=$this->Items->getSlo('psHide');
+        $this->utilities->jsonResponse($this->data,'psHide');  
     }
     public function getProjectStageDelSlo(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->actProjectStageData=array();
-        $this->brTag='&lt;br /&gt;';
-        $this->utilities->setGet('id',$this->inpArray);
-        self::getProjectStageData($this->inpArray['id']);
-        $this->Items->checkBlock($this->actProjectStageData['head']['bu'],$this->actProjectStageData['head']['bl'],$_SESSION['userid']);
-        $this->Items->setBlock($this->inpArray['id'],"SLO_PROJEKT_ETAP","buffer_user_id",$_SESSION['userid']);
-        $this->actProjectStageData['slo']=$this->Items->getSlo('psDelete');
-        $this->utilities->jsonResponse($this->actProjectStageData,'psDelete');  
-    }
-
-    private function getProjectStageData($id=0){
-        $this->Log->log(0,"[".__METHOD__."] ID => $id");
-        $head=$this->dbLink->squery("SELECT s.`id` as 'i',s.`id_dzial` as 'id',s.`number` as 'n',s.`title` as 't',s.`create_user_fullname` as 'cu',s.`create_user_login` as 'cul',s.`create_date` as 'cd',s.`mod_login` as 'mu',s.`mod_date` as 'md',s.`buffer_user_id` as 'bu',s.`wsk_u` as 'wu',s.`delete_fullname` as 'du',b.`login` as 'bl' FROM `slo_projekt_etap` as s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id` WHERE s.`id`=:id LIMIT 0,1",[':id'=>[$id,'INT']]);
-        $this->actProjectStageData['head']=array_map(array($this,'preapareProjectStageData'),$head[0]);
-        $body=$this->dbLink->squery("SELECT `id` as 'i',`value` as 'v',`file_selected` as 'f',`file_position` as 'fp',`wsk_v` as 'wsk_v' FROM `slo_projekt_etap_ele` WHERE `id_projekt_etap`=:id AND `wsk_u`='0' ",[':id'=>[$id,'INT']]);
-        $this->actProjectStageData['body']=array_map(array($this,'preapareProjectStageData'),$body);
-       
+        self::getProjectStage();
+        $this->data['slo']=$this->Items->getSlo('psDelete');
+        $this->utilities->jsonResponse($this->data,'psDelete');  
     }
     private function preapareProjectStageData($data){
         return str_replace($this->brTag,"",$data);
@@ -99,54 +85,33 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $this->actProjectStageData=array();
         $this->brTag='&lt;br /&gt;';
         $this->utilities->setGet('id',$this->inpArray);
-        self::getProjectStageData($this->inpArray['id']);
+        $this->actProjectStageData['stage']=parent::getStage($this->inpArray['id']);
         $this->utilities->jsonResponse($this->actProjectStageData,'psDetails');
+    }
+    private function setChangeState(){
+        $this->data=$this->Items->setPostId();
+        $this->Log->log(0,"[".__METHOD__."] POST");
+        $this->Log->logMulti(0,$this->data);
+        //Throw new Exception('TEST'.__LINE__,0);
+        $this->data['reason']=$this->Items->setReason($this->data);
+        $this->data['wskb']= $this->Items->getBufferUserId($this->data['id'],'SLO_PROJECT_STAGE','buffer_user_id');
+        $this->Items->checkBlock($this->data['wskb']['bu'],$this->data['wskb']['bl'],$_SESSION['userid']);
     }
     public function psHide(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->inpArray=$this->Items->setPostId();
-        $this->inpArray['reason']=$this->Items->setReason();
-        $this->inpArray['wskb']= $this->Items->getBufferUserId($this->inpArray['id'],'SLO_PROJEKT_ETAP','buffer_user_id');
-        $this->Items->checkBlock($this->inpArray['wskb']['bu'],$this->inpArray['wskb']['bl'],$_SESSION['userid']);
-        self::sqlHideStage();
-        $this->Items->setBlock($this->inpArray['id'],"SLO_PROJEKT_ETAP","buffer_user_id",'');
+        self::setChangeState();
+        parent::hideStage();
+        $this->Items->setBlock($this->data['id'],"SLO_PROJECT_STAGE","buffer_user_id",'');
+        //Throw new Exception('TEST'.__LINE__,0);
         $this->utilities->jsonResponse('','cModal');
     }
     public function psDelete(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->inpArray=$this->Items->setPostId();
-        $this->inpArray['reason']=$this->Items->setReason();
-        $this->inpArray['wskb']= $this->Items->getBufferUserId($this->inpArray['id'],'SLO_PROJEKT_ETAP','buffer_user_id');
-        $this->Items->checkBlock($this->inpArray['wskb']['bu'],$this->inpArray['wskb']['bl'],$_SESSION['userid']);
-        self::sqlDeleteStage();
-        $this->Items->setBlock($this->inpArray['id'],"SLO_PROJEKT_ETAP","buffer_user_id",'');
+        self::setChangeState();
+        parent::deleteStage();
+        $this->Items->setBlock($this->data['id'],"SLO_PROJECT_STAGE","buffer_user_id",'');
         $this->utilities->jsonResponse('','cModal');
     }
-    private function sqlDeleteStage(){
-        $query_data=[
-                ':id'=>[$this->inpArray['id'],'INT'],
-                ':wsku'=>['1','STR'],
-                ':userid'=>[$_SESSION["userid"],'INT'],
-                ':username'=>[$_SESSION["username"],'STR'],
-                ':fullname'=>[$_SESSION["nazwiskoImie"],'STR'],
-                ':aktualnadata'=>[CDT,'STR'],
-                ':ra'=>[RA,'STR'],
-                ':delete_reason'=>array($this->inpArray['reason'][1],'STR')
-            ];
-        $this->dbLink->setQuery("UPDATE `slo_projekt_etap` SET `wsk_u`=:wsku,`delete_user_id`=:userid,`delete_login`=:username,`delete_fullname`=:fullname,`delete_date`=:aktualnadata,`delete_reason`=:delete_reason,`delete_host`=:ra WHERE `id`=:id",$query_data);
-        $this->dbLink->runTransaction();
-    }
-    private function sqlHideStage(){
-        $sqlParm=[
-            ':id'=>[$this->inpArray['id'],'INT'],
-            ':wsk_v'=>['1','STR'],
-            ':hide_reason'=>[$this->inpArray['reason'][1],'STR']
-        ];
-        self::addUpdateAddOns($sqlParm);
-        $this->dbLink->setQuery("UPDATE `slo_projekt_etap` SET `wsk_v`=:wsk_v,`mod_user_id`=:mod_user_id,`mod_login`=:mod_login,`mod_date`=:mod_date,`hide_reason`=:hide_reason,`mod_host`=:mod_host WHERE `id`=:id",$sqlParm);
-        $this->dbLink->runTransaction();
-    }
-
     public function psCreate()
     {
         $this->Log->log(0,"[".__METHOD__."]");
@@ -264,7 +229,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
     private function checkStageData(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->inpArray['id']=intval($this->inpArray['id']);
-        self::getProjectStageData($this->inpArray['id']);
+        parent::getStage($this->inpArray['id']);
         //$this->actProjectStageData=$this->inpArray['id']
         /* EXIST AND IS NOT BLOCKED ? */
         $this->Log->logMulti(2,$this->actProjectStageData,__METHOD__);
@@ -395,25 +360,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
             }
         }
     }
-    private function addUpdateAddOns(&$data){
-        $addOns=array(
-                    ':mod_user_id'=>array($_SESSION["userid"],'INT'),
-                    ':mod_login'=>array($_SESSION["username"],'STR'),
-                    ':mod_date'=>array(CDT,'STR'),
-                    ':mod_host'=>array(RA,'STR')
-        );
-        $this->utilities->mergeArray($data,$addOns);
-    }
-    private function addDeleteAddOns(&$data){
-        $addOns=array(
-                    ':delete_user_id'=>array($_SESSION["userid"],'INT'),
-                    ':delete_login'=>array($_SESSION["username"],'STR'),
-                    ':delete_fullname'=>array($_SESSION["nazwiskoImie"],'STR'),
-                    ':delete_date'=>array(CDT,'STR'),
-                    ':delete_host'=>array(RA,'STR')
-        );
-        $this->utilities->mergeArray($data,$addOns);
-    }
+
     public function getNewStageDefaults(){
         $type=htmlentities(nl2br(filter_input(INPUT_GET,'type')), ENT_QUOTES,'UTF-8',FALSE);
         $this->Log->log(0,"[".__METHOD__."]\r\nTYPE - ".$type);

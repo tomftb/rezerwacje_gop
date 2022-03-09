@@ -82,3 +82,59 @@ class Xhr{
         //console.log(Xhr.runMethod);
     }
 }
+class Xhr2 {
+    construct(){
+        console.log('Xhr2::construct()');
+    }
+    run(property){
+        console.log('Xhr2::run(p)');
+        /*
+         * property:
+         * t = type GET/POST 
+         * u = url
+         * c = capture
+         * d = data
+         * o = object
+         * m = method
+         */      
+        var req=new XMLHttpRequest();
+            req.timeout =0 ; // 5000 => 5s time in milliseconds => DEFAULT 0
+            req.open(property.t, property.u, property.c);
+            req.ontimeout = function (e){
+                console.log("The request took too long!");
+            }; 
+            req.onprogress = function (e){
+                console.log(e);
+                console.log(e.position);
+                console.log(e.totalSize);
+                var percentComplete = (e.position / e.totalSize)*100;
+                console.log(percentComplete); 
+            };
+            req.onload = function(e) {
+                console.log('Xhr2::onload()');
+                property.o[property.m](this.response);
+            };
+            req.onerror =  function(e){
+                console.log('Xhr2::onload()');
+                console.log("Podczas pobierania dokumentu wystąpił błąd " + e.target.status + ".");    
+            };
+            req.onloadend =  function(e){
+                /* Occurs when the request has finish, regardless if it was successful or not*/
+                console.log('oneloadend');   
+            };
+            req.onloadstart = function (e){
+                console.log("Request started transferring data!");
+            };
+            req.onabort = function (e){
+                console.log("Request aborted!");
+            };
+            req.onreadystatechanged  = function() {
+                console.log(req.readyState);
+                if (req.readyState == req.DONE) {
+                    if (req.status == 200){ console.log("Request finished successfully!");}
+                        else {console.log("Request failed!");}
+                }
+            } ;
+            req.send(property.d); 
+    }  
+}

@@ -13,7 +13,9 @@ class Glossary{
     constructor(){ 
         console.log('Glossary::constructor()');
     }
-    
+    create(){
+        return this;
+    }
     add(key,value){
         /*
         console.log('Glossary::add()\r\n KEY => ');
@@ -98,44 +100,6 @@ class Glossary{
             return true;
         }
         console.log('Glossary::exist() FALSE');
-        return false;
-    }
-}
-
-class ManageGlossary{
-    
-    Glossary=new Object();
-
-    constructor(){ 
-        /*
-        console.log('ManageGlossary::constructor()');
-         * 
-         */
-    }
-    create(id){
-        /*
-        console.log('ManageGlossary::create()');
-        console.log(id);
-         * 
-         */
-        this.Glossary[id]=new Glossary();
-        /*
-        console.log(this.Glossary);
-         * 
-         */
-        return this.Glossary[id];
-    }
-    exist(id){
-        /*
-        console.log('ManageGlossary::exist()\r\n ID => '); 
-        console.log(id); 
-         * 
-         */
-        if(this.Glossary.hasOwnProperty(id)){
-            console.log('ManageGlossary::exist() TRUE');
-            return true;
-        }
-        console.log('ManageGlossary::exist() FALSE');
         return false;
     }
 }

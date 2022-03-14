@@ -35,23 +35,56 @@ class ProjectStageTable{
         }};
     tableColException=new Array('bl');
     tableBody;
-    constructor(Stage,Xhr,Html){
+    constructor(Stage){
         console.log('ProjectStageTable::construct()');  
         this.Stage=Stage;
-        this.Xhr=Xhr;
-        this.Html=Html;
+        this.Xhr=Stage.Items.Xhr;
+        this.Html=Stage.Items.Html;
     }
-    setProperties(appUrl,url,defaultTask){
+    setProperties(appUrl,url){
         console.log('ProjectConst::setProperties()');
-        this.defaultTask=defaultTask;
         this.appUrl=appUrl;
         this.router=url;
         console.log(appUrl);
-        console.log(defaultTask);
         console.log(url);
+    }
+    run(defaultTask){
+        console.log('ProjectConst::run()');
+        this.defaultTask=defaultTask;
+        this.getData();
+    }
+    getData(){
+        console.log('ProjectConst::getData()');
+        /*
+         * property:
+         * t = type GET/POST 
+         * u = url
+         * c = capture
+         * d = data
+         * o = object
+         * m = method
+         */
+        var xhrRun={
+            t:'GET',
+            u:this.router+this.defaultTask,
+            //u:'asdasd',
+            c:true,
+            d:null,
+            o:this,
+            m:'runTable' 
+        };
+        var xhrError={
+            o:this,
+            m:'setError'
+        };
+        /* SET XHR ON ERROR */
+        this.Xhr.setOnError(xhrError);
+        /* SET XHR LOAD */
+        this.Xhr.run(xhrRun);
     }
     runTable(response){
         console.log('ProjectConst::runTable()');
+        console.log(this);
         try {
             this.setLink();        
             this.clearTable();   
@@ -59,6 +92,7 @@ class ProjectStageTable{
         catch (error) {
             alert('ProjectStageTable::runTable() Error occured!');
             console.log(error);
+            return false;
         } 
         /* SET TO JSON RESPONSE */
         this.stageData=this.setData(response);
@@ -74,21 +108,18 @@ class ProjectStageTable{
                 this.setError(this.stageData.info);
             }
             else{
-                /* SET PAGE TITLE */
-                document.getElementById('headTitle').innerHTML=this.stageData.data.value.headTitle;
                 /* SET TABLE  */
                 this.setTable();
             } 
         }
         catch (error) {
             this.setError(error);
-        } 
+        }  
     }
     setTable(){
         console.log('ProjectStageTable::setTable()');
         this.setHead();
-        this.setBody();
-        
+        this.setBody();   
     }
     setHead(){
         console.log('ProjectStageTable::setHead()');
@@ -171,6 +202,9 @@ class ProjectStageTable{
     setButtonGroup(value){
         //console.log('TableNew::setGroupBtn('+i+')');
         var Ajax = this.Xhr;
+        //console.log(Ajax);
+        /* ADD LOAD INFO */
+        
         var btnGroup=document.createElement('DIV');
             btnGroup.setAttribute('class','btn-group pull-left');
             btnGroup.appendChild(this.getShowButton(Ajax,value.i));
@@ -189,6 +223,7 @@ class ProjectStageTable{
     getShowButton(Ajax,id){
         var btn  = this.getButton('Wyświetl','btn-info');
         var AjaxRun = this.getXhrRunProperty('psDetails&id='+id);
+            AjaxRun.m='edit';
             btn.onclick = function (){
                 Ajax.run(AjaxRun);
             };
@@ -205,6 +240,7 @@ class ProjectStageTable{
     getDeleteButton(Ajax,id){
         var btn  = this.getButton('Usuń','btn-danger');
         var AjaxRun = this.getXhrRunProperty('getProjectStageDelSlo&id='+id);
+            AjaxRun.m='remove';
             /* CLOSURE */
             btn.onclick = function (){
                 Ajax.run(AjaxRun);
@@ -218,13 +254,12 @@ class ProjectStageTable{
             c:false,
             d:null,
             o:this.Stage,
-            m:'runModal'
+            m:'hide'
         };
         return run;
     }
     setLink(){
         console.log('ProjectStageTable::setLink()');
-        //console.log(document.getElementById('mainTableDiv'));
         var tableEle = document.getElementById('mainTableDiv');
         console.log(tableEle);
         this.link={
@@ -249,7 +284,7 @@ class ProjectStageTable{
         };
     }
     setData(response){
-        console.log('ProjectStageTable::setData()');
+        console.log('ProjectStageTable::setJsonData()');
         console.log(response);
         try {
             return JSON.parse(response);    

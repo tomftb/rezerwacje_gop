@@ -1,4 +1,4 @@
-console.log('ProjectConst');
+//console.log('ProjectConst');
 /*
  * 
  * CLASS Modal -> js/Main/Modal.js
@@ -408,11 +408,7 @@ class ProjectConst{
             ProjectConst.Html.setDisabled(ProjectConst.Modal.link['buttonConfirm']);
         }
     }
-    static cModal(){
-        console.log('ProjectConst::cModal()');
-        $(ProjectConst.Modal.link['main']).modal('hide');
-        ProjectConst.Items.reloadData(ProjectConstTable,'runTable',ProjectConst.defaultTask+'');
-    }
+    
     static  isObjectEmpty(object) {
         var isEmpty = true;
         for (var keys in object) {

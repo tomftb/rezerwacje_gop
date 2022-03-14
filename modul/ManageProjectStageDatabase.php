@@ -27,6 +27,7 @@ abstract class ManageProjectStageDatabase {
         $glossary['decoration']=$this->dbUtilities->getStyle(0);
         $glossary['align']=$this->dbUtilities->getStyle(1);
         $glossary['measurement']=$this->dbUtilities->getStyle(2);
+        $glossary['department']=$this->dbUtilities->getUserDepartment($_SESSION['userid']);
         $glossary['parameter']=$this->dbUtilities->getParam('STAGE_%');
         return $glossary;
     }
@@ -84,6 +85,8 @@ abstract class ManageProjectStageDatabase {
     protected function manageStage(){
         $this->Log->log(0,"[".__METHOD__."]");
         try{
+            /* CHECK DEPARTMENT EXIST */
+            $this->dbUtilities->exist('DEPARTMENT',"id=".$this->data->department);
             /* START TRANSACTION */
             $this->dbLink->beginTransaction(); //PHP 5.1 and new
             //self::runQuery();
@@ -127,6 +130,7 @@ abstract class ManageProjectStageDatabase {
         }  
     }
     private function insertStage(){
+       
         $this->Log->log(0,"[".__METHOD__."]");  
          /* SQL INSERT STAGE */
         $parm=[

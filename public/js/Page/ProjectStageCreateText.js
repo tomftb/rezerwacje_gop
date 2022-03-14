@@ -1,8 +1,9 @@
 class ProjectStageCreateText{
-    Modal;
-    Items;
-    Stage;
-     Html;
+    Modal=new Object();
+    Items=new Object();
+    Stage=new Object();
+    Html=new Object();
+    Xhr=new Object();
     /* FIELD COUNTER */
     i=0;
     /* FIELD COUNTER */
@@ -12,20 +13,30 @@ class ProjectStageCreateText{
     helplink={};
     resonse; 
     Glossary={};
+    data={};
     
-    create(response){
+    getData(u,m){
+        console.log('ProjectStageCreateText::prepare()');
+        var xhrParm={
+            t:"GET",
+            u:this.Items.router+u,
+            c:false,
+            d:null,
+            o:this,
+            m:m
+        };
+        this.Xhr.run(xhrParm);
+    }
+    create(o){
         console.log('ProjectStageCreateText::create()');
-        console.log(response);
-        this.setUpGlossary(response);
-        /* 
-         * TEST GET 
-        console.log(this.Glossary.getKey('parameter'));
-        console.log(this.Glossary.getKeyProperty('parameter','STAGE_TEXT_BACKGROUND_COLOR'));
-        console.log(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'));
-        return true;
-        */
+        this.setUp(o);
+        this.getData('getNewStageDefaults&type=tx','setUpCreateData');        
+    }
+    setUpModal(){
+        console.log('ProjectStageCreateText::setUpModal()');
+        
         this.Items.prepareModal('Dodaj etap projektu - tekst','bg-info');
-        this.Items.setCloseModal(this.Stage.ProjectStageTable,'runTable',this.Stage.defaultTask+'0');
+        this.Items.setCloseModal(this.Stage,'show',this.Stage.defaultTask+this.data.data['value']['stage'].id);
         
         /* SET DEFAULT (EMPTY) LINK TO DATA*/
         this.link=this.getEmptyLink();
@@ -33,8 +44,8 @@ class ProjectStageCreateText{
         this.helplink=this.getEmptyHelpLink();
        
         var form=this.Html.getForm();
-        /* ASSIGN TITLE FIELD */
-        this.createHead(form,'','GOP');
+        /* ASSIGN TITLE DEPARTMENT FIELD */
+        this.createHead(form);
         /* ASSING PREVIEW FIELD */
         form.appendChild(this.createPreview());
          /* ASSING WORKING FIELD */
@@ -48,24 +59,11 @@ class ProjectStageCreateText{
         console.log(this.Modal.link['error']); 
         this.createManageButton('Dodaj');
     }
-      setUpGlossary(response){
-        console.log('ProjectStageCreateText::setUpGlossary()');
-        if(this.Stage.Items.ManageGlossary.exist('text')) {
-            console.log('Gloassary text exist');
-            console.log(this.Glossary);
-            return true;
-        }
-        console.log('Gloassary text not exist');
-        this.Glossary=this.Stage.Items.ManageGlossary.create('text');
-        this.Glossary.add('color',response.data.value.glossary.color);
-        this.Glossary.add('align',response.data.value.glossary.align);
-        this.Glossary.add('decoration',response.data.value.glossary.decoration);
-        this.Glossary.add('fontfamily',response.data.value.glossary.fontfamily);
-        this.Glossary.add('measurement',response.data.value.glossary.measurement);
-        this.Glossary.add('parameter',response.data.value.glossary.parameter);
-        console.log(this.Glossary);
+    edit(response){
+        console.log('ProjectStageCreateText::edit()');
+        console.log(response);
     }
-      getEmptyLink(){
+    getEmptyLink(){
         console.log('ProjectStageCreateText::getEmptyLink()');
         var link={
             department:'',
@@ -74,7 +72,7 @@ class ProjectStageCreateText{
         };
         return link;
     }
-      getEmptyHelpLink(){
+    getEmptyHelpLink(){
         console.log('ProjectStageCreateText::getEmptyHelpLink()');
         var link={
             previewDiv:{
@@ -96,27 +94,29 @@ class ProjectStageCreateText{
             this.helplink.previewDiv.pageBackgroundColor=this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v');
         return mainDiv;
     }
-      createHead(ele,title,department){
+    createHead(ele){
+        console.log('ProjectStageCreateText::createHead()');
+        console.log(this.data.data.value);
+        //console.log(reponse.data.value.stage.title);
+        //console.log(reponse.data.value.stage.department);
+
         var titleDiv=this.Html.getRow();
-        var departmentDiv=this.Html.getRow();
-            //mainDiv.classList.add('bg-info');
+
             this.helplink['titleDiv']=titleDiv;
         
         var titleLabelDiv=this.Html.getCol(1);
         var titleInputDiv=this.Html.getCol(11);
         
-      
             titleLabelDiv.appendChild(this.createLabel('h3','Tytuł'));
             
-        var input=this.Html.getInput('title',title,'text');
+        var input=this.Html.getInput('title',this.data.data.value.stage.title,'text');
             input.classList.add('form-control');
             input.setAttribute('placeholder','Enter title');
             input.setAttribute('aria-describedby',"titleHelp" );
             titleInputDiv.appendChild(input);
         
         this.helplink['title']=input;
-        
-        var helpValue=document.createTextNode('Staraj sie wprowadzić jednoznaczy tytuł.');     
+        var helpValue=document.createTextNode('Staraj sie wprowadzić jednoznaczy tytuł.Należy wprowadzić minimalnie 1 znak, a maksymalnie 1024 znaki.');     
          
         var help=document.createElement('small');
             help.setAttribute('id','titleHelp');
@@ -124,29 +124,39 @@ class ProjectStageCreateText{
             help.appendChild(helpValue);
             
             titleInputDiv.appendChild(help);
-        /* DEPARTMENT */
-       
-        var departmentData={
-            0:{
-                value:1,
-                title:'GOP'
-            }
-        };
-       
+        
+        titleDiv.appendChild(titleLabelDiv);
+        titleDiv.appendChild(titleInputDiv);
+
+        ele.appendChild(titleDiv);
+
+        ele.appendChild(this.createHeadDepartment(this.data.data.value.stage.department));
+    }
+    createHeadDepartment(dedaultDepartment){
+        console.log('ProjectStageCreateText::createHeadDepartment()');
+        console.log(dedaultDepartment);
+
+        var departmentDiv=this.Html.getRow();
         var departmentLabelDiv=this.Html.getCol(1);
         var departmentInputDiv=this.Html.getCol(11);
             departmentLabelDiv.appendChild(this.createLabel('h3','Dział:'));
         var department=this.createSelect('department','department');
             department.setAttribute('aria-describedby',"departmentHelp" );
-            department.appendChild(this.createSelectOption('Domyślny:',departmentData));  
-            department.appendChild(this.createSelectOption('Dostępne:',departmentData)); 
-            department.onchange = function () {
-                //console.log(this);
-                //console.log(this.value);
-                this.link['department']=this.value;
-            };
-            this.link['department']=departmentData[0].value;
-        
+            
+            /* TO DO => DEFAULT OD EDIT*/
+            if(dedaultDepartment[0].n!==''){
+                department.appendChild(this.createSelectOption('Aktualny:',dedaultDepartment));  
+            }
+            
+            console.log(this.Glossary);
+            department.appendChild(this.createSelectOption('Dostępne:',this.Glossary.item.department)); 
+            this.helplink['department']=department;
+        /* TO DO -> DEFAULT / EDIT */  
+       
+        //this.link['department']=this.Glossary.item.department[0].v;
+       
+       
+
         var departmentHelpValue=document.createTextNode('Wskaż dział.');     
          
         var departmentHelp=document.createElement('small');
@@ -157,14 +167,9 @@ class ProjectStageCreateText{
         departmentInputDiv.appendChild(department);
         departmentInputDiv.appendChild(departmentHelp);
         
-        titleDiv.appendChild(titleLabelDiv);
-        titleDiv.appendChild(titleInputDiv);
-        
         departmentDiv.appendChild(departmentLabelDiv);
         departmentDiv.appendChild(departmentInputDiv);
-        
-        ele.appendChild(titleDiv);
-        ele.appendChild(departmentDiv);
+        return departmentDiv;
     }
       createLabel(h,value){
         var titleLabelValue=document.createTextNode(value);
@@ -683,6 +688,7 @@ class ProjectStageCreateText{
         var tool2=this.Html.getCol(5);
         var tool3=this.Html.getCol(2);
         var radio = this.createTextToolRadioButton('valuenewline-'+isection+'-'+isub+'-'+isubrow,'Tekst od nowej lini?',this.getYesNowRadio('valuenewline-'+isection+'-'+isub+'-'+isubrow));
+         /* SET OBJECT, NOT OBJECT VALUE */
         var classObject=this;    
             /* SET DEFAULT VALUE FOR BREAK LINE */
             this.link.section['section-'+isection]['subsection'][isub][isubrow]['valuenewline']='1';
@@ -783,10 +789,10 @@ class ProjectStageCreateText{
             optionGroup.setAttribute('class','bg-info text-white');
             for (const property in data) {
                 var option=document.createElement('option');
-                    option.setAttribute('value',data[property].value);
+                    option.setAttribute('value',data[property].v);
                     option.style.color = '#000000';
                     option.style.backgroundColor = '#FFFFFF';
-                    option.innerText=data[property].title;
+                    option.innerText=data[property].n;
                     optionGroup.appendChild(option);
             };
         return optionGroup;
@@ -932,12 +938,12 @@ class ProjectStageCreateText{
                 //console.log(`${property}: ${data[property]}`);
                 //console.log(data[property]);
                 var option=document.createElement('option');
-                    option.setAttribute('value',data[property].value);
+                    option.setAttribute('value',data[property].v);
                     //option.setAttribute('class',data[property].fontcolor+' '+data[property].backgroundcolor);
                     option.style.fontFamily = data[property].fontfamily;
                     option.style.color = data[property].fontcolor;
                     option.style.backgroundColor = data[property].backgroundcolor;
-                    option.innerText=data[property].title;
+                    option.innerText=data[property].n;
                     optionGroup2.appendChild(option);
             };
         return optionGroup2;
@@ -1008,8 +1014,8 @@ class ProjectStageCreateText{
     }
       getSelectKeyProperties(value,title){
         var selectKeyProp={
-                value:value,
-                title:title,
+                v:value,
+                n:title,
                 fontcolor:'#000000',
                 backgroundcolor:'#FFFFFF',
                 fontfamily:''
@@ -1121,10 +1127,11 @@ class ProjectStageCreateText{
         var toolMain4=this.Html.getCol(3);    
 
         var pageBackgroundcolor=this.createTextToolSelect('backgroundcolor','Wskaż kolor tła strony:',this.getDefaultBackgroundColor(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),this.getBackgroundColorList());
+        var helplink=this.helplink;    
             pageBackgroundcolor.onchange = function (){
                 console.log(this.childNodes[1].value);
-                console.log(this.helplink);
-                this.helplink.previewDiv.pageBackgroundColor=this.childNodes[1].value;
+                console.log(helplink);
+                helplink.previewDiv.pageBackgroundColor=this.childNodes[1].value;
             };
         toolMain1.appendChild(pageBackgroundcolor);
         toolMain1.appendChild(this.createTextToolRadioButton('newpage','Etap od nowej strony?',this.getYesNowRadio('newpage')));    
@@ -1266,7 +1273,7 @@ class ProjectStageCreateText{
            
         return (div);
     }
-      createManageButton(btnLabel){
+    createManageButton(btnLabel){
         var preview=document.createElement('button');
             preview.setAttribute('class','btn btn-warning');
         var previewLabel = document.createTextNode('Podgląd');
@@ -1282,11 +1289,11 @@ class ProjectStageCreateText{
          * BUTTONS
          */
         
-        this.Modal.link['button'].appendChild(this.Items.getCancelButton(this.Stage.ProjectStageTable,'runTable',this.Stage.defaultTask+'0'));
+        this.Modal.link['button'].appendChild(this.Items.getCancelButton(this.Stage,'show',this.Stage.defaultTask+this.data.data['value']['stage'].id));
         this.Modal.link['button'].appendChild(preview);
         this.Modal.link['button'].appendChild(confirm);
     }
-      swapPreviewButton(ele)
+    swapPreviewButton(ele)
     {
         /*
         console.log('ProjectStageCreateText::swapPreviewButton()');
@@ -1343,12 +1350,15 @@ class ProjectStageCreateText{
       checkInputData(fd){
         
     }
-      setInputData(){
+    setInputData(){
+            console.log('ProjectStageCreateText::setInputData()');
+            console.log(this.link['department']);
         var data={
             db:'0',
             sec:{},
             title:this.helplink['title'].value,
-            department:this.link['department']
+            department:this.helplink['department'].value
+            //department:this.link['department']
         };
         for(const property in this.link.section){
             console.log('SECTION - '+property);
@@ -1459,5 +1469,63 @@ class ProjectStageCreateText{
       getMaxSubSectionCount(){
         //console.log('ProjectStageCreateText::getMaxSubSectionCount()');
         return parseInt(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MAX','v'),10);
+    }
+    setUp(o){
+        console.log('ProjectStageCreateText::setUp()');
+        /*
+         * o - object
+         */
+        this.Modal=o.Items.Modal;
+        this.Items=o.Items;
+        this.Stage=o;
+        this.Html=o.Items.Html;
+        this.Xhr=o.Items.Xhr;
+        this.Glossary=this.Items.Glossary['text'];
+    }
+    setUpData(response){
+        console.log('ProjectStage::setUpData()');
+        //return false;
+        //this.setUpGlossary(response);
+        try {
+            this.data=JSON.parse(response);  
+            if (!('status' in this.data) || !('info' in this.data)){
+                this.Items.setCloseModal(this.Stage.Table,'show',this.defaultTask+'0');
+                this.Html.showField(this.Modal.link['error'],'Application error occurred! Contact with Administrator!');
+            }
+            else if(this.data.status===1){
+                this.Items.setCloseModal(this.Stage.Table,'show',this.defaultTask+'0');
+                this.Html.showField(this.Modal.link['error'],this.data.info);
+            }
+           else{
+                /*  OK */ 
+            }  
+        }
+        catch (error) {
+            console.log(error);
+            /* SET TABLE ERROR */
+            //this.Stage.Table.setError(error);
+            this.Html.showField(this.Modal.link['error'],error);
+        } 
+        
+    }
+    setUpCreateData(response){
+        this.setUpData(response);
+        this.setUpStageDefault();
+        this.Glossary.item=this.data.data.value.glossary;
+        this.setUpModal();
+    }
+    setUpStageDefault(){
+        console.log('ProjectStageCreateText::setUpStageDefault()');
+        /* ADD EMPTY KEY title department*/
+        this.data.data['value']['stage']={
+                title:'',
+                id:0,
+                department:{
+                        0:{
+                            v:0,
+                            n:''  
+                        }
+                }
+        };
     }
 }

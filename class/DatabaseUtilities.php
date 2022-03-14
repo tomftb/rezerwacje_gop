@@ -1,16 +1,5 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- * Description of DatabaseUtilities
- *
- * @author tborczynski
- */
 class DatabaseUtilities {
     private $dbLink;
     private $sqlAddOn=[
@@ -57,6 +46,13 @@ class DatabaseUtilities {
             ':mod_host'=>[$this->RA,'STR']
         ];
     }
+    public function exist($table='',$where=''){
+        $query = $this->dbLink->prepare('SELECT * FROM '.$table.' WHERE '.$where.';');
+        $query->execute();
+        if(!$query->rowCount()){
+            Throw new Exception ('RECORD `'.$where.'` NOT EXIST IN TABLE `'.$table.'`',1);
+        }
+    }
     public function getColor(){
         $this->Log->log(0,"[".__METHOD__."]");
         return $this->dbLink->squery('SELECT `ENG` as n,`HEX` as v FROM `SLO_COLOR` ORDER BY `ENG` ASC');
@@ -72,6 +68,10 @@ class DatabaseUtilities {
     public function getParam($SHORTCUT=''){
         $this->Log->log(0,"[".__METHOD__."]\r\nSHORTCUT - $SHORTCUT");
         return $this->dbLink->squery('SELECT `SKROT` as s, `OPIS` as n,`WARTOSC` as v FROM `PARAMETRY` WHERE `SKROT` LIKE "'.$SHORTCUT.'" ORDER BY `ID` ASC');
+    }
+     public function getUserDepartment($id_user=0){
+        $this->Log->log(0,"[".__METHOD__."]\r\ID USER - ${id_user}");
+        return $this->dbLink->squery('SELECT d.`NAME` as n,d.`ID` as v FROM `DEPARTMENT_USER` as du, `DEPARTMENT` d WHERE du.`id_department`=d.`id` AND `id_user`=:id_user ORDER BY `id_department` ASC',[':id_user'=>[$id_user,'INT']]);
     }
     public function getCreateSql(){
         return $this->sqlAddOn['ci'];

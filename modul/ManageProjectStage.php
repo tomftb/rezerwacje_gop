@@ -8,7 +8,6 @@ class ManageProjectStage extends ManageProjectStageDatabase
     private $actProjectStageData=array();
     private $brTag='';
     private $Items;
-    
 
     function __construct(){
         parent::__construct();
@@ -54,7 +53,9 @@ class ManageProjectStage extends ManageProjectStageDatabase
          */
         $return['data']=parent::getStages($where,$parm);
         $return['headTitle']='Etapy';
-        $this->utilities->jsonResponse($return,'runModal');
+        //Throw New Exception ('test'.__LINE__,0);
+        //echo ;asd
+        $this->utilities->jsonResponse($return,'');
         //echo true;
     }
     private function getProjectStage(){
@@ -417,12 +418,32 @@ class ManageProjectStage extends ManageProjectStageDatabase
         //$input=filter_input_array(INPUT_POST);
         $this->Log->logMulti(0,filter_input(INPUT_POST,'stage'));
         $this->data=json_decode(filter_input(INPUT_POST,'stage'));
-        
         $this->Log->logMulti(0,$this->data);
-        
+        $this->error='';
+        $prefix="";
+        self::checkValue('title',$prefix);
+        self::checkValue('department',$prefix);
+        $this->error.=$prefix.$this->utilities->checkValueLength($this->data->title,'[title]',1,1024);
+        if($this->error){
+            Throw New Exception ($this->error,0);
+        }
         parent::manageStage();
-        $this->utilities->jsonResponse('','cModal');
-     
+        //Throw New Exception ('TEST LINE:'.__LINE__,0);
+        $this->utilities->jsonResponse('','cModal');    
+    }
+    private function checkValue($key='',&$prefix){
+        $this->Log->log(0,"[".__METHOD__."]\r\nKEY - ".$key); 
         
+        //$this->data
+        if(!property_exists($this->data,$key)){
+            Throw New Exception ('NO `'.$key.'` KEY IN POST',1);
+        }
+        /* REMOVE WHITE CHARACTER */
+        $this->data->$key=trim($this->data->$key);
+
+        if($this->data->$key===''){
+            $this->error.=$prefix.'['.$key.'] VALUE IS EMPTY!';
+            $prefix='<br/>';
+        }
     }
 }

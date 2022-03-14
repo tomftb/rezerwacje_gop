@@ -30,7 +30,6 @@ class Database extends PDO{
 			/* INITIALISED NEW OBJECT */
 			self::$dbLink=new Database($dbParm);
 			self::setLoadAtr(); 
-			;
 		}
 		else{
 			// ALREADY INITIALISED
@@ -190,5 +189,6 @@ class Database extends PDO{
             $this->queryList=[];
         }
     }
+
     function __destruct(){}
 }

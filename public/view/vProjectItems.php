@@ -5,17 +5,17 @@
             <div class="btn pull-left mt-0" > 
                 <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
                     <div class="btn-group" role="group">
-                        <button class="btn btn-info text-white" type="button" onclick="ProjectStage.show()">
+                        <button class="btn btn-info text-white" type="button" onclick="Items.showStage()">
                         Etapy
                         </button>
                         <button type="button" class="btn  btn-info dropdown-toggle dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                           <span class="sr-only">Toggle Dropdown</span>
                         </button>
                         <div class="dropdown-menu bg-info">
-                            <a id="createData" class="dropdown-item bg-info text-white" data-toggle="modal" data-target="#AdaptedModal" onclick="ProjectStage.preapreData()" href="#">Dodaj tekst</a>
-                            <a id="createImage" class="dropdown-item bg-info text-white" onclick="ProjectStage.prepareData('tx')" href="#">Dodaj zdjęcie</a>
-                            <a id="createTable" class="dropdown-item bg-info text-white" data-toggle="modal" data-target="#AdaptedModal" onclick="ProjectStage.prepareTable('t')" href="#">Dodaj tabelę</a>
-                            <a id="createList" class="dropdown-item bg-info text-white" data-toggle="modal" data-target="#AdaptedModal" onclick="ProjectStage.prepareList('l')" href="#">Dodaj listę</a>
+                            <a id="createData" class="dropdown-item bg-info text-white" data-toggle="modal" data-target="#AdaptedModal" onclick="ProjectStage.prepareData()" href="#">Dodaj tekst</a>
+                            <a id="createImage" class="dropdown-item bg-info text-white" onclick="Items.Stage.createText()" href="#">Dodaj zdjęcie</a>
+                            <a id="createTable" class="dropdown-item bg-info text-white" data-toggle="modal" data-target="#AdaptedModal" onclick="ProjectStage.prepareData('t')" href="#">Dodaj tabelę</a>
+                            <a id="createList" class="dropdown-item bg-info text-white" data-toggle="modal" data-target="#AdaptedModal" onclick="ProjectStage.prepareData('l')" href="#">Dodaj listę</a>
                             <!--<a class="dropdown-item" href="#">Pokaż</a>-->
                         </div>
                     </div>

@@ -1431,7 +1431,7 @@ class ProjectStageCreateText{
                     c:true,
                     d:fd,
                     o:this.Items,
-                    m:'checkResponse'
+                    m:'setModalResponse'
                 };
         var xhrError={
             o:this.Items,
@@ -1495,34 +1495,10 @@ class ProjectStageCreateText{
         this.Xhr=o.Items.Xhr2;
         this.Glossary=this.Items.Glossary['text'];
     }
-    setUpData(response){
-        console.log('ProjectStage::setUpData()');
-        //return false;
-        //this.setUpGlossary(response);
-        try {
-            this.data=JSON.parse(response);  
-            if (!('status' in this.data) || !('info' in this.data)){
-                this.Items.setCloseModal(this.Stage.Table,'show',this.defaultTask+'0');
-                this.Html.showField(this.Modal.link['error'],'Application error occurred! Contact with Administrator!');
-            }
-            else if(this.data.status===1){
-                this.Items.setCloseModal(this.Stage.Table,'show',this.defaultTask+'0');
-                this.Html.showField(this.Modal.link['error'],this.data.info);
-            }
-           else{
-                /*  OK */ 
-            }  
-        }
-        catch (error) {
-            console.log(error);
-            /* SET TABLE ERROR */
-            //this.Stage.Table.setError(error);
-            this.Html.showField(this.Modal.link['error'],error);
-        } 
-        
-    }
+
     setUpCreateData(response){
-        this.setUpData(response);
+        console.log('ProjectStageCreateText::setUpCreateData()');
+        this.data=this.Items.setUpModalData(response);
         this.setUpStageDefault();
         this.Glossary.item=this.data.data.value.glossary;
         this.setUpModal();

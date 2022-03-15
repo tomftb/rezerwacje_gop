@@ -215,29 +215,17 @@ class ProjectItems{
             m:methodToRun
         };
         this.Xhr.run(xhrRun);
-        //ProjectItems.Xhr.setRun(classToRun,methodToRun);
-        //ProjectItems.Xhr.run('GET',null,ProjectItems.router+taskToRun);
     }
     setProperties(){
         console.log('ProjectItems::setProperties()');
         try{
-            //ProjectItems.loadModal='<div class="modal" tabindex="-1" role="dialog"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"></div><div class="modal-body"></div><div class="modal-footer"></div></div></div></div>';
-            /* LOAD NOTIFY FRO HEAD*/
-            //console.log(document.getElementById('appLoadNotify'));
             ProjectItems.Xhr.load=document.getElementById('appLoadNotify');
-            //ProjectItems.Xhr.load=ProjectItems.loadModal;
         }
         catch (error){
             console.log(error);
             alert('ProjectItems::setProperties() Error occured!');
         }
     }
-   //loadOff(){
-     //   console.log('ProjectItems::loadOff()');
-        /* TO DO */
-        //ProjectItems.Xhr.load=document.getElementById('appLoadNotify');
-       // this.Html.hideField();
-   // }
     getCancelButton(classToRun,methodToRun,taskToRun){
         console.log('ProjectItems::getCancelButton()');
         console.log('Oboject:');
@@ -365,21 +353,31 @@ class ProjectItems{
         /* TO DO SET CLASS, OBJECT */
         this.reloadData(this.default.object,this.default.method,this.default.task);
     }
-    checkResponse(response){
-        console.log('ProjectItems::checkResponse()');
+    setModalResponse(response){
+        console.log('ProjectItems::setModalResponse()');
         console.log(response);
-        /* CHECK RESPONSE FORMAT */
-        try {
-            console.log(this.parseResponse(response));
-            this.closeModal();
+         try {
+            this.parseResponse(response);
+            /* CLOSE MODAL IF OK */
+            this.closeModal(); 
         }
         catch (error) {
             console.log(error);
-            /* SET TABLE ERROR */
-            //this.Stage.Table.setError(error);
+            /* SHOW ERROR MODAL */ 
+           this.Html.showField(this.Modal.link['error'],error);
+        }
+    }
+    setUpModalData(response){
+        console.log('ProjectItems::setUpModalData()');
+        var data={};
+        try {
+            data=this.parseResponse(response);
+        }
+        catch (error) {
+            console.log(error);
             this.Html.showField(this.Modal.link['error'],error);
         } 
-        
+        return data;
     }
 }
 

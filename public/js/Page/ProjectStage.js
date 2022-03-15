@@ -98,6 +98,7 @@ class ProjectStage{
                 object:this,
                 method:'show'
             };
+            this.Items.setCloseModal(this.Table,'show',this.defaultTask+'0');
             this.CreateText.create(this);
         }
         catch(error){

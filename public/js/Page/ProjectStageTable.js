@@ -39,6 +39,7 @@ class ProjectStageTable{
         console.log('ProjectStageTable::construct()');  
         this.Stage=Stage;
         this.Xhr=Stage.Items.Xhr;
+        this.XhrModal=Stage.Items.Xhr2;
         this.Html=Stage.Items.Html;
     }
     setProperties(appUrl,url){
@@ -201,15 +202,15 @@ class ProjectStageTable{
     }
     setButtonGroup(value){
         //console.log('TableNew::setGroupBtn('+i+')');
-        var Ajax = this.Xhr;
+       
         //console.log(Ajax);
         /* ADD LOAD INFO */
         
         var btnGroup=document.createElement('DIV');
             btnGroup.setAttribute('class','btn-group pull-left');
-            btnGroup.appendChild(this.getShowButton(Ajax,value.i));
-            btnGroup.appendChild(this.getHideButton(Ajax,value.i));
-            btnGroup.appendChild(this.getDeleteButton(Ajax,value.i));
+            btnGroup.appendChild(this.getShowButton(this.XhrModal,value.i));
+            btnGroup.appendChild(this.getHideButton(this.XhrModal,value.i));
+            btnGroup.appendChild(this.getDeleteButton(this.XhrModal,value.i));
         /* ADD ROW WITH BLOCK USER INGO */
         
         return btnGroup;
@@ -272,20 +273,20 @@ class ProjectStageTable{
         console.log(this.link);
     }
     clearTable(){
-        console.log('ProjectStageTable::clearTable()');
+        //console.log('ProjectStageTable::clearTable()');
         this.clearEle(this.link['error']);
         this.clearEle(this.link['head']);
         this.clearEle(this.link['body']);
     }
     clearEle(ele){
-        console.log('ProjectStageTable::clearEle()');
+        //console.log('ProjectStageTable::clearEle()');
         while (ele.firstChild){
             ele.firstChild.remove(); 
         };
     }
     setData(response){
-        console.log('ProjectStageTable::setJsonData()');
-        console.log(response);
+        /*console.log('ProjectStageTable::setData()');
+        console.log(response);*/
         try {
             return JSON.parse(response);    
         }

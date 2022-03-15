@@ -10,6 +10,7 @@ class ProjectItems{
     router='';
     appurl='';
     Xhr = new Object();
+    Xhr2 = new Object();
     Stage = new Object();
     Const = new Object();
     loadModal;
@@ -29,7 +30,7 @@ class ProjectItems{
         this.Html=new Html();
         this.Modal=new Modal();
         this.Xhr=new Xhr2();
-
+        this.Xhr2=new Xhr2();
         //Items.setLoadInfo();
         this.Glossary={
             text:new Glossary()
@@ -280,6 +281,19 @@ class ProjectItems{
         this.Xhr.setOnLoadStart(start);
         this.Xhr.setOnLoadEnd(end);
     }
+    setLoadModalInfo(){
+        this.Modal.loadNotify='<img src="'+window.appUrl+'/img/loading_60_60.gif" alt="load_gif">';
+        var Modal = this.Modal;
+ 
+        var start = function(){
+                    Modal.showLoad();
+            };
+        var end = function(){
+                    Modal.hideLoad();
+            };
+        this.Xhr2.setOnLoadStart(start);
+        this.Xhr2.setOnLoadEnd(end);
+    }
     parseResponse(response){
         console.log('ProjectItems::parseResponse()');
         var data = JSON.parse(response);  
@@ -331,7 +345,7 @@ class ProjectItems{
                 /* SET XHR ON ERROR */
                 
                 if(confirm('Potwierdź wykonanie akcji')){   
-                    Items.Modal.link['extra'].innerHTML='<center><img src="/img/loading_60_60.gif"/></center>';
+                    //Items.Modal.link['extra'].innerHTML='<center><img src="/img/loading_60_60.gif"/></center>';
                     //Items.Xhr.run('POST',fd,Items.router+data['data']['value']['stage'].i);
                     Items.Xhr.setOnError(xhrError);
                     Items.Xhr.run(xhrRun);
@@ -349,7 +363,23 @@ class ProjectItems{
         console.log('ProjectItems::closeModal()');
         $(this.Modal.link['main']).modal('hide');
         /* TO DO SET CLASS, OBJECT */
-        this.reloadData(Items.Stage,'show',this.default.task);
+        this.reloadData(this.default.object,this.default.method,this.default.task);
+    }
+    checkResponse(response){
+        console.log('ProjectItems::checkResponse()');
+        console.log(response);
+        /* CHECK RESPONSE FORMAT */
+        try {
+            console.log(this.parseResponse(response));
+            this.closeModal();
+        }
+        catch (error) {
+            console.log(error);
+            /* SET TABLE ERROR */
+            //this.Stage.Table.setError(error);
+            this.Html.showField(this.Modal.link['error'],error);
+        } 
+        
     }
 }
 
@@ -359,11 +389,10 @@ window.addEventListener('load', function(){
     console.log('page is fully loaded');
     try{
         Items.setLoadInfo();
-        //Items.loadGif=;
-        //Items.Xhr.setOnLoadStart(Items,'loadGif');
-        //Items.Xhr.setOnLoadEnd(Items,'unloadGif');
+        Items.setLoadModalInfo();
         Items.showStage();
         Items.Modal.setLink();
+        
     }
     catch (error){
         console.log(error);

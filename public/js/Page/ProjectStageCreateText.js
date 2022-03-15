@@ -1314,7 +1314,7 @@ class ProjectStageCreateText{
             this.setPreviewButtonAction(ele);
         }
     }
-      setEditButtonAction(ele){
+    setEditButtonAction(ele){
         /* console.log('ProjectStageCreateText::setEditButtonAction()'); */
         var classObject=this; 
         ele.onclick = function (){
@@ -1347,7 +1347,7 @@ class ProjectStageCreateText{
             classObject.sendInputData(fd);
         };
     }
-      checkInputData(fd){
+    checkInputData(fd){
         
     }
     setInputData(){
@@ -1413,7 +1413,7 @@ class ProjectStageCreateText{
         }
         return newProp;
     }
-      sendInputData(fd){
+    sendInputData(fd){
         console.log('ProjectStageCreateText::sendInputData()');
         console.log(fd);
         if(this.errorStatus){
@@ -1423,12 +1423,25 @@ class ProjectStageCreateText{
         }
         //Xhr.loadNotify=Modal.link['extra'];
         console.log(this.Items.appurl);
-        this.Modal.loadNotify='<img src="'+this.Items.appurl+'/img/loading_60_60.gif" alt="load_gif">';
         this.Modal.showLoad();
-        this.Items.Xhr.setRun(this.Stage,'runModal');
-        this.Items.Xhr.run('POST',fd,this.Items.router+'confirmProjectStageText');
+        var xhrRun={
+                    t:'POST',
+                    u:this.Items.router+'confirmProjectStageText',
+                    //u:'asdasd',
+                    c:true,
+                    d:fd,
+                    o:this.Items,
+                    m:'checkResponse'
+                };
+        var xhrError={
+            o:this.Items,
+            m:'setModalError'
+        };
+        /* SET XHR ON ERROR */
+        this.Xhr.setOnError(xhrError);
+        this.Xhr.run(xhrRun);      
     }
-      manageSubsection(ele){
+    manageSubsection(ele){
         
         console.log('ProjectStageCreateText::manageSubsection()');
         console.log(ele);
@@ -1466,7 +1479,7 @@ class ProjectStageCreateText{
         console.log(this.link.section);
         */
     }
-      getMaxSubSectionCount(){
+    getMaxSubSectionCount(){
         //console.log('ProjectStageCreateText::getMaxSubSectionCount()');
         return parseInt(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MAX','v'),10);
     }
@@ -1479,7 +1492,7 @@ class ProjectStageCreateText{
         this.Items=o.Items;
         this.Stage=o;
         this.Html=o.Items.Html;
-        this.Xhr=o.Items.Xhr;
+        this.Xhr=o.Items.Xhr2;
         this.Glossary=this.Items.Glossary['text'];
     }
     setUpData(response){

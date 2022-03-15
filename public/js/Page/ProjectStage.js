@@ -91,6 +91,13 @@ class ProjectStage{
         try{
             console.log('ProjectStage::createText()');
             console.log(this.CreateText);
+            //this.Items.setLoadModalInfo();
+            /* SET DEFAULT OBJECT */
+            this.Items.default={
+                task:this.defaultTask,
+                object:this,
+                method:'show'
+            };
             this.CreateText.create(this);
         }
         catch(error){

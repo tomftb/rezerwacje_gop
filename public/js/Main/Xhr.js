@@ -1,4 +1,5 @@
 console.log('Xhr::');
+/* STATIC VERSION */
 class Xhr{
     static runObject;
     static runMethod;
@@ -82,15 +83,20 @@ class Xhr{
         //console.log(Xhr.runMethod);
     }
 }
+/* NON STATIC VERSION */
 class Xhr2 {
     onError=new Object();
     LoadEnd;
     LoadStart;
-    construct(){
-        console.log('Xhr2::construct()');
+    uid=0;
+    constructor(){
+        console.log('Xhr2::constructor()');
+        this.uid=Math.random();
+        console.log(this.uid);
     }
     run(property){
         console.log('Xhr2::run(p)');
+        console.log(this.uid);
         /*
          * property:
          * t = type GET/POST 

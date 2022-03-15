@@ -25,6 +25,7 @@ final class ProjectItems extends Page{
         'Main/Html.js',
         'Main/Modal.js',
         'Main/Xhr.js',
+        'Main/Table.js',
         'Main/Glossary.js',
         'Main/headerView.js',
         'Page/ProjectStageCreateText.js',

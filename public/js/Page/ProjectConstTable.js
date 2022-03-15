@@ -1,13 +1,13 @@
 class ProjectConstTable{
-    Xhr;
-    Html;
-    Stage;
-    stageData;
+    Xhr= new Object();
+    XhrModal= new Object();
+    Html= new Object();
+    Main = new Object();
     /* FROM ProjectConst 'getprojectsconstslike&u=0&v=1&b=' */
     defaultTask='';
     appUrl='';
     router='';
-    link={};
+
     head={
         0:{
             title:'ID',
@@ -43,13 +43,25 @@ class ProjectConstTable{
                 scope:'col'
             }
         }};
+    body={
+        0:'0',
+        1:'1',
+        2:'2'
+    };
     tableColException=new Array('bl');
     tableBody;
-    constructor(Stage,Xhr,Html){
-        console.log('ProjectConstTable::construct()');  
-        this.Stage=Stage;
-        this.Xhr=Xhr;
-        this.Html=Html;
+    constructor(Main){
+        console.log('ProjectConst::construct()');  
+        this.Main=Main;
+        this.Table=Main.Items.Table;
+        this.Xhr=Main.Items.Xhr;
+        this.XhrModal=Main.Items.Xhr2;
+        var xhrError={
+                    o:this.Table,
+                    m:'setError'
+            };
+        this.XhrModal = Main.Items.Xhr.setOnError(xhrError);
+        this.Html=Main.Items.Html;
     }
     setProperties(appUrl,url,defaultTask){
         console.log('ProjectConst::setProperties()');
@@ -60,79 +72,23 @@ class ProjectConstTable{
         console.log(defaultTask);
         console.log(url);
     }
-    runTable(response){
-        console.log('ProjectConst::runTable()');
-        try {
-            this.setLink();        
-            this.clearTable();   
-        }
-        catch (error) {
-            alert('ProjectConstTable::runTable() Error occured!');
-            console.log(error);
-        } 
-        /* SET TO JSON RESPONSE */
-        this.stageData=this.setData(response);
-        if(!this.stageData){ 
-            this.setError('ProjectConstTable::runTable() Error occured!');
-            return false;
-        };
-        try {
-            if (!('status' in this.stageData) || !('info' in this.stageData)){
-                this.setError('ProjectConstTable::runTable() Application error occurred! Contact with Administrator!');
-            }
-            else if(this.stageData.status===1){
-                this.setError(this.stageData.info);
-            }
-            else{
-                /* SET PAGE TITLE */
-                document.getElementById('headTitle').innerHTML=this.stageData.data.value.headTitle;
-                /* SET TABLE  */
-                this.setTable();
-            } 
-        }
-        catch (error) {
-            this.setError(error);
-        } 
+    run (task){
+        this.Table.unsetError();
+        this.defaultTask=task;
+         /* CLEAR TABLE */
+        this.Table.clearTable();   
+         /* SET HEAD */
+        this.Table.setHead(this.head);
+        /* GET DATA => SET BODY */
+        this.Table.getData(this,'setBody',task);
     }
-    setTable(){
-        console.log('ProjectConstTable::setTable()');
-        this.setHead();
-        this.setBody();
-        
-    }
-    setHead(){
-        console.log('ProjectConstTable::setHead()');
-        for (const c in this.head){
-            var th=document.createElement('TH');
-            this.setHeadStyle(th,this.head[c]);
-            this.setHeadProperty(th,this.head[c]);
-            th.innerHTML=this.head[c].title;
-            this.link.head.appendChild(th);
-        }
-        console.log(this.link.head);
-        console.log(this.link.body);
-    }
-    setHeadProperty(th,headRow){
-        if(!headRow.hasOwnProperty('attribute')){
-            return false;
-        }
-        for(const attr in headRow.attribute){
-            th.setAttribute(attr,headRow.attribute[attr]);
-        }
-    }
-    setHeadStyle(th,headRow){
-        if(!headRow.hasOwnProperty('style')){
-            return false;
-        }
-        for(const attr in headRow.style){
-            th.style[attr]=headRow.style[attr];
-        } 
-    }
-    setBody(){
+    setBody(response){
         console.log('ProjectConstTable::setBody()');
-        for(const prop in this.stageData.data.value.data){
-            //console.log(this.stageData.data.value.data[prop]);
-            this.setBodyRow(this.stageData.data.value.data[prop]);
+        /* PARSE RESPONSE */
+        var data = this.Main.Items.setTableResponse(response);
+        /* SET BODY DATA */
+        for(const prop in data.data.value.data){
+            this.setBodyRow(data.data.value.data[prop]);
         } 
     }
     setBodyRow(bodyRow){
@@ -141,12 +97,13 @@ class ProjectConstTable{
         console.log(bodyRow);
         */       
         var tr=document.createElement('TR');
-            tr.appendChild(this.setBodyRowColData(bodyRow['0']));
-            tr.appendChild(this.setBodyRowColData(bodyRow['1']));
-            tr.appendChild(this.setBodyRowColData(bodyRow['2']));
-            tr.appendChild(this.setBodyRowColButton(bodyRow));
 
-        this.link['body'].appendChild(tr);
+            for(const prop in this.body){           
+                tr.appendChild(this.setBodyRowColData(bodyRow[this.body[prop]]));
+            };
+            tr.appendChild(this.setBodyRowColButton(bodyRow));
+            
+        this.Table.link['body'].appendChild(tr);
     }
     setBodyRowCol(){
         //console.log('ProjectConstTable::setBodyRowCol()');
@@ -181,12 +138,12 @@ class ProjectConstTable{
     }
     setButtonGroup(value){
         //console.log('TableNew::setGroupBtn('+i+')');
-        var Ajax = this.Xhr;
+
         var btnGroup=document.createElement('DIV');
             btnGroup.setAttribute('class','btn-group pull-left');
-            btnGroup.appendChild(this.getShowButton(Ajax,value[0]));
-            btnGroup.appendChild(this.getHideButton(Ajax,value[0]));
-            btnGroup.appendChild(this.getDeleteButton(Ajax,value[0]));
+            btnGroup.appendChild(this.getShowButton(this.XhrModal,value[0]));
+            btnGroup.appendChild(this.getHideButton(this.XhrModal,value[0]));
+            btnGroup.appendChild(this.getDeleteButton(this.XhrModal,value[0]));
         /* ADD ROW WITH BLOCK USER INGO */
         
         return btnGroup;
@@ -217,6 +174,7 @@ class ProjectConstTable{
         var btn  = this.getButton('Usuń','btn-danger');
         var AjaxRun = this.getXhrRunProperty('getProjectConstDelSlo&id='+id);
             /* CLOSURE */
+            AjaxRun.m='remove';
             btn.onclick = function (){
                 Ajax.run(AjaxRun);
             };
@@ -228,58 +186,9 @@ class ProjectConstTable{
             u:this.router+task,
             c:false,
             d:null,
-            o:this.Stage,
-            m:'runModal'
+            o:this.Main,
+            m:'hide'
         };
         return run;
-    }
-    setLink(){
-        console.log('ProjectConstTable::setLink()');
-        //console.log(document.getElementById('mainTableDiv'));
-        var tableEle = document.getElementById('mainTableDiv');
-        console.log(tableEle);
-        this.link={
-            main:tableEle,
-            error:tableEle.childNodes[0].childNodes[0],
-            head:tableEle.childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0],
-            body:tableEle.childNodes[1].childNodes[0].childNodes[0].childNodes[1],
-            extra:tableEle.childNodes[2]
-        };
-        console.log(this.link);
-    }
-    clearTable(){
-        console.log('ProjectConstTable::clearTable()');
-        this.clearEle(this.link['error']);
-        this.clearEle(this.link['head']);
-        this.clearEle(this.link['body']);
-    }
-    clearEle(ele){
-        console.log('ProjectConstTable::clearEle()');
-        while (ele.firstChild){
-            ele.firstChild.remove(); 
-        };
-    }
-    setData(response){
-        console.log('ProjectConstTable::setData()');
-        console.log(response);
-        try {
-            return JSON.parse(response);    
-        }
-        catch (error) {
-            this.setError(error);
-            return false;
-        } 
-        return false;
-    }
-    setError(info){
-        console.log('ProjectConstTable::setError()');
-        console.log(info);
-        console.log(this.link['error']);
-        this.link['error'].classList.remove("d-none");
-        this.link['error'].innerHTML=info;
-    }
-    unsetError(){
-        this.link['error'].classList.add("d-none");
-        this.link['error'].innerHTML='';
     }
 }

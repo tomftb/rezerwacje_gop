@@ -6,47 +6,50 @@
  */
 
 class ProjectConst{
-    static ErrorStack={};
-    static iField=0;
-    static errorStatus=false;
-    static ProjectConstTable;
-    static Xhr;
-    static Modal;
-    static Html;
-    static Items;
-    static data={};
-    static allConsts=new Array();
-    static defaultTask='getprojectsconstslike&u=0&v=0&b=';
-    static fieldDisabled=false;
+    ErrorStack={};
+    Field=0;
+    errorStatus=false;
+    ConstTable = new Object();
+    Xhr;
+    Modal;
+    Html;
+    Items;
+    data={};
+    allConsts=new Array();
+    defaultTask='getprojectsconstslike&u=0&v=0&b=';
+    fieldDisabled=false;
 
-    constructor() {
+    constructor(Items) {
         console.log('ProjectConst::constructor()');
+        this.Items = Items;
+        this.ConstTable = new ProjectConstTable(this);  
+        this.ConstTable.setProperties(this.Items.appurl,this.Items.router);
     }
-    
-    static show(){
-        console.log('ProjectConst::show()');
-        /* FIRST RUN -> PREVENT IF ELE NOT EXIST */
-        if(ProjectConst.Modal.exist){
-            /* CLEAR AND SET MODAL DATA */
-            ProjectConst.Items.setDefaultModal();
+    show(){
+        console.log('ProjectConst::show()');  
+        /* SET PAGE TITLE */
+        document.getElementById('headTitle').innerHTML='Stałe';
+        console.log(this.ConstTable);     
+        this.Items.default={
+            task:this.defaultTask,
+            object:this,
+            method:'show'
         };
-        ProjectConst.Items.Xhr.setRun(ProjectConst.ProjectConstTable,'runTable');
-        ProjectConst.Items.Xhr.run('GET',null,ProjectConst.Items.router+ProjectConst.defaultTask);
-        ProjectConst.ProjectConstTable.setProperties(ProjectConst.Items.appurl,ProjectConst.Items.router,ProjectConst.defaultTask);
+        this.ConstTable.run(this.Items.router+this.defaultTask);
     }
-    static new(){
+    new(){
         console.log('ProjectConst::new()');  
         /* IT CAN BU RUn WITHOUT RUN TABLE VIA show() */
         ProjectConst.Items.setDefaultModal();
         ProjectConst.Xhr.setRun(ProjectConst,'runModal');
         ProjectConst.Xhr.run('GET',null,ProjectConst.Items.router+'getProjectConstList');
     }
-    static prepareData(){
+    prepareData(){
         console.log('ProjectConst::prepareData()');
         ProjectConst.iField=0;
         ProjectConst.ErrorStack={};
     }
-    static runModal(response){//can be var response
+    runModal(response){//can be var response
         console.log('ProjectStage::runModal()');
         //console.log(response);
         ProjectConst.Modal.setLink();
@@ -83,13 +86,13 @@ class ProjectConst{
             } 
         }
     }
-    static getRemoveButtonCol(id){
+    getRemoveButtonCol(id){
         var colrm=document.createElement('DIV');
             colrm.setAttribute('class','col-sm-1');
             colrm.appendChild(ProjectConst.createRemoveButton("rm-"+id));
             return colrm;
     }
-    static prepareConst(){
+    prepareConst(){
         console.log('ProjectConst::prepareConst()');
         ProjectConst.ErrorStack={};
         ProjectConst.fieldDisabled=false;
@@ -108,7 +111,7 @@ class ProjectConst{
         ProjectConst.setConfirmButtons('0');
         
     }
-    static setEnabled(ele){
+    setEnabled(ele){
         /* CHECK IS THERE NO MORE ERRORS BEFORE ENABLE */
         for(const [key, value] of Object.entries(ProjectConst.ErrorStack)){
             console.log(value.err);
@@ -122,7 +125,7 @@ class ProjectConst{
         ele.classList.remove("disabled");
         ele.removeAttribute('disabled');
     }
-    static setInputConst(form,constName,constValue,constId,rmButton){
+    setInputConst(form,constName,constValue,constId,rmButton){
         console.log('ProjectConst::setInputConst()\r\nCONST ID:'+constId+'\r\niField:'+ProjectConst.iField);
         console.log(ProjectConst.Modal.link['adapted']);
         var hr=document.createElement('HR');
@@ -157,7 +160,7 @@ class ProjectConst{
             rowAll.appendChild(colAll);
             form.appendChild(rowAll);
     }
-    static newConstRow(title,placeholder,id,value){
+    newConstRow(title,placeholder,id,value){
         var row=document.createElement('DIV');
             row.setAttribute('class','form-group row');
         var label=document.createElement('LABEL');
@@ -190,7 +193,7 @@ class ProjectConst{
             row.appendChild(col);
         return row;
     }
-    static  createRemoveButton(id){
+     createRemoveButton(id){
         // i PARAMETERS
         var i=document.createElement('i');
             i.setAttribute('class','fa fa-minus');
@@ -208,7 +211,7 @@ class ProjectConst{
         div.appendChild(i);
         return(div); 
     }
-    static updateErrorStack(id){
+    updateErrorStack(id){
         console.log('ProjectConst::updateErrorStack()\r\nid');
         console.log(id);
         const tmpId=id.split('-');
@@ -225,7 +228,7 @@ class ProjectConst{
         }
         
     }
-    static createLegendRow(){
+    createLegendRow(){
         /*
          * ADD BUTTON ROW
          */
@@ -239,7 +242,7 @@ class ProjectConst{
             row.appendChild(col1);
         return row;
     }
-    static createAddButtonRow(){
+    createAddButtonRow(){
         /*
          * ADD BUTTON ROW
          */
@@ -253,7 +256,7 @@ class ProjectConst{
             row.appendChild(col1);
         return row;
     }
-    static createErrorDivRow(id){
+    createErrorDivRow(id){
         /*
          * DIV ERROR
          */
@@ -272,7 +275,7 @@ class ProjectConst{
         
         return row;
     }
-    static createAddButton()
+    createAddButton()
     {
         console.log('ProjectConst::createAddButton()');
         var i=document.createElement('i');
@@ -291,7 +294,7 @@ class ProjectConst{
            
         return (div);
     }
-    static setConfirmButtons(){
+    setConfirmButtons(){
         console.log('ProjectConst::setConfirmButtons()');
         var group=ProjectConst.Html.getGroupButton();
             group.appendChild(ProjectConst.Items.getCancelButton(ProjectConstTable,'runTable',ProjectConst.defaultTask+'0'));
@@ -310,7 +313,7 @@ class ProjectConst{
         ProjectConst.Modal.link['buttonConfirm']=confirm;
     }
     
-    static setEditButtons(idRecord){
+    setEditButtons(idRecord){
         console.log('ProjectConst::setEditButtons()');
         var group=ProjectConst.Html.getGroupButton();
             group.appendChild(ProjectConst.Items.getCancelButton(ProjectConstTable,'runTable',ProjectConst.defaultTask+idRecord));
@@ -327,7 +330,7 @@ class ProjectConst{
         ProjectConst.Modal.link['button'].appendChild(group);
         ProjectConst.Modal.link['buttonConfirm']=confirm;
     }
-    static sendConst(fd){
+    sendConst(fd){
         console.log('ProjectConst::sendConst()');
         console.log(ProjectConst.Modal.link['form']);
         if(ProjectConst.errorStatus){
@@ -342,7 +345,7 @@ class ProjectConst{
         ProjectConst.Xhr.setRun(ProjectConst,'runModal');
         ProjectConst.Xhr.run('POST',fd,ProjectConst.Items.router+'confirmProjectConst');
     }
-    static checkInputConst(id,value){
+    checkInputConst(id,value){
         console.log('ProjectConst::checkInputConst()\r\n'+id);
         const input = id.split('-');
         switch (input[0]) {
@@ -362,7 +365,7 @@ class ProjectConst{
                 console.log('ProjectConst::checkInputConst() WRONG INPUT - '+input);
           }
     }
-    static checkInputConstValue(inputName,inputNumber,value,regex){
+    checkInputConstValue(inputName,inputNumber,value,regex){
         console.log('ProjectConst::checkInputConstValue()');
         if(!value.match(regex)){
             console.log('SET ERROR');
@@ -377,7 +380,7 @@ class ProjectConst{
             ProjectConst.setEnabled(ProjectConst.Modal.link['buttonConfirm']);
         }   
     }
-    static checkInputConstExist(inputName,inputNumber,inputValue){
+    checkInputConstExist(inputName,inputNumber,inputValue){
         console.log('ProjectConst::checkInputConstExist()\r\n'+inputValue);
         /* CHECK IS NOT ALREADY ERROR SETUP */
         if(ProjectConst.ErrorStack[inputName+'Err'+inputNumber].err==='y'){
@@ -397,7 +400,7 @@ class ProjectConst{
             }
         }
     }
-    static checkConst(fd){
+    checkConst(fd){
         console.log('ProjectConst::checkConst()');
         console.log(ProjectConst.ErrorStack);
         console.log(fd);
@@ -410,7 +413,7 @@ class ProjectConst{
         }
     }
     
-    static  isObjectEmpty(object) {
+     isObjectEmpty(object) {
         var isEmpty = true;
         for (var keys in object) {
             isEmpty = false;
@@ -418,7 +421,7 @@ class ProjectConst{
         }
         return isEmpty;
     }
-    static checkInputIsEmpty(){
+    checkInputIsEmpty(){
         console.log('ProjectConst::checkInputIsEmpty()');
         console.log(ProjectConst.ErrorStack);
         console.log(ProjectConst.isObjectEmpty(ProjectConst.ErrorStack));
@@ -431,7 +434,7 @@ class ProjectConst{
         console.log('ERROR STACK NOT EMPTY');
         return false;
     }
-    static pcDetails(){
+    pcDetails(){
         console.log('ProjectConst::pcDetails()');
         ProjectConst.Items.prepareModal('Podgląd Stałej','bg-warning');
         ProjectConst.Items.setCloseModal(ProjectConstTable,'runTable',ProjectConst.defaultTask+ProjectConst.data['data']['value']['const'].i);
@@ -447,7 +450,7 @@ class ProjectConst{
          */
         ProjectConst.Items.setModalInfo("Project Const ID: "+ProjectConst.data['data']['value']['const'].i+", Create user: "+ProjectConst.data['data']['value']['const'].cu+" ("+ProjectConst.data['data']['value']['const'].cul+"), Create date: "+ProjectConst.data['data']['value']['const'].cd+", Modification made at date: "+ProjectConst.data['data']['value']['const'].md+" by user: "+ProjectConst.data['data']['value']['const'].mu);
     }
-    static pcEdit(){
+    pcEdit(){
         console.log('ProjectConst::pcEdit()');
         ProjectConst.Modal.clearData();
         ProjectConst.Modal.setHead('Edycja Stałej','bg-warning');
@@ -466,19 +469,19 @@ class ProjectConst{
         ProjectConst.Items.setModalInfo("Project Const ID: "+ProjectConst.data['data']['value']['const'].i+", Create user: "+ProjectConst.data['data']['value']['const'].cu+" ("+ProjectConst.data['data']['value']['const'].cul+"), Create date: "+ProjectConst.data['data']['value']['const'].cd+", Modification made at date: "+ProjectConst.data['data']['value']['const'].md+" by user: "+ProjectConst.data['data']['value']['const'].mu);
    
     }
-    static pcHide(){
+    pcHide(){
         console.log('ProjectConst::pcHide()');
         ProjectConst.Items.prepareModal('Ukrywanie Stałej','bg-secondary');
         ProjectConst.Items.setCloseModal(ProjectConstTable,'runTable',ProjectConst.defaultTask+ProjectConst.data['data']['value']['const'].i);
         ProjectConst.setChangeDataState('Ukryj','secondary');
     }
-    static pcDelete(){
+    pcDelete(){
         console.log('ProjectConst::pcDelete()');
         ProjectConst.Items.prepareModal('Usuwanie Stałej','bg-danger');
         ProjectConst.Items.setCloseModal(ProjectConstTable,'runTable',ProjectConst.defaultTask+ProjectConst.data['data']['value']['const'].i);
         ProjectConst.setChangeDataState('Usuń','danger');       
     }
-    static setChangeDataState(btnLabel,titleClass){
+    setChangeDataState(btnLabel,titleClass){
         console.log('ProjectConst::setChangeDataState()');
         console.log(ProjectConst.data['data']);
         

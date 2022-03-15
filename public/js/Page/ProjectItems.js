@@ -9,10 +9,13 @@ class ProjectItems{
     Html = new Object();
     router='';
     appurl='';
+    /* FOR TABLE */
     Xhr = new Object();
+    /* FOR MODAL */
     Xhr2 = new Object();
     Stage = new Object();
     Const = new Object();
+    Table = new Object();
     loadModal;
     //defaultTask='getprojectsstagelike&d=0&v=0&b=';
     default={
@@ -31,6 +34,7 @@ class ProjectItems{
         this.Modal=new Modal();
         this.Xhr=new Xhr2();
         this.Xhr2=new Xhr2();
+        this.Table = new Table(this.Xhr);
         //Items.setLoadInfo();
         this.Glossary={
             text:new Glossary()
@@ -42,16 +46,6 @@ class ProjectItems{
         console.log('ProjectItems::setUrl()'); 
         this.router=url;
         this.appurl=appurl; 
-    }
-    showStage(){
-        console.log('ProjectItems::showStage()');
-        this.Stage.Table.setLink();
-        this.Stage.show();
-    }
-    showConst(){
-        console.log('ProjectItems::showConst()');
-        this.Const.Table.setLink();
-        this.Const.show();
     }
     setError(ele,error){
         console.log('ProjectItems::setError()');
@@ -358,10 +352,24 @@ class ProjectItems{
         /* TO DO SET CLASS, OBJECT */
         this.reloadData(this.default.object,this.default.method,this.default.task);
     }
+    setTableResponse(response){
+        console.log('ProjectItems::setTableResponse()');
+        console.log(response);
+        try {
+            return this.parseResponse(response);
+        }
+        catch (error) {
+            console.log(error);
+            /* SHOW ERROR MODAL */ 
+            this.Table.setError(error);
+            return {};
+        }
+        return {};
+    }
     setModalResponse(response){
         console.log('ProjectItems::setModalResponse()');
         console.log(response);
-         try {
+        try {
             this.parseResponse(response);
             /* CLOSE MODAL IF OK */
             this.closeModal(); 
@@ -384,6 +392,7 @@ class ProjectItems{
         } 
         return data;
     }
+    
 }
 
 var Items = new ProjectItems(window.appUrl,window.appUrl+'/router.php?task=');
@@ -393,9 +402,9 @@ window.addEventListener('load', function(){
     try{
         Items.setLoadInfo();
         Items.setLoadModalInfo();
-        Items.showStage();
         Items.Modal.setLink();
-        
+        Items.Table.setLink();
+        Items.Stage.show();
     }
     catch (error){
         console.log(error);

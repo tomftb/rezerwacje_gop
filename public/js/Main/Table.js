@@ -7,6 +7,10 @@ class Table
     static ajaxLink;
     static errorLink;
     static errorDivId;
+    defaultTask='';
+    data={};
+    link={};
+    Xhr = new Object();
     btnInfo={
         'col':'',
         'text':'',
@@ -14,13 +18,13 @@ class Table
         'class':'',
         'ele':new Object()
     };
-    
+    head = {};
     //buttonsType='btnGroup';
     buttonsType;
     
-    constructor() { 
-        //console.log('Table::constructor()');
-        
+    constructor(Xhr) { 
+        console.log('Table::constructor()');
+        this.Xhr = Xhr;
     }
     setAjaxLink(alink){
         console.log('TABLE::setAjaxLink()');
@@ -233,5 +237,104 @@ class Table
                 alert('Something get wrong! Contact with administrator!');
             }
         };
+    }
+    /* NEW - 15.03.2022 */
+    getData(o,m,task){ 
+        console.log('ProjectStageTable::getData()');
+        /*
+         * o - object to run
+         * m - method to run
+         */
+        /*
+         * property:
+         * t = type GET/POST 
+         * u = url
+         * c = capture
+         * d = data
+         * o = object
+         * m = method
+         */
+        var xhrRun={
+            t:'GET',
+            u:task,
+            //u:'asdasd',
+            c:true,
+            d:null,
+            o:o,
+            m:m 
+        };
+        var xhrError={
+            o:this,
+            m:'setError'
+        };
+        /* SET XHR ON ERROR */
+        this.Xhr.setOnError(xhrError);
+        /* SET XHR LOAD */
+        this.Xhr.run(xhrRun);
+    }
+    setHead(head){
+        console.log('Table::setHead()');
+        console.log(head);
+        for (const c in head){
+            var th=document.createElement('TH');
+            this.setHeadStyle(th,head[c]);
+            this.setHeadProperty(th,head[c]);
+            th.innerHTML=head[c].title;
+            this.link.head.appendChild(th);
+        }
+        console.log(this.link.head);
+    }
+    setHeadProperty(th,headRow){
+        if(!headRow.hasOwnProperty('attribute')){
+            return false;
+        }
+        for(const attr in headRow.attribute){
+            th.setAttribute(attr,headRow.attribute[attr]);
+        }
+    }
+    setHeadStyle(th,headRow){
+        if(!headRow.hasOwnProperty('style')){
+            return false;
+        }
+        for(const attr in headRow.style){
+            th.style[attr]=headRow.style[attr];
+        } 
+    }
+    setLink(){
+        console.log('Table::setLink()');
+        var tableEle = document.getElementById('mainTableDiv');
+        console.log(tableEle);
+        this.link={
+            main:tableEle,
+            error:tableEle.childNodes[0].childNodes[0],
+            head:tableEle.childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0],
+            body:tableEle.childNodes[1].childNodes[0].childNodes[0].childNodes[1],
+            extra:tableEle.childNodes[2]
+        };
+        console.log(this.link);
+    }
+    clearTable(){
+        console.log('Table::clearTable()');
+        this.clearEle(this.link['error']);
+        this.clearEle(this.link['head']);
+        this.clearEle(this.link['body']);
+    }
+    clearEle(ele){
+        //console.log('ProjectStageTable::clearEle()');
+        while (ele.firstChild){
+            ele.firstChild.remove(); 
+        };
+    }
+    setError(info){
+        console.log('Table::setError()');
+        console.log(info);
+        console.log(this.link['error']);
+        this.link['error'].classList.remove("d-none");
+        this.link['error'].innerHTML=info;
+    }
+    unsetError(){
+        console.log('Table::unsetError()');
+        this.link['error'].classList.add("d-none");
+        this.link['error'].innerHTML='';
     }
 }

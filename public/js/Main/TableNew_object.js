@@ -49,6 +49,7 @@ class TableNew{
         //console.log(Modal.link['button']);
         
     }
+    
     static setBtnInfoEle(ele){
         this.btnInfo.ele=ele;
     }

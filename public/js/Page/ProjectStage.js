@@ -8,13 +8,10 @@ class ProjectStage{
     errorStatus=false;
     defaultTask='getprojectsstagelike&d=0&v=0&b=';
     data={};
-
     Items = new Object;
-    
     inputFieldCounter=0;
     fieldDisabled='n';
-    //ProjectStageTable;
-    Table = new Object;
+    StageTable = new Object;
     CreateText = new Object;
     CreateImage = new Object;
     CreateTable = new Object;
@@ -24,8 +21,8 @@ class ProjectStage{
         this.Items = Items;
         console.log(Items);
         console.log(this.Items.router);
-        this.Table = new ProjectStageTable(this);  
-        this.Table.setProperties(this.Items.appurl,this.Items.router);
+        this.StageTable = new ProjectStageTable(this);  
+        this.StageTable.setProperties(this.Items.appurl,this.Items.router);
         this.CreateText = new ProjectStageCreateText();
         this.CreateImage = new ProjectStageCreateImage();
         this.CreateTable = new ProjectStageCreateTable();
@@ -35,14 +32,13 @@ class ProjectStage{
         console.log('ProjectStage::show()');  
         /* SET PAGE TITLE */
         document.getElementById('headTitle').innerHTML='Etapy';
-        console.log(this.Table);
-        this.Table.unsetError();
+        console.log(this.StageTable);     
         this.Items.default={
             task:this.defaultTask,
             object:this,
             method:'show'
         };
-        this.Table.run(this.defaultTask);
+        this.StageTable.run(this.Items.router+this.defaultTask);
     }
 
     hide(response){

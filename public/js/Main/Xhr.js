@@ -148,12 +148,16 @@ class Xhr2 {
                     console.log("Xhr2::onload() Method:");
                     console.log(property.m);
                     console.log("Xhr2::onload() Method TYPE:");
+                    console.log(Error);
                     console.log(typeof property.o[property.m]);
-                    Error.o[Error.m]('Xhr2::onload() An Application Error Has Occurred!');
-                    //throw 'An Application Error Has Occurred!';
+                    //Error.o[Error.m]('Xhr2::onload() An Application Error Has Occurred!');
+                    throw 'An Application Error Has Occurred!';
                     return false;
                 }
-                property.o[property.m](this.response);
+                else{
+                    property.o[property.m](this.response);
+                }
+                
             };
             req.onerror =  function(e){
                 console.log('Xhr2::onerror()');

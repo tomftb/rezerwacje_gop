@@ -5,7 +5,7 @@
             <div class="btn pull-left mt-0" > 
                 <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
                     <div class="btn-group" role="group">
-                        <button class="btn btn-info text-white" type="button" onclick="Items.showStage()">
+                        <button class="btn btn-info text-white" type="button" onclick="Items.Stage.show()">
                         Etapy
                         </button>
                         <button type="button" class="btn  btn-info dropdown-toggle dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -20,7 +20,7 @@
                         </div>
                     </div>
                     <div class="btn-group" role="group">
-                      <button class="btn btn-warning text-white" type="button" onclick="ProjectConst.show()">
+                      <button class="btn btn-warning text-white" type="button" onclick="Items.Const.show()">
                         Stałe
                       </button>
                       <button type="button" class="btn  btn-warning dropdown-toggle dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

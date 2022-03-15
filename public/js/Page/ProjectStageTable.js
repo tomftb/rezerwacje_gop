@@ -1,13 +1,13 @@
 class ProjectStageTable{
-    Xhr;
-    Html;
-    Stage;
-    stageData;
+    Xhr= new Object();
+    XhrModal= new Object();
+    Html= new Object();
+    Main = new Object();
     /* FROM ProjectConst 'getprojectsconstslike&u=0&v=1&b=' */
     defaultTask='';
     appUrl='';
     router='';
-    link={};
+    Table = new Object();
     head={
         0:{
             title:'ID',
@@ -33,14 +33,17 @@ class ProjectStageTable{
                 scope:'col'
             }
         }};
-    tableColException=new Array('bl');
-    tableBody;
-    constructor(Stage){
-        console.log('ProjectStageTable::construct()');  
-        this.Stage=Stage;
-        this.Xhr=Stage.Items.Xhr;
-        this.XhrModal=Stage.Items.Xhr2;
-        this.Html=Stage.Items.Html;
+    body={
+        0:'i',
+        1:'t'
+    };
+    constructor(Main){
+        console.log('ProjectConst::construct()');  
+        this.Main=Main;
+        this.Table=Main.Items.Table;
+        this.Xhr=Main.Items.Xhr;
+        this.XhrModal=Main.Items.Xhr2;
+        this.Html=Main.Items.Html;
     }
     setProperties(appUrl,url){
         console.log('ProjectConst::setProperties()');
@@ -49,134 +52,35 @@ class ProjectStageTable{
         console.log(appUrl);
         console.log(url);
     }
-    run(defaultTask){
-        console.log('ProjectConst::run()');
-        this.defaultTask=defaultTask;
-        this.getData();
+    run (task){
+        this.Table.unsetError();
+        this.defaultTask=task;
+         /* CLEAR TABLE */
+        this.Table.clearTable();   
+         /* SET HEAD */
+        this.Table.setHead(this.head);
+        /* GET DATA => SET BODY */
+        this.Table.getData(this,'setBody',task);
     }
-    getData(){
-        console.log('ProjectConst::getData()');
-        /*
-         * property:
-         * t = type GET/POST 
-         * u = url
-         * c = capture
-         * d = data
-         * o = object
-         * m = method
-         */
-        var xhrRun={
-            t:'GET',
-            u:this.router+this.defaultTask,
-            //u:'asdasd',
-            c:true,
-            d:null,
-            o:this,
-            m:'runTable' 
-        };
-        var xhrError={
-            o:this,
-            m:'setError'
-        };
-        /* SET XHR ON ERROR */
-        this.Xhr.setOnError(xhrError);
-        /* SET XHR LOAD */
-        this.Xhr.run(xhrRun);
-    }
-    runTable(response){
-        console.log('ProjectConst::runTable()');
-        console.log(this);
-        try {
-            this.setLink();        
-            this.clearTable();   
-        }
-        catch (error) {
-            alert('ProjectStageTable::runTable() Error occured!');
-            console.log(error);
-            return false;
-        } 
-        /* SET TO JSON RESPONSE */
-        this.stageData=this.setData(response);
-        if(!this.stageData){ 
-            this.setError('ProjectStageTable::runTable() Error occured!');
-            return false;
-        };
-        try {
-            if (!('status' in this.stageData) || !('info' in this.stageData)){
-                this.setError('ProjectStageTable::runTable() Application error occurred! Contact with Administrator!');
-            }
-            else if(this.stageData.status===1){
-                this.setError(this.stageData.info);
-            }
-            else{
-                /* SET TABLE  */
-                this.setTable();
-            } 
-        }
-        catch (error) {
-            this.setError(error);
-        }  
-    }
-    setTable(){
-        console.log('ProjectStageTable::setTable()');
-        this.setHead();
-        this.setBody();   
-    }
-    setHead(){
-        console.log('ProjectStageTable::setHead()');
-        for (const c in this.head){
-            var th=document.createElement('TH');
-            this.setHeadStyle(th,this.head[c]);
-            this.setHeadProperty(th,this.head[c]);
-            th.innerHTML=this.head[c].title;
-            this.link.head.appendChild(th);
-        }
-        console.log(this.link.head);
-        console.log(this.link.body);
-    }
-    setHeadProperty(th,headRow){
-        if(!headRow.hasOwnProperty('attribute')){
-            return false;
-        }
-        for(const attr in headRow.attribute){
-            th.setAttribute(attr,headRow.attribute[attr]);
-        }
-    }
-    setHeadStyle(th,headRow){
-        if(!headRow.hasOwnProperty('style')){
-            return false;
-        }
-        for(const attr in headRow.style){
-            th.style[attr]=headRow.style[attr];
-        } 
-    }
-    setBody(){
+    setBody(response){
         console.log('ProjectStageTable::setBody()');
-        for(const prop in this.stageData.data.value.data){
-            //console.log(this.stageData.data.value.data[prop]);
-            this.setBodyRow(this.stageData.data.value.data[prop]);
+        /* PARSE RESPONSE */
+        var data = this.Main.Items.setTableResponse(response);
+        /* SET BODY DATA */
+        for(const prop in data.data.value.data){
+            this.setBodyRow(data.data.value.data[prop]);
         } 
     }
-    setBodyRow(bodyRow){
-        /*
-        console.log('ProjectStageTable::setBodyRow()');
-        console.log(bodyRow);
-        */       
+    setBodyRow(bodyRow){      
         var tr=document.createElement('TR');
-            tr.appendChild(this.setBodyRowColData(bodyRow['i']));
-            tr.appendChild(this.setBodyRowColData(bodyRow['t']));
-            tr.appendChild(this.setBodyRowColButton(bodyRow));
-
-        this.link['body'].appendChild(tr);
-    }
-    setBodyRowCol(){
-        //console.log('ProjectStageTable::setBodyRowCol()');
-        var col=document.createElement('TD');
-        /* TO DO SOME ATTRBIUTES */
-        return col;
+        for(const prop in this.body){           
+            tr.appendChild(this.setBodyRowColData(bodyRow[this.body[prop]]));
+        };
+        tr.appendChild(this.setBodyRowColButton(bodyRow));
+        this.Table.link['body'].appendChild(tr);
     }
     setBodyRowColData(value){
-        var col = this.setBodyRowCol();
+        var col = document.createElement('TD');
             col.innerHTML=value;
             return col;
     }
@@ -193,7 +97,7 @@ class ProjectStageTable{
     }
     setBodyRowColButton(value){
         //console.log('ProjectStageTable::setBodyRowColButton()');
-        var col = this.setBodyRowCol();
+        var col = document.createElement('TD');
         var buttonGroup=this.setButtonGroup(value);
             col.appendChild(buttonGroup);
             this.setBlockUserInfo(col,value.bl);
@@ -254,57 +158,9 @@ class ProjectStageTable{
             u:this.router+task,
             c:false,
             d:null,
-            o:this.Stage,
+            o:this.Main,
             m:'hide'
         };
         return run;
-    }
-    setLink(){
-        console.log('ProjectStageTable::setLink()');
-        var tableEle = document.getElementById('mainTableDiv');
-        console.log(tableEle);
-        this.link={
-            main:tableEle,
-            error:tableEle.childNodes[0].childNodes[0],
-            head:tableEle.childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0],
-            body:tableEle.childNodes[1].childNodes[0].childNodes[0].childNodes[1],
-            extra:tableEle.childNodes[2]
-        };
-        console.log(this.link);
-    }
-    clearTable(){
-        //console.log('ProjectStageTable::clearTable()');
-        this.clearEle(this.link['error']);
-        this.clearEle(this.link['head']);
-        this.clearEle(this.link['body']);
-    }
-    clearEle(ele){
-        //console.log('ProjectStageTable::clearEle()');
-        while (ele.firstChild){
-            ele.firstChild.remove(); 
-        };
-    }
-    setData(response){
-        /*console.log('ProjectStageTable::setData()');
-        console.log(response);*/
-        try {
-            return JSON.parse(response);    
-        }
-        catch (error) {
-            this.setError(error);
-            return false;
-        } 
-        return false;
-    }
-    setError(info){
-        console.log('ProjectStageTable::setError()');
-        console.log(info);
-        console.log(this.link['error']);
-        this.link['error'].classList.remove("d-none");
-        this.link['error'].innerHTML=info;
-    }
-    unsetError(){
-        this.link['error'].classList.add("d-none");
-        this.link['error'].innerHTML='';
     }
 }

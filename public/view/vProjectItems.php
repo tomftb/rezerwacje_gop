@@ -12,10 +12,10 @@
                           <span class="sr-only">Toggle Dropdown</span>
                         </button>
                         <div class="dropdown-menu bg-info">
-                            <a id="createData" class="dropdown-item bg-info text-white" data-toggle="modal" data-target="#AdaptedModal" onclick="ProjectStage.prepareData()" href="#">Dodaj tekst</a>
-                            <a id="createImage" class="dropdown-item bg-info text-white" onclick="Items.Stage.createText()" href="#">Dodaj zdjęcie</a>
-                            <a id="createTable" class="dropdown-item bg-info text-white" data-toggle="modal" data-target="#AdaptedModal" onclick="ProjectStage.prepareData('t')" href="#">Dodaj tabelę</a>
-                            <a id="createList" class="dropdown-item bg-info text-white" data-toggle="modal" data-target="#AdaptedModal" onclick="ProjectStage.prepareData('l')" href="#">Dodaj listę</a>
+                            <a id="createText" class="dropdown-item bg-info text-white" onclick="Items.Stage.createText()" href="#">Dodaj tekst</a>
+                            <a id="createImage" class="dropdown-item bg-info text-white" onclick="Items.Stage.createImage()" href="#">Dodaj zdjęcie</a>
+                            <a id="createTable" class="dropdown-item bg-info text-white" onclick="Items.Stage.createTable()" href="#">Dodaj tabelę</a>
+                            <a id="createList" class="dropdown-item bg-info text-white" onclick="Items.Stage.createList()" href="#">Dodaj listę</a>
                             <!--<a class="dropdown-item" href="#">Pokaż</a>-->
                         </div>
                     </div>

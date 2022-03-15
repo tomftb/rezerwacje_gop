@@ -48,6 +48,11 @@ class ProjectItems{
         this.Stage.Table.setLink();
         this.Stage.show();
     }
+    showConst(){
+        console.log('ProjectItems::showConst()');
+        this.Const.Table.setLink();
+        this.Const.show();
+    }
     setError(ele,error){
         console.log('ProjectItems::setError()');
         console.log(ele);

@@ -95,8 +95,9 @@ class Xhr2 {
         console.log(this.uid);
     }
     run(property){
-        console.log('Xhr2::run(p)');
+        console.log('Xhr2::run()');
         console.log(this.uid);
+        console.log(property.t);
         /*
          * property:
          * t = type GET/POST 
@@ -106,18 +107,20 @@ class Xhr2 {
          * o = object
          * m = method
          */      
+       
         var Error=this.onError;
         var LoadEnd = this.LoadEnd;
         var LoadStart = this.LoadStart;
-
-        
+        //console.log(LoadStart);   
         var req=new XMLHttpRequest();
             req.timeout =0 ; // 5000 => 5s time in milliseconds => DEFAULT 0
             
-            console.log(req);
+            //console.log(req);
+            
             req.open(property.t, property.u, property.c);
             
             req.onloadstart = function (e){
+                console.log('Xhr2::onloadstart()');   
                 /*Request started transferring data! - TURN OF*/
                LoadStart();
             };
@@ -125,40 +128,45 @@ class Xhr2 {
             req.onprogress = function (e){
                 console.log('Xhr2::onprogress()');  
                 console.log(e);
+                var percentComplete = 100;
+                console.log('loaded');
                 console.log(e.loaded);
+                console.log('total');
                 console.log(e.total);
-                var percentComplete = (e.loaded / e.total)*100;
+                if(e.total>0){
+                    percentComplete = (e.loaded / e.total)*100;
+                }
+                console.log('percentComplete'); 
                 console.log(percentComplete); 
             };
             req.onloadend =  function(e){
                 /* Occurs when the request has finish, regardless if it was successful or not*/
-                console.log('Xhr2::oneloadend()');   
+                console.log('Xhr2::onloadend()');   
                 LoadEnd(); 
+                
             };
             req.ontimeout = function (e){
                 console.log("The request took too long!");
             };  
-            req.onload = function(e) {
-                console.log('Xhr2::onload()');
-                console.log(property);
-                if(typeof property.o[property.m] !=='function'){
-                    console.log("Xhr2::onload() Wrong Object or Method!");
-                    console.log("Xhr2::onload() Object:");
-                    console.log(property.o);
-                    console.log("Xhr2::onload() Method:");
-                    console.log(property.m);
-                    console.log("Xhr2::onload() Method TYPE:");
-                    console.log(Error);
-                    console.log(typeof property.o[property.m]);
-                    //Error.o[Error.m]('Xhr2::onload() An Application Error Has Occurred!');
-                    throw 'An Application Error Has Occurred!';
-                    return false;
-                }
-                else{
-                    property.o[property.m](this.response);
-                }
-                
-            };
+                 req.onload = function(e) {
+                    console.log('Xhr2::onload()');
+                    console.log(property);
+                    if(typeof property.o[property.m] !=='function'){
+                        console.log("Xhr2::onload() Wrong Object or Method!");
+                        console.log("Xhr2::onload() Object:");
+                        console.log(property.o);
+                        console.log("Xhr2::onload() Method:");
+                        console.log(property.m);
+                        console.log("Xhr2::onload() Method TYPE:");
+                        console.log(Error);
+                        console.log(typeof property.o[property.m]);
+                        Error.o[Error.m]('Xhr2::onload() An Application Error Has Occurred!');
+
+                    }
+                    else{
+                        property.o[property.m](this.response);
+                    }
+                };
             req.onerror =  function(e){
                 console.log('Xhr2::onerror()');
                 console.log("Podczas pobierania dokumentu wystąpił błąd " + e.target.status + ".");   
@@ -170,13 +178,13 @@ class Xhr2 {
                 console.log("Xhr2::onabort() Request aborted!");
             };
             req.onreadystatechanged  = function() {
+                console.log('Xhr2::onreadystatechanged()');
                 console.log(req.readyState);
                 if (req.readyState == req.DONE) {
                     if (req.status == 200){ console.log("Request finished successfully!");}
                         else {console.log("Request failed!");}
                 }
             } ;
-            console.log(req);
             req.send(property.d); 
     }  
     setOnError(property){

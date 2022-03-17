@@ -27,7 +27,7 @@
                         <span class="sr-only">Toggle Dropdown</span>
                       </button>
                       <div class="dropdown-menu bg-warning text-white">
-                        <a id="stageConstBtn" class="dropdown-item bg-warning text-white" onclick="ProjectConst.new()" href="#">Dodaj</a>
+                        <a id="createConst" class="dropdown-item bg-warning text-white" onclick="Items.Const.create()" href="#">Dodaj</a>
                         <!--<a class="dropdown-item" href="#">Pokaż</a>-->
                       </div>
                     </div>

@@ -23,7 +23,7 @@ class ProjectStage{
         console.log(this.Items.router);
         this.StageTable = new ProjectStageTable(this);  
         this.StageTable.setProperties(this.Items.appurl,this.Items.router);
-        this.CreateText = new ProjectStageCreateText();
+        this.CreateText = new ProjectStageCreateText(this);
         this.CreateImage = new ProjectStageCreateImage();
         this.CreateTable = new ProjectStageCreateTable();
         this.CreateTable = new ProjectStageCreateTable();
@@ -40,48 +40,58 @@ class ProjectStage{
         };
         this.StageTable.run(this.Items.router+this.defaultTask);
     }
-
-    hide(response){
-        console.log('ProjectStage::hide()');
+    prepare(response,btnLabel,btnClass){
+        console.log('ProjectStage::prepare()');
         console.log(response);
-        try{
+        
             /* SET UP STAGE DATA */
             var data=this.Items.parseResponse(response);
             /* SET UP GLOSSARY */
             //this.Items.Glossary
             /* RUN MODAL */
-            this.Items.prepareModal('Ukrywanie Etapu Projektu','bg-secondary');
+            this.Items.Modal.clearData();
             this.Items.setCloseModal(this,'show',this.defaultTask+data['data']['value']['stage'].i);
-            this.Items.setChangeDataState(data,'Ukryj','secondary',);
+            this.Items.setChangeDataState(data['data']['value']['stage'].i,data['data']['value']['stage'].t,data['data']['function'],data['data']['value']['slo'],btnLabel,btnClass);
+            this.Items.Modal.setInfo("Project Stage ID: "+data['data']['value']['stage'].i+", Create user: "+data['data']['value']['stage'].cu+" ("+data['data']['value']['stage'].cul+"), Create date: "+data['data']['value']['stage'].cd);
+       
+    }
+    hide(response){
+        console.log('ProjectStage::hide()');
+        try{
+            this.prepare(response,'Ukryj','secondary');
         }
         catch(error){
             console.log(error);
-            this.Table.setError(error);
+            this.StageTable.Table.setError('An Application Error Has Occurred!');
             return false;
         };
+        /* RUN MODAL IN second try to prevent hide error */
+        try{
+           this.Items.prepareModal('Ukrywanie Etapu Projektu','bg-secondary');
+        }
+        catch(error){
+            console.log(error);
+            this.ConstTable.Table.setError(error);
+        }
     }
     remove(response){
         console.log('ProjectStage::remove()');
-        console.log(response);
         try{
-            /* SET UP STAGE DATA */
-            var data=this.Items.parseResponse(response);
-            /* SET UP GLOSSARY */
-            //this.Items.Glossary
-            /* RUN MODAL */
-            this.Items.prepareModal('Usuwanie Etapu Projektu','bg-danger');
-            this.Items.setCloseModal(this,'show',this.defaultTask+data['data']['value']['stage'].i);
-            this.Items.setChangeDataState(data,'Usuń','danger',);
+            this.prepare(response,'Usuń','danger');
         }
         catch(error){
             console.log(error);
-            this.Table.setError(error);
+            this.StageTable.Table.setError('An Application Error Has Occurred!');
             return false;
         };
-    }
-    edit(response){
-        console.log('ProjectStage::edit()');
-        console.log(response);
+        /* RUN MODAL IN second try to prevent hide error */
+        try{
+            this.Items.prepareModal('Usuwanie Etapu Projektu','bg-danger');
+        }
+        catch(error){
+            console.log(error);
+            this.ConstTable.Table.setError(error);
+        }
     }
     createText(){
         try{
@@ -94,12 +104,11 @@ class ProjectStage{
                 object:this,
                 method:'show'
             };
-            this.Items.setCloseModal(this.Table,'show',this.defaultTask+'0');
-            this.CreateText.create(this);
+            this.CreateText.create();
         }
         catch(error){
             console.log(error);
-            this.Table.setError(error);
+            this.StageTable.Table.setError(error);
             return false;
         };
     }
@@ -111,5 +120,16 @@ class ProjectStage{
     }
     createList(){
         console.log('ProjectStage::createList()');
+    }
+    details(response){
+        try{
+            console.log('ProjectStage::details()');
+            this.CreateText.details(response);
+        }
+        catch(error){
+            console.log(error);
+            this.StageTable.Table.setError(error);
+            return false;
+        };
     }
 }

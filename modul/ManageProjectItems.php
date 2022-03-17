@@ -80,11 +80,14 @@ class ManageProjectItems{
     }
     public function setPostId(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->Utilities->validateKey(filter_input_array(INPUT_POST),'id',true,1);
-        return (filter_input_array(INPUT_POST));
+        //$this->Log->logMulti(0,$_POST);
+        $POST = filter_input_array(INPUT_POST);
+        $this->Utilities->validateKey($POST,'id',true,1);
+        return ($POST);
     }
     public function setReason(&$post){
         $this->Log->log(0,"[".__METHOD__."]");
+        $this->Log->logMulti(0,$post);
         $reason=explode('|',$post['reason']);
         $extra=$post['extra'];
         UNSET($post['extra']);

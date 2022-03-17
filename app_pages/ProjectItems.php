@@ -35,6 +35,7 @@ final class ProjectItems extends Page{
         'Page/ProjectStageTable.js',
         'Page/ProjectStage.js',
         'Page/ProjectConstTable.js',
+        'Page/ProjectConstCreate.js',
         'Page/ProjectConst.js',
         'Page/ProjectItems.js',
         ];

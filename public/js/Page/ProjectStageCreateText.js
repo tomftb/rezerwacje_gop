@@ -4,6 +4,7 @@ class ProjectStageCreateText{
     Stage=new Object();
     Html=new Object();
     Xhr=new Object();
+    XhrTable=new Object();
     /* FIELD COUNTER */
     i=0;
     /* FIELD COUNTER */
@@ -14,7 +15,22 @@ class ProjectStageCreateText{
     resonse; 
     Glossary={};
     data={};
+    fieldDisabled=false;
+    ErrorStack={};
     
+    constructor(Stage){
+        console.log('ProjectStageCreateText::constructor()');
+        /*
+         * Stage - object
+         */
+        this.Modal=Stage.Items.Modal;
+        this.Items=Stage.Items;
+        this.Stage=Stage;
+        this.Html=Stage.Items.Html;
+        this.Xhr=Stage.Items.Xhr2;
+        this.XhrTable=Stage.Items.Xhr;
+        this.Glossary=Stage.Items.Glossary['text'];
+    }
     getData(u,m){
         console.log('ProjectStageCreateText::prepare()');
         var xhrParm={
@@ -25,39 +41,123 @@ class ProjectStageCreateText{
             o:this,
             m:m
         };
-        this.Xhr.run(xhrParm);
+        this.XhrTable.run(xhrParm);
     }
-    create(o){
+    create(){
         console.log('ProjectStageCreateText::create()');
-        this.setUp(o);
         this.getData('getNewStageDefaults&type=tx','setUpCreateData');        
     }
     setUpModal(){
         console.log('ProjectStageCreateText::setUpModal()');
-        
-        this.Items.prepareModal('Dodaj etap projektu - tekst','bg-info');
-        this.Items.setCloseModal(this.Stage,'show',this.Stage.defaultTask+this.data.data['value']['stage'].id);
-        
-        /* SET DEFAULT (EMPTY) LINK TO DATA*/
-        this.link=this.getEmptyLink();
-        /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
-        this.helplink=this.getEmptyHelpLink();
+        try{
+            this.Modal.clearData();
+            this.Items.setCloseModal(this.Stage,'show',this.Stage.defaultTask+this.data.data['value']['stage'].id);
+
+            /* SET DEFAULT (EMPTY) LINK TO DATA*/
+            this.link=this.getEmptyLink();
+            /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
+            this.helplink=this.getEmptyHelpLink();
+
+            var form=this.Html.getForm();
+            /* ASSIGN TITLE DEPARTMENT FIELD */
+            this.createHead(form);
+            /* ASSING PREVIEW FIELD */
+            form.appendChild(this.createPreview());
+             /* ASSING WORKING FIELD */
+            form.appendChild(this.createDynamicView());
+
+            this.Modal.link['adapted'].appendChild(form);
+             /* ASSING ACTION BUTTONS */
+            this.createButtons();
+            console.log(this.Modal.link['adapted']);
+            console.log(this.Modal.link['button']); 
+            console.log(this.Modal.link['error']); 
+            this.createManageButton('Dodaj');
+        }
+        catch(error){
+            console.log('ProjectConstCreate::prepare()');
+            console.log(error);
+            //throw 'An Application Error Has Occurred!';
+            this.Items.Table.setError('An Application Error Has Occurred!');
+            return false;
+        }
+        /* IN ANOTHER BLOCK TRY CATCH TO PREVENT OPEN MODAL IF ERROR EXISTS TO HIDE ERROR SHOWED IN TABLE  */
+        try{
+            this.Items.prepareModal('Dodaj etap projektu - tekst','bg-info');
+        }
+        catch(error){
+            console.log('ProjectConstCreate::prepare()');
+            console.log(error);
+            //throw 'An Application Error Has Occurred!';
+            this.Items.Table.setError('An Application Error Has Occurred!');
+        }
+    }
+    details (response){
        
-        var form=this.Html.getForm();
-        /* ASSIGN TITLE DEPARTMENT FIELD */
-        this.createHead(form);
-        /* ASSING PREVIEW FIELD */
-        form.appendChild(this.createPreview());
-         /* ASSING WORKING FIELD */
-        form.appendChild(this.createDynamicView());
-   
-        this.Modal.link['adapted'].appendChild(form);
-         /* ASSING ACTION BUTTONS */
-        this.createButtons();
-        console.log(this.Modal.link['adapted']);
-        console.log(this.Modal.link['button']); 
-        console.log(this.Modal.link['error']); 
-        this.createManageButton('Dodaj');
+        try{
+            console.log('ProjectStageCreateText::details()');
+            this.data =this.Items.parseResponse(response);
+            console.log(this.data);
+            //console.log(this.data['data']['value']['const']);
+            /* TO DO IN FUTURE -> ADD setCloseModal multi id's */
+            this.Modal.clearData();
+            //this.Items.setCloseModal(this.Const,'show',this.Const.defaultTask+this.data['data']['value']['const'].i);
+            /* CLEAR ERROR STACK */
+            this.ErrorStack={};
+            /* SET CONSTS */
+            //this.allConsts=this.data['data']['value']['all'];
+            this.fieldDisabled=true;
+            /* form,constName,constValue,constId,rmButton */
+            /* TO DO -> Multi -> loop over data.value.const */
+            //this.setInputConst(this.Modal.link['adapted'],this.data['data']['value']['const'].n,this.data['data']['value']['const'].v,'0',null);
+            //this.Modal.link['adapted'].appendChild(this.createLegendRow()); 
+            /* CHECK IS BLOCKED  IF this.data['data']['value']['const'].bl NOT NULL => DISABLED */
+            
+            //this.setEditButtons(this.data['data']['value']['const'].i,this.data['data']['value']['const'].bl);
+            /*
+             * INFO
+             */
+            //this.Items.Modal.setInfo("Project Const ID: "+this.data['data']['value']['const'].i+", Create user: "+this.data['data']['value']['const'].cu+" ("+this.data['data']['value']['const'].cul+"), Create date: "+this.data['data']['value']['const'].cd+", Modification made at date: "+this.data['data']['value']['const'].md+" by user: "+this.data['data']['value']['const'].mu);
+            
+        }
+        catch(error){
+            console.log('ProjectStageCreateText::details()');
+            console.log(error);
+            throw 'An Application Error Has Occurred!';
+            //this.Stage.Table.setError('An Application Error Has Occurred!');
+            return false;
+        }
+        /* IN ANOTHER BLOCK TRY CATCH TO PREVENT OPEN MODAL IF ERROR EXISTS TO HIDE ERROR SHOWED IN TABLE  */
+        try{
+            this.Items.prepareModal('Podgląd Etapu projektu','bg-info');
+        }
+        catch(error){
+            console.log('ProjectStageCreateText::details()');
+            console.log(error);
+            //this.Items.Table.setError('An Application Error Has Occurred!');
+            throw 'An Application Error Has Occurred!';
+        }
+    }
+    block(){
+        try{
+            console.log('ProjectStageCreateText::block()');
+            /* SEND BLOCK */
+            var xhrParm={
+                t:"GET",
+                u:this.Items.router+'blockConst&id='+this.data['data']['value']['const'].i,
+                /* FOR POST SET TRUE */
+                c:true,
+                d:null,
+                o:this,
+                m:'edit'
+            };
+            this.Xhr.run(xhrParm);
+        }
+        catch(error){
+            console.log('ProjectConstCreate::block()');
+            console.log(error);
+            this.Html.showField(this.Modal.link['error'],'An Application Error Has Occurred!');
+        }
     }
     edit(response){
         console.log('ProjectStageCreateText::edit()');
@@ -1428,6 +1528,7 @@ class ProjectStageCreateText{
                     t:'POST',
                     u:this.Items.router+'confirmProjectStageText',
                     //u:'asdasd',
+                    /* FOR POST SET TRUE */
                     c:true,
                     d:fd,
                     o:this.Items,
@@ -1483,19 +1584,6 @@ class ProjectStageCreateText{
         //console.log('ProjectStageCreateText::getMaxSubSectionCount()');
         return parseInt(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MAX','v'),10);
     }
-    setUp(o){
-        console.log('ProjectStageCreateText::setUp()');
-        /*
-         * o - object
-         */
-        this.Modal=o.Items.Modal;
-        this.Items=o.Items;
-        this.Stage=o;
-        this.Html=o.Items.Html;
-        this.Xhr=o.Items.Xhr2;
-        this.Glossary=this.Items.Glossary['text'];
-    }
-
     setUpCreateData(response){
         console.log('ProjectStageCreateText::setUpCreateData()');
         this.data=this.Items.setUpModalData(response);

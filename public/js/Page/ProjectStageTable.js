@@ -1,6 +1,5 @@
 class ProjectStageTable{
     Xhr= new Object();
-    XhrModal= new Object();
     Html= new Object();
     Main = new Object();
     /* FROM ProjectConst 'getprojectsconstslike&u=0&v=1&b=' */
@@ -39,10 +38,9 @@ class ProjectStageTable{
     };
     constructor(Main){
         console.log('ProjectConst::construct()');  
-        this.Main=Main;
+        this.Stage=Main;
         this.Table=Main.Items.Table;
         this.Xhr=Main.Items.Xhr;
-        this.XhrModal=Main.Items.Xhr2;
         this.Html=Main.Items.Html;
     }
     setProperties(appUrl,url){
@@ -65,7 +63,7 @@ class ProjectStageTable{
     setBody(response){
         console.log('ProjectStageTable::setBody()');
         /* PARSE RESPONSE */
-        var data = this.Main.Items.setTableResponse(response);
+        var data = this.Stage.Items.setTableResponse(response);
         /* SET BODY DATA */
         for(const prop in data.data.value.data){
             this.setBodyRow(data.data.value.data[prop]);
@@ -112,9 +110,9 @@ class ProjectStageTable{
         
         var btnGroup=document.createElement('DIV');
             btnGroup.setAttribute('class','btn-group pull-left');
-            btnGroup.appendChild(this.getShowButton(this.XhrModal,value.i));
-            btnGroup.appendChild(this.getHideButton(this.XhrModal,value.i));
-            btnGroup.appendChild(this.getDeleteButton(this.XhrModal,value.i));
+            btnGroup.appendChild(this.getShowButton(this.Xhr,value.i));
+            btnGroup.appendChild(this.getHideButton(this.Xhr,value.i));
+            btnGroup.appendChild(this.getDeleteButton(this.Xhr,value.i));
         /* ADD ROW WITH BLOCK USER INGO */
         
         return btnGroup;
@@ -128,7 +126,7 @@ class ProjectStageTable{
     getShowButton(Ajax,id){
         var btn  = this.getButton('Wyświetl','btn-info');
         var AjaxRun = this.getXhrRunProperty('psDetails&id='+id);
-            AjaxRun.m='edit';
+            AjaxRun.m='details';
             btn.onclick = function (){
                 Ajax.run(AjaxRun);
             };
@@ -158,7 +156,7 @@ class ProjectStageTable{
             u:this.router+task,
             c:false,
             d:null,
-            o:this.Main,
+            o:this.Stage,
             m:'hide'
         };
         return run;

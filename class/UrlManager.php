@@ -107,7 +107,8 @@ final class UrlManager{
         ['pcHide','LOG_INTO_STAGE'],
         ['pcDelete','LOG_INTO_STAGE'],
         ['getProjectConstDetails','LOG_INTO_STAGE'],
-        ['confirmProjectStageText','LOG_INTO_STAGE']
+        ['confirmProjectStageText','LOG_INTO_STAGE'],
+        ['blockConst','LOG_INTO_STAGE'],
     ];
         
     public function __construct(){

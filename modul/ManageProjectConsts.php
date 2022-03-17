@@ -31,13 +31,14 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
         }
         //print_r($this->inpArray);
         array_walk($this->inpArray, array($this,'parseConsts'));
+        
         array_walk($this->newData, array($this,'parseConstsUnique'));
         if($this->error){
            Throw New Exception($this->error,0); 
         }
         //Throw New Exception('['.__METHOD__.'::'.__LINE__.'] TEST STOP',0); 
         array_map([$this,'dbManageConst'],$this->newData);
-        Throw New Exception('['.__METHOD__.'::'.__LINE__.'] TEST STOP',0); 
+        //Throw New Exception('['.__METHOD__.'::'.__LINE__.'] TEST STOP',0); 
         $this->Utilities->jsonResponse([],'cModal');
     }
     private function parseConsts(&$value='',$key=''){
@@ -136,7 +137,7 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
         $this->Utilities->setGet('id',$this->newData);
         parent::getConstData();
         $this->Items->checkBlock($this->newData['const']['bu'],$this->newData['const']['bl'],$_SESSION['userid']);
-        $this->Items->setBlock($this->newData['id'],"PROJECT_STAGE_CONST","buffer_user_id",$_SESSION['userid']);
+        self::block($this->newData['id'],$_SESSION['userid']);
         $this->newData['slo']=$this->Items->getSlo('pcHide');
         $this->Utilities->jsonResponse($this->newData,'pcHide');  
     }
@@ -146,7 +147,7 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
         $this->Utilities->setGet('id',$this->newData);
         parent::getConstData();
         $this->Items->checkBlock($this->newData['const']['bu'],$this->newData['const']['bl'],$_SESSION['userid']);
-        $this->Items->setBlock($this->newData['id'],"PROJECT_STAGE_CONST","buffer_user_id",$_SESSION['userid']);
+        self::block($this->newData['id']);
         $this->newData['slo']=$this->Items->getSlo('pcDelete');
         $this->Utilities->jsonResponse($this->newData,'pcDelete');  
     }
@@ -170,23 +171,41 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
     public function pcHide(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->newData=$this->Items->setPostId();
-        $this->newData['reason']=$this->Items->setReason();
+        $this->newData['reason']=$this->Items->setReason($this->newData);
         $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'PROJECT_STAGE_CONST','buffer_user_id');
         $this->Items->checkBlock($this->newData['wskb']['bu'],$this->newData['wskb']['bl'],$_SESSION['userid']);
         parent::hideConst();
-        $this->Items->setBlock($this->newData['id'],"PROJECT_STAGE_CONST","buffer_user_id",'');
+        self::block($this->newData['id'],$_SESSION['userid']);
         $this->Utilities->jsonResponse('','cModal');
     }
     public function pcDelete(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->newData=$this->Items->setPostId();
-        $this->newData['reason']=$this->Items->setReason();
+        $this->newData['reason']=$this->Items->setReason($this->newData);
         $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'PROJECT_STAGE_CONST','buffer_user_id');
         $this->Items->checkBlock($this->newData['wskb']['bu'],$this->newData['wskb']['bl'],$_SESSION['userid']);
         parent::deleteConst();
-        $this->Items->setBlock($this->newData['id'],"PROJECT_STAGE_CONST","buffer_user_id",'');
+        self::block($this->newData['id'],'');
         $this->Utilities->jsonResponse('','cModal');
     }
-
+    public function blockConst(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->newData=array();
+        //$this->newData=$this->Items->setPostId();
+        $this->Utilities->setGet('id',$this->newData);
+        /* CHECK FOR ACT BLOCK STATUS */
+        $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'PROJECT_STAGE_CONST','buffer_user_id');
+        
+        $this->Log->logMulti(0,$this->newData);
+        
+        $this->Items->checkBlock($this->newData['wskb']['bu'],$this->newData['wskb']['bl'],$_SESSION['userid']);
+        
+        
+        self::block($this->newData['id'],$_SESSION['userid']);
+        $this->Utilities->jsonResponse('','');
+    }
+    private function block($id=0,$user=''){
+         $this->Items->setBlock($id,"PROJECT_STAGE_CONST","buffer_user_id",$user);
+    }
 
 }

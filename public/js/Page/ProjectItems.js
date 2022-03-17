@@ -39,6 +39,10 @@ class ProjectItems{
         this.Glossary={
             text:new Glossary()
         };
+        
+        
+        this.Xhr2.setOnError(this.modalXhrError());
+        
         this.Stage=new ProjectStage(this);
         this.Const=new ProjectConst(this);
     }
@@ -46,15 +50,6 @@ class ProjectItems{
         console.log('ProjectItems::setUrl()'); 
         this.router=url;
         this.appurl=appurl; 
-    }
-    setError(ele,error){
-        console.log('ProjectItems::setError()');
-        console.log(ele);
-        ProjectItems.Modal.showField(ele,error);
-        
-    }
-    unsetError(ele){
-        ProjectItems.Modal.hideAndClearField(ele);
     }
     getJsonResponse(errLink,response){
         console.log('ProjectItems::getJsonResponse()');
@@ -92,13 +87,7 @@ class ProjectItems{
     unsetError(ele){
         ProjectItems.Html.hideAndClearField(ele);
     }
-    setModalInfo(value){
-        console.log('ProjectItems::setModalInfo()');
-        var textInfo=document.createElement('small');
-            textInfo.setAttribute('class','text-left text-secondary ml-1');
-            textInfo.innerHTML=value;
-        this.Modal.link['info'].appendChild(textInfo);
-    }
+
     setChangeStateFields(ele,sloData)
     { 
         console.log('ProjectItems::setChangeStateFields()');
@@ -155,8 +144,8 @@ class ProjectItems{
     }
     prepareModal(title,titleClass){
         console.log('ProjectItems::prepareModal()');
-        this.Modal.setLink();
-        this.Modal.clearData();
+        //this.Modal.setLink();
+        
         this.Modal.setHead(title,titleClass);
         //$(ProjectItems.Modal.link['main']).modal('show');
         $(this.Modal.link['main']).modal({
@@ -269,21 +258,32 @@ class ProjectItems{
         this.Xhr.setOnLoadEnd(end);
     }
     setLoadModalInfo(){
-        this.Modal.loadNotify='<img src="'+window.appUrl+'/img/loading_60_60.gif" alt="load_gif">';
-        var Modal = this.Modal;
- 
+        console.log('ProjectItems::setLoadModalInfo()');
+        var M = this.Modal;
+            M.loadNotify='<img src="'+window.appUrl+'/img/loading_60_60.gif" alt="load_gif">';
         var start = function(){
-                    Modal.showLoad();
+                M.showLoad(); 
             };
         var end = function(){
-                    Modal.hideLoad();
+                M.hideLoad();
             };
         this.Xhr2.setOnLoadStart(start);
         this.Xhr2.setOnLoadEnd(end);
     }
     parseResponse(response){
         console.log('ProjectItems::parseResponse()');
-        var data = JSON.parse(response);  
+        try {
+            var data = JSON.parse(response);  
+        }
+        catch (error){
+            console.log('RESPONSE:');
+            console.log(response);
+            console.log('ERROR:');
+            console.log(error);
+            throw 'Application error occurred! Contact with Administrator!';
+            return false;
+        }
+       
         if (!('status' in data) || !('info' in data)){
             console.log(data);
             throw 'Application error occurred! Contact with Administrator!';
@@ -297,54 +297,50 @@ class ProjectItems{
         return data;
     }
 
-    setChangeDataState(data,btnLabel,titleClass){
+    setChangeDataState(i,t,f,g,btnLabel,titleClass){
         console.log('ProjectItems::setChangeDataState()');
-        console.log(data['data']);
+        /*
+            i - id
+            t - tile
+            f - function to run
+            g - glossary
+        */
+        
         var form=this.Html.getForm();
         var h=document.createElement('H5');
             h.setAttribute('class','text-'+titleClass+' mb-3 text-center font-weight-bold');
-            h.innerHTML=data['data']['value']['stage'].t;
+            h.innerHTML=t;
         
-        form.appendChild(this.Html.getInput('id',data['data']['value']['stage'].i,'hidden'));
-        this.setChangeStateFields(form,data['data']['value']['slo']);
+        form.appendChild(this.Html.getInput('id',i,'hidden'));
+        this.setChangeStateFields(form,g);
         this.Modal.link['form']=form; 
         this.Modal.link['adapted'].appendChild(h);
         this.Modal.link['adapted'].appendChild(form);
         var Items=this;
-        var confirmButton=this.Html.confirmButton(btnLabel,'btn btn-'+titleClass,data['data']['function']);   
+        var confirmButton=this.Html.confirmButton(btnLabel,'btn btn-'+titleClass,f);   
             /* CLOSURE */
             confirmButton.onclick = function () {  
                 console.log('ProjectItems::setChangeDataState() onclick()');
                 const fd = new FormData(form);
                 var xhrRun={
                     t:'POST',
-                    u:Items.router+data['data']['function'],
-                    //u:'asdasd',
+                    u:Items.router+f,
                     c:true,
                     d:fd,
                     o:Items,
-                    m:'closeModal'
+                    m:'setModalResponse'
                 };
-                var xhrError={
-                    o:Items,
-                    m:'setModalError'
-                };
-                /* SET XHR ON ERROR */
-                
+                //var xhrError={
+                //    o:Items,
+                //    m:'setModalResponse'
+                //};
                 if(confirm('Potwierdź wykonanie akcji')){   
-                    //Items.Modal.link['extra'].innerHTML='<center><img src="/img/loading_60_60.gif"/></center>';
-                    //Items.Xhr.run('POST',fd,Items.router+data['data']['value']['stage'].i);
-                    Items.Xhr.setOnError(xhrError);
-                    Items.Xhr.run(xhrRun);
+                    //Items.Xhr2.setOnError(xhrError);
+                    Items.Xhr2.run(xhrRun);
                 };
             };
-        this.Modal.link['button'].appendChild(this.getCancelButton(this.default.object,this.default.method,this.default.task+data['data']['value']['stage'].i));
+        this.Modal.link['button'].appendChild(this.getCancelButton(this.default.object,this.default.method,this.default.task+i));
         this.Modal.link['button'].appendChild(confirmButton);
-        /*
-         * INFO
-         */
-        this.setModalInfo("Project Stage ID: "+data['data']['value']['stage'].i+", Create user: "+data['data']['value']['stage'].cu+" ("+data['data']['value']['stage'].cul+"), Create date: "+data['data']['value']['stage'].cd);
-        
     }
     closeModal(){
         console.log('ProjectItems::closeModal()');
@@ -354,7 +350,7 @@ class ProjectItems{
     }
     setTableResponse(response){
         console.log('ProjectItems::setTableResponse()');
-        console.log(response);
+        //console.log(response);
         try {
             return this.parseResponse(response);
         }
@@ -392,7 +388,14 @@ class ProjectItems{
         } 
         return data;
     }
-    
+    modalXhrError(){
+        console.log('ProjectItems::modalXhrError()');
+         var xhrError={
+            o:this,
+            m:'setModalError'
+        };
+        return xhrError;
+    }
 }
 
 var Items = new ProjectItems(window.appUrl,window.appUrl+'/router.php?task=');

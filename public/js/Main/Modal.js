@@ -83,15 +83,22 @@ class Modal{
         //console.log(this.link['head']);
     }
     showLoad(){
-        //console.log('Modal::showLoad()');
+        console.log('Modal::showLoad()');
         if(this.loadNotify!==''){
             this.Html.showField(this.link['extra'],this.loadNotify);
         }
     }
     hideLoad(){
-        //console.log('Modal::hideLoad()');
+        console.log('Modal::hideLoad()');
         if(this.loadNotify!==''){
             this.Html.hideField(this.link['extra']);
         }
+    }
+    setInfo(value){
+        console.log('Modal::setInfo()');
+        var textInfo=document.createElement('small');
+            textInfo.setAttribute('class','text-left text-secondary ml-1');
+            textInfo.innerHTML=value;
+            this.link['info'].appendChild(textInfo);
     }
 }

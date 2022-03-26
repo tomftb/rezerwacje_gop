@@ -86,8 +86,20 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $this->actProjectStageData=array();
         $this->brTag='&lt;br /&gt;';
         $this->utilities->setGet('id',$this->inpArray);
-        $this->actProjectStageData['stage']=parent::getStage($this->inpArray['id']);
-        $this->utilities->jsonResponse($this->actProjectStageData,'psDetails');
+        
+        $data = parent::getStageFullData($this->inpArray['id']);
+        /* GET DEFAULT PARAMETERS */
+        $data['glossary'] = parent::getStageGlossary();
+        
+        //$data['glossary']['parameter']=[];
+        /* SETUP PARAMETER */
+        //$parm=[];
+        //foreach($data['glossary']['parameter'] as $v){
+            //print_r($v);
+           // $parm[$v['s']]=['n'=>$v['n'],'v'=>$v['v']];
+       // }
+        //$data['glossary']['parameter']=$parm;
+        $this->utilities->jsonResponse($data,'psDetails');
     }
     private function setChangeState(){
         $this->data=$this->Items->setPostId();
@@ -361,7 +373,6 @@ class ManageProjectStage extends ManageProjectStageDatabase
             }
         }
     }
-
     public function getNewStageDefaults(){
         $type=htmlentities(nl2br(filter_input(INPUT_GET,'type')), ENT_QUOTES,'UTF-8',FALSE);
         $this->Log->log(0,"[".__METHOD__."]\r\nTYPE - ".$type);
@@ -369,7 +380,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $value['glossary'] = parent::getStageGlossary();
         /* SETUP PARAMETER */
         $parm=[];
-        foreach($value['glossary']['parameter'] as $v){
+        foreach(parent::getStageParameters() as $v){
             //print_r($v);
             $parm[$v['s']]=['n'=>$v['n'],'v'=>$v['v']];
         }

@@ -1,6 +1,7 @@
 class Glossary{
     /* ES6 PRAIVATE => # ON START */
     item={}
+    filled=false;
     /* GLOSSARY TEXT KEYS:
         color={},
         fontfamily:{},
@@ -25,6 +26,7 @@ class Glossary{
          * 
          */
         this.item[key]=value;
+        this.filled=true;
     }
     clear(){
         /*
@@ -101,5 +103,16 @@ class Glossary{
         }
         console.log('Glossary::exist() FALSE');
         return false;
+    }
+    itemCount(){
+        var i=0;
+        for (const prop in this.item){
+           i++;
+        }
+       return i;
+    }
+    fill(items){
+        this.item=items;
+        this.filled=true;
     }
 }

@@ -143,7 +143,7 @@ class ProjectItems{
         }
     }
     prepareModal(title,titleClass){
-        console.log('ProjectItems::prepareModal()');
+        //console.log('ProjectItems::prepareModal()');
         //this.Modal.setLink();
         
         this.Modal.setHead(title,titleClass);
@@ -160,8 +160,12 @@ class ProjectItems{
         var Items=this;
         /* CLOSURE */
         this.Modal.link['close'].onclick = function (){
-            Items.Modal.closeModal();
-            Items.reloadData(classToRun,methodToRun,taskToRun);
+            /* TO DO */
+            //if (confirm('Wyjść?') === true) {
+                Items.Modal.closeModal();
+                Items.reloadData(classToRun,methodToRun,taskToRun);
+            //}
+            //else{}
         };
          /* SET CLOSE VIA MOUSE */
         this.Modal.link['main'].onclick = function (e){
@@ -215,6 +219,7 @@ class ProjectItems{
         }
     }
     getCancelButton(classToRun,methodToRun,taskToRun){
+        /*
         console.log('ProjectItems::getCancelButton()');
         console.log('Oboject:');
         console.log(classToRun);
@@ -222,11 +227,18 @@ class ProjectItems{
         console.log(methodToRun);
         console.log('Task:');
         console.log(taskToRun);
+        */
         var cancel=this.Html.cancelButton('Anuluj');
         var Items = this;
             cancel.onclick=function(){
-                Items.Modal.closeModal();
-                Items.reloadData(classToRun,methodToRun,taskToRun);
+                if (confirm('Anulować?') === true) {
+                    /* TO DO -> TURN OFF CLOSE MODAL */
+                    Items.Modal.closeModal();
+                    Items.reloadData(classToRun,methodToRun,taskToRun);
+                }
+                else{ 
+                }
+               
             };
         return cancel;
     }
@@ -396,12 +408,22 @@ class ProjectItems{
         };
         return xhrError;
     }
+    count(o){
+    /* 
+     * 0 - object to count
+     */
+        var i=0;
+        for (const prop in o){
+            i++;
+        }
+        return i;
+    }
 }
 
 var Items = new ProjectItems(window.appUrl,window.appUrl+'/router.php?task=');
 
 window.addEventListener('load', function(){
-    console.log('page is fully loaded');
+    //console.log('page is fully loaded');
     try{
         Items.setLoadInfo();
         Items.setLoadModalInfo();

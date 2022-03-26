@@ -19,8 +19,8 @@ class ProjectStage{
     constructor(Items){
         console.log('ProjectStage::construct()');
         this.Items = Items;
-        console.log(Items);
-        console.log(this.Items.router);
+        //console.log(Items);
+        //console.log(this.Items.router);
         this.StageTable = new ProjectStageTable(this);  
         this.StageTable.setProperties(this.Items.appurl,this.Items.router);
         this.CreateText = new ProjectStageCreateText(this);
@@ -96,7 +96,8 @@ class ProjectStage{
     createText(){
         try{
             console.log('ProjectStage::createText()');
-            console.log(this.CreateText);
+            //console.log(this.Items.Glossary['text']);
+            //console.log(this.CreateText);
             //this.Items.setLoadModalInfo();
             /* SET DEFAULT OBJECT */
             this.Items.default={

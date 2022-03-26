@@ -23,20 +23,20 @@ class Table
     buttonsType;
     
     constructor(Xhr) { 
-        console.log('Table::constructor()');
+        //console.log('Table::constructor()');
         this.Xhr = Xhr;
     }
     setAjaxLink(alink){
-        console.log('TABLE::setAjaxLink()');
+        //console.log('TABLE::setAjaxLink()');
         Table.ajaxLink=alink;
-        console.log(Table.ajaxLink);
+        //console.log(Table.ajaxLink);
     }
     setErrorLink(eLink,eDiv){
-        console.log('TABLE::setErrorLink()');
+        //console.log('TABLE::setErrorLink()');
         Table.errorLink=eLink;
         Table.errorDivId=eDiv;
-        console.log(Table.errorLink);
-        console.log(Table.errorDivId);
+        //console.log(Table.errorLink);
+        //console.log(Table.errorDivId);
         //Table.errorDiv=eDiv;
     }
     setIdFiled(id){
@@ -273,8 +273,8 @@ class Table
         this.Xhr.run(xhrRun);
     }
     setHead(head){
-        console.log('Table::setHead()');
-        console.log(head);
+        //console.log('Table::setHead()');
+        //console.log(head);
         for (const c in head){
             var th=document.createElement('TH');
             this.setHeadStyle(th,head[c]);
@@ -282,7 +282,7 @@ class Table
             th.innerHTML=head[c].title;
             this.link.head.appendChild(th);
         }
-        console.log(this.link.head);
+        //console.log(this.link.head);
     }
     setHeadProperty(th,headRow){
         if(!headRow.hasOwnProperty('attribute')){
@@ -301,9 +301,9 @@ class Table
         } 
     }
     setLink(){
-        console.log('Table::setLink()');
+        //console.log('Table::setLink()');
         var tableEle = document.getElementById('mainTableDiv');
-        console.log(tableEle);
+        //console.log(tableEle);
         this.link={
             main:tableEle,
             error:tableEle.childNodes[0].childNodes[0],
@@ -311,10 +311,10 @@ class Table
             body:tableEle.childNodes[1].childNodes[0].childNodes[0].childNodes[1],
             extra:tableEle.childNodes[2]
         };
-        console.log(this.link);
+        //console.log(this.link);
     }
     clearTable(){
-        console.log('Table::clearTable()');
+        //console.log('Table::clearTable()');
         this.clearEle(this.link['error']);
         this.clearEle(this.link['head']);
         this.clearEle(this.link['body']);
@@ -327,8 +327,8 @@ class Table
     }
     setError(info){
         console.log('Table::setError()');
-        console.log(info);
-        console.log(this.link['error']);
+        //console.log(info);
+        //console.log(this.link['error']);
         this.link['error'].classList.remove("d-none");
         this.link['error'].innerHTML=info;
     }

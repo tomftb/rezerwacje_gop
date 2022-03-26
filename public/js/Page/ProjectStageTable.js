@@ -154,7 +154,7 @@ class ProjectStageTable{
         var run={
             t:"GET",
             u:this.router+task,
-            c:false,
+            c:true,
             d:null,
             o:this.Stage,
             m:'hide'

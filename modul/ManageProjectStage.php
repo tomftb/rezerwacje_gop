@@ -432,6 +432,9 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $this->Log->logMulti(0,$this->data);
         $this->error='';
         $prefix="";
+        if(!is_object($this->data)){
+            Throw New Exception ('POST DATA IS NOT A OBJECT',1);
+        }
         self::checkValue('title',$prefix);
         self::checkValue('department',$prefix);
         $this->error.=$prefix.$this->utilities->checkValueLength($this->data->title,'[title]',1,1024);

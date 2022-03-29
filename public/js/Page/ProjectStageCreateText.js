@@ -250,7 +250,6 @@ class ProjectStageCreateText{
             help.setAttribute('id','titleHelp');
             help.classList.add('form-text','text-muted');
             help.appendChild(helpValue);
-            
             titleInputDiv.appendChild(help);
         
         titleDiv.appendChild(titleLabelDiv);
@@ -286,7 +285,6 @@ class ProjectStageCreateText{
             this.helplink['department']=department;
         /* TO DO -> DEFAULT / EDIT */  
        
-        //this.link['department']=this.Glossary.item.department[0].v;
         var departmentHelpValue=document.createTextNode('Wskaż dział.');     
          
         var departmentHelp=document.createElement('small');
@@ -385,24 +383,27 @@ class ProjectStageCreateText{
         
         /* LOOP OVER  SECTION */   
         for(const property in this.stageData.section){
-            /* SECTION */
-            console.log('SECTION');
-            console.log(property);
-            console.log('SECTION '+property+' DATA');
-            console.log(this.stageData.section[property]);
+            /* SECTION 
+                console.log('SECTION');
+                console.log(property);
+                console.log('SECTION '+property+' DATA');
+             console.log(this.stageData.section[property]);
+            */
             /* CHECK AND SETUP COLUMNS NUMBER */
             writePageSectionWidth=Math.floor(607/this.stageData.section[property].subsectionvisible); /* minus padding left 92px */
-           
-            console.log('SECTION '+property+' DATA subsectionvisible');
-            console.log(this.stageData.section[property].subsectionvisible);
+            /*
+                console.log('SECTION '+property+' DATA subsectionvisible');
+                console.log(this.stageData.section[property].subsectionvisible);
+            */
             //console.log('SECTION '+property+' ALL DATA subsection');
             //console.log(this.stageData.section[property].subsection);
             
              /* LOOP OVER SUBSECTION - VISIBLE */   
             for(var i=0;i<this.stageData.section[property].subsectionvisible;i++){
-                /* SUBSECTION */   
-                console.log('SECTION '+property+' DATA subsection '+i);
-                console.log(this.stageData.section[property].subsection[i]);
+                /* SUBSECTION  
+                    console.log('SECTION '+property+' DATA subsection '+i);
+                    console.log(this.stageData.section[property].subsection[i]);
+                */  
                 var writePageSection=document.createElement('div');
                     writePageSection.style.width=writePageSectionWidth+'px';
                     writePageSection.style.border='0px';
@@ -411,83 +412,112 @@ class ProjectStageCreateText{
                     /* IN FUTURE SETUP SUBSECTION DATA */
                     /* IN FUTURE SETUP SUBSECTION PROPERTY */
                     /* IN FUTURE SETUP SUBSECTION STYLE */
+               
+                    /* NEW PARAGRAPH -> TO DO SET PARAGRAPH STYLE -> MARGIN -> PADDING ...*/
+                    
+                    var p=document.createElement('p');
+                        /* top margin, right margin, bottom margin, left margin */
+                        p.style.margin = "0px 0px 0px 0px";
+                        p.style.padding = "0px 0px 0px 0px";
+
                     /* LOOP OVER SUBSECTION ROW */
                     for(const propSubsection in this.stageData.section[property].subsection[i].subsectionrow){
+                        console.log('SUBSECTION ROW:');
                         console.log(propSubsection);
+                        console.log('SUBSECTION ROW FULL DATA:');
                         console.log(this.stageData.section[property].subsection[i].subsectionrow[propSubsection]);
                         /* SUBSECTION ROW DATA */
                         console.log('SUBSECTION ROW DATA');
                         console.log(this.stageData.section[property].subsection[i].subsectionrow[propSubsection].data);
-                        /* CHECK FOR BREAKLINE */
-                        this.setPreviewPageBreakLine(writePageSection,this.stageData.section[property].subsection[i].subsectionrow[propSubsection].data.valuenewline);
-                        /* SUBSECTION ROW PROPERTY */
-                        console.log('SUBSECTION ROW PROPERTY');
-                        console.log(this.stageData.section[property].subsection[i].subsectionrow[propSubsection].property);
+                       
+                        /* CHECK FOR BREAKLINE AND SET TEXT ALIGN => FOR VALUE SET VALUE NOT A REFERENCE ! */
+                        
+                        p = this.setPreviewPageBreakLine(writePageSection,p,this.stageData.section[property].subsection[i].subsectionrow[propSubsection].data.valuenewline,this.stageData.section[property].subsection[i].subsectionrow[propSubsection].style.textAlign);//
+                        
+                        
+                        /* SUBSECTION ROW PROPERTY 
+                            console.log('SUBSECTION ROW PROPERTY');
+                            console.log(this.stageData.section[property].subsection[i].subsectionrow[propSubsection].property);
+                        */
                         /* SUBSECTION ROW STYLE */
                         console.log('SUBSECTION ROW STYLE');
                         console.log(this.stageData.section[property].subsection[i].subsectionrow[propSubsection].style);
                         /* SETUP SUBSECTION ROW */
-                        writePageSection.appendChild(this.setPreviewValue(this.stageData.section[property].subsection[i].subsectionrow[propSubsection]));
+                        this.setPreviewValue(p,this.stageData.section[property].subsection[i].subsectionrow[propSubsection]);
+                        
+                       
                     /* END LOOP OVER SUBSECTION ROW */
                     }
+                    writePageSection.appendChild(p);
+                    console.log(writePageSection);
+                    
                     this.helplink.preview['write'].appendChild(writePageSection);
             /* END LOOP OVER SUBSECTION - VISIBLE */   
             }
         /* END LOOP OVER SECTION */     
         };
     }
-    setPreviewPageBreakLine(writePageSection,valueNewLine){
-        //console.log('ProjectStageCreateText::setPreviewPageBreakLine()');
-        var br=document.createElement('br');
-            if(valueNewLine==='y'){
-               //console.log('VALUE NEW LINE === y ADD BREAK LINE');
-                writePageSection.appendChild(br);
-            }
+    setPreviewPageBreakLine(writePageSection,p,valueNewLine,textAlign){
+        /* 
+            console.log('ProjectStageCreateText::setPreviewPageBreakLine()');
+            console.log('writePageSection');
+            console.log(writePageSection);
+            console.log('p');
+            console.log(p);
+            console.log('valueNewLine');
+            console.log(valueNewLine);
+            console.log('textAlign');
+            console.log(textAlign);
+        */
+        if(valueNewLine==='y'){
+            console.log('VALUE NEW LINE === y ADD NEW P');
+            //p.style.textAlign=textAlign;
+            writePageSection.appendChild(p);
+            var pNew=document.createElement('p');
+                pNew.style.margin = "0px 0px 0px 0px";
+                pNew.style.padding = "0px 0px 0px 0px";
+                pNew.style.textAlign=textAlign;
+            return pNew;
+        }
+        else{
+            p.style.textAlign=textAlign;
+        }
+        return p;    
     }
-    setPreviewValue(subsectionRow){
+    setPreviewValue(p,subsectionRow){
         console.log('ProjectStageCreateText::setPreviewValue()');
         console.log(subsectionRow);
-        var html=document.createElement('span');
-            html.style.fontSize=subsectionRow.style.fontSize+subsectionRow.style.fontSizeMeasurement;
-            html.style.fontFamily=subsectionRow.style.fontFamily;
-            html.style.color=subsectionRow.style.color;
-            html.style.backgroundColor=subsectionRow.style.backgroundColor;
-            html.style.fontWeight='normal';
+        var span=document.createElement('span');
+            span.style.fontSize=subsectionRow.style.fontSize+subsectionRow.style.fontSizeMeasurement;
+            span.style.fontFamily=subsectionRow.style.fontFamily;
+            span.style.color=subsectionRow.style.color;
+            span.style.backgroundColor=subsectionRow.style.backgroundColor;
+            span.style.fontWeight='normal';
 
-            /* TEXT ALIGN */
-            console.log(subsectionRow.style.textAlign);
-            if(subsectionRow.style.textAlign==='LEFT' || subsectionRow.style.textAlign==='RIGHT'){
-                html.style.cssFloat=subsectionRow.style.textAlign;
-            }
-            else if(subsectionRow.style.textAlign==='CENTER' || subsectionRow.style.textAlign==='JUSTIFY'){
-                html.style.textAlign=subsectionRow.style.textalign;
-                html.style.display='BLOCK';
-            }
-            else{
-                console.log('UNAVAILABLE');
-                console.log( subsectionRow.style.textAlign);                
-            }
         var text=document.createTextNode(subsectionRow.data.value);
-        if(subsectionRow.style.fontWeight==='1'){
-            html.style.fontWeight='bold';
-        }
-        if(subsectionRow.style.underline==='1' && subsectionRow.style['line-through']==='1'){
-            html.style.textDecoration='underline line-through';
-        }
-        else if(subsectionRow.style.underline==='1' && subsectionRow.style['line-through']==='0'){
-            html.style.textDecoration='underline';
-        }
-        else if(subsectionRow.style.underline==='0' && subsectionRow.style['line-through']==='1'){
-            html.style.textDecoration='line-through';
-        }
-        else {};
-        if(subsectionRow.style.fontStyle==='1'){
-            html.style.fontStyle='italic';
-        }
-        html.appendChild(text);
-        return html;
+            /* SET TEXT-DECORATION */ 
+            this.setPreviewValueTextDecoration(span,subsectionRow.style);
+            /* SET FONT-WEIGHT */ 
+            if(subsectionRow.fontWeight==='1'){
+                span.style.fontWeight='bold';
+            }
+            /* SET ITALIC */ 
+            if(subsectionRow.style.fontStyle==='1'){
+                span.style.fontStyle='italic';
+            }
+        span.appendChild(text);
+        p.appendChild(span);
     }
-    //createSection(isection,idDb){
+    setPreviewValueTextDecoration(span,style){
+        var textDecoration='';
+        if(style.underline==='1'){
+            textDecoration+='underline';
+        };
+        if(style['line-through']==='1'){
+            textDecoration+=' line-through';
+        };
+        span.style.textDecoration=textDecoration;
+    }
     createSection(iSection,section,helplink){
         console.log('ProjectStageCreateText::createSection()');
         console.log('helplink:');
@@ -496,53 +526,35 @@ class ProjectStageCreateText{
         console.log(iSection);
         console.log('stageData:');
         console.log(section);
-        //console.log('LINK:');
-        //console.log(this.link);
         
         var mainDiv=this.Html.getRow(); 
         var mainDivHeader=this.creteSectionHead(iSection); 
         var mainDivBody=this.Html.getCol(12); 
         
-            //this.link.section['section-'+iSection]={
-              //  subsectionvisible:0,
-                //ele:mainDivBody,
-               // subsection:{},
-                //db:section[iSection].data.id
-            //};
             helplink.section[iSection]={
-                main:{},
+                main:{
+                    all:{},
+                    head:{},
+                    body:{}
+                },
                 subsection:{}
             };
-            
-            
             for(const iSub in section[iSection].subsection){
                 /*
                 console.log('ProjectStageCreateText::createSection => subsection\r\ni:');
                 console.log(iSub);
                 console.log(section[iSection].subsection[iSub]);
-                */
-                /* SET SUBSECTION HELPLINK */
-                helplink.section[iSection]['subsection'][iSub]={
-                    /* FOR SHOW/HIDE */
-                    all:{},
-                    /* FOR ADD */
-                    dynamic:{},
-                    /* FOR REMOVE */
-                    row:{}
-                };
-                /* SET SUBSECTION LINK */
-                
-                //this.link.section['section-'+iSection].subsection[iSub]={};
+                */          
                 /* CREATE SUBSECTION */
-                mainDivBody.appendChild(this.createSubsection(iSection,iSub,section[iSection].subsection[iSub],helplink.section[iSection]['subsection'][iSub]));
+                mainDivBody.appendChild(this.createSubsection(iSection,iSub,section[iSection].subsection[iSub],helplink.section[iSection].subsection));
                 //console.log(mainDivBody);
             }
-             
             mainDivHeader.appendChild(this.createSectionTool(iSection,section,helplink)); 
-            
+            this.helplink.section[iSection].main.head=mainDivHeader;
+            this.helplink.section[iSection].main.body=mainDivBody;
             mainDiv.appendChild(mainDivHeader);  
             mainDiv.appendChild(mainDivBody);   
-            this.helplink.section[iSection].main=mainDiv;
+            this.helplink.section[iSection].main.all=mainDiv;
             //console.log(mainDiv);
             return mainDiv;
     }
@@ -557,13 +569,23 @@ class ProjectStageCreateText{
             mainDivHeader.appendChild(h);
         return mainDivHeader;
     }
-    createSubsection(iSection,iSub,subsection,helplink){
+    createSubsection(iSection,iSub,subsection,helplinkSubsection){
         /*
         console.log('ProjectStageCreateText::createSubsection()');
         console.log(subsection);
         console.log('helplink');
         console.log(helplink);
         */
+        /* CREATE HELPLINK SUBSECTION */
+        helplinkSubsection[iSub]={
+                    /* FOR SHOW/HIDE */
+                    all:{},
+                    /* FOR ADD */
+                    dynamic:{},
+                    /* FOR REMOVE */
+                    row:{}
+                };
+        
         var mainDiv=this.Html.getRow();
         var mainDivSubsection=this.Html.getCol(12);
         var mainDivBtn=this.Html.getCol(12);
@@ -573,14 +595,15 @@ class ProjectStageCreateText{
         for(const iR in subsection.subsectionrow){   
             console.log(subsection.subsectionrow[iR].data.valuenewline);
             
-            helplink.row[iR]={
+            helplinkSubsection[iSub].row[iR]={
+            //helplink.row[iR]={
                 all:{},
                 value:{},
                 error:{}
             };
             
             /* DYNAMIC RUN FUNCTION CREATE SUBSECTION ROW */
-            mainDivSubsection.appendChild(this[runFunction](iSection,iSub,iR,subsection.subsectionrow,helplink.row));
+            mainDivSubsection.appendChild(this[runFunction](iSection,iSub,iR,subsection.subsectionrow,helplinkSubsection[iSub].row));
             //mainDivSubsection.appendChild(this[runFunction](iSection,iSub,iR,subsection.subsectionrow[iR],helplink.row[iR]));
             /* SWAP TO EXTENDED FUNCTION */
             runFunction=runExtendedFunction;
@@ -592,9 +615,9 @@ class ProjectStageCreateText{
         console.log(iRow);
         */
         
-        helplink.dynamic=mainDivSubsection;
+        helplinkSubsection[iSub].dynamic=mainDivSubsection;
         
-        mainDivBtn.appendChild(this.createButtonRow(this.addSubsectionRow(iSection,iSub,iRow,subsection.subsectionrow,helplink)));
+        mainDivBtn.appendChild(this.createButtonRow(this.addSubsectionRow(iSection,iSub,iRow,subsection.subsectionrow,helplinkSubsection[iSub])));
                         
         mainDiv.appendChild(mainDivSubsection);
                     
@@ -602,7 +625,7 @@ class ProjectStageCreateText{
 
         /* SET SUBSECTION HELPLINK ELEMENT */
         
-        helplink.all=mainDiv;
+        helplinkSubsection[iSub].all=mainDiv;
         return mainDiv;
     }
     createSubsectionRowGroup(isection,isub,iSubRow,subsectionrow,helplink){
@@ -697,42 +720,163 @@ class ProjectStageCreateText{
             return mainDivCol;
     }
     createSectionTool(iSection,section,helplink){// isection
-        /*
+        /* */
         console.log('ProjectStageCreateText::createSectionTool()');
         console.log('section');
         console.log(section);
-        console.log('sub section min');
-        console.log(this.stageData.subsectionmin);
-        console.log('sub section max');
-        console.log(this.stageData.subsectionmax);
-        */
-        //var mainDiv=this.Html.getCol(12);
+
         var mainDivSection=this.Html.getRow();
         var tool1=this.Html.getCol(3);
         var tool2=this.Html.getCol(3);    
         var tool3=this.Html.getCol(3);
         var tool4=this.Html.getCol(3);  
-        var sectioncount=this.createTextToolSelect('section','Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',this.getSelectKey(section[iSection].subsectionvisible-1,section[iSection].subsectionvisible),this.getSectionCount(this.stageData.subsectionmin));
-        //console.log(sectioncount);
+        
        
-        //var sectioncount=this.createTextToolSelect('section'+isection,'Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',this.getSelectKey(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_DEFAULT','v'),this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_DEFAULT','v')),this.getSectionCount(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_DEFAULT','v')));
-        var ProjectStageCreateText=this;    
-            sectioncount.childNodes[1].onchange = function () { 
-                var max=parseInt(this.value,10)+1;
-                ProjectStageCreateText.manageSubsectionVisible(max,section[iSection],helplink.section[iSection]['subsection']);
-            };
-            /* FIRST RUN TO SETUP SECTION DEFAULT COUNT */
-            this.manageSubsectionVisible(section[iSection].subsectionvisible,section[iSection],helplink.section[iSection]['subsection']);
-            
-            tool1.appendChild(sectioncount);
+
+            //tool1.appendChild(sectioncount);
+            tool1.appendChild(this.setSectionSubSection(iSection,section[iSection].subsection,helplink.section[iSection].subsection));
+            //tool1.appendChild(this.setSectionSubSection(iSection,section,helplink));
             tool4.appendChild(this.createRemoveSectionButton(iSection,section,helplink.section));
-           
+            
+            //throw 'test-stop';
             //console.log( tool4);
         mainDivSection.appendChild(tool1);
         mainDivSection.appendChild(tool2);
         mainDivSection.appendChild(tool3);
         mainDivSection.appendChild(tool4);
         return mainDivSection;
+    }
+    setSectionSubSection(iSection,subsection,helplinkSubsection){
+        /*
+        console.log('ProjectStageCreateText::setSectionSubSection()');
+        console.log('subSection');
+        console.log(section[iSection].subsection);
+        console.log(subsection);
+        console.log('subSection count');
+        */
+        var subSectionCount = Object.keys(subsection).length;
+        /*
+        console.log('sub section min');
+        console.log(this.stageData.subsectionmin);
+        console.log('sub section max');
+        console.log(this.stageData.subsectionmax);
+        */
+        var subSectionEle=this.createTextToolSelect('section','Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',this.getSelectKey(subSectionCount-1,subSectionCount),this.getSectionCount(this.stageData.subsectionmin));
+        var classObject=this;    
+        var oldValue = 0;
+        var oldIndex = 0;
+            subSectionEle.childNodes[1].onfocus = function () { 
+                /*
+                console.log('ACT VALUE');
+                console.log(this.value);
+                console.log('ACT INDEX');
+                console.log(this.selectedIndex);
+                */
+                oldIndex = this.selectedIndex;
+                oldValue = this.value;
+            };
+            subSectionEle.childNodes[1].onchange = function () { 
+                    oldValue=parseInt(oldValue,10);
+                var newValue=parseInt(this.value,10);
+
+                if(oldValue<newValue){
+                    /* CREATE NEW STAGE OBJECT
+                    console.log('CREATE STAGE');
+                    console.log('iSection');
+                    console.log(iSection);
+                    console.log('subsection');
+                    console.log(subsection);
+                    console.log('helplinkSubsection');
+                    console.log(helplinkSubsection);
+                    console.log('OLD VALUE');
+                    console.log(oldValue);
+                    console.log('NEW VALUE');
+                    console.log(newValue);
+                    */
+                    for(var i = oldValue+1; i<newValue+1 ;i++ ){
+                        /* CREATE NEW STAGE OBJECT  
+                        console.log('i');
+                        console.log(i);
+                        */
+                        subsection[i]=classObject.setUpNewStageSubsectionProp();
+                        /* FIRST ALWAYS NOT NEW LINE */
+                        subsection[i].subsectionrow[0].data.valuenewline='n';
+                        /* CREATE NEW DOM ELEMENT */
+                        classObject.helplink.section[iSection].main.body.appendChild(classObject.createSubsection(iSection,i,subsection[i],helplinkSubsection));
+                    }             
+                    /*
+                    console.log('ADD STAGE DATA');
+                    console.log('IDX');
+                    console.log(this.selectedIndex);
+                    console.log('NEW VALUE');
+                    console.log(newValue);
+                    console.log('OLD VALUE');
+                    console.log(oldValue);
+                    console.log('OLD IDX');
+                    console.log(oldIndex);
+                    console.log('subsection new');
+                    console.log(subsection);
+                    console.log('subsection help new');
+                    console.log(helplinkSubsection);
+                    */
+                  return true;
+                }
+
+                if (confirm('Potwierdź zmianę ilości kolumn. Zostaną bezpowrotnie usunięte kolumny!') === true) {                   
+                    /*
+                    console.log('confirm - DELETE STAGE DATA AND HELPLINK');
+                    console.log('NEW VALUE'); 
+                    console.log(newValue);    
+                    console.log('IDX');
+                    console.log(this.selectedIndex);
+                    console.log('NEW VALUE'); 
+                    console.log(newValue);    
+                    console.log('OLD VALUE');
+                    console.log(oldValue);
+                    console.log('OLD IDX');
+                    console.log(oldIndex);
+                    */
+                    for(var i = Object.keys(subsection).length-1; i>newValue ;i-- ){
+                        /*
+                        console.log('i');
+                        console.log(i);
+                        console.log('proeprty');
+                        console.log(subsection[i]);
+                        console.log(helplinkSubsection[i].all);
+                        */
+                        delete subsection[i];
+                        helplinkSubsection[i].all.remove();
+                        delete helplinkSubsection[i];
+                        //classObject.helplink.section[iSection].main.body.appendChild(classObject.createSubsection(iSection,i,subsection[i],helplinkSubsection));
+                       // classObject.helplink.section[iSection].main.body.appendChild(classObject.createSubsection(iSection,i,subsection[i],helplinkSubsection));
+                    }
+                    /*
+                    console.log('subsection new');
+                    console.log(subsection);
+                    console.log('subsection help new');
+                    console.log(helplinkSubsection);
+                     */
+                    return true;
+                    /* DELETE STAGE AND HELPLINK */
+
+                }
+                else{
+                    /*
+                    console.log('NO confirm - NO DELETE STAGE DATA AND NO DELETE HELPLINK');
+                    console.log('IDX');
+                    console.log(this.selectedIndex);
+                    console.log('NEW VALUE'); 
+                    console.log(newValue);    
+                    console.log('OLD VALUE');
+                    console.log(oldValue);
+                    console.log('OLD IDX');
+                    console.log(oldIndex);
+                    */
+                    this.selectedIndex = oldIndex;
+                    this.value = oldValue;
+                }                
+            };
+        return subSectionEle;
     }
     createTextError(helplink){
         //console.log('ProjectStageCreateText::createTextError()');
@@ -782,8 +926,7 @@ class ProjectStageCreateText{
         /* SET CSS BOLD, ITALIC ... */
         
         this.createTextDecorationTool(tool4,isection,isub,isubrow,subsectionrow['style'],helplink.value); 
-        
-        //console.log(this.link);
+
         mainDiv.appendChild(tool1);
         mainDiv.appendChild(tool2);
         mainDiv.appendChild(tool3);
@@ -793,7 +936,7 @@ class ProjectStageCreateText{
         //return mainDiv;
     }
       createTextDecorationTool(tool4,isection,isub,isubrow,subsectionRowStyle,helplinkValue){
-        console.log('ProjectStageCreateText::createTextDecorationTool()');
+        //console.log('ProjectStageCreateText::createTextDecorationTool()');
         for(const prop of this.Glossary.getKey('decoration').entries()) {
             this.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow,subsectionRowStyle,helplinkValue);  
         } 
@@ -889,8 +1032,6 @@ class ProjectStageCreateText{
         var tool2=this.Html.getCol(5);
         var tool3=this.Html.getCol(2);
         var radio = this.createTextToolRadioButton('valuenewline-'+isection+'-'+isub+'-'+isubrow,'Tekst od nowej lini?',this.getYesNowRadio());//'valuenewline-'+isection+'-'+isub+'-'+isubrow
-       
-        //this.changeRadioButtonValue(radio.childNodes[1],subsectionrow,this.link.section['section-'+isection]['subsection'][isub][isubrow]);
         this.changeRadioButtonValue(radio.childNodes[1],subsectionrow);
         tool1.appendChild(radio);
         
@@ -986,7 +1127,7 @@ class ProjectStageCreateText{
             div.appendChild(select2);
             divMain.appendChild(label);
             divMain.appendChild(div);
-            console.log(div);
+            //console.log(div);
             //throw  'test-stop';
         return divMain;
     }
@@ -1038,9 +1179,11 @@ class ProjectStageCreateText{
         return select;
     }
     valueFontSizeModification(title,subsectionRowStyle,helplinkValue){
+        /*
         console.log('ProjectStageCreateText::valueFontSizeModification()');
         console.log(subsectionRowStyle);
         console.log(this.Glossary);
+        */
         var idFont = 'fontSize';
         var idMeasurement = 'fontSizeMeasurement';
         
@@ -1052,20 +1195,24 @@ class ProjectStageCreateText{
         
         var doubleSelect = this.createTextToolDoubleSelect(idFont,title,actFont,allFont,idMeasurement,actMeasurement,allMeasurement);
         //var classObject=this; 
-        console.log(doubleSelect);
+        //console.log(doubleSelect);
         doubleSelect.childNodes[1].childNodes[0].onchange = function(){
+            /*
             console.log(this);
             console.log('select 1');
-             console.log(this.value);
+            console.log(this.value);
+             */
             /* SET NEW VALUE */
             subsectionRowStyle[idFont]=this.value;
             /* SET NEW VALUE ELEMENT STYLE */
             helplinkValue.style[idFont]=this.value+subsectionRowStyle[idMeasurement];
         };
         doubleSelect.childNodes[1].childNodes[1].onchange = function(){
+            /*
             console.log(this);
             console.log('select 2');
             console.log(this.value);
+            */
             /* SET NEW VALUE */
             subsectionRowStyle[idMeasurement]=this.value;
             /* SET NEW VALUE ELEMENT STYLE */
@@ -1412,7 +1559,7 @@ class ProjectStageCreateText{
             div.onclick=function(){
                 if (confirm('Potwierdź usunięcie sekcji') === true) {
                     //console.log(helplink);
-                    helplink[iSection].main.remove();
+                    helplink[iSection].main.all.remove();
                     delete helplink[iSection];
                     delete section[iSection];
                     
@@ -1527,9 +1674,8 @@ class ProjectStageCreateText{
         var confirm=document.createElement('button');
             confirm.setAttribute('class','btn btn-info');
             confirm.innerText=btnLabel;
-            this.setSendDataAction(confirm);
-            /* SET SEND DATA */
-            
+            /* SET AND SEND DATA */
+            this.setSendDataAction(confirm);    
         /*
          * BUTTONS
          */
@@ -1582,151 +1728,6 @@ class ProjectStageCreateText{
             classObject.Html.showField(classObject.helplink.preview.whole);
         };
     }
-    setSendDataAction(ele){
-        var classObject=this; 
-        ele.onclick = function (){
-            var fd = new FormData();
-            fd.append('stage',classObject.setInputData());
-            classObject.checkInputData(fd);
-            classObject.sendInputData(fd);
-        };
-    }
-    checkInputData(fd){
-        
-    }
-    setInputData(){
-        return true;
-        
-        /*
-         * CHANGE TO stageData !!
-         */
-        
-            console.log('ProjectStageCreateText::setInputData()');
-            //console.log('LINK:');
-            //console.log(this.link);
-            console.log('HELPLINK:');
-            console.log(this.helplink);
-        var data={
-            db:'0',
-            sec:{},
-            title:this.helplink['title'].value,
-            department:this.helplink['department'].value
-            //department:this.link['department']
-        };
-        for(const property in this.link.section){
-            console.log('SECTION - '+property);
-            console.log(this.link.section[property]);
-            console.log(this.helplink.section[property]);
-            data.sec[property]={
-                //count:this.link.section[property].subsectionvisible,
-                db:this.link.section[property].db,
-                sub:{}        
-                //subsectionvisible:this.link.section[property].subsectionvisible
-            };
-            
-            /* LOOP OVER SUBSECTION */   
-            for(var i=0;i<this.link.section[property].subsectionvisible;i++){
-                console.log('SUBSECTION - '+i);
-                console.log(this.link.section[property].subsection[i]);    
-                data.sec[property].sub[i]={
-                    db:'0',
-                    row:{}
-                };
-                 /* LOOP OVER SUBSECTION ROW */
-                for(const propSubsectionRow in this.link.section[property].subsection[i]){
-                    console.log('SUBSECTION ROW - '+propSubsectionRow);
-                    console.log(this.link.section[property].subsection[i][propSubsectionRow]);
-                    data.sec[property].sub[i].row[propSubsectionRow]={
-                        style:{},
-                        property:{},
-                        newline:'',
-                        value:'',
-                        db:'0'
-                    };
-                    data.sec[property].sub[i].row[propSubsectionRow]['property']=this.setInputDataParseProperty(this.link.section[property].subsection[i][propSubsectionRow].property);              
-                    
-                    data.sec[property].sub[i].row[propSubsectionRow]['style']=this.link.section[property].subsection[i][propSubsectionRow].style;
-                    
-                    data.sec[property].sub[i].row[propSubsectionRow].value=this.link.section[property].subsection[i][propSubsectionRow].valueEle.value;
-                    
-                    data.sec[property].sub[i].row[propSubsectionRow].newline=this.link.section[property].subsection[i][propSubsectionRow].valuenewline;
-                    data.sec[property].sub[i].row[propSubsectionRow].db=this.link.section[property].subsection[i][propSubsectionRow].db;
-                }
-            }
-        }
-        console.log(data);
-        return JSON.stringify(data);
-    }
-      setInputDataParseProperty(property){
-        var newProp={};
-        for(const p in property){
-            
-            if(p!=='valueEle'){
-                newProp[p]=property[p]; 
-            }
-            //if(p==='valueEle'){
-                /* FIX AND SET VALUE => ELE VALUE */
-               //data.section[property].subsection[i].subsectionrow[propSubsectionRow]['property']['value']=this.link.section[property].subsection[i][propSubsectionRow].property.valueEle.value; 
-               newProp['value']=property[p].value;
-            //}
-        }
-        return newProp;
-    }
-    sendInputData(fd){
-        console.log('ProjectStageCreateText::sendInputData()');
-        console.log(fd);
-        if(this.errorStatus){
-            console.log(this.errorStatus);
-            console.log('ERROR EXIST NO SEND DATA');
-            return false;
-        }
-        //Xhr.loadNotify=Modal.link['extra'];
-        console.log(this.Items.appurl);
-        this.Modal.showLoad();
-        var xhrRun={
-                    t:'POST',
-                    u:this.Items.router+'confirmProjectStageText',
-                    //u:'asdasd',
-                    /* FOR POST SET TRUE */
-                    c:true,
-                    d:fd,
-                    o:this.Items,
-                    m:'setModalResponse'
-                };
-        var xhrError={
-            o:this.Items,
-            m:'setModalError'
-        };
-        /* SET XHR ON ERROR */
-        this.Xhr.setOnError(xhrError);
-        this.Xhr.run(xhrRun);      
-    }
-    manageSubsectionVisible(act,section,helplink){    
-        /*
-        console.log('ProjectStageCreateText::manageSubsectionVisible()');
-        console.log('act');
-        console.log(act);
-        console.log('section');
-        console.log(section);
-        console.log('helplink');
-        console.log(helplink);
-        */
-        /* PARSE TO INT */
-        var max=parseInt(act,10);
-        
-        for(var i=0;i<this.stageData.subsectionmax;i++){
-            /* REMOVE NAME => JS FORM DATA APPEND INPUT ONLY WITH NAME */
-            helplink[i].all.classList.remove('d-line');
-            helplink[i].all.classList.add('d-none');
-        } 
-        for(var i=0;i<max;i++){
-             /* ADD NAME => JS FORM DATA APPEND INPUT ONLY WITH NAME */
-            helplink[i].all.classList.remove('d-none');
-            helplink[i].all.classList.add('d-line');
-        }      
-        /* UPDATE SUBSECTION VISIBLE + ADD ONE FOR LOOP */
-        section.subsectionvisible=max;
-    }
     setUpCreateData(response){
         //console.log('ProjectStageCreateText::setUpCreateData()');
         var data = this.Items.parseResponse(response);
@@ -1763,7 +1764,7 @@ class ProjectStageCreateText{
                 },
                 section:{},
                 sectionmax:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SECTION_MAX','v'),
-                subsectionmin:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MIN','v'),
+                subsectionmin:3,//this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MIN','v'),
                 subsectionmax:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MAX','v'),
                 subsectionrowmax:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_ROW_MAX','v')
         };
@@ -1783,9 +1784,9 @@ class ProjectStageCreateText{
                 },
                 style:{},
                 property:{},
-                subsection:{},
+                subsection:{}
                 /* AFTER UPLOAD DATA FORM DB -> RECALCULATE DEPENDS OF DATA COUNT */
-                subsectionvisible:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MIN','v')
+                //,subsectionvisible:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MIN','v')
                 
             };
             /* CREATE EMPTY STAGE SUBSECTION - COLUMN  */
@@ -1795,26 +1796,26 @@ class ProjectStageCreateText{
     setUpNewStageSubsection(){
         //console.log('ProjectStageCreateText::setUpNewStageSubsection()');
         var subsection = {};
-        for(var i=0;i<this.stageData.subsectionmax;i++){
-            
-            subsection[i]={
+        for(var i=0;i<3;i++){
+        //for(var i=0;i<this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MIN','v');i++){
+        //for(var i=0;i<this.stageData.subsectionmax;i++){   
+            subsection[i]=this.setUpNewStageSubsectionProp();
+            /* FIRST ALWAYS NOT NEW LINE */
+            subsection[i].subsectionrow[0].data.valuenewline='n';
+        };
+        return subsection;
+    }
+    setUpNewStageSubsectionProp(){
+        var sub = {
                 data:{
                     id:0
                 },
                 style:{},
                 property:{},
-                subsectionrow:{
-                    0:{}
-                }
-               
+                subsectionrow:{}
             };
-            subsection[i].subsectionrow[0]=this.setUpNewStageSubsectionRow();
-            /* FIRST ALWAYS NOT NEW LINE */
-            subsection[i].subsectionrow[0].data.valuenewline='n';
-            //subsection[i].subsectionrow[1]=this.setUpNewStageSubsectionRow();
-            //subsection[i].subsectionrow[2]=this.setUpNewStageSubsectionRow();
-        };
-        return subsection;
+            sub.subsectionrow[0]=this.setUpNewStageSubsectionRow();
+        return sub;
     }
     setUpNewStageSubsectionRow(){
         var row = {
@@ -1865,6 +1866,43 @@ class ProjectStageCreateText{
             default:
                 return 'n';
         }
+    }
+    setSendDataAction(ele){
+        var classObject=this; 
+        ele.onclick = function (){
+            var fd = new FormData();
+            var data = classObject.stageData;
+            fd.append('stage',JSON.stringify(data));
+            classObject.checkInputData(data);
+            classObject.sendInputData(fd);
+        };
+    }
+    /* 
+     * SEND INPUT DATA TO SEND 
+     */
+    sendInputData(fd){
+        console.log('ProjectStageCreateText::sendInputData()');
+        console.log(fd);
+        if(this.errorStatus){
+            console.log(this.errorStatus);
+            console.log('ERROR EXIST NO SEND DATA');
+            return false;
+        }
+        var xhrRun={
+                t:'POST',
+                u:this.Items.router+'confirmProjectStageText',
+                //u:'asdasd',
+                /* FOR POST SET TRUE */
+                c:true,
+                d:fd,
+                o:this.Items,
+                m:'setModalResponse'
+            };
+        this.Xhr.run(xhrRun);      
+    }
+    checkInputData(data){
+        console.log('ProjectStageCreateText::checkInputData()');
+        console.log(data); 
     }
 }
             

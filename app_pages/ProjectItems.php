@@ -28,6 +28,7 @@ final class ProjectItems extends Page{
         'Main/Table.js',
         'Main/Glossary.js',
         'Main/headerView.js',
+        'Page/ProjectStageProperty.js',
         'Page/ProjectStageCreateText.js',
         'Page/ProjectStageCreateTable.js',
         'Page/ProjectStageCreateImage.js',

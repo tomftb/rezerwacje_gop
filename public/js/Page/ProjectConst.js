@@ -9,7 +9,7 @@ class ProjectConst{
         console.log('ProjectConst::constructor()');
         this.Items = Items;
         this.ConstTable = new ProjectConstTable(this);  
-        this.ConstTable.setProperties(Items.appurl,Items.router);
+        this.ConstTable.setProperties(Items.appurl,Items.router,this.defaultTask);
         this.ConstCreate = new ProjectConstCreate(this);
     }
     show(){

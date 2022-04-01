@@ -19,7 +19,10 @@ class ProjectStageCreateText{
     stageData={};
     fieldDisabled=false;
     ErrorStack={};
-    
+    Property={};
+    Department={};
+       // subsectionRowNewLine:'n'
+    //};
     constructor(Stage){
         console.log('ProjectStageCreateText::constructor()');
         /*
@@ -33,35 +36,32 @@ class ProjectStageCreateText{
         this.XhrTable=Stage.Items.Xhr;
         this.Glossary=Stage.Items.Glossary['text'];
     }
-    getData(u,m){
-        console.log('ProjectStageCreateText::prepare()');
-        var xhrParm={
-            t:"GET",
-            u:this.Items.router+u,
-            c:true,
-            d:null,
-            o:this,
-            m:m
-        };
-        this.XhrTable.run(xhrParm);
+    getXhrParm(type,task,method){
+        return {
+                t:type,
+                u:this.Items.router+task,
+                c:true,
+                d:null,
+                o:this,
+                m:method
+            };
     }
     create(){
         console.log('ProjectStageCreateText::create()');
-        /*
-        console.log(this.Glossary.item);
-        console.log(Object.keys(this.Glossary.item).length);
-        console.log(this.Glossary.filled);
-        */
-        if(this.Glossary.filled){
-            /* CREATE FAKE RESPONSE OBJECT */
-            this.iSectionField=1;
-            this.setUpNewStageObject(); 
-            /* SETUP MODAL */
-            this.setUpModal();
-        }
-        else{
-            this.getData('getNewStageDefaults&type=tx','setUpCreateData');    
-        }
+        try{
+            this.Property=this.Stage.Property.text;
+            this.Department=this.Stage.Property.department;
+            this.iSectionField=1; 
+            /* SETUP CLEAR STAGE DATA */
+            this.setUpNewStageObject();
+        } 
+        catch(err){
+            console.log('ProjectStageCreateText::create()\r\nERROR:');
+            console.log(err);
+            throw 'An Application Error Has Occurred!';
+        };
+        /* SETUP MODAL */
+        this.setUpModal();
     }
     setUpModal(){
         console.log('ProjectStageCreateText::setUpModal()');
@@ -106,10 +106,8 @@ class ProjectStageCreateText{
         try{
             console.log('ProjectStageCreateText::details()\r\nRESPONSE:');
             var data =this.Items.parseResponse(response);     
-            this.helplink={
-                dynamic:{},
-                dynamicSection:{}
-            };
+            /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
+            this.helplink=this.getEmptyHelpLink();
             console.log(data);
             //console.log(data.data.value);
             //console.log(this.data['data']['value']['const']);
@@ -123,7 +121,8 @@ class ProjectStageCreateText{
             this.fieldDisabled=true;
             
             this.setUpStage(data.data.value);
-            
+            console.log(this.stageData);
+            //throw 'test-stop-aaa';
             this.Items.setCloseModal(this.Stage,'show',this.Stage.defaultTask+this.stageData.data.id);
                    
             /* CREATE FORM */
@@ -178,17 +177,7 @@ class ProjectStageCreateText{
     block(){
         try{
             console.log('ProjectStageCreateText::block()');
-            /* SEND BLOCK */
-            var xhrParm={
-                t:"GET",
-                u:this.Items.router+'blockConst&id='+this.data['data']['value']['const'].i,
-                /* FOR POST SET TRUE */
-                c:true,
-                d:null,
-                o:this,
-                m:'edit'
-            };
-            this.Xhr.run(xhrParm);
+            this.Xhr.run(this.getXhrParm('GET','blockConst&id='+this.data['data']['value']['const'].i,'edit'));
         }
         catch(error){
             console.log('ProjectConstCreate::block()');
@@ -202,7 +191,7 @@ class ProjectStageCreateText{
     }
     getEmptyHelpLink(){
         //console.log('ProjectStageCreateText::getEmptyHelpLink()');
-        var link={
+        return {
             preview:{
                 whole:{}
             },
@@ -211,7 +200,6 @@ class ProjectStageCreateText{
             section:{},
             title:{}
         };
-        return link;
     }
     createPreview(){
         //console.log('ProjectStageCreateText::createPreview()');
@@ -227,23 +215,25 @@ class ProjectStageCreateText{
         //console.log(this.data.data.value);
         //console.log(reponse.data.value.stage.title);
         //console.log(reponse.data.value.stage.department);
-
+        var stageData = this.stageData;
         var titleDiv=this.Html.getRow();
-
-            this.helplink['titleDiv']=titleDiv;
-        
+            //this.helplink['titleDiv']=titleDiv;
         var titleLabelDiv=this.Html.getCol(1);
         var titleInputDiv=this.Html.getCol(11);
-        
-            titleLabelDiv.appendChild(this.createLabel('h3','Tytuł'));
+            titleLabelDiv.appendChild(this.createLabel('h3','Tytuł:'));
         var input=this.Html.getInput('title',this.stageData.data.title,'text');   
-        //var input=this.Html.getInput('title',this.data.data.value.stage.title,'text');
+            input.oninput = function(){
+                stageData.data.title=this.value;
+            };
+            input.onblur = function(){
+                console.log('check data title');
+            };
             input.classList.add('form-control');
             input.setAttribute('placeholder','Enter title');
             input.setAttribute('aria-describedby',"titleHelp" );
             titleInputDiv.appendChild(input);
         
-        this.helplink['title']=input;
+            //this.helplink['title']=input;
         var helpValue=document.createTextNode('Staraj sie wprowadzić jednoznaczy tytuł.Należy wprowadzić minimalnie 1 znak, a maksymalnie 1024 znaki.');     
          
         var help=document.createElement('small');
@@ -256,37 +246,27 @@ class ProjectStageCreateText{
         titleDiv.appendChild(titleInputDiv);
 
         ele.appendChild(titleDiv);
-        ele.appendChild(this.createHeadDepartment(this.stageData.data));
+        ele.appendChild(this.createHeadDepartment(stageData.data));
         //ele.appendChild(this.createHeadDepartment(this.data.data.value.stage.department));
     }
     createHeadDepartment(data){
-        //console.log('ProjectStageCreateText::createHeadDepartment()');
-        //console.log(data);
-        var departmentData={
-            0:{
-                n:data.name,
-                v:data.id_department
-            }
-        };
+        console.log('ProjectStageCreateText::createHeadDepartment()');        
         var departmentDiv=this.Html.getRow();
         var departmentLabelDiv=this.Html.getCol(1);
         var departmentInputDiv=this.Html.getCol(11);
             departmentLabelDiv.appendChild(this.createLabel('h3','Dział:'));
-        var department=this.createSelect('department','department');
+        var department=this.createSelect('department','department','w-100');
             department.setAttribute('aria-describedby',"departmentHelp" );
-            
-            /* TO DO => DEFAULT OD EDIT*/
-            if(departmentData[0].n!==''){
-                department.appendChild(this.createSelectOption('Aktualny:',departmentData));  
-            }
-            
-            //console.log(this.Glossary);
-            department.appendChild(this.createSelectOption('Dostępne:',this.Glossary.item.department)); 
-            this.helplink['department']=department;
-        /* TO DO -> DEFAULT / EDIT */  
-       
+            department.appendChild(this.createSelectOption('Aktualny:',this.Department.defaultDepartment));  
+            department.appendChild(this.createSelectOption('Dostępne:',this.Department.avaDepartmentList)); 
+        var departmentListNames = this.Department.departmentListNames; 
+            department.onchange = function () {              
+                data.departmentId = this.value;
+                data.departmentName = departmentListNames[this.selectedIndex];  
+                console.log(data);
+            };
+        this.helplink['department']=department;
         var departmentHelpValue=document.createTextNode('Wskaż dział.');     
-         
         var departmentHelp=document.createElement('small');
             departmentHelp.setAttribute('id','departmentHelp');
             departmentHelp.classList.add('form-text','text-muted');
@@ -338,7 +318,7 @@ class ProjectStageCreateText{
         return mainDiv;
     }
     setPreviewData(){
-        //console.log('ProjectStageCreateText::setPreviewData()');
+        console.log('ProjectStageCreateText::setPreviewData()');
         this.setPreviewPage();
         this.setPreviewPageValue();
     }
@@ -379,18 +359,22 @@ class ProjectStageCreateText{
         console.log('helplink');
         console.log(this.helplink);
         */
+        //throw 'test--stop';;
         var writePageSectionWidth=607;
-        
+        var subsectionCount=0;
         /* LOOP OVER  SECTION */   
         for(const property in this.stageData.section){
-            /* SECTION 
+            /* SECTION */
                 console.log('SECTION');
                 console.log(property);
                 console.log('SECTION '+property+' DATA');
-             console.log(this.stageData.section[property]);
-            */
+                console.log(this.stageData.section[property]);
+                console.log('SECTION '+property+' DATA SUBSECTION LENGTH');
+                subsectionCount=Object.keys(this.stageData.section[property].subsection).length;
+                console.log(subsectionCount);
+            
             /* CHECK AND SETUP COLUMNS NUMBER */
-            writePageSectionWidth=Math.floor(607/this.stageData.section[property].subsectionvisible); /* minus padding left 92px */
+            writePageSectionWidth=Math.floor(607/subsectionCount); /* minus padding left 92px */
             /*
                 console.log('SECTION '+property+' DATA subsectionvisible');
                 console.log(this.stageData.section[property].subsectionvisible);
@@ -399,7 +383,8 @@ class ProjectStageCreateText{
             //console.log(this.stageData.section[property].subsection);
             
              /* LOOP OVER SUBSECTION - VISIBLE */   
-            for(var i=0;i<this.stageData.section[property].subsectionvisible;i++){
+            for(var i=0;i<subsectionCount;i++){
+            //for(var i=0;i<this.stageData.section[property].subsectionvisible;i++){
                 /* SUBSECTION  
                     console.log('SECTION '+property+' DATA subsection '+i);
                     console.log(this.stageData.section[property].subsection[i]);
@@ -457,19 +442,19 @@ class ProjectStageCreateText{
         /* END LOOP OVER SECTION */     
         };
     }
-    setPreviewPageBreakLine(writePageSection,p,valueNewLine,textAlign){
+    setPreviewPageBreakLine(writePageSection,p,valuenewline,textAlign){
         /* 
             console.log('ProjectStageCreateText::setPreviewPageBreakLine()');
             console.log('writePageSection');
             console.log(writePageSection);
             console.log('p');
             console.log(p);
-            console.log('valueNewLine');
-            console.log(valueNewLine);
+            console.log('valuenewline');
+            console.log(valuenewline);
             console.log('textAlign');
             console.log(textAlign);
         */
-        if(valueNewLine==='y'){
+        if(valuenewline==='y'){
             console.log('VALUE NEW LINE === y ADD NEW P');
             //p.style.textAlign=textAlign;
             writePageSection.appendChild(p);
@@ -532,11 +517,7 @@ class ProjectStageCreateText{
         var mainDivBody=this.Html.getCol(12); 
         
             helplink.section[iSection]={
-                main:{
-                    all:{},
-                    head:{},
-                    body:{}
-                },
+                main:this.getHelpLinkSectionMain(),
                 subsection:{}
             };
             for(const iSub in section[iSection].subsection){
@@ -577,14 +558,7 @@ class ProjectStageCreateText{
         console.log(helplink);
         */
         /* CREATE HELPLINK SUBSECTION */
-        helplinkSubsection[iSub]={
-                    /* FOR SHOW/HIDE */
-                    all:{},
-                    /* FOR ADD */
-                    dynamic:{},
-                    /* FOR REMOVE */
-                    row:{}
-                };
+        helplinkSubsection[iSub]=this.getHelpLinkSubsection();
         
         var mainDiv=this.Html.getRow();
         var mainDivSubsection=this.Html.getCol(12);
@@ -593,15 +567,10 @@ class ProjectStageCreateText{
         var runFunction='createSubsectionRowGroup';
         var runExtendedFunction='createExtendedSubsectionRow';
         for(const iR in subsection.subsectionrow){   
-            console.log(subsection.subsectionrow[iR].data.valuenewline);
-            
-            helplinkSubsection[iSub].row[iR]={
-            //helplink.row[iR]={
-                all:{},
-                value:{},
-                error:{}
-            };
-            
+            /* VALUE NEW LINE */
+            //console.log(subsection.subsectionrow[iR].data.valuenewline);
+            /* SET NEW HELPLINK SUBSECTION ROW */
+            helplinkSubsection[iSub].row[iR]=this.getHelpLinkSubsectionRow();
             /* DYNAMIC RUN FUNCTION CREATE SUBSECTION ROW */
             mainDivSubsection.appendChild(this[runFunction](iSection,iSub,iR,subsection.subsectionrow,helplinkSubsection[iSub].row));
             //mainDivSubsection.appendChild(this[runFunction](iSection,iSub,iR,subsection.subsectionrow[iR],helplink.row[iR]));
@@ -627,6 +596,30 @@ class ProjectStageCreateText{
         
         helplinkSubsection[iSub].all=mainDiv;
         return mainDiv;
+    }
+    getHelpLinkSubsectionRow(){
+        return {
+            all:{},
+            value:{},
+            error:{}
+        };
+    }
+    getHelpLinkSubsection(){
+       return {
+            /* FOR SHOW/HIDE */
+            all:{},
+            /* FOR ADD */
+            dynamic:{},
+            /* FOR REMOVE */
+            row:{}
+        };
+    }
+    getHelpLinkSectionMain(){
+        return {
+                all:{},
+                head:{},
+                body:{}
+        };
     }
     createSubsectionRowGroup(isection,isub,iSubRow,subsectionrow,helplink){
         console.log('ProjectStageCreateText::createSubsectionRowGroup()');
@@ -761,7 +754,7 @@ class ProjectStageCreateText{
         console.log('sub section max');
         console.log(this.stageData.subsectionmax);
         */
-        var subSectionEle=this.createTextToolSelect('section','Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',this.getSelectKey(subSectionCount-1,subSectionCount),this.getSectionCount(this.stageData.subsectionmin));
+        var subSectionEle=this.createTextToolSelect('section','Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',this.getSelectKey(subSectionCount-1,subSectionCount),this.getSectionCount(this.Property.subsectionMin));
         var classObject=this;    
         var oldValue = 0;
         var oldIndex = 0;
@@ -1023,7 +1016,7 @@ class ProjectStageCreateText{
         console.log(subsectionrow);
         console.log('helplink:');
         console.log(helplink);
-        console.log('SUBSECTIONROW DATA VALUENEWLINE:');
+        console.log('SUBSECTIONROW DATA valuenewline:');
         console.log(subsectionrow.data.valuenewline);
         */
         var mainDivCol=this.Html.getCol(12);
@@ -1127,8 +1120,6 @@ class ProjectStageCreateText{
             div.appendChild(select2);
             divMain.appendChild(label);
             divMain.appendChild(div);
-            //console.log(div);
-            //throw  'test-stop';
         return divMain;
     }
       createTextToolSelect(id,title,actdata,alldata){
@@ -1325,7 +1316,7 @@ class ProjectStageCreateText{
     }
     getYesNowRadio(){
     //getYesNowRadio(id){
-        const value={
+        return {
             'y':{
                 check:'no-checked',
                 //id:id+'-y',
@@ -1341,7 +1332,6 @@ class ProjectStageCreateText{
                 fontcolor:'text-danger'
             }
         };
-        return value;
     }
     getSelectKey(value,title){
         var selectKey={};
@@ -1354,14 +1344,13 @@ class ProjectStageCreateText{
         return selectKey;
     }
     getSelectKeyProperties(value,title){
-        var selectKeyProp={
+        return {
                 v:value,
                 n:title,
                 color:'#000000',
                 backgroundcolor:'#FFFFFF',
                 fontFamily:''
             };
-        return selectKeyProp;
     }
       getExtendedSelectKeyProperties(value,title,color,backgroundcolor,fontFamily){
         var selectKeyProp=this.getSelectKeyProperties(value,title);
@@ -1392,11 +1381,11 @@ class ProjectStageCreateText{
         var defaultValue=this.getExtendedSelectKey(value,title,value);
         return defaultValue;
     }
-      getSectionCount(exception){
+    getSectionCount(exception){
         exception=parseInt(exception,10);
         var value={};
         var j=1;
-        for(var i=0;i<this.stageData.subsectionmax;i++){
+        for(var i=0;i<this.Property.subsectionMax;i++){
             if(exception!==j){
                 value[i]=this.getSelectKeyProperties(i,j);
             }
@@ -1619,27 +1608,23 @@ class ProjectStageCreateText{
             div.setAttribute('class','btn btn-success btn-add float-left');
             div.appendChild(i);
         /* SET CLASS OBJECT */
-        var ProjectStageCreateText=this;
+        var classObject=this;
             div.onclick=function(){       
                 console.log('ProjectStageCreateText::addSubsectionRow() click');
                 console.log('iRow');
                 console.log(iRow);
                 /* ADD NEW stageData subsectionrow object */
-                subsectionrow[iRow]=ProjectStageCreateText.setUpNewStageSubsectionRow();
+                subsectionrow[iRow]=classObject.setUpNewStageSubsectionRowProp(classObject.Property.subsectionRowNewLine);
                 console.log('subsectionrow');
                 console.log(subsectionrow);
                 console.log('helplink');
-                console.log(ProjectStageCreateText.helplink);
+                console.log(classObject.helplink);
                 
-                helplink.row[iRow]={
-                    all:{},
-                    value:{},
-                    error:{}
-                };
+                helplink.row[iRow]=classObject.getHelpLinkSubsectionRow();
                 
                 //ProjectStageCreateText.helplink.section['section-'+isection]['subsection'][isubsection].dynamic.appendChild(ProjectStageCreateText.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow[iRow]));
                 //helplink.dynamic.appendChild(ProjectStageCreateText.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow[iRow],helplink.row[iRow]));
-                helplink.dynamic.appendChild(ProjectStageCreateText.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow,helplink.row));
+                helplink.dynamic.appendChild(classObject.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow,helplink.row));
                 //helplink.dynamic.appendChild(ProjectStageCreateText.createExtendedSubsectionRow(iRow,subsectionrow,helplink.row));
                 /* INCREMENT SUBSECTION ROW */
                 iRow++;
@@ -1657,7 +1642,7 @@ class ProjectStageCreateText{
                  * CHECK IS THERE ANY ROW -> IF NO -> SWAP TO createSimleRow()
                  */
                 /* SETUP NEW SECTION in stageData */
-                classObject.stageData.section[iSection]=classObject.setUpNewStageSection();
+                classObject.stageData.section[iSection]=classObject.setUpNewStageSectionProp();
                 
                 classObject.helplink['dynamicSection'].appendChild(classObject.createSection(iSection,classObject.stageData.section,classObject.helplink));
                 
@@ -1684,16 +1669,12 @@ class ProjectStageCreateText{
         this.Modal.link['button'].appendChild(preview);
         this.Modal.link['button'].appendChild(confirm);
     }
-    swapPreviewButton(ele)
-    {
+    swapPreviewButton(ele){
         /*
         console.log('ProjectStageCreateText::swapPreviewButton()');
         console.log(ele.childNodes[0].textContent);
         console.log(ele.childNodes[0]);
         */
-        /*
-         * data,nodeValue.textContent,wholeText
-         */
         /* CHANGE BUTTON LABEL/FUNCTION */
         if(ele.childNodes[0].textContent==='Podgląd'){
             //ele.childNodes[0].textContent='Edytuj';
@@ -1728,18 +1709,6 @@ class ProjectStageCreateText{
             classObject.Html.showField(classObject.helplink.preview.whole);
         };
     }
-    setUpCreateData(response){
-        //console.log('ProjectStageCreateText::setUpCreateData()');
-        var data = this.Items.parseResponse(response);
-        //console.log('RESPONSE:');
-        //console.log(data);
-        /* SET GLOSARY ITEMS */
-        this.Glossary.fill(data.data.value.glossary);
-        this.iSectionField=1;
-        this.setUpNewStageObject(); 
-        /* SET UP MODAL */
-        this.setUpModal();
-    }
     setUpNewStageObject(){
         //console.log('ProjectStageCreateText::setUpNewStageObject()');
         /* CREATE EMPTY STAGE OBJECT */
@@ -1747,82 +1716,77 @@ class ProjectStageCreateText{
                data:{
                     title:'',
                     id:0,
-                    id_department:0,
+                    /* SET PROPER AS IN SQL */
+                    departmentId:this.Department.defaultDepartment[0].v,
                     /* name -> department name */
-                    name:'',
+                    /* SET PROPER AS IN SQL */
+                    departmentName:this.Department.defaultDepartment[0].n,
                     /* SET SQL new_page to valuenewline */
                     valuenewline:this.getValueChar(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_PAGE_FROM_NEW','v'))
                },
-               property:{
-                   
-               },
+               property:{},
                style:{
                    backgroundColor:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
                    backgroundColorName:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
                    backgroundImage:''
                    //,newPage:1
                 },
-                section:{},
-                sectionmax:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SECTION_MAX','v'),
-                subsectionmin:3,//this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MIN','v'),
-                subsectionmax:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MAX','v'),
-                subsectionrowmax:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_ROW_MAX','v')
+                section:this.setUpNewStageSection()
         };
-        for(var i=0;i<this.iSectionField;i++){
-             /* CREATE EMPTY STAGE SECTION - ROW */
-            this.stageData.section[i]=this.setUpNewStageSection();  
-        }
-        /*
-         * console.log('stageData:');
-         * console.log(this.stageData);
-         */
     }
     setUpNewStageSection(){
-        var section = {
-                data:{
-                    id:0
-                },
-                style:{},
-                property:{},
-                subsection:{}
-                /* AFTER UPLOAD DATA FORM DB -> RECALCULATE DEPENDS OF DATA COUNT */
-                //,subsectionvisible:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MIN','v')
-                
-            };
-            /* CREATE EMPTY STAGE SUBSECTION - COLUMN  */
-            section.subsection = this.setUpNewStageSubsection();
+        var section = {};
+        for(var i=0;i<this.iSectionField;i++){
+             /* CREATE EMPTY STAGE SECTION - ROW */
+            section[i]=this.setUpNewStageSectionProp();  
+        };
         return section;
+    }
+    setUpNewStageSectionProp(){
+        return {
+            data:{
+                id:0
+            },
+            style:{},
+            property:{},
+            /* CREATE EMPTY STAGE SUBSECTION - COLUMN  */
+            subsection:this.setUpNewStageSubsection()
+        };
     }
     setUpNewStageSubsection(){
         //console.log('ProjectStageCreateText::setUpNewStageSubsection()');
         var subsection = {};
-        for(var i=0;i<3;i++){
-        //for(var i=0;i<this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MIN','v');i++){
-        //for(var i=0;i<this.stageData.subsectionmax;i++){   
+        for(var i=0;i<this.Property.subsectionMin;i++){  
             subsection[i]=this.setUpNewStageSubsectionProp();
-            /* FIRST ALWAYS NOT NEW LINE */
-            subsection[i].subsectionrow[0].data.valuenewline='n';
-        };
+        }
         return subsection;
     }
     setUpNewStageSubsectionProp(){
-        var sub = {
+        return {
                 data:{
                     id:0
                 },
                 style:{},
                 property:{},
-                subsectionrow:{}
+                subsectionrow:this.setUpNewStageSubsectionRow()
             };
-            sub.subsectionrow[0]=this.setUpNewStageSubsectionRow();
-        return sub;
     }
     setUpNewStageSubsectionRow(){
-        var row = {
+        var subsectionRow = {};
+        /* FIRST ALWAYS NEW LINE */
+        var newLine = 'n';
+        for(var i=0;i<this.Property.subsectionRowMin;i++){  
+            subsectionRow[i]=this.setUpNewStageSubsectionRowProp(newLine);
+            newLine = this.Property.subsectionRowNewLine;
+        };
+        return subsectionRow;
+    }
+    setUpNewStageSubsectionRowProp(newLine){
+        return {
                 data:{
                     id:0,
                     value:'',
-                    valuenewline:this.getValueChar(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_ROW_NEW_LINE','v'))
+                    valuenewline:newLine
                 },
                 style:{
                     fontSize:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),
@@ -1847,7 +1811,6 @@ class ProjectStageCreateText{
                     /* ADD TO SQL - 0 -> n, 1 -> y */ 
                 }
         };
-        return row;
     }
     setUpStage(data){
         //console.log('ProjectStageCreateText::setUpStage()');
@@ -1872,7 +1835,7 @@ class ProjectStageCreateText{
         ele.onclick = function (){
             var fd = new FormData();
             var data = classObject.stageData;
-            fd.append('stage',JSON.stringify(data));
+                fd.append('stage',JSON.stringify(data));
             classObject.checkInputData(data);
             classObject.sendInputData(fd);
         };
@@ -1888,16 +1851,9 @@ class ProjectStageCreateText{
             console.log('ERROR EXIST NO SEND DATA');
             return false;
         }
-        var xhrRun={
-                t:'POST',
-                u:this.Items.router+'confirmProjectStageText',
-                //u:'asdasd',
-                /* FOR POST SET TRUE */
-                c:true,
-                d:fd,
-                o:this.Items,
-                m:'setModalResponse'
-            };
+        var xhrRun=this.getXhrParm('POST','confirmProjectStageText','setModalResponse');
+            xhrRun.o=this.Items;
+            xhrRun.d=fd;
         this.Xhr.run(xhrRun);      
     }
     checkInputData(data){
@@ -1905,4 +1861,3 @@ class ProjectStageCreateText{
         console.log(data); 
     }
 }
-            

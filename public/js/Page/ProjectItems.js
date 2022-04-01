@@ -39,12 +39,36 @@ class ProjectItems{
         this.Glossary={
             text:new Glossary()
         };
-        
-        
-        this.Xhr2.setOnError(this.modalXhrError());
-        
+        this.setLoadInfo();
+        this.setLoadModalInfo(); 
+        this.Xhr2.setOnError(this.modalXhrError()); 
         this.Stage=new ProjectStage(this);
         this.Const=new ProjectConst(this);
+        
+    }
+    getXhrParm(type,task,method){
+        return {
+                t:type,
+                u:this.router+task,
+                c:true,
+                d:null,
+                o:this,
+                m:method
+            };
+    }
+    setUpParameters(){
+        console.log('ProjectItems::setUpParameters()'); 
+        /* TO DO -> EXTEND FOR ALL GLOSSARY */
+        this.Xhr.run(this.getXhrParm('GET','getNewStageDefaults&type=tx','setUpGlossary'));
+    }
+    setUpGlossary(response){
+        var data = this.setTableResponse(response);
+        this.Glossary['text'].fill(data.data.value.glossary);
+        console.log(this.Glossary);
+        /* SETUP STAGE PROPERTY */
+        this.Stage.Property.setData(this.Glossary);
+        /* run default table table */
+        this.Stage.show();
     }
     setUrl(appurl,url){
         console.log('ProjectItems::setUrl()'); 
@@ -425,11 +449,10 @@ var Items = new ProjectItems(window.appUrl,window.appUrl+'/router.php?task=');
 window.addEventListener('load', function(){
     //console.log('page is fully loaded');
     try{
-        Items.setLoadInfo();
-        Items.setLoadModalInfo();
         Items.Modal.setLink();
         Items.Table.setLink();
-        Items.Stage.show();
+        /* SETUP PARAMETERS => Glossary */
+        Items.setUpParameters();
     }
     catch (error){
         console.log(error);

@@ -16,17 +16,20 @@ class ProjectStage{
     CreateImage = new Object;
     CreateTable = new Object;
     CreateList = new Object;
+    Property = new Object;
     constructor(Items){
         console.log('ProjectStage::construct()');
         this.Items = Items;
         //console.log(Items);
         //console.log(this.Items.router);
+        this.Property = new ProjectStageProperty();
         this.StageTable = new ProjectStageTable(this);  
         this.StageTable.setProperties(this.Items.appurl,this.Items.router);
         this.CreateText = new ProjectStageCreateText(this);
         this.CreateImage = new ProjectStageCreateImage();
         this.CreateTable = new ProjectStageCreateTable();
         this.CreateTable = new ProjectStageCreateTable();
+        
     }
     show(){
         console.log('ProjectStage::show()');  
@@ -96,6 +99,7 @@ class ProjectStage{
     createText(){
         try{
             console.log('ProjectStage::createText()');
+            
             //console.log(this.Items.Glossary['text']);
             //console.log(this.CreateText);
             //this.Items.setLoadModalInfo();

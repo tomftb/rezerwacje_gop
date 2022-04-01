@@ -435,9 +435,13 @@ class ManageProjectStage extends ManageProjectStageDatabase
         if(!is_object($this->data)){
             Throw New Exception ('POST DATA IS NOT A OBJECT',1);
         }
+        if(!is_object($this->data->data)){
+            Throw New Exception ('POST DATA PARAMETER DATA IS NOT A OBJECT',1);
+        }
         self::checkValue('title',$prefix);
-        self::checkValue('department',$prefix);
-        $this->error.=$prefix.$this->utilities->checkValueLength($this->data->title,'[title]',1,1024);
+        self::checkValue('departmentId',$prefix);
+        self::checkValue('departmentName',$prefix);
+        $this->error.=$prefix.$this->utilities->checkValueLength($this->data->data->title,'[title]',1,1024);
         if($this->error){
             Throw New Exception ($this->error,0);
         }
@@ -449,13 +453,13 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $this->Log->log(0,"[".__METHOD__."]\r\nKEY - ".$key); 
         
         //$this->data
-        if(!property_exists($this->data,$key)){
+        if(!property_exists($this->data->data,$key)){
             Throw New Exception ('NO `'.$key.'` KEY IN POST',1);
         }
         /* REMOVE WHITE CHARACTER */
-        $this->data->$key=trim($this->data->$key);
+        $this->data->$key=trim($this->data->data->$key);
 
-        if($this->data->$key===''){
+        if($this->data->data->$key===''){
             $this->error.=$prefix.'['.$key.'] VALUE IS EMPTY!';
             $prefix='<br/>';
         }

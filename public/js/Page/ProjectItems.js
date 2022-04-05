@@ -167,7 +167,7 @@ class ProjectItems{
         }
     }
     prepareModal(title,titleClass){
-        //console.log('ProjectItems::prepareModal()');
+        console.log('ProjectItems::prepareModal()');
         //this.Modal.setLink();
         
         this.Modal.setHead(title,titleClass);
@@ -177,6 +177,9 @@ class ProjectItems{
             backdrop: 'static',
             keyboard: false  // to prevent closing with Esc button (if you want this too)
         });
+        // REMOVE data-dismiss="modal" 
+        console.log(this.Modal.link['close'].parentNode);
+        this.Modal.link['close'].parentNode.removeAttribute('data-dismiss');
     }
     setCloseModal(classToRun,methodToRun,taskToRun){
         console.log('ProjectItems::setCloseModal()');
@@ -185,11 +188,11 @@ class ProjectItems{
         /* CLOSURE */
         this.Modal.link['close'].onclick = function (){
             /* TO DO */
-            //if (confirm('Wyjść?') === true) {
+            if (confirm('Wyjść?') === true) {
                 Items.Modal.closeModal();
                 Items.reloadData(classToRun,methodToRun,taskToRun);
-            //}
-            //else{}
+            }
+            else{}
         };
          /* SET CLOSE VIA MOUSE */
         this.Modal.link['main'].onclick = function (e){

@@ -25,14 +25,20 @@ final class Logger{
 		}
 		return self::$logLink;
 	}
-    public function log($l=0,$d=''){
+    public function log($l=0,$d='',$m=''){
         /*
          * l -> lvl of log
          * d -> data to write
          */
-	if(LOG_LVL>=$l){
+        $type=gettype($d);
+        //fwrite(self::$filename, "[".date("Y.m.d H:i:s")."] TYPE ".$type.PHP_EOL);
+        if($type==='array' || $type==='object'){
+            self::logMultidimensional($l,$d,$m);
+        }
+        else if(LOG_LVL>=$l){
             fwrite(self::$filename, "[".date("Y.m.d H:i:s")."] ".$d.PHP_EOL);
         }
+        else{}
     }
     private function open(){     
 		self::$filename = fopen(self::$logName, "a") or die(__METHOD__."Unable to open file!");

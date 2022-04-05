@@ -83,23 +83,9 @@ class ManageProjectStage extends ManageProjectStageDatabase
     }
     public function psDetails(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->actProjectStageData=array();
-        $this->brTag='&lt;br /&gt;';
         $this->utilities->setGet('id',$this->inpArray);
-        
         $data = parent::getStageFullData($this->inpArray['id']);
-        /* GET DEFAULT PARAMETERS */
-        $data['glossary'] = parent::getStageGlossary();
-        
-        //$data['glossary']['parameter']=[];
-        /* SETUP PARAMETER */
-        //$parm=[];
-        //foreach($data['glossary']['parameter'] as $v){
-            //print_r($v);
-           // $parm[$v['s']]=['n'=>$v['n'],'v'=>$v['v']];
-       // }
-        //$data['glossary']['parameter']=$parm;
-        $this->utilities->jsonResponse($data,'psDetails');
+        $this->utilities->jsonResponseData($data);
     }
     private function setChangeState(){
         $this->data=$this->Items->setPostId();
@@ -429,7 +415,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
         //$input=filter_input_array(INPUT_POST);
         $this->Log->logMulti(0,filter_input(INPUT_POST,'stage'));
         $this->data=json_decode(filter_input(INPUT_POST,'stage'));
-        $this->Log->logMulti(0,$this->data);
+        $this->Log->log(0,$this->data);
         $this->error='';
         $prefix="";
         if(!is_object($this->data)){
@@ -437,6 +423,10 @@ class ManageProjectStage extends ManageProjectStageDatabase
         }
         if(!is_object($this->data->data)){
             Throw New Exception ('POST DATA PARAMETER DATA IS NOT A OBJECT',1);
+        }
+        if(!property_exists($this->data,'section')){
+            /* NO SECTION */
+            Throw New Exception ('POST DATA SECTION DATA NOT EXIST',1);
         }
         self::checkValue('title',$prefix);
         self::checkValue('departmentId',$prefix);

@@ -114,16 +114,6 @@ class Utilities
     public function getNumber($n,$base=10){
         return intval($n,$base);
     }
-    public function getResponse($v='',$f=''){
-        return ([
-                'data'=>[
-                            'value'=>$v,
-                            'function'=>$f
-                        ],
-                'status'=>0,
-                'info'=>''
-        ]);
-    }
     public function setGet($key='id',&$input=[]){
         $input[$key]=self::getNumber(filter_input(INPUT_GET,$key,FILTER_VALIDATE_INT));
         if($input[$key]===0){
@@ -137,16 +127,29 @@ class Utilities
         }
     }
     public function jsonResponse($v='',$f=''){
-        echo json_encode(self::getResponse($v,$f));
+        echo json_encode([
+                'data'=>[
+                            'value'=>$v,
+                            'function'=>$f
+                        ],
+                'status'=>0,
+                'info'=>''
+        ]);
     }
-    public function getPost($trim=true,$date=false)
-    {
+     public function jsonResponseData($v=[]){
+        echo json_encode([
+                'data'=>$v,
+                'status'=>0,
+                'info'=>''
+            ]);
+    }
+    public function getPost($trim=true,$date=false){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->validDate=$date;
         $this->response['data']=array();
-        $this->Log->logMultidimensional(0,$_POST,"L::".__LINE__."::".__METHOD__);
-        foreach($_POST as $k => $v)
-        {
+        $POST = filter_input_array(INPUT_POST);
+        $this->Log->logMultidimensional(0,$POST,"L::".__LINE__."::".__METHOD__);
+        foreach($POST as $k => $v){
             $this->Log->log(2,"[".__METHOD__."] KEY => ".$k." ,VALUE => ".$v);
             self::myTrim($v,$trim);
             self::checkDateTypePost($k,$v);

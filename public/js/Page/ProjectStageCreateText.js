@@ -722,11 +722,7 @@ class ProjectStageCreateText{
         var tool3=this.Html.getCol(3);
         var tool4=this.Html.getCol(3);  
         
-       
-
-            //tool1.appendChild(sectioncount);
             tool1.appendChild(this.setSectionSubSection(iSection,section[iSection].subsection,helplink.section[iSection].subsection));
-            //tool1.appendChild(this.setSectionSubSection(iSection,section,helplink));
             tool4.appendChild(this.createRemoveSectionButton(iSection,section,helplink.section));
             
             //throw 'test-stop';
@@ -752,7 +748,7 @@ class ProjectStageCreateText{
         console.log('sub section max');
         console.log(this.stageData.subsectionmax);
         */
-        var subSectionEle=this.createTextToolSelect('section','Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',this.getSelectKey(subSectionCount-1,subSectionCount),this.getSectionCount(this.Property.subsectionMin));
+        var subSectionEle=this.createTextToolSelect('section','Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',this.getSelectKey(subSectionCount-1,subSectionCount),this.getSectionCount(subSectionCount));//this.Property.subsectionMin
         var classObject=this;    
         var oldValue = 0;
         var oldIndex = 0;

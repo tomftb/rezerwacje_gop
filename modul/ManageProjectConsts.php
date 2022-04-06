@@ -98,7 +98,7 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
         //$f='a';
         $this->Log->log(0,"[".__METHOD__."] FILTER => ".$f);
         $this->Log->logMulti(0,filter_input_array(INPUT_GET));
-        $select="SELECT s.`id` as 'i', s.`nazwa` as 'n',s.`wartosc` as 'v',s.`buffer_user_id` as 'bu',b.`login` as 'bl' FROM `PROJECT_STAGE_CONST` s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id`";
+        $select="SELECT s.`id` as 'i', s.`nazwa` as 'n',s.`wartosc` as 'v',s.`buffer_user_id` as 'bu',b.`login` as 'bl' FROM `project_stage_const` s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id`";
         $where='';
         $query_data=[];
         if(is_numeric($f)){
@@ -115,7 +115,7 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
         $this->inpArray['u']=$this->Items->setGetWsk('u');
         $this->inpArray['b']=$this->Items->setGetWsk('b');
         $this->inpArray['v']=$this->Items->setGetWsk('v');
-        $this->inpArray['wskb']=$this->Items->unsetBlock($this->inpArray['b'],'PROJECT_STAGE_CONST','buffer_user_id',$_SESSION['userid']);
+        $this->inpArray['wskb']=$this->Items->unsetBlock($this->inpArray['b'],'project_stage_const','buffer_user_id',$_SESSION['userid']);
         $query_data[':wsk_u']=array($this->inpArray['u'],'STR');
         $query_data[':wsk_v']=array($this->inpArray['v'],'STR');
         $query_data[':nazwa']=array('%'.$f.'%','STR');
@@ -172,7 +172,7 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
         $this->Log->log(0,"[".__METHOD__."]");
         $this->newData=$this->Items->setPostId();
         $this->newData['reason']=$this->Items->setReason($this->newData);
-        $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'PROJECT_STAGE_CONST','buffer_user_id');
+        $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'project_stage_const','buffer_user_id');
         $this->Items->checkBlock($this->newData['wskb']['bu'],$this->newData['wskb']['bl'],$_SESSION['userid']);
         parent::hideConst();
         self::block($this->newData['id'],$_SESSION['userid']);
@@ -182,7 +182,7 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
         $this->Log->log(0,"[".__METHOD__."]");
         $this->newData=$this->Items->setPostId();
         $this->newData['reason']=$this->Items->setReason($this->newData);
-        $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'PROJECT_STAGE_CONST','buffer_user_id');
+        $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'project_stage_const','buffer_user_id');
         $this->Items->checkBlock($this->newData['wskb']['bu'],$this->newData['wskb']['bl'],$_SESSION['userid']);
         parent::deleteConst();
         self::block($this->newData['id'],'');
@@ -194,7 +194,7 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
         //$this->newData=$this->Items->setPostId();
         $this->Utilities->setGet('id',$this->newData);
         /* CHECK FOR ACT BLOCK STATUS */
-        $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'PROJECT_STAGE_CONST','buffer_user_id');
+        $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'project_stage_const','buffer_user_id');
         
         $this->Log->logMulti(0,$this->newData);
         
@@ -205,7 +205,7 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
         $this->Utilities->jsonResponse('','');
     }
     private function block($id=0,$user=''){
-         $this->Items->setBlock($id,"PROJECT_STAGE_CONST","buffer_user_id",$user);
+         $this->Items->setBlock($id,"project_stage_const","buffer_user_id",$user);
     }
 
 }

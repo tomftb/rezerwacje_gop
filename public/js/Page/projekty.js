@@ -100,6 +100,7 @@ var defaultTableBtnConfig=
             perm :true,
             attributes : { 'data-toggle' : 'modal', 'data-target': '#AdaptedModal' }
         },
+        /* TURN OFF - WAIT FOR NEW VERSION
         GEN_RAPORT_PROJ : {
             label : 'Raport',
             task : 'getProjectReportData',
@@ -107,6 +108,7 @@ var defaultTableBtnConfig=
             perm :true,
             attributes : { 'data-toggle' : 'modal', 'data-target': '#AdaptedModal' }
         },
+     */
         GEN_PDF_PROJ : {
             label : 'PDF',
             task : 'pPDF',

@@ -41,7 +41,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
             $this->Log->log(0,"[".__METHOD__."] filter not numeric ");
             $where="WHERE s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`title` LIKE :title) ORDER BY s.`id` ASC";
         }
-        $this->inpArray['wskb']=$this->Items->unsetBlock($this->Items->setGetWsk('b'),'SLO_PROJECT_STAGE','buffer_user_id',$_SESSION['userid']);
+        $this->inpArray['wskb']=$this->Items->unsetBlock($this->Items->setGetWsk('b'),'slo_project_stage','buffer_user_id',$_SESSION['userid']);
         $parm[':wsk_u']=[$this->Items->setGetWsk('d'),'STR'];
         $parm[':wsk_v']=[$this->Items->setGetWsk('v'),'STR'];
         $parm[':title']=['%'.$f.'%','STR'];
@@ -64,7 +64,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
         $this->data['stage']=parent::getStage($id);
         $this->Items->checkBlock($this->data['stage']['bu'],$this->data['stage']['bl'],$_SESSION['userid']);
-        $this->Items->setBlock($id,"SLO_PROJECT_STAGE","buffer_user_id",$_SESSION['userid']);
+        $this->Items->setBlock($id,"slo_project_stage","buffer_user_id",$_SESSION['userid']);
     }
     public function getProjectStageHideSlo(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -93,14 +93,14 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $this->Log->logMulti(0,$this->data);
         //Throw new Exception('TEST'.__LINE__,0);
         $this->data['reason']=$this->Items->setReason($this->data);
-        $this->data['wskb']= $this->Items->getBufferUserId($this->data['id'],'SLO_PROJECT_STAGE','buffer_user_id');
+        $this->data['wskb']= $this->Items->getBufferUserId($this->data['id'],'slo_project_stage','buffer_user_id');
         $this->Items->checkBlock($this->data['wskb']['bu'],$this->data['wskb']['bl'],$_SESSION['userid']);
     }
     public function psHide(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::setChangeState();
         parent::hideStage();
-        $this->Items->setBlock($this->data['id'],"SLO_PROJECT_STAGE","buffer_user_id",'');
+        $this->Items->setBlock($this->data['id'],"slo_project_stage","buffer_user_id",'');
         //Throw new Exception('TEST'.__LINE__,0);
         $this->utilities->jsonResponse('','cModal');
     }
@@ -108,7 +108,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $this->Log->log(0,"[".__METHOD__."]");
         self::setChangeState();
         parent::deleteStage();
-        $this->Items->setBlock($this->data['id'],"SLO_PROJECT_STAGE","buffer_user_id",'');
+        $this->Items->setBlock($this->data['id'],"slo_project_stage","buffer_user_id",'');
         $this->utilities->jsonResponse('','cModal');
     }
     public function psCreate()

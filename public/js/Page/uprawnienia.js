@@ -1,6 +1,5 @@
 var ajax = new Ajax();
 var error = new Error();
-var utilities=new Utilities();
 var defaultTask='getAllPerm';
 var fieldDisabled='n';
 var responseData=new Object();

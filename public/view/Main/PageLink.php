@@ -27,7 +27,7 @@
                   </ul>
                 </nav><!-- #nav-menu-container -->     
             </div>
-            <div class="col-1 pt-3" id="appLoadNotify">
+            <div class="col-1 pt-3 d-none" id="appLoadNotify">
                 <img src="<?=APP_URL?>/img/loading_60_60.gif" alt="load" />
             </div>
         </div>

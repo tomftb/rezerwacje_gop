@@ -55,23 +55,23 @@ class DatabaseUtilities {
     }
     public function getColor(){
         $this->Log->log(0,"[".__METHOD__."]");
-        return $this->dbLink->squery('SELECT `ENG` as n,`HEX` as v FROM `SLO_COLOR` ORDER BY `ENG` ASC');
+        return $this->dbLink->squery('SELECT `ENG` as n,`HEX` as v FROM `slo_color` ORDER BY `ENG` ASC');
     }
     public function getFontFamily(){
         $this->Log->log(0,"[".__METHOD__."]");
-        return $this->dbLink->squery('SELECT `NAME` as n,`NAME` as v FROM `SLO_FONT_FAMILY` ORDER BY `NAME` ASC');
+        return $this->dbLink->squery('SELECT `NAME` as n,`NAME` as v FROM `slo_font_family` ORDER BY `NAME` ASC');
     }
     public function getStyle($GROUP=0){
         $this->Log->log(0,"[".__METHOD__."]\r\nGROUP - $GROUP");
-        return $this->dbLink->squery('SELECT `PL` as n,`ENG` as v FROM `SLO_STYLE` WHERE `GROUP`='.$GROUP.' ORDER BY `NUMBER` ASC');
+        return $this->dbLink->squery('SELECT `PL` as n,`ENG` as v FROM `slo_style` WHERE `GROUP`='.$GROUP.' ORDER BY `NUMBER` ASC');
     }
     public function getParam($SHORTCUT=''){
         $this->Log->log(0,"[".__METHOD__."]\r\nSHORTCUT - $SHORTCUT");
-        return $this->dbLink->squery('SELECT `SKROT` as s, `OPIS` as n,`WARTOSC` as v FROM `PARAMETRY` WHERE `SKROT` LIKE "'.$SHORTCUT.'" ORDER BY `ID` ASC');
+        return $this->dbLink->squery('SELECT `SKROT` as s, `OPIS` as n,`WARTOSC` as v FROM `parametry` WHERE `SKROT` LIKE "'.$SHORTCUT.'" ORDER BY `ID` ASC');
     }
      public function getUserDepartment($id_user=0){
         $this->Log->log(0,"[".__METHOD__."]\r\ID USER - ${id_user}");
-        return $this->dbLink->squery('SELECT d.`NAME` as n,d.`ID` as v FROM `DEPARTMENT_USER` as du, `DEPARTMENT` d WHERE du.`id_department`=d.`id` AND `id_user`=:id_user ORDER BY `id_department` ASC',[':id_user'=>[$id_user,'INT']]);
+        return $this->dbLink->squery('SELECT d.`NAME` as n,d.`ID` as v FROM `department_user` as du, `department` d WHERE du.`id_department`=d.`id` AND `id_user`=:id_user ORDER BY `id_department` ASC',[':id_user'=>[$id_user,'INT']]);
     }
     public function getCreateSql(){
         return $this->sqlAddOn['ci'];

@@ -28,7 +28,7 @@ class ProjectStage{
         this.CreateText = new ProjectStageCreateText(this);
         this.CreateImage = new ProjectStageCreateImage();
         this.CreateTable = new ProjectStageCreateTable();
-        this.CreateTable = new ProjectStageCreateTable();
+        this.CreateList = new ProjectStageCreateList(this);
         
     }
     show(){
@@ -119,12 +119,31 @@ class ProjectStage{
     }
     createImage(){
         console.log('ProjectStage::createImage()');
+
     }
     createTable(){
         console.log('ProjectStage::createTable()');
     }
     createList(){
-        console.log('ProjectStage::createList()');
+        
+        try{
+            console.log('ProjectStage::createList()');    
+            //console.log(this.Items.Glossary['text']);
+            //console.log(this.CreateText);
+            //this.Items.setLoadModalInfo();
+            /* SET DEFAULT OBJECT */
+            this.Items.default={
+                task:this.defaultTask,
+                object:this,
+                method:'show'
+            };
+            this.CreateList.create();
+        }
+        catch(error){
+            console.log(error);
+            this.StageTable.Table.setError(error);
+            return false;
+        };
     }
     details(response){
         try{

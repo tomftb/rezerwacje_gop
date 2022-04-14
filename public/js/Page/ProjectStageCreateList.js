@@ -13,7 +13,10 @@ class ProjectStageCreateList{
     link={};
     helplink={};
     resonse; 
-    Glossary={};
+    Glossary={
+        'text':{},
+        'list':{}
+    };
     /* rename data to stageData */
     data={};
     stageData={};
@@ -36,7 +39,8 @@ class ProjectStageCreateList{
         this.Html=Stage.Items.Html;
         this.Xhr=Stage.Items.Xhr2;
         this.XhrTable=Stage.Items.Xhr;
-        this.Glossary=Stage.Items.Glossary['text'];
+        this.Glossary.text=Stage.Items.Glossary['text'];
+        this.Glossary.list=Stage.Items.Glossary['list'];
     }
     getXhrParm(type,task,method){
         return {
@@ -201,7 +205,7 @@ class ProjectStageCreateList{
         var mainDiv=this.Html.getRow();
             mainDiv.classList.add('d-none');
             this.helplink['preview'].whole=mainDiv;
-            /* this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'); */
+            /* this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'); */
             //this.helplink.preview.pageBackgroundColor=this.stageData.style.backgroundcolor;
         return mainDiv;
     }
@@ -249,7 +253,7 @@ class ProjectStageCreateList{
         var departmentLabelDiv=this.Html.getCol(1);
         var departmentInputDiv=this.Html.getCol(11);
             departmentLabelDiv.appendChild(this.createLabel('h3','Dział:'));
-        var department=this.createSelect('department','department','w-100');
+        var department=this.createSelect('department','department','form-control w-100');
             department.setAttribute('aria-describedby',"departmentHelp" );
             department.appendChild(this.createSelectOption('Aktualny:',defaultDepartment));  
             department.appendChild(this.createSelectOption('Dostępne:',this.Department.avaDepartmentList)); 
@@ -623,7 +627,16 @@ class ProjectStageCreateList{
         /* CREATE ERROR DIV */
         mainDiv.appendChild(this.createTextError(helplink[iSubRow]));  
         /* CREATE TEXT TOOL */
-        mainDiv.appendChild(this.createTextTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow]));  
+        var textTool = this.createTextTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow]);
+         /* CREATE LIST TOOL */
+        var listTool = this.createListTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow]);
+        
+        var mainDivControl = this.createControlTool('Formatowanie',textTool,'Opcje listy',listTool);
+        
+        mainDiv.appendChild(mainDivControl);
+        
+        mainDiv.appendChild(textTool);  
+        mainDiv.appendChild(listTool);  
         /* SETUP HELPLINK */
         helplink[iSubRow]['all']=mainDiv;
         return mainDiv;
@@ -631,7 +644,7 @@ class ProjectStageCreateList{
     createExtendedSubsectionRow(isection,isub,isubrow,subsectionrow,helplink){
         console.log('ProjectStageCreateList::createExtendedSubsectionRow()');
         var mainDiv=this.createSubsectionRowGroup(isection,isub,isubrow,subsectionrow,helplink);
-            mainDiv.appendChild(this.createExtendedTextTool(isection,isub,isubrow,subsectionrow[isubrow],helplink[isubrow]));  
+            mainDiv.childNodes[3].appendChild(this.createExtendedTextTool(isection,isub,isubrow,subsectionrow[isubrow],helplink[isubrow]));  
         return mainDiv;
     }
     createSubsectionRow(isection,isub,isubrow,subsectionrow,helplink){
@@ -671,13 +684,14 @@ class ProjectStageCreateList{
             label.setAttribute('class','col-form-label');
             label.setAttribute('for','value-'+isection+'-'+isub+'-'+isubrow);
             label.innerHTML='<b>Wartość:</b><br/><small class=" text-muted ">['+'value-'+isection+'-'+isub+'-'+isubrow+']</small>';
+        //var input=document.createElement('input');
         var input=document.createElement('textarea');
             input.setAttribute('class','form-control border-1 border-info');
             input.setAttribute('placeholder','Write...');
             input.setAttribute('name','value-'+isection+'-'+isub+'-'+isubrow);
             input.appendChild(v);
            
-            input.setAttribute('rows','3');
+            input.setAttribute('rows','1');
             
             input.oninput = function(){
                 subsectionrow[isubrow].data.value=this.value;
@@ -880,6 +894,46 @@ class ProjectStageCreateList{
            //mainDivCol.appendChild(mainDiv);
         return mainDiv;
     }
+    createControlTool(labelText,eleText,labelList,eleList){
+        var mainCol = this.Html.getCol(12);
+            mainCol.classList.add('mt-1','mb-1');
+        var mainDivControl=this.Html.getRow();   
+        var mainDivControlCol = this.Html.getCol(4);
+        
+        var mainDivControlCol1 = this.Html.getCol(1);   
+        var mainDivControlCol2 = this.Html.getCol(7);
+            
+            
+            mainDivControlCol.classList.add('btn-group','btn-group-toggle');
+            mainDivControlCol.appendChild(this.createControl(labelText,eleText));
+            mainDivControlCol.appendChild(this.createControl(labelList,eleList));
+            
+            
+            mainDivControl.appendChild(mainDivControlCol1);
+            mainDivControl.appendChild(mainDivControlCol);
+            mainDivControl.appendChild(mainDivControlCol2);
+            mainCol.appendChild(mainDivControl);
+        return mainCol;
+    }
+    createControl(label,ele){
+        /* CONTROL */
+        var control = document.createElement('button');
+            control.setAttribute('type','button');
+            control.classList.add('btn','btn-outline-dark','btn-sm');
+            control.onclick = function (){
+                //console.log(ele);
+                //console.log(ele.classList);
+                //console.log(ele.classList.contains('d-none'));
+                if(ele.classList.contains('d-none')){
+                    ele.classList.remove('d-none');
+                }
+                else{
+                    ele.classList.add('d-none');
+                };
+            };
+            control.innerText = label;
+            return control; 
+    }
     createTextTool(isection,isub,isubrow,subsectionrow,helplink){
         /*
         console.log('ProjectStageCreateList::createTextTool()');
@@ -889,64 +943,86 @@ class ProjectStageCreateList{
         console.log(helplink);
         */
         var mainDivCol=this.Html.getCol(12);
+            mainDivCol.classList.add('d-none','bg-light');      
         var mainDiv=this.Html.getRow();
+            
         var tool1=this.Html.getCol(3);
         var tool2=this.Html.getCol(3);
         var tool3=this.Html.getCol(3);
         var tool4=this.Html.getCol(3);
             tool4.classList.add('pt-4');
-        
+       
+            
         //var fontSize=this.valueFontSizeModification('Rozmiar tekstu:',this.getDefaultFontSize(subsectionrow.style.fontSize,subsectionrow.style.fontSize),this.getFontSizeList(subsectionrow.style.fontSize),subsectionrow.style,helplink.value);
         var fontSize=this.valueFontSizeModification('Rozmiar tekstu:',subsectionrow.style,helplink.value);
-        /* MARGIN 
-        var marginLeft=this.valueFontSizeModification('Lewy margines:',subsectionrow.style,helplink.value);
-        var marginRight=this.valueFontSizeModification('Prawy margines:',subsectionrow.style,helplink.value);
-        var marginTop=this.valueFontSizeModification('Górny margines:',subsectionrow.style,helplink.value);
-        var marginBottom=this.valueFontSizeModification('Dolny margines:',subsectionrow.style,helplink.value);
-        */
-        /* LIST TYPE 
-        var listType=this.valueStyleModification('textAlign','Typ listy:',this.getSelectKey(subsectionrow.style.textAlign,subsectionrow.style.textAlignName),this.getFontAlignList(subsectionrow.style.textAlign),subsectionrow.style,helplink.value);
+       
         
-        */ 
-        /* LIST LEVEL 
-        var listLevel=this.valueStyleModification('textAlign','Poziom:',this.getSelectKey(subsectionrow.style.textAlign,subsectionrow.style.textAlignName),this.getFontAlignList(subsectionrow.style.textAlign),subsectionrow.style,helplink.value);
-        */
-        
-        var color=this.valueStyleModification('color','Kolor tekstu:',this.getDefaultColor(subsectionrow.style.color,subsectionrow.style.colorName),this.getColorList(subsectionrow.style.color),subsectionrow.style,helplink.value);
-        var fontFamily=this.valueStyleModification('fontFamily','Czcionka:',this.getDefaultFont(subsectionrow.style.fontFamily,subsectionrow.style.fontFamily),this.getFontList(subsectionrow.style.fontFamily),subsectionrow.style,helplink.value);
-        var textAlign=this.valueStyleModification('textAlign','Wyrównanie:',this.getSelectKey(subsectionrow.style.textAlign,subsectionrow.style.textAlignName),this.getFontAlignList(subsectionrow.style.textAlign),subsectionrow.style,helplink.value);
-        var backgroundColor=this.valueStyleModification('backgroundColor','Kolor tła:',this.getDefaultBackgroundColor(subsectionrow.style.backgroundColor,subsectionrow.style.backgroundColorName),this.getBackgroundColorList(subsectionrow.style.backgroundColor),subsectionrow.style,helplink.value);
+        var color=this.setValueStyle('color','Kolor tekstu:',this.getDefaultColor(subsectionrow.style.color,subsectionrow.style.colorName),this.getColorList(subsectionrow.style.color),subsectionrow.style,helplink.value);
+        var fontFamily=this.setValueStyle('fontFamily','Czcionka:',this.getDefaultFont(subsectionrow.style.fontFamily,subsectionrow.style.fontFamily),this.getFontList(subsectionrow.style.fontFamily),subsectionrow.style,helplink.value);
+        var textAlign=this.setValueStyle('textAlign','Wyrównanie:',this.getSelectKey(subsectionrow.style.textAlign,subsectionrow.style.textAlignName),this.getFontAlignList(subsectionrow.style.textAlign),subsectionrow.style,helplink.value);
+        var backgroundColor=this.setValueStyle('backgroundColor','Kolor tła:',this.getDefaultBackgroundColor(subsectionrow.style.backgroundColor,subsectionrow.style.backgroundColorName),this.getBackgroundColorList(subsectionrow.style.backgroundColor),subsectionrow.style,helplink.value);
         
         tool1.appendChild(fontSize);
         tool1.appendChild(color);
-        tool1.appendChild(backgroundColor);
+        tool3.appendChild(backgroundColor);
         
-        tool1.appendChild(fontFamily);
-        tool1.appendChild(textAlign);
-        
-        tool2.appendChild(listType);
-        tool2.appendChild(listLevel);
-        
-        tool3.appendChild(marginLeft);
-        tool3.appendChild(marginRight);
-        tool3.appendChild(marginTop);
-        tool3.appendChild(marginBottom);
-        
+        tool2.appendChild(fontFamily);
+        tool2.appendChild(textAlign);
+       
         /* SET CSS BOLD, ITALIC ... */
-        
         this.createTextDecorationTool(tool4,isection,isub,isubrow,subsectionrow['style'],helplink.value); 
 
         mainDiv.appendChild(tool1);
         mainDiv.appendChild(tool2);
         mainDiv.appendChild(tool3);
         mainDiv.appendChild(tool4);
+      
         mainDivCol.appendChild(mainDiv);
+        
         return mainDivCol;
         //return mainDiv;
     }
-      createTextDecorationTool(tool4,isection,isub,isubrow,subsectionRowStyle,helplinkValue){
+    createListTool(isection,isub,isubrow,subsectionrow,helplink){
+        var mainDivCol=this.Html.getCol(12);
+            mainDivCol.classList.add('d-none');
+        var mainDiv=this.Html.getRow();
+        var tool1=this.Html.getCol(3);
+        var tool2=this.Html.getCol(3);
+        var tool3=this.Html.getCol(3);
+        var tool4=this.Html.getCol(3);
+            
+        /* MARGIN 
+        var marginLeft=this.valueFontSizeModification('Lewy margines:',subsectionrow.style,helplink.value);
+        var marginRight=this.valueFontSizeModification('Prawy margines:',subsectionrow.style,helplink.value);
+        var marginTop=this.valueFontSizeModification('Górny margines:',subsectionrow.style,helplink.value);
+        var marginBottom=this.valueFontSizeModification('Dolny margines:',subsectionrow.style,helplink.value);
+        */
+        /* LIST TYPE  */
+        var listType=this.setValueProperty('listType','Typ listy:',this.getSelectKey(subsectionrow.property.listType,subsectionrow.property.listTypeName),this.getListTypeList(subsectionrow.property.listType),subsectionrow.property);
+       
+        
+        /* LIST LEVEL  */
+        var listLevel=this.setValueProperty('listLevel','Poziom:',this.getSelectKey(subsectionrow.property.listLevel,subsectionrow.property.listLevelName),this.getListLevelList(subsectionrow.property.listLevel,subsectionrow.property.listLevelMax),subsectionrow.property);
+       
+        /* */
+        tool2.appendChild(listType);
+        tool2.appendChild(listLevel);
+        /*
+        tool3.appendChild(marginLeft);
+        tool3.appendChild(marginRight);
+        tool3.appendChild(marginTop);
+        tool3.appendChild(marginBottom);
+        */
+        mainDiv.appendChild(tool1);
+        mainDiv.appendChild(tool2);
+        mainDiv.appendChild(tool3);
+        mainDiv.appendChild(tool4);
+        mainDivCol.appendChild(mainDiv);
+        return mainDivCol;
+    }
+    createTextDecorationTool(tool4,isection,isub,isubrow,subsectionRowStyle,helplinkValue){
         //console.log('ProjectStageCreateList::createTextDecorationTool()');
-        for(const prop of this.Glossary.getKey('decoration').entries()) {
+        for(const prop of this.Glossary.text.getKey('decoration').entries()) {
             this.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow,subsectionRowStyle,helplinkValue);  
         } 
     }
@@ -1035,7 +1111,7 @@ class ProjectStageCreateList{
         console.log('SUBSECTIONROW DATA valuenewline:');
         console.log(subsectionrow.data.valuenewline);
         */
-        var mainDivCol=this.Html.getCol(12);
+        //var mainDivCol=this.Html.getCol(12);
         var mainDiv=this.Html.getRow();
         var tool1=this.Html.getCol(5);
         var tool2=this.Html.getCol(5);
@@ -1048,9 +1124,10 @@ class ProjectStageCreateList{
         mainDiv.appendChild(tool1);
         mainDiv.appendChild(tool2);
         mainDiv.appendChild(tool3);
-        mainDivCol.appendChild(mainDiv);
+        return mainDiv;
+        //mainDivCol.appendChild(mainDiv);
          
-        return mainDivCol;
+        //return mainDivCol;
     }
     changeRadioButtonValue(radio,stageDataLink){//link
         /*
@@ -1125,10 +1202,10 @@ class ProjectStageCreateList{
         var label=document.createElement('span');
             label.setAttribute('class','text-info');
             label.innerHTML=title;
-        var select=this.createSelect(id,id,'w-75');
+        var select=this.createSelect(id,id,'form-control-sm form-control w-75');
             select.appendChild(this.createTextToolSelectOption('Domyślny:',actdata));  
             select.appendChild(this.createTextToolSelectOption('Dostępne:',alldata)); 
-        var select2=this.createSelect(id2,id2,'w-25');
+        var select2=this.createSelect(id2,id2,'form-control-sm form-control w-25');
             select2.appendChild(this.createTextToolSelectOption('Domyślny:',actdata2));  
             select2.appendChild(this.createTextToolSelectOption('Dostępne:',alldata2)); 
             
@@ -1138,23 +1215,26 @@ class ProjectStageCreateList{
             divMain.appendChild(div);
         return divMain;
     }
-      createTextToolSelect(id,title,actdata,alldata){
+    createTextToolSelect(id,title,actdata,alldata){
         //console.log('ProjectStageCreateList::createTextToolSelect()');
         var div=document.createElement('div');
             div.setAttribute('class','w-100 mt-2');
         var label=document.createElement('span');
             label.setAttribute('class','text-info');
             label.innerHTML=title;
-        var select=this.createSelect(id,id,'w-100');
+        var select=this.createSelect(id,id,'form-control-sm form-control w-100');
             select.appendChild(this.createTextToolSelectOption('Domyślny:',actdata));  
             select.appendChild(this.createTextToolSelectOption('Dostępne:',alldata)); 
             div.appendChild(label);
             div.appendChild(select);
         return div;
     }
-      createSelect(id,name,width){
+    createSelect(id,name,c){
+        /*
+         * c - class
+         */
         var select=document.createElement('select');
-            select.setAttribute('class','form-control '+width);
+            select.setAttribute('class',c);
             select.setAttribute('id',id);
             select.setAttribute('name',name);
             return select;
@@ -1173,15 +1253,28 @@ class ProjectStageCreateList{
             };
         return optionGroup;
     }
-    valueStyleModification(id,title,actdata,alldata,subsectionRowStyle,helplinkValue){
+    setValueStyle(id,title,actdata,alldata,subsectionRowStyle,helplinkValue){
         //console.log('ProjectStageCreateList::createTextToolSelectExtend()');
         var select = this.createTextToolSelect(id,title,actdata,alldata);
         /* CLOSURE - DOMKNIĘCIE*/
         select.childNodes[1].onchange = function(){
              /* SET NEW VALUE */
             subsectionRowStyle[id]=this.value;
-             /* SET NEW VALUE ELEMENT STYLE */
+             /* SET NEW VALUE ELEMENT STYLE/PROPERTY */
             helplinkValue.style[id]=this.value;
+        };
+        return select;
+    }
+    setValueProperty(id,title,actdata,alldata,subsectionRowProperty){
+        //console.log('ProjectStageCreateList::createTextToolSelectExtend()');
+        
+        var select = this.createTextToolSelect(id,title,actdata,alldata);
+        /* CLOSURE - DOMKNIĘCIE*/
+        select.childNodes[1].onchange = function(){
+            /* SET NEW VALUE */
+            subsectionRowProperty[id]=this.value;
+            console.log(actdata);
+            console.log(alldata);
         };
         return select;
     }
@@ -1195,7 +1288,7 @@ class ProjectStageCreateList{
         var idMeasurement = 'fontSizeMeasurement';
         
         var actFont = this.getDefaultFontSize(subsectionRowStyle.fontSize,subsectionRowStyle.fontSize);
-        var allFont = this.getFontSizeList(subsectionRowStyle.fontSize);
+        var allFont = this.getFontSizeList(subsectionRowStyle.fontSize,subsectionRowStyle.fontSizeMax);
         
         var actMeasurement = this.getDefaultFontSize(subsectionRowStyle.fontSizeMeasurement,subsectionRowStyle.fontSizeMeasurement);
         var allMeasurement = this.getFontSizeMeasurementList(subsectionRowStyle.fontSizeMeasurement);
@@ -1411,45 +1504,66 @@ class ProjectStageCreateList{
     }
     getColorList(exception){
         var value={};
-        for(var i=0;i<this.Glossary.getKeyCount('color');i++){
-            if(this.Glossary.getKeyPropertyAttribute('color',i,'v')!==exception){
-                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('color',i,'v'),this.Glossary.getKeyPropertyAttribute('color',i,'n'),this.Glossary.getKeyPropertyAttribute('color',i,'v'),'#FFFFFF','');
+        for(var i=0;i<this.Glossary.text.getKeyCount('color');i++){
+            if(this.Glossary.text.getKeyPropertyAttribute('color',i,'v')!==exception){
+                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),this.Glossary.text.getKeyPropertyAttribute('color',i,'n'),this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),'#FFFFFF','');
             }
         }
         return value;
     }
     getFontSizeMeasurementList(exception){
         var value={};        
-        for(var i=0;i<this.Glossary.getKeyCount('measurement');i++){
-            if(this.Glossary.getKeyPropertyAttribute('measurement',i,'v')!==exception){
-                value[i]=this.getSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('measurement',i,'v'),this.Glossary.getKeyPropertyAttribute('measurement',i,'n'));
+        for(var i=0;i<this.Glossary.text.getKeyCount('measurement');i++){
+            if(this.Glossary.text.getKeyPropertyAttribute('measurement',i,'v')!==exception){
+                value[i]=this.getSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('measurement',i,'v'),this.Glossary.text.getKeyPropertyAttribute('measurement',i,'n'));
             }
         }
         return value;
     }
     getBackgroundColorList(exception){
         var value={};
-        for(var i=0;i<this.Glossary.getKeyCount('color');i++){
+        for(var i=0;i<this.Glossary.text.getKeyCount('color');i++){
               /* TO DO -> CALCULATE FONT COLOR */
-            if(this.Glossary.getKeyPropertyAttribute('color',i,'v')!==exception){
-                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('color',i,'v'),this.Glossary.getKeyPropertyAttribute('color',i,'n'),'#FFFFFF',this.Glossary.getKeyPropertyAttribute('color',i,'v'),'');
+            if(this.Glossary.text.getKeyPropertyAttribute('color',i,'v')!==exception){
+                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),this.Glossary.text.getKeyPropertyAttribute('color',i,'n'),'#FFFFFF',this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),'');
             }
         }
         return value;
     }
     getFontAlignList(exception){
         var value={};        
-        for(var i=0;i<this.Glossary.getKeyCount('textAlign');i++){
-            if(this.Glossary.getKeyPropertyAttribute('textAlign',i,'v')!==exception){
-                value[i]=this.getSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('textAlign',i,'v'),this.Glossary.getKeyPropertyAttribute('textAlign',i,'n'));
+        for(var i=0;i<this.Glossary.text.getKeyCount('textAlign');i++){
+            if(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v')!==exception){
+                value[i]=this.getSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v'),this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'n'));
             }
         }
         return value;
     }
-      getFontSizeList(exception){
+    getListTypeList(exception){
+        var value={};        
+        for(var i=0;i<this.Glossary.list.getKeyCount('listType');i++){
+            if(this.Glossary.list.getKeyPropertyAttribute('listType',i,'v')!==exception){
+                value[i]=this.getSelectKeyProperties(this.Glossary.list.getKeyPropertyAttribute('listType',i,'v'),this.Glossary.list.getKeyPropertyAttribute('listType',i,'n'));
+            }
+        }
+        return value;
+    }
+    getListLevelList(exception,max){
         exception=parseInt(exception,10);
+        max=parseInt(max,10);
         var value={};
-        for(var i=2;i<57;){
+        for(var i=1;i<max+1;i++){
+            if(i!==exception){
+                value[i]=this.getSelectKeyProperties(i,i);  
+            }
+        }
+        return value;
+    }
+    getFontSizeList(exception,max){
+        exception=parseInt(exception,10);
+         max=parseInt(max,10);
+        var value={};
+        for(var i=2;i<max+1;){
             if(i!==exception){
                 value[i]=this.getSelectKeyProperties(i,i);  
             }
@@ -1460,9 +1574,9 @@ class ProjectStageCreateList{
     getFontList(exception){
         //console.log('ProjectStageCreateList::getFontList()');
         var value={};
-        for(var i=0;i<this.Glossary.getKeyCount('fontFamily');i++){
-            if(this.Glossary.getKeyPropertyAttribute('fontFamily',i,'v')!==exception){
-                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('fontFamily',i,'v'),this.Glossary.getKeyPropertyAttribute('fontFamily',i,'v'),'#000000','#FFFFFF',this.Glossary.getKeyPropertyAttribute('fontFamily',i,'v'));
+        for(var i=0;i<this.Glossary.text.getKeyCount('fontFamily');i++){
+            if(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v')!==exception){
+                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),'#000000','#FFFFFF',this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'));
             }
         }
         return value;
@@ -1481,7 +1595,7 @@ class ProjectStageCreateList{
         var toolMain3=this.Html.getCol(3);
         var toolMain4=this.Html.getCol(3);    
 
-        var pageBackgroundcolor=this.createTextToolSelect('backgroundcolor','Wskaż kolor tła strony:',this.getDefaultBackgroundColor(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),this.getBackgroundColorList());
+        var pageBackgroundcolor=this.createTextToolSelect('backgroundcolor','Wskaż kolor tła strony:',this.getDefaultBackgroundColor(this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),this.getBackgroundColorList());
  
             /* CLOSURE */
             pageBackgroundcolor.onchange = function (){   
@@ -1494,7 +1608,7 @@ class ProjectStageCreateList{
         
         toolMain1.appendChild(newPage);    
         
-        toolMain2.appendChild(this.valueStyleModification('backgroundimage','Wskaż obraz tła strony:'));
+        toolMain2.appendChild(this.setValueStyle('backgroundimage','Wskaż obraz tła strony:'));
 
         mainDiv.appendChild(h5);
         
@@ -1643,10 +1757,8 @@ class ProjectStageCreateList{
                 
                 helplink.row[iRow]=classObject.getHelpLinkSubsectionRow();
                 
-                //ProjectStageCreateList.helplink.section['section-'+isection]['subsection'][isubsection].dynamic.appendChild(ProjectStageCreateList.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow[iRow]));
-                //helplink.dynamic.appendChild(ProjectStageCreateList.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow[iRow],helplink.row[iRow]));
                 helplink.dynamic.appendChild(classObject.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow,helplink.row));
-                //helplink.dynamic.appendChild(ProjectStageCreateList.createExtendedSubsectionRow(iRow,subsectionrow,helplink.row));
+
                 /* INCREMENT SUBSECTION ROW */
                 iRow++;
             };
@@ -1743,12 +1855,12 @@ class ProjectStageCreateList{
                     /* SET PROPER AS IN SQL */
                     departmentName:this.Department.defaultDepartment[0].n,
                     /* SET SQL new_page to valuenewline */
-                    valuenewline:this.getValueChar(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_PAGE_FROM_NEW','v'))
+                    valuenewline:this.getValueChar(this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_PAGE_FROM_NEW','v'))
                },
                property:{},
                style:{
-                   backgroundColor:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
-                   backgroundColorName:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
+                   backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
+                   backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
                    backgroundImage:''
                    //,newPage:1
                 },
@@ -1811,26 +1923,34 @@ class ProjectStageCreateList{
                     valuenewline:newLine
                 },
                 style:{
-                    fontSize:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),
+                    fontSize:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),
+                    fontSizeMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MAX','v'),
                     /* ADD TO SQL - fontSizeMeasurement */
-                    fontSizeMeasurement:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v'),
-                    color:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),
+                    fontSizeMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v'),
+                    color:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),
                     /* ADD TO SQL - colorName */
-                    colorName:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','n'),
-                    backgroundColor:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
+                    colorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','n'),
+                    backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
                     /* ADD TO SQL - backgroundColorName */
-                    backgroundColorName:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
-                    fontFamily:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),
-                    fontWeight:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v'),
-                    fontStyle:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v'),
-                    underline:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
-                    'line-through':this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
-                    textAlign:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),
+                    backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
+                    fontFamily:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),
+                    fontWeight:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v'),
+                    fontStyle:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v'),
+                    underline:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
+                    'line-through':this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
+                    textAlign:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),
                     /* ADD TO SQL - backgroundColorName */
-                    textAlignName:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','n')
+                    textAlignName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','n')
                 },
                 property:{
                     /* ADD TO SQL - 0 -> n, 1 -> y */ 
+                     /* LIST */
+                    listType:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_TYPE','v'),
+                    listTypeName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_TYPE','n'),
+                    listLevel:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_LVL','v'),
+                    listLevelName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_LVL','n'),
+                    listLevelMax:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_MAX_LVL','v'),
+                    listLevelMaxName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_MAX_LVL','n')
                 }
         };
     }

@@ -65,11 +65,14 @@ class DatabaseUtilities {
         $this->Log->log(0,"[".__METHOD__."]\r\nGROUP - $GROUP");
         return $this->dbLink->squery('SELECT `PL` as n,`ENG` as v FROM `slo_style` WHERE `GROUP`='.$GROUP.' ORDER BY `NUMBER` ASC');
     }
+    public function getListType(){
+        return $this->dbLink->squery('SELECT `NAME` as n,`VALUE` as v FROM `slo_list_type` ORDER BY `VALUE` ASC');
+    }
     public function getParam($SHORTCUT=''){
         $this->Log->log(0,"[".__METHOD__."]\r\nSHORTCUT - $SHORTCUT");
         return $this->dbLink->squery('SELECT `SKROT` as s, `OPIS` as n,`WARTOSC` as v FROM `parametry` WHERE `SKROT` LIKE "'.$SHORTCUT.'" ORDER BY `ID` ASC');
     }
-     public function getUserDepartment($id_user=0){
+    public function getUserDepartment($id_user=0){
         $this->Log->log(0,"[".__METHOD__."]\r\ID USER - ${id_user}");
         return $this->dbLink->squery('SELECT d.`NAME` as n,d.`ID` as v FROM `department_user` as du, `department` d WHERE du.`id_department`=d.`id` AND `id_user`=:id_user ORDER BY `id_department` ASC',[':id_user'=>[$id_user,'INT']]);
     }

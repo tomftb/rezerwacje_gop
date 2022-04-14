@@ -363,14 +363,23 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $type=htmlentities(nl2br(filter_input(INPUT_GET,'type')), ENT_QUOTES,'UTF-8',FALSE);
         $this->Log->log(0,"[".__METHOD__."]\r\nTYPE - ".$type);
         /* GET DEFAULT PARAMETERS */
-        $value['glossary'] = parent::getStageGlossary();
+        
+        $value['list'] = parent::getStageGlossaryList();
+        $value['text'] = parent::getStageGlossaryText();
         /* SETUP PARAMETER */
         $parm=[];
-        foreach(parent::getStageParameters() as $v){
+        foreach(parent::getStageParameters('STAGE_TEXT_%') as $v){
+            //print_r($v);
+            $parm[$v['s']]=['n'=>$v['n'],'v'=>$v['v']];
+            //$value['text']['parameter']
+        };
+        $value['text']['parameter']=$parm;
+        $parm=[];
+        foreach(parent::getStageParameters('STAGE_LIST_%') as $v){
             //print_r($v);
             $parm[$v['s']]=['n'=>$v['n'],'v'=>$v['v']];
         }
-        $value['glossary']['parameter']=$parm;
+        $value['list']['parameter']=$parm;
         $this->utilities->jsonResponse($value,'createText');
     }
     protected function checkDataLength($value,$label,$min,$max){

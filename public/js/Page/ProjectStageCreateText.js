@@ -13,7 +13,9 @@ class ProjectStageCreateText{
     link={};
     helplink={};
     resonse; 
-    Glossary={};
+    Glossary={
+        'text':{}
+    };
     /* rename data to stageData */
     data={};
     stageData={};
@@ -36,7 +38,7 @@ class ProjectStageCreateText{
         this.Html=Stage.Items.Html;
         this.Xhr=Stage.Items.Xhr2;
         this.XhrTable=Stage.Items.Xhr;
-        this.Glossary=Stage.Items.Glossary['text'];
+        this.Glossary.text=Stage.Items.Glossary['text'];
     }
     getXhrParm(type,task,method){
         return {
@@ -201,7 +203,7 @@ class ProjectStageCreateText{
         var mainDiv=this.Html.getRow();
             mainDiv.classList.add('d-none');
             this.helplink['preview'].whole=mainDiv;
-            /* this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'); */
+            /* this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'); */
             //this.helplink.preview.pageBackgroundColor=this.stageData.style.backgroundcolor;
         return mainDiv;
     }
@@ -249,7 +251,7 @@ class ProjectStageCreateText{
         var departmentLabelDiv=this.Html.getCol(1);
         var departmentInputDiv=this.Html.getCol(11);
             departmentLabelDiv.appendChild(this.createLabel('h3','Dział:'));
-        var department=this.createSelect('department','department','w-100');
+        var department=this.createSelect('department','department','form-control w-100');
             department.setAttribute('aria-describedby',"departmentHelp" );
             department.appendChild(this.createSelectOption('Aktualny:',defaultDepartment));  
             department.appendChild(this.createSelectOption('Dostępne:',this.Department.avaDepartmentList)); 
@@ -618,20 +620,26 @@ class ProjectStageCreateText{
     createSubsectionRowGroup(isection,isub,iSubRow,subsectionrow,helplink){
         console.log('ProjectStageCreateText::createSubsectionRowGroup()');
         var mainDiv=this.Html.getRow();
-        /* SET SUBSECTION ROW */
-        mainDiv.appendChild(this.createSubsectionRow(isection,isub,iSubRow,subsectionrow,helplink));
-        /* CREATE ERROR DIV */
-        mainDiv.appendChild(this.createTextError(helplink[iSubRow]));  
+            /* SET SUBSECTION ROW */
+            mainDiv.appendChild(this.createSubsectionRow(isection,isub,iSubRow,subsectionrow,helplink));
+            /* CREATE ERROR DIV */
+            mainDiv.appendChild(this.createTextError(helplink[iSubRow]));  
         /* CREATE TEXT TOOL */
-        mainDiv.appendChild(this.createTextTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow]));  
-        /* SETUP HELPLINK */
-        helplink[iSubRow]['all']=mainDiv;
+        var textTool = this.createTextTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow]);
+        /* CREATE CONTROL */
+        var mainDivControl = this.createControlTool('Formatowanie',textTool);
+            mainDiv.appendChild(mainDivControl);
+            mainDiv.appendChild(textTool);
+            /* SETUP HELPLINK */
+            helplink[iSubRow]['all']=mainDiv;
         return mainDiv;
     }
     createExtendedSubsectionRow(isection,isub,isubrow,subsectionrow,helplink){
         console.log('ProjectStageCreateText::createExtendedSubsectionRow()');
         var mainDiv=this.createSubsectionRowGroup(isection,isub,isubrow,subsectionrow,helplink);
-            mainDiv.appendChild(this.createExtendedTextTool(isection,isub,isubrow,subsectionrow[isubrow],helplink[isubrow]));  
+            //mainDiv.appendChild(this.createExtendedTextTool(isection,isub,isubrow,subsectionrow[isubrow],helplink[isubrow]));  
+            mainDiv.childNodes[3].appendChild(this.createExtendedTextTool(isection,isub,isubrow,subsectionrow[isubrow],helplink[isubrow]));  
+        console.log(mainDiv.childNodes[3]);
         return mainDiv;
     }
     createSubsectionRow(isection,isub,isubrow,subsectionrow,helplink){
@@ -666,6 +674,10 @@ class ProjectStageCreateText{
             //removeDiv.appendChild(this.getRemoveButton("rmsubsection-"+isection+'-'+isub+'-'+isubrow));
             removeDiv.appendChild(this.getRemoveButton(isubrow,subsectionrow,helplink));
         var v = document.createTextNode(subsectionrow[isubrow].data.value.toString());
+        
+        //var p = document.createElement('p');
+          //  p.
+        
         /* LABEL */
         var label=document.createElement('LABEL');
             label.setAttribute('class','col-form-label');
@@ -699,10 +711,15 @@ class ProjectStageCreateText{
             helplink[isubrow].value=input;
             
             labelDiv.appendChild(label);
+            
+            //var mainDivControl = this.createControlTool('Formatowanie',input);
+            //labelDiv.appendChild(mainDivControl);
+            
             valueDiv.appendChild(input);
             
             mainDivSectionLabel.appendChild(sectionLabel);
             mainDiv.appendChild(labelDiv);
+            
             mainDiv.appendChild(valueDiv);
             mainDiv.appendChild(removeDiv);
             
@@ -880,6 +897,45 @@ class ProjectStageCreateText{
            //mainDivCol.appendChild(mainDiv);
         return mainDiv;
     }
+    createControlTool(labelText,eleText){
+        var mainCol = this.Html.getCol(12);
+            mainCol.classList.add('mt-1','mb-1');
+        var mainDivControl=this.Html.getRow();   
+        var mainDivControlCol = this.Html.getCol(2);
+        
+        var mainDivControlCol1 = this.Html.getCol(1);   
+        var mainDivControlCol2 = this.Html.getCol(9);
+            
+            
+            mainDivControlCol.classList.add('btn-group','btn-group-toggle');
+            mainDivControlCol.appendChild(this.createControl(labelText,eleText));
+            
+            
+            mainDivControl.appendChild(mainDivControlCol1);
+            mainDivControl.appendChild(mainDivControlCol);
+            mainDivControl.appendChild(mainDivControlCol2);
+            mainCol.appendChild(mainDivControl);
+        return mainCol;
+    }
+    createControl(label,ele){
+        /* CONTROL */
+        var control = document.createElement('button');
+            control.setAttribute('type','button');
+            control.classList.add('btn','btn-outline-dark','btn-sm');
+            control.onclick = function (){
+                //console.log(ele);
+                //console.log(ele.classList);
+                //console.log(ele.classList.contains('d-none'));
+                if(ele.classList.contains('d-none')){
+                    ele.classList.remove('d-none');
+                }
+                else{
+                    ele.classList.add('d-none');
+                };
+            };
+            control.innerText = label;
+            return control; 
+    }
     createTextTool(isection,isub,isubrow,subsectionrow,helplink){
         /*
         console.log('ProjectStageCreateText::createTextTool()');
@@ -889,7 +945,9 @@ class ProjectStageCreateText{
         console.log(helplink);
         */
         var mainDivCol=this.Html.getCol(12);
+            mainDivCol.classList.add('d-none','bg-light');  
         var mainDiv=this.Html.getRow();
+            
         var tool1=this.Html.getCol(3);
         var tool2=this.Html.getCol(3);
         var tool3=this.Html.getCol(3);
@@ -899,10 +957,10 @@ class ProjectStageCreateText{
         //var fontSize=this.valueFontSizeModification('Rozmiar tekstu:',this.getDefaultFontSize(subsectionrow.style.fontSize,subsectionrow.style.fontSize),this.getFontSizeList(subsectionrow.style.fontSize),subsectionrow.style,helplink.value);
         var fontSize=this.valueFontSizeModification('Rozmiar tekstu:',subsectionrow.style,helplink.value);
         
-        var color=this.valueStyleModification('color','Kolor tekstu:',this.getDefaultColor(subsectionrow.style.color,subsectionrow.style.colorName),this.getColorList(subsectionrow.style.color),subsectionrow.style,helplink.value);
-        var fontFamily=this.valueStyleModification('fontFamily','Czcionka:',this.getDefaultFont(subsectionrow.style.fontFamily,subsectionrow.style.fontFamily),this.getFontList(subsectionrow.style.fontFamily),subsectionrow.style,helplink.value);
-        var textAlign=this.valueStyleModification('textAlign','Wyrównanie:',this.getSelectKey(subsectionrow.style.textAlign,subsectionrow.style.textAlignName),this.getFontAlignList(subsectionrow.style.textAlign),subsectionrow.style,helplink.value);
-        var backgroundColor=this.valueStyleModification('backgroundColor','Kolor tła:',this.getDefaultBackgroundColor(subsectionrow.style.backgroundColor,subsectionrow.style.backgroundColorName),this.getBackgroundColorList(subsectionrow.style.backgroundColor),subsectionrow.style,helplink.value);
+        var color=this.setValueStyle('color','Kolor tekstu:',this.getDefaultColor(subsectionrow.style.color,subsectionrow.style.colorName),this.getColorList(subsectionrow.style.color),subsectionrow.style,helplink.value);
+        var fontFamily=this.setValueStyle('fontFamily','Czcionka:',this.getDefaultFont(subsectionrow.style.fontFamily,subsectionrow.style.fontFamily),this.getFontList(subsectionrow.style.fontFamily),subsectionrow.style,helplink.value);
+        var textAlign=this.setValueStyle('textAlign','Wyrównanie:',this.getSelectKey(subsectionrow.style.textAlign,subsectionrow.style.textAlignName),this.getFontAlignList(subsectionrow.style.textAlign),subsectionrow.style,helplink.value);
+        var backgroundColor=this.setValueStyle('backgroundColor','Kolor tła:',this.getDefaultBackgroundColor(subsectionrow.style.backgroundColor,subsectionrow.style.backgroundColorName),this.getBackgroundColorList(subsectionrow.style.backgroundColor),subsectionrow.style,helplink.value);
         
         tool1.appendChild(fontSize);
         tool1.appendChild(color);
@@ -924,7 +982,7 @@ class ProjectStageCreateText{
     }
       createTextDecorationTool(tool4,isection,isub,isubrow,subsectionRowStyle,helplinkValue){
         //console.log('ProjectStageCreateText::createTextDecorationTool()');
-        for(const prop of this.Glossary.getKey('decoration').entries()) {
+        for(const prop of this.Glossary.text.getKey('decoration').entries()) {
             this.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow,subsectionRowStyle,helplinkValue);  
         } 
     }
@@ -1013,7 +1071,7 @@ class ProjectStageCreateText{
         console.log('SUBSECTIONROW DATA valuenewline:');
         console.log(subsectionrow.data.valuenewline);
         */
-        var mainDivCol=this.Html.getCol(12);
+        //var mainDivCol=this.Html.getCol(12);
         var mainDiv=this.Html.getRow();
         var tool1=this.Html.getCol(5);
         var tool2=this.Html.getCol(5);
@@ -1026,9 +1084,10 @@ class ProjectStageCreateText{
         mainDiv.appendChild(tool1);
         mainDiv.appendChild(tool2);
         mainDiv.appendChild(tool3);
-        mainDivCol.appendChild(mainDiv);
+        return mainDiv;
+        //mainDivCol.appendChild(mainDiv);
          
-        return mainDivCol;
+        //return mainDivCol;
     }
     changeRadioButtonValue(radio,stageDataLink){//link
         /*
@@ -1103,10 +1162,10 @@ class ProjectStageCreateText{
         var label=document.createElement('span');
             label.setAttribute('class','text-info');
             label.innerHTML=title;
-        var select=this.createSelect(id,id,'w-75');
+        var select=this.createSelect(id,id,'form-control-sm form-control w-75');
             select.appendChild(this.createTextToolSelectOption('Domyślny:',actdata));  
             select.appendChild(this.createTextToolSelectOption('Dostępne:',alldata)); 
-        var select2=this.createSelect(id2,id2,'w-25');
+        var select2=this.createSelect(id2,id2,'form-control-sm form-control w-25');
             select2.appendChild(this.createTextToolSelectOption('Domyślny:',actdata2));  
             select2.appendChild(this.createTextToolSelectOption('Dostępne:',alldata2)); 
             
@@ -1123,21 +1182,24 @@ class ProjectStageCreateText{
         var label=document.createElement('span');
             label.setAttribute('class','text-info');
             label.innerHTML=title;
-        var select=this.createSelect(id,id,'w-100');
+        var select=this.createSelect(id,id,'form-control-sm form-control w-100');
             select.appendChild(this.createTextToolSelectOption('Domyślny:',actdata));  
             select.appendChild(this.createTextToolSelectOption('Dostępne:',alldata)); 
             div.appendChild(label);
             div.appendChild(select);
         return div;
     }
-      createSelect(id,name,width){
+    createSelect(id,name,c){
+        /*
+         * c - class
+         */
         var select=document.createElement('select');
-            select.setAttribute('class','form-control '+width);
+            select.setAttribute('class',c);
             select.setAttribute('id',id);
             select.setAttribute('name',name);
             return select;
     }
-      createSelectOption(title,data){
+    createSelectOption(title,data){
         var optionGroup=document.createElement('optgroup');
             optionGroup.setAttribute('label',title);
             optionGroup.setAttribute('class','bg-info text-white');
@@ -1151,7 +1213,7 @@ class ProjectStageCreateText{
             };
         return optionGroup;
     }
-    valueStyleModification(id,title,actdata,alldata,subsectionRowStyle,helplinkValue){
+    setValueStyle(id,title,actdata,alldata,subsectionRowStyle,helplinkValue){
         //console.log('ProjectStageCreateText::createTextToolSelectExtend()');
         var select = this.createTextToolSelect(id,title,actdata,alldata);
         /* CLOSURE - DOMKNIĘCIE*/
@@ -1173,7 +1235,7 @@ class ProjectStageCreateText{
         var idMeasurement = 'fontSizeMeasurement';
         
         var actFont = this.getDefaultFontSize(subsectionRowStyle.fontSize,subsectionRowStyle.fontSize);
-        var allFont = this.getFontSizeList(subsectionRowStyle.fontSize);
+        var allFont = this.getFontSizeList(subsectionRowStyle.fontSize,subsectionRowStyle.fontSizeMax);
         
         var actMeasurement = this.getDefaultFontSize(subsectionRowStyle.fontSizeMeasurement,subsectionRowStyle.fontSizeMeasurement);
         var allMeasurement = this.getFontSizeMeasurementList(subsectionRowStyle.fontSizeMeasurement);
@@ -1389,45 +1451,46 @@ class ProjectStageCreateText{
     }
     getColorList(exception){
         var value={};
-        for(var i=0;i<this.Glossary.getKeyCount('color');i++){
-            if(this.Glossary.getKeyPropertyAttribute('color',i,'v')!==exception){
-                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('color',i,'v'),this.Glossary.getKeyPropertyAttribute('color',i,'n'),this.Glossary.getKeyPropertyAttribute('color',i,'v'),'#FFFFFF','');
+        for(var i=0;i<this.Glossary.text.getKeyCount('color');i++){
+            if(this.Glossary.text.getKeyPropertyAttribute('color',i,'v')!==exception){
+                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),this.Glossary.text.getKeyPropertyAttribute('color',i,'n'),this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),'#FFFFFF','');
             }
         }
         return value;
     }
     getFontSizeMeasurementList(exception){
         var value={};        
-        for(var i=0;i<this.Glossary.getKeyCount('measurement');i++){
-            if(this.Glossary.getKeyPropertyAttribute('measurement',i,'v')!==exception){
-                value[i]=this.getSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('measurement',i,'v'),this.Glossary.getKeyPropertyAttribute('measurement',i,'n'));
+        for(var i=0;i<this.Glossary.text.getKeyCount('measurement');i++){
+            if(this.Glossary.text.getKeyPropertyAttribute('measurement',i,'v')!==exception){
+                value[i]=this.getSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('measurement',i,'v'),this.Glossary.text.getKeyPropertyAttribute('measurement',i,'n'));
             }
         }
         return value;
     }
     getBackgroundColorList(exception){
         var value={};
-        for(var i=0;i<this.Glossary.getKeyCount('color');i++){
+        for(var i=0;i<this.Glossary.text.getKeyCount('color');i++){
               /* TO DO -> CALCULATE FONT COLOR */
-            if(this.Glossary.getKeyPropertyAttribute('color',i,'v')!==exception){
-                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('color',i,'v'),this.Glossary.getKeyPropertyAttribute('color',i,'n'),'#FFFFFF',this.Glossary.getKeyPropertyAttribute('color',i,'v'),'');
+            if(this.Glossary.text.getKeyPropertyAttribute('color',i,'v')!==exception){
+                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),this.Glossary.text.getKeyPropertyAttribute('color',i,'n'),'#FFFFFF',this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),'');
             }
         }
         return value;
     }
     getFontAlignList(exception){
         var value={};        
-        for(var i=0;i<this.Glossary.getKeyCount('textAlign');i++){
-            if(this.Glossary.getKeyPropertyAttribute('textAlign',i,'v')!==exception){
-                value[i]=this.getSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('textAlign',i,'v'),this.Glossary.getKeyPropertyAttribute('textAlign',i,'n'));
+        for(var i=0;i<this.Glossary.text.getKeyCount('textAlign');i++){
+            if(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v')!==exception){
+                value[i]=this.getSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v'),this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'n'));
             }
         }
         return value;
     }
-      getFontSizeList(exception){
+    getFontSizeList(exception,max){
         exception=parseInt(exception,10);
+         max=parseInt(max,10);
         var value={};
-        for(var i=2;i<57;){
+        for(var i=2;i<max+1;){
             if(i!==exception){
                 value[i]=this.getSelectKeyProperties(i,i);  
             }
@@ -1438,9 +1501,9 @@ class ProjectStageCreateText{
     getFontList(exception){
         //console.log('ProjectStageCreateText::getFontList()');
         var value={};
-        for(var i=0;i<this.Glossary.getKeyCount('fontFamily');i++){
-            if(this.Glossary.getKeyPropertyAttribute('fontFamily',i,'v')!==exception){
-                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.getKeyPropertyAttribute('fontFamily',i,'v'),this.Glossary.getKeyPropertyAttribute('fontFamily',i,'v'),'#000000','#FFFFFF',this.Glossary.getKeyPropertyAttribute('fontFamily',i,'v'));
+        for(var i=0;i<this.Glossary.text.getKeyCount('fontFamily');i++){
+            if(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v')!==exception){
+                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),'#000000','#FFFFFF',this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'));
             }
         }
         return value;
@@ -1459,7 +1522,7 @@ class ProjectStageCreateText{
         var toolMain3=this.Html.getCol(3);
         var toolMain4=this.Html.getCol(3);    
 
-        var pageBackgroundcolor=this.createTextToolSelect('backgroundcolor','Wskaż kolor tła strony:',this.getDefaultBackgroundColor(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),this.getBackgroundColorList());
+        var pageBackgroundcolor=this.createTextToolSelect('backgroundcolor','Wskaż kolor tła strony:',this.getDefaultBackgroundColor(this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),this.getBackgroundColorList());
  
             /* CLOSURE */
             pageBackgroundcolor.onchange = function (){   
@@ -1472,7 +1535,7 @@ class ProjectStageCreateText{
         
         toolMain1.appendChild(newPage);    
         
-        toolMain2.appendChild(this.valueStyleModification('backgroundimage','Wskaż obraz tła strony:'));
+        toolMain2.appendChild(this.setValueStyle('backgroundimage','Wskaż obraz tła strony:'));
 
         mainDiv.appendChild(h5);
         
@@ -1618,13 +1681,8 @@ class ProjectStageCreateText{
                 console.log(subsectionrow);
                 console.log('helplink');
                 console.log(classObject.helplink);
-                
                 helplink.row[iRow]=classObject.getHelpLinkSubsectionRow();
-                
-                //ProjectStageCreateText.helplink.section['section-'+isection]['subsection'][isubsection].dynamic.appendChild(ProjectStageCreateText.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow[iRow]));
-                //helplink.dynamic.appendChild(ProjectStageCreateText.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow[iRow],helplink.row[iRow]));
                 helplink.dynamic.appendChild(classObject.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow,helplink.row));
-                //helplink.dynamic.appendChild(ProjectStageCreateText.createExtendedSubsectionRow(iRow,subsectionrow,helplink.row));
                 /* INCREMENT SUBSECTION ROW */
                 iRow++;
             };
@@ -1721,12 +1779,12 @@ class ProjectStageCreateText{
                     /* SET PROPER AS IN SQL */
                     departmentName:this.Department.defaultDepartment[0].n,
                     /* SET SQL new_page to valuenewline */
-                    valuenewline:this.getValueChar(this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_PAGE_FROM_NEW','v'))
+                    valuenewline:this.getValueChar(this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_PAGE_FROM_NEW','v'))
                },
                property:{},
                style:{
-                   backgroundColor:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
-                   backgroundColorName:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
+                   backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
+                   backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
                    backgroundImage:''
                    //,newPage:1
                 },
@@ -1789,23 +1847,24 @@ class ProjectStageCreateText{
                     valuenewline:newLine
                 },
                 style:{
-                    fontSize:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),
+                    fontSize:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),
+                    fontSizeMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MAX','v'),
                     /* ADD TO SQL - fontSizeMeasurement */
-                    fontSizeMeasurement:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v'),
-                    color:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),
+                    fontSizeMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v'),
+                    color:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),
                     /* ADD TO SQL - colorName */
-                    colorName:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','n'),
-                    backgroundColor:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
+                    colorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','n'),
+                    backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
                     /* ADD TO SQL - backgroundColorName */
-                    backgroundColorName:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
-                    fontFamily:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),
-                    fontWeight:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v'),
-                    fontStyle:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v'),
-                    underline:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
-                    'line-through':this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
-                    textAlign:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),
+                    backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
+                    fontFamily:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),
+                    fontWeight:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v'),
+                    fontStyle:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v'),
+                    underline:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
+                    'line-through':this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
+                    textAlign:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),
                     /* ADD TO SQL - backgroundColorName */
-                    textAlignName:this.Glossary.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','n')
+                    textAlignName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','n')
                 },
                 property:{
                     /* ADD TO SQL - 0 -> n, 1 -> y */ 

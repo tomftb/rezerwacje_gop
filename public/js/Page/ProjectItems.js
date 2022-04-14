@@ -37,7 +37,8 @@ class ProjectItems{
         this.Table = new Table(this.Xhr);
         //Items.setLoadInfo();
         this.Glossary={
-            text:new Glossary()
+            text:new Glossary(),
+            list:new Glossary()
         };
         this.setLoadInfo();
         this.setLoadModalInfo(); 
@@ -63,8 +64,10 @@ class ProjectItems{
     }
     setUpGlossary(response){
         var data = this.setTableResponse(response);
-        this.Glossary['text'].fill(data.data.value.glossary);
-        console.log(this.Glossary);
+        //console.log(data);
+        this.Glossary['text'].fill(data.data.value['text']);
+        this.Glossary['list'].fill(data.data.value['list']);
+        //console.log(this.Glossary);
         /* SETUP STAGE PROPERTY */
         this.Stage.Property.setData(this.Glossary);
         /* run default table table */

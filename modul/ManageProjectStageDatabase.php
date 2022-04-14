@@ -20,19 +20,25 @@ abstract class ManageProjectStageDatabase {
         $this->dbUtilities=new DatabaseUtilities();
     }
     public function __destruct(){}
-    protected function getStageGlossary(){
+    protected function getStageGlossaryText(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $glossary['color']=$this->dbUtilities->getColor();
-        $glossary['fontFamily']=$this->dbUtilities->getFontFamily();
-        $glossary['decoration']=$this->dbUtilities->getStyle(0);
-        $glossary['textAlign']=$this->dbUtilities->getStyle(1);
-        $glossary['measurement']=$this->dbUtilities->getStyle(2);
-        $glossary['department']=$this->dbUtilities->getUserDepartment($_SESSION['userid']);
-        
-        return $glossary;
+        return [
+            'color'=>$this->dbUtilities->getColor(),
+            'fontFamily'=>$this->dbUtilities->getFontFamily(),
+            'decoration'=>$this->dbUtilities->getStyle(0),
+            'textAlign'=>$this->dbUtilities->getStyle(1),
+            'measurement'=>$this->dbUtilities->getStyle(2),
+            'department'=>$this->dbUtilities->getUserDepartment($_SESSION['userid'])
+        ];
     }
-    protected function getStageParameters(){
-        return $this->dbUtilities->getParam('STAGE_%');
+    protected function getStageGlossaryList(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        return [
+            'listType'=>$this->dbUtilities->getListType()
+        ];
+    }
+    protected function getStageParameters($parm='STAGE_%'){
+        return $this->dbUtilities->getParam($parm);
     }
     protected function getStages($where='',$parm=[]){
         $this->Log->log(0,"[".__METHOD__."]");

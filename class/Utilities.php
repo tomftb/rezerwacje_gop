@@ -18,14 +18,11 @@ class Utilities
         'info'=>'',
         'data'=>''
     );
-    
-    public function __construct()
-    {
+    public function __construct(){
         $this->Log=Logger::init(__METHOD__);
         $this->Error=New ErrorHandler();
     }
-    public function checkInputGetValInt($key)
-    {
+    public function checkInputGetValInt($key){
         $i=filter_input(INPUT_GET,$key,FILTER_VALIDATE_INT);
         $this->Log->log(0,"[".__METHOD__."] KEY => ".$i);
         if(trim($i)!=='')
@@ -383,23 +380,19 @@ class Utilities
         }
         return ($this->response);
     }
-    public function getYearFromData($date,$delimiter='-')
-    {
+    public function getYearFromData($date,$delimiter='-'){
         $tmp=explode($delimiter,$date);
         return $tmp[0];
     }
-    public function getData()
-    {
+    public function getData(){
         $this->Log->log(0,"[".__METHOD__."]");
         return ($this->response['data']);
     }
-    public function getInfo()
-    {
+    public function getInfo(){
         $this->Log->log(0,"[".__METHOD__."]");
         return ($this->response['info']);
     }
-    public function getStatus()
-    {
+    public function getStatus(){
         $this->Log->log(0,"[".__METHOD__."]");
         return ($this->response['status']);
     }

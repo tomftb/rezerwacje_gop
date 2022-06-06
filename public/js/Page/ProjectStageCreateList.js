@@ -1,3 +1,7 @@
+/*
+ * 
+ * Author: Tomasz Borczynski
+ */
 class ProjectStageCreateList{
     Modal=new Object();
     Items=new Object();
@@ -5,11 +9,15 @@ class ProjectStageCreateList{
     Html=new Object();
     Xhr=new Object();
     XhrTable=new Object();
+    TabStop = new Object();
     /* FIELD COUNTER */
     i=0;
     /* FIELD COUNTER */
     iSectionField=1;
     sectionCount=1;
+    /* FLOAT */
+    ejectionMultiplier=0.0;
+    
     link={};
     helplink={};
     resonse; 
@@ -41,6 +49,9 @@ class ProjectStageCreateList{
         this.XhrTable=Stage.Items.Xhr;
         this.Glossary.text=Stage.Items.Glossary['text'];
         this.Glossary.list=Stage.Items.Glossary['list'];
+        this.DocPreview = new DocPreview();
+        this.Utilities = new Utilities();
+        this.TabStop = new TabStop();
     }
     getXhrParm(type,task,method){
         return {
@@ -55,6 +66,13 @@ class ProjectStageCreateList{
     create(){
         console.log('ProjectStageCreateList::create()');
         try{
+            /* SETUP EJECTION MULTIPLIER */
+            this.ejectionMultiplier=parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
+            /* SETUP TABSTOP PARAMETERS */
+            this.TabStop.setParameter(this.Glossary.text.like('parameter','^STAGE_TEXT_TABSTOP'));
+            this.TabStop.setProperty('listMeasurement',this.Glossary.text.item.listMeasurement);
+            this.TabStop.setProperty('tabStopAlign',this.Glossary.text.item.tabStopAlign);
+            this.TabStop.setProperty('leadingSign',this.Glossary.text.item.leadingSign);
             /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
             /* SET STAGE CREATE TEXT DEFAULT DEPARTMENT LIST */
@@ -94,7 +112,7 @@ class ProjectStageCreateList{
             this.createManageButton('Dodaj');
         }
         catch(err){
-            console.log('ProjectStageCreateList::setUpModal()');
+            console.log('ProjectStageCreateList::setUpModal()\r\nERROR:');
             console.log(err);
             this.Items.Table.setError('An Application Error Has Occurred!');
             return false;
@@ -105,7 +123,7 @@ class ProjectStageCreateList{
             this.Items.prepareModal('Dodaj etap projektu - lista','bg-info');
         }
         catch(err){
-            console.log('ProjectStageCreateList::setUpModal()');
+            console.log('ProjectStageCreateList::setUpModal()\r\nERROR:');
             console.log(err);
             this.Items.Table.setError('An Application Error Has Occurred!');
         }
@@ -315,192 +333,7 @@ class ProjectStageCreateList{
             console.log(mainDivSection);
         return mainDiv;
     }
-    setPreviewData(){
-        console.log('ProjectStageCreateList::setPreviewData()');
-        this.setPreviewPage();
-        this.setPreviewPageValue();
-    }
-    setPreviewPage(){
-        //console.log('ProjectStageCreateList::setPreviewPage()');   
-        this.helplink.preview.whole.style.backgroundColor='rgb(251,251,251)';
-        var wholePage=document.createElement('div');
-            wholePage.style.width='813px';
-            wholePage.style.height='1142px';
-            wholePage.style.backgroundColor='rgb(251,251,251)';
-            wholePage.style.paddingTop='10px';
-            wholePage.style.marginLeft='162px'; /* ALL 324, MAIN 10 */
-            wholePage.style.paddingLeft='10px'; /* ALL 324, MAIN 10 */
-        var blankPage=document.createElement('div');
-            blankPage.style.width='791px';
-            blankPage.style.height='1120px';   
-            blankPage.style.border='1px solid rgb(198,198,198)'; 
-            blankPage.style.backgroundColor=this.stageData.style.backgroundColor;
-        var writePage=document.createElement('div');
-            writePage.style.width='699px';
-            writePage.style.height='1028px';
-            /* IT IS DEPED OF FONT SIZE */
-            writePage.style.paddingTop='92px';
-            /* DEFAULT LEFT MARGIN 2,5 cm */ 
-            writePage.style.paddingLeft='92px'; /* ALL 314, MAIN 10 */
-            /* TO DO */
-            //writePage.style.textAlign=this.helplink.preview.pageTextAlign
-        blankPage.appendChild(writePage);
-        wholePage.appendChild(blankPage);
-        this.helplink.preview.whole.appendChild(wholePage);     
-        this.helplink.preview['write'] =  writePage;
-    }
-    setPreviewPageValue(){
-        /*
-        console.log('ProjectStageCreateList::setPreviewPageValue()');
-        console.log('stageData');
-        console.log(this.stageData);
-        console.log('helplink');
-        console.log(this.helplink);
-        */
-        //throw 'test--stop';;
-        var writePageSectionWidth=607;
-        var subsectionCount=0;
-        /* LOOP OVER  SECTION */   
-        for(const property in this.stageData.section){
-            /* SECTION */
-                console.log('SECTION');
-                console.log(property);
-                console.log('SECTION '+property+' DATA');
-                console.log(this.stageData.section[property]);
-                console.log('SECTION '+property+' DATA SUBSECTION LENGTH');
-                subsectionCount=Object.keys(this.stageData.section[property].subsection).length;
-                console.log(subsectionCount);
-            
-            /* CHECK AND SETUP COLUMNS NUMBER */
-            writePageSectionWidth=Math.floor(607/subsectionCount); /* minus padding left 92px */
-            /*
-                console.log('SECTION '+property+' DATA subsectionvisible');
-                console.log(this.stageData.section[property].subsectionvisible);
-            */
-            //console.log('SECTION '+property+' ALL DATA subsection');
-            //console.log(this.stageData.section[property].subsection);
-            
-             /* LOOP OVER SUBSECTION - VISIBLE */   
-            for(var i=0;i<subsectionCount;i++){
-            //for(var i=0;i<this.stageData.section[property].subsectionvisible;i++){
-                /* SUBSECTION  
-                    console.log('SECTION '+property+' DATA subsection '+i);
-                    console.log(this.stageData.section[property].subsection[i]);
-                */  
-                var writePageSection=document.createElement('div');
-                    writePageSection.style.width=writePageSectionWidth+'px';
-                    writePageSection.style.border='0px';
-                    writePageSection.style.margin='0px';
-                    writePageSection.style.cssFloat='LEFT';
-                    /* IN FUTURE SETUP SUBSECTION DATA */
-                    /* IN FUTURE SETUP SUBSECTION PROPERTY */
-                    /* IN FUTURE SETUP SUBSECTION STYLE */
-               
-                    /* NEW PARAGRAPH -> TO DO SET PARAGRAPH STYLE -> MARGIN -> PADDING ...*/
-                    
-                    var p=document.createElement('p');
-                        /* top margin, right margin, bottom margin, left margin */
-                        p.style.margin = "0px 0px 0px 0px";
-                        p.style.padding = "0px 0px 0px 0px";
 
-                    /* LOOP OVER SUBSECTION ROW */
-                    for(const propSubsection in this.stageData.section[property].subsection[i].subsectionrow){
-                        console.log('SUBSECTION ROW:');
-                        console.log(propSubsection);
-                        console.log('SUBSECTION ROW FULL DATA:');
-                        console.log(this.stageData.section[property].subsection[i].subsectionrow[propSubsection]);
-                        /* SUBSECTION ROW DATA */
-                        console.log('SUBSECTION ROW DATA');
-                        console.log(this.stageData.section[property].subsection[i].subsectionrow[propSubsection].data);
-                       
-                        /* CHECK FOR BREAKLINE AND SET TEXT ALIGN => FOR VALUE SET VALUE NOT A REFERENCE ! */
-                        
-                        p = this.setPreviewPageBreakLine(writePageSection,p,this.stageData.section[property].subsection[i].subsectionrow[propSubsection].data.valuenewline,this.stageData.section[property].subsection[i].subsectionrow[propSubsection].style.textAlign);//
-                        
-                        
-                        /* SUBSECTION ROW PROPERTY 
-                            console.log('SUBSECTION ROW PROPERTY');
-                            console.log(this.stageData.section[property].subsection[i].subsectionrow[propSubsection].property);
-                        */
-                        /* SUBSECTION ROW STYLE */
-                        console.log('SUBSECTION ROW STYLE');
-                        console.log(this.stageData.section[property].subsection[i].subsectionrow[propSubsection].style);
-                        /* SETUP SUBSECTION ROW */
-                        this.setPreviewValue(p,this.stageData.section[property].subsection[i].subsectionrow[propSubsection]);
-                        
-                       
-                    /* END LOOP OVER SUBSECTION ROW */
-                    }
-                    writePageSection.appendChild(p);
-                    console.log(writePageSection);
-                    
-                    this.helplink.preview['write'].appendChild(writePageSection);
-            /* END LOOP OVER SUBSECTION - VISIBLE */   
-            }
-        /* END LOOP OVER SECTION */     
-        };
-    }
-    setPreviewPageBreakLine(writePageSection,p,valuenewline,textAlign){
-        /* 
-            console.log('ProjectStageCreateList::setPreviewPageBreakLine()');
-            console.log('writePageSection');
-            console.log(writePageSection);
-            console.log('p');
-            console.log(p);
-            console.log('valuenewline');
-            console.log(valuenewline);
-            console.log('textAlign');
-            console.log(textAlign);
-        */
-        if(valuenewline==='y'){
-            console.log('VALUE NEW LINE === y ADD NEW P');
-            //p.style.textAlign=textAlign;
-            writePageSection.appendChild(p);
-            var pNew=document.createElement('p');
-                pNew.style.margin = "0px 0px 0px 0px";
-                pNew.style.padding = "0px 0px 0px 0px";
-                pNew.style.textAlign=textAlign;
-            return pNew;
-        }
-        else{
-            p.style.textAlign=textAlign;
-        }
-        return p;    
-    }
-    setPreviewValue(p,subsectionRow){
-        console.log('ProjectStageCreateList::setPreviewValue()');
-        console.log(subsectionRow);
-        var span=document.createElement('span');
-            span.style.fontSize=subsectionRow.style.fontSize+subsectionRow.style.fontSizeMeasurement;
-            span.style.fontFamily=subsectionRow.style.fontFamily;
-            span.style.color=subsectionRow.style.color;
-            span.style.backgroundColor=subsectionRow.style.backgroundColor;
-            span.style.fontWeight='normal';
-
-        var text=document.createTextNode(subsectionRow.data.value);
-            /* SET TEXT-DECORATION */ 
-            this.setPreviewValueTextDecoration(span,subsectionRow.style);
-            /* SET FONT-WEIGHT */ 
-            if(subsectionRow.fontWeight==='1'){
-                span.style.fontWeight='bold';
-            }
-            /* SET ITALIC */ 
-            if(subsectionRow.style.fontStyle==='1'){
-                span.style.fontStyle='italic';
-            }
-        span.appendChild(text);
-        p.appendChild(span);
-    }
-    setPreviewValueTextDecoration(span,style){
-        var textDecoration='';
-        if(style.underline==='1'){
-            textDecoration+='underline';
-        };
-        if(style['line-through']==='1'){
-            textDecoration+=' line-through';
-        };
-        span.style.textDecoration=textDecoration;
-    }
     createSection(iSection,section,helplink){
         console.log('ProjectStageCreateList::createSection()');
         console.log('helplink:');
@@ -626,17 +459,17 @@ class ProjectStageCreateList{
         mainDiv.appendChild(this.createSubsectionRow(isection,isub,iSubRow,subsectionrow,helplink));
         /* CREATE ERROR DIV */
         mainDiv.appendChild(this.createTextError(helplink[iSubRow]));  
-        /* CREATE TEXT TOOL */
-        var textTool = this.createTextTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow]);
-         /* CREATE LIST TOOL */
-        var listTool = this.createListTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow]);
+       
         
-        var mainDivControl = this.createControlTool('Formatowanie',textTool,'Opcje listy',listTool);
         
-        mainDiv.appendChild(mainDivControl);
+        //var mainDivControl = this.createControlTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow]);
+        //var mainDivControl = this.createControlTool('Formatowanie',textTool,'Opcje listy',listTool);
         
-        mainDiv.appendChild(textTool);  
-        mainDiv.appendChild(listTool);  
+        this.createControlTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow],mainDiv);
+        //mainDiv.appendChild(mainDivControl);
+        
+        //mainDiv.appendChild(textTool);  
+       //mainDiv.appendChild(listTool);  
         /* SETUP HELPLINK */
         helplink[iSubRow]['all']=mainDiv;
         return mainDiv;
@@ -678,7 +511,7 @@ class ProjectStageCreateList{
             //removeDiv.classList.add('float-right');
             //removeDiv.appendChild(this.getRemoveButton("rmsubsection-"+isection+'-'+isub+'-'+isubrow));
             removeDiv.appendChild(this.getRemoveButton(isubrow,subsectionrow,helplink));
-        var v = document.createTextNode(subsectionrow[isubrow].data.value.toString());
+        var v = document.createTextNode(subsectionrow[isubrow].paragraph.property.value.toString());
         /* LABEL */
         var label=document.createElement('LABEL');
             label.setAttribute('class','col-form-label');
@@ -694,23 +527,31 @@ class ProjectStageCreateList{
             input.setAttribute('rows','1');
             
             input.oninput = function(){
-                subsectionrow[isubrow].data.value=this.value;
+                subsectionrow[isubrow].paragraph.property.value=this.value;
             };
 
             /* SET INPUT TEXT STYLE FROM PARAMETER */
             
-            input.style.fontSize=subsectionrow[isubrow].style.fontSize+subsectionrow[isubrow].style.fontSizeMeasurement;  
-            input.style.color=subsectionrow[isubrow].style.color;
-            input.style.backgroundColor=subsectionrow[isubrow].style.backgroundColor;
-            input.style.fontFamily=subsectionrow[isubrow].style.fontFamily;
-            input.style.fontWeight=this.setFontStyle(subsectionrow[isubrow].style.fontWeight,'BOLD','NORMAL');
-            input.style.fontStyle=this.setFontStyle(subsectionrow[isubrow].style.fontStyle,'ITALIC','');
-            input.style.textDecoration=this.setFontStyle(subsectionrow[isubrow].style.underline,'UNDERLINE','')+" "+this.setFontStyle(subsectionrow[isubrow].style['line-through'],'line-through','');
-            input.style.textAlign=subsectionrow[isubrow].style.textAlign;
+            input.style.fontSize=subsectionrow[isubrow].paragraph.style.fontSize+subsectionrow[isubrow].paragraph.style.fontSizeMeasurement;  
+            input.style.color=subsectionrow[isubrow].paragraph.style.color;
+            input.style.backgroundColor=subsectionrow[isubrow].paragraph.style.backgroundColor;
+            input.style.fontFamily=subsectionrow[isubrow].paragraph.style.fontFamily;
+            input.style.fontWeight=this.setFontStyle(subsectionrow[isubrow].paragraph.style.fontWeight,'BOLD','NORMAL');
+            input.style.fontStyle=this.setFontStyle(subsectionrow[isubrow].paragraph.style.fontStyle,'ITALIC','');
+            input.style.textDecoration=this.setFontStyle(subsectionrow[isubrow].paragraph.style.underline,'UNDERLINE','')+" "+this.setFontStyle(subsectionrow[isubrow].paragraph.style['line-through'],'line-through','');
+            input.style.textAlign=subsectionrow[isubrow].paragraph.style.textAlign;
             
             /* SETUP HELPLINK TO FIELD INPUT */
-
-            helplink[isubrow].value=input;
+            helplink[isubrow]={
+                text:{
+                    value:input
+                },
+                list:{
+                    /* FAKE */
+                    value:document.createElement('span')
+                }
+            };
+            //helplink[isubrow].value=input;
             
             labelDiv.appendChild(label);
             valueDiv.appendChild(input);
@@ -801,7 +642,8 @@ class ProjectStageCreateList{
                         */
                         subsection[i]=classObject.setUpNewStageSubsectionProp();
                         /* FIRST ALWAYS NOT NEW LINE */
-                        subsection[i].subsectionrow[0].data.valuenewline='n';
+                        //subsection[i].subsectionrow[0].data.valuenewline='n';
+                        subsection[i].subsectionrow[0].paragraph.property.valuenewline='n';
                         /* CREATE NEW DOM ELEMENT */
                         classObject.helplink.section[iSection].main.body.appendChild(classObject.createSubsection(iSection,i,subsection[i],helplinkSubsection));
                     }             
@@ -894,7 +736,15 @@ class ProjectStageCreateList{
            //mainDivCol.appendChild(mainDiv);
         return mainDiv;
     }
-    createControlTool(labelText,eleText,labelList,eleList){
+    //createControlTool(labelText,eleText,labelList,eleList){
+    createControlTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,mainDiv){
+        /* CREATE TEXT TOOL */
+        var textTool = this.createTextToolSection(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
+        /* CREATE TEXT TOOL */
+        var textTabulatorTool = this.createTabStopSectionTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow.text);
+        /* CREATE LIST TOOL */
+        var listTool = this.createListToolSection(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
+        
         var mainCol = this.Html.getCol(12);
             mainCol.classList.add('mt-1','mb-1');
         var mainDivControl=this.Html.getRow();   
@@ -905,15 +755,20 @@ class ProjectStageCreateList{
             
             
             mainDivControlCol.classList.add('btn-group','btn-group-toggle');
-            mainDivControlCol.appendChild(this.createControl(labelText,eleText));
-            mainDivControlCol.appendChild(this.createControl(labelList,eleList));
+            mainDivControlCol.appendChild(this.createControl('Formatowanie',textTool));
+            mainDivControlCol.appendChild(this.createControl('Tabulatory',textTabulatorTool));
+            mainDivControlCol.appendChild(this.createControl('Opcje listy',listTool));
             
             
             mainDivControl.appendChild(mainDivControlCol1);
             mainDivControl.appendChild(mainDivControlCol);
             mainDivControl.appendChild(mainDivControlCol2);
             mainCol.appendChild(mainDivControl);
-        return mainCol;
+        mainDiv.appendChild(mainCol);    
+        mainDiv.appendChild(textTool);  
+        mainDiv.appendChild(textTabulatorTool);  
+        mainDiv.appendChild(listTool);
+        
     }
     createControl(label,ele){
         /* CONTROL */
@@ -921,6 +776,7 @@ class ProjectStageCreateList{
             control.setAttribute('type','button');
             control.classList.add('btn','btn-outline-dark','btn-sm');
             control.onclick = function (){
+                //console.log(this.classList);
                 //console.log(ele);
                 //console.log(ele.classList);
                 //console.log(ele.classList.contains('d-none'));
@@ -930,20 +786,30 @@ class ProjectStageCreateList{
                 else{
                     ele.classList.add('d-none');
                 };
+                if(this.classList.contains('btn-outline-dark')){
+                    this.classList.remove('btn-outline-dark');
+                    this.classList.add('btn-dark');
+                }
+                else{
+                    this.classList.add('btn-outline-dark');
+                    this.classList.remove('btn-dark');
+                };
+                
             };
             control.innerText = label;
             return control; 
     }
-    createTextTool(isection,isub,isubrow,subsectionrow,helplink){
+    createTextToolSection(isection,isub,isubrow,subsectionrow,helplink){
         /*
-        console.log('ProjectStageCreateList::createTextTool()');
+        console.log('ProjectStageCreateList::createTextToolSection()');
         console.log(subsectionrow);
         console.log(subsectionrow.style);
         console.log('helplink');
         console.log(helplink);
         */
         var mainDivCol=this.Html.getCol(12);
-            mainDivCol.classList.add('d-none','bg-light');      
+            mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
+             mainDivCol.style.backgroundColor='#e6e6e6';
         var mainDiv=this.Html.getRow();
             
         var tool1=this.Html.getCol(3);
@@ -954,23 +820,40 @@ class ProjectStageCreateList{
        
             
         //var fontSize=this.valueFontSizeModification('Rozmiar tekstu:',this.getDefaultFontSize(subsectionrow.style.fontSize,subsectionrow.style.fontSize),this.getFontSizeList(subsectionrow.style.fontSize),subsectionrow.style,helplink.value);
-        var fontSize=this.valueFontSizeModification('Rozmiar tekstu:',subsectionrow.style,helplink.value);
+        var fontSize=this.valueFontSizeModification('Rozmiar tekstu:',subsectionrow.paragraph.style,helplink.text.value);
        
         
-        var color=this.setValueStyle('color','Kolor tekstu:',this.getDefaultColor(subsectionrow.style.color,subsectionrow.style.colorName),this.getColorList(subsectionrow.style.color),subsectionrow.style,helplink.value);
-        var fontFamily=this.setValueStyle('fontFamily','Czcionka:',this.getDefaultFont(subsectionrow.style.fontFamily,subsectionrow.style.fontFamily),this.getFontList(subsectionrow.style.fontFamily),subsectionrow.style,helplink.value);
-        var textAlign=this.setValueStyle('textAlign','Wyrównanie:',this.getSelectKey(subsectionrow.style.textAlign,subsectionrow.style.textAlignName),this.getFontAlignList(subsectionrow.style.textAlign),subsectionrow.style,helplink.value);
-        var backgroundColor=this.setValueStyle('backgroundColor','Kolor tła:',this.getDefaultBackgroundColor(subsectionrow.style.backgroundColor,subsectionrow.style.backgroundColorName),this.getBackgroundColorList(subsectionrow.style.backgroundColor),subsectionrow.style,helplink.value);
+        var color=this.setValueStyle('color','Kolor tekstu:',this.getDefaultColor(subsectionrow.paragraph.style.color,subsectionrow.paragraph.style.colorName),this.getColorList(subsectionrow.paragraph.style.color),subsectionrow.paragraph.style,helplink.text.value);
+        var fontFamily=this.setValueStyle('fontFamily','Czcionka:',this.getDefaultFont(subsectionrow.paragraph.style.fontFamily,subsectionrow.paragraph.style.fontFamily),this.getFontList(subsectionrow.paragraph.style.fontFamily),subsectionrow.paragraph.style,helplink.text.value);
+        var textAlign=this.setValueStyle('textAlign','Wyrównanie:',this.getSelectKey(subsectionrow.paragraph.style.textAlign,subsectionrow.paragraph.style.textAlignName),this.getFontAlignList(subsectionrow.paragraph.style.textAlign),subsectionrow.paragraph.style,helplink.text.value);
+        var backgroundColor=this.setValueStyle('backgroundColor','Kolor tła:',this.getDefaultBackgroundColor(subsectionrow.paragraph.style.backgroundColor,subsectionrow.paragraph.style.backgroundColorName),this.getBackgroundColorList(subsectionrow.paragraph.style.backgroundColor),subsectionrow.paragraph.style,helplink.text.value);
+        
+        
+        var tabStop=this.createTextToolTabStop();
         
         tool1.appendChild(fontSize);
         tool1.appendChild(color);
-        tool3.appendChild(backgroundColor);
-        
+        tool1.appendChild(backgroundColor);
         tool2.appendChild(fontFamily);
         tool2.appendChild(textAlign);
+        tool2.appendChild(tabStop);
+        
+         /* LEFT EJECTION */
+        var leftEjection=this.createLeftEjectionInput(isection,isub,isubrow,subsectionrow,helplink);
+        //var leftEjection=this.setInputStyle('Wcięcie z lewej strony:',subsectionrow.paragraph,'leftEjection','leftEjectionMeasurement','leftEjectionMin','leftEjectionMax',this.getDefaultList(this.Glossary.text.item.listMeasurement,subsectionrow.paragraph.style['leftEjectionMeasurement']));
+        /* RIGHT EJECTION */
+        var rightEjection=this.setInputStyle('Wcięcie z prawej strony:',subsectionrow.paragraph,'rightEjection','rightEjectionMeasurement','rightEjectionMin','rightEjectionMax',this.getMeasurementList(subsectionrow.paragraph.style['rightEjectionMeasurement']));
+        /* INDENTATION */
+        var indentation=this.setIndentation(subsectionrow.paragraph);
+        /* PARAGRAPH TYPE */
+        var paragraph=this.createParagraphType(subsectionrow.paragraph);
+        tool3.appendChild(leftEjection);
+        tool3.appendChild(rightEjection);
+        tool3.appendChild(indentation);
+        tool3.appendChild(paragraph);
        
         /* SET CSS BOLD, ITALIC ... */
-        this.createTextDecorationTool(tool4,isection,isub,isubrow,subsectionrow['style'],helplink.value); 
+        this.createTextDecorationTool(tool4,isection,isub,isubrow,subsectionrow.paragraph.style,helplink.text.value); 
 
         mainDiv.appendChild(tool1);
         mainDiv.appendChild(tool2);
@@ -982,15 +865,53 @@ class ProjectStageCreateList{
         return mainDivCol;
         //return mainDiv;
     }
-    createListTool(isection,isub,isubrow,subsectionrow,helplink){
+    createLeftEjectionInput(isection,isub,isubrow,row,helplink){
+        var input = this.setInputStyle('Wcięcie z lewej strony:',row.paragraph,'leftEjection','leftEjectionMeasurement','leftEjectionMin','leftEjectionMax',this.getMeasurementList(row.paragraph.style['leftEjectionMeasurement']));
+        //console.log(helplink);
+        //console.log(input.childNodes[1].childNodes[0]);
+        helplink.text['leftEjection']=input.childNodes[1].childNodes[0];
+        //throw 'aaa';
+        return input;
+    }
+    createTabStopSectionTool(isection,isub,isubrow,subsectionrow,helplink){
         var mainDivCol=this.Html.getCol(12);
-            mainDivCol.classList.add('d-none');
+            mainDivCol.classList.add('d-none','bg-light','pt-1','pb-1');    //'bg-light',
+            //mainDivCol.style.backgroundColor='#e6e6e6';
+        var mainDiv=this.Html.getRow();
+            
+        var tool1=this.Html.getCol(7);
+        var tool2=this.Html.getCol(1);
+        var tool3=this.Html.getCol(2);
+        var tool4=this.Html.getCol(2);
+            //tool4.classList.add('pt-4'); 
+        
+        tool1.appendChild(this.TabStop.create(subsectionrow.paragraph.tabStop));
+        
+        mainDiv.appendChild(tool1);
+        mainDiv.appendChild(tool2);
+        mainDiv.appendChild(tool3);
+        mainDiv.appendChild(tool4);
+            
+        mainDivCol.appendChild(mainDiv);
+        
+        return mainDivCol;
+    }
+
+   
+    
+    
+    createListToolSection(isection,isub,isubrow,subsectionrow,helplink){
+        console.log('ProjectStageCreateList::createListToolSection()');
+        var mainDivCol=this.Html.getCol(12);
+            mainDivCol.classList.add('d-none','pt-1','pb-1');
+            mainDivCol.style.backgroundColor='#e6e6e6';
         var mainDiv=this.Html.getRow();
         var tool1=this.Html.getCol(3);
         var tool2=this.Html.getCol(3);
         var tool3=this.Html.getCol(3);
         var tool4=this.Html.getCol(3);
             
+            console.log(this.Glossary.list);
         /* MARGIN 
         var marginLeft=this.valueFontSizeModification('Lewy margines:',subsectionrow.style,helplink.value);
         var marginRight=this.valueFontSizeModification('Prawy margines:',subsectionrow.style,helplink.value);
@@ -998,15 +919,34 @@ class ProjectStageCreateList{
         var marginBottom=this.valueFontSizeModification('Dolny margines:',subsectionrow.style,helplink.value);
         */
         /* LIST TYPE  */
-        var listType=this.setValueProperty('listType','Typ listy:',this.getSelectKey(subsectionrow.property.listType,subsectionrow.property.listTypeName),this.getListTypeList(subsectionrow.property.listType),subsectionrow.property);
-       
-        
+        var listType=this.setValueProperty('listType','Typ listy:',this.getSelectKey(subsectionrow.list.style.listType,subsectionrow.list.style.listTypeName),this.getListTypeList(subsectionrow.list.style.listType),subsectionrow.list.style);   
         /* LIST LEVEL  */
-        var listLevel=this.setValueProperty('listLevel','Poziom:',this.getSelectKey(subsectionrow.property.listLevel,subsectionrow.property.listLevelName),this.getListLevelList(subsectionrow.property.listLevel,subsectionrow.property.listLevelMax),subsectionrow.property);
+        var listLevel=this.createListLevelSelect(subsectionrow,helplink);
+        //var listLevel=this.setValueProperty('listLevel','Poziom listy:',this.getSelectKey(subsectionrow.list.property.listLevel,subsectionrow.list.property.listLevelName),this.getListLevelList(subsectionrow.list.property.listLevel,subsectionrow.list.property.listLevelMax),subsectionrow.list.property);
+        /* CONTINUE/NEW ELEMENT */
+        //var newListElement=this.createNewListElement(subsectionrow);
+        var newList=this.createNewListSelect(subsectionrow);
+        var fontSize=this.valueFontSizeModification('Rozmiar:',subsectionrow.list.style,helplink.list.value);
+        var color=this.setValueStyle('color','Kolor:',this.getDefaultColor(subsectionrow.list.style.color,subsectionrow.list.style.colorName),this.getColorList(subsectionrow.list.style.color),subsectionrow.list.style,helplink.list.value);
+        var fontFamily=this.setValueStyle('fontFamily','Czcionka:',this.getDefaultFont(subsectionrow.list.style.fontFamily,subsectionrow.list.style.fontFamily),this.getFontList(subsectionrow.list.style.fontFamily),subsectionrow.list.style,helplink.list.value);
+        var backgroundColor=this.setValueStyle('backgroundColor','Kolor tła:',this.getDefaultBackgroundColor(subsectionrow.list.style.backgroundColor,subsectionrow.list.style.backgroundColorName),this.getBackgroundColorList(subsectionrow.list.style.backgroundColor),subsectionrow.list.style,helplink.list.value);
+        
+        tool1.appendChild(fontSize);
+        tool1.appendChild(color);
+        tool1.appendChild(backgroundColor);
+        tool1.appendChild(fontFamily);
+
+       
+        /* SET CSS BOLD, ITALIC ... */
+        this.createTextDecorationTool(tool4,isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
+
        
         /* */
-        tool2.appendChild(listType);
+
         tool2.appendChild(listLevel);
+        tool2.appendChild(listType);
+        tool2.appendChild(newList);
+        
         /*
         tool3.appendChild(marginLeft);
         tool3.appendChild(marginRight);
@@ -1020,20 +960,83 @@ class ProjectStageCreateList{
         mainDivCol.appendChild(mainDiv);
         return mainDivCol;
     }
-    createTextDecorationTool(tool4,isection,isub,isubrow,subsectionRowStyle,helplinkValue){
+    createListLevelSelect(row,helplink){
+         //console.log('ProjectStageCreateList::createListLevelSelect()');
+        var multiplier = this.ejectionMultiplier;
+        var select = this.createTextToolSelect('listLevel','Poziom listy (mnożnik - '+multiplier.toString()+'):',this.getSelectKey(row.list.property.listLevel,row.list.property.listLevelName),this.getListLevelList(row.list.property.listLevel,row.list.property.listLevelMax));
+        /* CLOSURE - DOMKNIĘCIE*/
+        select.childNodes[1].onchange = function(){
+            /* SET NEW VALUE */
+            var newValue = parseInt(this.value)*multiplier;
+                row.list.property['listLevel']=this.value;
+                row.paragraph.style['leftEjection']=newValue;
+                /* HELPLINK */
+                console.log(row);
+                console.log(helplink);
+                helplink.text.leftEjection.value=newValue;
+                //console.log(actdata);
+                //console.log(alldata);
+        };
+        return select;
+        //var select = this.setValueProperty('listLevel','Poziom listy:',this.getSelectKey(row.list.property.listLevel,row.list.property.listLevelName),this.getListLevelList(row.list.property.listLevel,row.list.property.listLevelMax),row.list.property);
+            
+        //return select;
+    }
+    createParagraphType(subsectionrow){
+        var all={
+            0:{
+                v:'l',
+                n:'Element listy'
+            },
+            1:{
+                v:'p',
+                n:'Nowy akapit'
+            }
+        };
+        return this.setValueProperty('paragraph','Typ:',this.getSelectKey(subsectionrow.property.paragraph,subsectionrow.property.paragraphName),this.getNewElementList(all,subsectionrow.property.paragraph),subsectionrow.property);
+      
+    }
+    createNewListSelect(subsectionrow){
+        var all={
+            0:{
+                v:'y',
+                n:'Nowa lista'
+            },
+            1:{
+                v:'n',
+                n:'Kontynuacja'
+            }
+        };
+        return this.setValueProperty('newList','Nowa Lista:',this.getSelectKey(subsectionrow.list.property.newList,subsectionrow.list.property.newListName),this.getNewElementList(all,subsectionrow.list.property.newList),subsectionrow.list.property);
+    }
+    createNewListElement(subsectionrow){
+        var allListEle={
+            0:{
+                v:'y',
+                n:'Nowy element'
+            },
+            1:{
+                v:'n',
+                n:'Nowa lista'
+            }
+        };
+        return this.setValueProperty('listNewElement','Nowy element:',this.getSelectKey(subsectionrow.list.property.listNewElement,subsectionrow.list.property.listNewElementName),this.getNewElementList(allListEle,subsectionrow.list.property.listNewElement),subsectionrow.list.property);
+      
+    }
+    createTextDecorationTool(tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
         //console.log('ProjectStageCreateList::createTextDecorationTool()');
         for(const prop of this.Glossary.text.getKey('decoration').entries()) {
-            this.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow,subsectionRowStyle,helplinkValue);  
+            this.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue);  
         } 
     }
-    setTextDecorationToolEntry(decorationProp,tool4,isection,isub,isubrow,subsectionRowStyle,helplinkValue){
+    setTextDecorationToolEntry(decorationProp,tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
         /*
             decorationProp.n. - name
             decorationProp.v - value
          */
-        var prop = this.setTextDecorationToolEntryProperties(decorationProp,subsectionRowStyle);
+        var prop = this.setTextDecorationToolEntryProperties(decorationProp,subsectionRowAttr);
         
-        var input = this.createTextToolCheckBox(prop.inputName,isection,isub,isubrow,prop.label,prop.check,subsectionRowStyle,helplinkValue);
+        var input = this.createTextToolCheckBox(prop.inputName,isection,isub,isubrow,prop.label,prop.check,subsectionRowAttr,helplinkValue);
         
         tool4.appendChild(input);
     }
@@ -1055,14 +1058,15 @@ class ProjectStageCreateList{
            input.setAttribute('value','0');
         }     
     }
-    setTextDecorationToolEntryProperties(decorationProp,subsectionRowStyle){
+    setTextDecorationToolEntryProperties(decorationProp,subsectionRowAttr){
         /*
           console.log('ProjectStageCreateList::setTextDecorationToolEntryProperties()');
           console.log('decorationProp');
           console.log(decorationProp);
           console.log('subsectionRowStyle');
-          console.log(subsectionRowStyle);
+          console.log(subsectionRowAttr);
         */ 
+        //throw 'stop-1273';
         if (!('v' in decorationProp) || !('n' in decorationProp)){
             //console.log('Decoration Property don\'t have key v or n');
             return false;
@@ -1075,22 +1079,22 @@ class ProjectStageCreateList{
         };
         switch(decorationProp.v){
             case 'BOLD':
-                fullProp.check=subsectionRowStyle.fontWeight;
+                fullProp.check=subsectionRowAttr.fontWeight;
                 fullProp.inputName='fontWeight';
                 fullProp.label='<b>'+decorationProp.n+'</b>';
                 break;
             case 'UNDERLINE':
-                fullProp.check=subsectionRowStyle.underline;
+                fullProp.check=subsectionRowAttr.underline;
                 fullProp.inputName='underline';
                 fullProp.label='<u>'+decorationProp.n+'</u>';
                 break;
             case 'ITALIC':
-                fullProp.check=subsectionRowStyle.fontStyle;
+                fullProp.check=subsectionRowAttr.fontStyle;
                 fullProp.inputName='fontStyle';
                 fullProp.label='<i>'+decorationProp.n+'</i>';
                 break;
             case 'line-through':
-                fullProp.check=subsectionRowStyle['line-through'];
+                fullProp.check=subsectionRowAttr['line-through'];
                 fullProp.inputName='line-through';
                 fullProp.label='<span style="text-decoration:line-through;">'+decorationProp.n+'</span>';
                 break;
@@ -1117,7 +1121,7 @@ class ProjectStageCreateList{
         var tool2=this.Html.getCol(5);
         var tool3=this.Html.getCol(2);
         var radio = this.createTextToolRadioButton('valuenewline-'+isection+'-'+isub+'-'+isubrow,'Tekst od nowej lini?',this.getYesNowRadio());//'valuenewline-'+isection+'-'+isub+'-'+isubrow
-        this.changeRadioButtonValue(radio.childNodes[1],subsectionrow);
+        this.changeRadioButtonValue(radio.childNodes[1],subsectionrow.paragraph);
         tool1.appendChild(radio);
         
         //console.log(tool1.childNodes[0].childNodes[1]); 
@@ -1129,17 +1133,17 @@ class ProjectStageCreateList{
          
         //return mainDivCol;
     }
-    changeRadioButtonValue(radio,stageDataLink){//link
+    changeRadioButtonValue(radio,subsectionrowParagraph){//link
         /*
         console.log('ProjectStageCreateList::changeRadioButtonValue()');
         console.log(radio);
         console.log('SUBSECTIONROW');
-        console.log(stageDataLink);
+        console.log(subsectionrowParagraph);
         */
         /* FIRST RUN TO SET PROPER VALUE AND onClick FUNCTION */
         radio.childNodes.forEach(
             function(currentValue) {//, currentIndex, listObj
-                if(currentValue.childNodes[0].value === stageDataLink.data.valuenewline){
+                if(currentValue.childNodes[0].value === subsectionrowParagraph.property.valuenewline){
                     /* REMOVE ATTRIBUTE no-checked */
                     currentValue.childNodes[0].removeAttribute('no-checked');
                     /* ADD ATTRIBUTE checked */
@@ -1147,7 +1151,8 @@ class ProjectStageCreateList{
                 }
                 /* CLOSURE */
                 currentValue.childNodes[0].onclick = function (){
-                    stageDataLink.data.valuenewline = this.value;  
+                    
+                    subsectionrowParagraph.property.valuenewline = this.value;  
                     //link['valuenewline']=this.value;
                    // console.log(stageDataLink);
                 };
@@ -1157,7 +1162,7 @@ class ProjectStageCreateList{
        // link['valuenewline']=stageDataLink.data.valuenewline;
     }
 
-    createTextToolCheckBox(id,isection,isub,isubrow,title,defaultvalue,subsectionRowStyle,helplinkValue){
+    createTextToolCheckBox(id,isection,isub,isubrow,title,defaultvalue,subsectionRowAttr,helplinkValue){
         
         //if(defaultvalue)
           
@@ -1167,7 +1172,7 @@ class ProjectStageCreateList{
             div.setAttribute('class','form-check mt-1');
         var input=document.createElement('input');
             input.setAttribute('name',id+'-'+isection+'-'+isub+'-'+isubrow);
-            input.setAttribute('id',id+'-'+isection+'-'+isub+'-'+isubrow);
+            //input.setAttribute('id',id+'-'+isection+'-'+isub+'-'+isubrow);
             input.setAttribute('type','checkbox');
             input.classList.add('form-check-input');
             input.onclick = function (){
@@ -1180,7 +1185,9 @@ class ProjectStageCreateList{
                 else{
                     this.value='0';
                 }
-                subsectionRowStyle[id]=this.value;
+                console.log(subsectionRowAttr);
+                console.log(subsectionRowAttr[id]);
+                subsectionRowAttr[id]=this.value;
                 classObject.setValueCheckBoxStyle(id,this.value,helplinkValue);
             };
             this.setTextDecorationToolEntryCheck(input,defaultvalue);
@@ -1195,38 +1202,38 @@ class ProjectStageCreateList{
     }
     createTextToolDoubleSelect(id,title,actdata,alldata,id2,actdata2,alldata2){
         console.log('ProjectStageCreateList::createTextToolDoubleSelect()');
-        var divMain = document.createElement('div');
-            divMain.classList.add('w-100','mt-2');
+        var divMain = this.createInputHead(title);
         var div=document.createElement('div');
-            div.setAttribute('class','input-group');//w-100 input-group
-        var label=document.createElement('span');
-            label.setAttribute('class','text-info');
-            label.innerHTML=title;
+            div.setAttribute('class','input-group');//w-100 input-group  
         var select=this.createSelect(id,id,'form-control-sm form-control w-75');
-            select.appendChild(this.createTextToolSelectOption('Domyślny:',actdata));  
-            select.appendChild(this.createTextToolSelectOption('Dostępne:',alldata)); 
+            select.appendChild(this.Html.createOptionGroup('Domyślny:',actdata));  
+            select.appendChild(this.Html.createOptionGroup('Dostępne:',alldata)); 
         var select2=this.createSelect(id2,id2,'form-control-sm form-control w-25');
-            select2.appendChild(this.createTextToolSelectOption('Domyślny:',actdata2));  
-            select2.appendChild(this.createTextToolSelectOption('Dostępne:',alldata2)); 
-            
-            div.appendChild(select);
-            div.appendChild(select2);
-            divMain.appendChild(label);
-            divMain.appendChild(div);
+            select2.appendChild(this.Html.createOptionGroup('Domyślny:',actdata2));  
+            select2.appendChild(this.Html.createOptionGroup('Dostępne:',alldata2)); 
+        div.appendChild(select);
+        div.appendChild(select2);
+        divMain.appendChild(div);
         return divMain;
     }
     createTextToolSelect(id,title,actdata,alldata){
         //console.log('ProjectStageCreateList::createTextToolSelect()');
+        var div = this.createInputHead(title);    
+        var select=this.createSelect(id,id,'form-control-sm form-control w-100');
+            select.appendChild(this.Html.createOptionGroup('Domyślny:',actdata));  
+            select.appendChild(this.Html.createOptionGroup('Dostępne:',alldata));  
+            div.appendChild(select);
+            console.log(select);
+        return div;
+    }
+    createInputHead(title){
         var div=document.createElement('div');
             div.setAttribute('class','w-100 mt-2');
+            div.classList.add('w-100','mt-2');
         var label=document.createElement('span');
             label.setAttribute('class','text-info');
             label.innerHTML=title;
-        var select=this.createSelect(id,id,'form-control-sm form-control w-100');
-            select.appendChild(this.createTextToolSelectOption('Domyślny:',actdata));  
-            select.appendChild(this.createTextToolSelectOption('Dostępne:',alldata)); 
-            div.appendChild(label);
-            div.appendChild(select);
+        div.appendChild(label);   
         return div;
     }
     createSelect(id,name,c){
@@ -1239,7 +1246,7 @@ class ProjectStageCreateList{
             select.setAttribute('name',name);
             return select;
     }
-      createSelectOption(title,data){
+    createSelectOption(title,data){
         var optionGroup=document.createElement('optgroup');
             optionGroup.setAttribute('label',title);
             optionGroup.setAttribute('class','bg-info text-white');
@@ -1252,6 +1259,17 @@ class ProjectStageCreateList{
                     optionGroup.appendChild(option);
             };
         return optionGroup;
+    }
+    createTextToolTabStop(){
+        var act={
+                0:this.Utilities.getDefaultOptionProperties('none','Brak')        
+        };
+        var all=new Object();
+       
+        var select = this.createTextToolSelect('tabStop','Tabulacja:',act,all); 
+        
+        this.TabStop.setOption(select.childNodes[1].childNodes[1]);
+        return select;
     }
     setValueStyle(id,title,actdata,alldata,subsectionRowStyle,helplinkValue){
         //console.log('ProjectStageCreateList::createTextToolSelectExtend()');
@@ -1266,15 +1284,22 @@ class ProjectStageCreateList{
         return select;
     }
     setValueProperty(id,title,actdata,alldata,subsectionRowProperty){
-        //console.log('ProjectStageCreateList::createTextToolSelectExtend()');
+        //console.log('ProjectStageCreateList::setValueProperty()');
         
         var select = this.createTextToolSelect(id,title,actdata,alldata);
         /* CLOSURE - DOMKNIĘCIE*/
         select.childNodes[1].onchange = function(){
             /* SET NEW VALUE */
+            console.log('ProjectStageCreateList::setValueProperty()');
+            console.log('ID:');
+            console.log(id);
+            console.log('VALUE:');
+            console.log(this.value);
+            console.log('PROPERTY:');
+            console.log(subsectionRowProperty);
             subsectionRowProperty[id]=this.value;
-            console.log(actdata);
-            console.log(alldata);
+            //console.log(actdata);
+            //console.log(alldata);
         };
         return select;
     }
@@ -1320,8 +1345,84 @@ class ProjectStageCreateList{
         };
         return doubleSelect;
     }
+    setInputStyle(title,subsectionrow,def,measurement,min,max,all){
+        /*console.log('ProjectStageCreateList::setInputStyle()');
+        console.log(subsectionrow);
+        console.log(all);*/
+        var defaultMeasurement={
+            0:this.Utilities.getDefaultOptionProperties(subsectionrow.style[measurement],subsectionrow.style[measurement])
+        };
+        //throw 'line-stop';
+        var mainDiv = this.createInputHead(title);  
+        var groupDiv=document.createElement('div');
+            groupDiv.setAttribute('class','input-group');
+        var input = document.createElement('INPUT');
+            input.setAttribute('value',subsectionrow.style[def]);
+            input.setAttribute('class','form-control form-control-sm w-75');
+            input.setAttribute('type','number');
+            input.onchange = function(){
+                console.log(def);
+                console.log(this.value);
+                subsectionrow.style[def]=this.value;
+                //console.log(subsectionrow.style[def]);
+            };
+        var select=document.createElement('select');
+            select.classList.add('form-control','form-control-sm','w-25');
+            select.appendChild(this.Html.createOptionGroup('Domyślny:',defaultMeasurement));  
+            select.appendChild(this.Html.createOptionGroup('Dostępne:',all)); 
+        groupDiv.appendChild(input);
+        groupDiv.appendChild(select);
+        mainDiv.appendChild(groupDiv);
+        return mainDiv;
+    }
+    setIndentation(subsectionrow){
+        console.log('ProjectStageCreateList::setIndentation()');
+        console.log('subsectionrow:');
+        console.log(subsectionrow);
+        console.log('measurement list:');
+        //console.log(all);
+        console.log('indentationSpecial list:');
+        //console.log(all2);
+        
+        var mainDiv = this.createInputHead('Specjalne:');  
+        var groupDiv=document.createElement('div');
+            groupDiv.setAttribute('class','input-group');
+        var selectIndentationType =  document.createElement('select');
+            selectIndentationType.classList.add('form-control','form-control-sm','w-50');  
+            /* DEFAULT */
+            var defaultIndentationType={
+                0:this.Utilities.getDefaultOptionProperties(subsectionrow.style['indentationSpecial'],subsectionrow.style['indentationSpecialName'])
+            };
+            selectIndentationType.appendChild(this.Html.createOptionGroup('Domyślny:',defaultIndentationType));  
+            /* REST */
+            selectIndentationType.appendChild(this.Html.createOptionGroup('Dostępne:',this.Utilities.getDefaultList(this.Glossary.text.item.indentationSpecial,subsectionrow.style['indentationSpecial'])));     
+        var inputIndentationValue = document.createElement('INPUT');
+            inputIndentationValue.setAttribute('value',subsectionrow.style['indentation']);
+            inputIndentationValue.setAttribute('class','form-control form-control-sm w-25');
+            inputIndentationValue.setAttribute('type','number');
+            inputIndentationValue.onchange = function(){
+                //console.log(subsectionrow);
+                console.log(this.value);
+                subsectionrow.style['indentation'] = this.value;
+            };
+        var selectIndentationMeasurement =  document.createElement('select');
+            selectIndentationMeasurement.classList.add('form-control','form-control-sm','w-25');
+            /* DEFAULT */
+            var defaultIndentationMeasurement={
+                0:this.Utilities.getDefaultOptionProperties(subsectionrow.style['indentationMeasurement'],subsectionrow.style['indentationMeasurement'])
+            };
+            selectIndentationMeasurement.appendChild(this.Html.createOptionGroup('Domyślny:',defaultIndentationMeasurement));  
+            /* REST */         
+            selectIndentationMeasurement.appendChild( this.Html.createOptionGroup('Dostępne',this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,subsectionrow.style['indentationMeasurement'])));
+        
+        groupDiv.appendChild(selectIndentationType);
+        groupDiv.appendChild(inputIndentationValue);
+        groupDiv.appendChild(selectIndentationMeasurement);
+        mainDiv.appendChild(groupDiv);
+        return mainDiv;
+    }
     setValueCheckBoxStyle(id,value,helplinkValue){
-        /*
+        /**/
         console.log('ProjectStageCreateList::setValueCheckBoxStyle()');
         console.log('ID:');
         console.log(id);
@@ -1329,7 +1430,7 @@ class ProjectStageCreateList{
         console.log(value);
         console.log('HELPLINK VALUE:');
         console.log(helplinkValue);
-        */
+        
         switch(id){
             case 'fontWeight':
                 helplinkValue.style[id]=this.setFontStyle(value,'BOLD','NORMAL');
@@ -1370,24 +1471,6 @@ class ProjectStageCreateList{
                 }
                 return tmpvalue;
             }
-    }
-    createTextToolSelectOption(title,data){
-        var optionGroup2=document.createElement('optgroup');
-            optionGroup2.setAttribute('label',title);
-            optionGroup2.setAttribute('class','bg-info text-white');
-            for (const property in data) {
-                //console.log(`${property}: ${data[property]}`);
-                //console.log(data[property]);
-                var option=document.createElement('option');
-                    option.setAttribute('value',data[property].v);
-                    //option.setAttribute('class',data[property].fontcolor+' '+data[property].backgroundcolor);
-                    option.style.fontFamily = data[property].fontFamily;
-                    option.style.color = data[property].color;
-                    option.style.backgroundColor = data[property].backgroundcolor;
-                    option.innerText=data[property].n;
-                    optionGroup2.appendChild(option);
-            };
-        return optionGroup2;
     }
     createTextToolRadioButton(id,title,value){
    
@@ -1444,49 +1527,40 @@ class ProjectStageCreateList{
     }
     getSelectKey(value,title){
         var selectKey={};
-            selectKey[0]=this.getSelectKeyProperties(value,title);
+            selectKey[0]=this.Utilities.getDefaultOptionProperties(value,title);
         return selectKey;
     }
     getExtendedSelectKey(value,title,key){
         var selectKey={};
-            selectKey[key]=this.getSelectKeyProperties(value,title);
+            selectKey[key]=this.Utilities.getDefaultOptionProperties(value,title);
         return selectKey;
     }
-    getSelectKeyProperties(value,title){
-        return {
-                v:value,
-                n:title,
-                color:'#000000',
-                backgroundcolor:'#FFFFFF',
-                fontFamily:''
-            };
-    }
-      getExtendedSelectKeyProperties(value,title,color,backgroundcolor,fontFamily){
-        var selectKeyProp=this.getSelectKeyProperties(value,title);
+    getExtendedSelectKeyProperties(value,title,color,backgroundcolor,fontFamily){
+        var selectKeyProp=this.Utilities.getDefaultOptionProperties(value,title);
             selectKeyProp.color=color;
             selectKeyProp.backgroundcolor=backgroundcolor;
             selectKeyProp.fontFamily=fontFamily;
         return selectKeyProp;
     }
-      getDefaultFont(value,title){
+    getDefaultFont(value,title){
         //console.log('ProjectStageCreateList::getDefaultFont()');
         var defaultValue=this.getSelectKey(value,title);
             defaultValue[0].fontFamily=value;
         return defaultValue;
     }
-       getDefaultColor(value,title){
+    getDefaultColor(value,title){
         var defaultValue=this.getSelectKey(value,title);
             defaultValue[0].color=value;
             //defaultValue.backgroundcolor=value; TO DO => DYNAMIC CHANGE
         return defaultValue;
     }
-      getDefaultBackgroundColor(value,title){
+    getDefaultBackgroundColor(value,title){
         var defaultValue=this.getSelectKey(value,title);
             defaultValue[0].backgroundcolor=value;
             //defaultValue.fontcolor=value; TO DO => DYNAMIC CHANGE
         return defaultValue;
     }
-      getDefaultFontSize(value,title){
+    getDefaultFontSize(value,title){
         var defaultValue=this.getExtendedSelectKey(value,title,value);
         return defaultValue;
     }
@@ -1496,7 +1570,7 @@ class ProjectStageCreateList{
         var j=1;
         for(var i=0;i<this.Property.subsectionMax;i++){
             if(exception!==j){
-                value[i]=this.getSelectKeyProperties(i,j);
+                value[i]=this.Utilities.getDefaultOptionProperties(i,j);
             }
             j++;
         }
@@ -1515,11 +1589,15 @@ class ProjectStageCreateList{
         var value={};        
         for(var i=0;i<this.Glossary.text.getKeyCount('measurement');i++){
             if(this.Glossary.text.getKeyPropertyAttribute('measurement',i,'v')!==exception){
-                value[i]=this.getSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('measurement',i,'v'),this.Glossary.text.getKeyPropertyAttribute('measurement',i,'n'));
+                value[i]=this.Utilities.getDefaultOptionProperties(this.Glossary.text.getKeyPropertyAttribute('measurement',i,'v'),this.Glossary.text.getKeyPropertyAttribute('measurement',i,'n'));
             }
         }
         return value;
     }
+    getMeasurementList(exception){
+        return this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,exception);
+    }
+
     getBackgroundColorList(exception){
         var value={};
         for(var i=0;i<this.Glossary.text.getKeyCount('color');i++){
@@ -1534,7 +1612,7 @@ class ProjectStageCreateList{
         var value={};        
         for(var i=0;i<this.Glossary.text.getKeyCount('textAlign');i++){
             if(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v')!==exception){
-                value[i]=this.getSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v'),this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'n'));
+                value[i]=this.Utilities.getDefaultOptionProperties(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v'),this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'n'));
             }
         }
         return value;
@@ -1543,10 +1621,19 @@ class ProjectStageCreateList{
         var value={};        
         for(var i=0;i<this.Glossary.list.getKeyCount('listType');i++){
             if(this.Glossary.list.getKeyPropertyAttribute('listType',i,'v')!==exception){
-                value[i]=this.getSelectKeyProperties(this.Glossary.list.getKeyPropertyAttribute('listType',i,'v'),this.Glossary.list.getKeyPropertyAttribute('listType',i,'n'));
+                value[i]=this.Utilities.getDefaultOptionProperties(this.Glossary.list.getKeyPropertyAttribute('listType',i,'v'),this.Glossary.list.getKeyPropertyAttribute('listType',i,'n'));
             }
         }
         return value;
+    }
+    getNewElementList(data,exception){
+        var list={};        
+        for(var i=0;i<Object.keys(data).length;i++){
+            if(data[i].v!==exception){
+                list[i]=this.Utilities.getDefaultOptionProperties(data[i].v,data[i].n);
+            }
+        }
+        return list;
     }
     getListLevelList(exception,max){
         exception=parseInt(exception,10);
@@ -1554,7 +1641,7 @@ class ProjectStageCreateList{
         var value={};
         for(var i=1;i<max+1;i++){
             if(i!==exception){
-                value[i]=this.getSelectKeyProperties(i,i);  
+                value[i]=this.Utilities.getDefaultOptionProperties(i,i);  
             }
         }
         return value;
@@ -1565,7 +1652,7 @@ class ProjectStageCreateList{
         var value={};
         for(var i=2;i<max+1;){
             if(i!==exception){
-                value[i]=this.getSelectKeyProperties(i,i);  
+                value[i]=this.Utilities.getDefaultOptionProperties(i,i);  
             }
             i=i+2;
         }
@@ -1629,13 +1716,9 @@ class ProjectStageCreateList{
         console.log('subsectionrow');
         console.log(subsectionrow);
         */
-        var i=document.createElement('i');
-            i.setAttribute('class','fa fa-minus');
-            i.setAttribute('aria-hidden','true');
-            i.setAttribute('style','color:#ffffff;');         
-        var div=document.createElement('div');
-            div.setAttribute('class','btn btn-danger ');//float-right
-        //var ProjectStageCreateList=this;    
+        var div=this.Html.removeButton();
+           
+          
             /* CLOSURE */
             div.onclick=function(){
                 /*
@@ -1657,7 +1740,7 @@ class ProjectStageCreateList{
                     // NOTHING TO DO
                 }
             };
-        div.appendChild(i);
+        
         return(div); 
     }
     createRemoveSectionButton(iSection,section,helplink){
@@ -1749,7 +1832,11 @@ class ProjectStageCreateList{
                 console.log('iRow');
                 console.log(iRow);
                 /* ADD NEW stageData subsectionrow object */
-                subsectionrow[iRow]=classObject.setUpNewStageSubsectionRowProp(classObject.Property.subsectionRowNewLine);
+                subsectionrow[iRow]=classObject.setUpNewStageSubsectionRowProp();
+                subsectionrow[iRow].paragraph.property.valuenewline=classObject.Property.subsectionRowNewLine;
+                //subsectionrow[iRow].list.property.newList='n';
+                // listNewElement:'y',
+                // listNewElementName:'Nowy element'
                 console.log('subsectionrow');
                 console.log(subsectionrow);
                 console.log('helplink');
@@ -1836,10 +1923,18 @@ class ProjectStageCreateList{
         /* console.log('ProjectStageCreateList::setPreviewButtonAction()'); */
         var classObject=this; 
         ele.onclick = function (){
-            classObject.swapPreviewButton(this);
-            classObject.Html.hideField(classObject.helplink.dynamic);
-            classObject.setPreviewData();
-            classObject.Html.showField(classObject.helplink.preview.whole);
+            try{
+                classObject.swapPreviewButton(this);
+                classObject.Html.hideField(classObject.helplink.dynamic);
+                //classObject.setPreviewData();
+                classObject.DocPreview.run(classObject.helplink,classObject.stageData);
+                classObject.Html.showField(classObject.helplink.preview.whole);
+            }
+            catch(error){
+                console.log('ProjectStageCreateList::setPreviewButtonAction()');
+                console.log(error);
+                classObject.Html.showField(classObject.Modal.link['error'],'An Application Error Has Occurred!');
+            }
         };
     }
     setUpNewStageObject(){
@@ -1859,10 +1954,10 @@ class ProjectStageCreateList{
                },
                property:{},
                style:{
-                   backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
-                   backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
-                   backgroundImage:''
-                   //,newPage:1
+                    backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
+                    backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
+                    backgroundImage:''
+                    //,newPage:1
                 },
                 section:this.setUpNewStageSection()
         };
@@ -1878,11 +1973,12 @@ class ProjectStageCreateList{
     setUpNewStageSectionProp(){
         return {
             data:{
-                id:0,
-                valuenewline:'n'
+                id:0
             },
             style:{},
-            property:{},
+            property:{
+                valuenewline:'n'
+            },
             /* CREATE EMPTY STAGE SUBSECTION - COLUMN  */
             subsection:this.setUpNewStageSubsection()
         };
@@ -1910,47 +2006,135 @@ class ProjectStageCreateList{
         /* FIRST ALWAYS NEW LINE */
         var newLine = 'n';
         for(var i=0;i<this.Property.subsectionRowMin;i++){  
-            subsectionRow[i]=this.setUpNewStageSubsectionRowProp(newLine);
+            subsectionRow[i]=this.setUpNewStageSubsectionRowProp();
+            subsectionRow[i].paragraph.property.valuenewline=newLine;
             newLine = this.Property.subsectionRowNewLine;
         };
         return subsectionRow;
     }
-    setUpNewStageSubsectionRowProp(newLine){
+    setUpNewStageSubsectionRowProp(){
         return {
                 data:{
-                    id:0,
-                    value:'',
-                    valuenewline:newLine
+                    id:0
                 },
-                style:{
-                    fontSize:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),
-                    fontSizeMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MAX','v'),
-                    /* ADD TO SQL - fontSizeMeasurement */
-                    fontSizeMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v'),
-                    color:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),
-                    /* ADD TO SQL - colorName */
-                    colorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','n'),
-                    backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
-                    /* ADD TO SQL - backgroundColorName */
-                    backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
-                    fontFamily:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),
-                    fontWeight:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v'),
-                    fontStyle:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v'),
-                    underline:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
-                    'line-through':this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
-                    textAlign:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),
-                    /* ADD TO SQL - backgroundColorName */
-                    textAlignName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','n')
+                paragraph:{
+                    style:{
+                        fontSize:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),
+                        fontSizeMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MAX','v'),
+                        /* ADD TO SQL - fontSizeMeasurement */
+                        fontSizeMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v'),
+                        color:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),
+                        /* ADD TO SQL - colorName */
+                        colorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','n'),
+                        backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
+                        /* ADD TO SQL - backgroundColorName */
+                        backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
+                        fontFamily:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),
+                        fontWeight:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v'),
+                        fontStyle:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v'),
+                        underline:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
+                        'line-through':this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
+                        textAlign:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),
+                        /* ADD TO SQL - backgroundColorName */
+                        textAlignName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','n'),
+                        /* TEXT - this.Glossary.text STAGE_TEXT_LEFT_EJECTION */
+                        leftEjection:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_LEFT_EJECTION','n'),
+                        leftEjectionMin:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_LEFT_EJECTION_MIN','n'),
+                        leftEjectionMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_LEFT_EJECTION_MAX','n'),
+                        leftEjectionMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_LEFT_EJECTION_MEASUREMENT','n'),
+                        /* TEXT - this.Glossary.text STAGE_TEXT_RIGHT_EJECTION */
+                        rightEjection:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_RIGHT_EJECTION','n'),
+                        rightEjectionMin:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_RIGHT_EJECTION_MIN','n'),
+                        rightEjectionMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_RIGHT_EJECTION_MAX','n'),
+                        rightEjectionMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_RIGHT_EJECTION_MEASUREMENT','n'),
+                        /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION */
+                        indentation:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION','n'),
+                        indentationMin:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_INDENTATION_MIN','n'),
+                        indentationMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_INDENTATION_MAX','n'),
+                        /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION_MEASUREMENT */
+                        indentationMeasurement:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_MEASUREMENT','n'),
+                        /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION_SPECIAL */
+                        indentationSpecial:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_SPECIAL','v'),
+                         /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION_SPECIAL */
+                        indentationSpecialName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_SPECIAL','n')
+                    },
+                    property:{
+                        /* ADD TO SQL - 0 -> n, 1 -> y */ 
+                        /* LIST */
+                        /*
+                         * l - list
+                         * p - paragraph
+                         * 
+                         */
+                        value:'',
+                        valuenewline:'n',/* default */
+                        paragraph:'l',
+                        paragraphName:'Element listy', //Nowy akapit
+                        /* CHECK FOR EXIST tabstop with number */
+                        tabStop:0
+                    },
+                    /* OBJECT */
+                    tabStop:{
+                        0:{
+                            position:0,
+                            measurement:'cm',
+                            measurementName:'cm',
+                            alignment:'left',
+                            alignmentName:'Do lewej',
+                            leadingSign:'none',
+                            leadingSignName:'Brak'
+                        }
+                    }
+                        
+                    
+                        /* EXAMPLE*/
+                        //0:
+                        
+                    
                 },
-                property:{
-                    /* ADD TO SQL - 0 -> n, 1 -> y */ 
-                     /* LIST */
-                    listType:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_TYPE','v'),
-                    listTypeName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_TYPE','n'),
-                    listLevel:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_LVL','v'),
-                    listLevelName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_LVL','n'),
-                    listLevelMax:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_MAX_LVL','v'),
-                    listLevelMaxName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_MAX_LVL','n')
+                list:{
+                    style:{
+                        fontSize:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_SIZE','v'),
+                        fontSizeMax:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_SIZE_MAX','v'),
+                        fontSizeMeasurement:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_SIZE_MEASUREMENT','v'),
+                        fontFamily:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_FAMILY','v'),
+                        listType:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_TYPE','v'),
+                        listTypeName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_TYPE','n'),
+                        fontWeight:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_BOLD','v'),
+                        fontStyle:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_ITALIC','v'),
+                        underline:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_UNDERLINE','v'),
+                        'line-through':this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_LINETHROUGH','v'),
+                        color:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_COLOR','v'),
+                        colorName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_COLOR','n'),
+                        backgroundColor:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_BACKGROUND_COLOR','v'),
+                        backgroundColorName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_BACKGROUND_COLOR','n')
+                    },
+                    property:{
+                        listLevel:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_LVL','v'),
+                        listLevelName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_LVL','n'),
+                        listLevelMax:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_MAX_LVL','v'),
+                        listLevelMaxName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_MAX_LVL','n'),
+                        //listNewElement:'y',
+                        //listNewElementName:'Nowy element',
+                        newList:'n',
+                        newListName:'Kontynuacja'
+                    }  
+                },
+                table:{
+                    style:{
+                        
+                    },
+                    property:{
+                        
+                    }
+                },
+                image:{
+                    style:{
+                        
+                    },
+                    property:{
+                        
+                    } 
                 }
         };
     }

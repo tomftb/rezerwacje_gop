@@ -1,3 +1,7 @@
+/*
+ * 
+ * Author: Tomasz Borczynski
+ */
 class ProjectStageCreateText{
     Modal=new Object();
     Items=new Object();
@@ -1175,7 +1179,7 @@ class ProjectStageCreateText{
             divMain.appendChild(div);
         return divMain;
     }
-      createTextToolSelect(id,title,actdata,alldata){
+    createTextToolSelect(id,title,actdata,alldata){
         //console.log('ProjectStageCreateText::createTextToolSelect()');
         var div=document.createElement('div');
             div.setAttribute('class','w-100 mt-2');
@@ -1488,7 +1492,7 @@ class ProjectStageCreateText{
     }
     getFontSizeList(exception,max){
         exception=parseInt(exception,10);
-         max=parseInt(max,10);
+        max=parseInt(max,10);
         var value={};
         for(var i=2;i<max+1;){
             if(i!==exception){

@@ -1,5 +1,8 @@
 <?php
-
+/*
+ * 
+ * Author: Tomasz Borczynski
+ */
 abstract class Page{
     private $Log;
     private $mainPerm='LOG_INTO_APP';

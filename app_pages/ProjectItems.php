@@ -22,12 +22,17 @@ final class ProjectItems extends Page{
         'Main/Footer.php'
         ];
     private $js=[
+        'Main/Utilities.js',
         'Main/Html.js',
         'Main/Modal.js',
         'Main/Xhr.js',
         'Main/Table.js',
         'Main/Glossary.js',
         'Main/headerView.js',
+        'Utilities/Style.js',
+        'Utilities/RomanList.js',
+        'Utilities/TabStop.js',
+        'Utilities/DocPreview.js',
         'Page/ProjectStageProperty.js',
         'Page/ProjectStageCreateText.js',
         'Page/ProjectStageCreateTable.js',
@@ -38,10 +43,8 @@ final class ProjectItems extends Page{
         'Page/ProjectConstTable.js',
         'Page/ProjectConstCreate.js',
         'Page/ProjectConst.js',
-        'Page/ProjectItems.js',
+        'Page/ProjectItems.js'
         ];
-
-	
     public function __construct(){
         parent::__construct();	
         self::setPage();

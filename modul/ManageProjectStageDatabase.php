@@ -28,13 +28,19 @@ abstract class ManageProjectStageDatabase {
             'decoration'=>$this->dbUtilities->getStyle(0),
             'textAlign'=>$this->dbUtilities->getStyle(1),
             'measurement'=>$this->dbUtilities->getStyle(2),
-            'department'=>$this->dbUtilities->getUserDepartment($_SESSION['userid'])
+            'department'=>$this->dbUtilities->getUserDepartment($_SESSION['userid']),
+            'leading'=>$this->dbUtilities->getSloList('l'),
+            'indentationSpecial'=>$this->dbUtilities->getSloList('s'),
+            'listMeasurement'=>$this->dbUtilities->getSloList('m'),
+            'leadingSign'=>$this->dbUtilities->getSloList('ls'),
+            'tabStopAlign'=>$this->dbUtilities->getSloList('a')
         ];
     }
     protected function getStageGlossaryList(){
         $this->Log->log(0,"[".__METHOD__."]");
         return [
             'listType'=>$this->dbUtilities->getListType()
+            
         ];
     }
     protected function getStageParameters($parm='STAGE_%'){

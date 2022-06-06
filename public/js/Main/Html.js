@@ -34,12 +34,12 @@ class Html{
             htmlElement.firstChild.remove(); 
         };
     }
-     setDisabled(ele){
+    setDisabled(ele){
         ele.classList.add("disabled");
         ele.setAttribute('disabled','');
         console.log(ele);
     }
-     confirmButton(label,c,id){    
+    confirmButton(label,c,id){    
         var button=document.createElement('button');
             button.setAttribute('class',c);
             button.setAttribute('id',id);
@@ -47,13 +47,13 @@ class Html{
             button.innerHTML=label;
         return button;
     }
-     getForm(){
+    getForm(){
         var form=document.createElement('FORM');
             form.setAttribute("ENCETYPE","multipart/form-data");
             form.setAttribute("autocomplete",'OFF');
         return form;
     }
-     cancelButton(label){
+    cancelButton(label){
         var cancel=document.createElement('button');
             cancel.setAttribute('class','btn btn-secondary');
             cancel.setAttribute('type','button');
@@ -61,7 +61,7 @@ class Html{
             cancel.innerText=label;
         return cancel;
     }
-     createSelectFromObject(d,n,sId,sC)
+    createSelectFromObject(d,n,sId,sC)
     {
         /*
          *  d => data
@@ -83,7 +83,7 @@ class Html{
         //console.log(s);
         return s;
     }
-     select(c,n)
+    select(c,n)
     {
         var s=document.createElement("select");
             s.setAttribute("CLASS",c);  
@@ -91,7 +91,7 @@ class Html{
             s.setAttribute("ID",n);  
             return s;
     }
-     getGroupButton(){
+    getGroupButton(){
         var group=document.createElement('div');
             group.setAttribute('class','btn-group');
             group.setAttribute('role','group');
@@ -117,10 +117,47 @@ class Html{
             input.setAttribute('type',type);
         return input;
     }
-     getEmpty(value){
+    getEmpty(value){
         if(value===null || value===undefined){
             return '';
         }
+    }
+    removeButton(){
+        var i=document.createElement('i');
+            i.setAttribute('class','fa fa-minus');
+            i.setAttribute('aria-hidden','true');
+            i.setAttribute('style','color:#ffffff;');         
+        var div=document.createElement('div');
+            div.setAttribute('class','btn btn-danger');
+            div.appendChild(i);
+        return div;
+    }
+    createOptionGroup(title,data){
+        var optionGroup2=document.createElement('optgroup');
+            optionGroup2.setAttribute('label',title);
+            optionGroup2.setAttribute('class','bg-info text-white');
+            for (const property in data) {
+                //console.log(`${property}: ${data[property]}`);
+                //console.log(data[property]);
+                optionGroup2.appendChild(this.createAdvancedOption(data[property]));
+            };
+        return optionGroup2;
+    }
+    createAdvancedOption(data){
+        var option=document.createElement('option');
+            option.setAttribute('value',data.v);
+            //option.setAttribute('class',data[property].fontcolor+' '+data[property].backgroundcolor);
+            option.style.fontFamily = data.fontFamily;
+            option.style.color = data.color;
+            option.style.backgroundColor = data.backgroundcolor;
+            option.innerText=data.n; 
+        return option;
+    }
+    createOption(){
+        var option=document.createElement('option');
+            option.style.color = '#000000';
+            option.style.backgroundColor = '#FFFFFF';
+        return option;
     }
 }
 

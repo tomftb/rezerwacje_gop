@@ -115,4 +115,24 @@ class Glossary{
         this.item=items;
         this.filled=true;
     }
+    like(key,pattern){
+        var p = new Object();
+        var regex=new RegExp(pattern, 'i');
+        if(!this.filled){
+            console.log('EMPTY GLOSSARY');
+            return null;
+        }
+        if(!this.item.hasOwnProperty(key)){
+            console.log('KEY:');
+            console.log(key);
+            console.log('NO EXISTS IN GLOSSARY');
+            return null;
+        }
+        for (const prop in this.item[key]){   
+            if(prop.match(regex)){
+                p[prop]=this.item[key][prop];
+            }
+        }
+        return p;
+    }
 }

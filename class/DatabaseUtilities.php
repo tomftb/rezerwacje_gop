@@ -76,6 +76,14 @@ class DatabaseUtilities {
         $this->Log->log(0,"[".__METHOD__."]\r\ID USER - ${id_user}");
         return $this->dbLink->squery('SELECT d.`NAME` as n,d.`ID` as v FROM `department_user` as du, `department` d WHERE du.`id_department`=d.`id` AND `id_user`=:id_user ORDER BY `id_department` ASC',[':id_user'=>[$id_user,'INT']]);
     }
+    public function getSloList($type='s'){
+        /* TYPE:
+         * s - specjalne
+         * i - interlinia
+         * m - miara (Measurement)
+         */
+        return $this->dbLink->squery('SELECT `NAME` as n,`VALUE` as v FROM `slo_list` WHERE `TYPE`="'.$type.'" ORDER BY `id` ASC');
+    }
     public function getCreateSql(){
         return $this->sqlAddOn['ci'];
     }

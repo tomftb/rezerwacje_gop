@@ -31,11 +31,24 @@ class Utilities {
         return i;
     }
     getLastProp(obj){
-        var l = ''; 
-        if(!typeof(obj)==='object'){return l;}
+        //console.log(typeof(obj));
+        var l = -1; 
+        if(!typeof(obj)==='object'){return -1;}
         for (const p in obj){
             l = p;
         }
         return l;
+    }
+    setCmToPx(v){
+        //console.log('Utilities::setCmToPx()');
+        /*
+         * 1 cm = 37.7952755906 pixel (X)
+         */
+        //console.log(v);
+        v = parseFloat(v);
+        //console.log(v);
+        v = v * 37.7952755906;
+        //console.log(v);
+        return v.toString()+'px';
     }
 }

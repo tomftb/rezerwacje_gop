@@ -1321,6 +1321,8 @@ class ProjectStageCreateList{
         return select;
     }
     setDefaultOption(paragraphTabStop,option,tabStop){
+        console.log('ProjectStageCreateList::setDefaultOption()\r\nPARAGRAPH TABSTOP:');
+        console.log(paragraphTabStop);
         if(paragraphTabStop<0){
             console.log('PARAGRAM TABSTOP < 0');
             console.log(paragraphTabStop);
@@ -2147,7 +2149,7 @@ class ProjectStageCreateList{
                         paragraph:'l',
                         paragraphName:'Element listy', //Nowy akapit
                         /* CHECK FOR EXIST tabstop with number */
-                        tabStop:0
+                        tabStop:100
                     },
                     /* OBJECT */
                     tabStop:{

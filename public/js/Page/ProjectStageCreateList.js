@@ -1274,11 +1274,12 @@ class ProjectStageCreateList{
         console.log(subsectionrow);
         console.log('HELPLINK');
         console.log(helplink);
-        console.log('TABSTOP ASSIGN TO PARAGRAPH');
-        console.log(subsectionrow.paragraph.property.tabStop);
+        
         console.log('AVAILABLE TABSTOP');
         console.log(subsectionrow.paragraph.tabStop);
         */  
+        console.log('TABSTOP ASSIGN TO PARAGRAPH');
+        console.log(subsectionrow.paragraph.property.tabStop);
         
         var deafultNone={
                 0:this.Utilities.getDefaultOptionProperties(-1,'Brak')  
@@ -1290,7 +1291,7 @@ class ProjectStageCreateList{
             console.log(subsectionrow.paragraph.tabStop);
             all[prop]=this.Utilities.getDefaultOptionProperties(prop,subsectionrow.paragraph.tabStop[prop].position+' '+subsectionrow.paragraph.tabStop[prop].measurementName+' | '+subsectionrow.paragraph.tabStop[prop].alignmentName+' | '+subsectionrow.paragraph.tabStop[prop].leadingSignName);
         }
-        //throw 'test-stop-1265';
+        
         
        
         var select = this.createTextToolSelect('tabStop','Tabulacja:',deafultNone,all); 
@@ -1299,6 +1300,8 @@ class ProjectStageCreateList{
         
         
         console.log(select);
+        console.log(select.childNodes[1].childNodes[1]);
+       // throw 'test-stop-1265';
         /* CLOSURE - DOMKNIĘCIE*/
         //var TabStop = this.TabStop;
         select.childNodes[1].onchange = function(){
@@ -1313,11 +1316,36 @@ class ProjectStageCreateList{
              /* SET NEW VALUE ELEMENT STYLE/PROPERTY */
             //helplinkValue.style[id]=this.value;
         };
-        //throw 'test-stop-1302';
-        
         /* SET DEFAULT OPTION */
-        
+        this.setDefaultOption(subsectionrow.paragraph.property.tabStop,select.childNodes[1].childNodes[1],subsectionrow.paragraph.tabStop);
         return select;
+    }
+    setDefaultOption(paragraphTabStop,option,tabStop){
+        if(paragraphTabStop<0){
+            console.log('PARAGRAM TABSTOP < 0');
+            console.log(paragraphTabStop);
+            return false;
+        }
+        if(this.Utilities.countObjectProp(tabStop)===0){
+            console.log('TABSTOP DATA LIST IS EMPTY');
+            return false;
+        }
+        /* SET PROPER DEFAULT OPTION ON SELECT */
+        console.log('SET PROPER OPTION');
+        for (let i = 0; i < option.children.length; i++) {
+            console.log(option.children[i].tagName);
+            console.log(option.children[i].value);
+                //console.log(parseInt(select.childNodes[1].childNodes[1].children[i].value,10));
+                if(parseInt(option.children[i].value,10)===paragraphTabStop){
+                    console.log('FOUND');
+                    
+                    //select.childNodes[1].childNodes[1].children[i].setAttribute('selected','');
+                    option.children[i].selected = true;
+                    return true;
+            }
+        }
+        console.log('OPTION NOT FOUND');
+        return false;
     }
     setValueStyle(id,title,actdata,alldata,subsectionRowStyle,helplinkValue){
         //console.log('ProjectStageCreateList::createTextToolSelectExtend()');

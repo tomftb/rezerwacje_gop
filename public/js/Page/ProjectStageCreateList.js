@@ -829,7 +829,7 @@ class ProjectStageCreateList{
         var backgroundColor=this.setValueStyle('backgroundColor','Kolor tła:',this.getDefaultBackgroundColor(subsectionrow.paragraph.style.backgroundColor,subsectionrow.paragraph.style.backgroundColorName),this.getBackgroundColorList(subsectionrow.paragraph.style.backgroundColor),subsectionrow.paragraph.style,helplink.text.value);
         
         
-        var tabStop=this.createTextToolTabStop();
+        var tabStop=this.createTextToolTabStop(isection,isub,isubrow,subsectionrow,helplink);
         
         tool1.appendChild(fontSize);
         tool1.appendChild(color);
@@ -1260,15 +1260,63 @@ class ProjectStageCreateList{
             };
         return optionGroup;
     }
-    createTextToolTabStop(){
-        var act={
-                0:this.Utilities.getDefaultOptionProperties('none','Brak')        
+    createTextToolTabStop(isection,isub,isubrow,subsectionrow,helplink){
+        /*
+        console.log('ProjectStageCreateList::createTextToolTabStop()');
+        console.log(arguments);
+        console.log('ISECTION');
+        console.log(isection);
+        console.log('ISUB');
+        console.log(isub);
+        console.log('ISBUROW');
+        console.log(isubrow);
+        console.log('SUBSECTIONROW');
+        console.log(subsectionrow);
+        console.log('HELPLINK');
+        console.log(helplink);
+        console.log('TABSTOP ASSIGN TO PARAGRAPH');
+        console.log(subsectionrow.paragraph.property.tabStop);
+        console.log('AVAILABLE TABSTOP');
+        console.log(subsectionrow.paragraph.tabStop);
+        */  
+        
+        var deafultNone={
+                0:this.Utilities.getDefaultOptionProperties(-1,'Brak')  
         };
         var all=new Object();
-       
-        var select = this.createTextToolSelect('tabStop','Tabulacja:',act,all); 
         
+        for(const prop in subsectionrow.paragraph.tabStop){
+            console.log(prop);
+            console.log(subsectionrow.paragraph.tabStop);
+            all[prop]=this.Utilities.getDefaultOptionProperties(prop,subsectionrow.paragraph.tabStop[prop].position+' '+subsectionrow.paragraph.tabStop[prop].measurementName+' | '+subsectionrow.paragraph.tabStop[prop].alignmentName+' | '+subsectionrow.paragraph.tabStop[prop].leadingSignName);
+        }
+        //throw 'test-stop-1265';
+        
+       
+        var select = this.createTextToolSelect('tabStop','Tabulacja:',deafultNone,all); 
+        /* SET REFERENCES TO SELECT OPTION */
         this.TabStop.setOption(select.childNodes[1].childNodes[1]);
+        
+        
+        console.log(select);
+        /* CLOSURE - DOMKNIĘCIE*/
+        //var TabStop = this.TabStop;
+        select.childNodes[1].onchange = function(){
+            /* this.value - INDEX */
+            console.log(this.value);
+            //console.log(TabStop.data[this.value]);
+            console.log(subsectionrow);
+            //console.log(subsectionrow.paragraph.property.tabStop);
+            subsectionrow.paragraph.property.tabStop = parseInt(this.value,10);
+             /* SET NEW VALUE */
+            //subsectionRowStyle[id]=this.value;
+             /* SET NEW VALUE ELEMENT STYLE/PROPERTY */
+            //helplinkValue.style[id]=this.value;
+        };
+        //throw 'test-stop-1302';
+        
+        /* SET DEFAULT OPTION */
+        
         return select;
     }
     setValueStyle(id,title,actdata,alldata,subsectionRowStyle,helplinkValue){
@@ -2082,7 +2130,8 @@ class ProjectStageCreateList{
                             alignment:'left',
                             alignmentName:'Do lewej',
                             leadingSign:'none',
-                            leadingSignName:'Brak'
+                            leadingSignName:'Brak',
+                            px:0
                         }
                     }
                         

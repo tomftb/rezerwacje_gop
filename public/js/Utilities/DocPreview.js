@@ -6,6 +6,7 @@ class DocPreview{
     Html = new Object();
     Style = new Object();
     RomanList = new Object();
+    Utilities = new Object();
     helplink = new Object();
     data = new Object();
     constructor(){
@@ -13,6 +14,7 @@ class DocPreview{
         this.Html=new Html();
         this.Style = new Style();
         this.RomanList = new RomanList();
+        this.Utilities = new Utilities();
     }
     run(helplink,data){
         console.log('DocPreview::setData()');
@@ -233,6 +235,8 @@ class DocPreview{
         console.log(row.list);
         console.log('ROW - PARAGRAPH:');
         console.log(row.paragraph);
+        console.log('ROW - PARAGRAPH - TABSTOP:');
+        console.log(row.paragraph.tabStop);
         var p = document.createElement('p');
         /* REMOVE MARGIN - LATER SEt AS ... */
             p.style.marginBottom="0px";
@@ -251,15 +255,26 @@ class DocPreview{
         //console.log(list.style);
         //console.log('PROPERTY:');
         //console.log(list.property);
-        span.style.marginLeft=this.setCmToPx(row.paragraph.style.leftEjection);
         
+        //span.style.marginLeft=this.Utilities.setCmToPx(row.paragraph.style.leftEjection);
+        this.setTabStop(span,row.paragraph);
         this.setEleStyle(span,row.list.style);
         this.setListEleHeadType(span,row.list.style.listType,listEleCounter);
         //ele.style.listStyleType=attributes.style.listType;
         
         return span;
     }
-
+    setTabStop(ele,paragraph){
+        console.log('DocPreview::setTabStop()');  
+        //var tabStop = this.Utilities.setCmToPx();
+        ele=this.Utilities.setCmToPx(paragraph.style.leftEjection);
+        console.log('LEFT EJECTION');  
+        console.log(paragraph.style.leftEjection);
+        console.log('TABSTOP IDX'); 
+        console.log(paragraph.property.tabStop);
+        console.log('TABSTOP'); 
+        console.log(paragraph.tabStop);
+    }
     setListEleHeadType(ele,listType,counter){
         /*
          *   console.log('DocPreview::setListEleHeadType()');  
@@ -280,18 +295,7 @@ class DocPreview{
             break;
         };
     }
-    setCmToPx(v){
-        console.log('DocPreview::setCmToPx()');
-        /*
-         * 1 cm = 37.7952755906 pixel (X)
-         */
-        console.log(v);
-        v = parseFloat(v);
-        console.log(v);
-        v = v * 37.7952755906;
-        console.log(v);
-        return v.toString()+'px';
-    }
+
     setParagraph(mainDiv,row,lastParagraphType){
         console.log('DocPreview::setParagraph()');
         console.log(row);
@@ -344,7 +348,7 @@ class DocPreview{
         var span = document.createElement('span');//'span','p'
             this.setEleStyle(span,paragraph.style);
             /* INDENTATION - WYSUNIECIE */
-            span.style.marginLeft=this.setCmToPx(paragraph.style[marginLeft]);//
+            span.style.marginLeft=this.Utilities.setCmToPx(paragraph.style[marginLeft]);//
         var value = document.createTextNode(paragraph.property.value);
             span.appendChild(value);
         return span;

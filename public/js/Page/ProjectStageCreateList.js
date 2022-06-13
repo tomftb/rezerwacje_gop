@@ -1324,29 +1324,28 @@ class ProjectStageCreateList{
         console.log('ProjectStageCreateList::setDefaultOption()\r\nPARAGRAPH TABSTOP:');
         console.log(paragraphTabStop);
         if(paragraphTabStop<0){
-            console.log('PARAGRAM TABSTOP < 0');
-            console.log(paragraphTabStop);
+            console.log('PARAGRAM TABSTOP < 0 -> RETURN FALSE');
+            //console.log(paragraphTabStop);
             return false;
         }
         if(this.Utilities.countObjectProp(tabStop)===0){
-            console.log('TABSTOP DATA LIST IS EMPTY');
+            console.log('TABSTOP DATA LIST IS EMPTY -> RETURN FALSE');
             return false;
         }
         /* SET PROPER DEFAULT OPTION ON SELECT */
-        console.log('SET PROPER OPTION');
+        //console.log('SET PROPER OPTION');
         for (let i = 0; i < option.children.length; i++) {
             console.log(option.children[i].tagName);
             console.log(option.children[i].value);
                 //console.log(parseInt(select.childNodes[1].childNodes[1].children[i].value,10));
                 if(parseInt(option.children[i].value,10)===paragraphTabStop){
-                    console.log('FOUND');
-                    
+                    //console.log('FOUND');
                     //select.childNodes[1].childNodes[1].children[i].setAttribute('selected','');
                     option.children[i].selected = true;
                     return true;
             }
         }
-        console.log('OPTION NOT FOUND');
+        console.log('OPTION NOT FOUND -> RETURN FALSE');
         return false;
     }
     setValueStyle(id,title,actdata,alldata,subsectionRowStyle,helplinkValue){

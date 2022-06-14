@@ -198,6 +198,7 @@ class DocPreview{
         if(listLvl===actLvl){
             console.log('THE SAME LEVEL');
             this.setListEle(mainDiv,row,lastLevelCounter[listLvl]);
+            
         }  
         else if(listLvl>actLvl){
             console.log('HIGHER LEVEL:');
@@ -237,45 +238,66 @@ class DocPreview{
         console.log(row.paragraph);
         console.log('ROW - PARAGRAPH - TABSTOP:');
         console.log(row.paragraph.tabStop);
-        var p = document.createElement('p');
-        /* REMOVE MARGIN - LATER SEt AS ... */
-            p.style.marginBottom="0px";
+        //var p = document.createElement('p');
+        var ele = document.createElement('div');
+            /* REMOVE MARGIN - LATER SEt AS ... */
+            //ele.style.marginBottom="0px";
         
-        /* SET LIST HEAD */
-        p.appendChild(this.setListEleHead(row,listEleCounter));
+        
+        /* SET LEFT EJECTION */
+        this.setTabStopEjection(ele,row.paragraph.style.leftEjection);
+        /* SET LIST HEAD -> SET indentation,leftEjection AS VALUE NOT REFERENCE*/
+        ele.appendChild(this.setListEleHead(row,listEleCounter));//
+        
+        
+        /* SET EJECTION TO 0 */
+        //row.paragraph.style.leftEjection = 0;
         /* SET LIST BODY */
-        //p.appendChild(this.setParagraph(div,row));
-        p.appendChild(this.setParagraphEle(row.paragraph,'indentation'));
-        div.appendChild(p);
-    }
-    setListEleHead(row,listEleCounter){
-        console.log('DocPreview::setListEleHead()');  
-        var span = document.createElement('span');
-        //var span = document.createElement('div');
-        //console.log('STYLE:');
-        //console.log(list.style);
-        //console.log('PROPERTY:');
-        //console.log(list.property);
+        //;
+        //ele.appendChild(ele);
+        ele.appendChild(this.setParagraphEle(row.paragraph));
+        div.appendChild(ele);
         
-        //span.style.marginLeft=this.Utilities.setCmToPx(row.paragraph.style.leftEjection);
-        this.setTabStop(span,row.paragraph);
-        this.setEleStyle(span,row.list.style);
-        this.setListEleHeadType(span,row.list.style.listType,listEleCounter);
+    }
+    setListEleHead(row,listEleCounter){//
+        console.log('DocPreview::setListEleHead()');  
+        var ele = document.createElement('div');
+            ele.style.display='inline-block';
+            //ele.style.marginLeft=this.Utilities.setCmToPx(row.paragraph.style.leftEjection).toString()+'px';
+            //ele.style.paddingLeft=leftEjection.toString()+'px';
+            ele.style.width=this.Utilities.setCmToPx(row.paragraph.style.indentation).toString()+'px';
+
+
+        //this.setTabStop(ele,row.paragraph);
+        this.setEleStyle(ele,row.list.style);
+        this.setListEleHeadType(ele,row.list.style.listType,listEleCounter);
         //ele.style.listStyleType=attributes.style.listType;
         
-        return span;
+        return ele;
+    }
+    setTabStopEjection(ele,leftEjection){
+        /*console.log('DocPreview::setTabStopEjection()');  
+        console.log('ELEMENT'); 
+        console.log(ele); 
+        console.log('LEFT EJECTION'); 
+        console.log(leftEjection); 
+                    */
+        if(parseFloat(leftEjection)>0){
+            ele.appendChild(this.getTabStopEle(leftEjection));
+        }
+        /*
+        console.log('ELEMENT'); 
+        console.log(ele); 
+        throw 'test-stop';
+                    */
     }
     setTabStop(ele,paragraph){
         console.log('DocPreview::setTabStop()');  
         //var tabStop = this.Utilities.setCmToPx();
-        var leftEjectionPx = this.Utilities.setCmToPx(paragraph.style.leftEjection).toString()+'px';
+        //var leftEjectionPx = this.Utilities.setCmToPx(paragraph.style.leftEjection).toString()+'px';
         var actTabStopPosition = 0;
-        //var actWidth = 0;
-        var end = 0;
+        var end = paragraph.style.leftEjection;
         
-        console.log('LEFT EJECTION (default in CM)');  
-        //console.log(typeof (paragraph.style.leftEjection));
-        console.log(paragraph.style.leftEjection);
         console.log('TABSTOP IDX'); 
         console.log(paragraph.property.tabStop);
         console.log('TABSTOP'); 
@@ -283,52 +305,22 @@ class DocPreview{
         
         /* COMPARE LEFT EJECTION VALUE WITH TABSTOP VALUE */
         if(paragraph.property.tabStop<0){
-            console.log('PARAGRAPH TABSTOP IDX < 0 => EXIT - `NO COMPARE`');
-            ele.style.marginLeft=leftEjectionPx;
+            console.log('PARAGRAPH TABSTOP IDX < 0 => EXIT - `NO TABSTOP`');
             return false;
         }
         console.log(paragraph.tabStop.hasOwnProperty(paragraph.property.tabStop));
-        //throw 'test-stop'; 
         if(!paragraph.tabStop.hasOwnProperty(paragraph.property.tabStop)){
-            console.log('PROPERTY:');
-            console.log(paragraph.property.tabStop);
-            console.log('NOT EXIST IN TABSTOP -> RETURN FALSE');
-            ele.style.marginLeft=leftEjectionPx;
+            console.log('TABSTOP IDX NOT EXIST IN TABSTOP LIST -> RETURN FALSE');
             return false;
         }
-        else{
-            console.log('TABSTOP PROPERTY:');
-            console.log(paragraph.tabStop[paragraph.property.tabStop]);
-            actTabStopPosition = paragraph.tabStop[paragraph.property.tabStop].position;
-        }
+        
+        actTabStopPosition = paragraph.tabStop[paragraph.property.tabStop].position;
+        
         if(paragraph.tabStop[paragraph.property.tabStop].position <= paragraph.style.leftEjection){
-            console.log('TABSTOP PROPERTY POSITION EQUAL OR IS LOWER THAN LEFT EJECTION -> SET LEFT EJECTION AND RETURN TRUE');
-            console.log('TABSTOP PROPERTY POSITION:');
-            console.log(paragraph.tabStop[paragraph.property.tabStop].position);
-            console.log('LEFT EJECTION:');
-            console.log(paragraph.style.leftEjection);
-            ele.style.marginLeft=leftEjectionPx;
+            console.log('TABSTOP PROPERTY POSITION EQUAL OR IS LOWER THAN LEFT EJECTION -> RETURN TRUE');
             return true;
         }
         console.log('TABSTOP PROPERTY POSITION HIGHER THAN LEFT EJECTION -> SET ALL TABSTOP AND RETURN TRUE');
-            
-            /*
-             * ACTUAL
-             * paragraph.tabStop[paragraph.property.tabStop].position
-             */
-            
-            
-            /* SET LEFT EJECTION - SPAN BLOCK */
-            if(paragraph.style.leftEjection>0){
-                var span = this.getTabStopEle(paragraph.style.leftEjection);
-                    ele.appendChild(span);
-                    end = paragraph.style.leftEjection;
-                    
-            }
-            else{
-                /* NOTHING TO DO */
-            }
-            
             for (const prop in paragraph.tabStop){
                 /* COMPARE POSITIONS, IF GRETER THEN LEAVE LOOP */
                 if(paragraph.tabStop[prop].position>actTabStopPosition){
@@ -342,20 +334,11 @@ class DocPreview{
                     
                 this.setTabStopDecoration(span,paragraph.tabStop[prop].leadingSign,paragraph.style.fontSize);
                     
-                    //span.appendChild(tmpText);
                     ele.appendChild(span);
-                    /* SETUP NEW WIDTH */
-                    //actWidth +=paragraph.tabStop[prop].position;
+
                     
                 end=paragraph.tabStop[prop].position;
             }
-       
-        console.log('PARAGRAPH TABSTOP IDX');
-        console.log(paragraph.property.tabStop);
-        console.log('PARAGRAPH TABSTOP DATA');
-        console.log(paragraph.tabStop[paragraph.property.tabStop]);
-        
-        //ele.style.marginLeft=leftEjectionPx;
         return true;
     }
     setTabStopDecoration(ele,sign,size){
@@ -364,7 +347,7 @@ class DocPreview{
         ele.style.borderTop='0px';
         /* SIZE div 10 ? */
         //size = size/10;
-        ele.style.borderBottom=this.Utilities.setPtToPx(size/10).toString()+'px';
+        ele.style.borderBottom=(this.Utilities.setPtToPx(size)/10).toString()+'px';
         switch(sign){           
             case 'dot':
                 /* 
@@ -396,10 +379,10 @@ class DocPreview{
         /*
          * w - width (default in cm)
          */
-        var span = document.createElement('div');
-            span.style.width=this.Utilities.setCmToPx(w).toString()+'px';
-            span.style.display='inline-block';
-        return span;
+        var ele = document.createElement('div');
+            ele.style.width=this.Utilities.setCmToPx(w).toString()+'px';
+            ele.style.display='inline-block';
+        return ele;
     }
     setListEleHeadType(ele,listType,counter){
         /*
@@ -456,26 +439,17 @@ class DocPreview{
                 console.log(row.paragraph.property.valuenewline);
                 break;
         }
-       
-        
-        
-        
-        
-        mainDiv.appendChild(this.setParagraphEle(row.paragraph,'leftEjection'));
-        
-        /* CHECK FOR BREAKLINE AND SET TEXT ALIGN => FOR VALUE SET VALUE NOT A REFERENCE ! */                 
-        //p = this.setPreviewPageBreakLine(writePageSection,p,this.stageData.section[property].subsection[i].subsectionrow[propSubsection].data.valuenewline,this.stageData.section[property].subsection[i].subsectionrow[propSubsection].style.textAlign);//
-        /* SETUP SUBSECTION ROW */
-        //this.setPreviewValue(p,this.stageData.section[property].subsection[i].subsectionrow[propSubsection]);
-        //writePageSection.appendChild(p);
+        /* LEFT EJECTION - WYSUNIECIE */
+        this.setTabStopEjection(mainDiv,row.paragraph.style.leftEjection);
+        mainDiv.appendChild(this.setParagraphEle(row.paragraph));
     }
-    setParagraphEle(paragraph,marginLeft){
-        console.log('DocPreview::setParagraphEle()');  
-        //var span = document.createElement('span');//'span','p'
+    setParagraphEle(paragraph){
+        console.log('DocPreview::setParagraphEle()'); 
         var ele = document.createElement('div');//'span','p'
             ele.style.display='inline-block';
+        //var span = document.createElement('span');//'span','p'
             this.setEleStyle(ele,paragraph.style);
-            /* INDENTATION - WYSUNIECIE */
+            /* SET TAB STOP */
             this.setTabStop(ele,paragraph);
             //span.style.marginLeft=this.Utilities.setCmToPx(paragraph.style[marginLeft]);//
         var value = document.createTextNode(paragraph.property.value);

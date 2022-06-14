@@ -49,6 +49,18 @@ class Utilities {
         //console.log(v);
         v = v * 37.7952755906;
         //console.log(v);
-        return v.toString()+'px';
+        return v;
+    }
+    setPtToPx(v){
+        //console.log('Utilities::setPtToPx()');
+        /*
+         * 1 cm = 37.7952755906 pixel (X)
+         */
+        //console.log(v);
+        v = parseFloat(v);
+        //console.log(v);
+        v = v * 1.3333333333;
+        //console.log(v);
+        return v;
     }
 }

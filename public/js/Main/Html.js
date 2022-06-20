@@ -122,15 +122,27 @@ class Html{
             return '';
         }
     }
-    removeButton(){
+    button(){
         var i=document.createElement('i');
-            i.setAttribute('class','fa fa-minus');
+            i.setAttribute('class','fa');//fa-minus
             i.setAttribute('aria-hidden','true');
             i.setAttribute('style','color:#ffffff;');         
         var div=document.createElement('div');
-            div.setAttribute('class','btn btn-danger');
+            div.setAttribute('class','btn');//btn-danger
             div.appendChild(i);
         return div;
+    }
+    removeButton(){
+        var button = this.button();
+            button.childNodes[0].classList.add('fa-minus');
+            button.classList.add('btn-danger');
+        return button;
+    }
+    addButton(){
+        var button = this.button();
+            button.childNodes[0].classList.add('fa-plus');
+            button.classList.add('btn-success');
+        return button;
     }
     createOptionGroup(title,data){
         var optionGroup2=document.createElement('optgroup');

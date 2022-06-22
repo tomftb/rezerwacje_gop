@@ -10,7 +10,7 @@ class TabStop{
     data = new Array();
     default = new Object();
     option = {};
-    selectedProperty = {};
+    paragraph = {};
     actData ={
             position:0,
             measurement:'',
@@ -211,24 +211,6 @@ class TabStop{
             div.appendChild(span);
         return div;
     }
-    /*
-    createValue(data,key,lp){
-         INPUT - Pozycja tabulatora 
-        var self = this;
-        var input=document.createElement('INPUT');
-            input.classList.add('form-control-sm','form-control');
-            input.setAttribute('type','number');
-             TO FIX 
-            input.setAttribute('value',data[key]);
-            input.onchange = function(){
-                data[key]=parseFloat(this.value);
-                self.option.childNodes[lp].childNodes[0].remove();
-                self.option.childNodes[lp].appendChild(document.createTextNode(self.setOptionLabal(data)));
-                console.log(data);
-            };
-            return input;
-    }
-            */
     createInputValue(){
         /* INPUT - Pozycja tabulatora */
         var self = this;
@@ -241,29 +223,6 @@ class TabStop{
             };
         return input;
     }
-    /*
-    createInputRowProperty(data,nameKey,valueKey,glossary,lp){
-        var select=document.createElement('SELECT');
-            select.classList.add('form-control-sm','form-control');
-        var defaultOption={
-                0:this.Utilities.getDefaultOptionProperties(data[valueKey],data[nameKey])
-            };
-        var self = this;
-            select.appendChild(this.Html.createOptionGroup('Domyślny:',defaultOption)); 
-            select.appendChild(this.Html.createOptionGroup('Dostępne',this.Utilities.getDefaultList(glossary,data[valueKey])));
-            select.onchange=function(){
-                // UPDATE OPTION SELECT VALUE IN DATA TABSTOP OBJECT
-                data[valueKey]=this.value;
-                // UPDATE OPTION SELECT LABEL IN DATA TABSTOP OBJECT
-                data[nameKey]=self.getValueNameFromGlossary(glossary,this.value);;
-                // REMOVE OPTION SELECT WITH OLD DATA VALUE
-                self.option.childNodes[lp].childNodes[0].remove();
-                // APPEND NEW OPTION SELECT WITH NEW DATA VALUE
-                self.option.childNodes[lp].appendChild(document.createTextNode(self.setOptionLabal(data)));
-            };
-        return select;   
-    }
-    */
     createInputRowProperty(nameKey,valueKey,glossary){
         var select=document.createElement('SELECT');
             select.classList.add('form-control-sm','form-control');
@@ -329,8 +288,8 @@ class TabStop{
                     position: self.actData.position
                 };
                 var selectedData={
-                    position: self.data[self.selectedProperty.tabStop].position,
-                    measurement: self.data[self.selectedProperty.tabStop].measurement
+                    position: self.data[self.paragraph.property.tabStop].position,
+                    measurement: self.data[self.paragraph.property.tabStop].measurement
                 };
                 var newData = new Object();
                 newData.data = {};
@@ -348,9 +307,9 @@ class TabStop{
                 console.log('ALL DATA:');
                 console.log(self.data);
                 console.log('SELECTED OPTION IDX:');
-                console.log(self.selectedProperty);
-                console.log(self.selectedProperty.tabStop);
-                console.log(typeof(self.selectedProperty.tabStop));
+                console.log(self.paragraph);
+                console.log(self.paragraph.property.tabStop);
+                console.log(typeof(self.paragraph.property.tabStop));
                 console.log('SELECTED OPTION DATA:');
                 console.log(selectedData.position);
                 console.log(typeof(selectedData.position));
@@ -424,12 +383,11 @@ class TabStop{
                 self.Html.removeChilds(self.listDiv);
                 //REMOVE OPTION SELECT WITH OLD DATA VALUE
                 self.Html.removeChilds(self.option);
-                
-                
-                /* SET NEW LIST */
-                 console.log('SET NEW LIST');
+                /* 
+                 * CREATE NEW LIST AND SELECT OPTION
+                 */
+                console.log('SET NEW LIST');
                 for(var i in newData.data){
-                    // APPEND NEW LIST WITH NEW DATA VALUE
                     console.log(newData.data[i].position);
                     console.log(typeof(newData.data[i].position));
                     console.log(newData.data[i].measurement);
@@ -437,43 +395,22 @@ class TabStop{
                     self.listDiv.appendChild(self.createListRow(i,newData.data,i));   
                     self.option.appendChild(self.setOptionEle(i,newData.data[i])); 
                     /* STRING = STRING */
-                    
                     if(newData.data[i].position===selectedData.position && newData.data[i].measurement===selectedData.measurement){
-                        console.log(self.option.lastChild);
+                        /* 
+                         * SET SELECTED OPTION 
+                         */
                         self.option.lastChild.selected=true;
-                        self.selectedProperty.tabStop=i;
+                        /* 
+                         * UPDATE ROW PROPERTY TAB STOP IDX 
+                         */
+                        self.paragraph.property.tabStop=i;
                     }
-                    
-                    
-                    //if(self.selectedProperty.tabStop===i){
-                     //   console.log(self.option.lastChild);
-                     //   self.option.lastChild.selected=true;
-                   // }
-                    // option.children[i].selected = true;
                 };
-                /* SET SELECT OPTION LIST */
-                /* CHECK SELECTED OPTION IDX*/
-                /* OPTION - BRAK -> CLEAR ALL AND SETUP NEW */
-                //if(self.selectedIdx===-1){
-                   
-                 //   for(var i in newData.data){
-                        //APPEND NEW OPTION SELECT WITH NEW DATA VALUE
-                    //    self.option.appendChild(self.setOptionEle(newData.data[i])); 
-                   // };
-               // }
-               // else{
-                    
-                //}
                 
-                
-               
-               
-                //console.log(self.option);
-                
-                //self.data[Date.now()] = newData;
+                /* 
+                 * UPDATE OBJECT DATA PROPERTY WITH NEW TAB STOP
+                 */
                 self.data = newData.data;
-                console.log(self.data);
-                console.log(newData);
             };
         return btnDiv;
     }

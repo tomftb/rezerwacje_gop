@@ -191,6 +191,14 @@ class TabStop{
                     delete data[idx];
                     /* REMOVE VALUE OPTION FROM LIST IN SELECT TABSTOP */
                     self.option.childNodes[lp].remove();
+                    /* SET paragraph.property.tabStop */
+                    console.log(self.paragraph.property.tabStop);
+                    if(idx===self.paragraph.property.tabStop){
+                        self.paragraph.property.tabStop='-1';
+                    }
+                    /* REMOVE FROM paragraph.tabStop */
+                    delete self.paragraph.tabStop[idx];
+                    console.log(self.paragraph.property.tabStop);
                 } else {
                     // NOTHING TO DO
                 }
@@ -235,6 +243,9 @@ class TabStop{
                 };
                 /* EXCEPTION IF self.paragraph.property.tabStop = '-1' = NONE */
                 //throw 'stop-193';
+                console.log(self.paragraph);
+                console.log(self.paragraph.property);
+                console.log(self.paragraph.property.tabStop);
                 if(self.paragraph.property.tabStop!=='-1'){
                     selectedData={
                         position: self.data[self.paragraph.property.tabStop].position,

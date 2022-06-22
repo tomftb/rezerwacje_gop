@@ -80,13 +80,6 @@ class TabStop{
         var self=this;
         
         var div = this.createInputRow();
-        
-        //var text = document.createTextNode('Dodaj tabulację');
-        
-        //var div=document.createElement('div');
-         //   div.setAttribute('class','btn btn-sm btn-warning btn-add float-left text-white');
-         //   div.appendChild(text);
-        
             /* CLOSURE */
             div.onclick = function(){
                 console.log('TabStop::createInputAdd');
@@ -94,15 +87,6 @@ class TabStop{
                 //var idx =  self.Utilities.countObjectProp(self.data);  
                 var newIdx =  parseInt(self.Utilities.getLastProp(self.data),10)+1; 
                 var lp = self.Utilities.countObjectProp(self.data);
-                    //self.data.push(data);
-                    console.log('Data:');
-                    console.log(self.data);
-                    console.log('IDX:');
-                    console.log(newIdx);
-                    console.log('Option:');
-                    console.log(self.option);
-                    console.log('Lp:');
-                    console.log(lp);
                     self.data[newIdx] = self.getDefault();
                 var newOption=self.Html.createOption();
                     newOption.setAttribute('value',newIdx);
@@ -116,47 +100,13 @@ class TabStop{
                     self.option.appendChild(newOption);
                     //listDiv.appendChild(self.createInputRow(newIdx,self.data,lp));
                 /* ADD ROW tabstop PROPERTY */
-              
-                
             };
         //console.clear();
         console.log(div);
         return div;
     }
-    /*
-    createInputAdd(listDiv){
-        var self=this;
-        var text = document.createTextNode('Dodaj tabulację');   
-        var div=document.createElement('div');
-            div.setAttribute('class','btn btn-sm btn-warning btn-add float-left text-white');
-            div.appendChild(text);
-        
-            // CLOSURE
-            div.onclick = function(){
-                console.log('TabStop::createInputAdd');
-                var newIdx =  parseInt(self.Utilities.getLastProp(self.data),10)+1; 
-                var lp = self.Utilities.countObjectProp(self.data);
-                    console.log('Data:');
-                    console.log(self.data);
-                    console.log('IDX:');
-                    console.log(newIdx);
-                    console.log('Option:');
-                    console.log(self.option);
-                    console.log('Lp:');
-                    console.log(lp);
-                    self.data[newIdx] = self.getDefault();
-                var newOption=self.Html.createOption();
-                    newOption.setAttribute('value',newIdx);
-                    newOption.innerText = self.setOptionLabal(self.data[newIdx]);
-                    self.option.appendChild(newOption);
-                    listDiv.appendChild(self.createInputRow(newIdx,self.data,lp));
-            };
-        return div;
-    }
-    */
     createInputRow(){
-        console.log('TabStop::createInputRow()');    
-        
+        console.log('TabStop::createInputRow()');          
         var divTool = document.createElement('DIV');
             divTool.classList.add('input-group');
             /* VALUE INPUT */
@@ -171,26 +121,6 @@ class TabStop{
             divTool.appendChild(this.addButton());
        return divTool;
     }
-    /*
-    createInputRow(idx,data,lp){
-        console.log('TabStop::createInputRow()');
-        console.log(idx);
-        console.log(data);
-        // DIV - blok input
-        var divTool = document.createElement('DIV');
-            divTool.classList.add('input-group');
-            // VALUE INPUT 
-            divTool.appendChild(this.createValue(data[idx],'position',lp));
-            // MEASUREMENT SELECT 
-            divTool.appendChild(this.createInputRowProperty(data[idx],'measurementName','measurement',this.property.listMeasurement,lp));
-            // ALIGN SELECT
-            divTool.appendChild(this.createInputRowProperty(data[idx],'alignmentName','alignment',this.property.tabStopAlign,lp));
-            // LEADING SIGN SELECT
-            divTool.appendChild(this.createInputRowProperty(data[idx],'leadingSignName','leadingSign',this.property.leadingSign,lp));
-            // REMOVE BUTTON
-            divTool.appendChild(this.createRemoveButton(divTool,idx,data,lp));
-        return divTool;
-    }*/
     createListRow(idx,data,lp){
         //console.log('TabStop::createListRow()');
         var divMain = document.createElement('DIV');
@@ -275,6 +205,8 @@ class TabStop{
             btnDiv.classList.remove('btn-success');
             btnDiv.classList.add('btn-warning');
             btnDiv.onclick = function(){
+                var found = false;
+                var lp = 0;
                 /* REFERENCJA */
                 //var actData = self.actData;
                 /* WARTOSCI */
@@ -285,98 +217,83 @@ class TabStop{
                     leadingSignName: self.actData.leadingSignName,
                     measurement: self.actData.measurement,
                     measurementName: self.actData.measurementName,
-                    position: self.actData.position
+                    position: self.actData.position,
+                    positionInMM:self.actData.position
                 };
-                var selectedData={
-                    position: self.data[self.paragraph.property.tabStop].position,
-                    measurement: self.data[self.paragraph.property.tabStop].measurement
+                
+                if(actData.measurement==='cm'){
+                    actData.positionInMM=actData.position*10;
+                }
+                console.clear();
+                console.log('INPUT positionInMM');
+                console.log(typeof(actData.positionInMM));
+                console.log(actData.positionInMM);
+                /* DEFAULT */
+                var selectedData = {
+                    position: -1,
+                    measurement: ''
+                };
+                /* EXCEPTION IF self.paragraph.property.tabStop = '-1' = NONE */
+                //throw 'stop-193';
+                if(self.paragraph.property.tabStop!=='-1'){
+                    selectedData={
+                        position: self.data[self.paragraph.property.tabStop].position,
+                        measurement: self.data[self.paragraph.property.tabStop].measurement
+                    }; 
                 };
                 var newData = new Object();
                 newData.data = {};
                 newData.i = 0;
                 newData.add = function(d){
-                    //console.log(this);
                     this.data[this.i]=d;
                     this.i++;
                 };
-                console.clear();
-                console.log('NEW DATA:');
-                console.log(newData);
-                console.log('INPUT DATA:');
-                console.log(self.actData);
-                console.log('ALL DATA:');
-                console.log(self.data);
-                console.log('SELECTED OPTION IDX:');
-                console.log(self.paragraph);
-                console.log(self.paragraph.property.tabStop);
-                console.log(typeof(self.paragraph.property.tabStop));
-                console.log('SELECTED OPTION DATA:');
-                console.log(selectedData.position);
-                console.log(typeof(selectedData.position));
-                console.log(selectedData.measurement);
-                console.log(typeof(selectedData.measurement));
-                //console.log('LIST DIV:');
-                //console.log(self.listDiv);
-                
-                // console.log('LIST OPTION:');
-                //console.log(self.option);
-               
-               
-                var found = false;
-                var lp = 0;
                 for(var idx in self.data){
-                    console.log('INPUT POSITION');
-                    console.log(self.actData.position);
-                    console.log('DATA POSITION');
-                    console.log(self.data[idx].position);
-                    if(self.data[idx].position<actData.position){
-                        console.log('LOWER');
-                        //self.listDiv.appendChild(self.createListRow(idx,self.data,idx));
-                        //
-                       // newData[lp]=self.data[idx];
+                    
+                    
+                    /*
+                     * CREATE NEW PROPERTY positionInMM -> cm to mm
+                     */
+                    if(self.data[idx].measurement==='cm'){
+                        self.data[idx]['positionInMM']=self.data[idx].position*10;
+                    }
+                    else{
+                        self.data[idx]['positionInMM']=self.data[idx].position;
+                    }
+                    
+                    console.log('ACT positionInMM');
+                    console.log(typeof(self.data[idx]['positionInMM']));
+                    console.log(self.data[idx]['positionInMM']);
+                    if(self.data[idx]['positionInMM']<actData.positionInMM){
+                        //console.log('LOWER');
                        newData.add(self.data[idx]);
                     }
                      /* CHECK FOR EXIST, IF EXIST -> UPDATE */
-                    else if(self.data[idx].position===actData.position){
-                        //&& self.data[idx].measurement===self.actData.measurement
-                        console.log('THE SAME - UPDATE');
+                    else if(self.data[idx].positionInMM===actData.positionInMM){
+                        //console.log('THE SAME - UPDATE');
                         found = true;
-                        //newData.add('test-'+Date.now());
-                        //newData.add({a:''});
+                        delete actData.positionInMM;
                         newData.add(actData);
-                       // newData[lp]=self.actData;
+                        
                     }
                     else{
-                        console.log('HIGHER');
+                        //console.log('HIGHER');
                         if(!found){
-                          //  newData[lp]=self.actData;
-                            //newData.add('test2-'+Date.now());
+                            delete actData.positionInMM;
                             newData.add(actData);
                             found = true;
                             /* INCREMENT */
                             lp++;
                         }
                         /* REST */
-                        newData.add(self.data[idx]);
-                       // newData[lp]=self.data[idx];
-                        /* UPDATE CURRENT TO ACTUALL */
-                        
-                        /* MOVE ACTUAL TO NEXT */
+                        newData.add(self.data[idx]);            
                     }
-                   
-                    
-                    
-                    // console.log(newData[lp]);
                     lp++;
+                    delete self.data[idx].positionInMM;
                 };
                 
                 if(!found){
-                    console.log('ELEMENT NOT FOUND -> ADD AT END OF THE LIST'); 
-                    console.log(newData); 
-                    console.log(lp); 
-                   // newData[lp] = self.actData;
-                    console.log(newData); 
-                    //newData.add('test-end-'+Date.now());
+                    //console.log('ELEMENT NOT FOUND -> ADD AT END OF THE LIST'); 
                     newData.add(actData);
                 }
                 // REMOVE LIST WITH OLD DATA VALUE
@@ -386,16 +303,23 @@ class TabStop{
                 /* 
                  * CREATE NEW LIST AND SELECT OPTION
                  */
-                console.log('SET NEW LIST');
                 for(var i in newData.data){
-                    console.log(newData.data[i].position);
-                    console.log(typeof(newData.data[i].position));
-                    console.log(newData.data[i].measurement);
-                    console.log(typeof(newData.data[i].measurement));
                     self.listDiv.appendChild(self.createListRow(i,newData.data,i));   
                     self.option.appendChild(self.setOptionEle(i,newData.data[i])); 
+                    
                     /* STRING = STRING */
                     if(newData.data[i].position===selectedData.position && newData.data[i].measurement===selectedData.measurement){
+                        /* 
+                         * SET SELECTED OPTION 
+                         */
+                        self.option.lastChild.selected=true;
+                        /* 
+                         * UPDATE ROW PROPERTY TAB STOP IDX 
+                         */
+                        self.paragraph.property.tabStop=i;
+                    }
+                    /* 0 EXCEPTION */
+                    if(newData.data[i].position===selectedData.position && selectedData.position===0){
                         /* 
                          * SET SELECTED OPTION 
                          */
@@ -408,9 +332,11 @@ class TabStop{
                 };
                 
                 /* 
-                 * UPDATE OBJECT DATA PROPERTY WITH NEW TAB STOP
+                 * UPDATE OBJECT TabStop data PROPERTY AND paragraph.tabsStop PROPERTY WITH NEW TAB STOP
                  */
                 self.data = newData.data;
+                self.paragraph.tabStop = newData.data;
+                console.log(newData.data);
             };
         return btnDiv;
     }

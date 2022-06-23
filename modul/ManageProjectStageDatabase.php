@@ -71,11 +71,11 @@ abstract class ManageProjectStageDatabase {
             $data[$k]['property']=$this->dbLink->squery("SELECT * FROM `slo_project_stage_property` WHERE `id_stage`=".$v['id']);
             /* ADD EMPTY SECTION KEY => NO SECTION KEY => PROBLEM ON FRONT ADD NEW */
             $data[$k]['section']=[];
-            self::getStageSection($id,$data[$k]);
+            self::getStageSection($data[$k],$id);
         }
         return $data;
     }
-    private function getStageSection($id=0,&$data){
+    private function getStageSection(&$data,$id=0){
         /* GET SECTION*/
         foreach($this->dbLink->squery("SELECT `id`,`new_line` as valuenewline FROM `slo_project_stage_section` WHERE id_stage=".$id." AND wsk_u='0'") as $k => $v){
             $data['section'][$k]['data']=$v;
@@ -83,10 +83,10 @@ abstract class ManageProjectStageDatabase {
             $data['section'][$k]['property']=$this->dbLink->squery("SELECT * FROM `slo_project_stage_section_property` WHERE `id_section`=".$v['id']);
              /* ADD EMPTY SECTION KEY => NO SECTION KEY => PROBLEM ON FRONT ADD NEW */
             $data['section'][$k]['subsection']=[];
-            self::getStageSubsection($v['id'],$data['section'][$k]);
+            self::getStageSubsection($data['section'][$k],$v['id']);
         }
     }
-    private function getStageSubsection($id=0,&$data){
+    private function getStageSubsection(&$data,$id=0){
         /* GET SUBSECTION */
         foreach($this->dbLink->squery("SELECT * FROM `slo_project_stage_subsection` WHERE `id_section`=".$id." AND wsk_u='0'") as $k => $v){
             $data['subsection'][$k]['data']=$v;
@@ -94,10 +94,10 @@ abstract class ManageProjectStageDatabase {
             $data['subsection'][$k]['property']=$this->dbLink->squery("SELECT * FROM `slo_project_stage_subsection_property` WHERE `id_subsection`=".$v['id']);
              /* ADD EMPTY SECTION KEY => NO SECTION KEY => PROBLEM ON FRONT ADD NEW */
             $data['subsection'][$k]['subsectionrow']=[];
-            self::getStageSubsectionRow($v['id'],$data['subsection'][$k]);
+            self::getStageSubsectionRow($data['subsection'][$k],$v['id']);
         }
     }
-    private function getStageSubsectionRow($id=0,&$data){
+    private function getStageSubsectionRow(&$data,$id=0){
         /* GET SUBSECTION ROW */
         foreach($this->dbLink->squery("SELECT `id`,`value`,`new_line` as valuenewline FROM `slo_project_stage_subsection_row` WHERE `id_subsection`=".$id." AND wsk_u='0'") as $k => $v){
             $data['subsectionrow'][$k]['data']=$v;

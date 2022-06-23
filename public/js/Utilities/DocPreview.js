@@ -237,7 +237,7 @@ class DocPreview{
         console.log('ROW - PARAGRAPH:');
         console.log(row.paragraph);
         console.log('ROW - PARAGRAPH - TABSTOP:');
-        console.log(row.paragraph.tabStop);
+        console.log(row.paragraph.tabstop);
         //var p = document.createElement('p');
         var ele = document.createElement('div');
             /* REMOVE MARGIN - LATER SEt AS ... */
@@ -293,51 +293,51 @@ class DocPreview{
     }
     setTabStop(ele,paragraph){
         console.log('DocPreview::setTabStop()');  
-        //var tabStop = this.Utilities.setCmToPx();
+        //var tabstop = this.Utilities.setCmToPx();
         //var leftEjectionPx = this.Utilities.setCmToPx(paragraph.style.leftEjection).toString()+'px';
         var actTabStopPosition = 0;
         var end = paragraph.style.leftEjection;
         
         console.log('TABSTOP IDX'); 
-        console.log(paragraph.property.tabStop);
+        console.log(paragraph.property.tabstop);
         console.log('TABSTOP'); 
-        console.log(paragraph.tabStop);
+        console.log(paragraph.tabstop);
         
         /* COMPARE LEFT EJECTION VALUE WITH TABSTOP VALUE */
-        if(paragraph.property.tabStop<0){
+        if(paragraph.property.tabstop<0){
             console.log('PARAGRAPH TABSTOP IDX < 0 => EXIT - `NO TABSTOP`');
             return false;
         }
-        console.log(paragraph.tabStop.hasOwnProperty(paragraph.property.tabStop));
-        if(!paragraph.tabStop.hasOwnProperty(paragraph.property.tabStop)){
+        console.log(paragraph.tabstop.hasOwnProperty(paragraph.property.tabstop));
+        if(!paragraph.tabstop.hasOwnProperty(paragraph.property.tabstop)){
             console.log('TABSTOP IDX NOT EXIST IN TABSTOP LIST -> RETURN FALSE');
             return false;
         }
         
-        actTabStopPosition = paragraph.tabStop[paragraph.property.tabStop].position;
+        actTabStopPosition = paragraph.tabstop[paragraph.property.tabstop].position;
         
-        if(paragraph.tabStop[paragraph.property.tabStop].position <= paragraph.style.leftEjection){
+        if(paragraph.tabstop[paragraph.property.tabstop].position <= paragraph.style.leftEjection){
             console.log('TABSTOP PROPERTY POSITION EQUAL OR IS LOWER THAN LEFT EJECTION -> RETURN TRUE');
             return true;
         }
         console.log('TABSTOP PROPERTY POSITION HIGHER THAN LEFT EJECTION -> SET ALL TABSTOP AND RETURN TRUE');
-            for (const prop in paragraph.tabStop){
+            for (const prop in paragraph.tabstop){
                 /* COMPARE POSITIONS, IF GRETER THEN LEAVE LOOP */
-                if(paragraph.tabStop[prop].position>actTabStopPosition){
+                if(paragraph.tabstop[prop].position>actTabStopPosition){
                     break;
                 }
                 console.log('append');
                     
-                var span = this.getTabStopEle((paragraph.tabStop[prop].position)-end);
+                var span = this.getTabStopEle((paragraph.tabstop[prop].position)-end);
                 //var tmpText = document.createTextNode('aaaa');
-                    console.log(paragraph.tabStop[prop].leadingSign);
+                    console.log(paragraph.tabstop[prop].leadingSign);
                     
-                this.setTabStopDecoration(span,paragraph.tabStop[prop].leadingSign,paragraph.style.fontSize);
+                this.setTabStopDecoration(span,paragraph.tabstop[prop].leadingSign,paragraph.style.fontSize);
                     
                     ele.appendChild(span);
 
                     
-                end=paragraph.tabStop[prop].position;
+                end=paragraph.tabstop[prop].position;
             }
         return true;
     }

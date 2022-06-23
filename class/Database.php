@@ -56,7 +56,7 @@ class Database extends PDO{
             $pass=base64_decode($pass);
         }
     }
-    public function squery($sth,$param=[],$result='FETCH_ASSOC'){ 
+    public function squery($sth,$param=[],$result='FETCH_ASSOC',$fetch='fetchAll'){ 
         /*
          * PARAMETER MUST BY INSERTED WITHOUT CHAR => ' " IN STATEMATE TO PROPER BIND VALUE
          */
@@ -70,7 +70,8 @@ class Database extends PDO{
         catch (PDOException $e){
             throw New Exception(__METHOD__.$e,1);
 	}
-        return(self::$dbLink->sth->fetchAll(self::parseResultType(strtoupper(trim($result)))));  
+        return(self::$dbLink->sth->{$fetch}(self::parseResultType(strtoupper(trim($result)))));  
+        //return(self::$dbLink->sth->fetchAll(self::parseResultType(strtoupper(trim($result)))));  
     }
     private function parseResultType($t){
 		if(array_key_exists($t,$this->pdoFetchAll)){

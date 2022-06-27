@@ -181,9 +181,22 @@ class DocPreview{
     }
     setList(mainDiv,row,actLvl,lastLevelCounter){
         console.log('DocPreview::setList()'); 
-       
         console.log(lastLevelCounter);
-        
+        console.log('ROW');
+        console.log(row);
+        console.log('NEW LINE');
+        console.log(row.paragraph.property.valuenewline);
+        console.log('MAIN DIV');
+        console.log(mainDiv);
+        /*
+         * EXCEPTION -> IF n => append to last child
+         */
+        if(row.paragraph.property.valuenewline==='n' && mainDiv.hasChildNodes()){
+            console.log('hasChildNodes');
+            console.log(mainDiv.hasChildNodes());
+            mainDiv.lastChild.appendChild(this.setParagraphEle(row.paragraph));
+            return false;
+        }
         /*
          * SET LIST LEVEL TO INT
          */

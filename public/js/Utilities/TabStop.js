@@ -93,7 +93,7 @@ class TabStop{
                      
                     //throw 'llll';
                     
-                    //all[prop]=this.Utilities.getDefaultOptionProperties(prop,subsectionrow.paragraph.tabStop[prop].position+' '+subsectionrow.paragraph.tabStop[prop].measurementName+' | '+subsectionrow.paragraph.tabStop[prop].alignmentName+' | '+subsectionrow.paragraph.tabStop[prop].leadingSignName);
+                    //all[prop]=this.Utilities.getDefaultOptionProperties(prop,subsectionrow.paragraph.tabstop[prop].position+' '+subsectionrow.paragraph.tabstop[prop].measurementName+' | '+subsectionrow.paragraph.tabstop[prop].alignmentName+' | '+subsectionrow.paragraph.tabstop[prop].leadingSignName);
                     newOption.innerText = self.setOptionLabal(self.data[newIdx]);
                     //newOption.innerText=self.data[newIdx].position+' '+self.data[newIdx].measurementName+' | '+self.data[newIdx].alignmentName+' | '+self.data[newIdx].leadingSignName; 
                     //throw 'aaaaaaaaa';
@@ -114,7 +114,7 @@ class TabStop{
             /* MEASUREMENT SELECT */
             divTool.appendChild(this.createInputRowProperty('measurementName','measurement',this.property.listMeasurement));
             /* ALIGN SELECT */
-            divTool.appendChild(this.createInputRowProperty('alignmentName','alignment',this.property.tabStopAlign));
+            divTool.appendChild(this.createInputRowProperty('alignmentName','alignment',this.property.tabstopAlign));
             /* LEADING SIGN SELECT */
             divTool.appendChild(this.createInputRowProperty('leadingSignName','leadingSign',this.property.leadingSign));
             /* ADD BUTTON */
@@ -191,14 +191,14 @@ class TabStop{
                     delete data[idx];
                     /* REMOVE VALUE OPTION FROM LIST IN SELECT TABSTOP */
                     self.option.childNodes[lp].remove();
-                    /* SET paragraph.property.tabStop */
-                    console.log(self.paragraph.property.tabStop);
-                    if(idx===self.paragraph.property.tabStop){
-                        self.paragraph.property.tabStop='-1';
+                    /* SET paragraph.property.tabstop */
+                    console.log(self.paragraph.property.tabstop);
+                    if(idx===self.paragraph.property.tabstop){
+                        self.paragraph.property.tabstop='-1';
                     }
-                    /* REMOVE FROM paragraph.tabStop */
-                    delete self.paragraph.tabStop[idx];
-                    console.log(self.paragraph.property.tabStop);
+                    /* REMOVE FROM paragraph.tabstop */
+                    delete self.paragraph.tabstop[idx];
+                    console.log(self.paragraph.property.tabstop);
                 } else {
                     // NOTHING TO DO
                 }
@@ -241,15 +241,15 @@ class TabStop{
                     position: -1,
                     measurement: ''
                 };
-                /* EXCEPTION IF self.paragraph.property.tabStop = '-1' = NONE */
+                /* EXCEPTION IF self.paragraph.property.tabstop = '-1' = NONE */
                 //throw 'stop-193';
                 console.log(self.paragraph);
                 console.log(self.paragraph.property);
-                console.log(self.paragraph.property.tabStop);
-                if(self.paragraph.property.tabStop!=='-1'){
+                console.log(self.paragraph.property.tabstop);
+                if(self.paragraph.property.tabstop!=='-1'){
                     selectedData={
-                        position: self.data[self.paragraph.property.tabStop].position,
-                        measurement: self.data[self.paragraph.property.tabStop].measurement
+                        position: self.data[self.paragraph.property.tabstop].position,
+                        measurement: self.data[self.paragraph.property.tabstop].measurement
                     }; 
                 };
                 var newData = new Object();
@@ -327,7 +327,7 @@ class TabStop{
                         /* 
                          * UPDATE ROW PROPERTY TAB STOP IDX 
                          */
-                        self.paragraph.property.tabStop=i;
+                        self.paragraph.property.tabstop=i;
                     }
                     /* 0 EXCEPTION */
                     if(newData.data[i].position===selectedData.position && selectedData.position===0){
@@ -338,7 +338,7 @@ class TabStop{
                         /* 
                          * UPDATE ROW PROPERTY TAB STOP IDX 
                          */
-                        self.paragraph.property.tabStop=i;
+                        self.paragraph.property.tabstop=i;
                     }
                 };
                 
@@ -346,7 +346,7 @@ class TabStop{
                  * UPDATE OBJECT TabStop data PROPERTY AND paragraph.tabsStop PROPERTY WITH NEW TAB STOP
                  */
                 self.data = newData.data;
-                self.paragraph.tabStop = newData.data;
+                self.paragraph.tabstop = newData.data;
                 console.log(newData.data);
             };
         return btnDiv;

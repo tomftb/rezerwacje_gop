@@ -3,24 +3,19 @@
  * Author: Tomasz Borczynski
  */
 class TabStop{
-    //parameter=new Object();
     property=new Object();
     Html = new Object();
     Utilities = new Object();
     data = new Array();
     default = new Object();
-    option = {};
+    //option = {};
     paragraph = {};
-    actData ={
-            position:0,
-            measurement:'',
-            measurementName:'',
-            alignment:'',
-            alignmentName:'',
-            leadingSign:'',
-            leadingSignName:''
-    };
-    listDiv=new Object();
+    /*
+     * data
+     * option - link
+     * list - link
+     */
+    actData ={};
     
     constructor(){
         this.Html = new Html();
@@ -33,32 +28,37 @@ class TabStop{
         //this.parameter = p;
         this.default = this.getDefault(p);
     }
-    create(data){
-        console.log('TabStop::create');
+    create(data,idx){
+        console.log('TabStop::create()');
         console.log(data);
+        console.log(idx);
+        console.log('paragraph');
+        console.log(this.paragraph);
         this.data = data;
+        console.log('this data');
+        console.log(data);
         /* PUNKT TABULACJI */
         /* mainDiv - blok calosci */
         var main = document.createElement('DIV');
             main.classList.add('row');
         /* mainDiv - dynamiczny blok */
-        this.listDiv = document.createElement('DIV');
-        this.listDiv.classList.add('col-12');
+        this.paragraph[idx].list = document.createElement('DIV');
+        this.paragraph[idx].list.classList.add('col-12');
             /* SET DATA */
-            this.setData();
+            this.setData(idx);
             main.appendChild(this.createLabel('Tabulacje','h5'));
-            main.appendChild(this.createInput());
+            main.appendChild(this.createInput(idx));
             main.appendChild(this.createLabel('Aktualna lista:','h6'));
-            main.appendChild(this.listDiv);
+            main.appendChild(this.paragraph[idx].list);
             
         console.log(main);
         return main;
     }
-    setData(){
+    setData(idx){
         console.log('TabStop::setData');
         var lp=0;
         for(var index in this.data){
-            this.listDiv.appendChild(this.createListRow(index,this.data,lp));
+            this.paragraph[idx].list.appendChild(this.createListRow(index,this.data,lp,idx));
             lp++;
         }
     }
@@ -76,52 +76,23 @@ class TabStop{
                 leadingSignName:parameter.STAGE_TEXT_TABSTOP_LEADING_SIGN.n
         };                  
     }
-    createInputAdd(listDiv){
-        var self=this;
-        
-        var div = this.createInputRow();
-            /* CLOSURE */
-            div.onclick = function(){
-                console.log('TabStop::createInputAdd');
-                //var data = self.getDefault();
-                //var idx =  self.Utilities.countObjectProp(self.data);  
-                var newIdx =  parseInt(self.Utilities.getLastProp(self.data),10)+1; 
-                var lp = self.Utilities.countObjectProp(self.data);
-                    self.data[newIdx] = self.getDefault();
-                var newOption=self.Html.createOption();
-                    newOption.setAttribute('value',newIdx);
-                     
-                    //throw 'llll';
-                    
-                    //all[prop]=this.Utilities.getDefaultOptionProperties(prop,subsectionrow.paragraph.tabstop[prop].position+' '+subsectionrow.paragraph.tabstop[prop].measurementName+' | '+subsectionrow.paragraph.tabstop[prop].alignmentName+' | '+subsectionrow.paragraph.tabstop[prop].leadingSignName);
-                    newOption.innerText = self.setOptionLabal(self.data[newIdx]);
-                    //newOption.innerText=self.data[newIdx].position+' '+self.data[newIdx].measurementName+' | '+self.data[newIdx].alignmentName+' | '+self.data[newIdx].leadingSignName; 
-                    //throw 'aaaaaaaaa';
-                    self.option.appendChild(newOption);
-                    //listDiv.appendChild(self.createInputRow(newIdx,self.data,lp));
-                /* ADD ROW tabstop PROPERTY */
-            };
-        //console.clear();
-        console.log(div);
-        return div;
-    }
-    createInputRow(){
+    createInputRow(idx){
         console.log('TabStop::createInputRow()');          
         var divTool = document.createElement('DIV');
             divTool.classList.add('input-group');
             /* VALUE INPUT */
-            divTool.appendChild(this.createInputValue());
+            divTool.appendChild(this.createInputValue(idx));
             /* MEASUREMENT SELECT */
-            divTool.appendChild(this.createInputRowProperty('measurementName','measurement',this.property.listMeasurement));
+            divTool.appendChild(this.createInputRowProperty('measurementName','measurement',this.property.listMeasurement,idx));
             /* ALIGN SELECT */
-            divTool.appendChild(this.createInputRowProperty('alignmentName','alignment',this.property.tabstopAlign));
+            divTool.appendChild(this.createInputRowProperty('alignmentName','alignment',this.property.tabstopAlign,idx));
             /* LEADING SIGN SELECT */
-            divTool.appendChild(this.createInputRowProperty('leadingSignName','leadingSign',this.property.leadingSign));
+            divTool.appendChild(this.createInputRowProperty('leadingSignName','leadingSign',this.property.leadingSign,idx));
             /* ADD BUTTON */
-            divTool.appendChild(this.addButton());
+            divTool.appendChild(this.addButton(idx));
        return divTool;
     }
-    createListRow(idx,data,lp){
+    createListRow(idx,data,lp,mainIdx){
         //console.log('TabStop::createListRow()');
         var divMain = document.createElement('DIV');
             divMain.classList.add('row','ml-0');
@@ -129,7 +100,7 @@ class TabStop{
             divMain.appendChild(this.createListRowEle(data[idx].alignmentName,'col-3'));
             divMain.appendChild(this.createListRowEle(data[idx].leadingSignName,'col-3'));
             /* REMOVE BUTTON */
-            divMain.appendChild(this.rmButton(divMain,idx,data,lp));
+            divMain.appendChild(this.rmButton(divMain,idx,data,lp,mainIdx));
         return divMain; 
     }
     createListRowEle(value,col){
@@ -141,19 +112,28 @@ class TabStop{
             div.appendChild(span);
         return div;
     }
-    createInputValue(){
+    createInputValue(idx){
         /* INPUT - Pozycja tabulatora */
+        this.actData[idx]={
+            position:0,
+            measurement:'',
+            measurementName:'',
+            alignment:'',
+            alignmentName:'',
+            leadingSign:'',
+            leadingSignName:''
+        }
         var self = this;
         var input=document.createElement('INPUT');
             input.classList.add('form-control-sm','form-control');
             input.setAttribute('type','number');
             input.setAttribute('value',this.default.position);
             input.onchange = function (){
-                self.actData.position = parseFloat(this.value);
+                self.actData[idx].position = parseFloat(this.value);
             };
         return input;
     }
-    createInputRowProperty(nameKey,valueKey,glossary){
+    createInputRowProperty(nameKey,valueKey,glossary,idx){
         var select=document.createElement('SELECT');
             select.classList.add('form-control-sm','form-control');
         var defaultOption={
@@ -163,17 +143,17 @@ class TabStop{
             select.appendChild(this.Html.createOptionGroup('Domyślny:',defaultOption)); 
             select.appendChild(this.Html.createOptionGroup('Dostępne',this.Utilities.getDefaultList(glossary,this.default[valueKey])));   
             /* SET DEEFAULT */
-            this.actData[valueKey] = this.default[valueKey];
-            this.actData[nameKey] = this.default[nameKey];
+            this.actData[idx][valueKey] = this.default[valueKey];
+            this.actData[idx][nameKey] = this.default[nameKey];
             select.onchange=function(){
                 // UPDATE OPTION SELECT VALUE IN DATA TABSTOP OBJECT
-                self.actData[valueKey]=this.value;
+                self.actData[idx][valueKey]=this.value;
                 // UPDATE OPTION SELECT LABEL IN DATA TABSTOP OBJECT
-                self.actData[nameKey]=self.getValueNameFromGlossary(glossary,this.value);;
+                self.actData[idx][nameKey]=self.getValueNameFromGlossary(glossary,this.value);;
             };
         return select;   
     }
-    rmButton(divRow,idx,data,lp){
+    rmButton(divRow,idx,data,lp,mainIdx){
         var div = this.Html.removeButton();
             //console.log(div);
             //div.classList.add('input-group-text');
@@ -184,21 +164,24 @@ class TabStop{
             /* CLOSURE */
         var self = this;
             div.onclick=function(){
-                if (confirm('Potwierdź usunięcie tabulacji') === true) {   
+                if (confirm('Potwierdź usunięcie tabulacji') === true) { 
+                    console.log('MAIN IDX');
+                    console.log(mainIdx);
                     /* REMOVE DIV ROW WITH INPUT AND BUTTON */
                     divRow.remove();
                     /* REMOVE DATA IDX FROM DATA (LIST) TABSTOP OBJECT */
                     delete data[idx];
+                    
                     /* REMOVE VALUE OPTION FROM LIST IN SELECT TABSTOP */
-                    self.option.childNodes[lp].remove();
+                    self.paragraph[mainIdx].option.childNodes[lp].remove();
                     /* SET paragraph.property.tabstop */
-                    console.log(self.paragraph.property.tabstop);
-                    if(idx===self.paragraph.property.tabstop){
-                        self.paragraph.property.tabstop='-1';
+                    console.log(self.paragraph[mainIdx].data.property.tabstop);
+                    if(idx===self.paragraph[mainIdx].data.property.tabstop){
+                        self.paragraph[mainIdx].data.property.tabstop='-1';
                     }
                     /* REMOVE FROM paragraph.tabstop */
-                    delete self.paragraph.tabstop[idx];
-                    console.log(self.paragraph.property.tabstop);
+                    delete self.paragraph[mainIdx].data.tabstop[idx];
+                    console.log(self.paragraph[mainIdx].data.property.tabstop);
                 } else {
                     // NOTHING TO DO
                 }
@@ -206,36 +189,44 @@ class TabStop{
             divAll.appendChild(div);
         return divAll;
     }
-    addButton(){
+    addButton(idx){
+        console.log('TabStop:addButton()');
+        console.log('idx:');
+        console.log(idx);
+        console.log('paragraph');
+        console.log(this.paragraph);
         var self = this;
         var btnDiv = this.Html.addButton();
             btnDiv.classList.add('btn-sm','rounded-0');
             btnDiv.classList.remove('btn-success');
             btnDiv.classList.add('btn-warning');
             btnDiv.onclick = function(){
+                console.clear();
+                console.log('idx:');
+                console.log(idx);
                 var found = false;
                 var lp = 0;
                 /* REFERENCJA */
                 //var actData = self.actData;
                 /* WARTOSCI */
-                var actData={
-                    alignment: self.actData.alignment,
-                    alignmentName: self.actData.alignmentName,
-                    leadingSign: self.actData.leadingSign,
-                    leadingSignName: self.actData.leadingSignName,
-                    measurement: self.actData.measurement,
-                    measurementName: self.actData.measurementName,
-                    position: self.actData.position,
-                    positionInMM:self.actData.position
+                var tmpData={
+                    alignment: self.actData[idx].alignment,
+                    alignmentName: self.actData[idx].alignmentName,
+                    leadingSign: self.actData[idx].leadingSign,
+                    leadingSignName: self.actData[idx].leadingSignName,
+                    measurement: self.actData[idx].measurement,
+                    measurementName: self.actData[idx].measurementName,
+                    position: self.actData[idx].position,
+                    positionInMM:self.actData[idx].position
                 };
                 
-                if(actData.measurement==='cm'){
-                    actData.positionInMM=actData.position*10;
+                if(tmpData.measurement==='cm'){
+                    tmpData.positionInMM=tmpData.position*10;
                 }
-                console.clear();
+                
                 console.log('INPUT positionInMM');
-                console.log(typeof(actData.positionInMM));
-                console.log(actData.positionInMM);
+                console.log(typeof(tmpData.positionInMM));
+                console.log(tmpData.positionInMM);
                 /* DEFAULT */
                 var selectedData = {
                     position: -1,
@@ -243,13 +234,13 @@ class TabStop{
                 };
                 /* EXCEPTION IF self.paragraph.property.tabstop = '-1' = NONE */
                 //throw 'stop-193';
-                console.log(self.paragraph);
-                console.log(self.paragraph.property);
-                console.log(self.paragraph.property.tabstop);
-                if(self.paragraph.property.tabstop!=='-1'){
+                console.log(self.paragraph[idx]);
+                console.log(self.paragraph[idx].data.property);
+                console.log(self.paragraph[idx].data.property.tabstop);
+                if(self.paragraph[idx].data.property.tabstop!=='-1'){
                     selectedData={
-                        position: self.data[self.paragraph.property.tabstop].position,
-                        measurement: self.data[self.paragraph.property.tabstop].measurement
+                        position: self.data[self.paragraph[idx].data.property.tabstop].position,
+                        measurement: self.data[self.paragraph[idx].data.property.tabstop].measurement
                     }; 
                 };
                 var newData = new Object();
@@ -259,86 +250,86 @@ class TabStop{
                     this.data[this.i]=d;
                     this.i++;
                 };
-                for(var idx in self.data){
+                for(var prop in self.data){
                     
                     
                     /*
                      * CREATE NEW PROPERTY positionInMM -> cm to mm
                      */
-                    if(self.data[idx].measurement==='cm'){
-                        self.data[idx]['positionInMM']=self.data[idx].position*10;
+                    if(self.data[prop].measurement==='cm'){
+                        self.data[prop]['positionInMM']=self.data[prop].position*10;
                     }
                     else{
-                        self.data[idx]['positionInMM']=self.data[idx].position;
+                        self.data[prop]['positionInMM']=self.data[prop].position;
                     }
                     
                     console.log('ACT positionInMM');
-                    console.log(typeof(self.data[idx]['positionInMM']));
-                    console.log(self.data[idx]['positionInMM']);
-                    if(self.data[idx]['positionInMM']<actData.positionInMM){
+                    console.log(typeof(self.data[prop]['positionInMM']));
+                    console.log(self.data[prop]['positionInMM']);
+                    if(self.data[prop]['positionInMM']<tmpData.positionInMM){
                         //console.log('LOWER');
-                       newData.add(self.data[idx]);
+                       newData.add(self.data[prop]);
                     }
                      /* CHECK FOR EXIST, IF EXIST -> UPDATE */
-                    else if(self.data[idx].positionInMM===actData.positionInMM){
+                    else if(self.data[prop].positionInMM===tmpData.positionInMM){
                         //console.log('THE SAME - UPDATE');
                         found = true;
-                        delete actData.positionInMM;
-                        newData.add(actData);
+                        delete tmpData.positionInMM;
+                        newData.add(tmpData);
                         
                     }
                     else{
                         //console.log('HIGHER');
                         if(!found){
-                            delete actData.positionInMM;
-                            newData.add(actData);
+                            delete tmpData.positionInMM;
+                            newData.add(tmpData);
                             found = true;
                             /* INCREMENT */
                             lp++;
                         }
                         /* REST */
-                        newData.add(self.data[idx]);            
+                        newData.add(self.data[prop]);            
                     }
                     lp++;
-                    delete self.data[idx].positionInMM;
+                    delete self.data[prop].positionInMM;
                 };
                 
                 if(!found){
                     //console.log('ELEMENT NOT FOUND -> ADD AT END OF THE LIST'); 
-                    newData.add(actData);
+                    newData.add(tmpData);
                 }
                 // REMOVE LIST WITH OLD DATA VALUE
-                self.Html.removeChilds(self.listDiv);
+                self.Html.removeChilds(self.paragraph[idx].list);
                 //REMOVE OPTION SELECT WITH OLD DATA VALUE
-                self.Html.removeChilds(self.option);
+                self.Html.removeChilds(self.paragraph[idx].option);
                 /* 
                  * CREATE NEW LIST AND SELECT OPTION
                  */
                 for(var i in newData.data){
-                    self.listDiv.appendChild(self.createListRow(i,newData.data,i));   
-                    self.option.appendChild(self.setOptionEle(i,newData.data[i])); 
+                    self.paragraph[idx].list.appendChild(self.createListRow(i,newData.data,i,idx));   
+                    self.paragraph[idx].option.appendChild(self.setOptionEle(i,newData.data[i])); 
                     
                     /* STRING = STRING */
                     if(newData.data[i].position===selectedData.position && newData.data[i].measurement===selectedData.measurement){
                         /* 
                          * SET SELECTED OPTION 
                          */
-                        self.option.lastChild.selected=true;
+                        self.paragraph[idx].option.lastChild.selected=true;
                         /* 
                          * UPDATE ROW PROPERTY TAB STOP IDX 
                          */
-                        self.paragraph.property.tabstop=i;
+                        self.paragraph[idx].data.property.tabstop=i;
                     }
                     /* 0 EXCEPTION */
                     if(newData.data[i].position===selectedData.position && selectedData.position===0){
                         /* 
                          * SET SELECTED OPTION 
                          */
-                        self.option.lastChild.selected=true;
+                        self.paragraph[idx].option.lastChild.selected=true;
                         /* 
                          * UPDATE ROW PROPERTY TAB STOP IDX 
                          */
-                        self.paragraph.property.tabstop=i;
+                        self.paragraph[idx].data.property.tabstop=i;
                     }
                 };
                 
@@ -346,14 +337,14 @@ class TabStop{
                  * UPDATE OBJECT TabStop data PROPERTY AND paragraph.tabsStop PROPERTY WITH NEW TAB STOP
                  */
                 self.data = newData.data;
-                self.paragraph.tabstop = newData.data;
+                self.paragraph[idx].data.tabstop = newData.data;
                 console.log(newData.data);
             };
         return btnDiv;
     }
-    setOptionRef(option){
-        this.option=option;
-    }
+    //setOptionRef(option){
+      //  this.option=option;
+    //}
     setOptionEle(i,d){
         var option = this.Html.createOption();
             option.innerText = d.position+' '+d.measurementName+' | '+d.alignmentName+' | '+d.leadingSignName;
@@ -379,11 +370,10 @@ class TabStop{
             div.appendChild(p);
             return div;
     }
-    createInput(){      
+    createInput(idx){      
         var inputDiv = document.createElement('DIV');
             inputDiv.classList.add('col-12');
-            //inputDiv.appendChild(this.createInputAdd(listDiv));
-            inputDiv.appendChild(this.createInputRow());
+            inputDiv.appendChild(this.createInputRow(idx));
         return inputDiv;
     }
     

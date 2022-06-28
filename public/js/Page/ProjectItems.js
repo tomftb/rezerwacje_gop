@@ -218,6 +218,8 @@ class ProjectItems{
         console.log(classToRun);
         console.log(methodToRun);
         console.log(taskToRun);
+        /* CLEAR TABLE */
+        this.Table.clearTable();   
         /*
          * property:
          * t = type GET/POST 

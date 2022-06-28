@@ -109,7 +109,8 @@ class ProjectStage{
                 object:this,
                 method:'show'
             };
-            this.CreateText.create();
+            /* TURN OFF  - createList instead*/
+            //this.CreateText.create();
         }
         catch(error){
             console.log(error);
@@ -147,8 +148,10 @@ class ProjectStage{
     }
     details(response){
         try{
+            console.clear();
             console.log('ProjectStage::details()');
-            this.CreateText.details(response);
+            //this.CreateText.details(response);
+            this.CreateList.details(response);
         }
         catch(error){
             console.log(error);

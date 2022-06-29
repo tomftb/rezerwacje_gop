@@ -420,6 +420,16 @@ class ProjectItems{
            this.Html.showField(this.Modal.link['error'],error);
         }
     }
+    setFieldResponse(response){
+       try {
+            this.parseResponse(response);
+        }
+        catch (error) {
+            console.log(error);
+            /* SHOW ERROR MODAL */ 
+           this.Html.showField(this.Modal.link['error'],error);
+        } 
+    }
     setUpModalData(response){
         console.log('ProjectItems::setUpModalData()');
         var data={};

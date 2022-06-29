@@ -47,11 +47,13 @@ class ProjectStageCreateList{
         this.Html=Stage.Items.Html;
         this.Xhr=Stage.Items.Xhr2;
         this.XhrTable=Stage.Items.Xhr;
-        this.Glossary.text=Stage.Items.Glossary['text'];
-        this.Glossary.list=Stage.Items.Glossary['list'];
+        this.Glossary={
+            'text':Stage.Items.Glossary['text'],
+            'list':Stage.Items.Glossary['list']
+        };
         this.DocPreview = new DocPreview();
         this.Utilities = new Utilities();
-        this.TabStop = new TabStop();
+
     }
     getXhrParm(type,task,method){
         return {
@@ -68,11 +70,8 @@ class ProjectStageCreateList{
         try{
             /* SETUP EJECTION MULTIPLIER */
             this.ejectionMultiplier=parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
-            /* SETUP TABSTOP PARAMETERS */
-            this.TabStop.setParameter(this.Glossary.text.like('parameter','^STAGE_TEXT_TABSTOP'));
-            this.TabStop.setProperty('listMeasurement',this.Glossary.text.item.listMeasurement);
-            this.TabStop.setProperty('tabStopAlign',this.Glossary.text.item.tabStopAlign);
-            this.TabStop.setProperty('leadingSign',this.Glossary.text.item.leadingSign);
+            this.TabStop = new Object();
+            
             /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
             /* SET STAGE CREATE TEXT DEFAULT DEPARTMENT LIST */
@@ -127,21 +126,22 @@ class ProjectStageCreateList{
             console.log(err);
             this.Items.Table.setError('An Application Error Has Occurred!');
         }
-    }
-    details (response){   
+    }    
+    details(response){   
         try{
-            console.log('ProjectStageCreateList::details()\r\nRESPONSE:');   
+            console.clear();
+            console.log('ProjectStageCreateList::details()');   
+            /* SETUP EJECTION MULTIPLIER */
+            this.ejectionMultiplier=parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
             /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
             /* SET STAGE CREATE TEXT DEFAULT DEPARTMENT LIST */
             this.Department=this.Stage.Property.department;
-            
-            var data =this.Items.parseResponse(response);     
+            this.iSectionField=1; 
+             /* SETUP STAGE DATA */
+            this.stageData = this.Items.parseResponse(response).data;   
             /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
             this.helplink=this.getEmptyHelpLink();
-            console.log(data);
-            //console.log(data.data.value);
-            //console.log(this.data['data']['value']['const']);
             /* TO DO IN FUTURE -> ADD setCloseModal multi id's */
             this.Modal.clearData();
             //this.Items.setCloseModal(this.Const,'show',this.Const.defaultTask+this.data['data']['value']['const'].i);
@@ -150,18 +150,16 @@ class ProjectStageCreateList{
             /* SET CONSTS */
             //this.allConsts=this.data['data']['value']['all'];
             this.fieldDisabled=true;
-            this.stageData = data.data[0]; 
-            //this.setUpStage(data.data.value);
-            console.log(this.stageData);
-            //throw 'test-stop-aaa';
+
             this.Items.setCloseModal(this.Stage,'show',this.Stage.defaultTask+this.stageData.data.id);              
             /* CREATE FORM */
             var form=this.Html.getForm();
             /* ASSIGN TITLE DEPARTMENT FIELD */
+            console.log(this.stageData);
             var stageDepartment = {
                 0:{
-                    n:data.data[0].data.departmentName,
-                    v:data.data[0].data.departmentId
+                    n:this.stageData.data.departmentName,
+                    v:this.stageData.data.departmentId
                 }
             };
             //throw 'test-stop-1234';
@@ -190,6 +188,13 @@ class ProjectStageCreateList{
             console.log(error);
             throw 'An Application Error Has Occurred!';
         }
+    }
+    setTabStopParameters(TabStop){
+        /* SETUP TABSTOP PARAMETERS */
+        TabStop.setParameter(this.Glossary.text.like('parameter','^STAGE_TEXT_TABSTOP'));
+        TabStop.setProperty('listMeasurement',this.Glossary.text.item.listMeasurement);
+        TabStop.setProperty('tabstopAlign',this.Glossary.text.item.tabstopAlign);
+        TabStop.setProperty('leadingSign',this.Glossary.text.item.leadingSign); 
     }
     block(){
         try{
@@ -641,9 +646,9 @@ class ProjectStageCreateList{
                         console.log(i);
                         */
                         subsection[i]=classObject.setUpNewStageSubsectionProp();
-                        /* FIRST ALWAYS NOT NEW LINE */
+                        /* FIRST ALWAYS NEW LINE */
                         //subsection[i].subsectionrow[0].data.valuenewline='n';
-                        subsection[i].subsectionrow[0].paragraph.property.valuenewline='n';
+                        subsection[i].subsectionrow[0].paragraph.property.valuenewline='y';
                         /* CREATE NEW DOM ELEMENT */
                         classObject.helplink.section[iSection].main.body.appendChild(classObject.createSubsection(iSection,i,subsection[i],helplinkSubsection));
                     }             
@@ -738,13 +743,21 @@ class ProjectStageCreateList{
     }
     //createControlTool(labelText,eleText,labelList,eleList){
     createControlTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,mainDiv){
+        helplinkISubRow['tool']={};
         /* CREATE TEXT TOOL */
         var textTool = this.createTextToolSection(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
         /* CREATE TEXT TOOL */
-        var textTabulatorTool = this.createTabStopSectionTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow.text);
+        var textTabStopTool = this.createTabStopSectionTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow.text);
+        var textTabStopToolControl = this.createControl('Tabulatory',textTabStopTool);
+        /* SET LINK TO tabstopTool */
+            helplinkISubRow.tool['tabstopControl']=textTabStopToolControl;
+            helplinkISubRow.tool['tabstop']=textTabStopTool;
         /* CREATE LIST TOOL */
         var listTool = this.createListToolSection(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
-        
+        var listToolControl = this.createControl('Opcje listy',listTool);
+        /* SET LINK TO listTool */
+            helplinkISubRow.tool['listControl']=listToolControl;
+            helplinkISubRow.tool['list']=listTool;
         var mainCol = this.Html.getCol(12);
             mainCol.classList.add('mt-1','mb-1');
         var mainDivControl=this.Html.getRow();   
@@ -756,19 +769,18 @@ class ProjectStageCreateList{
             
             mainDivControlCol.classList.add('btn-group','btn-group-toggle');
             mainDivControlCol.appendChild(this.createControl('Formatowanie',textTool));
-            mainDivControlCol.appendChild(this.createControl('Tabulatory',textTabulatorTool));
-            mainDivControlCol.appendChild(this.createControl('Opcje listy',listTool));
+            mainDivControlCol.appendChild(textTabStopToolControl);
+            mainDivControlCol.appendChild(listToolControl);
             
             
             mainDivControl.appendChild(mainDivControlCol1);
             mainDivControl.appendChild(mainDivControlCol);
             mainDivControl.appendChild(mainDivControlCol2);
             mainCol.appendChild(mainDivControl);
-        mainDiv.appendChild(mainCol);    
-        mainDiv.appendChild(textTool);  
-        mainDiv.appendChild(textTabulatorTool);  
-        mainDiv.appendChild(listTool);
-        
+            mainDiv.appendChild(mainCol);    
+            mainDiv.appendChild(textTool);  
+            mainDiv.appendChild(textTabStopTool);  
+            mainDiv.appendChild(listTool);
     }
     createControl(label,ele){
         /* CONTROL */
@@ -809,7 +821,7 @@ class ProjectStageCreateList{
         */
         var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
-             mainDivCol.style.backgroundColor='#e6e6e6';
+            mainDivCol.style.backgroundColor='#e6e6e6';
         var mainDiv=this.Html.getRow();
             
         var tool1=this.Html.getCol(3);
@@ -829,14 +841,14 @@ class ProjectStageCreateList{
         var backgroundColor=this.setValueStyle('backgroundColor','Kolor tła:',this.getDefaultBackgroundColor(subsectionrow.paragraph.style.backgroundColor,subsectionrow.paragraph.style.backgroundColorName),this.getBackgroundColorList(subsectionrow.paragraph.style.backgroundColor),subsectionrow.paragraph.style,helplink.text.value);
         
         
-        var tabStop=this.createTextToolTabStop(isection,isub,isubrow,subsectionrow,helplink);
+        var tabstop=this.createTextToolTabStop(isection,isub,isubrow,subsectionrow,helplink);
         
         tool1.appendChild(fontSize);
         tool1.appendChild(color);
         tool1.appendChild(backgroundColor);
         tool2.appendChild(fontFamily);
         tool2.appendChild(textAlign);
-        tool2.appendChild(tabStop);
+        tool2.appendChild(tabstop);
         
          /* LEFT EJECTION */
         var leftEjection=this.createLeftEjectionInput(isection,isub,isubrow,subsectionrow,helplink);
@@ -846,7 +858,7 @@ class ProjectStageCreateList{
         /* INDENTATION */
         var indentation=this.setIndentation(subsectionrow.paragraph);
         /* PARAGRAPH TYPE */
-        var paragraph=this.createParagraphType(subsectionrow.paragraph);
+        var paragraph=this.createParagraphType(subsectionrow.paragraph,helplink);
         tool3.appendChild(leftEjection);
         tool3.appendChild(rightEjection);
         tool3.appendChild(indentation);
@@ -885,7 +897,7 @@ class ProjectStageCreateList{
         var tool4=this.Html.getCol(2);
             //tool4.classList.add('pt-4'); 
         
-        tool1.appendChild(this.TabStop.create(subsectionrow.paragraph.tabStop));
+        tool1.appendChild(this.TabStop[isubrow].create());//subsectionrow.paragraph.tabstop,isubrow
         
         mainDiv.appendChild(tool1);
         mainDiv.appendChild(tool2);
@@ -893,7 +905,7 @@ class ProjectStageCreateList{
         mainDiv.appendChild(tool4);
             
         mainDivCol.appendChild(mainDiv);
-        
+        console.log(mainDivCol);
         return mainDivCol;
     }
 
@@ -901,7 +913,7 @@ class ProjectStageCreateList{
     
     
     createListToolSection(isection,isub,isubrow,subsectionrow,helplink){
-        console.log('ProjectStageCreateList::createListToolSection()');
+        //console.log('ProjectStageCreateList::createListToolSection()');
         var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('d-none','pt-1','pb-1');
             mainDivCol.style.backgroundColor='#e6e6e6';
@@ -911,7 +923,7 @@ class ProjectStageCreateList{
         var tool3=this.Html.getCol(3);
         var tool4=this.Html.getCol(3);
             
-            console.log(this.Glossary.list);
+        //console.log(this.Glossary.list);
         /* MARGIN 
         var marginLeft=this.valueFontSizeModification('Lewy margines:',subsectionrow.style,helplink.value);
         var marginRight=this.valueFontSizeModification('Prawy margines:',subsectionrow.style,helplink.value);
@@ -961,7 +973,7 @@ class ProjectStageCreateList{
         return mainDivCol;
     }
     createListLevelSelect(row,helplink){
-         //console.log('ProjectStageCreateList::createListLevelSelect()');
+        //console.log('ProjectStageCreateList::createListLevelSelect()');
         var multiplier = this.ejectionMultiplier;
         var select = this.createTextToolSelect('listLevel','Poziom listy (mnożnik - '+multiplier.toString()+'):',this.getSelectKey(row.list.property.listLevel,row.list.property.listLevelName),this.getListLevelList(row.list.property.listLevel,row.list.property.listLevelMax));
         /* CLOSURE - DOMKNIĘCIE*/
@@ -982,7 +994,7 @@ class ProjectStageCreateList{
             
         //return select;
     }
-    createParagraphType(subsectionrow){
+    createParagraphType(subsectionrow,helplink){
         var all={
             0:{
                 v:'l',
@@ -993,7 +1005,14 @@ class ProjectStageCreateList{
                 n:'Nowy akapit'
             }
         };
-        return this.setValueProperty('paragraph','Typ:',this.getSelectKey(subsectionrow.property.paragraph,subsectionrow.property.paragraphName),this.getNewElementList(all,subsectionrow.property.paragraph),subsectionrow.property);
+        
+        var run={
+            method:'setToolList',
+            helplink:helplink,
+            toolBtn:'listToolControl',
+            toolDiv:'listTool'
+        };
+        return this.setValuePropertyExtended('paragraph','Typ:',this.getSelectKey(subsectionrow.property.paragraph,subsectionrow.property.paragraphName),this.getNewElementList(all,subsectionrow.property.paragraph),subsectionrow.property,run);
       
     }
     createNewListSelect(subsectionrow){
@@ -1010,7 +1029,7 @@ class ProjectStageCreateList{
         return this.setValueProperty('newList','Nowa Lista:',this.getSelectKey(subsectionrow.list.property.newList,subsectionrow.list.property.newListName),this.getNewElementList(all,subsectionrow.list.property.newList),subsectionrow.list.property);
     }
     createNewListElement(subsectionrow){
-        var allListEle={
+        var all={
             0:{
                 v:'y',
                 n:'Nowy element'
@@ -1020,7 +1039,8 @@ class ProjectStageCreateList{
                 n:'Nowa lista'
             }
         };
-        return this.setValueProperty('listNewElement','Nowy element:',this.getSelectKey(subsectionrow.list.property.listNewElement,subsectionrow.list.property.listNewElementName),this.getNewElementList(allListEle,subsectionrow.list.property.listNewElement),subsectionrow.list.property);
+        
+        return this.setValueProperty('listNewElement','Nowy element:',this.getSelectKey(subsectionrow.list.property.listNewElement,subsectionrow.list.property.listNewElementName),this.getNewElementList(all,subsectionrow.list.property.listNewElement),subsectionrow.list.property);
       
     }
     createTextDecorationTool(tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
@@ -1040,7 +1060,18 @@ class ProjectStageCreateList{
         
         tool4.appendChild(input);
     }
-      setTextDecorationToolEntryCheck(input,check){
+    setToolList(value,run){
+        console.log('ProjectStageCreateList::setToolList()');
+        console.log(run);
+        if(value==='p'){
+            this.hideControl(run);
+            /* FIX tabstopList SELECT */
+        }
+        else{
+            this.showControl(run);
+        }
+    }
+    setTextDecorationToolEntryCheck(input,check){
         /*
          * console.log('ProjectStageCreateList::setTextDecorationToolEntryCheck()');
          * console.log(check);
@@ -1121,7 +1152,12 @@ class ProjectStageCreateList{
         var tool2=this.Html.getCol(5);
         var tool3=this.Html.getCol(2);
         var radio = this.createTextToolRadioButton('valuenewline-'+isection+'-'+isub+'-'+isubrow,'Tekst od nowej lini?',this.getYesNowRadio());//'valuenewline-'+isection+'-'+isub+'-'+isubrow
-        this.changeRadioButtonValue(radio.childNodes[1],subsectionrow.paragraph);
+        var run = {
+            method:'setToolVisibility',
+            helplink:helplink,
+            tool:['tabstopControl','tabstop','listControl','list']
+        };
+        this.setRadioButtonExtend(radio.childNodes[1],subsectionrow.paragraph,run);
         tool1.appendChild(radio);
         
         //console.log(tool1.childNodes[0].childNodes[1]); 
@@ -1133,14 +1169,18 @@ class ProjectStageCreateList{
          
         //return mainDivCol;
     }
-    changeRadioButtonValue(radio,subsectionrowParagraph){//link
-        /*
-        console.log('ProjectStageCreateList::changeRadioButtonValue()');
+    setRadioButton(radio,subsectionrowParagraph){//link
+        this.setRadioButtonExtend(radio,subsectionrowParagraph,null);
+    }
+    setRadioButtonExtend(radio,subsectionrowParagraph,run){
+        /**/
+        console.log('setRadioButtonExtend::changeRadioButtonValue()');
         console.log(radio);
         console.log('SUBSECTIONROW');
         console.log(subsectionrowParagraph);
-        */
+        
         /* FIRST RUN TO SET PROPER VALUE AND onClick FUNCTION */
+        var self = this;
         radio.childNodes.forEach(
             function(currentValue) {//, currentIndex, listObj
                 if(currentValue.childNodes[0].value === subsectionrowParagraph.property.valuenewline){
@@ -1151,17 +1191,43 @@ class ProjectStageCreateList{
                 }
                 /* CLOSURE */
                 currentValue.childNodes[0].onclick = function (){
-                    
-                    subsectionrowParagraph.property.valuenewline = this.value;  
-                    //link['valuenewline']=this.value;
-                   // console.log(stageDataLink);
+                    subsectionrowParagraph.property.valuenewline = this.value; 
+                    //console.log(this.value);
+                    if(run){
+                        self[run.method](this.value,run);
+                    };
                 };
             }
-            //,this
         );
-       // link['valuenewline']=stageDataLink.data.valuenewline;
     }
-
+    setToolVisibility(value,run){
+        console.log('setRadioButtonExtend::setTabStopTool()');
+        console.log(run);
+        if(value==='n'){
+            this.hideControl(run);
+            /* FIX tabstopList SELECT */
+        }
+        else{
+            this.showControl(run);
+        }
+    }
+    showControl(run){
+        for(const prop in run.tool){
+            console.log(run.tool[prop]);
+            if (run.helplink.tool[run.tool[prop]].style.display) {
+                run.helplink.tool[run.tool[prop]].style.removeProperty('display');
+            }
+            else{
+            }
+        }
+        
+    }
+    hideControl(run){
+        for(const prop in run.tool){
+            console.log(run.tool[prop]);
+            run.helplink.tool[run.tool[prop]].style.setProperty('display', 'none');
+        }
+    }
     createTextToolCheckBox(id,isection,isub,isubrow,title,defaultvalue,subsectionRowAttr,helplinkValue){
         
         //if(defaultvalue)
@@ -1218,12 +1284,13 @@ class ProjectStageCreateList{
     }
     createTextToolSelect(id,title,actdata,alldata){
         //console.log('ProjectStageCreateList::createTextToolSelect()');
+        //console.log(id);
         var div = this.createInputHead(title);    
         var select=this.createSelect(id,id,'form-control-sm form-control w-100');
             select.appendChild(this.Html.createOptionGroup('Domyślny:',actdata));  
             select.appendChild(this.Html.createOptionGroup('Dostępne:',alldata));  
             div.appendChild(select);
-            console.log(select);
+            //console.log(select);
         return div;
     }
     createInputHead(title){
@@ -1261,92 +1328,77 @@ class ProjectStageCreateList{
         return optionGroup;
     }
     createTextToolTabStop(isection,isub,isubrow,subsectionrow,helplink){
-        /*
         console.log('ProjectStageCreateList::createTextToolTabStop()');
-        console.log(arguments);
-        console.log('ISECTION');
-        console.log(isection);
-        console.log('ISUB');
-        console.log(isub);
-        console.log('ISBUROW');
-        console.log(isubrow);
-        console.log('SUBSECTIONROW');
-        console.log(subsectionrow);
-        console.log('HELPLINK');
-        console.log(helplink);
-        
-        console.log('AVAILABLE TABSTOP');
-        console.log(subsectionrow.paragraph.tabStop);
-        */  
         console.log('TABSTOP ASSIGN TO PARAGRAPH');
-        console.log(subsectionrow.paragraph.property.tabStop);
+        console.log(subsectionrow.paragraph.property.tabstop);
+        //console.log('I SUB ROW');
+        //console.log(isubrow);
+        //throw 'test-stop';
         
         var deafultNone={
                 0:this.Utilities.getDefaultOptionProperties(-1,'Brak')  
-        };
+            };
         var all=new Object();
         
-        for(const prop in subsectionrow.paragraph.tabStop){
+        for(const prop in subsectionrow.paragraph.tabstop){
             console.log(prop);
-            console.log(subsectionrow.paragraph.tabStop);
-            all[prop]=this.Utilities.getDefaultOptionProperties(prop,subsectionrow.paragraph.tabStop[prop].position+' '+subsectionrow.paragraph.tabStop[prop].measurementName+' | '+subsectionrow.paragraph.tabStop[prop].alignmentName+' | '+subsectionrow.paragraph.tabStop[prop].leadingSignName);
+            console.log(subsectionrow.paragraph.tabstop);
+            all[prop]=this.Utilities.getDefaultOptionProperties(prop,subsectionrow.paragraph.tabstop[prop].position+' '+subsectionrow.paragraph.tabstop[prop].measurementName+' | '+subsectionrow.paragraph.tabstop[prop].alignmentName+' | '+subsectionrow.paragraph.tabstop[prop].leadingSignName);
         }
+        /*
+         * 
+         * SET NEW TabStop Object
+         */
+        this.TabStop[isubrow]= new TabStop();
+        this.setTabStopParameters(this.TabStop[isubrow]);
         
-        
-       
-        var select = this.createTextToolSelect('tabStop','Tabulacja:',deafultNone,all); 
+        var select = this.createTextToolSelect('tabstop','Tabulacja:',deafultNone,all); 
         /* SET REFERENCES TO SELECT OPTION */
-        this.TabStop.setOption(select.childNodes[1].childNodes[1]);
-        
+        /* SET REFERENCES TO SUBSECTION ROW PARAGRAPH */
+        this.TabStop[isubrow].paragraph={
+            data:subsectionrow.paragraph,
+            option:select.childNodes[1].childNodes[1]
+        };
         
         console.log(select);
         console.log(select.childNodes[1].childNodes[1]);
-       // throw 'test-stop-1265';
+        //throw 'test-stop-1265';
         /* CLOSURE - DOMKNIĘCIE*/
-        //var TabStop = this.TabStop;
+        //var self = this;
+        
         select.childNodes[1].onchange = function(){
             /* this.value - INDEX */
             console.log(this.value);
             //console.log(TabStop.data[this.value]);
             console.log(subsectionrow);
-            //console.log(subsectionrow.paragraph.property.tabStop);
-            subsectionrow.paragraph.property.tabStop = parseInt(this.value,10);
-             /* SET NEW VALUE */
-            //subsectionRowStyle[id]=this.value;
-             /* SET NEW VALUE ELEMENT STYLE/PROPERTY */
-            //helplinkValue.style[id]=this.value;
+            subsectionrow.paragraph.property.tabstop = this.value; //parseInt(this.value,10);
         };
         /* SET DEFAULT OPTION */
-        this.setDefaultOption(subsectionrow.paragraph.property.tabStop,select.childNodes[1].childNodes[1],subsectionrow.paragraph.tabStop);
+        this.setDefaultOption(subsectionrow.paragraph.property.tabstop,select.childNodes[1].childNodes[1],subsectionrow.paragraph.tabstop);
         return select;
     }
-    setDefaultOption(paragraphTabStop,option,tabStop){
+    setDefaultOption(paragraphTabStop,option,tabstop){
         console.log('ProjectStageCreateList::setDefaultOption()\r\nPARAGRAPH TABSTOP:');
         console.log(paragraphTabStop);
-        if(paragraphTabStop<0){
+        if(paragraphTabStop==='-1'){
             console.log('PARAGRAM TABSTOP < 0 -> RETURN FALSE');
             //console.log(paragraphTabStop);
             return false;
         }
-        if(this.Utilities.countObjectProp(tabStop)===0){
+        if(this.Utilities.countObjectProp(tabstop)===0){
             console.log('TABSTOP DATA LIST IS EMPTY -> RETURN FALSE');
             return false;
         }
         /* SET PROPER DEFAULT OPTION ON SELECT */
         //console.log('SET PROPER OPTION');
         for (let i = 0; i < option.children.length; i++) {
-            console.log(option.children[i].tagName);
-            console.log(option.children[i].value);
-                //console.log(parseInt(select.childNodes[1].childNodes[1].children[i].value,10));
-                if(parseInt(option.children[i].value,10)===paragraphTabStop){
-                    //console.log('FOUND');
-                    //select.childNodes[1].childNodes[1].children[i].setAttribute('selected','');
+                if(option.children[i].value===paragraphTabStop){
                     option.children[i].selected = true;
-                    return true;
+                    return paragraphTabStop;
             }
         }
         console.log('OPTION NOT FOUND -> RETURN FALSE');
-        return false;
+        return -1;
     }
     setValueStyle(id,title,actdata,alldata,subsectionRowStyle,helplinkValue){
         //console.log('ProjectStageCreateList::createTextToolSelectExtend()');
@@ -1361,9 +1413,13 @@ class ProjectStageCreateList{
         return select;
     }
     setValueProperty(id,title,actdata,alldata,subsectionRowProperty){
+        return this.setValuePropertyExtended(id,title,actdata,alldata,subsectionRowProperty,null);
+    }
+    setValuePropertyExtended(id,title,actdata,alldata,subsectionRowProperty,run){
         //console.log('ProjectStageCreateList::setValueProperty()');
         
         var select = this.createTextToolSelect(id,title,actdata,alldata);
+        var self = this;
         /* CLOSURE - DOMKNIĘCIE*/
         select.childNodes[1].onchange = function(){
             /* SET NEW VALUE */
@@ -1375,14 +1431,18 @@ class ProjectStageCreateList{
             console.log('PROPERTY:');
             console.log(subsectionRowProperty);
             subsectionRowProperty[id]=this.value;
+            if(run){
+                self[run.method](this.value,run);
+            }
             //console.log(actdata);
             //console.log(alldata);
         };
         return select;
     }
     valueFontSizeModification(title,subsectionRowStyle,helplinkValue){
+        //console.log('ProjectStageCreateList::valueFontSizeModification()');
         /*
-        console.log('ProjectStageCreateList::valueFontSizeModification()');
+        
         console.log(subsectionRowStyle);
         console.log(this.Glossary);
         */
@@ -1550,7 +1610,8 @@ class ProjectStageCreateList{
             }
     }
     createTextToolRadioButton(id,title,value){
-   
+        //console.log('ProjectStageCreateList::createTextToolRadioButton()');
+        //console.log(id);
         var maindiv=this.Html.getRow();
         var collabel=this.Html.getCol(12);
         var colvalue=this.Html.getCol(12);
@@ -1765,10 +1826,10 @@ class ProjectStageCreateList{
             pageBackgroundcolor.onchange = function (){   
                 stageDataLink.style.backgroundColor = this.childNodes[1].value;          
             };
-        toolMain1.appendChild(pageBackgroundcolor);
+            toolMain1.appendChild(pageBackgroundcolor);
         var newPage = this.createTextToolRadioButton('newpage','Etap od nowej strony?',this.getYesNowRadio());
         /* SET BUTTON RADIO TO PROPER VALUE */
-        this.changeRadioButtonValue(newPage.childNodes[1],stageDataLink);//helplink
+        this.setRadioButton(newPage.childNodes[1],stageDataLink);//helplink
         
         toolMain1.appendChild(newPage);    
         
@@ -1982,6 +2043,7 @@ class ProjectStageCreateList{
             ele.innerText='Podgląd';
             this.setPreviewButtonAction(ele);
         }
+        console.clear();
     }
     setEditButtonAction(ele){
         /* console.log('ProjectStageCreateList::setEditButtonAction()'); */
@@ -2054,7 +2116,7 @@ class ProjectStageCreateList{
             },
             style:{},
             property:{
-                valuenewline:'n'
+                valuenewline:'y'
             },
             /* CREATE EMPTY STAGE SUBSECTION - COLUMN  */
             subsection:this.setUpNewStageSubsection()
@@ -2081,11 +2143,11 @@ class ProjectStageCreateList{
     setUpNewStageSubsectionRow(){
         var subsectionRow = {};
         /* FIRST ALWAYS NEW LINE */
-        var newLine = 'n';
+        //var newLine = 'y';
         for(var i=0;i<this.Property.subsectionRowMin;i++){  
             subsectionRow[i]=this.setUpNewStageSubsectionRowProp();
-            subsectionRow[i].paragraph.property.valuenewline=newLine;
-            newLine = this.Property.subsectionRowNewLine;
+           // subsectionRow[i].paragraph.property.valuenewline=newLine;
+           // newLine = this.Property.subsectionRowNewLine;
         };
         return subsectionRow;
     }
@@ -2144,31 +2206,24 @@ class ProjectStageCreateList{
                          * 
                          */
                         value:'',
-                        valuenewline:'n',/* default */
+                        valuenewline:'y',/* default */
                         paragraph:'l',
                         paragraphName:'Element listy', //Nowy akapit
                         /* CHECK FOR EXIST tabstop with number */
-                        tabStop:100
+                        tabstop:'0'
                     },
                     /* OBJECT */
-                    tabStop:{
-                        0:{
+                    tabstop:{
+                        '0':{
                             position:0,
                             measurement:'cm',
                             measurementName:'cm',
                             alignment:'left',
                             alignmentName:'Do lewej',
                             leadingSign:'none',
-                            leadingSignName:'Brak',
-                            px:0
+                            leadingSignName:'Brak'
                         }
-                    }
-                        
-                    
-                        /* EXAMPLE*/
-                        //0:
-                        
-                    
+                    }                  
                 },
                 list:{
                     style:{
@@ -2199,20 +2254,12 @@ class ProjectStageCreateList{
                     }  
                 },
                 table:{
-                    style:{
-                        
-                    },
-                    property:{
-                        
-                    }
+                    style:{ },
+                    property:{}
                 },
                 image:{
-                    style:{
-                        
-                    },
-                    property:{
-                        
-                    } 
+                    style:{},
+                    property:{} 
                 }
         };
     }

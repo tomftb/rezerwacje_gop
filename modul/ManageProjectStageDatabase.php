@@ -144,7 +144,7 @@ abstract class ManageProjectStageDatabase {
             self::getStageEleProperty($data->{$k}->paragraph,'slo_project_stage_subsection_row_p',$data->{$k}->data->id);
             self::getStageEleProperty($data->{$k}->table,'slo_project_stage_subsection_row_t',$data->{$k}->data->id);
             /* SET TAB STOP */
-            self::assignTabStopProperty($data->{$k}->paragraph,$id);
+            self::assignTabStopProperty($data->{$k}->paragraph,$data->{$k}->data->id);
         }
     }
     
@@ -537,7 +537,10 @@ abstract class ManageProjectStageDatabase {
         self::deleteAttributes($v->data->id,'slo_project_stage_subsection_row_p');
         self::insertAttributes($v->data->id,$v->paragraph,'slo_project_stage_subsection_row_p');
         /* INSERT SUBSECTION ROW TABSTOP */
+        //print_r($parm);
         $this->dbLink->query2("DELETE FROM `slo_project_stage_subsection_row_p_tabstop` WHERE `id_parent`=:id;",$parm);
+        //print_r($v->data->id);
+        //print_r($v->paragraph->tabstop);
         self::insertTabStop($v->data->id,$v->paragraph->tabstop);
         /*
          * INSERT list

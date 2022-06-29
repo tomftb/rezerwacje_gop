@@ -12,7 +12,7 @@ class Glossary{
      */
     
     constructor(){ 
-        console.log('Glossary::constructor()');
+        //console.log('Glossary::constructor()');
     }
     create(){
         return this;
@@ -98,10 +98,10 @@ class Glossary{
          */
         //if(Object.keys(this.item).length > 0){
         if(this.item.hasOwnProperty(key)){
-            console.log('Glossary::exist() TRUE');
+            //console.log('Glossary::exist() TRUE');
             return true;
         }
-        console.log('Glossary::exist() FALSE');
+        //console.log('Glossary::exist() FALSE');
         return false;
     }
     itemCount(){
@@ -119,13 +119,15 @@ class Glossary{
         var p = new Object();
         var regex=new RegExp(pattern, 'i');
         if(!this.filled){
-            console.log('EMPTY GLOSSARY');
+            //console.log('EMPTY GLOSSARY');
             return null;
         }
         if(!this.item.hasOwnProperty(key)){
+            /*
             console.log('KEY:');
             console.log(key);
             console.log('NO EXISTS IN GLOSSARY');
+             */
             return null;
         }
         for (const prop in this.item[key]){   

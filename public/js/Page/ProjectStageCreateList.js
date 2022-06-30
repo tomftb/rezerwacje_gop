@@ -131,7 +131,17 @@ class ProjectStageCreateList{
             this.Items.Table.setError('An Application Error Has Occurred!');
         }
     }    
-    details(response){   
+    details(response){  
+        try{
+              /* SETUP STAGE DATA */
+            this.StageData = new StageData(this.Glossary,this.Stage.Property);
+            this.StageData.setStage(this.Items.parseResponse(response).data);
+        }catch(error){
+            console.log('ProjectStageCreateList::details()');
+            console.log(error);
+            throw error;
+            return false;
+        }
         try{
             //console.clear();
             console.log('ProjectStageCreateList::details()');   
@@ -142,9 +152,7 @@ class ProjectStageCreateList{
             this.Property=this.Stage.Property.text;
             /* SET STAGE CREATE TEXT DEFAULT DEPARTMENT LIST */
             this.Department=this.Stage.Property.department;
-             /* SETUP STAGE DATA */
-            this.StageData = new StageData(this.Glossary,this.Stage.Property);
-            this.StageData.setStage(this.Items.parseResponse(response).data);
+           
             //this.StageData.Stage = this.Items.parseResponse(response).data;  
             //this.StageData.iSection = this.Utilities
             /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/

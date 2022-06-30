@@ -999,10 +999,9 @@ class ProjectStageCreateList{
         };
         
         var run={
-            method:'setToolList',
+            method:'setToolVisibility',
             helplink:helplink,
-            toolBtn:'listToolControl',
-            toolDiv:'listTool'
+            tool:['listControl','list']
         };
         return this.setValuePropertyExtended('paragraph','Typ:',this.getSelectKey(subsectionrow.property.paragraph,subsectionrow.property.paragraphName),this.getNewElementList(all,subsectionrow.property.paragraph),subsectionrow.property,run);
       
@@ -1144,7 +1143,7 @@ class ProjectStageCreateList{
         var tool2=this.Html.getCol(5);
         var tool3=this.Html.getCol(2);
         var radio = this.createTextToolRadioButton('valuenewline-'+isection+'-'+isub+'-'+isubrow,'Tekst od nowej lini?',this.getYesNowRadio());//'valuenewline-'+isection+'-'+isub+'-'+isubrow
-        var run = {
+        var run={
             method:'setToolVisibility',
             helplink:helplink,
             tool:['tabstopControl','tabstop','listControl','list']
@@ -1166,7 +1165,7 @@ class ProjectStageCreateList{
     }
     setRadioButtonExtend(radio,subsectionrowParagraph,run){
         /**/
-        console.log('setRadioButtonExtend::changeRadioButtonValue()');
+        console.log('ProjectStageCreateList::setRadioButtonExtend()');
         console.log(radio);
         console.log('SUBSECTIONROW');
         console.log(subsectionrowParagraph);
@@ -1193,14 +1192,21 @@ class ProjectStageCreateList{
         );
     }
     setToolVisibility(value,run){
-        console.log('setRadioButtonExtend::setTabStopTool()');
+        console.log('ProjectStageCreateList::setToolVisibility()');
         console.log(run);
-        if(value==='n'){
-            this.hideControl(run);
-            /* FIX tabstopList SELECT */
-        }
-        else{
-            this.showControl(run);
+        console.log('value');
+        console.log(value);
+        switch(value){
+            case 'l':   
+            case 'y':
+                this.showControl(run);
+                break;
+            case 'n':
+            case 'p':
+                this.hideControl(run);
+                break;
+            default:
+                break;
         }
     }
     showControl(run){
@@ -1422,6 +1428,8 @@ class ProjectStageCreateList{
             console.log(this.value);
             console.log('PROPERTY:');
             console.log(subsectionRowProperty);
+            console.log('RUN:');
+            console.log(run);
             subsectionRowProperty[id]=this.value;
             if(run){
                 self[run.method](this.value,run);

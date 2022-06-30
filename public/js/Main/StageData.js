@@ -5,7 +5,7 @@ class StageData{
     Stage={};
     Glossary={};
     Property={};
-    iSection=1;
+    iSection=0;
     constructor(Glossary,Property){
         this.Glossary = Glossary;
         this.Property=Property;
@@ -33,22 +33,17 @@ class StageData{
                     backgroundImage:''
                     //,newPage:1
                 },
-                section:this.createDefaultSection()
+                section:{}
         };
+        this.createDefaultSection();
     }
     createDefaultSection(){
-        var section = {};
-        /* SETUP VALUE NOT REFERENCE - PREVENT LOOP*/
-        var iSectionMax=this.iSection;
-        for(var i=0;i<iSectionMax;i++){
-             /* CREATE EMPTY STAGE SECTION - ROW */
-            section[i]=this.createSection();  
+        for(var i=0;i<this.Property.text.sectionMin;i++){
+            this.createSection();
         };
-        return section;
     }
-    createSection(){
-        this.iSection++;
-        return {
+    createSection(){    
+        this.Stage.section[this.iSection]={
             data:{
                 id:0
             },
@@ -59,6 +54,8 @@ class StageData{
             /* CREATE EMPTY STAGE SUBSECTION - COLUMN  */
             subsection:this.createDefaultSubsection()
         };
+        this.iSection++;
+        return this.Stage.section;
     }
     createDefaultSubsection(){
         //console.log('ProjectStageCreateList::setUpNewStageSubsection()');

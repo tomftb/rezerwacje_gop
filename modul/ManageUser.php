@@ -139,7 +139,7 @@ class ManageUser
         $this->Log->log(0,$this->inpArray['Haslo']);
         $this->inpArray['Haslo']=trim($this->inpArray['Haslo']);
         /* LENGTH */
-        $err=self::checkDataLength($this->inpArray['Haslo'],'polu hasło',6,30);
+        $err=self::checkPasswordLength();
         /* PREG_MATCH = TWO DIGIT */
         if(!preg_match('/.*\d+.*/', $this->inpArray['Haslo'])){
             $err.='<br/>W haśle musi się znależć co najmniej jedna cyfra';
@@ -153,6 +153,16 @@ class ManageUser
         if($err){ 
             Throw New Exception($err,0);    
         }
+    }
+    private function checkPasswordLength(){
+        $length = strlen($this->inpArray['Haslo']);
+        if($length<6){
+                    return 'za krótkie hasło';
+        }
+        if($length>30){
+            return 'za długie hasło';
+        }
+        return ''; 
     }
     private function setPassword(){
         $this->Log->log(0,"[".__METHOD__."] PASSWORD_BCRYPT ALGORITHM");

@@ -10,10 +10,9 @@ class ProjectStageCreateList{
     Xhr=new Object();
     XhrTable=new Object();
     TabStop = new Object();
+    StageData = new Object();
     /* FIELD COUNTER */
     i=0;
-    /* FIELD COUNTER */
-    iSectionField=1;
     sectionCount=1;
     /* FLOAT */
     ejectionMultiplier=0.0;
@@ -66,19 +65,23 @@ class ProjectStageCreateList{
             };
     }
     create(){
+        console.clear();
         console.log('ProjectStageCreateList::create()');
         try{
             /* SETUP EJECTION MULTIPLIER */
             this.ejectionMultiplier=parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
-            this.TabStop = new Object();
+            this.TabStop = new TabStop();
             
-            /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
+             /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
             /* SET STAGE CREATE TEXT DEFAULT DEPARTMENT LIST */
             this.Department=this.Stage.Property.department;
-            this.iSectionField=1; 
-            /* SETUP CLEAR STAGE DATA */
-            this.setUpNewStageObject();
+            
+            this.StageData = new StageData(this.Glossary,this.Stage.Property);
+            
+            
+             /* SETUP CLEAR STAGE DATA */
+            this.StageData.createDefault();
         } 
         catch(err){
             console.log('ProjectStageCreateList::create()\r\nERROR:');
@@ -96,7 +99,8 @@ class ProjectStageCreateList{
             /* CLEAR DATA MODAL */
             this.Modal.clearData();
             /* SET CLOSE BUTTON */
-            this.Items.setCloseModal(this.Stage,'show',this.Stage.defaultTask+this.stageData.data.id);
+            //console.log(this.StageData.Stage);
+            this.Items.setCloseModal(this.Stage,'show',this.Stage.defaultTask+this.StageData.Stage.data.id);
             /* SET FORM */
             var form=this.Html.getForm();
             /* ASSIGN TITLE DEPARTMENT FIELD */
@@ -129,17 +133,20 @@ class ProjectStageCreateList{
     }    
     details(response){   
         try{
-            console.clear();
+            //console.clear();
             console.log('ProjectStageCreateList::details()');   
             /* SETUP EJECTION MULTIPLIER */
             this.ejectionMultiplier=parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
+            this.TabStop = new TabStop();
             /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
             /* SET STAGE CREATE TEXT DEFAULT DEPARTMENT LIST */
             this.Department=this.Stage.Property.department;
-            this.iSectionField=1; 
              /* SETUP STAGE DATA */
-            this.stageData = this.Items.parseResponse(response).data;   
+            this.StageData = new StageData(this.Glossary,this.Stage.Property);
+            this.StageData.setStage(this.Items.parseResponse(response).data);
+            //this.StageData.Stage = this.Items.parseResponse(response).data;  
+            //this.StageData.iSection = this.Utilities
             /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
             this.helplink=this.getEmptyHelpLink();
             /* TO DO IN FUTURE -> ADD setCloseModal multi id's */
@@ -151,15 +158,15 @@ class ProjectStageCreateList{
             //this.allConsts=this.data['data']['value']['all'];
             this.fieldDisabled=true;
 
-            this.Items.setCloseModal(this.Stage,'show',this.Stage.defaultTask+this.stageData.data.id);              
+            this.Items.setCloseModal(this.Stage,'show',this.Stage.defaultTask+this.StageData.Stage.data.id);              
             /* CREATE FORM */
             var form=this.Html.getForm();
             /* ASSIGN TITLE DEPARTMENT FIELD */
-            console.log(this.stageData);
+            console.log(this.StageData.Stage);
             var stageDepartment = {
                 0:{
-                    n:this.stageData.data.departmentName,
-                    v:this.stageData.data.departmentId
+                    n:this.StageData.Stage.data.departmentName,
+                    v:this.StageData.Stage.data.departmentId
                 }
             };
             //throw 'test-stop-1234';
@@ -237,13 +244,13 @@ class ProjectStageCreateList{
         //console.log(this.data.data.value);
         //console.log(reponse.data.value.stage.title);
         //console.log(reponse.data.value.stage.department);
-        var stageData = this.stageData;
+        var stageData = this.StageData.Stage;
         var titleDiv=this.Html.getRow();
             //this.helplink['titleDiv']=titleDiv;
         var titleLabelDiv=this.Html.getCol(1);
         var titleInputDiv=this.Html.getCol(11);
             titleLabelDiv.appendChild(this.createLabel('h3','Tytuł:'));
-        var input=this.Html.getInput('title',this.stageData.data.title,'text');   
+        var input=this.Html.getInput('title',this.StageData.Stage.data.title,'text');   
             input.oninput = function(){
                 stageData.data.title=this.value;
             };
@@ -308,37 +315,28 @@ class ProjectStageCreateList{
             return titleLabel;
     }
     createDynamicView(helplink){
-        //console.log('ProjectStageCreateList::createDynamicView()');
+        console.log('ProjectStageCreateList::createDynamicView()');
         var mainDiv=this.Html.getRow();
             mainDiv.classList.add('d-block');  
         var mainDivSection=this.Html.getCol(12);
-        var iSection = 0;    
             /* CREATE TEXT STAGE SECTION */
-            for(const prop in this.stageData.section){
-                /*
-                console.log('STAGE SECTION:');
-                console.log(prop);
-                console.log('STAGE SECTION PROPERTY:');
-                console.log(this.stageData.section[prop]);
-                */
+            console.log(this.StageData.Stage);
+            for(const prop in this.StageData.Stage.section){
                 /* CREATE SECTION */
-                mainDivSection.appendChild(this.createSection(prop,this.stageData.section,helplink));
-                iSection++;
+                mainDivSection.appendChild(this.createSection(prop,this.StageData.Stage.section,helplink));
             };
             /* APPEND SECTION */
             mainDiv.appendChild(mainDivSection);
              /* CREATE ADD BUTTON */
-            mainDiv.appendChild(this.createButtonCol(this.createAddSectionButton(iSection)));
-            //mainDiv.appendChild(this.createButtonCol(this.createAddSectionButton('section-0')));
+            mainDiv.appendChild(this.createButtonCol(this.createAddSectionButton()));//iSection
             /* CREATE TEXT SECTION PAGE TOOL*/
-            mainDiv.appendChild(this.createTextPageTool(this.stageData));
+            mainDiv.appendChild(this.createTextPageTool(this.StageData.Stage));
             
             this.helplink['dynamic']=mainDiv;
             this.helplink['dynamicSection']=mainDivSection;
             console.log(mainDivSection);
         return mainDiv;
     }
-
     createSection(iSection,section,helplink){
         console.log('ProjectStageCreateList::createSection()');
         console.log('helplink:');
@@ -356,15 +354,9 @@ class ProjectStageCreateList{
                 main:this.getHelpLinkSectionMain(),
                 subsection:{}
             };
-            for(const iSub in section[iSection].subsection){
-                /*
-                console.log('ProjectStageCreateList::createSection => subsection\r\ni:');
-                console.log(iSub);
-                console.log(section[iSection].subsection[iSub]);
-                */          
+            for(const iSub in section[iSection].subsection){     
                 /* CREATE SUBSECTION */
                 mainDivBody.appendChild(this.createSubsection(iSection,iSub,section[iSection].subsection[iSub],helplink.section[iSection].subsection));
-                //console.log(mainDivBody);
             }
             mainDivHeader.appendChild(this.createSectionTool(iSection,section,helplink)); 
             this.helplink.section[iSection].main.head=mainDivHeader;
@@ -609,7 +601,7 @@ class ProjectStageCreateList{
         console.log(this.stageData.subsectionmax);
         */
         var subSectionEle=this.createTextToolSelect('section','Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',this.getSelectKey(subSectionCount-1,subSectionCount),this.getSectionCount(subSectionCount));//this.Property.subsectionMin
-        var classObject=this;    
+        var self=this;    
         var oldValue = 0;
         var oldIndex = 0;
             subSectionEle.childNodes[1].onfocus = function () { 
@@ -645,12 +637,12 @@ class ProjectStageCreateList{
                         console.log('i');
                         console.log(i);
                         */
-                        subsection[i]=classObject.setUpNewStageSubsectionProp();
+                        subsection[i]=self.StageData.createSubsection();
                         /* FIRST ALWAYS NEW LINE */
                         //subsection[i].subsectionrow[0].data.valuenewline='n';
                         subsection[i].subsectionrow[0].paragraph.property.valuenewline='y';
                         /* CREATE NEW DOM ELEMENT */
-                        classObject.helplink.section[iSection].main.body.appendChild(classObject.createSubsection(iSection,i,subsection[i],helplinkSubsection));
+                        self.helplink.section[iSection].main.body.appendChild(self.createSubsection(iSection,i,subsection[i],helplinkSubsection));
                     }             
                     /*
                     console.log('ADD STAGE DATA');
@@ -1964,47 +1956,43 @@ class ProjectStageCreateList{
             div.setAttribute('class','btn btn-success btn-add float-left');
             div.appendChild(i);
         /* SET CLASS OBJECT */
-        var classObject=this;
+        var self=this;
             div.onclick=function(){       
                 console.log('ProjectStageCreateList::addSubsectionRow() click');
                 console.log('iRow');
                 console.log(iRow);
                 /* ADD NEW stageData subsectionrow object */
-                subsectionrow[iRow]=classObject.setUpNewStageSubsectionRowProp();
-                subsectionrow[iRow].paragraph.property.valuenewline=classObject.Property.subsectionRowNewLine;
+                subsectionrow[iRow]=self.StageData.createSubsectionRow();
+                subsectionrow[iRow].paragraph.property.valuenewline=self.Property.subsectionRowNewLine;
                 //subsectionrow[iRow].list.property.newList='n';
                 // listNewElement:'y',
                 // listNewElementName:'Nowy element'
                 console.log('subsectionrow');
                 console.log(subsectionrow);
                 console.log('helplink');
-                console.log(classObject.helplink);
+                console.log(self.helplink);
                 
-                helplink.row[iRow]=classObject.getHelpLinkSubsectionRow();
+                helplink.row[iRow]=self.getHelpLinkSubsectionRow();
                 
-                helplink.dynamic.appendChild(classObject.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow,helplink.row));
+                helplink.dynamic.appendChild(self.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow,helplink.row));
 
                 /* INCREMENT SUBSECTION ROW */
                 iRow++;
             };
         return (div);
     }
-    createAddSectionButton(iSection){
+    createAddSectionButton(){
         //console.log('ProjectStageCreateList::createAddSectionButton()');
         var div=document.createElement('div');
             div.setAttribute('class','btn btn-success btn-add');
-        var classObject=this;
+        var self=this;
             div.innerText='Dodaj sekcję';
             div.onclick=function(){
                 /* TO DO
                  * CHECK IS THERE ANY ROW -> IF NO -> SWAP TO createSimleRow()
                  */
-                /* SETUP NEW SECTION in stageData */
-                classObject.stageData.section[iSection]=classObject.setUpNewStageSectionProp();
-                
-                classObject.helplink['dynamicSection'].appendChild(classObject.createSection(iSection,classObject.stageData.section,classObject.helplink));
-                
-                iSection++;
+                /* SETUP NEW SECTION in stageData */                
+                self.helplink['dynamicSection'].appendChild(self.createSection(self.StageData.iSection,self.StageData.createSection(),self.helplink));
             };     
         return (div);
     }
@@ -2014,6 +2002,7 @@ class ProjectStageCreateList{
         var previewLabel = document.createTextNode('Podgląd');
             preview.appendChild(previewLabel);
             this.setPreviewButtonAction(preview);
+       
         var confirm=document.createElement('button');
             confirm.setAttribute('class','btn btn-info');
             confirm.innerText=btnLabel;
@@ -2022,10 +2011,30 @@ class ProjectStageCreateList{
         /*
          * BUTTONS
          */
-        this.Modal.link['button'].appendChild(this.Items.getCancelButton(this.Stage,'show',this.Stage.defaultTask+this.stageData.data.id));
+        this.Modal.link['button'].appendChild(this.Items.getCancelButton(this.Stage,'show',this.Stage.defaultTask+this.StageData.Stage.data.id));
         //this.Modal.link['button'].appendChild(this.Items.getCancelButton(this.Stage,'show',this.Stage.defaultTask+this.data.data['value']['stage'].id));
         this.Modal.link['button'].appendChild(preview);
+        this.Modal.link['button'].appendChild(this.docButton());
         this.Modal.link['button'].appendChild(confirm);
+    }
+    docButton(){
+        var doc=document.createElement('button');
+            doc.setAttribute('class','btn btn-primary');
+        var docLabel = document.createTextNode('DOC');
+            doc.appendChild(docLabel);
+        var self = this;
+            doc.onclick = function(){
+                console.clear();
+                'generate doc file';
+                console.log(self.StageData.Stage);
+                var fd = new FormData();
+                    fd.append('stage',JSON.stringify(self.StageData.Stage));
+                var xhrRun=self.getXhrParm('POST','genProjectReportTestDoc','setFieldResponse');
+                    xhrRun.o=self.Items;
+                    xhrRun.d=fd;
+                    self.Xhr.run(xhrRun);  
+            };
+        return doc;
     }
     swapPreviewButton(ele){
         /*
@@ -2060,235 +2069,36 @@ class ProjectStageCreateList{
     setPreviewButtonAction(ele){
         /* CHANGE LABEL */
         /* console.log('ProjectStageCreateList::setPreviewButtonAction()'); */
-        var classObject=this; 
+        var self=this; 
         ele.onclick = function (){
             try{
-                classObject.swapPreviewButton(this);
-                classObject.Html.hideField(classObject.helplink.dynamic);
+                self.swapPreviewButton(this);
+                self.Html.hideField(self.helplink.dynamic);
                 //classObject.setPreviewData();
-                classObject.DocPreview.run(classObject.helplink,classObject.stageData);
-                classObject.Html.showField(classObject.helplink.preview.whole);
+                self.DocPreview.run(self.helplink,self.StageData.Stage);
+                self.Html.showField(self.helplink.preview.whole);
             }
             catch(error){
                 console.log('ProjectStageCreateList::setPreviewButtonAction()');
                 console.log(error);
-                classObject.Html.showField(classObject.Modal.link['error'],'An Application Error Has Occurred!');
+                self.Html.showField(self.Modal.link['error'],'An Application Error Has Occurred!');
             }
         };
     }
-    setUpNewStageObject(){
-        //console.log('ProjectStageCreateList::setUpNewStageObject()');
-        /* CREATE EMPTY STAGE OBJECT */
-        this.stageData={
-               data:{
-                    title:'',
-                    id:0,
-                    /* SET PROPER AS IN SQL */
-                    departmentId:this.Department.defaultDepartment[0].v,
-                    /* name -> department name */
-                    /* SET PROPER AS IN SQL */
-                    departmentName:this.Department.defaultDepartment[0].n,
-                    /* SET SQL new_page to valuenewline */
-                    valuenewline:this.getValueChar(this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_PAGE_FROM_NEW','v'))
-               },
-               property:{},
-               style:{
-                    backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
-                    backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
-                    backgroundImage:''
-                    //,newPage:1
-                },
-                section:this.setUpNewStageSection()
-        };
-    }
-    setUpNewStageSection(){
-        var section = {};
-        for(var i=0;i<this.iSectionField;i++){
-             /* CREATE EMPTY STAGE SECTION - ROW */
-            section[i]=this.setUpNewStageSectionProp();  
-        };
-        return section;
-    }
-    setUpNewStageSectionProp(){
-        return {
-            data:{
-                id:0
-            },
-            style:{},
-            property:{
-                valuenewline:'y'
-            },
-            /* CREATE EMPTY STAGE SUBSECTION - COLUMN  */
-            subsection:this.setUpNewStageSubsection()
-        };
-    }
-    setUpNewStageSubsection(){
-        //console.log('ProjectStageCreateList::setUpNewStageSubsection()');
-        var subsection = {};
-        for(var i=0;i<this.Property.subsectionMin;i++){  
-            subsection[i]=this.setUpNewStageSubsectionProp();
-        }
-        return subsection;
-    }
-    setUpNewStageSubsectionProp(){
-        return {
-                data:{
-                    id:0
-                },
-                style:{},
-                property:{},
-                subsectionrow:this.setUpNewStageSubsectionRow()
-            };
-    }
-    setUpNewStageSubsectionRow(){
-        var subsectionRow = {};
-        /* FIRST ALWAYS NEW LINE */
-        //var newLine = 'y';
-        for(var i=0;i<this.Property.subsectionRowMin;i++){  
-            subsectionRow[i]=this.setUpNewStageSubsectionRowProp();
-           // subsectionRow[i].paragraph.property.valuenewline=newLine;
-           // newLine = this.Property.subsectionRowNewLine;
-        };
-        return subsectionRow;
-    }
-    setUpNewStageSubsectionRowProp(){
-        return {
-                data:{
-                    id:0
-                },
-                paragraph:{
-                    style:{
-                        fontSize:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),
-                        fontSizeMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MAX','v'),
-                        /* ADD TO SQL - fontSizeMeasurement */
-                        fontSizeMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v'),
-                        color:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),
-                        /* ADD TO SQL - colorName */
-                        colorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','n'),
-                        backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
-                        /* ADD TO SQL - backgroundColorName */
-                        backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
-                        fontFamily:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),
-                        fontWeight:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v'),
-                        fontStyle:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v'),
-                        underline:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
-                        'line-through':this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
-                        textAlign:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),
-                        /* ADD TO SQL - backgroundColorName */
-                        textAlignName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','n'),
-                        /* TEXT - this.Glossary.text STAGE_TEXT_LEFT_EJECTION */
-                        leftEjection:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_LEFT_EJECTION','n'),
-                        leftEjectionMin:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_LEFT_EJECTION_MIN','n'),
-                        leftEjectionMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_LEFT_EJECTION_MAX','n'),
-                        leftEjectionMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_LEFT_EJECTION_MEASUREMENT','n'),
-                        /* TEXT - this.Glossary.text STAGE_TEXT_RIGHT_EJECTION */
-                        rightEjection:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_RIGHT_EJECTION','n'),
-                        rightEjectionMin:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_RIGHT_EJECTION_MIN','n'),
-                        rightEjectionMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_RIGHT_EJECTION_MAX','n'),
-                        rightEjectionMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_RIGHT_EJECTION_MEASUREMENT','n'),
-                        /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION */
-                        indentation:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION','n'),
-                        indentationMin:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_INDENTATION_MIN','n'),
-                        indentationMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_INDENTATION_MAX','n'),
-                        /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION_MEASUREMENT */
-                        indentationMeasurement:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_MEASUREMENT','n'),
-                        /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION_SPECIAL */
-                        indentationSpecial:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_SPECIAL','v'),
-                         /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION_SPECIAL */
-                        indentationSpecialName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_SPECIAL','n')
-                    },
-                    property:{
-                        /* ADD TO SQL - 0 -> n, 1 -> y */ 
-                        /* LIST */
-                        /*
-                         * l - list
-                         * p - paragraph
-                         * 
-                         */
-                        value:'',
-                        valuenewline:'y',/* default */
-                        paragraph:'l',
-                        paragraphName:'Element listy', //Nowy akapit
-                        /* CHECK FOR EXIST tabstop with number */
-                        tabstop:'0'
-                    },
-                    /* OBJECT */
-                    tabstop:{
-                        '0':{
-                            position:0,
-                            measurement:'cm',
-                            measurementName:'cm',
-                            alignment:'left',
-                            alignmentName:'Do lewej',
-                            leadingSign:'none',
-                            leadingSignName:'Brak'
-                        }
-                    }                  
-                },
-                list:{
-                    style:{
-                        fontSize:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_SIZE','v'),
-                        fontSizeMax:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_SIZE_MAX','v'),
-                        fontSizeMeasurement:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_SIZE_MEASUREMENT','v'),
-                        fontFamily:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_FAMILY','v'),
-                        listType:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_TYPE','v'),
-                        listTypeName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_TYPE','n'),
-                        fontWeight:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_BOLD','v'),
-                        fontStyle:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_ITALIC','v'),
-                        underline:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_UNDERLINE','v'),
-                        'line-through':this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_LINETHROUGH','v'),
-                        color:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_COLOR','v'),
-                        colorName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_COLOR','n'),
-                        backgroundColor:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_BACKGROUND_COLOR','v'),
-                        backgroundColorName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_BACKGROUND_COLOR','n')
-                    },
-                    property:{
-                        listLevel:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_LVL','v'),
-                        listLevelName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_DEFAULT_LVL','n'),
-                        listLevelMax:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_MAX_LVL','v'),
-                        listLevelMaxName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_MAX_LVL','n'),
-                        //listNewElement:'y',
-                        //listNewElementName:'Nowy element',
-                        newList:'n',
-                        newListName:'Kontynuacja'
-                    }  
-                },
-                table:{
-                    style:{ },
-                    property:{}
-                },
-                image:{
-                    style:{},
-                    property:{} 
-                }
-        };
-    }
-    setUpStage(data){
+    //setUpStage(data){
         //console.log('ProjectStageCreateList::setUpStage()');
         //console.log(data.stage[0]);
         /* ADD EMPTY KEY title department*/
-        this.stageData = data.stage[0]; 
-    }
-    getValueChar(value){
-        switch(value){
-            case 0:
-            case '0':
-                return 'n';
-            case 1:
-            case '1':
-                return 'y';
-            default:
-                return 'n';
-        }
-    }
+       // this.stageData = data.stage[0]; 
+   // }
+
     setSendDataAction(ele){
-        var classObject=this; 
+        var self=this; 
         ele.onclick = function (){
             var fd = new FormData();
-            var data = classObject.stageData;
-                fd.append('stage',JSON.stringify(data));
-            classObject.checkInputData(data);
-            classObject.sendInputData(fd);
+                fd.append('stage',JSON.stringify(self.StageData.Stage));
+            self.checkInputData(self.StageData.Stage);
+            self.sendInputData(fd);
         };
     }
     /* 

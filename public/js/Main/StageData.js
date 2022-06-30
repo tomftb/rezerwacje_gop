@@ -210,4 +210,8 @@ class StageData{
                 return 'n';
         }
     }
+    setStage(data){
+        this.Stage = data;
+        this.iSection = Object.keys(this.Stage.section).length;
+    }
 }

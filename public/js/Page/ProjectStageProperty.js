@@ -13,6 +13,7 @@ class ProjectStageProperty{
     setText(data){
          /* SHORTCUT */
         this.text={  
+            sectionMin:data.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_SECTION_MIN','v'),
             sectionMax:data.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_SECTION_MAX','v'),
             subsectionMin:data.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MIN','v'),
             subsectionMax:data.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MAX','v'),

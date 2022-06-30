@@ -232,9 +232,10 @@ abstract class ManageProjectStageDatabase {
             $this->Log->log(0,"INSERT STAGE"); 
             /* SQL INSERT STAGE */
             self::insertStage();
+            $lastStage = $this->dbLink->lastInsertId();
             /* SQL INSERT STAGE SECTION */
             foreach($this->data->section as $v){
-                self::insertSection($this->dbLink->lastInsertId(),$v);
+                self::insertSection($lastStage,$v);
             }
         }
         else{

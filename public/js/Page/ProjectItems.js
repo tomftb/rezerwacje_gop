@@ -421,14 +421,29 @@ class ProjectItems{
         }
     }
     setFieldResponse(response){
-       try {
-            this.parseResponse(response);
+        console.log('ProjectItems::setFieldResponse()');
+        try {
+            return this.parseResponse(response);
+            /* TO DO -> set value to field if ok */
         }
         catch (error) {
             console.log(error);
             /* SHOW ERROR MODAL */ 
-           this.Html.showField(this.Modal.link['error'],error);
-        } 
+            this.Html.showField(this.Modal.link['error'],error);
+            return false;
+        }
+        return false;
+    }
+    uploadFile(response){
+        
+        var data = this.setFieldResponse(response);
+        if(data===false){
+            return false;
+        }
+            console.log(data);
+            console.log(data.data);
+        var win = window.open('router.php?task='+data['data']['function']+'&file='+data['data']['value'], '_blank');
+            win.focus();
     }
     setUpModalData(response){
         console.log('ProjectItems::setUpModalData()');

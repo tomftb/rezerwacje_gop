@@ -32,7 +32,7 @@ class createDoc {
          * SETUP DOCUMENT DATA
          */
         $this->projectData=$projectDetails;
-        $this->fileName=$fileName."_".uniqid().$ext;
+        $this->fileName=uniqid($fileName."_").$ext;
         $this->files=$files;
         $this->docDir=$dir;
         /*
@@ -63,6 +63,179 @@ class createDoc {
         $this->Log->log(0,"[".__METHOD__."] SAVE FILE => ".$this->docDir.$this->fileName);
         //$objWriter->setOutputEscapingEnabled(true);
         $objWriter->save($this->docDir.$this->fileName);
+    }
+    public function genReportStage(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        //print_r($this->projectData);
+        /* MOVE data->valuenewline to property */
+        self::setReportStagePage();
+        self::setReportStageSection();
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
+        $objWriter->save($this->docDir.$this->fileName);
+    }
+    private function setReportStagePage(){
+        /* TO DO */
+        
+        //print_r($this->projectData->style);
+        //print_r($this->projectData->property);
+        unset($this->projectData->style);
+        unset($this->projectData->property);
+    }
+    private function setReportStageSection(){
+        //print_r($this->projectData->section);
+        
+        $firstRow=true;
+        foreach($this->projectData->section as $s){
+            /*
+             * (twips )Twip to miara typograficzna, zdefiniowana jako 1⁄20 punktu typograficznego. Jeden twip ma 1⁄1440 cala lub 17,64 μm
+             */
+            $section = self::setSectionColumn($s->subsection);
+            //var_dump($section);
+            /* COLUMNS */
+            foreach($s->subsection as $u){
+                //$section->addText("Regularność pomiarów danych sejsmicznychWedług podziału administracyjnego Polski projektowane zdjęcie sejsmiczne dla tematu: „Prace sejsmiczne 3D Wielkie Oczy” znajduje się w południowo-wschodniej Polsce, w obrębie województwa podkarpackiego, w powiecie jarosławskim, lubaczowskim i przemyskim (tylko punkty odbioru).Obszar badań zlokalizowany jest w obrębie koncesji poszukiwawczych: Lubaczów – Zapałów 21/97/p i Przeworsk – Jarosław - Stubno 24/99/p.Obszar projektowanego zdjęcia sejsmicznego Wielkie Oczy 3D położony jest we wschodniej części zapadliska przedkarpackiego. Głównymi elementami jego budowy geologicznej są utwory miocenu autochtonicznego i mezopaleozoiczne podłoże zbudowane z  utworów prekambru, kambru, ordowiku, syluru, jury i kredy.Otrzymaną regularność pomiarów zaprezentowano na mapach rozmieszczenia punktów wzbudzania i odbioru (Ryc. 3 1Ryc. 3 1), jak również na mapach krotności profilowania (ilości tras sejsmicznych w binach WPG) (Ryc. 3 2Ryc. 3 2), oraz mapach ");
+                //$section->addText("1");
+                /* TO DO */
+                //print_r($u->style);
+                //print_r($u->property);
+                //print_r($u->subsectionrow);
+                
+               
+                foreach($u->subsectionrow as $r){
+                    if($firstRow){
+                        $textrun = $section->addTextRun();
+                        self::setText($textrun,$r);
+                        $firstRow=false;
+                        continue;
+                    }
+                    $textrun = self::checkNewLine($section,$textrun,$r->paragraph->property->valuenewline);
+                    self::setText($textrun,$r);
+                    //print_r($r->paragraph->style);
+                    //print_r($r->paragraph->property);
+                    //print_r($r->paragraph->tabstop);
+                    //print_r($r->list->style);
+                    //print_r($r->list->property);
+                    //print_r($r->image->style);
+                    //print_r($r->image->property);
+                    //print_r($r->table->style);
+                    //print_r($r->table->property);
+                    
+                }
+                $firstRow=true;
+            }
+            
+            /* AT THE END ADD FAKE section if no more left */
+            
+            //break;
+            //$section = $this->phpWord->addSection();
+            //$section->getStyle()->setBreakType('continuous');
+            //$section->addText(" 1 subsection");
+            //self::setSectionColumn
+            //print_r($s->property);
+            //print_r($s->style);
+            //print_r($s->subsection);
+        }
+    }
+    private function setSectionColumn($subsection){
+        /* EXAMPLE:
+            * Normal
+                $section = $this->phpWord->addSection(array('breakType' => 'continuous'));
+                $section->addText("Normal paragraph again. {$filler_text}");
+            * Two columns
+                $section = $this->phpWord->addSection(
+                    array(
+                        'colsNum'   => 2,
+                        'colsSpace' => 1440,
+                        'breakType' => 'continuous',
+                        )
+                );
+                $section->addText("Two columns, one inch (1440 twips) spacing. {$filler_text}");
+            * Three columns
+                $section = $this->phpWord->addSection(
+                    array(
+                        'colsNum'   => 3,
+                        'colsSpace' => 720,
+                        'breakType' => 'continuous',
+                    )
+                );
+                $section->addText("Three columns, half inch (720 twips) spacing. {$filler_text}");
+         */
+        //echo 'COUNT'.count(get_object_vars($subsection));
+        //print_r(get_object_vars($subsection));
+        //$this->Log->log(0,"[".__METHOD__."] SECTIONS -> ".count(get_object_vars($subsection))); 
+        $cols = count(get_object_vars($subsection));
+        
+        return $this->phpWord->addSection(
+                    array(
+                        'colsNum'   => $cols , //$cols
+                        'breakType' => 'continuous', // new word page
+                        'colsSpace' => 2880/$cols , // 2880/$cols
+                    )
+                );
+    }
+    private function setText($textrun,$r){
+        $font=[
+            'name' => $r->paragraph->style->fontFamily,
+            'size' => $r->paragraph->style->fontSize,
+            'color' => $r->paragraph->style->color,
+            'bgColor' => $r->paragraph->style->backgroundColor,
+            'bold' => self::setTextStyle($r->paragraph->style->fontWeight),
+            'italic'=>self::setTextStyle($r->paragraph->style->fontStyle),
+            'underline' => self::setTextStyle($r->paragraph->style->underline),
+            'strikethrough' => self::setTextStyle($r->paragraph->style->{'line-through'})
+        ];
+        $textrun->addText($r->paragraph->property->value, $font);
+        return true;
+                    $textrun->addText('I am inline styled ', $fontStyle_array);
+                    $textrun->addText('with ');
+                    $textrun->addText('color', array('color' => '996699'));
+                    $textrun->addText(', ');
+                    $textrun->addText('bold', array('bold' => true));
+                    $textrun->addText(', ');
+                    $textrun->addText('italic', array('italic' => true));
+                    $textrun->addText(', ');
+                    $textrun->addText('underline', array('underline' => 'dash'));
+                    $textrun->addText(', ');
+                    $textrun->addText('strikethrough', array('strikethrough' => true));
+                    $textrun->addText(', ');
+                    $textrun->addText('doubleStrikethrough', array('doubleStrikethrough' => true));
+                    $textrun->addText(', ');
+                    $textrun->addText('superScript', array('superScript' => true));
+                    $textrun->addText(', ');
+                    $textrun->addText('subScript', array('subScript' => true));
+                    $textrun->addText(', ');
+                    $textrun->addText('smallCaps', array('smallCaps' => true));
+                    $textrun->addText(', ');
+                    $textrun->addText('allCaps', array('allCaps' => true));
+                    $textrun->addText(', ');
+                    $textrun->addText('fgColor', array('fgColor' => 'yellow'));
+                    $textrun->addText(', ');
+                    $textrun->addText('scale', array('scale' => 200));
+                    $textrun->addText(', ');
+                    $textrun->addText('spacing', array('spacing' => 120));
+                    $textrun->addText(', ');
+                    $textrun->addText('kerning', array('kerning' => 10));
+                    $textrun->addText('. ');
+    }
+    private function setList(){
+        
+    }
+    private function setTextStyle($style='1'){
+        if($style==='1'){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    private function checkNewLine($section,$textrun,$newline='y'){
+        if($newline==='y'){
+            return $section->addTextRun();
+        }
+        else{
+            return $textrun;
+        }
+        
     }
     public function createProjectReport(){
         $this->Log->log(0,"[".__METHOD__."]"); 

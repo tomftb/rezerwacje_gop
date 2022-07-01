@@ -148,7 +148,7 @@ class ProjectStage{
     }
     details(response){
         try{
-            console.clear();
+            //console.clear();
             console.log('ProjectStage::details()');
             //this.CreateText.details(response);
             this.CreateList.details(response);

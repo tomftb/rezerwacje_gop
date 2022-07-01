@@ -2045,7 +2045,7 @@ class ProjectStageCreateList{
                 console.log(self.StageData.Stage);
                 var fd = new FormData();
                     fd.append('stage',JSON.stringify(self.StageData.Stage));
-                var xhrRun=self.getXhrParm('POST','genProjectReportTestDoc','setFieldResponse');
+                var xhrRun=self.getXhrParm('POST','genProjectReportTestDoc','uploadFile');
                     xhrRun.o=self.Items;
                     xhrRun.d=fd;
                     self.Xhr.run(xhrRun);  

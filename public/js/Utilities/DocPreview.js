@@ -117,6 +117,7 @@ class DocPreview{
                     
                     var lastLevelCounter = new Object();
                     var actParagraphType='';
+                    var firstLine = true;
                     /* VIRTUAL - MUST BY SETUP BY RETURN */
                     //var actEle = document.createElement('li');
                     //var actEle = writePageSection;
@@ -133,8 +134,8 @@ class DocPreview{
                         
                         /* FOR TESTS */
                         //listEleCounter=parseInt(this.data.section[property].subsection[i].subsectionrow[propSubsection].paragraph.property.value,10);
-                        this.setPageValueEle(writePageSection,this.data.section[property].subsection[i].subsectionrow[propSubsection],actListLevel,lastLevelCounter,actParagraphType);
-                        
+                        this.setPageValueEle(writePageSection,this.data.section[property].subsection[i].subsectionrow[propSubsection],actListLevel,lastLevelCounter,actParagraphType,firstLine);
+                        firstLine=false;
                         //actEle = this.setList(writePageSection,actEle,this.data.section[property].subsection[i].subsectionrow[propSubsection].list,actListLevel);
                         //p = this.setPreviewValue(writePageSection,p,this.data.section[property].subsection[i].subsectionrow[propSubsection]);
                         //li = this.setPreviewValue(li,this.data.section[property].subsection[i].subsectionrow[propSubsection]);
@@ -161,7 +162,7 @@ class DocPreview{
         /* END LOOP OVER SECTION */     
         };
     }
-    setPageValueEle(mainDiv,row,actLvl,lastLevelCounter,lastParagraphType){
+    setPageValueEle(mainDiv,row,actLvl,lastLevelCounter,lastParagraphType,firstLine){
         /*
             console.log(row);
             console.log('Paragraph type:');
@@ -173,7 +174,7 @@ class DocPreview{
                 this.setList(mainDiv,row,actLvl,lastLevelCounter);
                 break;
             case 'p':
-                this.setParagraph(mainDiv,row,lastParagraphType);
+                this.setParagraph(mainDiv,row,lastParagraphType,firstLine);
                 break;
             default:
                 break;
@@ -418,7 +419,7 @@ class DocPreview{
         };
     }
 
-    setParagraph(mainDiv,row,lastParagraphType){
+    setParagraph(mainDiv,row,lastParagraphType,firstLine){
         console.log('DocPreview::setParagraph()');
         console.log(row);
         /* SET TEMPORARY VALUE */
@@ -439,10 +440,16 @@ class DocPreview{
                 break;
             case 'y':
                 /* EXCEPTION */
+                
                 if(lastParagraphType==='l'){
 
                 }
+                else if(firstLine){
+                    /* EXCEPTION 2 */
+                }
                 else{
+                    /* ADD EXCEPTION FOR FIRST LINE */
+                    //throw 'first line 447';
                     mainDiv.appendChild(document.createElement('br'));
                 }
                 

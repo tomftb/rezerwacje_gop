@@ -249,8 +249,8 @@ class createDoc {
         $align=[
                 'CENTER'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER,
                 'LEFT'=>\PhpOffice\PhpWord\SimpleType\Jc::LEFT,
-                'RIGHT'=>\PhpOffice\PhpWord\SimpleType\Jc::RIGHT
-                //'JUSTIFY'=>\PhpOffice\PhpWord\SimpleType\Jc::JUSTIFY
+                'RIGHT'=>\PhpOffice\PhpWord\SimpleType\Jc::RIGHT,
+                'JUSTIFY'=>\PhpOffice\PhpWord\SimpleType\Jc::BOTH
         ];
         if(!array_key_exists($r->paragraph->style->textAlign,$align)){
             Throw New Exception('WRONG TEXT ALIGN -> '.$r->paragraph->style->textAlign,0);

@@ -103,12 +103,17 @@ class createDoc {
                
                 foreach($u->subsectionrow as $r){
                     if($firstRow){
-                        $textrun = $section->addTextRun();
+                        //$this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
+                        //$this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
+                        //$textrun = $section->addTextRun(array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+                        //$textrun->addText($r->paragraph->property->value, 'r2Style', 'p2Style');
+                        //array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100)
+                        $textrun = $section->addTextRun(self::setAlign($r));
                         self::setText($textrun,$r);
                         $firstRow=false;
                         continue;
                     }
-                    $textrun = self::checkNewLine($section,$textrun,$r->paragraph->property->valuenewline);
+                    $textrun = self::checkNewLine($section,$textrun,$r->paragraph->property->valuenewline,$r);
                     self::setText($textrun,$r);
                     //print_r($r->paragraph->style);
                     //print_r($r->paragraph->property);
@@ -174,17 +179,20 @@ class createDoc {
                 );
     }
     private function setText($textrun,$r){
-        $font=[
-            'name' => $r->paragraph->style->fontFamily,
-            'size' => $r->paragraph->style->fontSize,
-            'color' => $r->paragraph->style->color,
-            'bgColor' => $r->paragraph->style->backgroundColor,
-            'bold' => self::setTextStyle($r->paragraph->style->fontWeight),
-            'italic'=>self::setTextStyle($r->paragraph->style->fontStyle),
-            'underline' => self::setTextStyle($r->paragraph->style->underline),
-            'strikethrough' => self::setTextStyle($r->paragraph->style->{'line-through'})
-        ];
-        $textrun->addText($r->paragraph->property->value, $font);
+        //$this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
+        //$this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
+        //$section->addText($text, 'r2Style', 'p2Style');
+       
+        ///$subsequent->addText("OPRACOWANIE BADAŃ SEJSMICZNYCH",$FontStyle,$ParagraphStyle);   
+        
+        //$text = "some text";
+        //$this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
+        //$this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
+        //$section->addText($text, 'r2Style', 'p2Style');
+        
+        //$this->phpWord->addFontStyle('r2Style', self::setFont($r));
+        //$this->phpWord->addParagraphStyle('p2Style',  array('align' => \PhpOffice\PhpWord\SimpleType\Jc::RIGHT, 'spaceAfter' => 100));
+        $textrun->addText($r->paragraph->property->value,self::setFont($r));
         return true;
                     $textrun->addText('I am inline styled ', $fontStyle_array);
                     $textrun->addText('with ');
@@ -217,8 +225,50 @@ class createDoc {
                     $textrun->addText('kerning', array('kerning' => 10));
                     $textrun->addText('. ');
     }
+    private function setFont($r){
+        /* TO DO -> CHECK EXISTS */
+        return [
+            'name' => $r->paragraph->style->fontFamily,
+            'size' => $r->paragraph->style->fontSize,
+            'color' => $r->paragraph->style->color,
+            'bgColor' => $r->paragraph->style->backgroundColor,
+            'bold' => self::setTextStyle($r->paragraph->style->fontWeight),
+            'italic'=>self::setTextStyle($r->paragraph->style->fontStyle),
+            'underline' => self::setTextStyle($r->paragraph->style->underline),
+            'strikethrough' => self::setTextStyle($r->paragraph->style->{'line-through'})
+        ];
+    }
+    private function setAlign($r){
+        $this->Log->log(0,"[".__METHOD__."] TEXT ALIGN -> ".$r->paragraph->style->textAlign);
+        //'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER);
+        //$this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
+        //$this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
+        //$ParagraphStyle['alignment']=\PhpOffice\PhpWord\SimpleType\Jc::LEFT;
+        //$this->mainSection->addText("Na zlecenie:",$FontStyle,$ParagraphStyle);
+         /* TO DO -> CHECK EXISTS */
+        $align=[
+                'CENTER'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER,
+                'LEFT'=>\PhpOffice\PhpWord\SimpleType\Jc::LEFT,
+                'RIGHT'=>\PhpOffice\PhpWord\SimpleType\Jc::RIGHT
+                //'JUSTIFY'=>\PhpOffice\PhpWord\SimpleType\Jc::JUSTIFY
+        ];
+        if(!array_key_exists($r->paragraph->style->textAlign,$align)){
+            Throw New Exception('WRONG TEXT ALIGN -> '.$r->paragraph->style->textAlign,0);
+        }
+        return ['alignment'=>$align[$r->paragraph->style->textAlign]];
+    }
     private function setList(){
-        
+        $this->phpWord->addNumberingStyle(
+            $multilevelNumberingStyleName,
+            array(
+                'type'   => 'multilevel',
+                'levels' => array(
+                    array('format' => 'decimal', 'text' => '%1.', 'left' => 360, 'hanging' => 360, 'tabPos' => 360),
+                    array('format' => 'upperLetter', 'text' => '%2.', 'left' => 720, 'hanging' => 360, 'tabPos' => 720),
+                ),
+            )
+        );
+        $this->mainSection->addListItem('List Item I', 0, null, $multilevelNumberingStyleName); 
     }
     private function setTextStyle($style='1'){
         if($style==='1'){
@@ -228,9 +278,9 @@ class createDoc {
             return false;
         }
     }
-    private function checkNewLine($section,$textrun,$newline='y'){
+    private function checkNewLine($section,$textrun,$newline='y',$r){
         if($newline==='y'){
-            return $section->addTextRun();
+            return $section->addTextRun(self::setAlign($r));
         }
         else{
             return $textrun;

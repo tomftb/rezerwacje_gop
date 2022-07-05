@@ -3,8 +3,8 @@
  * Author: Tomasz Borczynski
  */
 class RomanList{
-    setLower(counter){
-        console.log('RomanList::setLower()');
+    lower(counter){
+        console.log('RomanList::lower()');
         var basic=["","i",'ii','iii','iv','v','vi','vii','viii',"ix"];
         var advanced=["x","xl","l","xc","c","cd","d","cm","m","mmmcmxcix"];
         /*
@@ -21,8 +21,8 @@ class RomanList{
          */
         return this.set(counter,basic,advanced);
     }
-    setUpper(counter){
-        console.log('RomanList::setUpper()');
+    upper(counter){
+        console.log('RomanList::upper()');
         var basic=["","I",'II','III','IV','V','VI','VII','VIII',"IX"];
         var advanced=["X","XL","L","XC","C","CD","D","CM","M","MMMCMXCIX"];
         /*

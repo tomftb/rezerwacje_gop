@@ -6,6 +6,7 @@ class DocPreview{
     Html = new Object();
     Style = new Object();
     RomanList = new Object();
+    AlphabeticalList = new Object();
     Utilities = new Object();
     helplink = new Object();
     data = new Object();
@@ -14,6 +15,7 @@ class DocPreview{
         this.Html=new Html();
         this.Style = new Style();
         this.RomanList = new RomanList();
+        this.AlphabeticalList = new AlphabeticalList();
         this.Utilities = new Utilities();
     }
     run(helplink,data){
@@ -461,10 +463,16 @@ class DocPreview{
     setListAdvancedEleHeadType(ele,listType,counter){
         switch(listType){
             case 'upper-roman':
-                ele.appendChild(this.RomanList.setUpperRoman(counter));
+                ele.appendChild(this.RomanList.upper(counter));
                 break;
             case 'lower-roman':
-                ele.appendChild(this.RomanList.setLowerRoman(counter));
+                ele.appendChild(this.RomanList.lower(counter));
+                break;
+            case 'lower-alpha':
+                ele.appendChild(this.AlphabeticalList.lower(counter));
+                break;
+            case 'upper-alpha':
+                ele.appendChild(this.AlphabeticalList.upper(counter));
                 break;
             default:
                 //var value = document.createTextNode(counter);

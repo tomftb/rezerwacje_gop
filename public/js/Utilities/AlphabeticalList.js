@@ -3,8 +3,8 @@
  * Author: Tomasz Borczynski
  */
 class AlphabeticalList{
-    setLower(counter){
-        console.log('AlphabeticalList::setLower()');
+    lower(counter){
+        console.log('AlphabeticalList::lower()');
         var basic=["","a",'b','c','d','e','f','g','h',"i"];
         var advanced=["x","xl","l","xc","c","cd","d","cm","m","mmmcmxcix"];
         /*
@@ -21,8 +21,8 @@ class AlphabeticalList{
          */
         return this.set(counter,basic,advanced);
     }
-    setUpper(counter){
-        console.log('AlphabeticalList::setUpper()');
+    upper(counter){
+        console.log('AlphabeticalList::upper()');
         var basic=["","A",'B','C','D','E','F','G','H',"I"];
         var advanced=["X","XL","L","XC","C","CD","D","CM","M","MMMCMXCIX"];
         /*

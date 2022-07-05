@@ -17,6 +17,14 @@ class AlphabeticalList{
         console.log('AlphabeticalList::set()');
         console.log(c);
         
+        /* EXCEPTION - NOT NUMBER*/
+        if(typeof(c)!=='number'){
+            return document.createTextNode('E-TYPE');
+        }
+         /* EXCEPTION LOWER COUNTER*/
+        if(c<1){
+            return document.createTextNode('E-COUNTER');
+        }
          /* optimalisation */
          /* INDEX IN ARRAY START FROM 0 */
         if(c<27){

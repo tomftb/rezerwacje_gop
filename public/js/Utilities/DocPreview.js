@@ -93,9 +93,13 @@ class DocPreview{
                 */  
                 var writePageSection=document.createElement('div');
                     writePageSection.style.width=writePageSectionWidth+'px';
-                    writePageSection.style.border='0px';
+                    //writePageSection.style.display='inline-block';
+                    writePageSection.style.border='0px solid blue';
                     writePageSection.style.margin='0px';
-                    writePageSection.style.cssFloat='LEFT';
+                    //writePageSection.style.paddingBottom='0px';
+                    writePageSection.style.padding='0px 0px 0px 0px';
+                    //writePageSection.style.margin='0px';
+                    //writePageSection.style.cssFloat='LEFT';
                     /* IN FUTURE SETUP SUBSECTION DATA */
                     /* IN FUTURE SETUP SUBSECTION PROPERTY */
                     /* IN FUTURE SETUP SUBSECTION STYLE */
@@ -163,6 +167,7 @@ class DocPreview{
         };
     }
     setPageValueEle(mainDiv,row,actLvl,lastLevelCounter,lastParagraphType,firstLine){
+        console.log('DocPreview::setPageValueEle()');
         /*
             console.log(row);
             console.log('Paragraph type:');
@@ -171,9 +176,11 @@ class DocPreview{
          */
         switch(row.paragraph.property.paragraph){
             case 'l':
+                console.log('LIST');
                 this.setList(mainDiv,row,actLvl,lastLevelCounter);
                 break;
             case 'p':
+                console.log('PARAGRAPH');
                 this.setParagraph(mainDiv,row,lastParagraphType,firstLine);
                 break;
             default:
@@ -253,15 +260,19 @@ class DocPreview{
         console.log('ROW - PARAGRAPH - TABSTOP:');
         console.log(row.paragraph.tabstop);
         //var p = document.createElement('p');
-        var ele = document.createElement('div');
-            /* REMOVE MARGIN - LATER SEt AS ... */
-            //ele.style.marginBottom="0px";
-        
-        
+        var divWidth=document.createElement('div');
+        //var ele = document.createElement('div');
+            divWidth.style.width='100%';
+            divWidth.style.display='flex';
+            divWidth.style.justifyContent=row.paragraph.style.textAlign;
+            //divWidth.style.border='1px solid red';
+            divWidth.style.padding='0px';
+            divWidth.style.margin='0px';
+
         /* SET LEFT EJECTION */
-        this.setTabStopEjection(ele,row.paragraph.style.leftEjection);
+        this.setTabStopEjection(divWidth,row.paragraph.style.leftEjection);
         /* SET LIST HEAD -> SET indentation,leftEjection AS VALUE NOT REFERENCE*/
-        ele.appendChild(this.setListEleHead(row,listEleCounter));//
+        divWidth.appendChild(this.setListEleHead(row,listEleCounter));//
         
         
         /* SET EJECTION TO 0 */
@@ -269,14 +280,18 @@ class DocPreview{
         /* SET LIST BODY */
         //;
         //ele.appendChild(ele);
-        ele.appendChild(this.setParagraphEle(row.paragraph));
-        div.appendChild(ele);
+        divWidth.appendChild(this.setParagraphEle(row.paragraph));
+        //divWidth.appendChild(divFloat);
+        div.appendChild(divWidth);
         
     }
     setListEleHead(row,listEleCounter){//
         console.log('DocPreview::setListEleHead()');  
         var ele = document.createElement('div');
             ele.style.display='inline-block';
+            ele.style.border='0px solid orange';
+            ele.style.padding='0px 0px 0px 0px';
+            ele.style.margin='0px';
             //ele.style.marginLeft=this.Utilities.setCmToPx(row.paragraph.style.leftEjection).toString()+'px';
             //ele.style.paddingLeft=leftEjection.toString()+'px';
             ele.style.width=this.Utilities.setCmToPx(row.paragraph.style.indentation).toString()+'px';
@@ -396,6 +411,8 @@ class DocPreview{
         var ele = document.createElement('div');
             ele.style.width=this.Utilities.setCmToPx(w).toString()+'px';
             ele.style.display='inline-block';
+            ele.style.margin='0px';
+            ele.style.padding='0px';
         return ele;
     }
     setListEleHeadType(ele,listType,counter){
@@ -422,6 +439,18 @@ class DocPreview{
     setParagraph(mainDiv,row,lastParagraphType,firstLine){
         console.log('DocPreview::setParagraph()');
         console.log(row);
+        /*
+         * var divWidth=document.createElement('div');
+        //var ele = document.createElement('div');
+            divWidth.style.width='100%';
+            divWidth.style.display='flex';
+            divWidth.style.justifyContent=row.paragraph.style.textAlign;
+            //divWidth.style.border='1px solid red';
+            divWidth.style.padding='0px';
+            divWidth.style.margin='0px';
+         */
+        
+        
         /* SET TEMPORARY VALUE */
         //var indentation=row.paragraph.style.indentation;
 
@@ -431,10 +460,21 @@ class DocPreview{
                 if(lastParagraphType==='' || lastParagraphType==='l'){
                     //row.paragraph.style.indentation=indentation;
                 }
-                else{
+                else if(mainDiv.hasChildNodes()){
+                    
+                    /* TO DO -> NEW TAB STOP */
+                    
                     /* CLEAR MARING LEFT */
                     //row.paragraph.style.indentation=0;
-                    row.paragraph.style.leftEjection=0;
+                    row.paragraph.style.leftEjection=0;  
+                    console.log('hasChildNodes');
+                    console.log(mainDiv.hasChildNodes());
+                    mainDiv.lastChild.appendChild(this.setParagraphEle(row.paragraph));
+                    return true;
+                    
+                }
+                else{
+                    
                 }
                
                 break;
@@ -450,7 +490,9 @@ class DocPreview{
                 else{
                     /* ADD EXCEPTION FOR FIRST LINE */
                     //throw 'first line 447';
-                    mainDiv.appendChild(document.createElement('br'));
+                    var divBr = document.createElement('div');
+                        divBr.style.width='100%';
+                    mainDiv.appendChild(divBr);
                 }
                 
                 break;
@@ -459,14 +501,29 @@ class DocPreview{
                 console.log(row.paragraph.property.valuenewline);
                 break;
         }
+        
+        var divWidth=document.createElement('div');
+        //var ele = document.createElement('div');
+            divWidth.style.width='100%';
+            divWidth.style.display='flex';
+            divWidth.style.justifyContent=row.paragraph.style.textAlign;
+            //divWidth.style.border='1px solid red';
+            divWidth.style.padding='0px';
+            divWidth.style.margin='0px';
+        
         /* LEFT EJECTION - WYSUNIECIE */
-        this.setTabStopEjection(mainDiv,row.paragraph.style.leftEjection);
-        mainDiv.appendChild(this.setParagraphEle(row.paragraph));
+        this.setTabStopEjection(divWidth,row.paragraph.style.leftEjection);
+        divWidth.appendChild(this.setParagraphEle(row.paragraph));
+        mainDiv.appendChild(divWidth);
     }
     setParagraphEle(paragraph){
         console.log('DocPreview::setParagraphEle()'); 
         var ele = document.createElement('div');//'span','p'
             ele.style.display='inline-block';
+            ele.style.border='0px solid purple';
+            ele.style.padding='0px 0px 0px 0px';
+            ele.style.margin='0px';
+            
         //var span = document.createElement('span');//'span','p'
             this.setEleStyle(ele,paragraph.style);
             /* SET TAB STOP */
@@ -474,6 +531,9 @@ class DocPreview{
             //span.style.marginLeft=this.Utilities.setCmToPx(paragraph.style[marginLeft]);//
         var value = document.createTextNode(paragraph.property.value);
             ele.appendChild(value);
+            
+            console.log(ele);
+            
         return ele;
     }
     setEleStyle(ele,style){

@@ -3,10 +3,10 @@
  * Author: Tomasz Borczynski
  */
 class RomanList{
-    setLowerRoman(counter){
-        console.log('RomanList::setLowerRoman()');
-        var basicRoman=["","i",'ii','iii','iv','v','vi','vii','viii',"ix"];
-        var advancedRoman=["x","xl","l","xc","c","cd","d","cm","m","mmmcmxcix"];
+    setLower(counter){
+        console.log('RomanList::setLower()');
+        var basic=["","i",'ii','iii','iv','v','vi','vii','viii',"ix"];
+        var advanced=["x","xl","l","xc","c","cd","d","cm","m","mmmcmxcix"];
         /*
          * x - 10
          * xl - 40
@@ -19,12 +19,12 @@ class RomanList{
          * m - 1000
          * mmmcmxcix - 3999
          */
-        return this.setRoman(counter,basicRoman,advancedRoman);
+        return this.set(counter,basic,advanced);
     }
-    setUpperRoman(counter){
-        console.log('RomanList::setUpperRoman()');
-        var basicRoman=["","I",'II','III','IV','V','VI','VII','VIII',"IX"];
-        var advancedRoman=["X","XL","L","XC","C","CD","D","CM","M","MMMCMXCIX"];
+    setUpper(counter){
+        console.log('RomanList::setUpper()');
+        var basic=["","I",'II','III','IV','V','VI','VII','VIII',"IX"];
+        var advanced=["X","XL","L","XC","C","CD","D","CM","M","MMMCMXCIX"];
         /*
          * X - 10
          * XX - 20
@@ -49,10 +49,10 @@ class RomanList{
          * MM - 2000
          * MMM - 3000
          */
-        return this.setRoman(counter,basicRoman,advancedRoman);
+        return this.set(counter,basic,advanced);
     }
-    setRoman(c,bR,aR){
-        console.log('RomanList::setRoman()');
+    set(c,bR,aR){
+        console.log('RomanList::set()');
         /* TEST VALUE
             c = 1156;
          */
@@ -78,30 +78,30 @@ class RomanList{
             all:''
         };
         /* 1000 */
-        c=this.setRomanValue(c,999,1000,aR[8],r);
+        c=this.setValue(c,999,1000,aR[8],r);
         /* 900 */
-        c=this.setRomanValue(c,899,900,aR[7],r);
+        c=this.setValue(c,899,900,aR[7],r);
         /* 500 */
-        c=this.setRomanValue(c,499,500,aR[6],r);
+        c=this.setValue(c,499,500,aR[6],r);
         /* 400 */
-        c=this.setRomanValue(c,399,400,aR[5],r);
+        c=this.setValue(c,399,400,aR[5],r);
         /* 100 */
-        c=this.setRomanValue(c,99,100,aR[4],r);
+        c=this.setValue(c,99,100,aR[4],r);
         /* 90 */
-        c=this.setRomanValue(c,89,90,aR[3],r);
+        c=this.setValue(c,89,90,aR[3],r);
         /* 50 */
-        c=this.setRomanValue(c,49,50,aR[2],r);
+        c=this.setValue(c,49,50,aR[2],r);
         /* 40 */
-        c=this.setRomanValue(c,39,40,aR[1],r);
+        c=this.setValue(c,39,40,aR[1],r);
         /* 10 */
-        c=this.setRomanValue(c,9,10,aR[0],r);    
+        c=this.setValue(c,9,10,aR[0],r);    
         /* RETURN NEW ROMAN VALUE */
         console.log(r);
         return document.createTextNode(r.all+bR[c]);
     }
-    setRomanValue(c,max,minus,v,roman){
+    setValue(c,max,minus,v,roman){
         /*
-        console.log('RomanList::setRomanValue()');
+        console.log('RomanList::setValue()');
         console.log(counter);
         console.log(max,);
         console.log(minus);

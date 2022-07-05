@@ -1,34 +1,43 @@
 /* 
- * Roman List
+ * Alphabetical List
  * Author: Tomasz Borczynski
  */
 class AlphabeticalList{
+    lowerList=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+    upperList=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+    
+    lowerExtend(counter,addition){
+        console.log('AlphabeticalList::lowerExtend()');
+        return document.createTextNode(this.set(counter,this.lowerList)+addition);
+    }
     lower(counter){
         console.log('AlphabeticalList::lower()');
-        var basic=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
-        return this.set(counter,basic);
+        return document.createTextNode(this.set(counter,this.lowerList));
+    }
+    upperExtend(counter,addition){
+        console.log('AlphabeticalList::upperExtend()');
+        return document.createTextNode(this.set(counter,this.upperList)+addition);
     }
     upper(counter){
         console.log('AlphabeticalList::upper()');
-        var basic=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-        return this.set(counter,basic);
+        return document.createTextNode(this.set(counter,this.upperList));
     }
-    set(c,bR){
+    set(c,l){
         console.log('AlphabeticalList::set()');
         console.log(c);
         
         /* EXCEPTION - NOT NUMBER*/
         if(typeof(c)!=='number'){
-            return document.createTextNode('E-TYPE');
+            return 'E-TYPE';
         }
          /* EXCEPTION LOWER COUNTER*/
         if(c<1){
-            return document.createTextNode('E-COUNTER');
+            return 'E-COUNTER';
         }
          /* optimalisation */
          /* INDEX IN ARRAY START FROM 0 */
         if(c<27){
-            return document.createTextNode(bR[c-1]);
+            return l[c-1].toString();
         }
         /* 26 */
         var total = parseInt(c/26,10);
@@ -38,13 +47,14 @@ class AlphabeticalList{
         /* EXCEPTION */
         if(rest===0){
             /* INDEX */
-            var all = bR[25].repeat(total);
+            var all = l[25].repeat(total);
         }
         else{
-            var all = bR[rest-1].repeat(total+1);
+            var all = l[rest-1].repeat(total+1);
         }
         console.log(all);
-        return document.createTextNode(all);
+        return all.toString();
+        //return document.createTextNode(all.toString());
     }
 
 }

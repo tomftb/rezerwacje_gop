@@ -31,6 +31,7 @@ final class ProjectItems extends Page{
         'Main/headerView.js',
         'Utilities/Style.js',
         'Utilities/RomanList.js',
+        'Utilities/AlphabeticalList.js',
         'Utilities/TabStop.js',
         'Main/StageData.js',
         'Utilities/DocPreview.js',

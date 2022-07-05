@@ -421,7 +421,44 @@ class DocPreview{
          * PARSE LIST TYPE
          */
         console.log(listType);
-        //throw 'aaaaa';
+        this.setListSimpleEleHeadType(ele,listType,counter);
+        this.setListAdvancedEleHeadType(ele,listType,counter);   
+    }
+    setListSimpleEleHeadType(ele,listType,counter){
+        var span = document.createElement('span');
+        switch(listType){
+            case 'bullet':
+                span.innerHTML='&#8226;';
+                break;
+            case 'square':
+                span.innerHTML='&#9632;';
+                break;
+            case 'minus':
+                span.innerHTML='&#8722;';
+                break;
+            case 'circle':
+                 span.innerHTML='o';            
+                break;
+            case 'check':
+                span.innerHTML='&#10003;';
+                break;
+            case 'decimal':
+                span.innerHTML=counter;
+                break;
+            case 'decimal-dot':
+                span.innerHTML=counter+'.';
+                break;
+            case 'decimal-round-right-bracket':
+                span.innerHTML=counter+')';
+                break;
+            default:
+                //var value = document.createTextNode(counter);
+                //ele.appendChild(value);
+            break;
+        };
+        ele.appendChild(span);
+    }
+    setListAdvancedEleHeadType(ele,listType,counter){
         switch(listType){
             case 'upper-roman':
                 ele.appendChild(this.RomanList.setUpperRoman(counter));
@@ -429,31 +466,11 @@ class DocPreview{
             case 'lower-roman':
                 ele.appendChild(this.RomanList.setLowerRoman(counter));
                 break;
-            case 'bullet':
-                ele.appendChild(this.setListSimpleEleHeadType('&#8226;'));
-                break;
-            case 'square':
-                ele.appendChild(this.setListSimpleEleHeadType('&#9632;'));
-                break;
-            case 'minus':
-                ele.appendChild(this.setListSimpleEleHeadType('&#8722;'));
-                break;
-            case 'circle':
-                ele.appendChild(this.setListSimpleEleHeadType('o'));
-                break;
-            case 'check':
-                ele.appendChild(this.setListSimpleEleHeadType('&#10003;'));
-                break;
             default:
-                var value = document.createTextNode(counter);
-                ele.appendChild(value);
+                //var value = document.createTextNode(counter);
+                //ele.appendChild(value);
             break;
         };
-    }
-    setListSimpleEleHeadType(name){
-        var span = document.createElement('span');
-            span.innerHTML=name;
-        return span;
     }
     setParagraph(mainDiv,row,lastParagraphType,firstLine){
         console.log('DocPreview::setParagraph()');

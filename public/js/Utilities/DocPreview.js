@@ -474,6 +474,18 @@ class DocPreview{
             case 'upper-alpha':
                 ele.appendChild(this.AlphabeticalList.upper(counter));
                 break;
+            case 'lower-alpha-round-right-bracket':
+                ele.appendChild(this.AlphabeticalList.lowerExtend(counter,')'));
+                break;
+            case 'lower-alpha-dot':
+                ele.appendChild(this.AlphabeticalList.lowerExtend(counter,'.'));
+                break;
+            case 'upper-alpha-round-right-bracket':
+                ele.appendChild(this.AlphabeticalList.upperExtend(counter,')'));
+                break;
+            case 'upper-alpha-dot':
+                ele.appendChild(this.AlphabeticalList.upperExtend(counter,'.'));
+                break;
             default:
                 //var value = document.createTextNode(counter);
                 //ele.appendChild(value);

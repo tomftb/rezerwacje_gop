@@ -162,7 +162,7 @@ class Html{
             option.style.fontFamily = data.fontFamily;
             option.style.color = data.color;
             option.style.backgroundColor = data.backgroundcolor;
-            option.innerText=data.n; 
+            option.innerHTML=data.n; 
         return option;
     }
     createOption(){

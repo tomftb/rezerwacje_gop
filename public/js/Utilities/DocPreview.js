@@ -429,13 +429,32 @@ class DocPreview{
             case 'lower-roman':
                 ele.appendChild(this.RomanList.setLowerRoman(counter));
                 break;
+            case 'bullet':
+                ele.appendChild(this.setListSimpleEleHeadType('&#8226;'));
+                break;
+            case 'square':
+                ele.appendChild(this.setListSimpleEleHeadType('&#9632;'));
+                break;
+            case 'minus':
+                ele.appendChild(this.setListSimpleEleHeadType('&#8722;'));
+                break;
+            case 'circle':
+                ele.appendChild(this.setListSimpleEleHeadType('o'));
+                break;
+            case 'check':
+                ele.appendChild(this.setListSimpleEleHeadType('&#10003;'));
+                break;
             default:
                 var value = document.createTextNode(counter);
                 ele.appendChild(value);
             break;
         };
     }
-
+    setListSimpleEleHeadType(name){
+        var span = document.createElement('span');
+            span.innerHTML=name;
+        return span;
+    }
     setParagraph(mainDiv,row,lastParagraphType,firstLine){
         console.log('DocPreview::setParagraph()');
         console.log(row);

@@ -851,12 +851,13 @@ class ProjectStageCreate{
         tool2.appendChild(tabstop);
         
          /* LEFT EJECTION */
-        var leftEjection=this.createLeftEjectionInput(isection,isub,isubrow,subsectionrow,helplink);
+        //var leftEjection=this.createLeftEjectionInput(isection,isub,isubrow,subsectionrow,helplink);
+        var leftEjection=this.ProjectStageTool.setLeftEjection(subsectionrow.paragraph,helplink);
         //var leftEjection=this.setInputStyle('Wcięcie z lewej strony:',subsectionrow.paragraph,'leftEjection','leftEjectionMeasurement','leftEjectionMin','leftEjectionMax',this.getDefaultList(this.Glossary.text.item.listMeasurement,subsectionrow.paragraph.style['leftEjectionMeasurement']));
         /* RIGHT EJECTION */
-        var rightEjection=this.setInputStyle('Wcięcie z prawej strony:',subsectionrow.paragraph,'rightEjection','rightEjectionMeasurement','rightEjectionMin','rightEjectionMax',this.getMeasurementList(subsectionrow.paragraph.style['rightEjectionMeasurement']));
+        var rightEjection=this.ProjectStageTool.setRightEjection(subsectionrow.paragraph,helplink);
         /* INDENTATION */
-        var indentation=this.ProjectStageTool.setIndentation(subsectionrow.paragraph);
+        var indentation=this.ProjectStageTool.setIndentation(subsectionrow.paragraph,helplink);
         /* PARAGRAPH TYPE */
         var paragraph=this.createParagraphType(subsectionrow.paragraph,helplink);
         tool3.appendChild(leftEjection);

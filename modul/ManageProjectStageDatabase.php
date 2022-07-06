@@ -382,20 +382,24 @@ abstract class ManageProjectStageDatabase {
         /*
          * INSERT paragraph
          */
+        $this->Log->log(0,"paragraph");
         self::insertAttributes($lastId,$data->paragraph,'slo_project_stage_subsection_row_p');
         /* INSERT SUBSECTION ROW TABSTOP */
         self::insertTabStop($lastId,$data->paragraph->tabstop);
         /*
          * INSERT list
          */
+        $this->Log->log(0,"list");
         self::insertAttributes($lastId,$data->list,'slo_project_stage_subsection_row_l');
         /*
          * INSERT table
          */
+        $this->Log->log(0,"table");
         self::insertAttributes($lastId,$data->table,'slo_project_stage_subsection_row_t');
         /*
          * INSERT image
          */
+        $this->Log->log(0,"image");
         self::insertAttributes($lastId,$data->image,'slo_project_stage_subsection_row_i');
     }
     private function insertAttributes($id=0,$data=[],$table='slo_project_stage_subsection_row_p'){
@@ -413,6 +417,8 @@ abstract class ManageProjectStageDatabase {
         foreach($data as $k => $v){
             $parm[':property']=[$k,'STR']; 
             $parm[':value']=[$v,'STR']; 
+            //$this->Log->log(0,$k);
+            //$this->Log->log(0,$v);
             $this->dbLink->query2(
                  "INSERT INTO `".$table."` (`id_parent`,`property`,`value`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:id,:property,:value,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
                   ,array_merge($parm, $this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm())

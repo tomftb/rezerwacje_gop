@@ -12,10 +12,11 @@ class ProjectStage{
     inputFieldCounter=0;
     fieldDisabled='n';
     StageTable = new Object;
-    CreateText = new Object;
+    //CreateText = new Object;
     CreateImage = new Object;
     CreateTable = new Object;
-    CreateList = new Object;
+    Create = new Object;
+    //CreateList = new Object;
     Property = new Object;
     constructor(Items){
         console.log('ProjectStage::construct()');
@@ -25,11 +26,11 @@ class ProjectStage{
         this.Property = new ProjectStageProperty();
         this.StageTable = new ProjectStageTable(this);  
         this.StageTable.setProperties(this.Items.appurl,this.Items.router);
-        this.CreateText = new ProjectStageCreateText(this);
+        //this.CreateText = new ProjectStageCreateText(this);
         this.CreateImage = new ProjectStageCreateImage();
         this.CreateTable = new ProjectStageCreateTable();
-        this.CreateList = new ProjectStageCreateList(this);
-        
+        //this.CreateList = new ProjectStageCreateList(this);
+        this.Create = new ProjectStageCreate(this);
     }
     show(){
         console.log('ProjectStage::show()');  
@@ -110,7 +111,7 @@ class ProjectStage{
                 method:'show'
             };
             /* TURN OFF  - createList instead*/
-            //this.CreateText.create();
+            this.Create.create('t');
         }
         catch(error){
             console.log(error);
@@ -138,7 +139,7 @@ class ProjectStage{
                 object:this,
                 method:'show'
             };
-            this.CreateList.create();
+            this.Create.create('l');
         }
         catch(error){
             console.log(error);

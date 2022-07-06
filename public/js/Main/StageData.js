@@ -12,7 +12,7 @@ class StageData{
         this.Glossary = Glossary;
         this.Property=Property;
         this.type = type;
-        this.setSubsectionRowType(type);
+        this.setSubsectionRowParagraph(type);
         this.setSubsectionRowTabStop(tabstop);
         console.log(this.Property); 
     }
@@ -223,7 +223,7 @@ class StageData{
         this.Stage = data;
         this.iSection = Object.keys(this.Stage.section).length;
     }
-    setSubsectionRowType(type){
+    setSubsectionRowParagraph(type){
         /*
          * type:
          * p - paragraph

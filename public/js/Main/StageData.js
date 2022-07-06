@@ -6,9 +6,14 @@ class StageData{
     Glossary={};
     Property={};
     iSection=0;
-    constructor(Glossary,Property){
+    type={};
+    tabStop={};
+    constructor(Glossary,Property,type,tabstop){
         this.Glossary = Glossary;
         this.Property=Property;
+        this.type = type;
+        this.setSubsectionRowType(type);
+        this.setSubsectionRowTabStop(tabstop);
         console.log(this.Property); 
     }
     createDefault(){
@@ -85,8 +90,8 @@ class StageData{
                // newLine = this.Property.subsectionRowNewLine;
             };
             return subsectionRow;
-        }
-        createSubsectionRow(){
+    }
+    createSubsectionRow(){
         return {
                 data:{
                     id:0
@@ -142,12 +147,15 @@ class StageData{
                          */
                         value:'',
                         valuenewline:'y',/* default */
-                        paragraph:'l',
-                        paragraphName:'Element listy', //Nowy akapit
+                        paragraph:this.type.paragraph,
+                        paragraphName:this.type.paragraph.name, //Nowy akapit
                         /* CHECK FOR EXIST tabstop with number */
-                        tabstop:'0'
+                        //tabstop:'0'
+                        tabstop:null
                     },
                     /* OBJECT */
+                    tabstop:this.tabStop
+                    /*
                     tabstop:{
                         '0':{
                             position:0,
@@ -158,7 +166,8 @@ class StageData{
                             leadingSign:'none',
                             leadingSignName:'Brak'
                         }
-                    }                  
+                    }    
+                    */
                 },
                 list:{
                     style:{
@@ -213,5 +222,39 @@ class StageData{
     setStage(data){
         this.Stage = data;
         this.iSection = Object.keys(this.Stage.section).length;
+    }
+    setSubsectionRowType(type){
+        /*
+         * type:
+         * p - paragraph
+         * l - list
+         * t - table
+         * i - image
+        */
+        var paragraph = {
+            paragraph:'p',
+            paragraphName:'Nowy akapit'
+        };
+        var list = {
+            paragraph:'l',
+            paragraphName:'Element listy'
+        };
+        switch(type){
+            case 'l':
+                this.type=list;
+                break;
+            default:
+            case 'p':
+                this.type=paragraph;
+                break;
+        };
+        
+    }
+    setSubsectionRowTabStop(tabstop){
+        if(tabstop===null){
+            //console.log('nulllll');
+            return false;
+        }
+        this.tabStop = tabstop;
     }
 }

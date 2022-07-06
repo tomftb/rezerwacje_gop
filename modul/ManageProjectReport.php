@@ -53,6 +53,26 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         $v['act']=parent::getProjectStage(['idp'=>[$this->inpArray['id'],'INT']]);
         $this->utilities->jsonResponse($v,'pReportOff'); 
     }
+    public function genProjectReportTestDoc(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $post=filter_input_array(INPUT_POST);
+        /* parse data */
+        if(empty($post)){ Throw New Exception ('NO STAGE REPORT DATA',0);}
+        if(!array_key_exists('stage', $post)){Throw New Exception ('POST STAGE DATA KEY NOT EXIST',1);}
+        //$this->inpArray=json_decode($post['stage']);
+        //print_r($this->inpArray);
+        
+        $doc = new createDoc(json_decode($post['stage']),[],'TestProjectStage','.docx',APP_ROOT.UPLOAD_PROJECT_REPORT_DOC_DIR);
+        $doc->genReportStage();
+        //echo "DOC NAME: ".$doc->getDocName();
+        
+        //downloadFile::getFile(APP_ROOT.UPLOAD_PROJECT_DOC_DIR,$doc->getDocName());
+        $this->utilities->jsonResponse($doc->getDocName(),'downloadProjectReportDoc');
+        
+        //$this->utilities->jsonResponse('','cModal');
+       
+        //$this->utilities->jsonResponse($doc->getDocName(),'downloadProjectDoc');
+    }
     private function uploadFiles($linkToFile='',$uploadDir=''){
         $this->modul['FILE']=NEW file();
         $this->modul['FILE']->setUrl($linkToFile);

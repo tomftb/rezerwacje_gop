@@ -11,6 +11,8 @@ class ProjectStageCreate{
     XhrTable=new Object();
     TabStop = new Object();
     StageData = new Object();
+    //Tool = new Object();
+    ProjectStageTool = new Object();
     /* FIELD COUNTER */
     i=0;
     sectionCount=1;
@@ -46,12 +48,14 @@ class ProjectStageCreate{
         this.Html=Stage.Items.Html;
         this.Xhr=Stage.Items.Xhr2;
         this.XhrTable=Stage.Items.Xhr;
+        //this.Tool=Stage.Tool;
         this.Glossary={
             'text':Stage.Items.Glossary['text'],
             'list':Stage.Items.Glossary['list']
         };
         this.DocPreview = new DocPreview();
         this.Utilities = new Utilities();
+        this.ProjectStageTool = new ProjectStageTool(this);
 
     }
     getXhrParm(type,task,method){
@@ -852,7 +856,7 @@ class ProjectStageCreate{
         /* RIGHT EJECTION */
         var rightEjection=this.setInputStyle('Wcięcie z prawej strony:',subsectionrow.paragraph,'rightEjection','rightEjectionMeasurement','rightEjectionMin','rightEjectionMax',this.getMeasurementList(subsectionrow.paragraph.style['rightEjectionMeasurement']));
         /* INDENTATION */
-        var indentation=this.setIndentation(subsectionrow.paragraph);
+        var indentation=this.ProjectStageTool.setIndentation(subsectionrow.paragraph);
         /* PARAGRAPH TYPE */
         var paragraph=this.createParagraphType(subsectionrow.paragraph,helplink);
         tool3.appendChild(leftEjection);
@@ -1516,52 +1520,7 @@ class ProjectStageCreate{
         mainDiv.appendChild(groupDiv);
         return mainDiv;
     }
-    setIndentation(subsectionrow){
-        console.log('ProjectStageCreate::setIndentation()');
-        console.log('subsectionrow:');
-        console.log(subsectionrow);
-        console.log('measurement list:');
-        //console.log(all);
-        console.log('indentationSpecial list:');
-        //console.log(all2);
-        
-        var mainDiv = this.createInputHead('Specjalne:');  
-        var groupDiv=document.createElement('div');
-            groupDiv.setAttribute('class','input-group');
-        var selectIndentationType =  document.createElement('select');
-            selectIndentationType.classList.add('form-control','form-control-sm','w-50');  
-            /* DEFAULT */
-            var defaultIndentationType={
-                0:this.Utilities.getDefaultOptionProperties(subsectionrow.style['indentationSpecial'],subsectionrow.style['indentationSpecialName'])
-            };
-            selectIndentationType.appendChild(this.Html.createOptionGroup('Domyślny:',defaultIndentationType));  
-            /* REST */
-            selectIndentationType.appendChild(this.Html.createOptionGroup('Dostępne:',this.Utilities.getDefaultList(this.Glossary.text.item.indentationSpecial,subsectionrow.style['indentationSpecial'])));     
-        var inputIndentationValue = document.createElement('INPUT');
-            inputIndentationValue.setAttribute('value',subsectionrow.style['indentation']);
-            inputIndentationValue.setAttribute('class','form-control form-control-sm w-25');
-            inputIndentationValue.setAttribute('type','number');
-            inputIndentationValue.onchange = function(){
-                //console.log(subsectionrow);
-                console.log(this.value);
-                subsectionrow.style['indentation'] = this.value;
-            };
-        var selectIndentationMeasurement =  document.createElement('select');
-            selectIndentationMeasurement.classList.add('form-control','form-control-sm','w-25');
-            /* DEFAULT */
-            var defaultIndentationMeasurement={
-                0:this.Utilities.getDefaultOptionProperties(subsectionrow.style['indentationMeasurement'],subsectionrow.style['indentationMeasurement'])
-            };
-            selectIndentationMeasurement.appendChild(this.Html.createOptionGroup('Domyślny:',defaultIndentationMeasurement));  
-            /* REST */         
-            selectIndentationMeasurement.appendChild( this.Html.createOptionGroup('Dostępne',this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,subsectionrow.style['indentationMeasurement'])));
-        
-        groupDiv.appendChild(selectIndentationType);
-        groupDiv.appendChild(inputIndentationValue);
-        groupDiv.appendChild(selectIndentationMeasurement);
-        mainDiv.appendChild(groupDiv);
-        return mainDiv;
-    }
+    
     setValueCheckBoxStyle(id,value,helplinkValue){
         /**/
         console.log('ProjectStageCreate::setValueCheckBoxStyle()');

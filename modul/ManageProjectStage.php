@@ -430,12 +430,16 @@ class ManageProjectStage extends ManageProjectStageDatabase
         if(!is_object($this->data)){
             Throw New Exception ('POST DATA IS NOT A OBJECT',1);
         }
-        if(!is_object($this->data->data)){
-            Throw New Exception ('POST DATA PARAMETER DATA IS NOT A OBJECT',1);
+        if(!property_exists($this->data,'data')){
+            /* NO SECTION */
+            Throw New Exception ('POST DATA PROPERTY NOT EXIST',1);
         }
+        //if(!is_object($this->data->data)){
+        //    Throw New Exception ('POST DATA PARAMETER DATA IS NOT A OBJECT',1);
+       // }
         if(!property_exists($this->data,'section')){
             /* NO SECTION */
-            Throw New Exception ('POST DATA SECTION DATA NOT EXIST',1);
+            Throw New Exception ('POST SECTION PROEPRTY NOT EXIST',1);
         }
         self::checkValue('title',$prefix);
         self::checkValue('departmentId',$prefix);

@@ -148,7 +148,7 @@ class StageData{
                         value:'',
                         valuenewline:'y',/* default */
                         paragraph:this.type.paragraph,
-                        paragraphName:this.type.paragraph.name, //Nowy akapit
+                        paragraphName:this.type.paragraphName, //Nowy akapit
                         /* CHECK FOR EXIST tabstop with number */
                         //tabstop:'0'
                         tabstop:null

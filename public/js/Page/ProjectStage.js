@@ -16,6 +16,7 @@ class ProjectStage{
     CreateImage = new Object;
     CreateTable = new Object;
     Create = new Object;
+    Tool = new Object();
     //CreateList = new Object;
     Property = new Object;
     constructor(Items){
@@ -23,6 +24,7 @@ class ProjectStage{
         this.Items = Items;
         //console.log(Items);
         //console.log(this.Items.router);
+        this.Tool = new Tool();
         this.Property = new ProjectStageProperty();
         this.StageTable = new ProjectStageTable(this);  
         this.StageTable.setProperties(this.Items.appurl,this.Items.router);

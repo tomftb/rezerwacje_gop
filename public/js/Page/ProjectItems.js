@@ -16,6 +16,7 @@ class ProjectItems{
     Stage = new Object();
     Const = new Object();
     Table = new Object();
+
     loadModal;
     //defaultTask='getprojectsstagelike&d=0&v=0&b=';
     default={

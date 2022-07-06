@@ -112,7 +112,7 @@ class StageData{
                         paragraphName:this.default.paragraph.property.paragraphName, //Nowy akapit
                         /* CHECK FOR EXIST tabstop with number */
                         //tabstop:'0'
-                        tabstop:null
+                        tabstop:'-1'
                     },
                     /* OBJECT */
                     tabstop:this.tabStop

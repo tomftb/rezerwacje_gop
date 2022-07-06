@@ -71,15 +71,11 @@ class ProjectStageCreateList{
             /* SETUP EJECTION MULTIPLIER */
             this.ejectionMultiplier=parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
             this.TabStop = new TabStop();
-            
              /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
             /* SET STAGE CREATE TEXT DEFAULT DEPARTMENT LIST */
             this.Department=this.Stage.Property.department;
-            
-            this.StageData = new StageData(this.Glossary,this.Stage.Property);
-            
-            
+            this.StageData = new StageData(this.Glossary,this.Stage.Property,'l',null);
              /* SETUP CLEAR STAGE DATA */
             this.StageData.createDefault();
         } 

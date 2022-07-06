@@ -152,7 +152,7 @@ class ProjectStage{
             //console.clear();
             console.log('ProjectStage::details()');
             //this.CreateText.details(response);
-            this.CreateList.details(response);
+            this.Create.details(response);
         }
         catch(error){
             console.log(error);

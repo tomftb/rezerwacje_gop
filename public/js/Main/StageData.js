@@ -6,13 +6,13 @@ class StageData{
     Glossary={};
     Property={};
     iSection=0;
-    type={};
+    default={};
     tabStop={};
     constructor(Glossary,Property,type,tabstop){
         this.Glossary = Glossary;
         this.Property=Property;
-        this.type = type;
-        this.setSubsectionRowParagraph(type);
+
+        this.setSubsectionRowDefault(type);
         this.setSubsectionRowTabStop(tabstop);
         console.log(this.Property); 
     }
@@ -97,46 +97,7 @@ class StageData{
                     id:0
                 },
                 paragraph:{
-                    style:{
-                        fontSize:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),
-                        fontSizeMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MAX','v'),
-                        /* ADD TO SQL - fontSizeMeasurement */
-                        fontSizeMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v'),
-                        color:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),
-                        /* ADD TO SQL - colorName */
-                        colorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','n'),
-                        backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
-                        /* ADD TO SQL - backgroundColorName */
-                        backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
-                        fontFamily:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),
-                        fontWeight:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v'),
-                        fontStyle:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v'),
-                        underline:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
-                        'line-through':this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
-                        textAlign:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),
-                        /* ADD TO SQL - backgroundColorName */
-                        textAlignName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','n'),
-                        /* TEXT - this.Glossary.text STAGE_TEXT_LEFT_EJECTION */
-                        leftEjection:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_LEFT_EJECTION','n'),
-                        leftEjectionMin:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_LEFT_EJECTION_MIN','n'),
-                        leftEjectionMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_LEFT_EJECTION_MAX','n'),
-                        leftEjectionMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_LEFT_EJECTION_MEASUREMENT','n'),
-                        /* TEXT - this.Glossary.text STAGE_TEXT_RIGHT_EJECTION */
-                        rightEjection:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_RIGHT_EJECTION','n'),
-                        rightEjectionMin:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_RIGHT_EJECTION_MIN','n'),
-                        rightEjectionMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_RIGHT_EJECTION_MAX','n'),
-                        rightEjectionMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_RIGHT_EJECTION_MEASUREMENT','n'),
-                        /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION */
-                        indentation:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION','n'),
-                        indentationMin:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_INDENTATION_MIN','n'),
-                        indentationMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_INDENTATION_MAX','n'),
-                        /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION_MEASUREMENT */
-                        indentationMeasurement:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_MEASUREMENT','n'),
-                        /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION_SPECIAL */
-                        indentationSpecial:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_SPECIAL','v'),
-                         /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION_SPECIAL */
-                        indentationSpecialName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_SPECIAL','n')
-                    },
+                    style:this.default.paragraph.style,
                     property:{
                         /* ADD TO SQL - 0 -> n, 1 -> y */ 
                         /* LIST */
@@ -147,8 +108,8 @@ class StageData{
                          */
                         value:'',
                         valuenewline:'y',/* default */
-                        paragraph:this.type.paragraph,
-                        paragraphName:this.type.paragraphName, //Nowy akapit
+                        paragraph:this.default.paragraph.property.paragraph,
+                        paragraphName:this.default.paragraph.property.paragraphName, //Nowy akapit
                         /* CHECK FOR EXIST tabstop with number */
                         //tabstop:'0'
                         tabstop:null
@@ -223,7 +184,7 @@ class StageData{
         this.Stage = data;
         this.iSection = Object.keys(this.Stage.section).length;
     }
-    setSubsectionRowParagraph(type){
+    setSubsectionRowDefault(type){
         /*
          * type:
          * p - paragraph
@@ -231,21 +192,101 @@ class StageData{
          * t - table
          * i - image
         */
-        var paragraph = {
-            paragraph:'p',
-            paragraphName:'Nowy akapit'
+        var rowParagraph={
+                paragraph:{
+                    style:{
+                        fontSize:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),
+                        fontSizeMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MAX','v'),
+                        fontSizeMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MEASUREMENT','v'),
+                        color:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','v'),
+                        colorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_COLOR','n'),
+                        backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
+                        backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
+                        fontFamily:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_FAMILY','v'),
+                        fontWeight:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_BOLD','v'),
+                        fontStyle:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_ITALIC','v'),
+                        underline:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_UNDERLINE','v'),
+                        'line-through':this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_LINETHROUGH','v'),
+                        textAlign:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','v'),
+                        textAlignName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_ALIGN','n'),
+                        leftEjection:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_LEFT_EJECTION','n'),
+                        leftEjectionMin:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_LEFT_EJECTION_MIN','n'),
+                        leftEjectionMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_LEFT_EJECTION_MAX','n'),
+                        leftEjectionMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_LEFT_EJECTION_MEASUREMENT','n'),
+                        rightEjection:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_RIGHT_EJECTION','n'),
+                        rightEjectionMin:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_RIGHT_EJECTION_MIN','n'),
+                        rightEjectionMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_RIGHT_EJECTION_MAX','n'),
+                        rightEjectionMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_RIGHT_EJECTION_MEASUREMENT','n'),
+                        indentation:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_INDENTATION','n'),
+                        indentationMin:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_INDENTATION_MIN','n'),
+                        indentationMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_INDENTATION_MAX','n'),
+                        indentationMeasurement:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_INDENTATION_MEASUREMENT','n'),
+                        indentationSpecial:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_INDENTATION_SPECIAL','v'),
+                        indentationSpecialName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_INDENTATION_SPECIAL','n')
+                    },
+                    property: {
+                        paragraph:'p',
+                        paragraphName:'Nowy akapit'
+                    }    
+                }
+                
         };
-        var list = {
-            paragraph:'l',
-            paragraphName:'Element listy'
-        };
+        var rowList={ 
+                paragraph:{
+                    style:{
+                        fontSize:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_FONT_SIZE','v'),
+                        fontSizeMax:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_FONT_SIZE_MAX','v'),
+                        /* ADD TO SQL - fontSizeMeasurement */
+                        fontSizeMeasurement:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_FONT_SIZE_MEASUREMENT','v'),
+                        color:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_COLOR','v'),
+                        /* ADD TO SQL - colorName */
+                        colorName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_COLOR','n'),
+                        backgroundColor:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_BACKGROUND_COLOR','v'),
+                        /* ADD TO SQL - backgroundColorName */
+                        backgroundColorName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_BACKGROUND_COLOR','n'),
+                        fontFamily:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_FONT_FAMILY','v'),
+                        fontWeight:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_FONT_BOLD','v'),
+                        fontStyle:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_FONT_ITALIC','v'),
+                        underline:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_FONT_UNDERLINE','v'),
+                        'line-through':this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_FONT_LINETHROUGH','v'),
+                        textAlign:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_ALIGN','v'),
+                        /* ADD TO SQL - backgroundColorName */
+                        textAlignName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_ALIGN','n'),
+                        /* TEXT - this.Glossary.text STAGE_TEXT_LEFT_EJECTION */
+                        leftEjection:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_LEFT_EJECTION','n'),
+                        leftEjectionMin:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_LEFT_EJECTION_MIN','n'),
+                        leftEjectionMax:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_LEFT_EJECTION_MAX','n'),
+                        leftEjectionMeasurement:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_LEFT_EJECTION_MEASUREMENT','n'),
+                        /* TEXT - this.Glossary.text STAGE_TEXT_RIGHT_EJECTION */
+                        rightEjection:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_RIGHT_EJECTION','n'),
+                        rightEjectionMin:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_RIGHT_EJECTION_MIN','n'),
+                        rightEjectionMax:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_RIGHT_EJECTION_MAX','n'),
+                        rightEjectionMeasurement:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_RIGHT_EJECTION_MEASUREMENT','n'),
+                        /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION */
+                        indentation:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION','n'),
+                        indentationMin:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_MIN','n'),
+                        indentationMax:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_MAX','n'),
+                        /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION_MEASUREMENT */
+                        indentationMeasurement:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_MEASUREMENT','n'),
+                        /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION_SPECIAL */
+                        indentationSpecial:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_SPECIAL','v'),
+                         /* TEXT - this.Glossary.text STAGE_TEXT_INDENTATION_SPECIAL */
+                        indentationSpecialName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_SPECIAL','n')
+                    },
+                    property:{
+                        paragraph:'l',
+                        paragraphName:'Element listy'
+                    }
+                }
+                
+            };
         switch(type){
             case 'l':
-                this.type=list;
+                this.default=rowList;
                 break;
             default:
             case 'p':
-                this.type=paragraph;
+                this.default=rowParagraph;
                 break;
         };
         

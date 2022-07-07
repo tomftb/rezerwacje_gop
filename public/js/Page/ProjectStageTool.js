@@ -210,14 +210,7 @@ class ProjectStageTool{
             0:{
                 link:row,
                 helplink:helplink,
-                /*Anonymous Functions*/
-                onchange:function(value){
-                        console.log('ProjectStageTool::getFontFamily');
-                         /* SET PROPERTY KEY */
-                        this.link[key]=value;
-                         /* SET INPUT STYLE PROPERTY */
-                        this.helplink.style[key]=value;
-                },
+                key:key,
                 type:'select',
                 attributes:{
                     class:'w-100'
@@ -225,24 +218,47 @@ class ProjectStageTool{
             }    
         };
     }
-    getFontFamily(rowParagraphStyle,helplinkInputValue){
-        console.log('ProjectStageTool::getFontFamily()');
-        console.log(rowParagraphStyle);
-        console.log(helplinkInputValue);
-        var defaultFont={
-                0:this.Utilities.getDefaultOptionProperties(rowParagraphStyle.fontFamily,rowParagraphStyle.fontFamily)
+    getSimpleTool(row,helplink,key){
+        var tool = this.getTool(row,helplink,key);
+            /*Anonymous Functions*/
+            tool[0]['onchange']=function(value){
+                console.log('ProjectStageTool::getSimpleTool');
+                console.log(value);
+                console.log(this.link);
+                console.log(this.helplink);
+                console.log(this.key);
+                /* SET PROPERTY KEY */
+                this.link[this.key]=value;
+                /* SET INPUT STYLE PROPERTY */
+                this.helplink.style[this.key]=value;
             };
-            defaultFont[0].fontFamily=rowParagraphStyle.fontFamily;
-        var allFonts = {};
-            for(var i=0;i<this.Glossary.text.getKeyCount('fontFamily');i++){
-                if(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v')!==rowParagraphStyle.fontFamily){
-                    allFonts[i]=this.getExtendedOption(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),'#000000','#FFFFFF',this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'));
+        return tool;
+    }
+    getExtendedTool(row,helplink,key,glossary){
+        var tool = this.getTool(row,helplink,key);
+            /*Anonymous Functions*/
+            tool[0]['glossary']=glossary;
+            tool[0]['onchange']=function(value){
+                console.log('ProjectStageTool::getSimpleTool');
+                console.log(value);
+                console.log(this.link);
+                console.log(this.helplink);
+                console.log(this.key);
+                /* SET PROPERTY KEY */
+                this.link[this.key[0]]=value;
+                /* SET INPUT STYLE PROPERTY */
+                this.helplink.style[this.key[0]]=value;
+                console.log(this.glossary);
+                for(const prop in this.glossary){
+                    console.log(this.glossary[prop]);
+                    if(this.glossary[prop].v===value){
+                        console.log('FOUND');
+                        this.link[this.key[1]] = this.glossary[prop].n;
+                        break;
+                    }
                 }
-            }
-        var data=this.getTool(rowParagraphStyle,helplinkInputValue,'fontFamily');
-            data[0]['default']=defaultFont;//this.getDefaultFont(rowParagraphStyle.fontFamily,rowParagraphStyle.fontFamily);
-            data[0]['all']=allFonts;  
-        return  this.Tool.create('Czcionka:',data);
+            };
+        return tool;
     }
     getExtendedOption(value,title,color,backgroundcolor,fontFamily){
         var option=this.Utilities.getDefaultOptionProperties(value,title);
@@ -250,6 +266,42 @@ class ProjectStageTool{
             option.backgroundcolor=backgroundcolor;
             option.fontFamily=fontFamily;
         return option;
+    }
+    getFontFamily(rowStyle,inputEle){
+        console.log('ProjectStageTool::getFontFamily()');
+        console.log(rowStyle);
+        console.log(inputEle);
+        var defaultFont={
+                0:this.Utilities.getDefaultOptionProperties(rowStyle.fontFamily,rowStyle.fontFamily)
+            };
+            defaultFont[0].fontFamily=rowStyle.fontFamily;
+        var all = {};
+            for(var i=0;i<this.Glossary.text.getKeyCount('fontFamily');i++){
+                if(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v')!==rowStyle.fontFamily){
+                    all[i]=this.getExtendedOption(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),'#000000','#FFFFFF',this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'));
+                }
+            }
+        var data=this.getSimpleTool(rowStyle,inputEle,'fontFamily');
+            data[0]['default']=defaultFont;
+            data[0]['all']=all;  
+        return  this.Tool.create('Czcionka:',data);
+    }
+    getBackgroundColor(rowStyle,inputEle){
+        console.log('ProjectStageTool::getBackgroundColor()');
+        var defaultBackgroundColor={
+                0:this.Utilities.getDefaultOptionProperties(rowStyle.backgroundColor,rowStyle.backgroundColorName)
+            };
+            defaultBackgroundColor[0].backgroundcolor=rowStyle.backgroundColor;
+        var all = {};
+            for(var i=0;i<this.Glossary.text.getKeyCount('color');i++){
+                if(this.Glossary.text.getKeyPropertyAttribute('color',i,'v')!==rowStyle.backgroundColor){
+                    all[i]=this.getExtendedOption(this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),this.Glossary.text.getKeyPropertyAttribute('color',i,'n'),'#FFFFFF',this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),'');
+                }
+            }   
+        var data=this.getExtendedTool(rowStyle,inputEle,['backgroundColor','backgroundColorName'],this.Glossary.text.item.color);
+            data[0]['default']=defaultBackgroundColor;
+            data[0]['all']=all;  
+        return  this.Tool.create('Kolor tła:',data);
     }
 }
 

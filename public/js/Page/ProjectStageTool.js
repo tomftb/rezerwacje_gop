@@ -286,7 +286,7 @@ class ProjectStageTool{
             data[0]['all']=all;  
         return  this.Tool.create('Czcionka:',data);
     }
-    getBackgroundColor(rowStyle,inputEle){
+    getBackgroundColor(title,rowStyle,inputEle){
         console.log('ProjectStageTool::getBackgroundColor()');
         var defaultBackgroundColor={
                 0:this.Utilities.getDefaultOptionProperties(rowStyle.backgroundColor,rowStyle.backgroundColorName)
@@ -301,7 +301,7 @@ class ProjectStageTool{
         var data=this.getExtendedTool(rowStyle,inputEle,['backgroundColor','backgroundColorName'],this.Glossary.text.item.color);
             data[0]['default']=defaultBackgroundColor;
             data[0]['all']=all;  
-        return  this.Tool.create('Kolor tła:',data);
+        return  this.Tool.create(title,data);
     }
 }
 

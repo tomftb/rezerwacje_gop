@@ -79,7 +79,6 @@ class ProjectStageTool{
                 type:'select',
                 attributes:{
                     class:'w-25',
-                    type:'number'
                 }
             }    
         };
@@ -205,6 +204,52 @@ class ProjectStageTool{
             }
         };
         return  this.Tool.create('Typ:',data);
+    }
+    getTool(row,helplink,key){
+        return {
+            0:{
+                link:row,
+                helplink:helplink,
+                /*Anonymous Functions*/
+                onchange:function(value){
+                        console.log('ProjectStageTool::getFontFamily');
+                         /* SET PROPERTY KEY */
+                        this.link[key]=value;
+                         /* SET INPUT STYLE PROPERTY */
+                        this.helplink.style[key]=value;
+                },
+                type:'select',
+                attributes:{
+                    class:'w-100'
+                }
+            }    
+        };
+    }
+    getFontFamily(rowParagraphStyle,helplinkInputValue){
+        console.log('ProjectStageTool::getFontFamily()');
+        console.log(rowParagraphStyle);
+        console.log(helplinkInputValue);
+        var defaultFont={
+                0:this.Utilities.getDefaultOptionProperties(rowParagraphStyle.fontFamily,rowParagraphStyle.fontFamily)
+            };
+            defaultFont[0].fontFamily=rowParagraphStyle.fontFamily;
+        var allFonts = {};
+            for(var i=0;i<this.Glossary.text.getKeyCount('fontFamily');i++){
+                if(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v')!==rowParagraphStyle.fontFamily){
+                    allFonts[i]=this.getExtendedOption(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),'#000000','#FFFFFF',this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'));
+                }
+            }
+        var data=this.getTool(rowParagraphStyle,helplinkInputValue,'fontFamily');
+            data[0]['default']=defaultFont;//this.getDefaultFont(rowParagraphStyle.fontFamily,rowParagraphStyle.fontFamily);
+            data[0]['all']=allFonts;  
+        return  this.Tool.create('Czcionka:',data);
+    }
+    getExtendedOption(value,title,color,backgroundcolor,fontFamily){
+        var option=this.Utilities.getDefaultOptionProperties(value,title);
+            option.color=color;
+            option.backgroundcolor=backgroundcolor;
+            option.fontFamily=fontFamily;
+        return option;
     }
 }
 

@@ -836,7 +836,6 @@ class ProjectStageCreate{
        
         
         var color=this.setValueStyle('color','Kolor tekstu:',this.getDefaultColor(subsectionrow.paragraph.style.color,subsectionrow.paragraph.style.colorName),this.getColorList(subsectionrow.paragraph.style.color),subsectionrow.paragraph.style,helplink.text.value);
-        var fontFamily=this.setValueStyle('fontFamily','Czcionka:',this.getDefaultFont(subsectionrow.paragraph.style.fontFamily,subsectionrow.paragraph.style.fontFamily),this.getFontList(subsectionrow.paragraph.style.fontFamily),subsectionrow.paragraph.style,helplink.text.value);
         var textAlign=this.setValueStyle('textAlign','Wyrównanie:',this.getSelectKey(subsectionrow.paragraph.style.textAlign,subsectionrow.paragraph.style.textAlignName),this.getFontAlignList(subsectionrow.paragraph.style.textAlign),subsectionrow.paragraph.style,helplink.text.value);
         var backgroundColor=this.setValueStyle('backgroundColor','Kolor tła:',this.getDefaultBackgroundColor(subsectionrow.paragraph.style.backgroundColor,subsectionrow.paragraph.style.backgroundColorName),this.getBackgroundColorList(subsectionrow.paragraph.style.backgroundColor),subsectionrow.paragraph.style,helplink.text.value);
         
@@ -846,21 +845,19 @@ class ProjectStageCreate{
         tool1.appendChild(fontSize);
         tool1.appendChild(color);
         tool1.appendChild(backgroundColor);
-        tool2.appendChild(fontFamily);
+        
+        tool2.appendChild(this.ProjectStageTool.getFontFamily(subsectionrow.paragraph.style,helplink.text.value));
         tool2.appendChild(textAlign);
         tool2.appendChild(tabstop);
-         /* LEFT EJECTION */
-        var leftEjection=this.ProjectStageTool.getLeftEjection(subsectionrow.paragraph,helplink);
-        /* RIGHT EJECTION */
-        var rightEjection=this.ProjectStageTool.getRightEjection(subsectionrow.paragraph,helplink);
-        /* INDENTATION */
-        var indentation=this.ProjectStageTool.getIndentation(subsectionrow.paragraph,helplink);
+                
+        /* LEFT EJECTION */
+        tool3.appendChild(this.ProjectStageTool.getLeftEjection(subsectionrow.paragraph,helplink));
+         /* RIGHT EJECTION */
+        tool3.appendChild(this.ProjectStageTool.getRightEjection(subsectionrow.paragraph,helplink));
+         /* INDENTATION */
+        tool3.appendChild(this.ProjectStageTool.getIndentation(subsectionrow.paragraph,helplink));
         /* PARAGRAPH TYPE */
-        var paragraph=this.ProjectStageTool.getParagraph(subsectionrow.paragraph,helplink);
-        tool3.appendChild(leftEjection);
-        tool3.appendChild(rightEjection);
-        tool3.appendChild(indentation);
-        tool3.appendChild(paragraph);
+        tool3.appendChild(this.ProjectStageTool.getParagraph(subsectionrow.paragraph,helplink));
        
         /* SET CSS BOLD, ITALIC ... */
         this.createTextDecorationTool(tool4,isection,isub,isubrow,subsectionrow.paragraph.style,helplink.text.value); 
@@ -931,13 +928,14 @@ class ProjectStageCreate{
         var newList=this.createNewListSelect(subsectionrow);
         var fontSize=this.valueFontSizeModification('Rozmiar:',subsectionrow.list.style,helplink.list.value);
         var color=this.setValueStyle('color','Kolor:',this.getDefaultColor(subsectionrow.list.style.color,subsectionrow.list.style.colorName),this.getColorList(subsectionrow.list.style.color),subsectionrow.list.style,helplink.list.value);
-        var fontFamily=this.setValueStyle('fontFamily','Czcionka:',this.getDefaultFont(subsectionrow.list.style.fontFamily,subsectionrow.list.style.fontFamily),this.getFontList(subsectionrow.list.style.fontFamily),subsectionrow.list.style,helplink.list.value);
         var backgroundColor=this.setValueStyle('backgroundColor','Kolor tła:',this.getDefaultBackgroundColor(subsectionrow.list.style.backgroundColor,subsectionrow.list.style.backgroundColorName),this.getBackgroundColorList(subsectionrow.list.style.backgroundColor),subsectionrow.list.style,helplink.list.value);
         
         tool1.appendChild(fontSize);
         tool1.appendChild(color);
         tool1.appendChild(backgroundColor);
-        tool1.appendChild(fontFamily);
+        /* GET FONT FAMILY SELECT */
+        
+        tool1.appendChild(this.ProjectStageTool.getFontFamily(subsectionrow.list.style,helplink.list.value));
 
        
         /* SET CSS BOLD, ITALIC ... */
@@ -1573,12 +1571,7 @@ class ProjectStageCreate{
             selectKeyProp.fontFamily=fontFamily;
         return selectKeyProp;
     }
-    getDefaultFont(value,title){
-        //console.log('ProjectStageCreate::getDefaultFont()');
-        var defaultValue=this.getSelectKey(value,title);
-            defaultValue[0].fontFamily=value;
-        return defaultValue;
-    }
+
     getDefaultColor(value,title){
         var defaultValue=this.getSelectKey(value,title);
             defaultValue[0].color=value;
@@ -1686,16 +1679,6 @@ class ProjectStageCreate{
                 value[i]=this.Utilities.getDefaultOptionProperties(i,i);  
             }
             i=i+2;
-        }
-        return value;
-    }
-    getFontList(exception){
-        //console.log('ProjectStageCreate::getFontList()');
-        var value={};
-        for(var i=0;i<this.Glossary.text.getKeyCount('fontFamily');i++){
-            if(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v')!==exception){
-                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),'#000000','#FFFFFF',this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'));
-            }
         }
         return value;
     }

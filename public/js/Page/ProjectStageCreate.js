@@ -849,17 +849,14 @@ class ProjectStageCreate{
         tool2.appendChild(fontFamily);
         tool2.appendChild(textAlign);
         tool2.appendChild(tabstop);
-        
          /* LEFT EJECTION */
-        //var leftEjection=this.createLeftEjectionInput(isection,isub,isubrow,subsectionrow,helplink);
-        var leftEjection=this.ProjectStageTool.setLeftEjection(subsectionrow.paragraph,helplink);
-        //var leftEjection=this.setInputStyle('Wcięcie z lewej strony:',subsectionrow.paragraph,'leftEjection','leftEjectionMeasurement','leftEjectionMin','leftEjectionMax',this.getDefaultList(this.Glossary.text.item.listMeasurement,subsectionrow.paragraph.style['leftEjectionMeasurement']));
+        var leftEjection=this.ProjectStageTool.getLeftEjection(subsectionrow.paragraph,helplink);
         /* RIGHT EJECTION */
-        var rightEjection=this.ProjectStageTool.setRightEjection(subsectionrow.paragraph,helplink);
+        var rightEjection=this.ProjectStageTool.getRightEjection(subsectionrow.paragraph,helplink);
         /* INDENTATION */
-        var indentation=this.ProjectStageTool.setIndentation(subsectionrow.paragraph,helplink);
+        var indentation=this.ProjectStageTool.getIndentation(subsectionrow.paragraph,helplink);
         /* PARAGRAPH TYPE */
-        var paragraph=this.createParagraphType(subsectionrow.paragraph,helplink);
+        var paragraph=this.ProjectStageTool.getParagraph(subsectionrow.paragraph,helplink);
         tool3.appendChild(leftEjection);
         tool3.appendChild(rightEjection);
         tool3.appendChild(indentation);
@@ -878,14 +875,7 @@ class ProjectStageCreate{
         return mainDivCol;
         //return mainDiv;
     }
-    createLeftEjectionInput(isection,isub,isubrow,row,helplink){
-        var input = this.setInputStyle('Wcięcie z lewej strony:',row.paragraph,'leftEjection','leftEjectionMeasurement','leftEjectionMin','leftEjectionMax',this.getMeasurementList(row.paragraph.style['leftEjectionMeasurement']));
-        //console.log(helplink);
-        //console.log(input.childNodes[1].childNodes[0]);
-        helplink.text['leftEjection']=input.childNodes[1].childNodes[0];
-        //throw 'aaa';
-        return input;
-    }
+
     createTabStopSectionTool(isection,isub,isubrow,subsectionrow,helplink){
         var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('d-none','bg-light','pt-1','pb-1');    //'bg-light',
@@ -995,26 +985,7 @@ class ProjectStageCreate{
             
         //return select;
     }
-    createParagraphType(subsectionrow,helplink){
-        var all={
-            0:{
-                v:'l',
-                n:'Element listy'
-            },
-            1:{
-                v:'p',
-                n:'Nowy akapit'
-            }
-        };
-        
-        var run={
-            method:'setToolVisibility',
-            helplink:helplink,
-            tool:['listControl','list']
-        };
-        return this.setValuePropertyExtended('paragraph','Typ:',this.getSelectKey(subsectionrow.property.paragraph,subsectionrow.property.paragraphName),this.getNewElementList(all,subsectionrow.property.paragraph),subsectionrow.property,run);
-      
-    }
+
     createNewListSelect(subsectionrow){
         var all={
             0:{
@@ -1200,24 +1171,7 @@ class ProjectStageCreate{
             }
         );
     }
-    setToolVisibility(value,run){
-        console.log('ProjectStageCreate::setToolVisibility()');
-        console.log(run);
-        console.log('value');
-        console.log(value);
-        switch(value){
-            case 'l':   
-            case 'y':
-                this.showControl(run);
-                break;
-            case 'n':
-            case 'p':
-                this.hideControl(run);
-                break;
-            default:
-                break;
-        }
-    }
+    
     showControl(run){
         for(const prop in run.tool){
             console.log(run.tool[prop]);
@@ -1422,32 +1376,7 @@ class ProjectStageCreate{
     setValueProperty(id,title,actdata,alldata,subsectionRowProperty){
         return this.setValuePropertyExtended(id,title,actdata,alldata,subsectionRowProperty,null);
     }
-    setValuePropertyExtended(id,title,actdata,alldata,subsectionRowProperty,run){
-        //console.log('ProjectStageCreate::setValueProperty()');
-        
-        var select = this.createTextToolSelect(id,title,actdata,alldata);
-        var self = this;
-        /* CLOSURE - DOMKNIĘCIE*/
-        select.childNodes[1].onchange = function(){
-            /* SET NEW VALUE */
-            console.log('ProjectStageCreate::setValueProperty()');
-            console.log('ID:');
-            console.log(id);
-            console.log('VALUE:');
-            console.log(this.value);
-            console.log('PROPERTY:');
-            console.log(subsectionRowProperty);
-            console.log('RUN:');
-            console.log(run);
-            subsectionRowProperty[id]=this.value;
-            if(run){
-                self[run.method](this.value,run);
-            }
-            //console.log(actdata);
-            //console.log(alldata);
-        };
-        return select;
-    }
+    
     valueFontSizeModification(title,subsectionRowStyle,helplinkValue){
         //console.log('ProjectStageCreate::valueFontSizeModification()');
         /*
@@ -2092,5 +2021,60 @@ class ProjectStageCreate{
     checkInputData(data){
         console.log('ProjectStageCreate::checkInputData()');
         console.log(data); 
+    }
+        setValuePropertyExtended(id,title,actdata,alldata,subsectionRowProperty,run){
+        //console.log('ProjectStageCreate::setValueProperty()');
+        
+        var select = this.createTextToolSelect(id,title,actdata,alldata);
+        var self = this;
+        /* CLOSURE - DOMKNIĘCIE*/
+        select.childNodes[1].onchange = function(){
+            /* SET NEW VALUE */
+            console.log('ProjectStageCreate::setValueProperty()');
+            console.log('ID:');
+            console.log(id);
+            console.log('VALUE:');
+            console.log(this.value);
+            console.log('PROPERTY:');
+            console.log(subsectionRowProperty);
+            console.log('RUN:');
+            console.log(run);
+            subsectionRowProperty[id]=this.value;
+            if(run){
+                self[run.method](this.value,run);
+            }
+            //console.log(actdata);
+            //console.log(alldata);
+        };
+        return select;
+    }
+    setToolVisibility(value,run){
+        console.log('ProjectStageCreate::setToolVisibility()');
+        console.log(run);
+        console.log('value');
+        console.log(value);
+        switch(value){
+            case 'l':   
+            case 'y':
+                this.showControl(run);
+                break;
+            case 'n':
+            case 'p':
+                this.hideControl(run);
+                break;
+            default:
+                break;
+        }
+    }
+    createTextToolSelect(id,title,actdata,alldata){
+        //console.log('ProjectStageCreate::createTextToolSelect()');
+        //console.log(id);
+        var div = this.createInputHead(title);    
+        var select=this.createSelect(id,id,'form-control-sm form-control w-100');
+            select.appendChild(this.Html.createOptionGroup('Domyślny:',actdata));  
+            select.appendChild(this.Html.createOptionGroup('Dostępne:',alldata));  
+            div.appendChild(select);
+            //console.log(select);
+        return div;
     }
 }

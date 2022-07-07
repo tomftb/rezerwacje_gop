@@ -9,8 +9,8 @@ class ProjectStageTool{
         this.Glossary = Stage.Glossary;
         this.Tool = new Tool();
     }
-    setIndentation(subsectionrow,helplink){
-        console.log('ProjectStageTool::setIndentation()');
+    getIndentation(subsectionrow,helplink){
+        console.log('ProjectStageTool::getIndentation()');
         console.log(helplink);
         var data={
             0:{
@@ -18,11 +18,23 @@ class ProjectStageTool{
                     0:this.Utilities.getDefaultOptionProperties(subsectionrow.style['indentationSpecial'],subsectionrow.style['indentationSpecialName'])
                 },
                 all:this.Utilities.getDefaultList(this.Glossary.text.item.indentationSpecial,subsectionrow.style['indentationSpecial']),
-                property:{
-                    value:'indentationSpecial',
-                    name:'indentationSpecialName',
-                    link:subsectionrow.style,
-                    glossary:this.Glossary.text.item.indentationSpecial
+                link:subsectionrow.style,
+                glossary:this.Glossary.text.item.indentationSpecial,
+                /*Anonymous Functions*/
+                onchange:function(value){
+                        console.log('ProjectStageTool::getIndentation');
+                        console.log(this.link);
+                        console.log(this.glossary);
+                        this.link['indentationSpecial'] = value;
+                        console.log(value);
+                        for(const prop in this.glossary){
+                            console.log(this.glossary[prop]);
+                            if(this.glossary[prop].v===value){
+                                console.log('FOUND');
+                                this.link['indentationSpecialName'] = this.glossary[prop].n;
+                                break;
+                            }
+                        }
                 },
                 type:'select',
                 attributes:{
@@ -30,14 +42,15 @@ class ProjectStageTool{
                 }
             },
             1:{
-                value:subsectionrow.style['indentation'],
-                property:{
-                    value:'indentation',
-                    link:subsectionrow.style
+                link:subsectionrow.style,
+                value:subsectionrow.style.indentation,
+                onchange:function(value){
+                    this.link['indentation'] = value;
                 },
                 type:'input',
                 attributes:{
-                    class:'w-25'
+                    class:'w-25',
+                    type:'number'
                 }
             },   
             2:{
@@ -45,15 +58,28 @@ class ProjectStageTool{
                     0:this.Utilities.getDefaultOptionProperties(subsectionrow.style['indentationMeasurement'],subsectionrow.style['indentationMeasurement'])
                 },
                 all:this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,subsectionrow.style['indentationMeasurement']),
-                property:{
-                    value:'indentationMeasurement',
-                    name:'indentationMeasurement',
-                    glossary:this.Glossary.text.item.listMeasurement,
-                    link:subsectionrow.style
+                link:subsectionrow.style,
+                glossary:this.Glossary.text.item.listMeasurement,
+                /*Anonymous Functions*/
+                onchange:function(value){
+                        console.log('ProjectStageTool::getIndentation');
+                        console.log(this.link);
+                        console.log(this.glossary);
+                        this.link['indentationMeasurement'] = value;
+                        console.log(value);
+                        for(const prop in this.glossary){
+                            console.log(this.glossary[prop]);
+                            if(this.glossary[prop].v===value){
+                                console.log('FOUND');
+                                this.link['indentationMeasurement'] = this.glossary[prop].n;
+                                break;
+                            }
+                        }
                 },
                 type:'select',
                 attributes:{
-                    class:'w-25'
+                    class:'w-25',
+                    type:'number'
                 }
             }    
         };
@@ -61,18 +87,23 @@ class ProjectStageTool{
             helplink.tool['indentation'] = tool;
         return  tool;
     }
-    setEjection(subsectionrow,keys,title){
-        console.log('ProjectStageTool::setRightEjection()');
-         var data={
+    getEjection(subsectionrow,keys,title){
+        console.log('ProjectStageTool::getEjection()');
+       // console.log(subsectionrow);
+        //throw 'aaaaaaaaa';
+        var data={
             0:{
+                link:subsectionrow.style,
                 value:subsectionrow.style[keys[0]],
-                property:{
-                    value:keys[0],
-                    link:subsectionrow.style
+                /* VALUE */
+                key:keys[0],
+                onchange:function(value){
+                    this.link[this.key] = value;
                 },
                 type:'input',
                 attributes:{
-                    class:'w-75'
+                    class:'w-75',
+                    type:'number'
                 }
             },
             1:{
@@ -80,11 +111,11 @@ class ProjectStageTool{
                     0:this.Utilities.getDefaultOptionProperties(subsectionrow.style[keys[1]],subsectionrow.style[keys[1]])
                 },
                 all:this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,subsectionrow.style[keys[1]]),
-                property:{
-                    value:keys[1],
-                    name:keys[1],
-                    link:subsectionrow.style,
-                    glossary:this.Glossary.text.item.listMeasurement
+                key:keys[1],
+                link:subsectionrow.style,
+                onchange:function(value){
+                        //console.log('ProjectStageTool::getEjection');
+                        this.link[this.key] = value;
                 },
                 type:'select',
                 attributes:{
@@ -98,19 +129,82 @@ class ProjectStageTool{
          */           
         return  this.Tool.create(title,data);
     }
-    setRightEjection(subsectionrow,helplink){
+    getRightEjection(subsectionrow,helplink){
         var keys=['rightEjection','rightEjectionMeasurement'];
-        var tool = this.setEjection(subsectionrow,keys,'Wcięcie z prawej strony:');
+        var tool = this.getEjection(subsectionrow,keys,'Wcięcie z prawej strony:');
         /* SET HELPLINK */
             helplink.text['rightEjection']=tool.childNodes[1].childNodes[0];
         return tool;
     }
-    setLeftEjection(subsectionrow,helplink){
+    getLeftEjection(subsectionrow,helplink){
         var keys=['leftEjection','leftEjectionMeasurement'];
-        var tool = this.setEjection(subsectionrow,keys,'Wcięcie z lewej strony:');
+        var tool = this.getEjection(subsectionrow,keys,'Wcięcie z lewej strony:');
         /* SET HELPLINK */
             helplink.text['leftEjection']=tool.childNodes[1].childNodes[0];
         return tool;
+    }
+    getParagraph(subsectionrow,helplink){
+        console.log('ProjectStageTool::getParagraph()');
+        //throw 'aaaaaaaaa';
+        var Glossary={
+            0:{
+                v:'l',
+                n:'Element listy'
+            },
+            1:{
+                v:'p',
+                n:'Nowy akapit'
+            }
+        };
+        var data={
+            0:{
+                default:{
+                    0:this.Utilities.getDefaultOptionProperties(subsectionrow.property.paragraph,subsectionrow.property.paragraphName)
+                },
+                all:this.Utilities.getDefaultList(Glossary,subsectionrow.property.paragraph),
+                helplink:helplink,
+                link:subsectionrow.property,
+                glossary:Glossary,
+                onchange:function(value){
+                    console.log('ProjectStageTool::getParagraph()');
+                    var toggle = ['listControl','list','indentation'];
+                    /* TO DO -> indetation -> SET TO INPUT BLOCK ? */
+                    console.log(this.link);
+                    console.log(this.helplink);
+                    console.log(value);
+                    this.link['paragraph'] = value;
+                    for(const prop in this.glossary){
+                            console.log(this.glossary[prop]);
+                            if(this.glossary[prop].v===value){
+                                console.log('FOUND');
+                                this.link['paragraphName'] = this.glossary[prop].n;
+                                break;
+                            }
+                    }
+                    if(value==='l'){
+                        /* l - list - show list tool */
+                        for(const prop in toggle){
+                            //console.log(run.tool[prop]);
+                            if (this.helplink.tool[toggle[prop]].style.display){
+                                this.helplink.tool[toggle[prop]].style.removeProperty('display');
+                            }
+                        }
+                    }
+                    else{
+                        /* p  - paragraph - hide list tool */
+                        for(const prop in toggle){
+                            //console.log(run.tool[prop]);
+                            this.helplink.tool[toggle[prop]].style.setProperty('display', 'none');
+                        }
+                    }
+                },                   
+                type:'select',
+                attributes:{
+                    class:'w-100'
+                }
+            }
+        };
+        return  this.Tool.create('Typ:',data);
     }
 }
 

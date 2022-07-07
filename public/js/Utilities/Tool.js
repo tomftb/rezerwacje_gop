@@ -31,11 +31,9 @@ class Tool{
         var input = document.createElement('INPUT');
             input.setAttribute('value',data.value);
             input.setAttribute('class','form-control form-control-sm '+data.attributes.class);
-            input.setAttribute('type','number');
-            input.onchange = function(){
-                console.log(this.value);
-                data.property.link[data.property.value] = this.value;
-            };
+            input.type=data.attributes.type;
+            //input.setAttribute('type','number');
+            this.setOnChange(input,data);
             return input;
     }
     getSelect(data){
@@ -47,19 +45,8 @@ class Tool{
             select.appendChild(this.Html.createOptionGroup('Domyślny:',data.default));  
             /* REST */         
             select.appendChild(this.Html.createOptionGroup('Dostępne',data.all));
-            select.onchange = function(){
-                console.log(this.value);
-                data.property.link[data.property.value] = this.value;
-                for(const prop in data.property.glossary){
-                    console.log(data.property.glossary[prop].n);
-                    console.log(data.property.glossary[prop].v);
-                    if(data.property.glossary[prop].v===this.value){
-                        console.log('found');
-                        data.property.link[data.property.name] = data.property.glossary[prop].n;
-                        break;
-                    }
-                }
-            };
+            this.setOnChange(select,data);
+            
         return select;
     }
     createLabel(title){
@@ -71,5 +58,12 @@ class Tool{
             label.innerHTML=title;
         div.appendChild(label);   
         return div;
+    }
+    setOnChange(ele,data){
+        if(data.hasOwnProperty('onchange')){
+            ele.onchange = function(){
+                data.onchange(this.value);
+            };
+        }
     }
 }

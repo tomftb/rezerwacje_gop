@@ -26,6 +26,7 @@ class Glossary{
          * 
          */
         this.item[key]=value;
+        //this[key]=value;
         this.filled=true;
     }
     clear(){
@@ -140,6 +141,7 @@ class Glossary{
        return i;
     }
     fill(items){
+        /* ALL GLOSSARY DIRECT FROM DB */
         this.item=items;
         this.filled=true;
     }
@@ -194,5 +196,15 @@ class Glossary{
     getItemValue(item,name){
         return this.getItem(item,name,'n','v');
         
+    }
+}
+class Item{
+    /* TO DO - SET GLOSSARY TO ITEMS */
+    item={};
+    set(items){
+        
+    }
+    get(){
+        return this.item;
     }
 }

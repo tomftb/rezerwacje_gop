@@ -41,6 +41,11 @@ class Glossary{
         console.log(key); 
          * 
          */
+        if(!this.item.hasOwnProperty(key)){
+            console.log('Glossary::getKeyCount() KEY NOT EXISTS:');
+            console.log(key);
+            throw 'ERROR in Glossary::removeKey()';
+        }
         delete this.item[key];
     }
     getKey(key){
@@ -49,6 +54,11 @@ class Glossary{
         console.log(this.item[key]);   
          * 
          */
+        if(!this.item.hasOwnProperty(key)){
+            console.log('Glossary::getKey() KEY NOT EXISTS:');
+            console.log(key);
+            throw 'ERROR in Glossary::getKey()';
+        }
         return this.item[key];
     }
     getKeyCount(key){
@@ -57,6 +67,11 @@ class Glossary{
         console.log(this.item[key]);  
          * 
          */ 
+        if(!this.item.hasOwnProperty(key)){
+            console.log('Glossary::getKeyCount() KEY NOT EXISTS:');
+            console.log(key);
+            throw 'ERROR in Glossary::getKeyCount()';
+        }
         return this.item[key].length;
     }
     get(){
@@ -71,11 +86,18 @@ class Glossary{
         console.log('Glossary::getKeyProperty()\r\n KEY => '); 
          * 
          */
+        
         var k=this.getKey(key);
         /*
         console.log(k[property]); 
          * 
          */
+        if(!k.hasOwnProperty(property)){
+            console.log('Glossary::getKeyCount() KEY PROPERTY NOT EXISTS:');
+            console.log(key);
+            console.log(property);
+            throw 'ERROR in Glossary::getKeyProperty()';
+        }
         return k[property];
     }
     getKeyPropertyAttribute(key,property,attribute){
@@ -88,6 +110,12 @@ class Glossary{
         /*
          console.log(k[attribute]); 
          */
+        if(!k.hasOwnProperty(attribute)){
+            console.log('Glossary::getKeyCount() KEY PROPERTY ATTRIBUTE NOT EXISTS:');
+            console.log(key);
+            console.log(property);
+            throw 'ERROR in Glossary::getKeyPropertyAttribute()';
+        }
         return k[attribute];
     }
     exist(key){
@@ -136,5 +164,35 @@ class Glossary{
             }
         }
         return p;
+    }
+    getItem(item,f,p,r){
+        /*
+         * item 
+         * f - field value to find
+         * p - property to compare
+         * r - property to return
+         */
+        if(!this.item.hasOwnProperty(item)){
+            console.log('Glossary::getKeyCount() PROPERTY NOT EXISTS:');
+            console.log(item);
+            throw 'ERROR in Glossary::getItem()';
+        }
+        for(const prop in this.item[item]){
+            //console.log();
+            if(this.item[item][prop][p]===f){            
+                return this.item[item][prop][r];
+                break;
+            }
+        }
+        console.log('Glossary::getKeyCount() VALUE NOT FOUND:');
+        console.log(f);
+        throw 'ERROR in Glossary::getItem()';
+    }
+    getItemName(item,value){
+        return this.getItem(item,value,'v','n');
+    }
+    getItemValue(item,name){
+        return this.getItem(item,name,'n','v');
+        
     }
 }

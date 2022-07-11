@@ -832,7 +832,7 @@ class ProjectStageCreate{
             
         //var fontSize=this.valueFontSizeModification('Rozmiar tekstu:',this.getDefaultFontSize(subsectionrow.style.fontSize,subsectionrow.style.fontSize),this.getFontSizeList(subsectionrow.style.fontSize),subsectionrow.style,helplink.value);
         var fontSize=this.valueFontSizeModification('Rozmiar tekstu:',subsectionrow.paragraph.style,helplink.text.value);
-        var textAlign=this.setValueStyle('textAlign','Wyrównanie:',this.getSelectKey(subsectionrow.paragraph.style.textAlign,subsectionrow.paragraph.style.textAlignName),this.getFontAlignList(subsectionrow.paragraph.style.textAlign),subsectionrow.paragraph.style,helplink.text.value);
+        
         var tabstop=this.createTextToolTabStop(isection,isub,isubrow,subsectionrow,helplink);
         
         tool1.appendChild(fontSize);
@@ -841,7 +841,8 @@ class ProjectStageCreate{
   
         
         tool2.appendChild(this.ProjectStageTool.getFontFamily(subsectionrow.paragraph.style,helplink.text.value));
-        tool2.appendChild(textAlign);
+        tool2.appendChild(this.ProjectStageTool.getTextAlign(subsectionrow.paragraph.style,helplink.text.value));
+        //tool2.appendChild(textAlign);
         tool2.appendChild(tabstop);
                 
         /* LEFT EJECTION */

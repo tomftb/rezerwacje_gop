@@ -297,7 +297,7 @@ class ProjectStageTool{
         data[0]['default']=this.getDefaultOption(property,key[0],key[1]);
         data[0]['all']=all;  
     }
-    getSimpleBackgroundColor(title,property){
+    getSimpleBackgroundColor(property){
         console.log('ProjectStageTool::getSimpleBackgroundColor()');
         var key = ['backgroundColor','backgroundColorName'];
         var data=this.getExtendedTool(property,key,this.Glossary.text,'color');
@@ -305,9 +305,9 @@ class ProjectStageTool{
             return self.getExtendedOption(value,title,backgroundColor,color,fontFamily);
         };
         this.setColorProperty(data,property,key,run);   
-        return  this.Tool.create(title,data);
+        return  this.Tool.create('Kolor tła:',data);
     }
-    getExtendedBackgroundColor(title,property,ele){
+    getExtendedBackgroundColor(property,ele){
         console.log('ProjectStageTool::getExtendedBackgroundColor()');
         /*
          * property - reference to property
@@ -319,13 +319,25 @@ class ProjectStageTool{
             return self.getExtendedOption(value,title,backgroundColor,color,fontFamily);
         };
         this.setColorProperty(data,property,key,run);   
-        return  this.Tool.create(title,data);
+        return  this.Tool.create('Kolor tła:',data);
     }
-    getColor(title,property,ele){
-        console.log('ProjectStageTool::getColor()');
+    getSimpleColor(property){
+        console.log('ProjectStageTool::getSimpleColor()');
         /*
          * property - reference to property
-         * ele - reference to element
+         */
+        var key = ['color','colorName'];
+        var data=this.getExtendedTool(property,key,this.Glossary.text,'color');     
+        var run = function(self,value,title,color,backgroundColor,fontFamily){
+            return self.getExtendedOption(value,title,color,backgroundColor,fontFamily);
+        };
+        this.setColorProperty(data,property,key,run);
+        return  this.Tool.create('Kolor tekstu:',data);
+    }
+    getExtendedColor(property,ele){
+        console.log('ProjectStageTool::getExtendedColor()');
+        /*
+         * property - reference to property
          */
         var key = ['color','colorName'];
         var data=this.getCompleteTool(property,key,ele,this.Glossary.text,'color');     
@@ -333,7 +345,7 @@ class ProjectStageTool{
             return self.getExtendedOption(value,title,color,backgroundColor,fontFamily);
         };
         this.setColorProperty(data,property,key,run);
-        return  this.Tool.create(title,data);
+        return  this.Tool.create('Kolor tekstu:',data);
     }
     getTextAlign(property,ele){
         console.log('ProjectStageTool::getTextAlign()');

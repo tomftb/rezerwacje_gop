@@ -833,9 +833,9 @@ class ProjectStageCreate{
         /* FONT SIZE */
         tool1.appendChild(this.ProjectStageTool.getExtendedFontSize(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT COLOR */
-        tool1.appendChild(this.ProjectStageTool.getColor('Kolor tekstu:',subsectionrow.paragraph.style,helplink.text.value));
+        tool1.appendChild(this.ProjectStageTool.getExtendedColor(subsectionrow.paragraph.style,helplink.text.value));
         /* BACKGROUND COLOR */
-        tool1.appendChild(this.ProjectStageTool.getExtendedBackgroundColor('Kolor tła:',subsectionrow.paragraph.style,helplink.text.value));
+        tool1.appendChild(this.ProjectStageTool.getExtendedBackgroundColor(subsectionrow.paragraph.style,helplink.text.value));
         /* FONT FAMILY */
         tool2.appendChild(this.ProjectStageTool.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT ALIGN */
@@ -918,12 +918,11 @@ class ProjectStageCreate{
         //var newListElement=this.createNewListElement(subsectionrow);
         var newList=this.createNewListSelect(subsectionrow);
         //var fontSize=this.valueFontSizeModification('Rozmiar:',subsectionrow.list.style,helplink.list.value);
-        var color=this.setValueStyle('color','Kolor:',this.getDefaultColor(subsectionrow.list.style.color,subsectionrow.list.style.colorName),this.getColorList(subsectionrow.list.style.color),subsectionrow.list.style,helplink.list.value);
-    
+
         tool1.appendChild(this.ProjectStageTool.getSimpleFontSize(subsectionrow.list.style));
-        tool1.appendChild(color);
+        tool1.appendChild(this.ProjectStageTool.getSimpleColor(subsectionrow.list.style));
         /* GET BackgroundColor */
-        tool1.appendChild(this.ProjectStageTool.getExtendedBackgroundColor('Kolor tła:',subsectionrow.list.style,helplink.list.value));
+        tool1.appendChild(this.ProjectStageTool.getSimpleBackgroundColor(subsectionrow.list.style));
         /* GET FONT FAMILY SELECT */
         tool1.appendChild(this.ProjectStageTool.getSimpleFontFamily(subsectionrow.list.style));
         /* SET CSS BOLD, ITALIC ... */
@@ -1515,12 +1514,7 @@ class ProjectStageCreate{
         return selectKeyProp;
     }
 
-    getDefaultColor(value,title){
-        var defaultValue=this.getSelectKey(value,title);
-            defaultValue[0].color=value;
-            //defaultValue.backgroundcolor=value; TO DO => DYNAMIC CHANGE
-        return defaultValue;
-    }
+
 
 
     getSectionCount(exception){
@@ -1535,15 +1529,7 @@ class ProjectStageCreate{
         }
         return value;
     }
-    getColorList(exception){
-        var value={};
-        for(var i=0;i<this.Glossary.text.getKeyCount('color');i++){
-            if(this.Glossary.text.getKeyPropertyAttribute('color',i,'v')!==exception){
-                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),this.Glossary.text.getKeyPropertyAttribute('color',i,'n'),this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),'#FFFFFF','');
-            }
-        }
-        return value;
-    }
+
     getMeasurementList(exception){
         return this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,exception);
     }
@@ -1606,7 +1592,7 @@ class ProjectStageCreate{
         var toolMain4=this.Html.getCol(3);    
 
         //var pageBackgroundcolor=this.createTextToolSelect('backgroundcolor','Wskaż kolor tła strony:',this.getDefaultBackgroundColor(this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),this.getBackgroundColorList());
-        toolMain1.appendChild(this.ProjectStageTool.getSimpleBackgroundColor('Wskaż kolor tła strony:',section.style));
+        toolMain1.appendChild(this.ProjectStageTool.getSimpleBackgroundColor(section.style));
         //throw 'aaaaaa';
             /* CLOSURE */
             //pageBackgroundcolor.onchange = function (){   

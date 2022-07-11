@@ -327,6 +327,7 @@ class ProjectStageCreate{
         var mainDiv=this.Html.getRow();
             mainDiv.classList.add('d-block');  
         var mainDivSection=this.Html.getCol(12);
+            mainDivSection.classList.add('border');
             /* CREATE TEXT STAGE SECTION */
             console.log(this.StageData.Stage);
             for(const prop in this.StageData.Stage.section){
@@ -336,10 +337,7 @@ class ProjectStageCreate{
             /* APPEND SECTION */
             mainDiv.appendChild(mainDivSection);
              /* CREATE ADD BUTTON */
-            mainDiv.appendChild(this.createButtonCol(this.createAddSectionButton()));//iSection
-            /* CREATE TEXT SECTION PAGE TOOL*/
-            mainDiv.appendChild(this.createTextPageTool(this.StageData.Stage));
-            
+            mainDiv.appendChild(this.createButtonCol(this.createAddSectionButton()));//iSection      
             this.helplink['dynamic']=mainDiv;
             this.helplink['dynamicSection']=mainDivSection;
             console.log(mainDivSection);
@@ -372,7 +370,8 @@ class ProjectStageCreate{
             mainDiv.appendChild(mainDivHeader);  
             mainDiv.appendChild(mainDivBody);   
             this.helplink.section[iSection].main.all=mainDiv;
-            //console.log(mainDiv);
+            console.log(mainDiv);
+            mainDiv.appendChild(this.createSectionPageTool(section[iSection],helplink.section[iSection]));
             return mainDiv;
     }
     creteSectionHead(isection){
@@ -833,31 +832,26 @@ class ProjectStageCreate{
             
         //var fontSize=this.valueFontSizeModification('Rozmiar tekstu:',this.getDefaultFontSize(subsectionrow.style.fontSize,subsectionrow.style.fontSize),this.getFontSizeList(subsectionrow.style.fontSize),subsectionrow.style,helplink.value);
         var fontSize=this.valueFontSizeModification('Rozmiar tekstu:',subsectionrow.paragraph.style,helplink.text.value);
-       
-        
-        var color=this.setValueStyle('color','Kolor tekstu:',this.getDefaultColor(subsectionrow.paragraph.style.color,subsectionrow.paragraph.style.colorName),this.getColorList(subsectionrow.paragraph.style.color),subsectionrow.paragraph.style,helplink.text.value);
         var textAlign=this.setValueStyle('textAlign','Wyrównanie:',this.getSelectKey(subsectionrow.paragraph.style.textAlign,subsectionrow.paragraph.style.textAlignName),this.getFontAlignList(subsectionrow.paragraph.style.textAlign),subsectionrow.paragraph.style,helplink.text.value);
-        var backgroundColor=this.setValueStyle('backgroundColor','Kolor tła:',this.getDefaultBackgroundColor(subsectionrow.paragraph.style.backgroundColor,subsectionrow.paragraph.style.backgroundColorName),this.getBackgroundColorList(subsectionrow.paragraph.style.backgroundColor),subsectionrow.paragraph.style,helplink.text.value);
-        
-        
         var tabstop=this.createTextToolTabStop(isection,isub,isubrow,subsectionrow,helplink);
         
         tool1.appendChild(fontSize);
-        tool1.appendChild(color);
-        tool1.appendChild(backgroundColor);
+        tool1.appendChild(this.ProjectStageTool.getColor('Kolor tekstu:',subsectionrow.paragraph.style,helplink.text.value));
+        tool1.appendChild(this.ProjectStageTool.getExtendedBackgroundColor('Kolor tła:',subsectionrow.paragraph.style,helplink.text.value));
+  
         
         tool2.appendChild(this.ProjectStageTool.getFontFamily(subsectionrow.paragraph.style,helplink.text.value));
         tool2.appendChild(textAlign);
         tool2.appendChild(tabstop);
                 
         /* LEFT EJECTION */
-        tool3.appendChild(this.ProjectStageTool.getLeftEjection(subsectionrow.paragraph,helplink));
+        tool3.appendChild(this.ProjectStageTool.getLeftEjection(subsectionrow.paragraph.style,helplink.text));
          /* RIGHT EJECTION */
-        tool3.appendChild(this.ProjectStageTool.getRightEjection(subsectionrow.paragraph,helplink));
+        tool3.appendChild(this.ProjectStageTool.getRightEjection(subsectionrow.paragraph.style,helplink));
          /* INDENTATION */
-        tool3.appendChild(this.ProjectStageTool.getIndentation(subsectionrow.paragraph,helplink));
+        tool3.appendChild(this.ProjectStageTool.getIndentation(subsectionrow.paragraph.style,helplink));
         /* PARAGRAPH TYPE */
-        tool3.appendChild(this.ProjectStageTool.getParagraph(subsectionrow.paragraph,helplink));
+        tool3.appendChild(this.ProjectStageTool.getParagraph(subsectionrow.paragraph.property,helplink.tool));
        
         /* SET CSS BOLD, ITALIC ... */
         this.createTextDecorationTool(tool4,isection,isub,isubrow,subsectionrow.paragraph.style,helplink.text.value); 
@@ -928,16 +922,13 @@ class ProjectStageCreate{
         var newList=this.createNewListSelect(subsectionrow);
         var fontSize=this.valueFontSizeModification('Rozmiar:',subsectionrow.list.style,helplink.list.value);
         var color=this.setValueStyle('color','Kolor:',this.getDefaultColor(subsectionrow.list.style.color,subsectionrow.list.style.colorName),this.getColorList(subsectionrow.list.style.color),subsectionrow.list.style,helplink.list.value);
-        var backgroundColor=this.setValueStyle('backgroundColor','Kolor tła:',this.getDefaultBackgroundColor(subsectionrow.list.style.backgroundColor,subsectionrow.list.style.backgroundColorName),this.getBackgroundColorList(subsectionrow.list.style.backgroundColor),subsectionrow.list.style,helplink.list.value);
-        
+    
         tool1.appendChild(fontSize);
         tool1.appendChild(color);
-        tool1.appendChild(backgroundColor);
+        /* GET BackgroundColor */
+        tool1.appendChild(this.ProjectStageTool.getExtendedBackgroundColor('Kolor tła:',subsectionrow.list.style,helplink.list.value));
         /* GET FONT FAMILY SELECT */
-        
         tool1.appendChild(this.ProjectStageTool.getFontFamily(subsectionrow.list.style,helplink.list.value));
-
-       
         /* SET CSS BOLD, ITALIC ... */
         this.createTextDecorationTool(tool4,isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
 
@@ -1008,7 +999,6 @@ class ProjectStageCreate{
                 n:'Nowa lista'
             }
         };
-        
         return this.setValueProperty('listNewElement','Nowy element:',this.getSelectKey(subsectionrow.list.property.listNewElement,subsectionrow.list.property.listNewElementName),this.getNewElementList(all,subsectionrow.list.property.listNewElement),subsectionrow.list.property);
       
     }
@@ -1578,12 +1568,7 @@ class ProjectStageCreate{
             //defaultValue.backgroundcolor=value; TO DO => DYNAMIC CHANGE
         return defaultValue;
     }
-    getDefaultBackgroundColor(value,title){
-        var defaultValue=this.getSelectKey(value,title);
-            defaultValue[0].backgroundcolor=value;
-            //defaultValue.fontcolor=value; TO DO => DYNAMIC CHANGE
-        return defaultValue;
-    }
+
     getDefaultFontSize(value,title){
         var defaultValue=this.getExtendedSelectKey(value,title,value);
         return defaultValue;
@@ -1620,17 +1605,6 @@ class ProjectStageCreate{
     }
     getMeasurementList(exception){
         return this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,exception);
-    }
-
-    getBackgroundColorList(exception){
-        var value={};
-        for(var i=0;i<this.Glossary.text.getKeyCount('color');i++){
-              /* TO DO -> CALCULATE FONT COLOR */
-            if(this.Glossary.text.getKeyPropertyAttribute('color',i,'v')!==exception){
-                value[i]=this.getExtendedSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),this.Glossary.text.getKeyPropertyAttribute('color',i,'n'),'#FFFFFF',this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),'');
-            }
-        }
-        return value;
     }
     getFontAlignList(exception){
         var value={};        
@@ -1682,34 +1656,41 @@ class ProjectStageCreate{
         }
         return value;
     }
-    createTextPageTool(stageDataLink){
-        console.log('ProjectStageCreate::createTextPageTool()');
+    createSectionPageTool(section,helplink){
+        console.log('ProjectStageCreate::createSectionPageTool()');
+        console.log(section);
+        console.log(helplink);
+        
         var mainDivCol=this.Html.getCol(12);
-            mainDivCol.classList.add('bg-light');
+            mainDivCol.classList.add('bg-light','mt-1');
+            mainDivCol.style.backgroundColor='#e6e6e6';
         var mainDiv=this.Html.getRow();
         var mainDiv3=this.Html.getRow();
         var h5=document.createElement('h5');
-            h5.setAttribute('class','w-100 text-center pt-0 pb-1 mt-0 bg-secondary');// 
-            h5.innerHTML='<small class="text-white">Opcje odnoszące się do całej strony:</small>';
+            h5.setAttribute('class','w-100 text-center text-bold pt-0 pb-1 mt-0 bg-secondary');//  text-center
+            //h5.style.backgroundColor='#e6e6e6';
+            h5.innerHTML='<small class="text-white">Opcje odnoszące się do całej sekcji:</small>';//text-info
         var toolMain1=this.Html.getCol(3);
         var toolMain2=this.Html.getCol(3);    
         var toolMain3=this.Html.getCol(3);
         var toolMain4=this.Html.getCol(3);    
 
-        var pageBackgroundcolor=this.createTextToolSelect('backgroundcolor','Wskaż kolor tła strony:',this.getDefaultBackgroundColor(this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),this.getBackgroundColorList());
- 
+        //var pageBackgroundcolor=this.createTextToolSelect('backgroundcolor','Wskaż kolor tła strony:',this.getDefaultBackgroundColor(this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),this.getBackgroundColorList());
+        toolMain1.appendChild(this.ProjectStageTool.getSimpleBackgroundColor('Wskaż kolor tła strony:',section.style));
+        //throw 'aaaaaa';
             /* CLOSURE */
-            pageBackgroundcolor.onchange = function (){   
-                stageDataLink.style.backgroundColor = this.childNodes[1].value;          
-            };
-            toolMain1.appendChild(pageBackgroundcolor);
-        var newPage = this.createTextToolRadioButton('newpage','Etap od nowej strony?',this.getYesNowRadio());
+            //pageBackgroundcolor.onchange = function (){   
+             //   stageDataLink.style.backgroundColor = this.childNodes[1].value;          
+           // };
+           // toolMain1.appendChild(pageBackgroundcolor);
+          // 
+        var newPage = this.createTextToolRadioButton('newpage','Sekcja od nowej strony?',this.getYesNowRadio());
         /* SET BUTTON RADIO TO PROPER VALUE */
-        this.setRadioButton(newPage.childNodes[1],stageDataLink);//helplink
+        //this.setRadioButton(newPage.childNodes[1],stageDataLink);//helplink
         
         toolMain1.appendChild(newPage);    
         
-        toolMain2.appendChild(this.setValueStyle('backgroundimage','Wskaż obraz tła strony:'));
+        toolMain2.appendChild(this.setValueStyle('backgroundimage','Wskaż obraz tła sekcji:'));
 
         mainDiv.appendChild(h5);
         

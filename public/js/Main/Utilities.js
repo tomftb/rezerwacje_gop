@@ -9,7 +9,7 @@ class Utilities {
                 v:value,
                 n:title,
                 color:'#000000',
-                backgroundcolor:'#FFFFFF',
+                backgroundColor:'#FFFFFF',
                 fontFamily:''
             };
     }

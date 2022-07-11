@@ -738,9 +738,9 @@ class ProjectStageCreate{
     createControlTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,mainDiv){
         helplinkISubRow['tool']={};
         /* CREATE TEXT TOOL */
-        var textTool = this.createTextToolSection(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
+        var textTool = this.ProjectStageTool.getTextTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,this.TabStop);
         /* CREATE TEXT TOOL */
-        var textTabStopTool = this.createTabStopSectionTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow.text);
+        var textTabStopTool = this.ProjectStageTool.getTabStopTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow.text,this.TabStop);
         var textTabStopToolControl = this.createControl('Tabulatory',textTabStopTool);
         /* SET LINK TO tabstopTool */
             helplinkISubRow.tool['tabstopControl']=textTabStopToolControl;
@@ -804,88 +804,7 @@ class ProjectStageCreate{
             control.innerText = label;
             return control; 
     }
-    createTextToolSection(isection,isub,isubrow,subsectionrow,helplink){
-        /*
-        console.log('ProjectStageCreate::createTextToolSection()');
-        console.log(subsectionrow);
-        console.log(subsectionrow.style);
-        console.log('helplink');
-        console.log(helplink);
-        */
-        var mainDivCol=this.Html.getCol(12);
-            mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
-            mainDivCol.style.backgroundColor='#e6e6e6';
-        var mainDiv=this.Html.getRow();
-            
-        var tool1=this.Html.getCol(3);
-        var tool2=this.Html.getCol(3);
-        var tool3=this.Html.getCol(3);
-        var tool4=this.Html.getCol(3);
-            tool4.classList.add('pt-4');
 
-        /* FONT SIZE */
-        tool1.appendChild(this.ProjectStageTool.getExtendedFontSize(subsectionrow.paragraph.style,helplink.text.value));
-        /* TEXT COLOR */
-        tool1.appendChild(this.ProjectStageTool.getExtendedColor(subsectionrow.paragraph.style,helplink.text.value));
-        /* BACKGROUND COLOR */
-        tool1.appendChild(this.ProjectStageTool.getExtendedBackgroundColor(subsectionrow.paragraph.style,helplink.text.value));
-        /* FONT FAMILY */
-        tool2.appendChild(this.ProjectStageTool.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
-        /* TEXT ALIGN */
-        tool2.appendChild(this.ProjectStageTool.getTextAlign(subsectionrow.paragraph.style,helplink.text.value));
-        /* TAB STOP */
-        tool2.appendChild(this.ProjectStageTool.getTabStop(this.TabStop,isection,isub,isubrow,subsectionrow,helplink));
-                
-        /* LEFT EJECTION */
-        tool3.appendChild(this.ProjectStageTool.getLeftEjection(subsectionrow.paragraph.style,helplink.text));
-         /* RIGHT EJECTION */
-        tool3.appendChild(this.ProjectStageTool.getRightEjection(subsectionrow.paragraph.style,helplink));
-         /* INDENTATION */
-        tool3.appendChild(this.ProjectStageTool.getIndentation(subsectionrow.paragraph.style,helplink));
-        /* PARAGRAPH TYPE */
-        tool3.appendChild(this.ProjectStageTool.getParagraph(subsectionrow.paragraph.property,helplink.tool));
-       
-        /* SET CSS BOLD, ITALIC ... */
-        this.createTextDecorationTool(tool4,isection,isub,isubrow,subsectionrow.paragraph.style,helplink.text.value); 
-
-        mainDiv.appendChild(tool1);
-        mainDiv.appendChild(tool2);
-        mainDiv.appendChild(tool3);
-        mainDiv.appendChild(tool4);
-      
-        mainDivCol.appendChild(mainDiv);
-        
-        return mainDivCol;
-    }
-
-    createTabStopSectionTool(isection,isub,isubrow,subsectionrow,helplink){
-        var mainDivCol=this.Html.getCol(12);
-            mainDivCol.classList.add('d-none','bg-light','pt-1','pb-1');    //'bg-light',
-            //mainDivCol.style.backgroundColor='#e6e6e6';
-        var mainDiv=this.Html.getRow();
-            
-        var tool1=this.Html.getCol(7);
-        var tool2=this.Html.getCol(1);
-        var tool3=this.Html.getCol(2);
-        var tool4=this.Html.getCol(2);
-        //tool4.classList.add('pt-4'); 
-        //console.log(this.ProjectStageTool.getTabStopList(isubrow));
-        console.log(this.TabStop[isubrow]);
-        tool1.appendChild(this.TabStop[isubrow].create());//subsectionrow.paragraph.tabstop,isubrow
-        
-        mainDiv.appendChild(tool1);
-        mainDiv.appendChild(tool2);
-        mainDiv.appendChild(tool3);
-        mainDiv.appendChild(tool4);
-            
-        mainDivCol.appendChild(mainDiv);
-        console.log(mainDivCol);
-        return mainDivCol;
-    }
-
-   
-    
-    
     createListToolSection(isection,isub,isubrow,subsectionrow,helplink){
         //console.log('ProjectStageCreate::createListToolSection()');
         var mainDivCol=this.Html.getCol(12);
@@ -898,12 +817,7 @@ class ProjectStageCreate{
         var tool4=this.Html.getCol(3);
             
         //console.log(this.Glossary.list);
-        /* MARGIN 
-        var marginLeft=this.valueFontSizeModification('Lewy margines:',subsectionrow.style,helplink.value);
-        var marginRight=this.valueFontSizeModification('Prawy margines:',subsectionrow.style,helplink.value);
-        var marginTop=this.valueFontSizeModification('Górny margines:',subsectionrow.style,helplink.value);
-        var marginBottom=this.valueFontSizeModification('Dolny margines:',subsectionrow.style,helplink.value);
-        */
+
         /* LIST TYPE  */
         var listType=this.setValueProperty('listType','Typ listy:',this.getSelectKey(subsectionrow.list.style.listType,subsectionrow.list.style.listTypeName),this.getListTypeList(subsectionrow.list.style.listType),subsectionrow.list.style);   
         /* LIST LEVEL  */
@@ -912,7 +826,7 @@ class ProjectStageCreate{
         /* CONTINUE/NEW ELEMENT */
         //var newListElement=this.createNewListElement(subsectionrow);
         var newList=this.createNewListSelect(subsectionrow);
-        //var fontSize=this.valueFontSizeModification('Rozmiar:',subsectionrow.list.style,helplink.list.value);
+
 
         tool1.appendChild(this.ProjectStageTool.getSimpleFontSize(subsectionrow.list.style));
         tool1.appendChild(this.ProjectStageTool.getSimpleColor(subsectionrow.list.style));
@@ -921,7 +835,7 @@ class ProjectStageCreate{
         /* GET FONT FAMILY SELECT */
         tool1.appendChild(this.ProjectStageTool.getSimpleFontFamily(subsectionrow.list.style));
         /* SET CSS BOLD, ITALIC ... */
-        this.createTextDecorationTool(tool4,isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
+        this.ProjectStageTool.getTextDecoration(tool4,isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
 
         /* */
 
@@ -929,12 +843,6 @@ class ProjectStageCreate{
         tool2.appendChild(listType);
         tool2.appendChild(newList);
         
-        /*
-        tool3.appendChild(marginLeft);
-        tool3.appendChild(marginRight);
-        tool3.appendChild(marginTop);
-        tool3.appendChild(marginBottom);
-        */
         mainDiv.appendChild(tool1);
         mainDiv.appendChild(tool2);
         mainDiv.appendChild(tool3);
@@ -953,16 +861,10 @@ class ProjectStageCreate{
                 row.list.property['listLevel']=this.value;
                 row.paragraph.style['leftEjection']=newValue;
                 /* HELPLINK */
-                console.log(row);
-                console.log(helplink);
                 helplink.text.leftEjection.value=newValue;
-                //console.log(actdata);
-                //console.log(alldata);
         };
         return select;
-        //var select = this.setValueProperty('listLevel','Poziom listy:',this.getSelectKey(row.list.property.listLevel,row.list.property.listLevelName),this.getListLevelList(row.list.property.listLevel,row.list.property.listLevelMax),row.list.property);
-            
-        //return select;
+
     }
 
     createNewListSelect(subsectionrow){
@@ -992,23 +894,8 @@ class ProjectStageCreate{
         return this.setValueProperty('listNewElement','Nowy element:',this.getSelectKey(subsectionrow.list.property.listNewElement,subsectionrow.list.property.listNewElementName),this.getNewElementList(all,subsectionrow.list.property.listNewElement),subsectionrow.list.property);
       
     }
-    createTextDecorationTool(tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
-        //console.log('ProjectStageCreate::createTextDecorationTool()');
-        for(const prop of this.Glossary.text.getKey('decoration').entries()) {
-            this.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue);  
-        } 
-    }
-    setTextDecorationToolEntry(decorationProp,tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
-        /*
-            decorationProp.n. - name
-            decorationProp.v - value
-         */
-        var prop = this.setTextDecorationToolEntryProperties(decorationProp,subsectionRowAttr);
-        
-        var input = this.createTextToolCheckBox(prop.inputName,isection,isub,isubrow,prop.label,prop.check,subsectionRowAttr,helplinkValue);
-        
-        tool4.appendChild(input);
-    }
+
+
     setToolList(value,run){
         console.log('ProjectStageCreate::setToolList()');
         console.log(run);
@@ -1020,71 +907,8 @@ class ProjectStageCreate{
             this.showControl(run);
         }
     }
-    setTextDecorationToolEntryCheck(input,check){
-        /*
-         * console.log('ProjectStageCreate::setTextDecorationToolEntryCheck()');
-         * console.log(check);
-         */
-       
-        /* NO PARAMETER */
-        if(check===''){
-            input.setAttribute('value','1');            
-        }
-        if(parseInt(check,10)===1){
-            input.setAttribute('value','1');
-            input.setAttribute('checked',''); 
-        }
-        else{
-           input.setAttribute('value','0');
-        }     
-    }
-    setTextDecorationToolEntryProperties(decorationProp,subsectionRowAttr){
-        /*
-          console.log('ProjectStageCreate::setTextDecorationToolEntryProperties()');
-          console.log('decorationProp');
-          console.log(decorationProp);
-          console.log('subsectionRowStyle');
-          console.log(subsectionRowAttr);
-        */ 
-        //throw 'stop-1273';
-        if (!('v' in decorationProp) || !('n' in decorationProp)){
-            //console.log('Decoration Property don\'t have key v or n');
-            return false;
-        };
-        var fullProp={
-            label:decorationProp.n,
-            inputName:decorationProp.v,
-            check:'',
-            id:''
-        };
-        switch(decorationProp.v){
-            case 'BOLD':
-                fullProp.check=subsectionRowAttr.fontWeight;
-                fullProp.inputName='fontWeight';
-                fullProp.label='<b>'+decorationProp.n+'</b>';
-                break;
-            case 'UNDERLINE':
-                fullProp.check=subsectionRowAttr.underline;
-                fullProp.inputName='underline';
-                fullProp.label='<u>'+decorationProp.n+'</u>';
-                break;
-            case 'ITALIC':
-                fullProp.check=subsectionRowAttr.fontStyle;
-                fullProp.inputName='fontStyle';
-                fullProp.label='<i>'+decorationProp.n+'</i>';
-                break;
-            case 'line-through':
-                fullProp.check=subsectionRowAttr['line-through'];
-                fullProp.inputName='line-through';
-                fullProp.label='<span style="text-decoration:line-through;">'+decorationProp.n+'</span>';
-                break;
-            default:
-                console.log('UNAVAILABLE - '+decorationProp.v);
-                break;
-        }
-        
-        return fullProp;
-    }
+
+
     createExtendedTextTool(isection,isub,isubrow,subsectionrow,helplink){
         /*
         console.log('ProjectStageCreate::createExtendedTextTool()');
@@ -1167,44 +991,7 @@ class ProjectStageCreate{
             run.helplink.tool[run.tool[prop]].style.setProperty('display', 'none');
         }
     }
-    createTextToolCheckBox(id,isection,isub,isubrow,title,defaultvalue,subsectionRowAttr,helplinkValue){
-        
-        //if(defaultvalue)
-          
-        var classObject=this;
-        
-        var div=document.createElement('div');
-            div.setAttribute('class','form-check mt-1');
-        var input=document.createElement('input');
-            input.setAttribute('name',id+'-'+isection+'-'+isub+'-'+isubrow);
-            //input.setAttribute('id',id+'-'+isection+'-'+isub+'-'+isubrow);
-            input.setAttribute('type','checkbox');
-            input.classList.add('form-check-input');
-            input.onclick = function (){
-                console.log('ProjectStageCreate::createTextToolCheckBox()');
-                console.log('ID - '+id);
-                console.log(this);
-                if(this.value==='0'){
-                    this.value='1';
-                }
-                else{
-                    this.value='0';
-                }
-                console.log(subsectionRowAttr);
-                console.log(subsectionRowAttr[id]);
-                subsectionRowAttr[id]=this.value;
-                classObject.setValueCheckBoxStyle(id,this.value,helplinkValue);
-            };
-            this.setTextDecorationToolEntryCheck(input,defaultvalue);
-            
-        var label=document.createElement('label');
-            label.setAttribute('class','form-check-label');
-            label.setAttribute('for',id+'-'+isection+'-'+isub+'-'+isubrow);
-            label.innerHTML=title;
-       div.appendChild(input);
-       div.appendChild(label);
-       return div;
-    }
+
     createTextToolDoubleSelect(id,title,actdata,alldata,id2,actdata2,alldata2){
         console.log('ProjectStageCreate::createTextToolDoubleSelect()');
         var divMain = this.createInputHead(title);
@@ -1314,57 +1101,14 @@ class ProjectStageCreate{
         return mainDiv;
     }
     
-    setValueCheckBoxStyle(id,value,helplinkValue){
-        /**/
-        console.log('ProjectStageCreate::setValueCheckBoxStyle()');
-        console.log('ID:');
-        console.log(id);
-        console.log('VALUE:');
-        console.log(value);
-        console.log('HELPLINK VALUE:');
-        console.log(helplinkValue);
-        
-        switch(id){
-            case 'fontWeight':
-                helplinkValue.style[id]=this.setFontStyle(value,'BOLD','NORMAL');
-                break;
-            case 'fontStyle':
-                helplinkValue.style[id]=this.setFontStyle(value,'ITALIC','');
-                break;      
-            case 'underline':      
-                helplinkValue.style.textDecoration=this.setValueStyleTextDecoration(helplinkValue.style.textDecoration,value,'underline');           
-                break;
-            case 'line-through':
-                helplinkValue.style.textDecoration=this.setValueStyleTextDecoration(helplinkValue.style.textDecoration,value,'line-through');                 
-                break;
-            default:
-                console.log('unavailable');
-                break;
-        }
-    }
+
     setFontStyle(value,trueValue,falseValue){
         if(value==='1'){
             return trueValue;
         }
         return falseValue;
     }
-    setValueStyleTextDecoration(actEleTextDecoration,value,styleToSetUp){
-        var tmpvalue=actEleTextDecoration;
-        var tmpvaluearray=tmpvalue.split(' ');
-            if(value==='1'){
-                return styleToSetUp+' '+tmpvalue;
-            }
-            else{
-                tmpvalue='';
-                for(var s=0;s<tmpvaluearray.length;s++){
-                    tmpvaluearray[s]=tmpvaluearray[s].trim();
-                    if(tmpvaluearray[s]!==styleToSetUp){
-                        tmpvalue+=tmpvaluearray[s]+' ';
-                    }
-                }
-                return tmpvalue;
-            }
-    }
+
     createTextToolRadioButton(id,title,value){
         //console.log('ProjectStageCreate::createTextToolRadioButton()');
         //console.log(id);

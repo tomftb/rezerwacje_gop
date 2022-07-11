@@ -3,11 +3,13 @@ class ProjectStageTool{
     Tool = new Object();
     Utilities = new Object()
     Glossary = new Object();
+    Html = new Object();
     //TabStop = new Object();
     
     constructor(Stage){
         this.Utilities = Stage.Utilities;
         this.Glossary = Stage.Glossary;
+        this.Html = Stage.Html;
         this.Tool = new Tool();
         //this.TabStop = Stage.TabStop;
     }
@@ -567,7 +569,251 @@ class ProjectStageTool{
         console.log('OPTION NOT FOUND -> RETURN FALSE');
         return false;
     }
-    //getTabStopList(isubrow){
-     //   return this.TabStop[isubrow];
-    //}
+    createTextToolCheckBox(id,isection,isub,isubrow,title,defaultvalue,subsectionRowAttr,helplinkValue){
+        
+        //if(defaultvalue)
+          
+        var classObject=this;
+        
+        var div=document.createElement('div');
+            div.setAttribute('class','form-check mt-1');
+        var input=document.createElement('input');
+            input.setAttribute('name',id+'-'+isection+'-'+isub+'-'+isubrow);
+            //input.setAttribute('id',id+'-'+isection+'-'+isub+'-'+isubrow);
+            input.setAttribute('type','checkbox');
+            input.classList.add('form-check-input');
+            input.onclick = function (){
+                console.log('ProjectStageCreate::createTextToolCheckBox()');
+                console.log('ID - '+id);
+                console.log(this);
+                if(this.value==='0'){
+                    this.value='1';
+                }
+                else{
+                    this.value='0';
+                }
+                console.log(subsectionRowAttr);
+                console.log(subsectionRowAttr[id]);
+                subsectionRowAttr[id]=this.value;
+                classObject.setValueCheckBoxStyle(id,this.value,helplinkValue);
+            };
+            this.setTextDecorationToolEntryCheck(input,defaultvalue);
+            
+        var label=document.createElement('label');
+            label.setAttribute('class','form-check-label');
+            label.setAttribute('for',id+'-'+isection+'-'+isub+'-'+isubrow);
+            label.innerHTML=title;
+       div.appendChild(input);
+       div.appendChild(label);
+       return div;
+    }
+    setTextDecorationToolEntryProperties(decorationProp,subsectionRowAttr){
+        /*
+          console.log('ProjectStageCreate::setTextDecorationToolEntryProperties()');
+          console.log('decorationProp');
+          console.log(decorationProp);
+          console.log('subsectionRowStyle');
+          console.log(subsectionRowAttr);
+        */ 
+        //throw 'stop-1273';
+        if (!('v' in decorationProp) || !('n' in decorationProp)){
+            //console.log('Decoration Property don\'t have key v or n');
+            return false;
+        };
+        var fullProp={
+            label:decorationProp.n,
+            inputName:decorationProp.v,
+            check:'',
+            id:''
+        };
+        switch(decorationProp.v){
+            case 'BOLD':
+                fullProp.check=subsectionRowAttr.fontWeight;
+                fullProp.inputName='fontWeight';
+                fullProp.label='<b>'+decorationProp.n+'</b>';
+                break;
+            case 'UNDERLINE':
+                fullProp.check=subsectionRowAttr.underline;
+                fullProp.inputName='underline';
+                fullProp.label='<u>'+decorationProp.n+'</u>';
+                break;
+            case 'ITALIC':
+                fullProp.check=subsectionRowAttr.fontStyle;
+                fullProp.inputName='fontStyle';
+                fullProp.label='<i>'+decorationProp.n+'</i>';
+                break;
+            case 'line-through':
+                fullProp.check=subsectionRowAttr['line-through'];
+                fullProp.inputName='line-through';
+                fullProp.label='<span style="text-decoration:line-through;">'+decorationProp.n+'</span>';
+                break;
+            default:
+                console.log('UNAVAILABLE - '+decorationProp.v);
+                break;
+        }
+        
+        return fullProp;
+    }
+    setTextDecorationToolEntry(decorationProp,tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
+        /*
+            decorationProp.n. - name
+            decorationProp.v - value
+         */
+        var prop = this.setTextDecorationToolEntryProperties(decorationProp,subsectionRowAttr);
+        
+        var input = this.createTextToolCheckBox(prop.inputName,isection,isub,isubrow,prop.label,prop.check,subsectionRowAttr,helplinkValue);
+        
+        tool4.appendChild(input);
+    }
+    setTextDecorationToolEntryCheck(input,check){
+        /*
+         * console.log('ProjectStageCreate::setTextDecorationToolEntryCheck()');
+         * console.log(check);
+         */
+       
+        /* NO PARAMETER */
+        if(check===''){
+            input.setAttribute('value','1');            
+        }
+        if(parseInt(check,10)===1){
+            input.setAttribute('value','1');
+            input.setAttribute('checked',''); 
+        }
+        else{
+           input.setAttribute('value','0');
+        }     
+    }
+    setValueCheckBoxStyle(id,value,helplinkValue){
+        /**/
+        console.log('ProjectStageCreate::setValueCheckBoxStyle()');
+        console.log('ID:');
+        console.log(id);
+        console.log('VALUE:');
+        console.log(value);
+        console.log('HELPLINK VALUE:');
+        console.log(helplinkValue);
+        
+        switch(id){
+            case 'fontWeight':
+                helplinkValue.style[id]=this.setFontStyle(value,'BOLD','NORMAL');
+                break;
+            case 'fontStyle':
+                helplinkValue.style[id]=this.setFontStyle(value,'ITALIC','');
+                break;      
+            case 'underline':      
+                helplinkValue.style.textDecoration=this.setValueStyleTextDecoration(helplinkValue.style.textDecoration,value,'underline');           
+                break;
+            case 'line-through':
+                helplinkValue.style.textDecoration=this.setValueStyleTextDecoration(helplinkValue.style.textDecoration,value,'line-through');                 
+                break;
+            default:
+                console.log('unavailable');
+                break;
+        }
+    }
+    setFontStyle(value,trueValue,falseValue){
+        if(value==='1'){
+            return trueValue;
+        }
+        return falseValue;
+    }
+        setValueStyleTextDecoration(actEleTextDecoration,value,styleToSetUp){
+        var tmpvalue=actEleTextDecoration;
+        var tmpvaluearray=tmpvalue.split(' ');
+            if(value==='1'){
+                return styleToSetUp+' '+tmpvalue;
+            }
+            else{
+                tmpvalue='';
+                for(var s=0;s<tmpvaluearray.length;s++){
+                    tmpvaluearray[s]=tmpvaluearray[s].trim();
+                    if(tmpvaluearray[s]!==styleToSetUp){
+                        tmpvalue+=tmpvaluearray[s]+' ';
+                    }
+                }
+                return tmpvalue;
+            }
+    }
+    getTextDecoration(tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
+        //console.log('ProjectStageCreate::createTextDecorationTool()');
+        for(const prop of this.Glossary.text.getKey('decoration').entries()) {
+            this.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue);  
+        } 
+    }
+    getTextTool(isection,isub,isubrow,subsectionrow,helplink,TabStop){
+        /*
+        console.log('ProjectStageCreate::createTextToolSection()');
+        console.log(subsectionrow);
+        console.log(subsectionrow.style);
+        console.log('helplink');
+        console.log(helplink);
+        */
+        var mainDivCol=this.Html.getCol(12);
+            mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
+            mainDivCol.style.backgroundColor='#e6e6e6';
+        var mainDiv=this.Html.getRow();
+            
+        var tool1=this.Html.getCol(3);
+        var tool2=this.Html.getCol(3);
+        var tool3=this.Html.getCol(3);
+        var tool4=this.Html.getCol(3);
+            tool4.classList.add('pt-4');
+
+        /* FONT SIZE */
+        tool1.appendChild(this.getExtendedFontSize(subsectionrow.paragraph.style,helplink.text.value));
+        /* TEXT COLOR */
+        tool1.appendChild(this.getExtendedColor(subsectionrow.paragraph.style,helplink.text.value));
+        /* BACKGROUND COLOR */
+        tool1.appendChild(this.getExtendedBackgroundColor(subsectionrow.paragraph.style,helplink.text.value));
+        /* FONT FAMILY */
+        tool2.appendChild(this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
+        /* TEXT ALIGN */
+        tool2.appendChild(this.getTextAlign(subsectionrow.paragraph.style,helplink.text.value));
+        /* TAB STOP */
+        tool2.appendChild(this.getTabStop(TabStop,isection,isub,isubrow,subsectionrow,helplink));    
+        /* LEFT EJECTION */
+        tool3.appendChild(this.getLeftEjection(subsectionrow.paragraph.style,helplink.text));
+         /* RIGHT EJECTION */
+        tool3.appendChild(this.getRightEjection(subsectionrow.paragraph.style,helplink));
+         /* INDENTATION */
+        tool3.appendChild(this.getIndentation(subsectionrow.paragraph.style,helplink));
+        /* PARAGRAPH TYPE */
+        tool3.appendChild(this.getParagraph(subsectionrow.paragraph.property,helplink.tool));
+       
+        /* SET CSS BOLD, ITALIC ... */
+        this.getTextDecoration(tool4,isection,isub,isubrow,subsectionrow.paragraph.style,helplink.text.value); 
+
+        mainDiv.appendChild(tool1);
+        mainDiv.appendChild(tool2);
+        mainDiv.appendChild(tool3);
+        mainDiv.appendChild(tool4);
+      
+        mainDivCol.appendChild(mainDiv);
+
+        return mainDivCol;
+    }
+    getTabStopTool(isection,isub,isubrow,subsectionrow,helplink,TabStop){
+        var mainDivCol=this.Html.getCol(12);
+            mainDivCol.classList.add('d-none','bg-light','pt-1','pb-1');    //'bg-light',
+            //mainDivCol.style.backgroundColor='#e6e6e6';
+        var mainDiv=this.Html.getRow();
+            
+        var tool1=this.Html.getCol(7);
+        var tool2=this.Html.getCol(1);
+        var tool3=this.Html.getCol(2);
+        var tool4=this.Html.getCol(2);
+        //tool4.classList.add('pt-4'); 
+        //console.log(this.ProjectStageTool.getTabStopList(isubrow));
+        console.log(TabStop[isubrow]);
+        tool1.appendChild(TabStop[isubrow].create());//subsectionrow.paragraph.tabstop,isubrow
+        
+        mainDiv.appendChild(tool1);
+        mainDiv.appendChild(tool2);
+        mainDiv.appendChild(tool3);
+        mainDiv.appendChild(tool4);
+            
+        mainDivCol.appendChild(mainDiv);
+        console.log(mainDivCol);
+        return mainDivCol;
+    }
 }

@@ -161,7 +161,7 @@ class Html{
             //option.setAttribute('class',data[property].fontcolor+' '+data[property].backgroundcolor);
             option.style.fontFamily = data.fontFamily;
             option.style.color = data.color;
-            option.style.backgroundColor = data.backgroundcolor;
+            option.style.backgroundColor = data.backgroundColor;
             option.innerHTML=data.n; 
         return option;
     }

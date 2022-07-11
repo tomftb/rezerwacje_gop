@@ -228,6 +228,7 @@ class ProjectStageTool{
                 this.property[this.key]=value;
                 /* SET INPUT STYLE PROPERTY */
                 this.ele.style[this.key]=value;
+                console.log(this.ele);
             };
         return tool;
     }
@@ -280,22 +281,6 @@ class ProjectStageTool{
             option.backgroundColor=backgroundColor;
             option.fontFamily=fontFamily;
         return option;
-    }
-    getFontFamily(property,ele){
-        console.log('ProjectStageTool::getFontFamily()');
-        var all = {};
-            for(var i=0;i<this.Glossary.text.getKeyCount('fontFamily');i++){
-                if(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v')===property['fontFamily']){
-                    continue;
-                }
-                let v = this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v');
-                /* OPTION: value,title,color,backgroundColor,fontFamily */
-                all[i]=this.getExtendedOption(v,v,'#000000','#FFFFFF',v);
-            }
-        var data=this.getAdvancedTool(property,'fontFamily',ele);
-            data[0]['default']=this.getDefaultOption(property,'fontFamily','fontFamily');
-            data[0]['all']=all;  
-        return  this.Tool.create('Czcionka:',data);
     }
     setColorProperty(data,property,key,run){
         console.log('ProjectStageTool::setColorProperty()');
@@ -365,6 +350,38 @@ class ProjectStageTool{
             data[0]['default']=this.getDefaultOption(property,'textAlign','textAlignName');
             data[0]['all']=all;  
         return  this.Tool.create('Wyrównanie:',data);
+    }
+    getFontFamily(property){
+        console.log('ProjectStageTool::getFontFamily()');
+        var all = {};
+            for(var i=0;i<this.Glossary.text.getKeyCount('fontFamily');i++){
+                if(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v')===property['fontFamily']){
+                    continue;
+                }
+                let v = this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v');
+                /* OPTION: value,title,color,backgroundColor,fontFamily */
+                all[i]=this.getExtendedOption(v,v,'#000000','#FFFFFF',v);
+            }
+        var data=this.getTool(property,'fontFamily');
+            data[0]['default']=this.getDefaultOption(property,'fontFamily','fontFamily');
+            data[0]['all']=all;  
+        return  data;
+    }
+    getSimpleFontFamily(property){
+        var data = this.getFontFamily(property);
+            data[0]['onchange']=function(value){
+                this.property[this.key] = value; 
+            };
+        return this.Tool.create('Czcionka:',data);
+    }
+    getExtendedFontFamily(property,ele){
+        var data = this.getFontFamily(property);
+            data[0]['ele']=ele;
+            data[0]['onchange']=function(value){
+                this.property[this.key] = value; 
+                this.ele.style[this.key] = value;
+            };
+        return this.Tool.create('Czcionka:',data);
     }
     getFontSize(property){
         /* console.log('ProjectStageTool::getFontSize()'); */

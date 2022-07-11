@@ -837,7 +837,7 @@ class ProjectStageCreate{
         /* BACKGROUND COLOR */
         tool1.appendChild(this.ProjectStageTool.getExtendedBackgroundColor('Kolor tła:',subsectionrow.paragraph.style,helplink.text.value));
         /* FONT FAMILY */
-        tool2.appendChild(this.ProjectStageTool.getFontFamily(subsectionrow.paragraph.style,helplink.text.value));
+        tool2.appendChild(this.ProjectStageTool.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT ALIGN */
         tool2.appendChild(this.ProjectStageTool.getTextAlign(subsectionrow.paragraph.style,helplink.text.value));
         tool2.appendChild(tabstop);
@@ -925,7 +925,7 @@ class ProjectStageCreate{
         /* GET BackgroundColor */
         tool1.appendChild(this.ProjectStageTool.getExtendedBackgroundColor('Kolor tła:',subsectionrow.list.style,helplink.list.value));
         /* GET FONT FAMILY SELECT */
-        tool1.appendChild(this.ProjectStageTool.getFontFamily(subsectionrow.list.style,helplink.list.value));
+        tool1.appendChild(this.ProjectStageTool.getSimpleFontFamily(subsectionrow.list.style));
         /* SET CSS BOLD, ITALIC ... */
         this.createTextDecorationTool(tool4,isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
 

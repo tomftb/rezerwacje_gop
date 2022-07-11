@@ -204,13 +204,7 @@ class ProjectStageCreate{
             throw 'An Application Error Has Occurred!';
         }
     }
-    setTabStopParameters(TabStop){
-        /* SETUP TABSTOP PARAMETERS */
-        TabStop.setParameter(this.Glossary.text.like('parameter','^STAGE_TEXT_TABSTOP'));
-        TabStop.setProperty('listMeasurement',this.Glossary.text.item.listMeasurement);
-        TabStop.setProperty('tabstopAlign',this.Glossary.text.item.tabstopAlign);
-        TabStop.setProperty('leadingSign',this.Glossary.text.item.leadingSign); 
-    }
+
     block(){
         try{
             console.log('ProjectStageCreate::block()');
@@ -829,7 +823,6 @@ class ProjectStageCreate{
         var tool4=this.Html.getCol(3);
             tool4.classList.add('pt-4');
 
-        var tabstop=this.createTextToolTabStop(isection,isub,isubrow,subsectionrow,helplink);
         /* FONT SIZE */
         tool1.appendChild(this.ProjectStageTool.getExtendedFontSize(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT COLOR */
@@ -840,7 +833,8 @@ class ProjectStageCreate{
         tool2.appendChild(this.ProjectStageTool.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT ALIGN */
         tool2.appendChild(this.ProjectStageTool.getTextAlign(subsectionrow.paragraph.style,helplink.text.value));
-        tool2.appendChild(tabstop);
+        /* TAB STOP */
+        tool2.appendChild(this.ProjectStageTool.getTabStop(this.TabStop,isection,isub,isubrow,subsectionrow,helplink));
                 
         /* LEFT EJECTION */
         tool3.appendChild(this.ProjectStageTool.getLeftEjection(subsectionrow.paragraph.style,helplink.text));
@@ -874,8 +868,9 @@ class ProjectStageCreate{
         var tool2=this.Html.getCol(1);
         var tool3=this.Html.getCol(2);
         var tool4=this.Html.getCol(2);
-            //tool4.classList.add('pt-4'); 
-        
+        //tool4.classList.add('pt-4'); 
+        //console.log(this.ProjectStageTool.getTabStopList(isubrow));
+        console.log(this.TabStop[isubrow]);
         tool1.appendChild(this.TabStop[isubrow].create());//subsectionrow.paragraph.tabstop,isubrow
         
         mainDiv.appendChild(tool1);
@@ -928,7 +923,6 @@ class ProjectStageCreate{
         /* SET CSS BOLD, ITALIC ... */
         this.createTextDecorationTool(tool4,isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
 
-       
         /* */
 
         tool2.appendChild(listLevel);
@@ -1272,79 +1266,8 @@ class ProjectStageCreate{
             };
         return optionGroup;
     }
-    createTextToolTabStop(isection,isub,isubrow,subsectionrow,helplink){
-        console.log('ProjectStageCreate::createTextToolTabStop()');
-        console.log('TABSTOP ASSIGN TO PARAGRAPH');
-        console.log(subsectionrow.paragraph.property.tabstop);
-        //console.log('I SUB ROW');
-        //console.log(isubrow);
-        //throw 'test-stop';
-        
-        var deafultNone={
-                0:this.Utilities.getDefaultOptionProperties(-1,'Brak')  
-            };
-        var all=new Object();
-        
-        for(const prop in subsectionrow.paragraph.tabstop){
-            console.log(prop);
-            console.log(subsectionrow.paragraph.tabstop);
-            all[prop]=this.Utilities.getDefaultOptionProperties(prop,subsectionrow.paragraph.tabstop[prop].position+' '+subsectionrow.paragraph.tabstop[prop].measurementName+' | '+subsectionrow.paragraph.tabstop[prop].alignmentName+' | '+subsectionrow.paragraph.tabstop[prop].leadingSignName);
-        }
-        /*
-         * 
-         * SET NEW TabStop Object
-         */
-        this.TabStop[isubrow]= new TabStop();
-        this.setTabStopParameters(this.TabStop[isubrow]);
-        
-        var select = this.createTextToolSelect('tabstop','Tabulacja:',deafultNone,all); 
-        /* SET REFERENCES TO SELECT OPTION */
-        /* SET REFERENCES TO SUBSECTION ROW PARAGRAPH */
-        this.TabStop[isubrow].paragraph={
-            data:subsectionrow.paragraph,
-            option:select.childNodes[1].childNodes[1]
-        };
-        
-        console.log(select);
-        console.log(select.childNodes[1].childNodes[1]);
-        //throw 'test-stop-1265';
-        /* CLOSURE - DOMKNIĘCIE*/
-        //var self = this;
-        
-        select.childNodes[1].onchange = function(){
-            /* this.value - INDEX */
-            console.log(this.value);
-            //console.log(TabStop.data[this.value]);
-            console.log(subsectionrow);
-            subsectionrow.paragraph.property.tabstop = this.value; //parseInt(this.value,10);
-        };
-        /* SET DEFAULT OPTION */
-        this.setDefaultOption(subsectionrow.paragraph.property.tabstop,select.childNodes[1].childNodes[1],subsectionrow.paragraph.tabstop);
-        return select;
-    }
-    setDefaultOption(paragraphTabStop,option,tabstop){
-        console.log('ProjectStageCreate::setDefaultOption()\r\nPARAGRAPH TABSTOP:');
-        console.log(paragraphTabStop);
-        if(paragraphTabStop==='-1'){
-            console.log('PARAGRAM TABSTOP < 0 -> RETURN FALSE');
-            //console.log(paragraphTabStop);
-            return false;
-        }
-        if(this.Utilities.countObjectProp(tabstop)===0){
-            console.log('TABSTOP DATA LIST IS EMPTY -> RETURN FALSE');
-            return false;
-        }
-        /* SET PROPER DEFAULT OPTION ON SELECT */
-        //console.log('SET PROPER OPTION');
-        for (let i = 0; i < option.children.length; i++) {
-                if(option.children[i].value===paragraphTabStop){
-                    option.children[i].selected = true;
-                    return paragraphTabStop;
-            }
-        }
-        console.log('OPTION NOT FOUND -> RETURN FALSE');
-        return -1;
-    }
+
+
     setValueStyle(id,title,actdata,alldata,subsectionRowStyle,helplinkValue){
         //console.log('ProjectStageCreate::createTextToolSelectExtend()');
         var select = this.createTextToolSelect(id,title,actdata,alldata);

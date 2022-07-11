@@ -3,11 +3,13 @@ class ProjectStageTool{
     Tool = new Object();
     Utilities = new Object()
     Glossary = new Object();
+    //TabStop = new Object();
     
     constructor(Stage){
         this.Utilities = Stage.Utilities;
         this.Glossary = Stage.Glossary;
         this.Tool = new Tool();
+        //this.TabStop = Stage.TabStop;
     }
     getIndentation(property,ele){
         console.log('ProjectStageTool::getIndentation()');
@@ -482,4 +484,90 @@ class ProjectStageTool{
         }
         return value;
     }
+    getTabStop(TabStopRef,isection,isub,isubrow,subsectionrow,helplink){
+        console.log('ProjectStageTool::getTabStop()');
+        console.log('TABSTOP ASSIGN TO PARAGRAPH');
+        console.log(subsectionrow.paragraph.property.tabstop);
+       
+        var all=new Object();
+        for(const prop in subsectionrow.paragraph.tabstop){
+            //console.log(prop);
+            //console.log(subsectionrow.paragraph.tabstop);
+            all[prop]=this.Utilities.getDefaultOptionProperties(prop,subsectionrow.paragraph.tabstop[prop].position+' '+subsectionrow.paragraph.tabstop[prop].measurementName+' | '+subsectionrow.paragraph.tabstop[prop].alignmentName+' | '+subsectionrow.paragraph.tabstop[prop].leadingSignName);
+        }
+        /*
+         * SET NEW TabStop Object
+         */
+        TabStopRef[isubrow]= new TabStop();
+        this.setTabStopParameters(TabStopRef[isubrow]);
+
+        var data={
+            0:{
+                default:{
+                    0:this.Utilities.getDefaultOptionProperties(-1,'Brak') 
+                },
+                all:all,
+                property:subsectionrow,
+                glossary:this.Glossary.text,
+                /* Anonymous Function */
+                onchange:function(value){
+                        this.property['tabstop'] = value;
+                },
+                type:'select',
+                attributes:{
+                    class:'w-100'
+                }
+            }
+        };
+        var tool = this.Tool.create('Tabulacja:',data);
+        //console.log(tool);
+        //console.log(tool.childNodes[1].childNodes[0].childNodes[1]);
+
+        /* SET REFERENCES TO SELECT OPTION */
+        /* SET REFERENCES TO SUBSECTION ROW PARAGRAPH */
+        TabStopRef[isubrow].paragraph={
+            data:subsectionrow.paragraph,
+            option:tool.childNodes[1].childNodes[0].childNodes[1]
+        };
+        
+
+        /* SET DEFAULT OPTION */
+        this.setDefaultOption(subsectionrow.paragraph.property.tabstop,tool.childNodes[1].childNodes[0].childNodes[1],subsectionrow.paragraph.tabstop);
+        console.log(TabStopRef);
+        //throw 'aaaa';
+        return  tool;
+    }
+    setTabStopParameters(TabStop){
+        /* SETUP TABSTOP PARAMETERS */
+        TabStop.setParameter(this.Glossary.text.like('parameter','^STAGE_TEXT_TABSTOP'));
+        TabStop.setProperty('listMeasurement',this.Glossary.text.item.listMeasurement);
+        TabStop.setProperty('tabstopAlign',this.Glossary.text.item.tabstopAlign);
+        TabStop.setProperty('leadingSign',this.Glossary.text.item.leadingSign); 
+    }
+    setDefaultOption(paragraphTabStop,option,tabstop){
+        console.log('ProjectStageCreate::setDefaultOption()\r\nPARAGRAPH TABSTOP:');
+        console.log(paragraphTabStop);
+        if(paragraphTabStop==='-1'){
+            console.log('PARAGRAM TABSTOP < 0 -> RETURN FALSE');
+            //console.log(paragraphTabStop);
+            return false;
+        }
+        if(this.Utilities.countObjectProp(tabstop)===0){
+            console.log('TABSTOP DATA LIST IS EMPTY -> RETURN FALSE');
+            return false;
+        }
+        /* SET PROPER DEFAULT OPTION ON SELECT */
+        //console.log('SET PROPER OPTION');
+        for (let i = 0; i < option.children.length; i++) {
+                if(option.children[i].value===paragraphTabStop){
+                    option.children[i].selected = true;
+                    return paragraphTabStop;
+            }
+        }
+        console.log('OPTION NOT FOUND -> RETURN FALSE');
+        return false;
+    }
+    //getTabStopList(isubrow){
+     //   return this.TabStop[isubrow];
+    //}
 }

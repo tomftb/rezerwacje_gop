@@ -283,11 +283,6 @@ class ProjectStageTool{
     }
     getFontFamily(property,ele){
         console.log('ProjectStageTool::getFontFamily()');
-        var defaultFont={
-                0:this.Utilities.getDefaultOptionProperties(property['fontFamily'],property['fontFamily'])
-            };
-            /* SET OPTION STYLE PROPERTY */
-            defaultFont[0].fontFamily=property['fontFamily'];
         var all = {};
             for(var i=0;i<this.Glossary.text.getKeyCount('fontFamily');i++){
                 if(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v')===property['fontFamily']){
@@ -298,17 +293,12 @@ class ProjectStageTool{
                 all[i]=this.getExtendedOption(v,v,'#000000','#FFFFFF',v);
             }
         var data=this.getAdvancedTool(property,'fontFamily',ele);
-            data[0]['default']=defaultFont;
+            data[0]['default']=this.getDefaultOption(property,'fontFamily','fontFamily');
             data[0]['all']=all;  
         return  this.Tool.create('Czcionka:',data);
     }
     setColorProperty(data,property,key,run){
         console.log('ProjectStageTool::setColorProperty()');
-        var defaultColor = {
-                0:this.Utilities.getDefaultOptionProperties(property[key[0]],property[key[1]])
-            };
-        /* SET OPTION STYLE PROPERTY */
-        defaultColor[0][key[0]]=property[key[0]];
         var self = this;
         var all = {};
             for(var i=0;i<this.Glossary.text.getKeyCount('color');i++){
@@ -319,7 +309,7 @@ class ProjectStageTool{
                 let backgroundColor = '#FFFFFF';
                 all[i]=run(self,color,this.Glossary.text.getKeyPropertyAttribute('color',i,'n'),color,backgroundColor,'');
             }; 
-        data[0]['default']=defaultColor;
+        data[0]['default']=this.getDefaultOption(property,key[0],key[1]);
         data[0]['all']=all;  
     }
     getSimpleBackgroundColor(title,property){
@@ -359,5 +349,31 @@ class ProjectStageTool{
         };
         this.setColorProperty(data,property,key,run);
         return  this.Tool.create(title,data);
+    }
+    getTextAlign(property,ele){
+        console.log('ProjectStageTool::getTextAlign()');
+        var all = {};
+            for(var i=0;i<this.Glossary.text.getKeyCount('textAlign');i++){
+                
+                if(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v')===property['textAlign']){
+                    continue;
+                }
+                
+                /* OPTION: value,title,color,backgroundColor,fontFamily */
+                all[i]=this.getExtendedOption(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v'),this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'n'),'#000000','#FFFFFF','');
+            }
+        var data=this.getAdvancedTool(property,'textAlign',ele);
+            data[0]['default']=this.getDefaultOption(property,'textAlign','textAlignName');
+            data[0]['all']=all;  
+        return  this.Tool.create('Wyrównanie:',data);
+        //var textAlign=this.setValueStyle('textAlign','Wyrównanie:',this.getSelectKey(subsectionrow.paragraph.style.textAlign,subsectionrow.paragraph.style.textAlignName),this.getFontAlignList(subsectionrow.paragraph.style.textAlign),subsectionrow.paragraph.style,helplink.text.value);
+    }
+    getDefaultOption(property,value,name){
+        var d={
+                0:this.Utilities.getDefaultOptionProperties(property[value],property[name])
+            };
+            /* SET OPTION STYLE PROPERTY */
+        d[0][value]=property[value];
+        return d;
     }
 }

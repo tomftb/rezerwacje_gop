@@ -6,7 +6,8 @@ class StageData{
     Glossary={};
     Property={};
     iSection=0;
-    default={};
+    defaultRow={};
+    defaultSection={};
     tabStop={};
     constructor(Glossary,Property,type,tabstop){
         this.Glossary = Glossary;
@@ -33,9 +34,10 @@ class StageData{
                },
                property:{},
                style:{
-                    backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
-                    backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
-                    backgroundImage:''
+                    /* MOVE TO SECTION */
+                    //backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
+                    //backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
+                    //backgroundImage:''
                     //,newPage:1
                 },
                 section:{}
@@ -52,7 +54,7 @@ class StageData{
             data:{
                 id:0
             },
-            style:{},
+            style:this.defaultSection.style,
             property:{
                 valuenewline:'y'
             },
@@ -97,7 +99,7 @@ class StageData{
                     id:0
                 },
                 paragraph:{
-                    style:this.default.paragraph.style,
+                    style:this.defaultRow.paragraph.style,
                     property:{
                         /* ADD TO SQL - 0 -> n, 1 -> y */ 
                         /* LIST */
@@ -108,8 +110,8 @@ class StageData{
                          */
                         value:'',
                         valuenewline:'y',/* default */
-                        paragraph:this.default.paragraph.property.paragraph,
-                        paragraphName:this.default.paragraph.property.paragraphName, //Nowy akapit
+                        paragraph:this.defaultRow.paragraph.property.paragraph,
+                        paragraphName:this.defaultRow.paragraph.property.paragraphName, //Nowy akapit
                         /* CHECK FOR EXIST tabstop with number */
                         //tabstop:'0'
                         tabstop:'-1'
@@ -192,6 +194,20 @@ class StageData{
          * t - table
          * i - image
         */
+        var sectionText={
+            style:{
+                backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_SECTION_BACKGROUND_COLOR','v'),
+                backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_SECTION_BACKGROUND_COLOR','n'),
+                backgroundImage:''
+            }
+        };
+        var sectionList={
+            style:{
+                backgroundColor:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_SECTION_BACKGROUND_COLOR','v'),
+                backgroundColorName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_SECTION_BACKGROUND_COLOR','n'),
+                backgroundImage:''
+            }
+        };
         var rowParagraph={
                 paragraph:{
                     style:{
@@ -282,11 +298,13 @@ class StageData{
             };
         switch(type){
             case 'l':
-                this.default=rowList;
+                this.defaultRow=rowList;
+                this.defaultSection=sectionText;
                 break;
             default:
             case 'p':
-                this.default=rowParagraph;
+                this.defaultRow=rowParagraph;
+                this.defaultSection=sectionList;
                 break;
         };
         

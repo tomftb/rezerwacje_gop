@@ -9,32 +9,24 @@ class ProjectStageTool{
         this.Glossary = Stage.Glossary;
         this.Tool = new Tool();
     }
-    getIndentation(subsectionrow,helplink){
+    getIndentation(property,ele){
         console.log('ProjectStageTool::getIndentation()');
-        console.log(helplink);
+        /*
+         * property - reference for example subsectionrow.paragraph.style
+         * ele - reference for example helplink
+         */  
         var data={
             0:{
                 default:{
-                    0:this.Utilities.getDefaultOptionProperties(subsectionrow.style['indentationSpecial'],subsectionrow.style['indentationSpecialName'])
+                    0:this.Utilities.getDefaultOptionProperties(property['indentationSpecial'],property['indentationSpecialName'])
                 },
-                all:this.Utilities.getDefaultList(this.Glossary.text.item.indentationSpecial,subsectionrow.style['indentationSpecial']),
-                link:subsectionrow.style,
-                glossary:this.Glossary.text.item.indentationSpecial,
-                /*Anonymous Functions*/
+                all:this.Utilities.getDefaultList(this.Glossary.text.item.indentationSpecial,property['indentationSpecial']),
+                property:property,
+                glossary:this.Glossary.text,
+                /* Anonymous Function */
                 onchange:function(value){
-                        console.log('ProjectStageTool::getIndentation');
-                        console.log(this.link);
-                        console.log(this.glossary);
-                        this.link['indentationSpecial'] = value;
-                        console.log(value);
-                        for(const prop in this.glossary){
-                            console.log(this.glossary[prop]);
-                            if(this.glossary[prop].v===value){
-                                console.log('FOUND');
-                                this.link['indentationSpecialName'] = this.glossary[prop].n;
-                                break;
-                            }
-                        }
+                        this.property['indentationSpecial'] = value;
+                        this.property['indentationSpecialName'] = this.glossary.getItemName('indentationSpecial',value);
                 },
                 type:'select',
                 attributes:{
@@ -42,10 +34,10 @@ class ProjectStageTool{
                 }
             },
             1:{
-                link:subsectionrow.style,
-                value:subsectionrow.style.indentation,
+                property:property,
+                value:property.indentation,
                 onchange:function(value){
-                    this.link['indentation'] = value;
+                    this.property['indentation'] = value;
                 },
                 type:'input',
                 attributes:{
@@ -55,49 +47,37 @@ class ProjectStageTool{
             },   
             2:{
                 default:{
-                    0:this.Utilities.getDefaultOptionProperties(subsectionrow.style['indentationMeasurement'],subsectionrow.style['indentationMeasurement'])
+                    0:this.Utilities.getDefaultOptionProperties(property['indentationMeasurement'],property['indentationMeasurement'])
                 },
-                all:this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,subsectionrow.style['indentationMeasurement']),
-                link:subsectionrow.style,
-                glossary:this.Glossary.text.item.listMeasurement,
-                /*Anonymous Functions*/
+                all:this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,property['indentationMeasurement']),
+                property:property,
+                /* Anonymous Function */
                 onchange:function(value){
-                        console.log('ProjectStageTool::getIndentation');
-                        console.log(this.link);
-                        console.log(this.glossary);
-                        this.link['indentationMeasurement'] = value;
-                        console.log(value);
-                        for(const prop in this.glossary){
-                            console.log(this.glossary[prop]);
-                            if(this.glossary[prop].v===value){
-                                console.log('FOUND');
-                                this.link['indentationMeasurement'] = this.glossary[prop].n;
-                                break;
-                            }
-                        }
+                    this.property['indentationMeasurement'] = value;
                 },
                 type:'select',
                 attributes:{
-                    class:'w-25',
+                    class:'w-25'
                 }
-            }    
+            }
         };
         var tool = this.Tool.create('Specjalne:',data);
-            helplink.tool['indentation'] = tool;
+            ele.tool['indentation'] = tool;
         return  tool;
     }
-    getEjection(subsectionrow,keys,title){
-        console.log('ProjectStageTool::getEjection()');
-       // console.log(subsectionrow);
-        //throw 'aaaaaaaaa';
+    getEjection(property,keys,title){
+        //console.log('ProjectStageTool::getEjection()');
+        /*
+         * property - reference for example subsectionrow.paragraph.style
+         */
         var data={
             0:{
-                link:subsectionrow.style,
-                value:subsectionrow.style[keys[0]],
+                property:property,
+                value:property[keys[0]],
                 /* VALUE */
                 key:keys[0],
                 onchange:function(value){
-                    this.link[this.key] = value;
+                    this.property[this.key] = value;
                 },
                 type:'input',
                 attributes:{
@@ -107,14 +87,13 @@ class ProjectStageTool{
             },
             1:{
                 default:{
-                    0:this.Utilities.getDefaultOptionProperties(subsectionrow.style[keys[1]],subsectionrow.style[keys[1]])
+                    0:this.Utilities.getDefaultOptionProperties(property[keys[1]],property[keys[1]])
                 },
-                all:this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,subsectionrow.style[keys[1]]),
+                all:this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,property[keys[1]]),
                 key:keys[1],
-                link:subsectionrow.style,
+                property:property,
                 onchange:function(value){
-                        //console.log('ProjectStageTool::getEjection');
-                        this.link[this.key] = value;
+                        this.property[this.key] = value;
                 },
                 type:'select',
                 attributes:{
@@ -128,22 +107,34 @@ class ProjectStageTool{
          */           
         return  this.Tool.create(title,data);
     }
-    getRightEjection(subsectionrow,helplink){
-        var keys=['rightEjection','rightEjectionMeasurement'];
-        var tool = this.getEjection(subsectionrow,keys,'Wcięcie z prawej strony:');
+    getRightEjection(property,ele){
+        console.log('ProjectStageTool::getRightEjection()');
+        /*
+         * property - reference for example subsectionrow.paragraph.style
+         * ele - references for example helplink.text
+         */
+        var tool = this.getEjection(property,['rightEjection','rightEjectionMeasurement'],'Wcięcie z prawej strony:');
         /* SET HELPLINK */
-            helplink.text['rightEjection']=tool.childNodes[1].childNodes[0];
+            ele.rightEjection=tool.childNodes[1].childNodes[0];
         return tool;
     }
-    getLeftEjection(subsectionrow,helplink){
-        var keys=['leftEjection','leftEjectionMeasurement'];
-        var tool = this.getEjection(subsectionrow,keys,'Wcięcie z lewej strony:');
+    getLeftEjection(property,ele){
+        console.log('ProjectStageTool::getLeftEjection()');
+        /*
+         * property - reference for example subsectionrow.paragraph.style
+         * ele - references for example helplink.text
+         */
+        var tool = this.getEjection(property,['leftEjection','leftEjectionMeasurement'],'Wcięcie z lewej strony:');
         /* SET HELPLINK */
-            helplink.text['leftEjection']=tool.childNodes[1].childNodes[0];
+            ele.leftEjection=tool.childNodes[1].childNodes[0];
         return tool;
     }
-    getParagraph(subsectionrow,helplink){
+    getParagraph(property,ele){
         console.log('ProjectStageTool::getParagraph()');
+        /*
+         * property - reference for example subsectionrow.paragraph.property
+         * ele - references for example helplink.tool
+         */
         //throw 'aaaaaaaaa';
         var Glossary={
             0:{
@@ -158,25 +149,19 @@ class ProjectStageTool{
         var data={
             0:{
                 default:{
-                    0:this.Utilities.getDefaultOptionProperties(subsectionrow.property.paragraph,subsectionrow.property.paragraphName)
+                    0:this.Utilities.getDefaultOptionProperties(property['paragraph'],property['paragraphName'])
                 },
-                all:this.Utilities.getDefaultList(Glossary,subsectionrow.property.paragraph),
-                helplink:helplink,
-                link:subsectionrow.property,
+                all:this.Utilities.getDefaultList(Glossary,property['paragraph']),
+                ele:ele,
+                property:property,
                 glossary:Glossary,
                 onchange:function(value){
-                    console.log('ProjectStageTool::getParagraph()');
                     var toggle = ['listControl','list','indentation'];
                     /* TO DO -> indetation -> SET TO INPUT BLOCK ? */
-                    console.log(this.link);
-                    console.log(this.helplink);
-                    console.log(value);
-                    this.link['paragraph'] = value;
+                    this.property['paragraph'] = value;
                     for(const prop in this.glossary){
-                            console.log(this.glossary[prop]);
                             if(this.glossary[prop].v===value){
-                                console.log('FOUND');
-                                this.link['paragraphName'] = this.glossary[prop].n;
+                                this.property['paragraphName'] = this.glossary[prop].n;
                                 break;
                             }
                     }
@@ -184,8 +169,8 @@ class ProjectStageTool{
                         /* l - list - show list tool */
                         for(const prop in toggle){
                             //console.log(run.tool[prop]);
-                            if (this.helplink.tool[toggle[prop]].style.display){
-                                this.helplink.tool[toggle[prop]].style.removeProperty('display');
+                            if (this.ele[toggle[prop]].style.display){
+                                this.ele[toggle[prop]].style.removeProperty('display');
                             }
                         }
                     }
@@ -193,7 +178,7 @@ class ProjectStageTool{
                         /* p  - paragraph - hide list tool */
                         for(const prop in toggle){
                             //console.log(run.tool[prop]);
-                            this.helplink.tool[toggle[prop]].style.setProperty('display', 'none');
+                            this.ele[toggle[prop]].style.setProperty('display', 'none');
                         }
                     }
                 },                   
@@ -205,11 +190,10 @@ class ProjectStageTool{
         };
         return  this.Tool.create('Typ:',data);
     }
-    getTool(row,helplink,key){
+    getTool(property,key){
         return {
             0:{
-                link:row,
-                helplink:helplink,
+                property:property,
                 key:key,
                 type:'select',
                 attributes:{
@@ -218,90 +202,162 @@ class ProjectStageTool{
             }    
         };
     }
-    getSimpleTool(row,helplink,key){
-        var tool = this.getTool(row,helplink,key);
-            /*Anonymous Functions*/
+    getBasicTool(property,key){
+        /*
+         * property - reference to property
+         */
+        var tool = this.getTool(property,key);
+            /* Anonymous Function */
             tool[0]['onchange']=function(value){
-                console.log('ProjectStageTool::getSimpleTool');
-                console.log(value);
-                console.log(this.link);
-                console.log(this.helplink);
-                console.log(this.key);
-                /* SET PROPERTY KEY */
-                this.link[this.key]=value;
-                /* SET INPUT STYLE PROPERTY */
-                this.helplink.style[this.key]=value;
+                /* SET PROPERTY KEY VALUE */
+                this.property[this.key]=value;
             };
         return tool;
     }
-    getExtendedTool(row,helplink,key,glossary){
-        var tool = this.getTool(row,helplink,key);
-            /*Anonymous Functions*/
+    getAdvancedTool(property,key,ele){
+        /*
+         * property - reference to property
+         * ele - reference to element
+         */
+        var tool = this.getTool(property,key);
+            /* SET ELEMENT */
+            tool[0]['ele']=ele;
+            /* Anonymous Function */
+            tool[0]['onchange']=function(value){
+                /* SET PROPERTY KEY VALUE */
+                this.property[this.key]=value;
+                /* SET INPUT STYLE PROPERTY */
+                this.ele.style[this.key]=value;
+            };
+        return tool;
+    }
+    getExtendedTool(property,key,glossary,item){
+        /*
+         * property - reference to property
+         */
+        var tool = this.getTool(property,key);
+            /* SET GLOSSARY */
             tool[0]['glossary']=glossary;
+            /* Anonymous Function */
             tool[0]['onchange']=function(value){
-                console.log('ProjectStageTool::getSimpleTool');
-                console.log(value);
-                console.log(this.link);
-                console.log(this.helplink);
-                console.log(this.key);
-                /* SET PROPERTY KEY */
-                this.link[this.key[0]]=value;
+                console.log('ProjectStageTool::getExtendedTool()');
+                /* SET PROPERTY KEY VALUE */
+                this.property[this.key[0]]=value;
+                /* SET SECOND PROPERTY KEY VALUE */
+                this.property[this.key[1]] = this.glossary.getItemName(item,value);
+            };
+        return tool;
+    }/* COMPLEX */
+    getCompleteTool(property,key,ele,glossary,item){
+         /*
+         * property - reference to property
+         * ele - reference to element
+         */
+        var tool = this.getTool(property,key);
+            /* SET ELE */
+            tool[0]['ele']=ele;
+            /* SET GLOSSARY */
+            tool[0]['glossary']=glossary;
+            tool[0]['item']=item;
+            /* Anonymous Function */
+            tool[0]['onchange']=function(value){
+                console.log('ProjectStageTool::getCompleteTool()');
+                /* SET PROPERTY KEY VALUE */
+                this.property[this.key[0]]=value;
                 /* SET INPUT STYLE PROPERTY */
-                this.helplink.style[this.key[0]]=value;
-                console.log(this.glossary);
-                for(const prop in this.glossary){
-                    console.log(this.glossary[prop]);
-                    if(this.glossary[prop].v===value){
-                        console.log('FOUND');
-                        this.link[this.key[1]] = this.glossary[prop].n;
-                        break;
-                    }
-                }
+                this.ele.style[this.key[0]]=value;
+                /* SET SECOND PROPERTY KEY VALUE */
+                this.property[this.key[1]] = this.glossary.getItemName(item,value);
             };
         return tool;
     }
-    getExtendedOption(value,title,color,backgroundcolor,fontFamily){
+    getColorExtendedOption(value,title,color,backgroundColor,fontFamily){
+        return this.getExtendedOption(value,title,backgroundColor,color,fontFamily);
+    }
+    getExtendedOption(value,title,color,backgroundColor,fontFamily){
         var option=this.Utilities.getDefaultOptionProperties(value,title);
             option.color=color;
-            option.backgroundcolor=backgroundcolor;
+            option.backgroundColor=backgroundColor;
             option.fontFamily=fontFamily;
         return option;
     }
-    getFontFamily(rowStyle,inputEle){
+    getFontFamily(property,ele){
         console.log('ProjectStageTool::getFontFamily()');
-        console.log(rowStyle);
-        console.log(inputEle);
         var defaultFont={
-                0:this.Utilities.getDefaultOptionProperties(rowStyle.fontFamily,rowStyle.fontFamily)
+                0:this.Utilities.getDefaultOptionProperties(property['fontFamily'],property['fontFamily'])
             };
-            defaultFont[0].fontFamily=rowStyle.fontFamily;
+            /* SET OPTION STYLE PROPERTY */
+            defaultFont[0].fontFamily=property['fontFamily'];
         var all = {};
             for(var i=0;i<this.Glossary.text.getKeyCount('fontFamily');i++){
-                if(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v')!==rowStyle.fontFamily){
-                    all[i]=this.getExtendedOption(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'),'#000000','#FFFFFF',this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v'));
+                if(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v')===property['fontFamily']){
+                    continue;
                 }
+                let v = this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v');
+                /* OPTION: value,title,color,backgroundColor,fontFamily */
+                all[i]=this.getExtendedOption(v,v,'#000000','#FFFFFF',v);
             }
-        var data=this.getSimpleTool(rowStyle,inputEle,'fontFamily');
+        var data=this.getAdvancedTool(property,'fontFamily',ele);
             data[0]['default']=defaultFont;
             data[0]['all']=all;  
         return  this.Tool.create('Czcionka:',data);
     }
-    getBackgroundColor(title,rowStyle,inputEle){
-        console.log('ProjectStageTool::getBackgroundColor()');
-        var defaultBackgroundColor={
-                0:this.Utilities.getDefaultOptionProperties(rowStyle.backgroundColor,rowStyle.backgroundColorName)
+    setColorProperty(data,property,key,run){
+        console.log('ProjectStageTool::setColorProperty()');
+        var defaultColor = {
+                0:this.Utilities.getDefaultOptionProperties(property[key[0]],property[key[1]])
             };
-            defaultBackgroundColor[0].backgroundcolor=rowStyle.backgroundColor;
+        /* SET OPTION STYLE PROPERTY */
+        defaultColor[0][key[0]]=property[key[0]];
+        var self = this;
         var all = {};
             for(var i=0;i<this.Glossary.text.getKeyCount('color');i++){
-                if(this.Glossary.text.getKeyPropertyAttribute('color',i,'v')!==rowStyle.backgroundColor){
-                    all[i]=this.getExtendedOption(this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),this.Glossary.text.getKeyPropertyAttribute('color',i,'n'),'#FFFFFF',this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),'');
+                if(this.Glossary.text.getKeyPropertyAttribute('color',i,'v')===property[key[0]]){
+                    continue;/* SKIP */
                 }
-            }   
-        var data=this.getExtendedTool(rowStyle,inputEle,['backgroundColor','backgroundColorName'],this.Glossary.text.item.color);
-            data[0]['default']=defaultBackgroundColor;
-            data[0]['all']=all;  
+                let color = this.Glossary.text.getKeyPropertyAttribute('color',i,'v');
+                let backgroundColor = '#FFFFFF';
+                all[i]=run(self,color,this.Glossary.text.getKeyPropertyAttribute('color',i,'n'),color,backgroundColor,'');
+            }; 
+        data[0]['default']=defaultColor;
+        data[0]['all']=all;  
+    }
+    getSimpleBackgroundColor(title,property){
+        console.log('ProjectStageTool::getSimpleBackgroundColor()');
+        var key = ['backgroundColor','backgroundColorName'];
+        var data=this.getExtendedTool(property,key,this.Glossary.text,'color');
+        var run = function(self,value,title,color,backgroundColor,fontFamily){
+            return self.getExtendedOption(value,title,backgroundColor,color,fontFamily);
+        };
+        this.setColorProperty(data,property,key,run);   
+        return  this.Tool.create(title,data);
+    }
+    getExtendedBackgroundColor(title,property,ele){
+        console.log('ProjectStageTool::getExtendedBackgroundColor()');
+        /*
+         * property - reference to property
+         * ele - reference to element
+         */
+        var key = ['backgroundColor','backgroundColorName'];
+        var data=this.getCompleteTool(property,key,ele,this.Glossary.text,'color');    
+        var run = function(self,value,title,color,backgroundColor,fontFamily){
+            return self.getExtendedOption(value,title,backgroundColor,color,fontFamily);
+        };
+        this.setColorProperty(data,property,key,run);   
+        return  this.Tool.create(title,data);
+    }
+    getColor(title,property,ele){
+        console.log('ProjectStageTool::getColor()');
+        /*
+         * property - reference to property
+         * ele - reference to element
+         */
+        var key = ['color','colorName'];
+        var data=this.getCompleteTool(property,key,ele,this.Glossary.text,'color');     
+        var run = function(self,value,title,color,backgroundColor,fontFamily){
+            return self.getExtendedOption(value,title,color,backgroundColor,fontFamily);
+        };
+        this.setColorProperty(data,property,key,run);
         return  this.Tool.create(title,data);
     }
 }
-

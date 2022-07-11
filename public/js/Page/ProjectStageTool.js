@@ -358,7 +358,6 @@ class ProjectStageTool{
                 if(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v')===property['textAlign']){
                     continue;
                 }
-                
                 /* OPTION: value,title,color,backgroundColor,fontFamily */
                 all[i]=this.getExtendedOption(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v'),this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'n'),'#000000','#FFFFFF','');
             }
@@ -366,7 +365,73 @@ class ProjectStageTool{
             data[0]['default']=this.getDefaultOption(property,'textAlign','textAlignName');
             data[0]['all']=all;  
         return  this.Tool.create('Wyrównanie:',data);
-        //var textAlign=this.setValueStyle('textAlign','Wyrównanie:',this.getSelectKey(subsectionrow.paragraph.style.textAlign,subsectionrow.paragraph.style.textAlignName),this.getFontAlignList(subsectionrow.paragraph.style.textAlign),subsectionrow.paragraph.style,helplink.text.value);
+    }
+    getFontSize(property){
+        /* console.log('ProjectStageTool::getFontSize()'); */
+        /*
+         * property - reference for example subsectionrow.paragraph.style
+         * ele - references for example helplink.text
+         */
+        var key=['fontSize','fontSizeMeasurement'];
+        var data={
+            0:{
+                default:{
+                    0:this.Utilities.getDefaultOptionProperties(property['fontSize'],property['fontSize'])
+                },
+                all:this.getFontSizeList(property['fontSize'],75),
+                key:key,
+                property:property,
+                type:'select',
+                attributes:{
+                    class:'w-75'
+                }
+            },
+            1:{
+                default:{
+                    0:this.Utilities.getDefaultOptionProperties(property['fontSizeMeasurement'],property['fontSizeMeasurement'])
+                },
+                all:this.Utilities.getDefaultList(this.Glossary.text.item.measurement,property['fontSizeMeasurement']),
+                key:key,
+                property:property,
+                onchange:function(value){
+                    this.property[this.key[1]] = value;
+                    this.ele.style[key[0]]=this.property[key[0]]+value;
+                },
+                type:'select',
+                attributes:{
+                    class:'w-25'
+                }
+            }
+        };
+        /* TO DO 
+        size max
+        size min               
+        */
+        return data;     
+    }
+    getSimpleFontSize(property){
+        var data = this.getFontSize(property);
+            data[0]['onchange']=function(value){
+                this.property[this.key[0]] = value; 
+            };
+            data[1]['onchange']=function(value){
+                this.property[this.key[1]] = value;
+            }; 
+        return this.Tool.create('Rozmiar tekstu:',data);
+    }
+    getExtendedFontSize(property,ele){
+        var data = this.getFontSize(property);
+            data[0]['ele']=ele;
+            data[0]['onchange']=function(value){
+                this.property[this.key[0]] = value;
+                this.ele.style[this.key[0]]=value+this.property[this.key[1]];
+            };
+            data[1]['ele']=ele;
+            data[1]['onchange']=function(value){
+                this.property[this.key[1]] = value;
+                this.ele.style[this.key[0]]=this.property[this.key[0]]+value;
+            }; 
+        return this.Tool.create('Rozmiar tekstu:',data);
     }
     getDefaultOption(property,value,name){
         var d={
@@ -375,5 +440,17 @@ class ProjectStageTool{
             /* SET OPTION STYLE PROPERTY */
         d[0][value]=property[value];
         return d;
+    }
+    getFontSizeList(exception,max){
+        exception=parseInt(exception,10);
+        max=parseInt(max,10);
+        var value={};
+        for(var i=2;i<max+1;){
+            if(i!==exception){
+                value[i]=this.Utilities.getDefaultOptionProperties(i,i);  
+            }
+            i=i+2;
+        }
+        return value;
     }
 }

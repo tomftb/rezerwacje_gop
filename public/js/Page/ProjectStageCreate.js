@@ -828,21 +828,18 @@ class ProjectStageCreate{
         var tool3=this.Html.getCol(3);
         var tool4=this.Html.getCol(3);
             tool4.classList.add('pt-4');
-       
-            
-        //var fontSize=this.valueFontSizeModification('Rozmiar tekstu:',this.getDefaultFontSize(subsectionrow.style.fontSize,subsectionrow.style.fontSize),this.getFontSizeList(subsectionrow.style.fontSize),subsectionrow.style,helplink.value);
-        var fontSize=this.valueFontSizeModification('Rozmiar tekstu:',subsectionrow.paragraph.style,helplink.text.value);
-        
+
         var tabstop=this.createTextToolTabStop(isection,isub,isubrow,subsectionrow,helplink);
-        
-        tool1.appendChild(fontSize);
+        /* FONT SIZE */
+        tool1.appendChild(this.ProjectStageTool.getExtendedFontSize(subsectionrow.paragraph.style,helplink.text.value));
+        /* TEXT COLOR */
         tool1.appendChild(this.ProjectStageTool.getColor('Kolor tekstu:',subsectionrow.paragraph.style,helplink.text.value));
+        /* BACKGROUND COLOR */
         tool1.appendChild(this.ProjectStageTool.getExtendedBackgroundColor('Kolor tła:',subsectionrow.paragraph.style,helplink.text.value));
-  
-        
+        /* FONT FAMILY */
         tool2.appendChild(this.ProjectStageTool.getFontFamily(subsectionrow.paragraph.style,helplink.text.value));
+        /* TEXT ALIGN */
         tool2.appendChild(this.ProjectStageTool.getTextAlign(subsectionrow.paragraph.style,helplink.text.value));
-        //tool2.appendChild(textAlign);
         tool2.appendChild(tabstop);
                 
         /* LEFT EJECTION */
@@ -865,7 +862,6 @@ class ProjectStageCreate{
         mainDivCol.appendChild(mainDiv);
         
         return mainDivCol;
-        //return mainDiv;
     }
 
     createTabStopSectionTool(isection,isub,isubrow,subsectionrow,helplink){
@@ -921,10 +917,10 @@ class ProjectStageCreate{
         /* CONTINUE/NEW ELEMENT */
         //var newListElement=this.createNewListElement(subsectionrow);
         var newList=this.createNewListSelect(subsectionrow);
-        var fontSize=this.valueFontSizeModification('Rozmiar:',subsectionrow.list.style,helplink.list.value);
+        //var fontSize=this.valueFontSizeModification('Rozmiar:',subsectionrow.list.style,helplink.list.value);
         var color=this.setValueStyle('color','Kolor:',this.getDefaultColor(subsectionrow.list.style.color,subsectionrow.list.style.colorName),this.getColorList(subsectionrow.list.style.color),subsectionrow.list.style,helplink.list.value);
     
-        tool1.appendChild(fontSize);
+        tool1.appendChild(this.ProjectStageTool.getSimpleFontSize(subsectionrow.list.style));
         tool1.appendChild(color);
         /* GET BackgroundColor */
         tool1.appendChild(this.ProjectStageTool.getExtendedBackgroundColor('Kolor tła:',subsectionrow.list.style,helplink.list.value));
@@ -1365,50 +1361,6 @@ class ProjectStageCreate{
     setValueProperty(id,title,actdata,alldata,subsectionRowProperty){
         return this.setValuePropertyExtended(id,title,actdata,alldata,subsectionRowProperty,null);
     }
-    
-    valueFontSizeModification(title,subsectionRowStyle,helplinkValue){
-        //console.log('ProjectStageCreate::valueFontSizeModification()');
-        /*
-        
-        console.log(subsectionRowStyle);
-        console.log(this.Glossary);
-        */
-        var idFont = 'fontSize';
-        var idMeasurement = 'fontSizeMeasurement';
-        
-        var actFont = this.getDefaultFontSize(subsectionRowStyle.fontSize,subsectionRowStyle.fontSize);
-        var allFont = this.getFontSizeList(subsectionRowStyle.fontSize,subsectionRowStyle.fontSizeMax);
-        
-        var actMeasurement = this.getDefaultFontSize(subsectionRowStyle.fontSizeMeasurement,subsectionRowStyle.fontSizeMeasurement);
-        var allMeasurement = this.getFontSizeMeasurementList(subsectionRowStyle.fontSizeMeasurement);
-        
-        var doubleSelect = this.createTextToolDoubleSelect(idFont,title,actFont,allFont,idMeasurement,actMeasurement,allMeasurement);
-        //var classObject=this; 
-        //console.log(doubleSelect);
-        doubleSelect.childNodes[1].childNodes[0].onchange = function(){
-            /*
-            console.log(this);
-            console.log('select 1');
-            console.log(this.value);
-             */
-            /* SET NEW VALUE */
-            subsectionRowStyle[idFont]=this.value;
-            /* SET NEW VALUE ELEMENT STYLE */
-            helplinkValue.style[idFont]=this.value+subsectionRowStyle[idMeasurement];
-        };
-        doubleSelect.childNodes[1].childNodes[1].onchange = function(){
-            /*
-            console.log(this);
-            console.log('select 2');
-            console.log(this.value);
-            */
-            /* SET NEW VALUE */
-            subsectionRowStyle[idMeasurement]=this.value;
-            /* SET NEW VALUE ELEMENT STYLE */
-            helplinkValue.style[idFont]=subsectionRowStyle[idFont]+this.value;
-        };
-        return doubleSelect;
-    }
     setInputStyle(title,subsectionrow,def,measurement,min,max,all){
         /*console.log('ProjectStageCreate::setInputStyle()');
         console.log(subsectionrow);
@@ -1570,10 +1522,7 @@ class ProjectStageCreate{
         return defaultValue;
     }
 
-    getDefaultFontSize(value,title){
-        var defaultValue=this.getExtendedSelectKey(value,title,value);
-        return defaultValue;
-    }
+
     getSectionCount(exception){
         exception=parseInt(exception,10);
         var value={};
@@ -1591,15 +1540,6 @@ class ProjectStageCreate{
         for(var i=0;i<this.Glossary.text.getKeyCount('color');i++){
             if(this.Glossary.text.getKeyPropertyAttribute('color',i,'v')!==exception){
                 value[i]=this.getExtendedSelectKeyProperties(this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),this.Glossary.text.getKeyPropertyAttribute('color',i,'n'),this.Glossary.text.getKeyPropertyAttribute('color',i,'v'),'#FFFFFF','');
-            }
-        }
-        return value;
-    }
-    getFontSizeMeasurementList(exception){
-        var value={};        
-        for(var i=0;i<this.Glossary.text.getKeyCount('measurement');i++){
-            if(this.Glossary.text.getKeyPropertyAttribute('measurement',i,'v')!==exception){
-                value[i]=this.Utilities.getDefaultOptionProperties(this.Glossary.text.getKeyPropertyAttribute('measurement',i,'v'),this.Glossary.text.getKeyPropertyAttribute('measurement',i,'n'));
             }
         }
         return value;
@@ -1645,18 +1585,7 @@ class ProjectStageCreate{
         }
         return value;
     }
-    getFontSizeList(exception,max){
-        exception=parseInt(exception,10);
-         max=parseInt(max,10);
-        var value={};
-        for(var i=2;i<max+1;){
-            if(i!==exception){
-                value[i]=this.Utilities.getDefaultOptionProperties(i,i);  
-            }
-            i=i+2;
-        }
-        return value;
-    }
+
     createSectionPageTool(section,helplink){
         console.log('ProjectStageCreate::createSectionPageTool()');
         console.log(section);

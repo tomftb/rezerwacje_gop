@@ -920,5 +920,43 @@ class ProjectStageTool{
             control.innerText = label;
             return control; 
     }
+    createControlTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,mainDiv,TabStop){
+        helplinkISubRow['tool']={};
+        /* CREATE TEXT TOOL */
+        var textTool = this.getTextTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,TabStop);
+        /* CREATE TEXT TOOL */
+        var textTabStopTool = this.getTabStopTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow.text,TabStop);
+        var textTabStopToolControl = this.createControl('Tabulatory',textTabStopTool);
+        /* SET LINK TO tabstopTool */
+            helplinkISubRow.tool['tabstopControl']=textTabStopToolControl;
+            helplinkISubRow.tool['tabstop']=textTabStopTool;
+        /* CREATE LIST TOOL */
+        var listTool = this.getListTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
+        var listToolControl = this.createControl('Opcje listy',listTool);
+        /* SET LINK TO listTool */
+            helplinkISubRow.tool['listControl']=listToolControl;
+            helplinkISubRow.tool['list']=listTool;
+        var mainCol = this.Html.getCol(12);
+            mainCol.classList.add('mt-1','mb-1');
+        var mainDivControl=this.Html.getRow();   
+        var mainDivControlCol = this.Html.getCol(4);
+        
+        var mainDivControlCol1 = this.Html.getCol(1);   
+        var mainDivControlCol2 = this.Html.getCol(7);
+
+            mainDivControlCol.classList.add('btn-group','btn-group-toggle');
+            mainDivControlCol.appendChild(this.createControl('Formatowanie',textTool));
+            mainDivControlCol.appendChild(textTabStopToolControl);
+            mainDivControlCol.appendChild(listToolControl);
+    
+            mainDivControl.appendChild(mainDivControlCol1);
+            mainDivControl.appendChild(mainDivControlCol);
+            mainDivControl.appendChild(mainDivControlCol2);
+            mainCol.appendChild(mainDivControl);
+            mainDiv.appendChild(mainCol);    
+            mainDiv.appendChild(textTool);  
+            mainDiv.appendChild(textTabStopTool);  
+            mainDiv.appendChild(listTool);
+    }
 
 }

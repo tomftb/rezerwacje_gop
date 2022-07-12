@@ -426,7 +426,7 @@ class ProjectStageCreate{
         mainDiv.appendChild(this.createSubsectionRow(isection,isub,iSubRow,subsectionrow,helplink));
         /* CREATE ERROR DIV */
         mainDiv.appendChild(this.createTextError(helplink[iSubRow]));  
-        this.createControlTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow],mainDiv);
+        this.ProjectStageTool.createControlTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow],mainDiv,this.TabStop);
         /* SETUP HELPLINK */
         helplink[iSubRow]['all']=mainDiv;
         return mainDiv;
@@ -572,46 +572,6 @@ class ProjectStageCreate{
             mainDiv.appendChild(errorDiv);  
         return mainDiv;
     }
-    createControlTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,mainDiv){
-        helplinkISubRow['tool']={};
-        /* CREATE TEXT TOOL */
-        var textTool = this.ProjectStageTool.getTextTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,this.TabStop);
-        /* CREATE TEXT TOOL */
-        var textTabStopTool = this.ProjectStageTool.getTabStopTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow.text,this.TabStop);
-        var textTabStopToolControl = this.ProjectStageTool.createControl('Tabulatory',textTabStopTool);
-        /* SET LINK TO tabstopTool */
-            helplinkISubRow.tool['tabstopControl']=textTabStopToolControl;
-            helplinkISubRow.tool['tabstop']=textTabStopTool;
-        /* CREATE LIST TOOL */
-        var listTool = this.ProjectStageTool.getListTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
-        var listToolControl = this.ProjectStageTool.createControl('Opcje listy',listTool);
-        /* SET LINK TO listTool */
-            helplinkISubRow.tool['listControl']=listToolControl;
-            helplinkISubRow.tool['list']=listTool;
-        var mainCol = this.Html.getCol(12);
-            mainCol.classList.add('mt-1','mb-1');
-        var mainDivControl=this.Html.getRow();   
-        var mainDivControlCol = this.Html.getCol(4);
-        
-        var mainDivControlCol1 = this.Html.getCol(1);   
-        var mainDivControlCol2 = this.Html.getCol(7);
-
-            mainDivControlCol.classList.add('btn-group','btn-group-toggle');
-            mainDivControlCol.appendChild(this.ProjectStageTool.createControl('Formatowanie',textTool));
-            mainDivControlCol.appendChild(textTabStopToolControl);
-            mainDivControlCol.appendChild(listToolControl);
-    
-            mainDivControl.appendChild(mainDivControlCol1);
-            mainDivControl.appendChild(mainDivControlCol);
-            mainDivControl.appendChild(mainDivControlCol2);
-            mainCol.appendChild(mainDivControl);
-            mainDiv.appendChild(mainCol);    
-            mainDiv.appendChild(textTool);  
-            mainDiv.appendChild(textTabStopTool);  
-            mainDiv.appendChild(listTool);
-    }
-
-
     setToolList(value,run){
         console.log('ProjectStageCreate::setToolList()');
         console.log(run);

@@ -920,7 +920,7 @@ class ProjectStageTool{
             control.innerText = label;
             return control; 
     }
-    createControlTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,mainDiv,TabStop){
+    getControlTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,mainDiv,TabStop){
         helplinkISubRow['tool']={};
         /* CREATE TEXT TOOL */
         var textTool = this.getTextTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,TabStop);

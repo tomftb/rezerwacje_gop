@@ -426,7 +426,7 @@ class ProjectStageCreate{
         mainDiv.appendChild(this.createSubsectionRow(isection,isub,iSubRow,subsectionrow,helplink));
         /* CREATE ERROR DIV */
         mainDiv.appendChild(this.createTextError(helplink[iSubRow]));  
-        this.ProjectStageTool.createControlTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow],mainDiv,this.TabStop);
+        this.ProjectStageTool.getControlTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow],mainDiv,this.TabStop);
         /* SETUP HELPLINK */
         helplink[iSubRow]['all']=mainDiv;
         return mainDiv;

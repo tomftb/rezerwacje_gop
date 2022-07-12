@@ -514,7 +514,7 @@ class ProjectStageCreate{
         var tool4=this.Html.getCol(3);  
         
             tool1.appendChild(this.ProjectStageTool.setSectionSubSection(iSection,section[iSection].subsection,helplink.section[iSection].subsection,this));
-            tool4.appendChild(this.createRemoveSectionButton(iSection,section,helplink.section));
+            tool4.appendChild(this.ProjectStageTool.createRemoveSectionButton(iSection,section,helplink.section));
 
         mainDivSection.appendChild(tool1);
         mainDivSection.appendChild(tool2);
@@ -806,29 +806,7 @@ class ProjectStageCreate{
         
         return(div); 
     }
-    createRemoveSectionButton(iSection,section,helplink){
-        /* console.log('ProjectStageCreate::createRemoveSectionButton()'); */
-        var div=document.createElement('div');
-            div.setAttribute('class','btn btn-danger float-right');
-            div.innerText='Usuń sekcję';
 
-            /* CLOSURE */
-            div.onclick=function(){
-                if (confirm('Potwierdź usunięcie sekcji') === true) {
-                    //console.log(helplink);
-                    //console.log(section);
-                    helplink[iSection].main.all.remove();
-                    delete helplink[iSection];
-                    delete section[iSection];
-                    
-                } else {
-                    // NOTHING TO DO
-                }
-                //this.updateErrorStack(id);      
-            };
-           
-        return(div); 
-    }
     createButtonCol(button){
         //console.log('ProjectStageCreate::createButtonCol()');
         /*

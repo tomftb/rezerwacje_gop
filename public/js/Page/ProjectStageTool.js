@@ -1048,4 +1048,25 @@ class ProjectStageTool{
         }
         return value;
     }
+    createRemoveSectionButton(iSection,section,helplink){
+        /* console.log('ProjectStageTool::createRemoveSectionButton()'); */
+        var div=document.createElement('div');
+            div.setAttribute('class','btn btn-danger float-right');
+            div.innerText='Usuń sekcję';
+            /* CLOSURE */
+            div.onclick=function(){
+                if (confirm('Potwierdź usunięcie sekcji') === true) {
+                    //console.log(helplink);
+                    //console.log(section);
+                    helplink[iSection].main.all.remove();
+                    delete helplink[iSection];
+                    delete section[iSection];
+                    
+                } else {
+                    // NOTHING TO DO
+                }
+                //this.updateErrorStack(id);      
+            };
+        return(div); 
+    }
 }

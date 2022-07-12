@@ -375,7 +375,7 @@ class ProjectStageTool{
         var multiplier = parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
         var key = ['listLevel','listLevelName'];
         var data=this.getTool(property,key);
-            data[0]['default']=this.getDefaultOption(property.list.property,'listLevel','listLevelName');
+            data[0]['default']=this.getDefaultOption(property.list.property,key[0],key[1]);
             data[0]['property']=property;
             data[0]['ele']=ele;
             data[0]['multiplier']=multiplier;
@@ -401,7 +401,8 @@ class ProjectStageTool{
         }
         return value;
     }
-    getNewList(subsectionrow){
+    getNewList(property){
+        console.log('ProjectStageTool::getNewList()');
         var all={
             0:{
                 v:'y',
@@ -412,7 +413,23 @@ class ProjectStageTool{
                 n:'Kontynuacja'
             }
         };
-        return this.setValueProperty('newList','Nowa Lista:',this.getSelectKey(subsectionrow.list.property.newList,subsectionrow.list.property.newListName),this.getNewElementList(all,subsectionrow.list.property.newList),subsectionrow.list.property);
+        var key = ['newList','newListName'];
+        var data=this.getTool(property,key);
+            data[0]['default']=this.getDefaultOption(property,key[0],key[1]);
+            data[0]['property']=property;
+            data[0]['Glossary']=all;
+            data[0]['onchange']= function(value){               
+                    this.property[this.key[0]]=value;
+                    for(const prop in this.Glossary){
+                        if(this.Glossary[prop].v===value){
+                            this.property[this.key[1]]=this.Glossary[prop].n;
+                            break;
+                        };
+                    };    
+                    //console.log(this.property);
+            };
+            data[0]['all']=this.getNewElementList(all,property.newList); 
+        return  this.Tool.create('Nowa Lista:',data); 
     }
     getNewElementList(data,exception){
         var list={};        

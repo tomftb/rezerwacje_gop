@@ -815,11 +815,7 @@ class ProjectStageCreate{
         var tool2=this.Html.getCol(3);
         var tool3=this.Html.getCol(3);
         var tool4=this.Html.getCol(3);
-            
-        //console.log(this.Glossary.list);
-
-        /* LIST TYPE  */
-        var listType=this.setValueProperty('listType','Typ listy:',this.getSelectKey(subsectionrow.list.style.listType,subsectionrow.list.style.listTypeName),this.getListTypeList(subsectionrow.list.style.listType),subsectionrow.list.style);   
+    
         /* LIST LEVEL  */
         var listLevel=this.createListLevelSelect(subsectionrow,helplink);
         //var listLevel=this.setValueProperty('listLevel','Poziom listy:',this.getSelectKey(subsectionrow.list.property.listLevel,subsectionrow.list.property.listLevelName),this.getListLevelList(subsectionrow.list.property.listLevel,subsectionrow.list.property.listLevelMax),subsectionrow.list.property);
@@ -840,7 +836,8 @@ class ProjectStageCreate{
         /* */
 
         tool2.appendChild(listLevel);
-        tool2.appendChild(listType);
+        /* LIST TYPE  */
+        tool2.appendChild(this.ProjectStageTool.getListType(subsectionrow.list.style));
         tool2.appendChild(newList);
         
         mainDiv.appendChild(tool1);
@@ -1205,15 +1202,6 @@ class ProjectStageCreate{
         for(var i=0;i<this.Glossary.text.getKeyCount('textAlign');i++){
             if(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v')!==exception){
                 value[i]=this.Utilities.getDefaultOptionProperties(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v'),this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'n'));
-            }
-        }
-        return value;
-    }
-    getListTypeList(exception){
-        var value={};        
-        for(var i=0;i<this.Glossary.list.getKeyCount('listType');i++){
-            if(this.Glossary.list.getKeyPropertyAttribute('listType',i,'v')!==exception){
-                value[i]=this.Utilities.getDefaultOptionProperties(this.Glossary.list.getKeyPropertyAttribute('listType',i,'v'),this.Glossary.list.getKeyPropertyAttribute('listType',i,'n'));
             }
         }
         return value;

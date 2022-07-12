@@ -13,6 +13,17 @@ class ProjectStageTool{
         this.Tool = new Tool();
         //this.TabStop = Stage.TabStop;
     }
+    getAllOptions(Glossary,property,key,run){
+        console.log('ProjectStageTool::getAllOptions()');
+        var all = {}; 
+        for(var i=0;i<Glossary.getKeyCount(key);i++){
+            if(Glossary.getKeyPropertyAttribute(key,i,'v')===property[key]){
+                continue;
+            }
+            all[i]=run(this,Glossary,key,i);
+        };
+        return all;
+    }
     getIndentation(property,ele){
         console.log('ProjectStageTool::getIndentation()');
         /*
@@ -232,7 +243,6 @@ class ProjectStageTool{
                 this.property[this.key]=value;
                 /* SET INPUT STYLE PROPERTY */
                 this.ele.style[this.key]=value;
-                console.log(this.ele);
             };
         return tool;
     }
@@ -288,42 +298,30 @@ class ProjectStageTool{
     }
     setColorProperty(data,property,key,run){
         console.log('ProjectStageTool::setColorProperty()');
-        var self = this;
-        var all = {};
-            for(var i=0;i<this.Glossary.text.getKeyCount('color');i++){
-                if(this.Glossary.text.getKeyPropertyAttribute('color',i,'v')===property[key[0]]){
-                    continue;/* SKIP */
-                }
-                let color = this.Glossary.text.getKeyPropertyAttribute('color',i,'v');
-                let backgroundColor = '#FFFFFF';
-                all[i]=run(self,color,this.Glossary.text.getKeyPropertyAttribute('color',i,'n'),color,backgroundColor,'');
-            }; 
         data[0]['default']=this.getDefaultOption(property,key[0],key[1]);
-        data[0]['all']=all;  
+        data[0]['all']=this.getAllOptions(this.Glossary.text,property,'color',run); 
     }
-    getSimpleBackgroundColor(property){
-        console.log('ProjectStageTool::getSimpleBackgroundColor()');
-        var key = ['backgroundColor','backgroundColorName'];
-        var data=this.getExtendedTool(property,key,this.Glossary.text,'color');
-        var run = function(self,value,title,color,backgroundColor,fontFamily){
-            return self.getExtendedOption(value,title,backgroundColor,color,fontFamily);
+    getBackgroundColor(property,key,data){
+        var run = function(self,Glossary,key,i){
+            let v = Glossary.getKeyPropertyAttribute(key,i,'v'); 
+            return self.getExtendedOption(v,self.Glossary.text.getKeyPropertyAttribute(key,i,'n'),'#FFFFFF',v,'');
         };
         this.setColorProperty(data,property,key,run);   
-        return  this.Tool.create('Kolor tła:',data);
+        return this.Tool.create('Kolor tła:',data);
+    }
+    getSimpleBackgroundColor(property){
+        /* console.log('ProjectStageTool::getSimpleBackgroundColor()'); */
+        var key = ['backgroundColor','backgroundColorName'];
+        return  this.getBackgroundColor(property,key,this.getExtendedTool(property,key,this.Glossary.text,'color'));
     }
     getExtendedBackgroundColor(property,ele){
-        console.log('ProjectStageTool::getExtendedBackgroundColor()');
+        /* console.log('ProjectStageTool::getExtendedBackgroundColor()'); */
         /*
          * property - reference to property
          * ele - reference to element
          */
         var key = ['backgroundColor','backgroundColorName'];
-        var data=this.getCompleteTool(property,key,ele,this.Glossary.text,'color');    
-        var run = function(self,value,title,color,backgroundColor,fontFamily){
-            return self.getExtendedOption(value,title,backgroundColor,color,fontFamily);
-        };
-        this.setColorProperty(data,property,key,run);   
-        return  this.Tool.create('Kolor tła:',data);
+        return this.getBackgroundColor(property,key,this.getCompleteTool(property,key,ele,this.Glossary.text,'color'));
     }
     getSimpleColor(property){
         console.log('ProjectStageTool::getSimpleColor()');
@@ -332,8 +330,9 @@ class ProjectStageTool{
          */
         var key = ['color','colorName'];
         var data=this.getExtendedTool(property,key,this.Glossary.text,'color');     
-        var run = function(self,value,title,color,backgroundColor,fontFamily){
-            return self.getExtendedOption(value,title,color,backgroundColor,fontFamily);
+        var run = function(self,Glossary,key,i){
+            let v = Glossary.getKeyPropertyAttribute(key,i,'v');
+            return self.getExtendedOption(v,self.Glossary.text.getKeyPropertyAttribute(key,i,'n'),v,'#FFFFFF','');
         };
         this.setColorProperty(data,property,key,run);
         return  this.Tool.create('Kolor tekstu:',data);
@@ -345,42 +344,42 @@ class ProjectStageTool{
          */
         var key = ['color','colorName'];
         var data=this.getCompleteTool(property,key,ele,this.Glossary.text,'color');     
-        var run = function(self,value,title,color,backgroundColor,fontFamily){
-            return self.getExtendedOption(value,title,color,backgroundColor,fontFamily);
+        var run = function(self,Glossary,key,i){
+            let v = Glossary.getKeyPropertyAttribute(key,i,'v');
+            return self.getExtendedOption(v,self.Glossary.text.getKeyPropertyAttribute(key,i,'n'),v,'#FFFFFF','');
         };
         this.setColorProperty(data,property,key,run);
         return  this.Tool.create('Kolor tekstu:',data);
     }
     getTextAlign(property,ele){
         console.log('ProjectStageTool::getTextAlign()');
-        var all = {};
-            for(var i=0;i<this.Glossary.text.getKeyCount('textAlign');i++){
-                
-                if(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v')===property['textAlign']){
-                    continue;
-                }
-                /* OPTION: value,title,color,backgroundColor,fontFamily */
-                all[i]=this.getExtendedOption(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v'),this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'n'),'#000000','#FFFFFF','');
-            }
+        var run = function(self,Glossary,key,i){
+            return self.getExtendedOption(Glossary.getKeyPropertyAttribute(key,i,'v'),Glossary.getKeyPropertyAttribute(key,i,'n'),'#000000','#FFFFFF','');  
+        };
         var data=this.getAdvancedTool(property,'textAlign',ele);
             data[0]['default']=this.getDefaultOption(property,'textAlign','textAlignName');
-            data[0]['all']=all;  
+            data[0]['all']=this.getAllOptions(this.Glossary.text,property,'textAlign',run);  
         return  this.Tool.create('Wyrównanie:',data);
+    }
+    getListType(property){   
+        
+        var run = function(self,Glossary,key,i){
+            return self.Utilities.getDefaultOptionProperties(Glossary.getKeyPropertyAttribute(key,i,'v'),Glossary.getKeyPropertyAttribute(key,i,'n'));
+        };
+        var data=this.getBasicTool(property,'listType');
+            data[0]['default']=this.getDefaultOption(property,'listType','listTypeName');
+            data[0]['all']=this.getAllOptions(this.Glossary.list,property,'listType',run);  
+        return  this.Tool.create('Typ listy:',data); 
     }
     getFontFamily(property){
         console.log('ProjectStageTool::getFontFamily()');
-        var all = {};
-            for(var i=0;i<this.Glossary.text.getKeyCount('fontFamily');i++){
-                if(this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v')===property['fontFamily']){
-                    continue;
-                }
-                let v = this.Glossary.text.getKeyPropertyAttribute('fontFamily',i,'v');
-                /* OPTION: value,title,color,backgroundColor,fontFamily */
-                all[i]=this.getExtendedOption(v,v,'#000000','#FFFFFF',v);
-            }
+        var run = function(self,Glossary,key,i){
+            let v = Glossary.getKeyPropertyAttribute(key,i,'v');
+            return self.getExtendedOption(v,v,'#000000','#FFFFFF',v);  
+        };
         var data=this.getTool(property,'fontFamily');
             data[0]['default']=this.getDefaultOption(property,'fontFamily','fontFamily');
-            data[0]['all']=all;  
+            data[0]['all']=this.getAllOptions(this.Glossary.text,property,'fontFamily',run);  
         return  data;
     }
     getSimpleFontFamily(property){
@@ -547,7 +546,7 @@ class ProjectStageTool{
         TabStop.setProperty('leadingSign',this.Glossary.text.item.leadingSign); 
     }
     setDefaultOption(paragraphTabStop,option,tabstop){
-        console.log('ProjectStageCreate::setDefaultOption()\r\nPARAGRAPH TABSTOP:');
+        console.log('ProjectStageTool::setDefaultOption()\r\nPARAGRAPH TABSTOP:');
         console.log(paragraphTabStop);
         if(paragraphTabStop==='-1'){
             console.log('PARAGRAM TABSTOP < 0 -> RETURN FALSE');
@@ -583,7 +582,7 @@ class ProjectStageTool{
             input.setAttribute('type','checkbox');
             input.classList.add('form-check-input');
             input.onclick = function (){
-                console.log('ProjectStageCreate::createTextToolCheckBox()');
+                console.log('ProjectStageTool::createTextToolCheckBox()');
                 console.log('ID - '+id);
                 console.log(this);
                 if(this.value==='0'){
@@ -609,7 +608,7 @@ class ProjectStageTool{
     }
     setTextDecorationToolEntryProperties(decorationProp,subsectionRowAttr){
         /*
-          console.log('ProjectStageCreate::setTextDecorationToolEntryProperties()');
+          console.log('ProjectStageTool::setTextDecorationToolEntryProperties()');
           console.log('decorationProp');
           console.log(decorationProp);
           console.log('subsectionRowStyle');
@@ -667,7 +666,7 @@ class ProjectStageTool{
     }
     setTextDecorationToolEntryCheck(input,check){
         /*
-         * console.log('ProjectStageCreate::setTextDecorationToolEntryCheck()');
+         * console.log('ProjectStageTool::setTextDecorationToolEntryCheck()');
          * console.log(check);
          */
        
@@ -685,7 +684,7 @@ class ProjectStageTool{
     }
     setValueCheckBoxStyle(id,value,helplinkValue){
         /**/
-        console.log('ProjectStageCreate::setValueCheckBoxStyle()');
+        console.log('ProjectStageTool::setValueCheckBoxStyle()');
         console.log('ID:');
         console.log(id);
         console.log('VALUE:');
@@ -717,7 +716,7 @@ class ProjectStageTool{
         }
         return falseValue;
     }
-        setValueStyleTextDecoration(actEleTextDecoration,value,styleToSetUp){
+    setValueStyleTextDecoration(actEleTextDecoration,value,styleToSetUp){
         var tmpvalue=actEleTextDecoration;
         var tmpvaluearray=tmpvalue.split(' ');
             if(value==='1'){
@@ -735,14 +734,14 @@ class ProjectStageTool{
             }
     }
     getTextDecoration(tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
-        //console.log('ProjectStageCreate::createTextDecorationTool()');
+        //console.log('ProjectStageTool::createTextDecorationTool()');
         for(const prop of this.Glossary.text.getKey('decoration').entries()) {
             this.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue);  
         } 
     }
     getTextTool(isection,isub,isubrow,subsectionrow,helplink,TabStop){
         /*
-        console.log('ProjectStageCreate::createTextToolSection()');
+        console.log('ProjectStageTool::getTextTool()');
         console.log(subsectionrow);
         console.log(subsectionrow.style);
         console.log('helplink');
@@ -816,4 +815,5 @@ class ProjectStageTool{
         console.log(mainDivCol);
         return mainDivCol;
     }
+
 }

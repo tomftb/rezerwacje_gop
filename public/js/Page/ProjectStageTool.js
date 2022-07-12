@@ -365,9 +365,11 @@ class ProjectStageTool{
         var run = function(self,Glossary,key,i){
             return self.Utilities.getDefaultOptionProperties(Glossary.getKeyPropertyAttribute(key,i,'v'),Glossary.getKeyPropertyAttribute(key,i,'n'));
         };
-        var data=this.getBasicTool(property,'listType');
-            data[0]['default']=this.getDefaultOption(property,'listType','listTypeName');
-            data[0]['all']=this.getAllOptions(this.Glossary.list,property,'listType',run);  
+        var key=['listType','listTypeName'];
+        var data=this.getExtendedTool(property,key,this.Glossary.list,key[0])
+            data[0]['default']=this.getDefaultOption(property,key[0],key[1]);
+            data[0]['all']=this.getAllOptions(this.Glossary.list,property,key[0],run);  
+            
         return  this.Tool.create('Typ listy:',data); 
     }
     getListLevel(property,ele){
@@ -417,11 +419,11 @@ class ProjectStageTool{
         var data=this.getTool(property,key);
             data[0]['default']=this.getDefaultOption(property,key[0],key[1]);
             data[0]['property']=property;
-            data[0]['Glossary']=all;
+            data[0]['glossary']=all;
             data[0]['onchange']= function(value){               
                     this.property[this.key[0]]=value;
                     for(const prop in this.Glossary){
-                        if(this.Glossary[prop].v===value){
+                        if(this.glossary[prop].v===value){
                             this.property[this.key[1]]=this.Glossary[prop].n;
                             break;
                         };
@@ -834,6 +836,39 @@ class ProjectStageTool{
       
         mainDivCol.appendChild(mainDiv);
 
+        return mainDivCol;
+    }
+    createListToolSection(isection,isub,isubrow,subsectionrow,helplink){
+        // console.log('ProjectStageCreate::createListToolSection()');
+        var mainDivCol=this.Html.getCol(12);
+            mainDivCol.classList.add('d-none','pt-1','pb-1');
+            mainDivCol.style.backgroundColor='#e6e6e6';
+        var mainDiv=this.Html.getRow();
+        var tool1=this.Html.getCol(3);
+        var tool2=this.Html.getCol(3);
+        var tool3=this.Html.getCol(3);
+        var tool4=this.Html.getCol(3);
+    
+        tool1.appendChild(this.getSimpleFontSize(subsectionrow.list.style));
+        tool1.appendChild(this.getSimpleColor(subsectionrow.list.style));
+        /* GET BackgroundColor */
+        tool1.appendChild(this.getSimpleBackgroundColor(subsectionrow.list.style));
+        /* GET FONT FAMILY SELECT */
+        tool1.appendChild(this.getSimpleFontFamily(subsectionrow.list.style));
+        /* SET CSS BOLD, ITALIC ... */
+        this.getTextDecoration(tool4,isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
+        /* LIST LEVEL  */
+        tool2.appendChild(this.getListLevel(subsectionrow,helplink));
+        /* LIST TYPE  */
+        tool2.appendChild(this.getListType(subsectionrow.list.style));
+        /* CONTINUE/NEW ELEMENT */
+        tool2.appendChild(this.getNewList(subsectionrow.list.property));
+        
+        mainDiv.appendChild(tool1);
+        mainDiv.appendChild(tool2);
+        mainDiv.appendChild(tool3);
+        mainDiv.appendChild(tool4);
+        mainDivCol.appendChild(mainDiv);
         return mainDivCol;
     }
     getTabStopTool(isection,isub,isubrow,subsectionrow,helplink,TabStop){

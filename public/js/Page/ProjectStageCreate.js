@@ -583,7 +583,7 @@ class ProjectStageCreate{
             helplinkISubRow.tool['tabstopControl']=textTabStopToolControl;
             helplinkISubRow.tool['tabstop']=textTabStopTool;
         /* CREATE LIST TOOL */
-        var listTool = this.createListToolSection(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
+        var listTool = this.ProjectStageTool.createListToolSection(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
         var listToolControl = this.ProjectStageTool.createControl('Opcje listy',listTool);
         /* SET LINK TO listTool */
             helplinkISubRow.tool['listControl']=listToolControl;
@@ -610,44 +610,6 @@ class ProjectStageCreate{
             mainDiv.appendChild(textTabStopTool);  
             mainDiv.appendChild(listTool);
     }
-    createListToolSection(isection,isub,isubrow,subsectionrow,helplink){
-        // console.log('ProjectStageCreate::createListToolSection()');
-        var mainDivCol=this.Html.getCol(12);
-            mainDivCol.classList.add('d-none','pt-1','pb-1');
-            mainDivCol.style.backgroundColor='#e6e6e6';
-        var mainDiv=this.Html.getRow();
-        var tool1=this.Html.getCol(3);
-        var tool2=this.Html.getCol(3);
-        var tool3=this.Html.getCol(3);
-        var tool4=this.Html.getCol(3);
-    
-       
-
-        /* CONTINUE/NEW ELEMENT */
-        var newList=this.ProjectStageTool.getNewList(subsectionrow.list.property);
-
-        tool1.appendChild(this.ProjectStageTool.getSimpleFontSize(subsectionrow.list.style));
-        tool1.appendChild(this.ProjectStageTool.getSimpleColor(subsectionrow.list.style));
-        /* GET BackgroundColor */
-        tool1.appendChild(this.ProjectStageTool.getSimpleBackgroundColor(subsectionrow.list.style));
-        /* GET FONT FAMILY SELECT */
-        tool1.appendChild(this.ProjectStageTool.getSimpleFontFamily(subsectionrow.list.style));
-        /* SET CSS BOLD, ITALIC ... */
-        this.ProjectStageTool.getTextDecoration(tool4,isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
-        /* LIST LEVEL  */
-        tool2.appendChild(this.ProjectStageTool.getListLevel(subsectionrow,helplink));
-        /* LIST TYPE  */
-        tool2.appendChild(this.ProjectStageTool.getListType(subsectionrow.list.style));
-        tool2.appendChild(newList);
-        
-        mainDiv.appendChild(tool1);
-        mainDiv.appendChild(tool2);
-        mainDiv.appendChild(tool3);
-        mainDiv.appendChild(tool4);
-        mainDivCol.appendChild(mainDiv);
-        return mainDivCol;
-    }
-
 
 
     setToolList(value,run){

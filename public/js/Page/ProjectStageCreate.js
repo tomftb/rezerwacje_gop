@@ -583,7 +583,7 @@ class ProjectStageCreate{
             helplinkISubRow.tool['tabstopControl']=textTabStopToolControl;
             helplinkISubRow.tool['tabstop']=textTabStopTool;
         /* CREATE LIST TOOL */
-        var listTool = this.ProjectStageTool.createListToolSection(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
+        var listTool = this.ProjectStageTool.getListTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
         var listToolControl = this.ProjectStageTool.createControl('Opcje listy',listTool);
         /* SET LINK TO listTool */
             helplinkISubRow.tool['listControl']=listToolControl;

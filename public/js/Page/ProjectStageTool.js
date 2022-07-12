@@ -838,7 +838,7 @@ class ProjectStageTool{
 
         return mainDivCol;
     }
-    createListToolSection(isection,isub,isubrow,subsectionrow,helplink){
+    getListTool(isection,isub,isubrow,subsectionrow,helplink){
         // console.log('ProjectStageCreate::createListToolSection()');
         var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('d-none','pt-1','pb-1');

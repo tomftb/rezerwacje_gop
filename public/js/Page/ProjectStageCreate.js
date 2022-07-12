@@ -624,7 +624,7 @@ class ProjectStageCreate{
        
 
         /* CONTINUE/NEW ELEMENT */
-        var newList=this.ProjectStageTool.createNewListSelect(subsectionrow);
+        var newList=this.ProjectStageTool.getNewList(subsectionrow);
 
         tool1.appendChild(this.ProjectStageTool.getSimpleFontSize(subsectionrow.list.style));
         tool1.appendChild(this.ProjectStageTool.getSimpleColor(subsectionrow.list.style));

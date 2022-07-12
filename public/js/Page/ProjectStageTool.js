@@ -401,7 +401,7 @@ class ProjectStageTool{
         }
         return value;
     }
-    createNewListSelect(subsectionrow){
+    getNewList(subsectionrow){
         var all={
             0:{
                 v:'y',

@@ -988,19 +988,45 @@ class ProjectStageTool{
                 },
                 all:this.getSectionCount(subSectionCount,self.Property.subsectionMax),
                 self:self,
+                subsection:subsection,
+                iSection:iSection,
+                helplinkSubsection:helplinkSubsection,
                 oldValue:0,
                 oldIndex:0,
                 glossary:this.Glossary.text,
                 /* Anonymous Function */
                 onchange:function(t){
                     /* t - this */
-                    
+                    this.oldValue=parseInt(this.oldValue,10);
+                    var newValue=parseInt(t.value,10);
+                        if(this.oldValue<newValue){
+                            for(var i = this.oldValue+1; i<newValue+1 ;i++ ){
+                                this.subsection[i]=this.self.StageData.createSubsection();
+                                /* FIRST ALWAYS NEW LINE */
+                                //subsection[i].subsectionrow[0].data.valuenewline='n';
+                                this.subsection[i].subsectionrow[0].paragraph.property.valuenewline='y';
+                                /* CREATE NEW DOM ELEMENT */
+                                this.self.helplink.section[this.iSection].main.body.appendChild(this.self.createSubsection(this.iSection,i,this.subsection[i],this.helplinkSubsection));
+                            }             
+                            return true;
+                        }
+                        if (confirm('Potwierdź zmianę ilości kolumn. Zostaną bezpowrotnie usunięte kolumny!') === true) {                   
+                            for(var i = Object.keys(this.subsection).length-1; i>newValue ;i-- ){
+                                delete this.subsection[i];
+                                this.helplinkSubsection[i].all.remove();
+                                delete this.helplinkSubsection[i];
+                            }
+                            return true;
+                        }
+                        else{
+                            this.selectedIndex = oldIndex;
+                            this.value = oldValue;
+                        }
                 },
                 onfocus:function(t){
                     /* t - this */
                     this.oldIndex = t.selectedIndex;
                     this.oldValue = t.value;
-                    console.log('onfocus');
                 },
                 type:'select',
                 attributes:{
@@ -1008,46 +1034,7 @@ class ProjectStageTool{
                 }
             }
         };
-        var tool = this.Tool.create('Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',data);
-            //helplinkSubsection.tool['indentation'] = tool;
-        return  tool;
-       
-        var subSectionEle=this.createTextToolSelect('section','Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',this.getSelectKey(subSectionCount-1,subSectionCount),this.getSectionCount(subSectionCount));//this.Property.subsectionMin
-        //var self=this;    
-        var oldValue = 0;
-        var oldIndex = 0;
-            subSectionEle.childNodes[1].onfocus = function () {
-                oldIndex = this.selectedIndex;
-                oldValue = this.value;
-            };
-            subSectionEle.childNodes[1].onchange = function () { 
-                    oldValue=parseInt(oldValue,10);
-                var newValue=parseInt(this.value,10);
-                if(oldValue<newValue){
-                    for(var i = oldValue+1; i<newValue+1 ;i++ ){
-                        subsection[i]=self.StageData.createSubsection();
-                        /* FIRST ALWAYS NEW LINE */
-                        //subsection[i].subsectionrow[0].data.valuenewline='n';
-                        subsection[i].subsectionrow[0].paragraph.property.valuenewline='y';
-                        /* CREATE NEW DOM ELEMENT */
-                        self.helplink.section[iSection].main.body.appendChild(self.createSubsection(iSection,i,subsection[i],helplinkSubsection));
-                    }             
-                  return true;
-                }
-                if (confirm('Potwierdź zmianę ilości kolumn. Zostaną bezpowrotnie usunięte kolumny!') === true) {                   
-                    for(var i = Object.keys(subsection).length-1; i>newValue ;i-- ){
-                        delete subsection[i];
-                        helplinkSubsection[i].all.remove();
-                        delete helplinkSubsection[i];
-                    }
-                    return true;
-                }
-                else{
-                    this.selectedIndex = oldIndex;
-                    this.value = oldValue;
-                }                
-            };
-        return subSectionEle;
+        return  this.Tool.create('Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',data);
     }
     getSectionCount(exception,max){
         exception=parseInt(exception,10);

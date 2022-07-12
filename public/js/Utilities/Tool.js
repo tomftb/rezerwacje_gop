@@ -46,6 +46,7 @@ class Tool{
             /* REST */         
             select.appendChild(this.Html.createOptionGroup('Dostępne',data.all));
             this.setOnChange(select,data);
+            this.setOnFocus(select,data);
             
         return select;
     }
@@ -60,10 +61,19 @@ class Tool{
         return div;
     }
     setOnChange(ele,data){
-        if(data.hasOwnProperty('onchange')){
-            ele.onchange = function(){
-                data.onchange(this.value);
-            };
-        }
+        if(!data.hasOwnProperty('onchange')){
+            return null;
+        };
+        ele.onchange = function(){
+            data.onchange(this);
+        };
+    }
+    setOnFocus(ele,data){
+        if(!data.hasOwnProperty('onfocus')){
+            return null;
+        };
+        ele.onfocus = function(){
+            data.onchange(this);
+        };
     }
 }

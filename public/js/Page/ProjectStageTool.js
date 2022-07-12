@@ -815,5 +815,29 @@ class ProjectStageTool{
         console.log(mainDivCol);
         return mainDivCol;
     }
-
+    createControl(label,ele){
+        /* CONTROL */
+        var control = document.createElement('button');
+            control.setAttribute('type','button');
+            control.classList.add('btn','btn-outline-dark','btn-sm');
+            control.onclick = function (){
+                if(ele.classList.contains('d-none')){
+                    ele.classList.remove('d-none');
+                }
+                else{
+                    ele.classList.add('d-none');
+                };
+                if(this.classList.contains('btn-outline-dark')){
+                    this.classList.remove('btn-outline-dark');
+                    this.classList.add('btn-dark');
+                }
+                else{
+                    this.classList.add('btn-outline-dark');
+                    this.classList.remove('btn-dark');
+                };
+                
+            };
+            control.innerText = label;
+            return control; 
+    }
 }

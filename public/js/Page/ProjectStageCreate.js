@@ -56,7 +56,6 @@ class ProjectStageCreate{
         this.DocPreview = new DocPreview();
         this.Utilities = new Utilities();
         this.ProjectStageTool = new ProjectStageTool(this);
-
     }
     getXhrParm(type,task,method){
         return {
@@ -133,7 +132,7 @@ class ProjectStageCreate{
     }    
     details(response){  
         try{
-              /* SETUP STAGE DATA */
+            /* SETUP STAGE DATA */
             this.StageData = new StageData(this.Glossary,this.Stage.Property);
             this.StageData.setStage(this.Items.parseResponse(response).data);
         }catch(error){
@@ -152,14 +151,10 @@ class ProjectStageCreate{
             this.Property=this.Stage.Property.text;
             /* SET STAGE CREATE TEXT DEFAULT DEPARTMENT LIST */
             this.Department=this.Stage.Property.department;
-           
-            //this.StageData.Stage = this.Items.parseResponse(response).data;  
-            //this.StageData.iSection = this.Utilities
             /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
             this.helplink=this.getEmptyHelpLink();
             /* TO DO IN FUTURE -> ADD setCloseModal multi id's */
             this.Modal.clearData();
-            //this.Items.setCloseModal(this.Const,'show',this.Const.defaultTask+this.data['data']['value']['const'].i);
             /* CLEAR ERROR STACK */
             this.ErrorStack={};
             /* SET CONSTS */
@@ -177,7 +172,6 @@ class ProjectStageCreate{
                     v:this.StageData.Stage.data.departmentId
                 }
             };
-            //throw 'test-stop-1234';
             this.createHead(form,stageDepartment);      
              /* ASSING PREVIEW FIELD */           
             form.appendChild(this.createPreview());  
@@ -204,7 +198,6 @@ class ProjectStageCreate{
             throw 'An Application Error Has Occurred!';
         }
     }
-
     block(){
         try{
             console.log('ProjectStageCreate::block()');
@@ -258,7 +251,6 @@ class ProjectStageCreate{
             input.setAttribute('placeholder','Enter title');
             input.setAttribute('aria-describedby',"titleHelp" );
             titleInputDiv.appendChild(input);
-        
             //this.helplink['title']=input;
         var helpValue=document.createTextNode('Staraj sie wprowadzić jednoznaczy tytuł.Należy wprowadzić minimalnie 1 znak, a maksymalnie 1024 znaki.');     
          
@@ -375,12 +367,7 @@ class ProjectStageCreate{
         return mainDivHeader;
     }
     createSubsection(iSection,iSub,subsection,helplinkSubsection){
-        /*
-        console.log('ProjectStageCreate::createSubsection()');
-        console.log(subsection);
-        console.log('helplink');
-        console.log(helplink);
-        */
+        // console.log('ProjectStageCreate::createSubsection()');
         /* CREATE HELPLINK SUBSECTION */
         helplinkSubsection[iSub]=this.getHelpLinkSubsection();
         
@@ -391,33 +378,20 @@ class ProjectStageCreate{
         var runFunction='createSubsectionRowGroup';
         var runExtendedFunction='createExtendedSubsectionRow';
         for(const iR in subsection.subsectionrow){   
-            /* VALUE NEW LINE */
-            //console.log(subsection.subsectionrow[iR].data.valuenewline);
             /* SET NEW HELPLINK SUBSECTION ROW */
             helplinkSubsection[iSub].row[iR]=this.getHelpLinkSubsectionRow();
             /* DYNAMIC RUN FUNCTION CREATE SUBSECTION ROW */
             mainDivSubsection.appendChild(this[runFunction](iSection,iSub,iR,subsection.subsectionrow,helplinkSubsection[iSub].row));
-            //mainDivSubsection.appendChild(this[runFunction](iSection,iSub,iR,subsection.subsectionrow[iR],helplink.row[iR]));
             /* SWAP TO EXTENDED FUNCTION */
             runFunction=runExtendedFunction;
             /* INCREMENT iROW */
             iRow++;
-        } 
-        /*
-        console.log('iRow:');
-        console.log(iRow);
-        */
-        
+        }         
         helplinkSubsection[iSub].dynamic=mainDivSubsection;
-        
-        mainDivBtn.appendChild(this.createButtonRow(this.addSubsectionRow(iSection,iSub,iRow,subsection.subsectionrow,helplinkSubsection[iSub])));
-                        
+        mainDivBtn.appendChild(this.createButtonRow(this.addSubsectionRow(iSection,iSub,iRow,subsection.subsectionrow,helplinkSubsection[iSub])));            
         mainDiv.appendChild(mainDivSubsection);
-                    
         mainDiv.appendChild(mainDivBtn);
-
         /* SET SUBSECTION HELPLINK ELEMENT */
-        
         helplinkSubsection[iSub].all=mainDiv;
         return mainDiv;
     }
@@ -479,8 +453,6 @@ class ProjectStageCreate{
             labelDiv.classList.add('mr-0','pr-0');
         var valueDiv=this.Html.getCol(10);
         var removeDiv=this.Html.getCol(1);
-            //removeDiv.classList.add('float-right');
-            //removeDiv.appendChild(this.getRemoveButton("rmsubsection-"+isection+'-'+isub+'-'+isubrow));
             removeDiv.appendChild(this.getRemoveButton(isubrow,subsectionrow,helplink));
         var v = document.createTextNode(subsectionrow[isubrow].paragraph.property.value.toString());
         /* LABEL */
@@ -510,7 +482,6 @@ class ProjectStageCreate{
             input.style.fontStyle=this.setFontStyle(subsectionrow[isubrow].paragraph.style.fontStyle,'ITALIC','');
             input.style.textDecoration=this.setFontStyle(subsectionrow[isubrow].paragraph.style.underline,'UNDERLINE','')+" "+this.setFontStyle(subsectionrow[isubrow].paragraph.style['line-through'],'line-through','');
             input.style.textAlign=subsectionrow[isubrow].paragraph.style.textAlign;
-            
             /* SETUP HELPLINK TO FIELD INPUT */
             helplink[isubrow]={
                 text:{
@@ -521,15 +492,12 @@ class ProjectStageCreate{
                     value:document.createElement('span')
                 }
             };
-            
             labelDiv.appendChild(label);
             valueDiv.appendChild(input);
-            
             mainDivSectionLabel.appendChild(sectionLabel);
             mainDiv.appendChild(labelDiv);
             mainDiv.appendChild(valueDiv);
             mainDiv.appendChild(removeDiv);
-            
             mainDivCol.appendChild(mainDivSectionLabel);
             mainDivCol.appendChild(mainDiv);
             return mainDivCol;
@@ -539,7 +507,6 @@ class ProjectStageCreate{
         console.log('ProjectStageCreate::createSectionTool()');
         console.log('section');
         console.log(section);
-
         var mainDivSection=this.Html.getRow();
         var tool1=this.Html.getCol(3);
         var tool2=this.Html.getCol(3);    
@@ -611,13 +578,13 @@ class ProjectStageCreate{
         var textTool = this.ProjectStageTool.getTextTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,this.TabStop);
         /* CREATE TEXT TOOL */
         var textTabStopTool = this.ProjectStageTool.getTabStopTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow.text,this.TabStop);
-        var textTabStopToolControl = this.createControl('Tabulatory',textTabStopTool);
+        var textTabStopToolControl = this.ProjectStageTool.createControl('Tabulatory',textTabStopTool);
         /* SET LINK TO tabstopTool */
             helplinkISubRow.tool['tabstopControl']=textTabStopToolControl;
             helplinkISubRow.tool['tabstop']=textTabStopTool;
         /* CREATE LIST TOOL */
         var listTool = this.createListToolSection(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
-        var listToolControl = this.createControl('Opcje listy',listTool);
+        var listToolControl = this.ProjectStageTool.createControl('Opcje listy',listTool);
         /* SET LINK TO listTool */
             helplinkISubRow.tool['listControl']=listToolControl;
             helplinkISubRow.tool['list']=listTool;
@@ -630,7 +597,7 @@ class ProjectStageCreate{
         var mainDivControlCol2 = this.Html.getCol(7);
 
             mainDivControlCol.classList.add('btn-group','btn-group-toggle');
-            mainDivControlCol.appendChild(this.createControl('Formatowanie',textTool));
+            mainDivControlCol.appendChild(this.ProjectStageTool.createControl('Formatowanie',textTool));
             mainDivControlCol.appendChild(textTabStopToolControl);
             mainDivControlCol.appendChild(listToolControl);
     
@@ -642,31 +609,6 @@ class ProjectStageCreate{
             mainDiv.appendChild(textTool);  
             mainDiv.appendChild(textTabStopTool);  
             mainDiv.appendChild(listTool);
-    }
-    createControl(label,ele){
-        /* CONTROL */
-        var control = document.createElement('button');
-            control.setAttribute('type','button');
-            control.classList.add('btn','btn-outline-dark','btn-sm');
-            control.onclick = function (){
-                if(ele.classList.contains('d-none')){
-                    ele.classList.remove('d-none');
-                }
-                else{
-                    ele.classList.add('d-none');
-                };
-                if(this.classList.contains('btn-outline-dark')){
-                    this.classList.remove('btn-outline-dark');
-                    this.classList.add('btn-dark');
-                }
-                else{
-                    this.classList.add('btn-outline-dark');
-                    this.classList.remove('btn-dark');
-                };
-                
-            };
-            control.innerText = label;
-            return control; 
     }
     createListToolSection(isection,isub,isubrow,subsectionrow,helplink){
         // console.log('ProjectStageCreate::createListToolSection()');

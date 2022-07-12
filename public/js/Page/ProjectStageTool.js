@@ -39,9 +39,10 @@ class ProjectStageTool{
                 property:property,
                 glossary:this.Glossary.text,
                 /* Anonymous Function */
-                onchange:function(value){
-                        this.property['indentationSpecial'] = value;
-                        this.property['indentationSpecialName'] = this.glossary.getItemName('indentationSpecial',value);
+                onchange:function(t){
+                    /* t - this */
+                    this.property['indentationSpecial'] = t.value;
+                    this.property['indentationSpecialName'] = this.glossary.getItemName('indentationSpecial',t.value);
                 },
                 type:'select',
                 attributes:{
@@ -51,8 +52,9 @@ class ProjectStageTool{
             1:{
                 property:property,
                 value:property.indentation,
-                onchange:function(value){
-                    this.property['indentation'] = value;
+                onchange:function(t){
+                    /* t - this */
+                    this.property['indentation'] = t.value;
                 },
                 type:'input',
                 attributes:{
@@ -67,8 +69,9 @@ class ProjectStageTool{
                 all:this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,property['indentationMeasurement']),
                 property:property,
                 /* Anonymous Function */
-                onchange:function(value){
-                    this.property['indentationMeasurement'] = value;
+                onchange:function(t){
+                    /* t - this */
+                    this.property['indentationMeasurement'] = t.value;
                 },
                 type:'select',
                 attributes:{
@@ -91,8 +94,9 @@ class ProjectStageTool{
                 value:property[keys[0]],
                 /* VALUE */
                 key:keys[0],
-                onchange:function(value){
-                    this.property[this.key] = value;
+                onchange:function(t){
+                    /* t - this */
+                    this.property[this.key] = t.value;
                 },
                 type:'input',
                 attributes:{
@@ -107,8 +111,9 @@ class ProjectStageTool{
                 all:this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,property[keys[1]]),
                 key:keys[1],
                 property:property,
-                onchange:function(value){
-                        this.property[this.key] = value;
+                onchange:function(t){
+                    /* t - this */
+                    this.property[this.key] = t.value;
                 },
                 type:'select',
                 attributes:{
@@ -170,17 +175,18 @@ class ProjectStageTool{
                 ele:ele,
                 property:property,
                 glossary:Glossary,
-                onchange:function(value){
+                onchange:function(t){
+                    /* t - this */
                     var toggle = ['listControl','list','indentation'];
                     /* TO DO -> indetation -> SET TO INPUT BLOCK ? */
-                    this.property['paragraph'] = value;
+                    this.property['paragraph'] = t.value;
                     for(const prop in this.glossary){
-                            if(this.glossary[prop].v===value){
+                            if(this.glossary[prop].v===t.value){
                                 this.property['paragraphName'] = this.glossary[prop].n;
                                 break;
                             }
                     }
-                    if(value==='l'){
+                    if(t.value==='l'){
                         /* l - list - show list tool */
                         for(const prop in toggle){
                             //console.log(run.tool[prop]);
@@ -223,9 +229,10 @@ class ProjectStageTool{
          */
         var tool = this.getTool(property,key);
             /* Anonymous Function */
-            tool[0]['onchange']=function(value){
+            tool[0]['onchange']=function(t){
+                /* t - this */
                 /* SET PROPERTY KEY VALUE */
-                this.property[this.key]=value;
+                this.property[this.key]=t.value;
             };
         return tool;
     }
@@ -238,11 +245,12 @@ class ProjectStageTool{
             /* SET ELEMENT */
             tool[0]['ele']=ele;
             /* Anonymous Function */
-            tool[0]['onchange']=function(value){
+            tool[0]['onchange']=function(t){
+                /* t -this */
                 /* SET PROPERTY KEY VALUE */
-                this.property[this.key]=value;
+                this.property[this.key]=t.value;
                 /* SET INPUT STYLE PROPERTY */
-                this.ele.style[this.key]=value;
+                this.ele.style[this.key]=t.value;
             };
         return tool;
     }
@@ -254,12 +262,13 @@ class ProjectStageTool{
             /* SET GLOSSARY */
             tool[0]['glossary']=glossary;
             /* Anonymous Function */
-            tool[0]['onchange']=function(value){
+            tool[0]['onchange']=function(t){
+                /* t - this */
                 console.log('ProjectStageTool::getExtendedTool()');
                 /* SET PROPERTY KEY VALUE */
-                this.property[this.key[0]]=value;
+                this.property[this.key[0]]=t.value;
                 /* SET SECOND PROPERTY KEY VALUE */
-                this.property[this.key[1]] = this.glossary.getItemName(item,value);
+                this.property[this.key[1]] = this.glossary.getItemName(item,t.value);
             };
         return tool;
     }/* COMPLEX */
@@ -275,14 +284,15 @@ class ProjectStageTool{
             tool[0]['glossary']=glossary;
             tool[0]['item']=item;
             /* Anonymous Function */
-            tool[0]['onchange']=function(value){
+            tool[0]['onchange']=function(t){
+                /* t - this */
                 console.log('ProjectStageTool::getCompleteTool()');
                 /* SET PROPERTY KEY VALUE */
-                this.property[this.key[0]]=value;
+                this.property[this.key[0]]=t.value;
                 /* SET INPUT STYLE PROPERTY */
-                this.ele.style[this.key[0]]=value;
+                this.ele.style[this.key[0]]=t.value;
                 /* SET SECOND PROPERTY KEY VALUE */
-                this.property[this.key[1]] = this.glossary.getItemName(item,value);
+                this.property[this.key[1]] = this.glossary.getItemName(item,t.value);
             };
         return tool;
     }
@@ -381,10 +391,11 @@ class ProjectStageTool{
             data[0]['property']=property;
             data[0]['ele']=ele;
             data[0]['multiplier']=multiplier;
-            data[0]['onchange']= function(value){
+            data[0]['onchange']= function(t){
+                /* t - this */
                  /* SET NEW VALUE */
-                var newValue = parseInt(value)*this.multiplier;
-                    property.list.property['listLevel']=value;
+                var newValue = parseInt(t.value)*this.multiplier;
+                    property.list.property['listLevel']=t.value;
                     property.paragraph.style['leftEjection']=newValue;
                     /* HELPLINK */
                     ele.text.leftEjection.value=newValue;
@@ -420,10 +431,11 @@ class ProjectStageTool{
             data[0]['default']=this.getDefaultOption(property,key[0],key[1]);
             data[0]['property']=property;
             data[0]['glossary']=all;
-            data[0]['onchange']= function(value){               
-                    this.property[this.key[0]]=value;
+            data[0]['onchange']= function(t){
+                /* t - this */
+                    this.property[this.key[0]]=t.value;
                     for(const prop in this.Glossary){
-                        if(this.glossary[prop].v===value){
+                        if(this.glossary[prop].v===t.value){
                             this.property[this.key[1]]=this.Glossary[prop].n;
                             break;
                         };
@@ -455,17 +467,19 @@ class ProjectStageTool{
     }
     getSimpleFontFamily(property){
         var data = this.getFontFamily(property);
-            data[0]['onchange']=function(value){
-                this.property[this.key] = value; 
+            data[0]['onchange']=function(t){
+                /* t - this */
+                this.property[this.key] = t.value; 
             };
         return this.Tool.create('Czcionka:',data);
     }
     getExtendedFontFamily(property,ele){
         var data = this.getFontFamily(property);
             data[0]['ele']=ele;
-            data[0]['onchange']=function(value){
-                this.property[this.key] = value; 
-                this.ele.style[this.key] = value;
+            data[0]['onchange']=function(t){
+                /* t - this */
+                this.property[this.key] = t.value; 
+                this.ele.style[this.key] = t.value;
             };
         return this.Tool.create('Czcionka:',data);
     }
@@ -496,9 +510,10 @@ class ProjectStageTool{
                 all:this.Utilities.getDefaultList(this.Glossary.text.item.measurement,property['fontSizeMeasurement']),
                 key:key,
                 property:property,
-                onchange:function(value){
-                    this.property[this.key[1]] = value;
-                    this.ele.style[key[0]]=this.property[key[0]]+value;
+                onchange:function(t){
+                    /* t - this */
+                    this.property[this.key[1]] = t.value;
+                    this.ele.style[key[0]]=this.property[key[0]]+t.value;
                 },
                 type:'select',
                 attributes:{
@@ -514,25 +529,29 @@ class ProjectStageTool{
     }
     getSimpleFontSize(property){
         var data = this.getFontSize(property);
-            data[0]['onchange']=function(value){
-                this.property[this.key[0]] = value; 
+            data[0]['onchange']=function(t){
+                /* t - this */
+                this.property[this.key[0]] = t.value; 
             };
-            data[1]['onchange']=function(value){
-                this.property[this.key[1]] = value;
+            data[1]['onchange']=function(t){
+                /* t - this */
+                this.property[this.key[1]] = t.value;
             }; 
         return this.Tool.create('Rozmiar tekstu:',data);
     }
     getExtendedFontSize(property,ele){
         var data = this.getFontSize(property);
             data[0]['ele']=ele;
-            data[0]['onchange']=function(value){
-                this.property[this.key[0]] = value;
-                this.ele.style[this.key[0]]=value+this.property[this.key[1]];
+            data[0]['onchange']=function(t){
+                /* t - this */
+                this.property[this.key[0]] = t.value;
+                this.ele.style[this.key[0]]=t.value+this.property[this.key[1]];
             };
             data[1]['ele']=ele;
-            data[1]['onchange']=function(value){
-                this.property[this.key[1]] = value;
-                this.ele.style[this.key[0]]=this.property[this.key[0]]+value;
+            data[1]['onchange']=function(t){
+                /* t - this */
+                this.property[this.key[1]] = t.value;
+                this.ele.style[this.key[0]]=this.property[this.key[0]]+t.value;
             }; 
         return this.Tool.create('Rozmiar tekstu:',data);
     }
@@ -582,8 +601,9 @@ class ProjectStageTool{
                 property:subsectionrow,
                 glossary:this.Glossary.text,
                 /* Anonymous Function */
-                onchange:function(value){
-                        this.property['tabstop'] = value;
+                onchange:function(t){
+                    /* t - this */
+                    this.property['tabstop'] = t.value;
                 },
                 type:'select',
                 attributes:{
@@ -958,5 +978,87 @@ class ProjectStageTool{
             mainDiv.appendChild(textTabStopTool);  
             mainDiv.appendChild(listTool);
     }
-
+    setSectionSubSection(iSection,subsection,helplinkSubsection,self){
+        /* console.log('ProjectStageCreate::setSectionSubSection()'); */
+        var subSectionCount = Object.keys(subsection).length;
+        var data={
+            0:{
+                default:{
+                    0:this.Utilities.getDefaultOptionProperties(subSectionCount-1,subSectionCount)
+                },
+                all:this.getSectionCount(subSectionCount,self.Property.subsectionMax),
+                self:self,
+                oldValue:0,
+                oldIndex:0,
+                glossary:this.Glossary.text,
+                /* Anonymous Function */
+                onchange:function(t){
+                    /* t - this */
+                    
+                },
+                onfocus:function(t){
+                    /* t - this */
+                    this.oldIndex = t.selectedIndex;
+                    this.oldValue = t.value;
+                    console.log('onfocus');
+                },
+                type:'select',
+                attributes:{
+                    class:'w-50'
+                }
+            }
+        };
+        var tool = this.Tool.create('Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',data);
+            //helplinkSubsection.tool['indentation'] = tool;
+        return  tool;
+       
+        var subSectionEle=this.createTextToolSelect('section','Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',this.getSelectKey(subSectionCount-1,subSectionCount),this.getSectionCount(subSectionCount));//this.Property.subsectionMin
+        //var self=this;    
+        var oldValue = 0;
+        var oldIndex = 0;
+            subSectionEle.childNodes[1].onfocus = function () {
+                oldIndex = this.selectedIndex;
+                oldValue = this.value;
+            };
+            subSectionEle.childNodes[1].onchange = function () { 
+                    oldValue=parseInt(oldValue,10);
+                var newValue=parseInt(this.value,10);
+                if(oldValue<newValue){
+                    for(var i = oldValue+1; i<newValue+1 ;i++ ){
+                        subsection[i]=self.StageData.createSubsection();
+                        /* FIRST ALWAYS NEW LINE */
+                        //subsection[i].subsectionrow[0].data.valuenewline='n';
+                        subsection[i].subsectionrow[0].paragraph.property.valuenewline='y';
+                        /* CREATE NEW DOM ELEMENT */
+                        self.helplink.section[iSection].main.body.appendChild(self.createSubsection(iSection,i,subsection[i],helplinkSubsection));
+                    }             
+                  return true;
+                }
+                if (confirm('Potwierdź zmianę ilości kolumn. Zostaną bezpowrotnie usunięte kolumny!') === true) {                   
+                    for(var i = Object.keys(subsection).length-1; i>newValue ;i-- ){
+                        delete subsection[i];
+                        helplinkSubsection[i].all.remove();
+                        delete helplinkSubsection[i];
+                    }
+                    return true;
+                }
+                else{
+                    this.selectedIndex = oldIndex;
+                    this.value = oldValue;
+                }                
+            };
+        return subSectionEle;
+    }
+    getSectionCount(exception,max){
+        exception=parseInt(exception,10);
+        var value={};
+        var j=1;
+        for(var i=0;i<max;i++){
+            if(exception!==j){
+                value[i]=this.Utilities.getDefaultOptionProperties(i,j);
+            }
+            j++;
+        }
+        return value;
+    }
 }

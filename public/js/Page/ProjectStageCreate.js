@@ -513,7 +513,7 @@ class ProjectStageCreate{
         var tool3=this.Html.getCol(3);
         var tool4=this.Html.getCol(3);  
         
-            tool1.appendChild(this.setSectionSubSection(iSection,section[iSection].subsection,helplink.section[iSection].subsection));
+            tool1.appendChild(this.ProjectStageTool.setSectionSubSection(iSection,section[iSection].subsection,helplink.section[iSection].subsection,this));
             tool4.appendChild(this.createRemoveSectionButton(iSection,section,helplink.section));
 
         mainDivSection.appendChild(tool1);
@@ -522,46 +522,7 @@ class ProjectStageCreate{
         mainDivSection.appendChild(tool4);
         return mainDivSection;
     }
-    setSectionSubSection(iSection,subsection,helplinkSubsection){
-        /* console.log('ProjectStageCreate::setSectionSubSection()'); */
-        var subSectionCount = Object.keys(subsection).length;
-        var subSectionEle=this.createTextToolSelect('section','Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',this.getSelectKey(subSectionCount-1,subSectionCount),this.getSectionCount(subSectionCount));//this.Property.subsectionMin
-        var self=this;    
-        var oldValue = 0;
-        var oldIndex = 0;
-            subSectionEle.childNodes[1].onfocus = function () {
-                oldIndex = this.selectedIndex;
-                oldValue = this.value;
-            };
-            subSectionEle.childNodes[1].onchange = function () { 
-                    oldValue=parseInt(oldValue,10);
-                var newValue=parseInt(this.value,10);
-                if(oldValue<newValue){
-                    for(var i = oldValue+1; i<newValue+1 ;i++ ){
-                        subsection[i]=self.StageData.createSubsection();
-                        /* FIRST ALWAYS NEW LINE */
-                        //subsection[i].subsectionrow[0].data.valuenewline='n';
-                        subsection[i].subsectionrow[0].paragraph.property.valuenewline='y';
-                        /* CREATE NEW DOM ELEMENT */
-                        self.helplink.section[iSection].main.body.appendChild(self.createSubsection(iSection,i,subsection[i],helplinkSubsection));
-                    }             
-                  return true;
-                }
-                if (confirm('Potwierdź zmianę ilości kolumn. Zostaną bezpowrotnie usunięte kolumny!') === true) {                   
-                    for(var i = Object.keys(subsection).length-1; i>newValue ;i-- ){
-                        delete subsection[i];
-                        helplinkSubsection[i].all.remove();
-                        delete helplinkSubsection[i];
-                    }
-                    return true;
-                }
-                else{
-                    this.selectedIndex = oldIndex;
-                    this.value = oldValue;
-                }                
-            };
-        return subSectionEle;
-    }
+
     createTextError(helplink){
         /* console.log('ProjectStageCreate::createTextError()'); */
         var mainDiv=this.Html.getCol(12); 
@@ -665,17 +626,7 @@ class ProjectStageCreate{
         divMain.appendChild(div);
         return divMain;
     }
-    createTextToolSelect(id,title,actdata,alldata){
-        //console.log('ProjectStageCreate::createTextToolSelect()');
-        //console.log(id);
-        var div = this.createInputHead(title);    
-        var select=this.createSelect(id,id,'form-control-sm form-control w-100');
-            select.appendChild(this.Html.createOptionGroup('Domyślny:',actdata));  
-            select.appendChild(this.Html.createOptionGroup('Dostępne:',alldata));  
-            div.appendChild(select);
-            //console.log(select);
-        return div;
-    }
+
     createInputHead(title){
         var div=document.createElement('div');
             div.setAttribute('class','w-100 mt-2');
@@ -710,21 +661,7 @@ class ProjectStageCreate{
             };
         return optionGroup;
     }
-    setValueStyle(id,title,actdata,alldata,subsectionRowStyle,helplinkValue){
-        //console.log('ProjectStageCreate::createTextToolSelectExtend()');
-        var select = this.createTextToolSelect(id,title,actdata,alldata);
-        /* CLOSURE - DOMKNIĘCIE*/
-        select.childNodes[1].onchange = function(){
-             /* SET NEW VALUE */
-            subsectionRowStyle[id]=this.value;
-             /* SET NEW VALUE ELEMENT STYLE/PROPERTY */
-            helplinkValue.style[id]=this.value;
-        };
-        return select;
-    }
-    setValueProperty(id,title,actdata,alldata,subsectionRowProperty){
-        return this.setValuePropertyExtended(id,title,actdata,alldata,subsectionRowProperty,null);
-    }
+
     setInputStyle(title,subsectionrow,def,measurement,min,max,all){
         /*console.log('ProjectStageCreate::setInputStyle()');
         console.log(subsectionrow);
@@ -814,49 +751,6 @@ class ProjectStageCreate{
             }
         };
     }
-    getSelectKey(value,title){
-        var selectKey={};
-            selectKey[0]=this.Utilities.getDefaultOptionProperties(value,title);
-        return selectKey;
-    }
-    getExtendedSelectKey(value,title,key){
-        var selectKey={};
-            selectKey[key]=this.Utilities.getDefaultOptionProperties(value,title);
-        return selectKey;
-    }
-    getExtendedSelectKeyProperties(value,title,color,backgroundcolor,fontFamily){
-        var selectKeyProp=this.Utilities.getDefaultOptionProperties(value,title);
-            selectKeyProp.color=color;
-            selectKeyProp.backgroundcolor=backgroundcolor;
-            selectKeyProp.fontFamily=fontFamily;
-        return selectKeyProp;
-    }
-    getSectionCount(exception){
-        exception=parseInt(exception,10);
-        var value={};
-        var j=1;
-        for(var i=0;i<this.Property.subsectionMax;i++){
-            if(exception!==j){
-                value[i]=this.Utilities.getDefaultOptionProperties(i,j);
-            }
-            j++;
-        }
-        return value;
-    }
-
-    getMeasurementList(exception){
-        return this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,exception);
-    }
-    getFontAlignList(exception){
-        var value={};        
-        for(var i=0;i<this.Glossary.text.getKeyCount('textAlign');i++){
-            if(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v')!==exception){
-                value[i]=this.Utilities.getDefaultOptionProperties(this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'v'),this.Glossary.text.getKeyPropertyAttribute('textAlign',i,'n'));
-            }
-        }
-        return value;
-    }
-
     createSectionPageTool(section,helplink){
         console.log('ProjectStageCreate::createSectionPageTool()');
         console.log(section);
@@ -876,16 +770,12 @@ class ProjectStageCreate{
         var toolMain3=this.Html.getCol(3);
         var toolMain4=this.Html.getCol(3);    
 
-        //var pageBackgroundcolor=this.createTextToolSelect('backgroundcolor','Wskaż kolor tła strony:',this.getDefaultBackgroundColor(this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n')),this.getBackgroundColorList());
         toolMain1.appendChild(this.ProjectStageTool.getSimpleBackgroundColor(section.style));
         var newPage = this.createTextToolRadioButton('newpage','Sekcja od nowej strony?',this.getYesNowRadio());
         /* SET BUTTON RADIO TO PROPER VALUE */
-        //this.setRadioButton(newPage.childNodes[1],stageDataLink);//helplink
-        
+
         toolMain1.appendChild(newPage);    
         
-        toolMain2.appendChild(this.setValueStyle('backgroundimage','Wskaż obraz tła sekcji:'));
-
         mainDiv.appendChild(h5);
         
         mainDiv3.appendChild(toolMain1);
@@ -1124,32 +1014,7 @@ class ProjectStageCreate{
         console.log('ProjectStageCreate::checkInputData()');
         console.log(data); 
     }
-    setValuePropertyExtended(id,title,actdata,alldata,subsectionRowProperty,run){
-        //console.log('ProjectStageCreate::setValueProperty()');
-        
-        var select = this.createTextToolSelect(id,title,actdata,alldata);
-        var self = this;
-        /* CLOSURE - DOMKNIĘCIE*/
-        select.childNodes[1].onchange = function(){
-            /* SET NEW VALUE */
-            console.log('ProjectStageCreate::setValueProperty()');
-            console.log('ID:');
-            console.log(id);
-            console.log('VALUE:');
-            console.log(this.value);
-            console.log('PROPERTY:');
-            console.log(subsectionRowProperty);
-            console.log('RUN:');
-            console.log(run);
-            subsectionRowProperty[id]=this.value;
-            if(run){
-                self[run.method](this.value,run);
-            }
-            //console.log(actdata);
-            //console.log(alldata);
-        };
-        return select;
-    }
+
     setToolVisibility(value,run){
         console.log('ProjectStageCreate::setToolVisibility()');
         console.log(run);
@@ -1168,15 +1033,5 @@ class ProjectStageCreate{
                 break;
         }
     }
-    createTextToolSelect(id,title,actdata,alldata){
-        //console.log('ProjectStageCreate::createTextToolSelect()');
-        //console.log(id);
-        var div = this.createInputHead(title);    
-        var select=this.createSelect(id,id,'form-control-sm form-control w-100');
-            select.appendChild(this.Html.createOptionGroup('Domyślny:',actdata));  
-            select.appendChild(this.Html.createOptionGroup('Dostępne:',alldata));  
-            div.appendChild(select);
-            //console.log(select);
-        return div;
-    }
+
 }

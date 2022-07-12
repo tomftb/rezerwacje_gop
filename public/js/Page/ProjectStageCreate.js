@@ -17,7 +17,7 @@ class ProjectStageCreate{
     i=0;
     sectionCount=1;
     /* FLOAT */
-    ejectionMultiplier=0.0;
+    //ejectionMultiplier=0.0;
     
     link={};
     helplink={};
@@ -72,7 +72,7 @@ class ProjectStageCreate{
         console.log('ProjectStageCreate::create(type)');
         try{
             /* SETUP EJECTION MULTIPLIER */
-            this.ejectionMultiplier=parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
+            //this.ejectionMultiplier=parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
             this.TabStop = new TabStop();
              /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
@@ -145,7 +145,7 @@ class ProjectStageCreate{
             //console.clear();
             console.log('ProjectStageCreate::details()');   
             /* SETUP EJECTION MULTIPLIER */
-            this.ejectionMultiplier=parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
+            //this.ejectionMultiplier=parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
             this.TabStop = new TabStop();
             /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
@@ -621,11 +621,9 @@ class ProjectStageCreate{
         var tool3=this.Html.getCol(3);
         var tool4=this.Html.getCol(3);
     
-        /* LIST LEVEL  */
-        var listLevel=this.createListLevelSelect(subsectionrow,helplink);
-        //var listLevel=this.setValueProperty('listLevel','Poziom listy:',this.getSelectKey(subsectionrow.list.property.listLevel,subsectionrow.list.property.listLevelName),this.getListLevelList(subsectionrow.list.property.listLevel,subsectionrow.list.property.listLevelMax),subsectionrow.list.property);
+       
+
         /* CONTINUE/NEW ELEMENT */
-        //var newListElement=this.createNewListElement(subsectionrow);
         var newList=this.createNewListSelect(subsectionrow);
 
         tool1.appendChild(this.ProjectStageTool.getSimpleFontSize(subsectionrow.list.style));
@@ -636,8 +634,8 @@ class ProjectStageCreate{
         tool1.appendChild(this.ProjectStageTool.getSimpleFontFamily(subsectionrow.list.style));
         /* SET CSS BOLD, ITALIC ... */
         this.ProjectStageTool.getTextDecoration(tool4,isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
-
-        tool2.appendChild(listLevel);
+        /* LIST LEVEL  */
+        tool2.appendChild(this.ProjectStageTool.getListLevel(subsectionrow,helplink));
         /* LIST TYPE  */
         tool2.appendChild(this.ProjectStageTool.getListType(subsectionrow.list.style));
         tool2.appendChild(newList);
@@ -649,22 +647,7 @@ class ProjectStageCreate{
         mainDivCol.appendChild(mainDiv);
         return mainDivCol;
     }
-    createListLevelSelect(row,helplink){
-        //console.log('ProjectStageCreate::createListLevelSelect()');
-        var multiplier = this.ejectionMultiplier;
-        var select = this.createTextToolSelect('listLevel','Poziom listy (mnożnik - '+multiplier.toString()+'):',this.getSelectKey(row.list.property.listLevel,row.list.property.listLevelName),this.getListLevelList(row.list.property.listLevel,row.list.property.listLevelMax));
-        /* CLOSURE - DOMKNIĘCIE*/
-        select.childNodes[1].onchange = function(){
-            /* SET NEW VALUE */
-            var newValue = parseInt(this.value)*multiplier;
-                row.list.property['listLevel']=this.value;
-                row.paragraph.style['leftEjection']=newValue;
-                /* HELPLINK */
-                helplink.text.leftEjection.value=newValue;
-        };
-        return select;
 
-    }
     createNewListSelect(subsectionrow){
         var all={
             0:{
@@ -985,18 +968,6 @@ class ProjectStageCreate{
         }
         return list;
     }
-    getListLevelList(exception,max){
-        exception=parseInt(exception,10);
-        max=parseInt(max,10);
-        var value={};
-        for(var i=1;i<max+1;i++){
-            if(i!==exception){
-                value[i]=this.Utilities.getDefaultOptionProperties(i,i);  
-            }
-        }
-        return value;
-    }
-
     createSectionPageTool(section,helplink){
         console.log('ProjectStageCreate::createSectionPageTool()');
         console.log(section);

@@ -361,8 +361,7 @@ class ProjectStageTool{
             data[0]['all']=this.getAllOptions(this.Glossary.text,property,'textAlign',run);  
         return  this.Tool.create('Wyrównanie:',data);
     }
-    getListType(property){   
-        
+    getListType(property){     
         var run = function(self,Glossary,key,i){
             return self.Utilities.getDefaultOptionProperties(Glossary.getKeyPropertyAttribute(key,i,'v'),Glossary.getKeyPropertyAttribute(key,i,'n'));
         };
@@ -370,6 +369,37 @@ class ProjectStageTool{
             data[0]['default']=this.getDefaultOption(property,'listType','listTypeName');
             data[0]['all']=this.getAllOptions(this.Glossary.list,property,'listType',run);  
         return  this.Tool.create('Typ listy:',data); 
+    }
+    getListLevel(property,ele){
+        console.log('ProjectStageTool::getListLevel()');
+        var multiplier = parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
+        var key = ['listLevel','listLevelName'];
+        var data=this.getTool(property,key);
+            data[0]['default']=this.getDefaultOption(property.list.property,'listLevel','listLevelName');
+            data[0]['property']=property;
+            data[0]['ele']=ele;
+            data[0]['multiplier']=multiplier;
+            data[0]['onchange']= function(value){
+                 /* SET NEW VALUE */
+                var newValue = parseInt(value)*this.multiplier;
+                    property.list.property['listLevel']=value;
+                    property.paragraph.style['leftEjection']=newValue;
+                    /* HELPLINK */
+                    ele.text.leftEjection.value=newValue;
+            };
+            data[0]['all']=this.getListLevelList(property.list.property.listLevel,property.list.property.listLevelMax); 
+        return  this.Tool.create('Poziom listy (mnożnik - '+multiplier.toString()+'):',data); 
+    }
+    getListLevelList(exception,max){
+        exception=parseInt(exception,10);
+        max=parseInt(max,10);
+        var value={};
+        for(var i=1;i<max+1;i++){
+            if(i!==exception){
+                value[i]=this.Utilities.getDefaultOptionProperties(i,i);  
+            }
+        }
+        return value;
     }
     getFontFamily(property){
         console.log('ProjectStageTool::getFontFamily()');
@@ -521,9 +551,6 @@ class ProjectStageTool{
             }
         };
         var tool = this.Tool.create('Tabulacja:',data);
-        //console.log(tool);
-        //console.log(tool.childNodes[1].childNodes[0].childNodes[1]);
-
         /* SET REFERENCES TO SELECT OPTION */
         /* SET REFERENCES TO SUBSECTION ROW PARAGRAPH */
         TabStopRef[isubrow].paragraph={
@@ -607,14 +634,7 @@ class ProjectStageTool{
        return div;
     }
     setTextDecorationToolEntryProperties(decorationProp,subsectionRowAttr){
-        /*
-          console.log('ProjectStageTool::setTextDecorationToolEntryProperties()');
-          console.log('decorationProp');
-          console.log(decorationProp);
-          console.log('subsectionRowStyle');
-          console.log(subsectionRowAttr);
-        */ 
-        //throw 'stop-1273';
+        // console.log('ProjectStageTool::setTextDecorationToolEntryProperties()');
         if (!('v' in decorationProp) || !('n' in decorationProp)){
             //console.log('Decoration Property don\'t have key v or n');
             return false;
@@ -683,15 +703,7 @@ class ProjectStageTool{
         }     
     }
     setValueCheckBoxStyle(id,value,helplinkValue){
-        /**/
-        console.log('ProjectStageTool::setValueCheckBoxStyle()');
-        console.log('ID:');
-        console.log(id);
-        console.log('VALUE:');
-        console.log(value);
-        console.log('HELPLINK VALUE:');
-        console.log(helplinkValue);
-        
+        // console.log('ProjectStageTool::setValueCheckBoxStyle()');
         switch(id){
             case 'fontWeight':
                 helplinkValue.style[id]=this.setFontStyle(value,'BOLD','NORMAL');
@@ -740,13 +752,7 @@ class ProjectStageTool{
         } 
     }
     getTextTool(isection,isub,isubrow,subsectionrow,helplink,TabStop){
-        /*
-        console.log('ProjectStageTool::getTextTool()');
-        console.log(subsectionrow);
-        console.log(subsectionrow.style);
-        console.log('helplink');
-        console.log(helplink);
-        */
+        // console.log('ProjectStageTool::getTextTool()');
         var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
             mainDivCol.style.backgroundColor='#e6e6e6';
@@ -840,4 +846,5 @@ class ProjectStageTool{
             control.innerText = label;
             return control; 
     }
+
 }

@@ -73,7 +73,7 @@ class Tool{
             return null;
         };
         ele.onfocus = function(){
-            data.onchange(this);
+            data.onfocus(this);
         };
     }
 }

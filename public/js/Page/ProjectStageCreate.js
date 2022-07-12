@@ -345,7 +345,7 @@ class ProjectStageCreate{
                 /* CREATE SUBSECTION */
                 mainDivBody.appendChild(this.createSubsection(iSection,iSub,section[iSection].subsection[iSub],helplink.section[iSection].subsection));
             }
-            mainDivHeader.appendChild(this.createSectionTool(iSection,section,helplink)); 
+            mainDivHeader.appendChild(this.ProjectStageTool.createSectionTool(iSection,section,helplink,this)); 
             this.helplink.section[iSection].main.head=mainDivHeader;
             this.helplink.section[iSection].main.body=mainDivBody;
             mainDiv.appendChild(mainDivHeader);  
@@ -502,26 +502,7 @@ class ProjectStageCreate{
             mainDivCol.appendChild(mainDiv);
             return mainDivCol;
     }
-    createSectionTool(iSection,section,helplink){// isection
-        /* */
-        console.log('ProjectStageCreate::createSectionTool()');
-        console.log('section');
-        console.log(section);
-        var mainDivSection=this.Html.getRow();
-        var tool1=this.Html.getCol(3);
-        var tool2=this.Html.getCol(3);    
-        var tool3=this.Html.getCol(3);
-        var tool4=this.Html.getCol(3);  
-        
-            tool1.appendChild(this.ProjectStageTool.setSectionSubSection(iSection,section[iSection].subsection,helplink.section[iSection].subsection,this));
-            tool4.appendChild(this.ProjectStageTool.createRemoveSectionButton(iSection,section,helplink.section));
-
-        mainDivSection.appendChild(tool1);
-        mainDivSection.appendChild(tool2);
-        mainDivSection.appendChild(tool3);
-        mainDivSection.appendChild(tool4);
-        return mainDivSection;
-    }
+   
 
     createTextError(helplink){
         /* console.log('ProjectStageCreate::createTextError()'); */

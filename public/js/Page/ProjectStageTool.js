@@ -1069,4 +1069,24 @@ class ProjectStageTool{
             };
         return(div); 
     }
+    createSectionTool(iSection,section,helplink,ProjectStageCreate){// isection
+        /* */
+        console.log('ProjectStageCreate::createSectionTool()');
+        console.log('section');
+        console.log(section);
+        var mainDivSection=this.Html.getRow();
+        var tool1=this.Html.getCol(3);
+        var tool2=this.Html.getCol(3);    
+        var tool3=this.Html.getCol(3);
+        var tool4=this.Html.getCol(3);  
+        
+            tool1.appendChild(this.setSectionSubSection(iSection,section[iSection].subsection,helplink.section[iSection].subsection,ProjectStageCreate));
+            tool4.appendChild(this.createRemoveSectionButton(iSection,section,helplink.section));
+
+        mainDivSection.appendChild(tool1);
+        mainDivSection.appendChild(tool2);
+        mainDivSection.appendChild(tool3);
+        mainDivSection.appendChild(tool4);
+        return mainDivSection;
+    }
 }

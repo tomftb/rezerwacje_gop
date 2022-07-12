@@ -624,7 +624,7 @@ class ProjectStageCreate{
        
 
         /* CONTINUE/NEW ELEMENT */
-        var newList=this.createNewListSelect(subsectionrow);
+        var newList=this.ProjectStageTool.createNewListSelect(subsectionrow);
 
         tool1.appendChild(this.ProjectStageTool.getSimpleFontSize(subsectionrow.list.style));
         tool1.appendChild(this.ProjectStageTool.getSimpleColor(subsectionrow.list.style));
@@ -648,33 +648,8 @@ class ProjectStageCreate{
         return mainDivCol;
     }
 
-    createNewListSelect(subsectionrow){
-        var all={
-            0:{
-                v:'y',
-                n:'Nowa lista'
-            },
-            1:{
-                v:'n',
-                n:'Kontynuacja'
-            }
-        };
-        return this.setValueProperty('newList','Nowa Lista:',this.getSelectKey(subsectionrow.list.property.newList,subsectionrow.list.property.newListName),this.getNewElementList(all,subsectionrow.list.property.newList),subsectionrow.list.property);
-    }
-    createNewListElement(subsectionrow){
-        var all={
-            0:{
-                v:'y',
-                n:'Nowy element'
-            },
-            1:{
-                v:'n',
-                n:'Nowa lista'
-            }
-        };
-        return this.setValueProperty('listNewElement','Nowy element:',this.getSelectKey(subsectionrow.list.property.listNewElement,subsectionrow.list.property.listNewElementName),this.getNewElementList(all,subsectionrow.list.property.listNewElement),subsectionrow.list.property);
-      
-    }
+
+
     setToolList(value,run){
         console.log('ProjectStageCreate::setToolList()');
         console.log(run);
@@ -959,15 +934,7 @@ class ProjectStageCreate{
         }
         return value;
     }
-    getNewElementList(data,exception){
-        var list={};        
-        for(var i=0;i<Object.keys(data).length;i++){
-            if(data[i].v!==exception){
-                list[i]=this.Utilities.getDefaultOptionProperties(data[i].v,data[i].n);
-            }
-        }
-        return list;
-    }
+
     createSectionPageTool(section,helplink){
         console.log('ProjectStageCreate::createSectionPageTool()');
         console.log(section);

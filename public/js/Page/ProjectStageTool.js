@@ -401,6 +401,28 @@ class ProjectStageTool{
         }
         return value;
     }
+    createNewListSelect(subsectionrow){
+        var all={
+            0:{
+                v:'y',
+                n:'Nowa lista'
+            },
+            1:{
+                v:'n',
+                n:'Kontynuacja'
+            }
+        };
+        return this.setValueProperty('newList','Nowa Lista:',this.getSelectKey(subsectionrow.list.property.newList,subsectionrow.list.property.newListName),this.getNewElementList(all,subsectionrow.list.property.newList),subsectionrow.list.property);
+    }
+    getNewElementList(data,exception){
+        var list={};        
+        for(var i=0;i<Object.keys(data).length;i++){
+            if(data[i].v!==exception){
+                list[i]=this.Utilities.getDefaultOptionProperties(data[i].v,data[i].n);
+            }
+        }
+        return list;
+    }
     getFontFamily(property){
         console.log('ProjectStageTool::getFontFamily()');
         var run = function(self,Glossary,key,i){

@@ -55,85 +55,45 @@ class DocPreview{
         this.helplink.preview['write'] =  writePage;
     }
     setPageValue(){
-        /*
-        console.log('DocPreview::setPageValue()');
-        console.log('data');
-        console.log(this.data);
-        console.log('helplink');
-        console.log(this.helplink);
-        */
-        //throw 'test--stop';;
+        // console.log('DocPreview::setPageValue()');
         var writePageSectionWidth=607;
         var subsectionCount=0;
         /* LOOP OVER  SECTION */   
         for(const property in this.data.section){
             subsectionCount=Object.keys(this.data.section[property].subsection).length;
-            /* SECTION 
-                console.log('SECTION');
-                console.log(property);
-                console.log('SECTION '+property+' DATA');
-                console.log(this.data.section[property]);
-                console.log('SECTION '+property+' DATA SUBSECTION LENGTH');
-                console.log('SUBSECTION COUNT:');
-                console.log(subsectionCount);
-            */
+
             /* CHECK AND SETUP COLUMNS NUMBER */
             writePageSectionWidth=Math.floor(607/subsectionCount); /* minus padding left 92px */
-            /*
-                console.log('SECTION '+property+' DATA subsectionvisible');
-                console.log(this.data.section[property].subsectionvisible);
-            */
-            //console.log('SECTION '+property+' ALL DATA subsection');
-            //console.log(this.data.section[property].subsection);
             
-             /* LOOP OVER SUBSECTION - VISIBLE */   
+             /* LOOP OVER SUBSECTION - VISIBLE */
+            console.log('subsectionCount');
+            console.log(subsectionCount);
+            console.log(this.data);
+            
+            var divSection=document.createElement('div');
+                divSection.style.width='699px';
+                divSection.style.border='0px solid green';
+            //throw 'aaaa';
             for(var i=0;i<subsectionCount;i++){
-            //for(var i=0;i<this.data.section[property].subsectionvisible;i++){
-                /* SUBSECTION  
-                    console.log('SECTION '+property+' DATA subsection '+i);
-                    console.log(this.data.section[property].subsection[i]);
-                */  
                 var writePageSection=document.createElement('div');
-                    writePageSection.style.width=writePageSectionWidth+'px';
-                    //writePageSection.style.display='inline-block';
-                    writePageSection.style.border='0px solid blue';
-                    writePageSection.style.margin='0px';
-                    //writePageSection.style.paddingBottom='0px';
-                    writePageSection.style.padding='0px 0px 0px 0px';
-                    //writePageSection.style.margin='0px';
-                    //writePageSection.style.cssFloat='LEFT';
-                    /* IN FUTURE SETUP SUBSECTION DATA */
-                    /* IN FUTURE SETUP SUBSECTION PROPERTY */
-                    /* IN FUTURE SETUP SUBSECTION STYLE */
-               
+                writePageSection.style.width=writePageSectionWidth+'px';
+                writePageSection.style.border='0px solid blue';
+                writePageSection.style.margin='0px';
+                writePageSection.style.padding='0px 0px 0px 0px';
+                writePageSection.style.display='inline-block';
+                /* IN FUTURE SETUP SUBSECTION DATA */
+                /* IN FUTURE SETUP SUBSECTION PROPERTY */
+                /* IN FUTURE SETUP SUBSECTION STYLE */
                     /* NEW PARAGRAPH -> TO DO SET PARAGRAPH STYLE -> MARGIN -> PADDING ...*/
-                    
-                   // var p=document.createElement('p');
-                        /* top margin, right margin, bottom margin, left margin */
-                      //  p.style.margin = "0px 0px 0px 0px";
-                      //  p.style.padding = "0px 0px 0px 0px";
-                        
                     /* NEW LIST */   
-                    //var ul=document.createElement('ul');
-                   // var mainUl = this.createUl();
-                    //var li=document.createElement('li');
-                    var actListLevel=1;
-                    //var listEleCounter=1;
-                    
-                    
+                    var actListLevel=1;         
                     var lastLevelCounter = new Object();
                     var actParagraphType='';
                     var firstLine = true;
                     /* VIRTUAL - MUST BY SETUP BY RETURN */
-                    //var actEle = document.createElement('li');
-                    //var actEle = writePageSection;
+
                     /* LOOP OVER SUBSECTION ROW */
-                    for(const propSubsection in this.data.section[property].subsection[i].subsectionrow){
-                        //console.log('actListLevel - '+actListLevel);
-                        //console.log('newListLevel - '+this.data.section[property].subsection[i].subsectionrow[propSubsection].list.property.listLevel);
-                        
-                        //throw 'test-stop-414';
-                        
+                    for(const propSubsection in this.data.section[property].subsection[i].subsectionrow){               
                         /* SET LIST UL */
                         /* VIRTUAL - MUST BY SETUP BY RETURN */
                         /* CHANGE TO P -> NO POSSIBIITY TO SET CONTINUE LIST ATTRIBUTE !!  VIRTUAL COUNTER */
@@ -141,30 +101,20 @@ class DocPreview{
                         /* FOR TESTS */
                         //listEleCounter=parseInt(this.data.section[property].subsection[i].subsectionrow[propSubsection].paragraph.property.value,10);
                         this.setPageValueEle(writePageSection,this.data.section[property].subsection[i].subsectionrow[propSubsection],actListLevel,lastLevelCounter,actParagraphType,firstLine);
-                        firstLine=false;
-                        //actEle = this.setList(writePageSection,actEle,this.data.section[property].subsection[i].subsectionrow[propSubsection].list,actListLevel);
-                        //p = this.setPreviewValue(writePageSection,p,this.data.section[property].subsection[i].subsectionrow[propSubsection]);
-                        //li = this.setPreviewValue(li,this.data.section[property].subsection[i].subsectionrow[propSubsection]);
-                        
-                        //li.appendChild(p);
-                        //ul.appendChild(li);
+                        firstLine=false;            
                          /* CHECK IS NEW LI OR CONTINUE */
-                        //li = this.setListElement(p,li,ul);
-                        //listEleCounter++;
+
                         actListLevel=this.data.section[property].subsection[i].subsectionrow[propSubsection].list.property.listLevel;
                         actParagraphType=this.data.section[property].subsection[i].subsectionrow[propSubsection].paragraph.property.paragraph;
                         /* END LOOP OVER SUBSECTION ROW */
-                       
-                    }
-                    //ul.appendChild(li);
-                    //writePageSection.appendChild(p);
-                    //writePageSection.appendChild(ul);
-                    //writePageSection.appendChild(ulTest);
-                    console.log(writePageSection);
-                    
-                    this.helplink.preview['write'].appendChild(writePageSection);
-            /* END LOOP OVER SUBSECTION - VISIBLE */   
+                    }                     
+                /* END LOOP OVER SUBSECTION -  */   
+                console.log(writePageSection);      
+                divSection.appendChild(writePageSection);
+                this.helplink.preview['write'].appendChild(divSection);
+                console.log(this.helplink.preview['write']); 
             }
+           
         /* END LOOP OVER SECTION */     
         };
     }

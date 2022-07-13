@@ -352,7 +352,7 @@ class ProjectStageCreate{
             mainDiv.appendChild(mainDivBody);   
             this.helplink.section[iSection].main.all=mainDiv;
             console.log(mainDiv);
-            mainDiv.appendChild(this.createSectionPageTool(section[iSection],helplink.section[iSection]));
+            mainDiv.appendChild(this.ProjectStageTool.createSectionPageTool(section[iSection],helplink.section[iSection]));
             return mainDiv;
     }
     creteSectionHead(isection){
@@ -531,7 +531,7 @@ class ProjectStageCreate{
         var tool1=this.Html.getCol(5);
         var tool2=this.Html.getCol(5);
         var tool3=this.Html.getCol(2);
-        var radio = this.createTextToolRadioButton('valuenewline-'+isection+'-'+isub+'-'+isubrow,'Tekst od nowej lini?',this.getYesNowRadio());//'valuenewline-'+isection+'-'+isub+'-'+isubrow
+        var radio = this.ProjectStageTool.createTextToolRadioButton('valuenewline-'+isection+'-'+isub+'-'+isubrow,'Tekst od nowej lini?',this.ProjectStageTool.Tool.getYesNowRadio());//'valuenewline-'+isection+'-'+isub+'-'+isubrow
         var run={
             method:'setToolVisibility',
             helplink:helplink,
@@ -679,95 +679,7 @@ class ProjectStageCreate{
         }
         return falseValue;
     }
-    createTextToolRadioButton(id,title,value){
-        //console.log('ProjectStageCreate::createTextToolRadioButton()');
-        //console.log(id);
-        var maindiv=this.Html.getRow();
-        var collabel=this.Html.getCol(12);
-        var colvalue=this.Html.getCol(12);
-        var mainlabel=document.createElement('p');
-            mainlabel.setAttribute('class','text-info mt-1 mb-0 pb-0 w-100');
-            mainlabel.innerHTML=title;  
-        for (const property in value) {
-            /*console.log(`${property}: ${value[property]}`);
-            console.log(`${property}: ${value[property].check}`);
-            console.log(`${property}: ${value[property].id}`);*/
-            var div=this.Html.getRow();
-                div.setAttribute('class','form-check form-check-inline');
-            var input=document.createElement('input');
-                input.setAttribute('class','form-check-input');
-                input.setAttribute('type','radio');
-                input.setAttribute('id',value[property].id);
-                input.setAttribute('value',value[property].value);
-                input.setAttribute(value[property].check,'');
-                input.setAttribute('name',id);
-            var label=document.createElement('label');
-                label.setAttribute('class','form-check-label '+value[property].fontcolor);
-                label.setAttribute('for',value[property].id);
-                label.innerHTML=value[property].title;
-            div.appendChild(input);  
-            div.appendChild(label);
-            colvalue.appendChild(div);
-        }
-        collabel.appendChild(mainlabel);
-        maindiv.appendChild(collabel);  
-        maindiv.appendChild(colvalue);  
-        return maindiv;
-    }
-    getYesNowRadio(){
-        return {
-            'y':{
-                check:'no-checked',
-                //id:id+'-y',
-                value:'y',
-                title:'Tak',
-                fontcolor:'text-primary'
-            },
-            'n':{
-                check:'no-checked',
-                //id:id+'-n',
-                value:'n',
-                title:'Nie',
-                fontcolor:'text-danger'
-            }
-        };
-    }
-    createSectionPageTool(section,helplink){
-        console.log('ProjectStageCreate::createSectionPageTool()');
-        console.log(section);
-        console.log(helplink);
-        
-        var mainDivCol=this.Html.getCol(12);
-            mainDivCol.classList.add('bg-light','mt-1');
-            mainDivCol.style.backgroundColor='#e6e6e6';
-        var mainDiv=this.Html.getRow();
-        var mainDiv3=this.Html.getRow();
-        var h5=document.createElement('h5');
-            h5.setAttribute('class','w-100 text-center text-bold pt-0 pb-1 mt-0 bg-secondary');//  text-center
-            //h5.style.backgroundColor='#e6e6e6';
-            h5.innerHTML='<small class="text-white">Opcje odnoszące się do całej sekcji:</small>';//text-info
-        var toolMain1=this.Html.getCol(3);
-        var toolMain2=this.Html.getCol(3);    
-        var toolMain3=this.Html.getCol(3);
-        var toolMain4=this.Html.getCol(3);    
 
-        toolMain1.appendChild(this.ProjectStageTool.getSimpleBackgroundColor(section.style));
-        var newPage = this.createTextToolRadioButton('newpage','Sekcja od nowej strony?',this.getYesNowRadio());
-        /* SET BUTTON RADIO TO PROPER VALUE */
-
-        toolMain1.appendChild(newPage);    
-        
-        mainDiv.appendChild(h5);
-        
-        mainDiv3.appendChild(toolMain1);
-        mainDiv3.appendChild(toolMain2);
-        mainDiv3.appendChild(toolMain3);
-        mainDiv3.appendChild(toolMain4);
-        
-        mainDivCol.appendChild(mainDiv);
-        mainDivCol.appendChild(mainDiv3);
-        return mainDivCol;
-    }
     getRemoveButton(isubrow,subsectionrow,helplink){
         /* console.log('ProjectStageCreate::getRemoveButton()'); */
         var div=this.Html.removeButton();

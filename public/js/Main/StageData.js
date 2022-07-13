@@ -288,8 +288,11 @@ class StageData{
         };
     }
     setSubsectionRowTabStop(tabstop){
-        if(tabstop===null){
+        console.log('StageData::setSubsectionRowTabStop()');
+        console.log(tabstop)
+        if(tabstop===null || tabstop===undefined){
             //console.log('nulllll');
+            this.tabStop={};
             return false;
         }
         this.tabStop = tabstop;

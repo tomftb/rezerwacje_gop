@@ -22,11 +22,11 @@ class DocPreview{
         console.log('DocPreview::setData()');
         this.helplink=helplink;
         this.data=data;
-        this.setPage();
+        //this.getPage();
         this.setPageValue();
     }
-    setPage(){
-        //console.log('DocPreview::setPage()');   
+    getPage(){
+        //console.log('DocPreview::getPage()');   
         this.helplink.preview.whole.style.backgroundColor='rgb(251,251,251)';
         var wholePage=document.createElement('div');
             wholePage.style.width='813px';
@@ -47,32 +47,38 @@ class DocPreview{
             writePage.style.paddingTop='92px';
             /* DEFAULT LEFT MARGIN 2,5 cm */ 
             writePage.style.paddingLeft='92px'; /* ALL 314, MAIN 10 */
-            /* TO DO */
-            //writePage.style.textAlign=this.helplink.preview.pageTextAlign
         blankPage.appendChild(writePage);
         wholePage.appendChild(blankPage);
-        this.helplink.preview.whole.appendChild(wholePage);     
-        this.helplink.preview['write'] =  writePage;
+        this.helplink.preview.whole.appendChild(wholePage);
+        return blankPage;
     }
     setPageValue(){
         // console.log('DocPreview::setPageValue()');
         var writePageSectionWidth=607;
         var subsectionCount=0;
+        var firstSection = true;
+        var blankPage = this.getPage();
+
         /* LOOP OVER  SECTION */   
         for(const property in this.data.section){
-            subsectionCount=Object.keys(this.data.section[property].subsection).length;
-
-            /* CHECK AND SETUP COLUMNS NUMBER */
-            writePageSectionWidth=Math.floor(607/subsectionCount); /* minus padding left 92px */
             
-             /* LOOP OVER SUBSECTION - VISIBLE */
+            blankPage = this.checkNewPage(firstSection,this.data.section[property],blankPage);
+            //var writePage = 
+            subsectionCount=Object.keys(this.data.section[property].subsection).length;
+            /* CHECK AND SETUP COLUMNS NUMBER */
+            writePageSectionWidth=Math.floor(607/subsectionCount); /* minus padding left 92px */ 
+            /* LOOP OVER SUBSECTION - VISIBLE */
             console.log('subsectionCount');
             console.log(subsectionCount);
-            console.log(this.data);
+            
+            console.log(this.data.section[property]);
             
             var divSection=document.createElement('div');
                 divSection.style.width='699px';
                 divSection.style.border='0px solid green';
+                divSection.style.margin='0px';
+                divSection.style.padding='0px 0px 0px 0px';
+                //divSection.style.display='block';
             //throw 'aaaa';
             for(var i=0;i<subsectionCount;i++){
                 var writePageSection=document.createElement('div');
@@ -80,7 +86,8 @@ class DocPreview{
                 writePageSection.style.border='0px solid blue';
                 writePageSection.style.margin='0px';
                 writePageSection.style.padding='0px 0px 0px 0px';
-                writePageSection.style.display='inline-block';
+                writePageSection.style.float='left';
+                //writePageSection.style.display='inline-block';
                 /* IN FUTURE SETUP SUBSECTION DATA */
                 /* IN FUTURE SETUP SUBSECTION PROPERTY */
                 /* IN FUTURE SETUP SUBSECTION STYLE */
@@ -111,12 +118,28 @@ class DocPreview{
                 /* END LOOP OVER SUBSECTION -  */   
                 console.log(writePageSection);      
                 divSection.appendChild(writePageSection);
-                this.helplink.preview['write'].appendChild(divSection);
-                console.log(this.helplink.preview['write']); 
+                blankPage.childNodes[0].appendChild(divSection);
+                //console.log(this.helplink.preview['write']); 
             }
-           
+        firstSection = false;
         /* END LOOP OVER SECTION */     
         };
+    }
+    checkNewPage(firstSection,property,blankPage){
+        console.log('DocPreview::checkNewPage()');
+        if(firstSection){
+            /* UPDATE PAGE ATTRIBUTES */
+            blankPage.style.backgroundColor=property.style.backgroundColor;
+            return blankPage;
+        }
+        if(property.property.valuenewline==='y'){
+            var newBlankPage = this.getPage();
+             /* UPDATE PAGE ATTRIBUTES */
+            console.log(newBlankPage);
+            return newBlankPage;
+            
+        }
+        return blankPage;
     }
     setPageValueEle(mainDiv,row,actLvl,lastLevelCounter,lastParagraphType,firstLine){
         console.log('DocPreview::setPageValueEle()');

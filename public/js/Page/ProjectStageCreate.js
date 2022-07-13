@@ -133,7 +133,7 @@ class ProjectStageCreate{
     details(response){  
         try{
             /* SETUP STAGE DATA */
-            this.StageData = new StageData(this.Glossary,this.Stage.Property);
+            this.StageData = new StageData(this.Glossary,this.Stage.Property,null);
             this.StageData.setStage(this.Items.parseResponse(response).data);
         }catch(error){
             console.log('ProjectStageCreate::details()');
@@ -787,6 +787,9 @@ class ProjectStageCreate{
     setSendDataAction(ele){
         var self=this; 
         ele.onclick = function (){
+            //console.clear();
+            //console.log(self.StageData.Stage);
+            //throw 'asdasd';
             var fd = new FormData();
                 fd.append('stage',JSON.stringify(self.StageData.Stage));
             self.checkInputData(self.StageData.Stage);

@@ -76,4 +76,22 @@ class Tool{
             data.onfocus(this);
         };
     }
+    getYesNowRadio(){
+        return {
+            'y':{
+                check:'no-checked',
+                //id:id+'-y',
+                value:'y',
+                title:'Tak',
+                fontcolor:'text-primary'
+            },
+            'n':{
+                check:'no-checked',
+                //id:id+'-n',
+                value:'n',
+                title:'Nie',
+                fontcolor:'text-danger'
+            }
+        };
+    }
 }

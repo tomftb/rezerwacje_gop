@@ -354,7 +354,7 @@ class ProjectStageCreate{
             mainDiv.appendChild(mainDivBody);   
             this.helplink.section[iSection].main.all=mainDiv;
             console.log(mainDiv);
-            mainDiv.appendChild(this.ProjectStageTool.getSectionFooterTool(iSection,section));
+            mainDiv.appendChild(this.ProjectStageTool.getSectionFooterTool(section[iSection]));
             return mainDiv;
     }
     creteSectionHead(isection){

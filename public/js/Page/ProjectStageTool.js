@@ -1094,10 +1094,10 @@ class ProjectStageTool{
             };
         return(div); 
     }
-    getSectionFooterTool(iSection,section){
+    getSectionFooterTool(section){
         console.log('ProjectStageCreate::getSectionFooterTool()');
-        console.log('iSection');
-        console.log(iSection);
+        //console.log('iSection');
+        //console.log(iSection);
         console.log('section');
         console.log(section);
         console.log('section');
@@ -1116,7 +1116,7 @@ class ProjectStageTool{
         var toolMain3=this.Html.getCol(3);
         var toolMain4=this.Html.getCol(3);    
 
-            toolMain1.appendChild(this.getSimpleBackgroundColor(section[iSection].style));
+            toolMain1.appendChild(this.getSimpleBackgroundColor(section.style));
         var newPage = this.createTextToolRadioButton('newpage','Sekcja od nowej strony?',this.Tool.getYesNowRadio());
         /* SET BUTTON RADIO TO PROPER VALUE */
 

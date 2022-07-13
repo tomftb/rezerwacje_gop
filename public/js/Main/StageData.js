@@ -9,11 +9,12 @@ class StageData{
     defaultRow={};
     defaultSection={};
     tabStop={};
+    type='';
     constructor(Glossary,Property,type,tabstop){
         this.Glossary = Glossary;
         this.Property=Property;
-
-        this.setSubsectionRowDefault(type);
+        this.type=type;
+        //this.setSubsectionRowDefault();
         this.setSubsectionRowTabStop(tabstop);
         console.log(this.Property); 
     }
@@ -54,7 +55,7 @@ class StageData{
             data:{
                 id:0
             },
-            style:this.defaultSection.style,
+            style:this.getDefaultSectionStyle(),
             property:{
                 valuenewline:'y'
             },
@@ -94,44 +95,14 @@ class StageData{
             return subsectionRow;
     }
     createSubsectionRow(){
+        /* RUN SET DEFAULT -> TO PREVENT REFERENCES */
+        //this.setSubsectionRowDefault(this.type);
         return {
                 data:{
                     id:0
                 },
-                paragraph:{
-                    style:this.defaultRow.paragraph.style,
-                    property:{
-                        /* ADD TO SQL - 0 -> n, 1 -> y */ 
-                        /* LIST */
-                        /*
-                         * l - list
-                         * p - paragraph
-                         * 
-                         */
-                        value:'',
-                        valuenewline:'y',/* default */
-                        paragraph:this.defaultRow.paragraph.property.paragraph,
-                        paragraphName:this.defaultRow.paragraph.property.paragraphName, //Nowy akapit
-                        /* CHECK FOR EXIST tabstop with number */
-                        //tabstop:'0'
-                        tabstop:'-1'
-                    },
-                    /* OBJECT */
-                    tabstop:this.tabStop
-                    /*
-                    tabstop:{
-                        '0':{
-                            position:0,
-                            measurement:'cm',
-                            measurementName:'cm',
-                            alignment:'left',
-                            alignmentName:'Do lewej',
-                            leadingSign:'none',
-                            leadingSignName:'Brak'
-                        }
-                    }    
-                    */
-                },
+                /* TO DO -> CHECK to clone or new */
+                paragraph:this.getDefaultRowParagraph(),
                 list:{
                     style:{
                         fontSize:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_FONT_SIZE','v'),
@@ -186,30 +157,33 @@ class StageData{
         this.Stage = data;
         this.iSection = Object.keys(this.Stage.section).length;
     }
-    setSubsectionRowDefault(type){
-        /*
-         * type:
-         * p - paragraph
-         * l - list
-         * t - table
-         * i - image
-        */
-        var sectionText={
-            style:{
+    getDefaultSectionStyle(){
+        var sectionTextStyle={
+            
                 backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_SECTION_BACKGROUND_COLOR','v'),
                 backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_SECTION_BACKGROUND_COLOR','n'),
                 backgroundImage:''
-            }
+            
         };
-        var sectionList={
-            style:{
+        var sectionListStyle={
+            
                 backgroundColor:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_SECTION_BACKGROUND_COLOR','v'),
                 backgroundColorName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_SECTION_BACKGROUND_COLOR','n'),
                 backgroundImage:''
-            }
+            
         };
-        var rowParagraph={
-                paragraph:{
+        switch(this.type){
+            case 'l':
+                return sectionTextStyle;
+                break;
+            default:
+            case 'p':
+                return sectionListStyle;
+                break;
+        };
+    }
+    getDefaultRowParagraph(){
+        var rowParagraph={ 
                     style:{
                         fontSize:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE','v'),
                         fontSizeMax:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_FONT_SIZE_MAX','v'),
@@ -241,14 +215,18 @@ class StageData{
                         indentationSpecialName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_INDENTATION_SPECIAL','n')
                     },
                     property: {
+                        value:'',
+                        valuenewline:'y',/* default */
                         paragraph:'p',
-                        paragraphName:'Nowy akapit'
-                    }    
-                }
+                        paragraphName:'Nowy akapit',
+                        tabstop:'-1'
+                    },
+                    tabstop:this.tabStop
+                
                 
         };
         var rowList={ 
-                paragraph:{
+                
                     style:{
                         fontSize:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_FONT_SIZE','v'),
                         fontSizeMax:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_TEXT_FONT_SIZE_MAX','v'),
@@ -290,24 +268,24 @@ class StageData{
                         indentationSpecialName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_INDENTATION_SPECIAL','n')
                     },
                     property:{
+                        value:'',
+                        valuenewline:'y',/* default */
                         paragraph:'l',
-                        paragraphName:'Element listy'
-                    }
-                }
-                
+                        paragraphName:'Element listy',
+                        tabstop:'-1'
+                    },
+                    tabstop:this.tabStop
+                    
             };
-        switch(type){
+        switch(this.type){
             case 'l':
-                this.defaultRow=rowList;
-                this.defaultSection=sectionText;
+                return rowList;
                 break;
             default:
             case 'p':
-                this.defaultRow=rowParagraph;
-                this.defaultSection=sectionList;
+                return rowParagraph;
                 break;
         };
-        
     }
     setSubsectionRowTabStop(tabstop){
         if(tabstop===null){

@@ -354,7 +354,7 @@ class ProjectStageCreate{
             mainDiv.appendChild(mainDivBody);   
             this.helplink.section[iSection].main.all=mainDiv;
             console.log(mainDiv);
-            mainDiv.appendChild(this.ProjectStageTool.getSectionFooterTool(section[iSection]));
+            mainDiv.appendChild(this.ProjectStageTool.getSectionFooterTool(iSection,section[iSection]));
             return mainDiv;
     }
     creteSectionHead(isection){
@@ -436,7 +436,7 @@ class ProjectStageCreate{
     createExtendedSubsectionRow(isection,isub,isubrow,subsectionrow,helplink){
         console.log('ProjectStageCreate::createExtendedSubsectionRow()');
         var mainDiv=this.createSubsectionRowGroup(isection,isub,isubrow,subsectionrow,helplink);
-            mainDiv.childNodes[3].appendChild(this.createExtendedTextTool(isection,isub,isubrow,subsectionrow[isubrow],helplink[isubrow]));  
+            mainDiv.childNodes[3].appendChild(this.ProjectStageTool.createExtendedTextTool(isection,isub,isubrow,subsectionrow[isubrow],helplink[isubrow]));  
         return mainDiv;
     }
     createSubsectionRow(isection,isub,isubrow,subsectionrow,helplink){
@@ -516,83 +516,7 @@ class ProjectStageCreate{
             mainDiv.appendChild(errorDiv);  
         return mainDiv;
     }
-    setToolList(value,run){
-        console.log('ProjectStageCreate::setToolList()');
-        console.log(run);
-        if(value==='p'){
-            this.hideControl(run);
-            /* FIX tabstopList SELECT */
-        }
-        else{
-            this.showControl(run);
-        }
-    }
-    createExtendedTextTool(isection,isub,isubrow,subsectionrow,helplink){
-        // console.log('ProjectStageCreate::createExtendedTextTool()');
-        var mainDiv=this.Html.getRow();
-        var tool1=this.Html.getCol(5);
-        var tool2=this.Html.getCol(5);
-        var tool3=this.Html.getCol(2);
-        var radio = this.ProjectStageTool.createTextToolRadioButton('valuenewline-'+isection+'-'+isub+'-'+isubrow,'Tekst od nowej lini?',this.ProjectStageTool.Tool.getYesNowRadio());//'valuenewline-'+isection+'-'+isub+'-'+isubrow
-        var run={
-            method:'setToolVisibility',
-            helplink:helplink,
-            tool:['tabstopControl','tabstop','listControl','list']
-        };
-        this.setRadioButtonExtend(radio.childNodes[1],subsectionrow.paragraph,run);
-        tool1.appendChild(radio);
-        mainDiv.appendChild(tool1);
-        mainDiv.appendChild(tool2);
-        mainDiv.appendChild(tool3);
-        return mainDiv;
-    }
-    setRadioButton(radio,subsectionrowParagraph){//link
-        this.setRadioButtonExtend(radio,subsectionrowParagraph,null);
-    }
-    setRadioButtonExtend(radio,subsectionrowParagraph,run){
-        /**/
-        console.log('ProjectStageCreate::setRadioButtonExtend()');
-        console.log(radio);
-        console.log('SUBSECTIONROW');
-        console.log(subsectionrowParagraph);
-        
-        /* FIRST RUN TO SET PROPER VALUE AND onClick FUNCTION */
-        var self = this;
-        radio.childNodes.forEach(
-            function(currentValue) {//, currentIndex, listObj
-                if(currentValue.childNodes[0].value === subsectionrowParagraph.property.valuenewline){
-                    /* REMOVE ATTRIBUTE no-checked */
-                    currentValue.childNodes[0].removeAttribute('no-checked');
-                    /* ADD ATTRIBUTE checked */
-                    currentValue.childNodes[0].setAttribute('checked','');
-                }
-                /* CLOSURE */
-                currentValue.childNodes[0].onclick = function (){
-                    subsectionrowParagraph.property.valuenewline = this.value; 
-                    //console.log(this.value);
-                    if(run){
-                        self[run.method](this.value,run);
-                    };
-                };
-            }
-        );
-    }
-    showControl(run){
-        for(const prop in run.tool){
-            console.log(run.tool[prop]);
-            if (run.helplink.tool[run.tool[prop]].style.display) {
-                run.helplink.tool[run.tool[prop]].style.removeProperty('display');
-            }
-            else{
-            }
-        }
-    }
-    hideControl(run){
-        for(const prop in run.tool){
-            console.log(run.tool[prop]);
-            run.helplink.tool[run.tool[prop]].style.setProperty('display', 'none');
-        }
-    }
+
     createTextToolDoubleSelect(id,title,actdata,alldata,id2,actdata2,alldata2){
         console.log('ProjectStageCreate::createTextToolDoubleSelect()');
         var divMain = this.createInputHead(title);
@@ -890,23 +814,6 @@ class ProjectStageCreate{
         console.log(data); 
     }
 
-    setToolVisibility(value,run){
-        console.log('ProjectStageCreate::setToolVisibility()');
-        console.log(run);
-        console.log('value');
-        console.log(value);
-        switch(value){
-            case 'l':   
-            case 'y':
-                this.showControl(run);
-                break;
-            case 'n':
-            case 'p':
-                this.hideControl(run);
-                break;
-            default:
-                break;
-        }
-    }
+
 
 }

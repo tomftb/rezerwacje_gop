@@ -265,6 +265,8 @@ class ProjectStageTool{
             tool[0]['onchange']=function(t){
                 /* t - this */
                 console.log('ProjectStageTool::getExtendedTool()');
+                console.log(property);
+                console.log(key);
                 /* SET PROPERTY KEY VALUE */
                 this.property[this.key[0]]=t.value;
                 /* SET SECOND PROPERTY KEY VALUE */
@@ -287,6 +289,8 @@ class ProjectStageTool{
             tool[0]['onchange']=function(t){
                 /* t - this */
                 console.log('ProjectStageTool::getCompleteTool()');
+                console.log(property);
+                console.log(key);
                 /* SET PROPERTY KEY VALUE */
                 this.property[this.key[0]]=t.value;
                 /* SET INPUT STYLE PROPERTY */
@@ -858,9 +862,9 @@ class ProjectStageTool{
 
         return mainDivCol;
     }
-    createSectionTool(iSection,section,helplink,ProjectStageCreate){// isection
+    getSectionHeadTool(iSection,section,helplink,ProjectStageCreate){// isection
         /* */
-        console.log('ProjectStageCreate::createSectionTool()');
+        console.log('ProjectStageCreate::getSectionHeadTool()');
         console.log('section');
         console.log(section);
 
@@ -1090,11 +1094,14 @@ class ProjectStageTool{
             };
         return(div); 
     }
-    createSectionPageTool(section,helplink){
-        console.log('ProjectStageCreate::createSectionPageTool()');
+    getSectionFooterTool(iSection,section){
+        console.log('ProjectStageCreate::getSectionFooterTool()');
+        console.log('iSection');
+        console.log(iSection);
+        console.log('section');
         console.log(section);
-        console.log(helplink);
-        
+        console.log('section');
+        //throw 'stop';
         var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('bg-light','mt-1');
             mainDivCol.style.backgroundColor='#e6e6e6';
@@ -1109,7 +1116,7 @@ class ProjectStageTool{
         var toolMain3=this.Html.getCol(3);
         var toolMain4=this.Html.getCol(3);    
 
-        toolMain1.appendChild(this.getSimpleBackgroundColor(section.style));
+            toolMain1.appendChild(this.getSimpleBackgroundColor(section[iSection].style));
         var newPage = this.createTextToolRadioButton('newpage','Sekcja od nowej strony?',this.Tool.getYesNowRadio());
         /* SET BUTTON RADIO TO PROPER VALUE */
 

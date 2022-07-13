@@ -5,9 +5,11 @@ class Tool{
         this.Html = new Html();
     }
     create(label,data){
-        console.log('Tool::create()');
-        console.log(label);
-        console.log(data);
+        /*
+            console.log('Tool::create()');
+            console.log(label);
+            console.log(data);
+        */
         var mainDiv = this.createLabel(label);  
         var groupDiv=document.createElement('div');
             groupDiv.setAttribute('class','input-group');
@@ -37,7 +39,7 @@ class Tool{
             return input;
     }
     getSelect(data){
-        console.log(data.attributes);
+        //console.log(data.attributes);
         var select = document.createElement('select');
             //select.classList.add('form-control','form-control-sm',data.attributes.class);
             select.setAttribute('class','form-control form-control-sm '+data.attributes.class);

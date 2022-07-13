@@ -60,6 +60,8 @@ class DocPreview{
         var blankPage = this.getPage();
 
         /* LOOP OVER  SECTION */   
+        console.log(this.data.section);
+        //throw 'aaa';
         for(const property in this.data.section){
             
             blankPage = this.checkNewPage(firstSection,this.data.section[property],blankPage);
@@ -127,17 +129,19 @@ class DocPreview{
     }
     checkNewPage(firstSection,property,blankPage){
         console.log('DocPreview::checkNewPage()');
+        
         if(firstSection){
             /* UPDATE PAGE ATTRIBUTES */
             blankPage.style.backgroundColor=property.style.backgroundColor;
             return blankPage;
         }
         if(property.property.valuenewline==='y'){
+            console.log('SET NEW BLANK PAGE');
             var newBlankPage = this.getPage();
              /* UPDATE PAGE ATTRIBUTES */
+            newBlankPage.style.backgroundColor=property.style.backgroundColor;
             console.log(newBlankPage);
             return newBlankPage;
-            
         }
         return blankPage;
     }

@@ -326,6 +326,8 @@ class ProjectStageCreate{
     }
     createSection(iSection,section,helplink){
         console.log('ProjectStageCreate::createSection()');
+        console.log('iSection');
+        console.log(iSection);
         console.log('helplink:');
         console.log(helplink);
         console.log('iSection (iSectionField):');
@@ -345,14 +347,14 @@ class ProjectStageCreate{
                 /* CREATE SUBSECTION */
                 mainDivBody.appendChild(this.createSubsection(iSection,iSub,section[iSection].subsection[iSub],helplink.section[iSection].subsection));
             }
-            mainDivHeader.appendChild(this.ProjectStageTool.createSectionTool(iSection,section,helplink,this)); 
+            mainDivHeader.appendChild(this.ProjectStageTool.getSectionHeadTool(iSection,section,helplink,this)); 
             this.helplink.section[iSection].main.head=mainDivHeader;
             this.helplink.section[iSection].main.body=mainDivBody;
             mainDiv.appendChild(mainDivHeader);  
             mainDiv.appendChild(mainDivBody);   
             this.helplink.section[iSection].main.all=mainDiv;
             console.log(mainDiv);
-            mainDiv.appendChild(this.ProjectStageTool.createSectionPageTool(section[iSection],helplink.section[iSection]));
+            mainDiv.appendChild(this.ProjectStageTool.getSectionFooterTool(iSection,section));
             return mainDiv;
     }
     creteSectionHead(isection){
@@ -745,7 +747,9 @@ class ProjectStageCreate{
                 console.log('ProjectStageCreate::addSubsectionRow() onclick()');
                 /* ADD NEW stageData subsectionrow object */
                 subsectionrow[iRow]=self.StageData.createSubsectionRow();
-                subsectionrow[iRow].paragraph.property.valuenewline=self.Property.subsectionRowNewLine;                
+                subsectionrow[iRow].paragraph.property.valuenewline=self.Property.subsectionRowNewLine;
+                console.log(iRow);
+                console.log(subsectionrow[iRow]);
                 helplink.row[iRow]=self.getHelpLinkSubsectionRow();
                 
                 helplink.dynamic.appendChild(self.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow,helplink.row));

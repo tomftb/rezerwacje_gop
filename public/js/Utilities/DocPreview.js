@@ -72,9 +72,7 @@ class DocPreview{
             /* LOOP OVER SUBSECTION - VISIBLE */
             console.log('subsectionCount');
             console.log(subsectionCount);
-            
             console.log(this.data.section[property]);
-            
             var divSection=document.createElement('div');
                 divSection.style.width='699px';
                 divSection.style.border='0px solid green';
@@ -84,11 +82,11 @@ class DocPreview{
             //throw 'aaaa';
             for(var i=0;i<subsectionCount;i++){
                 var writePageSection=document.createElement('div');
-                writePageSection.style.width=writePageSectionWidth+'px';
-                writePageSection.style.border='0px solid blue';
-                writePageSection.style.margin='0px';
-                writePageSection.style.padding='0px 0px 0px 0px';
-                writePageSection.style.float='left';
+                    writePageSection.style.width=writePageSectionWidth+'px';
+                    writePageSection.style.border='0px solid blue';
+                    writePageSection.style.margin='0px';
+                    writePageSection.style.padding='0px 0px 0px 0px';
+                    writePageSection.style.float='left';
                 //writePageSection.style.display='inline-block';
                 /* IN FUTURE SETUP SUBSECTION DATA */
                 /* IN FUTURE SETUP SUBSECTION PROPERTY */
@@ -118,10 +116,13 @@ class DocPreview{
                         /* END LOOP OVER SUBSECTION ROW */
                     }                     
                 /* END LOOP OVER SUBSECTION -  */   
-                console.log(writePageSection);      
+                console.log(writePageSection);   
+                console.log('HEIGH:');
+                /* Display the height and width of "myDIV", including padding and border: in px offsetHeight clientHeight */
+                /* IMPORTANT Why I am getting Element offsetHeight "0"? even element original height is not showing */
+
                 divSection.appendChild(writePageSection);
                 blankPage.childNodes[0].appendChild(divSection);
-                //console.log(this.helplink.preview['write']); 
             }
         firstSection = false;
         /* END LOOP OVER SECTION */     

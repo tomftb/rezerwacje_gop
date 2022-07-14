@@ -289,7 +289,7 @@ class StageData{
     }
     setSubsectionRowTabStop(tabstop){
         console.log('StageData::setSubsectionRowTabStop()');
-        console.log(tabstop)
+        console.log(tabstop);
         if(tabstop===null || tabstop===undefined){
             //console.log('nulllll');
             this.tabStop={};

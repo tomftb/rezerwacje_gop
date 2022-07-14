@@ -42,8 +42,32 @@ class createDoc {
         $settings=new \PhpOffice\PhpWord\Settings();
         $settings::setOutputEscapingEnabled(true);
         $this->phpWord = new \PhpOffice\PhpWord\PhpWord();
+        /*
+         * IMPORTANT
+         * NO PAGE BACKGROUND COLOR
+         */
+        //print_r($this->phpWord);
+        self::setDocInfo();
     }
-
+    private function setDocInfo(){
+        $properties = $this->phpWord ->getDocInfo();
+        $properties->setCreator('Tomasz 1111111');
+        //echo 'asdasdas';
+        //$this->phpWord->getDocumentProperties();
+        
+            //$properties = $phpWord->getDocInfo();
+            
+            $properties->setCompany('Geofizyka Toruń S.A.');
+            $properties->setTitle('Testowy Etap projektu');
+            $properties->setDescription('TEST OPIS');
+            $properties->setCategory('TEST KATEGORIA');
+            $properties->setLastModifiedBy('OSTATNIA MODYFIKACJA przez tborcyznski');
+            $properties->setCreated(mktime(0, 0, 0, 3, 12, 2022));
+            $properties->setModified(mktime(0, 0, 0, 3, 14, 2022));
+            $properties->setSubject('TEMAT DOKUMENTU');
+            $properties->setKeywords('SŁOWA KLUCZOWE');
+          
+    }
     private function throwError($d='',$l=0){
         Throw New Exception ($d,$l);
     }
@@ -85,12 +109,24 @@ class createDoc {
         //print_r($this->projectData->section);
         
         $firstRow=true;
+        $firstSection=true;
+        $breakType='continuous';
         foreach($this->projectData->section as $s){
             /*
              * (twips )Twip to miara typograficzna, zdefiniowana jako 1⁄20 punktu typograficznego. Jeden twip ma 1⁄1440 cala lub 17,64 μm
              */
-            $section = self::setSectionColumn($s->subsection);
+            //print_r($this->projectData->section);
+            
+            /* CHECK FOR NEW PAGE */
+            
+            if($s->property->valuenewline==='y' && $firstSection===false){
+                //$section->addPageBreak();
+                $breakType='newPage';
+            }
+            
+            $section = self::setSectionColumn($s->subsection,$breakType);
             //var_dump($section);
+            print_r($section);
             /* COLUMNS */
             foreach($s->subsection as $u){
                 //$section->addText("Regularność pomiarów danych sejsmicznychWedług podziału administracyjnego Polski projektowane zdjęcie sejsmiczne dla tematu: „Prace sejsmiczne 3D Wielkie Oczy” znajduje się w południowo-wschodniej Polsce, w obrębie województwa podkarpackiego, w powiecie jarosławskim, lubaczowskim i przemyskim (tylko punkty odbioru).Obszar badań zlokalizowany jest w obrębie koncesji poszukiwawczych: Lubaczów – Zapałów 21/97/p i Przeworsk – Jarosław - Stubno 24/99/p.Obszar projektowanego zdjęcia sejsmicznego Wielkie Oczy 3D położony jest we wschodniej części zapadliska przedkarpackiego. Głównymi elementami jego budowy geologicznej są utwory miocenu autochtonicznego i mezopaleozoiczne podłoże zbudowane z  utworów prekambru, kambru, ordowiku, syluru, jury i kredy.Otrzymaną regularność pomiarów zaprezentowano na mapach rozmieszczenia punktów wzbudzania i odbioru (Ryc. 3 1Ryc. 3 1), jak również na mapach krotności profilowania (ilości tras sejsmicznych w binach WPG) (Ryc. 3 2Ryc. 3 2), oraz mapach ");
@@ -128,7 +164,10 @@ class createDoc {
                 }
                 $firstRow=true;
             }
-            
+            //if($s->property->valuenewline==='y' && $firstSection===false){
+                //$section->addPageBreak();
+               // $section = self::setSectionColumn($s->subsection,'newPage');
+           // }
             /* AT THE END ADD FAKE section if no more left */
             
             //break;
@@ -139,9 +178,10 @@ class createDoc {
             //print_r($s->property);
             //print_r($s->style);
             //print_r($s->subsection);
+             $firstSection=false;
         }
     }
-    private function setSectionColumn($subsection){
+    private function setSectionColumn($subsection,$breakType='continuous'){
         /* EXAMPLE:
             * Normal
                 $section = $this->phpWord->addSection(array('breakType' => 'continuous'));
@@ -169,13 +209,15 @@ class createDoc {
         //print_r(get_object_vars($subsection));
         //$this->Log->log(0,"[".__METHOD__."] SECTIONS -> ".count(get_object_vars($subsection))); 
         $cols = count(get_object_vars($subsection));
-        
+        //print_r($subsection);
         return $this->phpWord->addSection(
                     array(
                         'colsNum'   => $cols , //$cols
-                        'breakType' => 'continuous', // new word page
-                        'colsSpace' => 2880/$cols , // 2880/$cols
+                        'breakType' => $breakType, // new word page
+                        'colsSpace' => 2880/$cols  // 2880/$cols
+                        
                     )
+               
                 );
     }
     private function setText($textrun,$r){

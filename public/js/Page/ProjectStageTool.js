@@ -265,12 +265,16 @@ class ProjectStageTool{
             tool[0]['onchange']=function(t){
                 /* t - this */
                 console.log('ProjectStageTool::getExtendedTool()');
+                console.log('BEFORE:');
                 console.log(property);
                 console.log(key);
                 /* SET PROPERTY KEY VALUE */
                 this.property[this.key[0]]=t.value;
                 /* SET SECOND PROPERTY KEY VALUE */
                 this.property[this.key[1]] = this.glossary.getItemName(item,t.value);
+                console.log('AFTER:');
+                console.log(this.property[this.key[0]]);
+                console.log(this.property[this.key[1]]);
             };
         return tool;
     }/* COMPLEX */

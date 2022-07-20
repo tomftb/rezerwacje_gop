@@ -112,6 +112,7 @@ class createDoc {
         $firstSection=true;
         $breakType='continuous';
         $run=null;
+        $actListName= uniqid('list_');
         foreach($this->projectData->section as $s){
             /*
              * (twips )Twip to miara typograficzna, zdefiniowana jako 1⁄20 punktu typograficznego. Jeden twip ma 1⁄1440 cala lub 17,64 μm
@@ -151,12 +152,12 @@ class createDoc {
                         /*
                          * CHECK TYPE
                          */
-                        self::checkType($r,$section,$run);
+                        self::checkType($r,$section,$run,$actListName);
                         $firstRow=false;
                         continue;
                     }
                     //$textrun = self::checkNewLine($section,$textrun,$r->paragraph->property->valuenewline,$r);
-                    self::checkNewLine($r,$section,$run);
+                    self::checkNewLine($r,$section,$run,$actListName);
                     
                     
                     //print_r($r->paragraph->style);
@@ -193,9 +194,9 @@ class createDoc {
              $firstSection=false;
         }
     }
-    private function checkType($r,$section,&$run){
-        echo __METHOD__." - ";
-        echo $r->paragraph->property->paragraph." .";
+    private function checkType($r,&$section,&$run,$actListName=''){
+        //echo __METHOD__." - ";
+        //echo $r->paragraph->property->paragraph." .";
         switch($r->paragraph->property->paragraph):
             default:
             case 'p':
@@ -204,9 +205,7 @@ class createDoc {
                 $run = $textrun;
                 break;
             case 'l':
-                $listItemRun = $section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r), self::setListParagraph($r));
-                self::setText($listItemRun,$r);
-                $run = $listItemRun;
+                self::setListItem($r,$section,$run,$actListName);                
                 break;
         endswitch;
     }
@@ -216,24 +215,31 @@ class createDoc {
         switch($r->paragraph->property->paragraph):
             default:
             case 'p':
-                //$textrun = $section->addTextRun(self::setAlign($r));
                 self::setText($run,$r);
-                //return $run;
             case 'l':
-                //$listItemRun = $section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r), self::setListParagraph($r));
                 self::setText($run,$r);
-                //return $run;
         endswitch;
     }
-    private function setListStyle($r){
+    private function setListItem($r,&$section,&$run,$actListName=''){
+        //$this->phpWord->addSection();
+        //echo "Act list name - ".$actListName.', nowa lista - ';
+        //print_r($r->list->property->newList);
+        //echo '.';
+        if($r->list->property->newList==='y'){
+            $actListName= uniqid('list_');
+        }
+        $listItemRun = $section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r,$actListName), self::setListParagraph($r));
+        self::setText($listItemRun,$r);
+        $run = $listItemRun;
+    }
+    private function setListStyle($r,$listName=''){
       
         $hanging = self::getTwip($r->paragraph->style->indentation,$r->paragraph->style->indentationMeasurement);
         $left = $hanging+self::getTwip($r->paragraph->style->leftEjection,$r->paragraph->style->leftEjectionMeasurement);       
         /* Format List Array */
         $formatList=self::getFormatList($r->list->style->listType);
-        $name = 'multilevel';
         $this->phpWord->addNumberingStyle(
-            $name,
+            $listName,
             array(
                 'type'   => 'multilevel',
                 'levels' => array(
@@ -248,7 +254,7 @@ class createDoc {
             )
         );
         //return array('listType' => \PhpOffice\PhpWord\Style\ListItem::TYPE_NUMBER_NESTED);
-        return $name;
+        return $listName;
     }
     private function getTwip($size=0,$measurement='cm'){
         /* check - minus size */
@@ -434,11 +440,11 @@ class createDoc {
             return false;
         }
     }
-    private function checkNewLine($r,$section,&$run){
+    private function checkNewLine($r,&$section,&$run,$actListName){
         //echo __METHOD__." - ";
         //echo $r->paragraph->property->valuenewline."\r\n";
         if($r->paragraph->property->valuenewline==='y'){
-            self::checkType($r,$section,$run);
+            self::checkType($r,$section,$run,$actListName);
         }
         else{
             self::checkTypeInLine($r,$run);

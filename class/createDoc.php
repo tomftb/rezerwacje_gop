@@ -200,7 +200,7 @@ class createDoc {
         switch($r->paragraph->property->paragraph):
             default:
             case 'p':
-                $textrun = $section->addTextRun(self::setAlign($r));
+                $textrun = $section->addTextRun(self::setAlign($r->paragraph->style->textAlign));
                 self::setText($textrun,$r);
                 $run = $textrun;
                 break;
@@ -302,7 +302,8 @@ class createDoc {
     }
     private function setListParagraph($r){
         $name = 'P-Style';
-        $this->phpWord->addParagraphStyle($name, array('spaceAfter' => 95));
+        //var_dump($this->phpWord);
+        $this->phpWord->addParagraphStyle($name, array('align'=>self::setListAlign($r->paragraph->style->textAlign) ,'spaceAfter' => 95));
         return $name;
     }
     private function setSectionColumn($subsection,$breakType='continuous'){
@@ -414,24 +415,27 @@ class createDoc {
                 Throw New Exception('NOT SUPPORTED MEASUREMENT -> '.$measurement,0);
         endswitch;
     }
-    private function setAlign($r){
-        $this->Log->log(0,"[".__METHOD__."] TEXT ALIGN -> ".$r->paragraph->style->textAlign);
+    private function setAlign($align='LEFT'){
+        $this->Log->log(0,"[".__METHOD__."] TEXT ALIGN -> ".$align);
         //'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER);
         //$this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
         //$this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
         //$ParagraphStyle['alignment']=\PhpOffice\PhpWord\SimpleType\Jc::LEFT;
         //$this->mainSection->addText("Na zlecenie:",$FontStyle,$ParagraphStyle);
          /* TO DO -> CHECK EXISTS */
-        $align=[
+        $available=[
                 'CENTER'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER,
                 'LEFT'=>\PhpOffice\PhpWord\SimpleType\Jc::LEFT,
                 'RIGHT'=>\PhpOffice\PhpWord\SimpleType\Jc::RIGHT,
                 'JUSTIFY'=>\PhpOffice\PhpWord\SimpleType\Jc::BOTH
         ];
-        if(!array_key_exists($r->paragraph->style->textAlign,$align)){
-            Throw New Exception('WRONG TEXT ALIGN -> '.$r->paragraph->style->textAlign,0);
+        if(!array_key_exists($align,$available)){
+            Throw New Exception('WRONG TEXT ALIGN -> '.$align,0);
         }
-        return ['alignment'=>$align[$r->paragraph->style->textAlign]];
+        return ['alignment'=>$available[$align]];
+    }
+    private function setListAlign($align='LEFT'){
+        return self::setAlign($align)['alignment'];
     }
     private function setList(){
         $this->phpWord->addNumberingStyle(

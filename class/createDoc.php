@@ -111,6 +111,7 @@ class createDoc {
         $firstRow=true;
         $firstSection=true;
         $breakType='continuous';
+        $run=null;
         foreach($this->projectData->section as $s){
             /*
              * (twips )Twip to miara typograficzna, zdefiniowana jako 1⁄20 punktu typograficznego. Jeden twip ma 1⁄1440 cala lub 17,64 μm
@@ -126,7 +127,7 @@ class createDoc {
             
             $section = self::setSectionColumn($s->subsection,$breakType);
             //var_dump($section);
-            print_r($section);
+            //print_r($section);
             /* COLUMNS */
             foreach($s->subsection as $u){
                 //$section->addText("Regularność pomiarów danych sejsmicznychWedług podziału administracyjnego Polski projektowane zdjęcie sejsmiczne dla tematu: „Prace sejsmiczne 3D Wielkie Oczy” znajduje się w południowo-wschodniej Polsce, w obrębie województwa podkarpackiego, w powiecie jarosławskim, lubaczowskim i przemyskim (tylko punkty odbioru).Obszar badań zlokalizowany jest w obrębie koncesji poszukiwawczych: Lubaczów – Zapałów 21/97/p i Przeworsk – Jarosław - Stubno 24/99/p.Obszar projektowanego zdjęcia sejsmicznego Wielkie Oczy 3D położony jest we wschodniej części zapadliska przedkarpackiego. Głównymi elementami jego budowy geologicznej są utwory miocenu autochtonicznego i mezopaleozoiczne podłoże zbudowane z  utworów prekambru, kambru, ordowiku, syluru, jury i kredy.Otrzymaną regularność pomiarów zaprezentowano na mapach rozmieszczenia punktów wzbudzania i odbioru (Ryc. 3 1Ryc. 3 1), jak również na mapach krotności profilowania (ilości tras sejsmicznych w binach WPG) (Ryc. 3 2Ryc. 3 2), oraz mapach ");
@@ -138,19 +139,30 @@ class createDoc {
                 
                
                 foreach($u->subsectionrow as $r){
+                    //print_r($r);
+                    //print_r($r->paragraph->property->paragraph);
                     if($firstRow){
                         //$this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
                         //$this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
                         //$textrun = $section->addTextRun(array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
                         //$textrun->addText($r->paragraph->property->value, 'r2Style', 'p2Style');
                         //array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100)
-                        $textrun = $section->addTextRun(self::setAlign($r));
-                        self::setText($textrun,$r);
+                        
+                        /*
+                         * CHECK TYPE
+                         */
+                        self::checkType($r,$section,$run);
                         $firstRow=false;
                         continue;
                     }
-                    $textrun = self::checkNewLine($section,$textrun,$r->paragraph->property->valuenewline,$r);
-                    self::setText($textrun,$r);
+                    //$textrun = self::checkNewLine($section,$textrun,$r->paragraph->property->valuenewline,$r);
+                    self::checkNewLine($r,$section,$run);
+                    
+                    
+                    //print_r($r->paragraph->style);
+                    
+                    
+                    //self::setText($textrun,$r);
                     //print_r($r->paragraph->style);
                     //print_r($r->paragraph->property);
                     //print_r($r->paragraph->tabstop);
@@ -180,6 +192,108 @@ class createDoc {
             //print_r($s->subsection);
              $firstSection=false;
         }
+    }
+    private function checkType($r,$section,&$run){
+        echo __METHOD__." - ";
+        echo $r->paragraph->property->paragraph." .";
+        switch($r->paragraph->property->paragraph):
+            default:
+            case 'p':
+                $textrun = $section->addTextRun(self::setAlign($r));
+                self::setText($textrun,$r);
+                $run = $textrun;
+                break;
+            case 'l':
+                $listItemRun = $section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r), self::setListParagraph($r));
+                self::setText($listItemRun,$r);
+                $run = $listItemRun;
+                break;
+        endswitch;
+    }
+    private function checkTypeInLine($r,&$run){
+        //echo __METHOD__." - ";
+        //echo $r->paragraph->property->paragraph." .";
+        switch($r->paragraph->property->paragraph):
+            default:
+            case 'p':
+                //$textrun = $section->addTextRun(self::setAlign($r));
+                self::setText($run,$r);
+                //return $run;
+            case 'l':
+                //$listItemRun = $section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r), self::setListParagraph($r));
+                self::setText($run,$r);
+                //return $run;
+        endswitch;
+    }
+    private function setListStyle($r){
+      
+        $hanging = self::getTwip($r->paragraph->style->indentation,$r->paragraph->style->indentationMeasurement);
+        $left = $hanging+self::getTwip($r->paragraph->style->leftEjection,$r->paragraph->style->leftEjectionMeasurement);       
+        /* Format List Array */
+        $formatList=self::getFormatList($r->list->style->listType);
+        $name = 'multilevel';
+        $this->phpWord->addNumberingStyle(
+            $name,
+            array(
+                'type'   => 'multilevel',
+                'levels' => array(
+                    array('format' => $formatList[0], 'text' => '%1'.$formatList[1], 'left' => $left, 'hanging' => $hanging),//, 'tabPos' => 360
+                    array('format' => $formatList[0], 'text' => '%2'.$formatList[1], 'left' => $left, 'hanging' => $hanging),//, 'tabPos' => 720
+                    array('format' => $formatList[0], 'text' => '%3'.$formatList[1], 'left' => $left, 'hanging' => $hanging),//, 'tabPos' => 360
+                    array('format' => $formatList[0], 'text' => '%4'.$formatList[1], 'left' => $left, 'hanging' => $hanging),//, 'tabPos' => 720
+                    array('format' => $formatList[0], 'text' => '%5'.$formatList[1], 'left' => $left, 'hanging' => $hanging),//, 'tabPos' => 360
+                    array('format' => $formatList[0], 'text' => '%6'.$formatList[1], 'left' => $left, 'hanging' => $hanging),//, 'tabPos' => 720
+                    array('format' => $formatList[0], 'text' => '%7'.$formatList[1], 'left' => $left, 'hanging' => $hanging)//, 'tabPos' => 360
+                ),
+            )
+        );
+        //return array('listType' => \PhpOffice\PhpWord\Style\ListItem::TYPE_NUMBER_NESTED);
+        return $name;
+    }
+    private function getTwip($size=0,$measurement='cm'){
+        /* check - minus size */
+        switch($measurement):
+            case 'mm':
+                $size=$size/10;
+            case 'cm':
+                return \PhpOffice\PhpWord\Shared\Converter::cmToTwip($size);
+            case 'point':
+                return \PhpOffice\PhpWord\Shared\Converter::pointToTwip($size);
+            case 'inch':
+                return \PhpOffice\PhpWord\Shared\Converter::inchToTwip($size);
+            default:
+                Throw New Exception('NOT SUPPORTED MEASUREMENT -> '.$measurement,0);  
+        endswitch;
+    }
+
+    private function getFormatList($listType=''){
+        $available=[
+            'bullet'=>['bullet',''],
+            'decimal'=>['decimal',''],
+            'decimal-dot'=>['decimal','.'],
+            'decimal-round-right-bracket'=>['decimal',')'],
+            'upper-alpha'=>['upperLetter',''],
+            'upper-alpha-dot'=>['upperLetter','.'],
+            'upper-alpha-round-right-bracket'=>['upperLetter',')'],
+            'lower-alpha'=>['lowerLetter',''],
+            'lower-alpha-dot'=>['lowerLetter','.'],
+            'lower-alpha-round-right-bracket'=>['lowerLetter',')'],
+            'lower-roman'=>['lowerRoman',''],
+            'lower-roman-dot'=>['lowerRoman','.'],
+            'lower-roman-round-right-bracket'=>['lowerRoman',')'],
+            'upper-roman'=>['upperRoman',''],
+            'upper-roman-dot'=>['upperRoman','.'],
+            'upper-roman-round-right-bracket'=>['upperRoman',')']
+        ];
+        if(!array_key_exists($listType,$available)){
+            Throw New Exception('NOT SUPPORTED LIST TYPE -> '.$listType,0);
+        }
+        return $available[$listType];
+    }
+    private function setListParagraph($r){
+        $name = 'P-Style';
+        $this->phpWord->addParagraphStyle($name, array('spaceAfter' => 95));
+        return $name;
     }
     private function setSectionColumn($subsection,$breakType='continuous'){
         /* EXAMPLE:
@@ -220,7 +334,7 @@ class createDoc {
                
                 );
     }
-    private function setText($textrun,$r){
+    private function setText(&$run,$r){
         //$this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
         //$this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
         //$section->addText($text, 'r2Style', 'p2Style');
@@ -234,7 +348,7 @@ class createDoc {
         
         //$this->phpWord->addFontStyle('r2Style', self::setFont($r));
         //$this->phpWord->addParagraphStyle('p2Style',  array('align' => \PhpOffice\PhpWord\SimpleType\Jc::RIGHT, 'spaceAfter' => 100));
-        $textrun->addText($r->paragraph->property->value,self::setFont($r));
+        $run->addText($r->paragraph->property->value,self::setFont($r));
         return true;
                     $textrun->addText('I am inline styled ', $fontStyle_array);
                     $textrun->addText('with ');
@@ -320,14 +434,15 @@ class createDoc {
             return false;
         }
     }
-    private function checkNewLine($section,$textrun,$newline='y',$r){
-        if($newline==='y'){
-            return $section->addTextRun(self::setAlign($r));
+    private function checkNewLine($r,$section,&$run){
+        //echo __METHOD__." - ";
+        //echo $r->paragraph->property->valuenewline."\r\n";
+        if($r->paragraph->property->valuenewline==='y'){
+            self::checkType($r,$section,$run);
         }
         else{
-            return $textrun;
+            self::checkTypeInLine($r,$run);
         }
-        
     }
     public function createProjectReport(){
         $this->Log->log(0,"[".__METHOD__."]"); 
@@ -1162,13 +1277,13 @@ $row->addCell(1000)->addText('3');
         $this->mainSection->addListItem('List Item IV.a', 1, null, $multilevelNumberingStyleName);
         $this->mainSection->addTextBreak(2);
         $this->mainSection->addText('Multilevel predefined list.');
-        $this->mainSection->addListItem('List Item 1', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
-        $this->mainSection->addListItem('List Item 2', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
-        $this->mainSection->addListItem('List Item 3', 1, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
-        $this->mainSection->addListItem('List Item 4', 1, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
-        $this->mainSection->addListItem('List Item 5', 2, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
-        $this->mainSection->addListItem('List Item 6', 1, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
-        $this->mainSection->addListItem('List Item 7', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $this->mainSection->addListItem('List Item 1', 0, $fontStyleName, $multilevelNumberingStyleName, $paragraphStyleName);
+        $this->mainSection->addListItem('List Item 2', 0, $fontStyleName, $multilevelNumberingStyleName, $paragraphStyleName);
+        $this->mainSection->addListItem('List Item 3', 1, $fontStyleName, $multilevelNumberingStyleName, $paragraphStyleName);
+        $this->mainSection->addListItem('List Item 4', 1, $fontStyleName, $multilevelNumberingStyleName, $paragraphStyleName);
+        $this->mainSection->addListItem('List Item 5', 2, $fontStyleName, $multilevelNumberingStyleName, $paragraphStyleName);
+        $this->mainSection->addListItem('List Item 6', 1, $fontStyleName, $multilevelNumberingStyleName, $paragraphStyleName);
+        $this->mainSection->addListItem('List Item 7', 0, $fontStyleName, $multilevelNumberingStyleName, $paragraphStyleName);
         $this->mainSection->addTextBreak(2);
         $this->mainSection->addText('List with inline formatting.');
         $listItemRun = $this->mainSection->addListItemRun();
@@ -1203,6 +1318,90 @@ $row->addCell(1000)->addText('3');
         $this->mainSection->addTitle('Heading 1', 1);
         $this->mainSection->addTitle('Heading 2', 2);
         $this->mainSection->addTitle('Heading 3', 3);
+    }
+    private function testList22(&$section){
+        $section->addPageBreak();
+        /* CREATE LIST */
+        
+        $fontStyleName = 'myOwnStyle';
+        $this->phpWord->addFontStyle($fontStyleName, array('color' => 'FF0000'));
+        $paragraphStyleName = 'P-Style';
+        $this->phpWord->addParagraphStyle($paragraphStyleName, array('spaceAfter' => 95));
+        
+        $multilevelNumberingStyleName = 'multilevel';
+        $this->phpWord->addNumberingStyle(
+            $multilevelNumberingStyleName,
+            array(
+                'type'   => 'multilevel',
+                'levels' => array(
+                    array('format' => 'decimal', 'text' => '%1.', 'left' => 360, 'hanging' => 360, 'tabPos' => 360),
+                    array('format' => 'upperLetter', 'text' => '%2.', 'left' => 720, 'hanging' => 360, 'tabPos' => 720),
+                ),
+            )
+        );
+        $predefinedMultilevelStyle = array('listType' => \PhpOffice\PhpWord\Style\ListItem::TYPE_NUMBER_NESTED);
+
+
+       
+        // Lists
+        $section->addText('Multilevel list.');
+        $section->addListItem('List Item I', 0, null, $multilevelNumberingStyleName);
+        $section->addListItem('List Item I.a', 1, null, $multilevelNumberingStyleName);
+        $section->addListItem('List Item I.b', 1, null, $multilevelNumberingStyleName);
+        $section->addListItem('List Item II', 0, null, $multilevelNumberingStyleName);
+        $section->addListItem('List Item II.a', 1, null, $multilevelNumberingStyleName);
+        $section->addListItem('List Item III', 0, null, $multilevelNumberingStyleName);
+        $section->addTextBreak(2);
+        $section->addText('Basic simple bulleted list.');
+        $section->addListItem('List Item 1');
+        $section->addListItem('List Item 2');
+        $section->addListItem('List Item 3');
+        $section->addText('Continue from multilevel list above.');
+        $section->addListItem('List Item IV', 0, null, $multilevelNumberingStyleName);
+        $section->addListItem('List Item IV.a', 1, null, $multilevelNumberingStyleName);
+        $section->addTextBreak(2);
+        $section->addText('Multilevel predefined list.');
+        $section->addListItem('List Item 1', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $section->addListItem('List Item 2', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $section->addListItem('List Item 3', 1, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $section->addListItem('List Item 4', 1, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $section->addListItem('List Item 5', 2, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $section->addListItem('List Item 6', 1, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $section->addListItem('List Item 7', 0, $fontStyleName, $predefinedMultilevelStyle, $paragraphStyleName);
+        $section->addTextBreak(2);
+        $section->addText('List with inline formatting.');
+        $listItemRun = $section->addListItemRun();
+        $listItemRun->addText('List item 1');
+        $listItemRun->addText(' in bold', array('bold' => true));
+        $listItemRun = $section->addListItemRun(1, $predefinedMultilevelStyle, $paragraphStyleName);
+        $listItemRun->addText('List item 2');
+        $listItemRun->addText(' in italic', array('italic' => true));
+        $footnote = $section->addFootnote();
+        $footnote->addText('this is a footnote on a list item');
+        $listItemRun = $section->addListItemRun();
+        $listItemRun->addText('List item 3');
+        $listItemRun->addText(' underlined', array('underline' => 'dash'));
+        $section->addTextBreak(2);
+
+        // Numbered heading
+        $headingNumberingStyleName = 'headingNumbering';
+        $this->phpWord->addNumberingStyle(
+            $headingNumberingStyleName,
+            array('type'   => 'multilevel',
+                  'levels' => array(
+                      array('pStyle' => 'Heading1', 'format' => 'decimal', 'text' => '%1'),
+                      array('pStyle' => 'Heading2', 'format' => 'decimal', 'text' => '%1.%2'),
+                      array('pStyle' => 'Heading3', 'format' => 'decimal', 'text' => '%1.%2.%3'),
+                  ),
+            )
+        );
+        $this->phpWord->addTitleStyle(1, array('size' => 16), array('numStyle' => $headingNumberingStyleName, 'numLevel' => 0));
+        $this->phpWord->addTitleStyle(2, array('size' => 14), array('numStyle' => $headingNumberingStyleName, 'numLevel' => 1));
+        $this->phpWord->addTitleStyle(3, array('size' => 12), array('numStyle' => $headingNumberingStyleName, 'numLevel' => 2));
+
+        $section->addTitle('Heading 1', 1);
+        $section->addTitle('Heading 2', 2);
+        $section->addTitle('Heading 3', 3);
     }
     private function testTabulation(){
         $this->mainSection->addPageBreak();

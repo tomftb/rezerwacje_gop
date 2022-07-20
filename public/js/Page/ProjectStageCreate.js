@@ -727,7 +727,7 @@ class ProjectStageCreate{
         var self = this;
             doc.onclick = function(){
                 console.clear();
-                'generate doc file';
+                self.Html.hideField(self.Modal.link['error']);
                 console.log(self.StageData.Stage);
                 var fd = new FormData();
                     fd.append('stage',JSON.stringify(self.StageData.Stage));
@@ -787,9 +787,10 @@ class ProjectStageCreate{
     setSendDataAction(ele){
         var self=this; 
         ele.onclick = function (){
-            //console.clear();
+            console.clear();
             //console.log(self.StageData.Stage);
             //throw 'asdasd';
+            self.Html.hideField(self.Modal.link['error']);
             var fd = new FormData();
                 fd.append('stage',JSON.stringify(self.StageData.Stage));
             self.checkInputData(self.StageData.Stage);

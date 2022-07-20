@@ -259,6 +259,10 @@ class createDoc {
     private function getTwip($size=0,$measurement='cm'){
         /* check - minus size */
         switch($measurement):
+            //case 'pt':
+                //$size=$size*0.0352777778;
+                //echo $size.", ";
+                //return \PhpOffice\PhpWord\Shared\Converter::cmToTwip($size);
             case 'mm':
                 $size=$size/10;
             case 'cm':
@@ -391,7 +395,7 @@ class createDoc {
         /* TO DO -> CHECK EXISTS */
         return [
             'name' => $r->paragraph->style->fontFamily,
-            'size' => $r->paragraph->style->fontSize,
+            'size' => self::convertToPt($r->paragraph->style->fontSize,$r->paragraph->style->fontSizeMeasurement),
             'color' => $r->paragraph->style->color,
             'bgColor' => $r->paragraph->style->backgroundColor,
             'bold' => self::setTextStyle($r->paragraph->style->fontWeight),
@@ -399,6 +403,16 @@ class createDoc {
             'underline' => self::setTextStyle($r->paragraph->style->underline),
             'strikethrough' => self::setTextStyle($r->paragraph->style->{'line-through'})
         ];
+    }
+    private function convertToPt($size=0,$measurement='pt'){
+        switch($measurement):
+            case 'px':
+                return $size*0.75;
+            case 'pt':
+                return $size;
+            default:
+                Throw New Exception('NOT SUPPORTED MEASUREMENT -> '.$measurement,0);
+        endswitch;
     }
     private function setAlign($r){
         $this->Log->log(0,"[".__METHOD__."] TEXT ALIGN -> ".$r->paragraph->style->textAlign);

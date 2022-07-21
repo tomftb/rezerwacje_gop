@@ -94,11 +94,15 @@ class createDocAbstract {
         if(!array_key_exists($align,$available)){
             Throw New Exception('WRONG TEXT ALIGN -> '.$align,0);
         }
-        return ['alignment'=>$available[$align]];
+        return $available[$align];
     }
-    protected function setListAlign($align='LEFT'){
-        return self::setAlign($align)['alignment'];
+    protected function setParagraphProperties($r){
+        return [
+            'tabs'=>self::setTabStop($r->paragraph->tabstop),
+            'alignment'=>self::setAlign($r->paragraph->style->textAlign)
+        ];
     }
+
     private function setTextStyle($style='1'){
         if($style==='1'){
             return true;
@@ -107,5 +111,30 @@ class createDocAbstract {
             return false;
         }
     }
-    
+    private function setTabStop($rTabStop){
+        /*  AVAILABLE in CLASS:
+            - none,dot,hyphen,underscore,heavy,middleDot
+            UNAVAILABLE in MS Word Office:
+            - heavy
+            - middleDot
+        */
+        $tabStop=[];
+        foreach($rTabStop as $v){
+            array_push($tabStop,new \PhpOffice\PhpWord\Style\Tab($v->alignment, self::getTwip($v->position,$v->measurement),self::getLeadingSign($v->leadingSign)));
+        }
+        return $tabStop;
+    }
+    private function getLeadingSign($sign='none'){
+        $available=[
+            'none'=>'none',
+            'underline'=>'underscore',
+            'dash'=>'hyphen',
+            'dot'=>'dot'
+        ];
+        if(!array_key_exists($sign,$available)){
+            Throw New Exception('NOT SUPPORTED SIGN -> '.$sign,0);
+        }
+        return $available[$sign];
+    }
 }
+

@@ -611,7 +611,11 @@ class ProjectStageTool{
                 /* Anonymous Function */
                 onchange:function(t){
                     /* t - this */
-                    this.property['tabstop'] = t.value;
+                    //console.log(this);
+                    //console.log(t);
+                    //console.log(t.value);
+                    //console.log(this.property);
+                    this.property.paragraph.property.tabstop = t.value;
                 },
                 type:'select',
                 attributes:{

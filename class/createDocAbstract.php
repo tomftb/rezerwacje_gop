@@ -49,17 +49,33 @@ class createDocAbstract {
                 Throw New Exception('NOT SUPPORTED MEASUREMENT -> '.$measurement,0);
         endswitch;
     }
-    protected function setFont($r){
+    protected function setFont($rStyle){
         /* TO DO -> CHECK EXISTS */
+        /* AVAILABLE
+        $textrun->addText('color', array('color' => '996699'));
+        $textrun->addText('bold', array('bold' => true));
+        $textrun->addText('italic', array('italic' => true));
+        $textrun->addText('underline', array('underline' => 'dash'));
+        $textrun->addText('strikethrough', array('strikethrough' => true));
+        $textrun->addText('doubleStrikethrough', array('doubleStrikethrough' => true));
+        $textrun->addText('superScript', array('superScript' => true));
+        $textrun->addText('subScript', array('subScript' => true));
+        $textrun->addText('smallCaps', array('smallCaps' => true));
+        $textrun->addText('allCaps', array('allCaps' => true));
+        $textrun->addText('fgColor', array('fgColor' => 'yellow'));
+        $textrun->addText('scale', array('scale' => 200));
+        $textrun->addText('spacing', array('spacing' => 120));
+        $textrun->addText('kerning', array('kerning' => 10));
+        */
         return [
-            'name' => $r->paragraph->style->fontFamily,
-            'size' => self::convertToPt($r->paragraph->style->fontSize,$r->paragraph->style->fontSizeMeasurement),
-            'color' => $r->paragraph->style->color,
-            'bgColor' => $r->paragraph->style->backgroundColor,
-            'bold' => self::setTextStyle($r->paragraph->style->fontWeight),
-            'italic'=>self::setTextStyle($r->paragraph->style->fontStyle),
-            'underline' => self::setTextStyle($r->paragraph->style->underline),
-            'strikethrough' => self::setTextStyle($r->paragraph->style->{'line-through'})
+            'name' => $rStyle->fontFamily,
+            'size' => self::convertToPt($rStyle->fontSize,$rStyle->fontSizeMeasurement),
+            'color' => $rStyle->color,
+            'bgColor' => $rStyle->backgroundColor,
+            'bold' => self::setTextStyle($rStyle->fontWeight),
+            'italic'=>self::setTextStyle($rStyle->fontStyle),
+            'underline' => self::setTextStyle($rStyle->underline),
+            'strikethrough' => self::setTextStyle($rStyle->{'line-through'})
         ];
     }
     protected function setAlign($align='LEFT'){
@@ -91,4 +107,5 @@ class createDocAbstract {
             return false;
         }
     }
+    
 }

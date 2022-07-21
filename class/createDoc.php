@@ -1,5 +1,5 @@
 <?php
-class createDoc {
+class createDoc extends createDocAbstract {
     private $phpWorld;
     private $fileName='default.docx';
     private $projectData=array();
@@ -200,7 +200,7 @@ class createDoc {
         switch($r->paragraph->property->paragraph):
             default:
             case 'p':
-                $textrun = $section->addTextRun(self::setAlign($r->paragraph->style->textAlign));
+                $textrun = $section->addTextRun(parent::setAlign($r->paragraph->style->textAlign));
                 self::setText($textrun,$r);
                 $run = $textrun;
                 break;
@@ -215,9 +215,11 @@ class createDoc {
         switch($r->paragraph->property->paragraph):
             default:
             case 'p':
-                self::setText($run,$r);
+                //self::setText($run,$r);
+                $run->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
             case 'l':
-                self::setText($run,$r);
+                //self::setText($run,$r);
+                $run->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
         endswitch;
     }
     private function setListItem($r,&$section,&$run,$actListName=''){
@@ -229,81 +231,56 @@ class createDoc {
             $actListName= uniqid('list_');
         }
         $listItemRun = $section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r,$actListName), self::setListParagraph($r));
-        self::setText($listItemRun,$r);
+        //self::setText($listItemRun,$r);
+        $listItemRun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
         $run = $listItemRun;
     }
     private function setListStyle($r,$listName=''){
       
-        $hanging = self::getTwip($r->paragraph->style->indentation,$r->paragraph->style->indentationMeasurement);
-        $left = $hanging+self::getTwip($r->paragraph->style->leftEjection,$r->paragraph->style->leftEjectionMeasurement);       
+        $hanging = parent::getTwip($r->paragraph->style->indentation,$r->paragraph->style->indentationMeasurement);
+        $left = $hanging+parent::getTwip($r->paragraph->style->leftEjection,$r->paragraph->style->leftEjectionMeasurement);       
         /* Format List Array */
-        $formatList=self::getFormatList($r->list->style->listType);
+        $formatList=parent::getFormatList($r->list->style->listType);
         $this->phpWord->addNumberingStyle(
             $listName,
             array(
                 'type'   => 'multilevel',
                 'levels' => array(
-                    array('format' => $formatList[0], 'text' => '%1'.$formatList[1], 'left' => $left, 'hanging' => $hanging),//, 'tabPos' => 360
-                    array('format' => $formatList[0], 'text' => '%2'.$formatList[1], 'left' => $left, 'hanging' => $hanging),//, 'tabPos' => 720
-                    array('format' => $formatList[0], 'text' => '%3'.$formatList[1], 'left' => $left, 'hanging' => $hanging),//, 'tabPos' => 360
-                    array('format' => $formatList[0], 'text' => '%4'.$formatList[1], 'left' => $left, 'hanging' => $hanging),//, 'tabPos' => 720
-                    array('format' => $formatList[0], 'text' => '%5'.$formatList[1], 'left' => $left, 'hanging' => $hanging),//, 'tabPos' => 360
-                    array('format' => $formatList[0], 'text' => '%6'.$formatList[1], 'left' => $left, 'hanging' => $hanging),//, 'tabPos' => 720
-                    array('format' => $formatList[0], 'text' => '%7'.$formatList[1], 'left' => $left, 'hanging' => $hanging)//, 'tabPos' => 360
+                    /* ('start'=>, 'format'=>, 'text'=>, 'alignment'=>, 'tabPos'=>, 'left'=>, 'hanging'=>, 'font'=>, 'hint'=>) */
+                    array('format' => $formatList[0], 'text' => '%1'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 360
+                    array('format' => $formatList[0], 'text' => '%2'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 720
+                    array('format' => $formatList[0], 'text' => '%3'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 360
+                    array('format' => $formatList[0], 'text' => '%4'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 720
+                    array('format' => $formatList[0], 'text' => '%5'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 360
+                    array('format' => $formatList[0], 'text' => '%6'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 720
+                    array('format' => $formatList[0], 'text' => '%7'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily)//, 'tabPos' => 360
                 ),
             )
         );
         //return array('listType' => \PhpOffice\PhpWord\Style\ListItem::TYPE_NUMBER_NESTED);
         return $listName;
     }
-    private function getTwip($size=0,$measurement='cm'){
-        /* check - minus size */
-        switch($measurement):
-            //case 'pt':
-                //$size=$size*0.0352777778;
-                //echo $size.", ";
-                //return \PhpOffice\PhpWord\Shared\Converter::cmToTwip($size);
-            case 'mm':
-                $size=$size/10;
-            case 'cm':
-                return \PhpOffice\PhpWord\Shared\Converter::cmToTwip($size);
-            case 'point':
-                return \PhpOffice\PhpWord\Shared\Converter::pointToTwip($size);
-            case 'inch':
-                return \PhpOffice\PhpWord\Shared\Converter::inchToTwip($size);
-            default:
-                Throw New Exception('NOT SUPPORTED MEASUREMENT -> '.$measurement,0);  
-        endswitch;
-    }
-
-    private function getFormatList($listType=''){
-        $available=[
-            'bullet'=>['bullet',''],
-            'decimal'=>['decimal',''],
-            'decimal-dot'=>['decimal','.'],
-            'decimal-round-right-bracket'=>['decimal',')'],
-            'upper-alpha'=>['upperLetter',''],
-            'upper-alpha-dot'=>['upperLetter','.'],
-            'upper-alpha-round-right-bracket'=>['upperLetter',')'],
-            'lower-alpha'=>['lowerLetter',''],
-            'lower-alpha-dot'=>['lowerLetter','.'],
-            'lower-alpha-round-right-bracket'=>['lowerLetter',')'],
-            'lower-roman'=>['lowerRoman',''],
-            'lower-roman-dot'=>['lowerRoman','.'],
-            'lower-roman-round-right-bracket'=>['lowerRoman',')'],
-            'upper-roman'=>['upperRoman',''],
-            'upper-roman-dot'=>['upperRoman','.'],
-            'upper-roman-round-right-bracket'=>['upperRoman',')']
-        ];
-        if(!array_key_exists($listType,$available)){
-            Throw New Exception('NOT SUPPORTED LIST TYPE -> '.$listType,0);
-        }
-        return $available[$listType];
-    }
     private function setListParagraph($r){
         $name = 'P-Style';
         //var_dump($this->phpWord);
-        $this->phpWord->addParagraphStyle($name, array('align'=>self::setListAlign($r->paragraph->style->textAlign) ,'spaceAfter' => 95));
+            /*
+            'styleName'           => array(self::READ_VALUE, array('w:pStyle', 'w:name')),
+            'alignment'           => array(self::READ_VALUE, 'w:jc'),
+            'basedOn'             => array(self::READ_VALUE, 'w:basedOn'),
+            'next'                => array(self::READ_VALUE, 'w:next'),
+            'indent'              => array(self::READ_VALUE, 'w:ind', 'w:left'),
+            'hanging'             => array(self::READ_VALUE, 'w:ind', 'w:hanging'),
+            'spaceAfter'          => array(self::READ_VALUE, 'w:spacing', 'w:after'),
+            'spaceBefore'         => array(self::READ_VALUE, 'w:spacing', 'w:before'),
+            'widowControl'        => array(self::READ_FALSE, 'w:widowControl'),
+            'keepNext'            => array(self::READ_TRUE,  'w:keepNext'),
+            'keepLines'           => array(self::READ_TRUE,  'w:keepLines'),
+            'pageBreakBefore'     => array(self::READ_TRUE,  'w:pageBreakBefore'),
+            'contextualSpacing'   => array(self::READ_TRUE,  'w:contextualSpacing'),
+            'bidi'                => array(self::READ_TRUE,  'w:bidi'),
+            'suppressAutoHyphens' => array(self::READ_TRUE,  'w:suppressAutoHyphens'),
+                    */
+        $this->phpWord->addParagraphStyle($name, array('align'=>parent::setListAlign($r->paragraph->style->textAlign) ,'spaceAfter' => 95));
         return $name;
     }
     private function setSectionColumn($subsection,$breakType='continuous'){
@@ -339,125 +316,10 @@ class createDoc {
                     array(
                         'colsNum'   => $cols , //$cols
                         'breakType' => $breakType, // new word page
-                        'colsSpace' => 2880/$cols  // 2880/$cols
-                        
+                        'colsSpace' => 2880/$cols  // 2880/$cols              
                     )
-               
                 );
-    }
-    private function setText(&$run,$r){
-        //$this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
-        //$this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
-        //$section->addText($text, 'r2Style', 'p2Style');
-       
-        ///$subsequent->addText("OPRACOWANIE BADAŃ SEJSMICZNYCH",$FontStyle,$ParagraphStyle);   
-        
-        //$text = "some text";
-        //$this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
-        //$this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
-        //$section->addText($text, 'r2Style', 'p2Style');
-        
-        //$this->phpWord->addFontStyle('r2Style', self::setFont($r));
-        //$this->phpWord->addParagraphStyle('p2Style',  array('align' => \PhpOffice\PhpWord\SimpleType\Jc::RIGHT, 'spaceAfter' => 100));
-        $run->addText($r->paragraph->property->value,self::setFont($r));
-        return true;
-                    $textrun->addText('I am inline styled ', $fontStyle_array);
-                    $textrun->addText('with ');
-                    $textrun->addText('color', array('color' => '996699'));
-                    $textrun->addText(', ');
-                    $textrun->addText('bold', array('bold' => true));
-                    $textrun->addText(', ');
-                    $textrun->addText('italic', array('italic' => true));
-                    $textrun->addText(', ');
-                    $textrun->addText('underline', array('underline' => 'dash'));
-                    $textrun->addText(', ');
-                    $textrun->addText('strikethrough', array('strikethrough' => true));
-                    $textrun->addText(', ');
-                    $textrun->addText('doubleStrikethrough', array('doubleStrikethrough' => true));
-                    $textrun->addText(', ');
-                    $textrun->addText('superScript', array('superScript' => true));
-                    $textrun->addText(', ');
-                    $textrun->addText('subScript', array('subScript' => true));
-                    $textrun->addText(', ');
-                    $textrun->addText('smallCaps', array('smallCaps' => true));
-                    $textrun->addText(', ');
-                    $textrun->addText('allCaps', array('allCaps' => true));
-                    $textrun->addText(', ');
-                    $textrun->addText('fgColor', array('fgColor' => 'yellow'));
-                    $textrun->addText(', ');
-                    $textrun->addText('scale', array('scale' => 200));
-                    $textrun->addText(', ');
-                    $textrun->addText('spacing', array('spacing' => 120));
-                    $textrun->addText(', ');
-                    $textrun->addText('kerning', array('kerning' => 10));
-                    $textrun->addText('. ');
-    }
-    private function setFont($r){
-        /* TO DO -> CHECK EXISTS */
-        return [
-            'name' => $r->paragraph->style->fontFamily,
-            'size' => self::convertToPt($r->paragraph->style->fontSize,$r->paragraph->style->fontSizeMeasurement),
-            'color' => $r->paragraph->style->color,
-            'bgColor' => $r->paragraph->style->backgroundColor,
-            'bold' => self::setTextStyle($r->paragraph->style->fontWeight),
-            'italic'=>self::setTextStyle($r->paragraph->style->fontStyle),
-            'underline' => self::setTextStyle($r->paragraph->style->underline),
-            'strikethrough' => self::setTextStyle($r->paragraph->style->{'line-through'})
-        ];
-    }
-    private function convertToPt($size=0,$measurement='pt'){
-        switch($measurement):
-            case 'px':
-                return $size*0.75;
-            case 'pt':
-                return $size;
-            default:
-                Throw New Exception('NOT SUPPORTED MEASUREMENT -> '.$measurement,0);
-        endswitch;
-    }
-    private function setAlign($align='LEFT'){
-        $this->Log->log(0,"[".__METHOD__."] TEXT ALIGN -> ".$align);
-        //'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER);
-        //$this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
-        //$this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
-        //$ParagraphStyle['alignment']=\PhpOffice\PhpWord\SimpleType\Jc::LEFT;
-        //$this->mainSection->addText("Na zlecenie:",$FontStyle,$ParagraphStyle);
-         /* TO DO -> CHECK EXISTS */
-        $available=[
-                'CENTER'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER,
-                'LEFT'=>\PhpOffice\PhpWord\SimpleType\Jc::LEFT,
-                'RIGHT'=>\PhpOffice\PhpWord\SimpleType\Jc::RIGHT,
-                'JUSTIFY'=>\PhpOffice\PhpWord\SimpleType\Jc::BOTH
-        ];
-        if(!array_key_exists($align,$available)){
-            Throw New Exception('WRONG TEXT ALIGN -> '.$align,0);
-        }
-        return ['alignment'=>$available[$align]];
-    }
-    private function setListAlign($align='LEFT'){
-        return self::setAlign($align)['alignment'];
-    }
-    private function setList(){
-        $this->phpWord->addNumberingStyle(
-            $multilevelNumberingStyleName,
-            array(
-                'type'   => 'multilevel',
-                'levels' => array(
-                    array('format' => 'decimal', 'text' => '%1.', 'left' => 360, 'hanging' => 360, 'tabPos' => 360),
-                    array('format' => 'upperLetter', 'text' => '%2.', 'left' => 720, 'hanging' => 360, 'tabPos' => 720),
-                ),
-            )
-        );
-        $this->mainSection->addListItem('List Item I', 0, null, $multilevelNumberingStyleName); 
-    }
-    private function setTextStyle($style='1'){
-        if($style==='1'){
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
+    }    
     private function checkNewLine($r,&$section,&$run,$actListName){
         //echo __METHOD__." - ";
         //echo $r->paragraph->property->valuenewline."\r\n";

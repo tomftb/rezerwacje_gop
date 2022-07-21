@@ -201,7 +201,7 @@ class createDoc extends createDocAbstract {
             default:
             case 'p':
                 $textrun = $section->addTextRun(parent::setAlign($r->paragraph->style->textAlign));
-                self::setText($textrun,$r);
+                $textrun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
                 $run = $textrun;
                 break;
             case 'l':

@@ -151,6 +151,12 @@ class TabStop{
             div.onclick=function(){
                 if (confirm('Potwierdź usunięcie tabulacji') === true) { 
                     console.log('TabStop:rmButton().onclick()');
+                    //console.log('IDX:');
+                    //console.log(idx);
+                    //console.log('IDX typeof:');
+                    //console.log(typeof (idx));
+                    //console.log('DIV TO REMOVE:');
+                    //console.log(divRow);
                     /* REMOVE DIV ROW WITH INPUT AND BUTTON */
                     divRow.remove();
                     /* REMOVE DATA IDX FROM DATA (LIST) TABSTOP OBJECT */
@@ -158,23 +164,37 @@ class TabStop{
                     delete self.paragraph.data.tabstop[idx];
                     /* REMOVE VALUE OPTION FROM LIST IN SELECT TABSTOP */
                     let optionIdxToRemove = -1;
+                   // console.log('TabStop select oprion children:');
+                    //console.log(self.paragraph.option.children);
+                    //console.log('length:');
+                    //console.log(self.paragraph.option.children.length);
+                    
                     for (let i = 0; i < self.paragraph.option.children.length; i++) {
+                        //console.log(self.paragraph.option.children[i].value);
+                        //console.log(typeof (self.paragraph.option.children[i].value));
                         if(self.paragraph.option.children[i].value===idx){
+                            //console.log('found');
+                            //console.log(i);
                             optionIdxToRemove = i;
                             break;
                         }
                     }
-                    if(optionIdxToRemove>0){
-                        console.log('paragraph option to remove');
+                    /* CAN be idx = 0 */
+                    if(optionIdxToRemove>-1){
+                        //console.log('paragraph option to remove');
                         self.paragraph.option.childNodes[optionIdxToRemove].remove(); 
                     }
                     /* SET paragraph.property.tabstop */
+                    //console.log('Property tabStop:');
+                    //console.log(self.paragraph.data.property.tabstop);
+                    //console.log(typeof(self.paragraph.data.property.tabstop));
                     if(idx===self.paragraph.data.property.tabstop){
                         self.paragraph.data.property.tabstop='-1';
                     }
                     /* REMOVE FROM paragraph.tabstop */
                     delete self.paragraph.data.tabstop[idx];
-
+                    //console.log('TabStop list:');
+                    //console.log(self.paragraph.data.tabstop);
                 } else {
                     // NOTHING TO DO
                 }
@@ -216,8 +236,11 @@ class TabStop{
                 };
                 /* EXCEPTION IF self.paragraph.property.tabstop = '-1' = NONE */
                 //throw 'stop-193';
+                console.log('Paragraph:');
                 console.log(self.paragraph);
+                console.log('Paragraph data property:');
                 console.log(self.paragraph.data.property);
+                console.log('Paragraph data property - tabstop:');
                 console.log(self.paragraph.data.property.tabstop);
                 if(self.paragraph.data.property.tabstop!=='-1'){
                     selectedData={
@@ -314,11 +337,13 @@ class TabStop{
                         self.paragraph.data.property.tabstop=i;
                     }
                 };
-                
                 /* 
                  * UPDATE OBJECT TabStop data PROPERTY AND paragraph.tabsStop PROPERTY WITH NEW TAB STOP
                  */
                 self.paragraph.data.tabstop = newData.data;
+                console.log('Paragraph data tabstop list:');
+                console.log(self.paragraph.data.tabstop);
+                console.log('Paragraph data tabstop list (newData):');
                 console.log(newData.data);
             };
         return btnDiv;

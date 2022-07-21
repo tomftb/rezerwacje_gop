@@ -200,7 +200,9 @@ class createDoc extends createDocAbstract {
         switch($r->paragraph->property->paragraph):
             default:
             case 'p':
-                $textrun = $section->addTextRun(parent::setAlign($r->paragraph->style->textAlign));
+                $textrun = $section->addTextRun(parent::setParagraphProperties($r));
+                //$textrun = $section->addTextRun(parent::setAlign($r->paragraph->style->textAlign));//,$multipleTabsStyleName  
+                //var_dump($this->phpWord);
                 $textrun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
                 $run = $textrun;
                 break;
@@ -280,7 +282,7 @@ class createDoc extends createDocAbstract {
             'bidi'                => array(self::READ_TRUE,  'w:bidi'),
             'suppressAutoHyphens' => array(self::READ_TRUE,  'w:suppressAutoHyphens'),
                     */
-        $this->phpWord->addParagraphStyle($name, array('align'=>parent::setListAlign($r->paragraph->style->textAlign) ,'spaceAfter' => 95));
+        $this->phpWord->addParagraphStyle($name, array('align'=>parent::setAlign($r->paragraph->style->textAlign) ,'spaceAfter' => 95));
         return $name;
     }
     private function setSectionColumn($subsection,$breakType='continuous'){

@@ -17,22 +17,23 @@ class createDocAbstract {
     }
     protected function getFormatList($listType=''){
         $available=[
-            'bullet'=>['bullet',''],
-            'decimal'=>['decimal',''],
-            'decimal-dot'=>['decimal','.'],
-            'decimal-round-right-bracket'=>['decimal',')'],
-            'upper-alpha'=>['upperLetter',''],
-            'upper-alpha-dot'=>['upperLetter','.'],
-            'upper-alpha-round-right-bracket'=>['upperLetter',')'],
-            'lower-alpha'=>['lowerLetter',''],
-            'lower-alpha-dot'=>['lowerLetter','.'],
-            'lower-alpha-round-right-bracket'=>['lowerLetter',')'],
-            'lower-roman'=>['lowerRoman',''],
-            'lower-roman-dot'=>['lowerRoman','.'],
-            'lower-roman-round-right-bracket'=>['lowerRoman',')'],
-            'upper-roman'=>['upperRoman',''],
-            'upper-roman-dot'=>['upperRoman','.'],
-            'upper-roman-round-right-bracket'=>['upperRoman',')']
+            'bullet'=>['bullet','',''],
+            'decimal'=>['decimal','',''],
+            'decimal-dot'=>['decimal','','.'],
+            'decimal-round-right-bracket'=>['decimal','',')'],
+            'decimal-leading-zero'=>['decimal','0',''],
+            'upper-alpha'=>['upperLetter','',''],
+            'upper-alpha-dot'=>['upperLetter','','.'],
+            'upper-alpha-round-right-bracket'=>['upperLetter','',')'],
+            'lower-alpha'=>['lowerLetter','',''],
+            'lower-alpha-dot'=>['lowerLetter','','.'],
+            'lower-alpha-round-right-bracket'=>['lowerLetter','',')'],
+            'lower-roman'=>['lowerRoman','',''],
+            'lower-roman-dot'=>['lowerRoman','','.'],
+            'lower-roman-round-right-bracket'=>['lowerRoman','',')'],
+            'upper-roman'=>['upperRoman','',''],
+            'upper-roman-dot'=>['upperRoman','','.'],
+            'upper-roman-round-right-bracket'=>['upperRoman','',')']
         ];
         if(!array_key_exists($listType,$available)){
             Throw New Exception('NOT SUPPORTED LIST TYPE -> '.$listType,0);
@@ -75,7 +76,9 @@ class createDocAbstract {
             'bold' => self::setTextStyle($rStyle->fontWeight),
             'italic'=>self::setTextStyle($rStyle->fontStyle),
             'underline' => self::setTextStyle($rStyle->underline),
-            'strikethrough' => self::setTextStyle($rStyle->{'line-through'})
+            'strikethrough' => self::setTextStyle($rStyle->{'line-through'}),
+                //works -> height ? 'position'=>1000,
+                // works 'hidden'=>true
         ];
     }
     protected function setAlign($align='LEFT'){
@@ -111,7 +114,7 @@ class createDocAbstract {
             return false;
         }
     }
-    private function setTabStop($rTabStop){
+    protected function setTabStop($rTabStop){
         /*  AVAILABLE in CLASS:
             - none,dot,hyphen,underscore,heavy,middleDot
             UNAVAILABLE in MS Word Office:

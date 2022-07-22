@@ -201,15 +201,14 @@ class createDoc extends createDocAbstract {
         switch($r->paragraph->property->paragraph):
             default:
             case 'p':
-                $textrun = $section->addTextRun(parent::setParagraphProperties($r,$actTabStopName)); 
+                /* TO SET THE sAME TAB STOP - USE FRONT END TO ADD TAB STOP FOR NEW PARAGRAPH */
+                $textrun = $section->addTextRun(parent::setParagraphProperties($r)); 
                 //var_dump($this->phpWord);
                 //$rightTabStyleName = 'rightTab';
                 //$this->phpWord->addParagraphStyle($rightTabStyleName, array('tabs' => array(new \PhpOffice\PhpWord\Style\Tab('right', 1440,'dot'))));
                 $textrun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
                 //$section->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style),$rightTabStyleName);
-                
                 $run = $textrun;
-                
                 break;
             case 'l':
                 self::setListItem($r,$section,$run,$actListName,$actTabStopName);                
@@ -240,6 +239,8 @@ class createDoc extends createDocAbstract {
             $actTabStopName=uniqid('tabstop_');
             /* RESET TAB STOP */
         }
+        //echo 'act list name - '.$actListName.' ';
+        //echo 'act tab stop name - '.$actTabStopName.' ';
         $listItemRun = $section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r,$actListName), self::setListParagraph($r,$actTabStopName));
         //self::setText($listItemRun,$r);
         $listItemRun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
@@ -330,7 +331,7 @@ class createDoc extends createDocAbstract {
                     )
                 );
     }    
-    private function checkNewLine($r,&$section,&$run,$actListName='',&$actTabStopName=''){
+    private function checkNewLine($r,&$section,&$run,&$actListName='',&$actTabStopName=''){
         //echo __METHOD__." - ";
         //echo $r->paragraph->property->valuenewline."\r\n";
         if($r->paragraph->property->valuenewline==='y'){

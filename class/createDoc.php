@@ -112,7 +112,8 @@ class createDoc extends createDocAbstract {
         $firstSection=true;
         $breakType='continuous';
         $run=null;
-        $actListName= uniqid('list_');
+        $actListName=uniqid('list_');
+        $actTabStopName=uniqid('tabstop_');
         foreach($this->projectData->section as $s){
             /*
              * (twips )Twip to miara typograficzna, zdefiniowana jako 1⁄20 punktu typograficznego. Jeden twip ma 1⁄1440 cala lub 17,64 μm
@@ -152,12 +153,12 @@ class createDoc extends createDocAbstract {
                         /*
                          * CHECK TYPE
                          */
-                        self::checkType($r,$section,$run,$actListName);
+                        self::checkType($r,$section,$run,$actListName,$actTabStopName);
                         $firstRow=false;
                         continue;
                     }
                     //$textrun = self::checkNewLine($section,$textrun,$r->paragraph->property->valuenewline,$r);
-                    self::checkNewLine($r,$section,$run,$actListName);
+                    self::checkNewLine($r,$section,$run,$actListName,$actTabStopName);
                     
                     
                     //print_r($r->paragraph->style);
@@ -194,20 +195,24 @@ class createDoc extends createDocAbstract {
              $firstSection=false;
         }
     }
-    private function checkType($r,&$section,&$run,$actListName=''){
+    private function checkType($r,&$section,&$run,&$actListName='',&$actTabStopName=''){
         //echo __METHOD__." - ";
         //echo $r->paragraph->property->paragraph." .";
         switch($r->paragraph->property->paragraph):
             default:
             case 'p':
-                $textrun = $section->addTextRun(parent::setParagraphProperties($r));
-                //$textrun = $section->addTextRun(parent::setAlign($r->paragraph->style->textAlign));//,$multipleTabsStyleName  
+                $textrun = $section->addTextRun(parent::setParagraphProperties($r,$actTabStopName)); 
                 //var_dump($this->phpWord);
+                //$rightTabStyleName = 'rightTab';
+                //$this->phpWord->addParagraphStyle($rightTabStyleName, array('tabs' => array(new \PhpOffice\PhpWord\Style\Tab('right', 1440,'dot'))));
                 $textrun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
+                //$section->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style),$rightTabStyleName);
+                
                 $run = $textrun;
+                
                 break;
             case 'l':
-                self::setListItem($r,$section,$run,$actListName);                
+                self::setListItem($r,$section,$run,$actListName,$actTabStopName);                
                 break;
         endswitch;
     }
@@ -224,15 +229,18 @@ class createDoc extends createDocAbstract {
                 $run->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
         endswitch;
     }
-    private function setListItem($r,&$section,&$run,$actListName=''){
+    private function setListItem($r,&$section,&$run,&$actListName='',&$actTabStopName=''){
         //$this->phpWord->addSection();
         //echo "Act list name - ".$actListName.', nowa lista - ';
         //print_r($r->list->property->newList);
         //echo '.';
         if($r->list->property->newList==='y'){
-            $actListName= uniqid('list_');
+            /* SET NEW LIST NAME */
+            $actListName=uniqid('list_');
+            $actTabStopName=uniqid('tabstop_');
+            /* RESET TAB STOP */
         }
-        $listItemRun = $section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r,$actListName), self::setListParagraph($r));
+        $listItemRun = $section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r,$actListName), self::setListParagraph($r,$actTabStopName));
         //self::setText($listItemRun,$r);
         $listItemRun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
         $run = $listItemRun;
@@ -249,21 +257,21 @@ class createDoc extends createDocAbstract {
                 'type'   => 'multilevel',
                 'levels' => array(
                     /* ('start'=>, 'format'=>, 'text'=>, 'alignment'=>, 'tabPos'=>, 'left'=>, 'hanging'=>, 'font'=>, 'hint'=>) */
-                    array('format' => $formatList[0], 'text' => '%1'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 360
-                    array('format' => $formatList[0], 'text' => '%2'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 720
-                    array('format' => $formatList[0], 'text' => '%3'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 360
-                    array('format' => $formatList[0], 'text' => '%4'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 720
-                    array('format' => $formatList[0], 'text' => '%5'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 360
-                    array('format' => $formatList[0], 'text' => '%6'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 720
-                    array('format' => $formatList[0], 'text' => '%7'.$formatList[1], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily)//, 'tabPos' => 360
+                    array('format' => $formatList[0], 'text' => $formatList[1].'%1'.$formatList[2], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 360
+                    array('format' => $formatList[0], 'text' => $formatList[1].'%2'.$formatList[2], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 720
+                    array('format' => $formatList[0], 'text' => $formatList[1].'%3'.$formatList[2], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 360
+                    array('format' => $formatList[0], 'text' => $formatList[1].'%4'.$formatList[2], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 720
+                    array('format' => $formatList[0], 'text' => $formatList[1].'%5'.$formatList[2], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 360
+                    array('format' => $formatList[0], 'text' => $formatList[1].'%6'.$formatList[2], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily),//, 'tabPos' => 720
+                    array('format' => $formatList[0], 'text' => $formatList[1].'%7'.$formatList[2], 'left' => $left, 'hanging' => $hanging,'font' => $r->list->style->fontFamily)//, 'tabPos' => 360
                 ),
             )
         );
         //return array('listType' => \PhpOffice\PhpWord\Style\ListItem::TYPE_NUMBER_NESTED);
         return $listName;
     }
-    private function setListParagraph($r){
-        $name = 'P-Style';
+    private function setListParagraph($r,$actTabStopName='P-Style'){
+        //$name = 'P-Style';
         //var_dump($this->phpWord);
             /*
             'styleName'           => array(self::READ_VALUE, array('w:pStyle', 'w:name')),
@@ -282,8 +290,8 @@ class createDoc extends createDocAbstract {
             'bidi'                => array(self::READ_TRUE,  'w:bidi'),
             'suppressAutoHyphens' => array(self::READ_TRUE,  'w:suppressAutoHyphens'),
                     */
-        $this->phpWord->addParagraphStyle($name, array('align'=>parent::setAlign($r->paragraph->style->textAlign) ,'spaceAfter' => 95));
-        return $name;
+        $this->phpWord->addParagraphStyle($actTabStopName, array('align'=>parent::setAlign($r->paragraph->style->textAlign),'tabs'=>parent::setTabStop($r->paragraph->tabstop) ,'spaceAfter' => 95));
+        return $actTabStopName;
     }
     private function setSectionColumn($subsection,$breakType='continuous'){
         /* EXAMPLE:
@@ -322,11 +330,11 @@ class createDoc extends createDocAbstract {
                     )
                 );
     }    
-    private function checkNewLine($r,&$section,&$run,$actListName){
+    private function checkNewLine($r,&$section,&$run,$actListName='',&$actTabStopName=''){
         //echo __METHOD__." - ";
         //echo $r->paragraph->property->valuenewline."\r\n";
         if($r->paragraph->property->valuenewline==='y'){
-            self::checkType($r,$section,$run,$actListName);
+            self::checkType($r,$section,$run,$actListName,$actTabStopName);
         }
         else{
             self::checkTypeInLine($r,$run);

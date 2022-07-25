@@ -17,7 +17,7 @@ class ProjectStageTool{
         console.log('ProjectStageTool::getAllOptions()');
         var all = {}; 
         for(var i=0;i<Glossary.getKeyCount(key);i++){
-            if(Glossary.getKeyPropertyAttribute(key,i,'v')===property[key]){
+            if(Glossary.getKeyPropertyAttribute(key,i,'v')===property){//property[key]
                 continue;
             }
             all[i]=run(this,Glossary,key,i);
@@ -295,6 +295,7 @@ class ProjectStageTool{
                 console.log('ProjectStageTool::getCompleteTool()');
                 console.log(property);
                 console.log(key);
+                console.log(ele);
                 /* SET PROPERTY KEY VALUE */
                 this.property[this.key[0]]=t.value;
                 /* SET INPUT STYLE PROPERTY */
@@ -317,7 +318,7 @@ class ProjectStageTool{
     setColorProperty(data,property,key,run){
         console.log('ProjectStageTool::setColorProperty()');
         data[0]['default']=this.getDefaultOption(property,key[0],key[1]);
-        data[0]['all']=this.getAllOptions(this.Glossary.text,property,'color',run); 
+        data[0]['all']=this.getAllOptions(this.Glossary.text,property.color,'color',run); 
     }
     getBackgroundColor(property,key,data){
         var run = function(self,Glossary,key,i){
@@ -369,24 +370,39 @@ class ProjectStageTool{
         this.setColorProperty(data,property,key,run);
         return  this.Tool.create('Kolor tekstu:',data);
     }
-    getAlign(property,ele){
+    getSimpleAlign(property,propertyKey){
+        console.log('ProjectStageTool::getSimpleAlign()');
+        console.log(this.Glossary.text);
+        var run = this.getAlign();
+        var data=this.getExtendedTool(property,propertyKey,this.Glossary.text,'textAlign');
+            data[0]['default']=this.getDefaultOption(property,propertyKey[0],propertyKey[1]);
+            data[0]['all']=this.getAllOptions(this.Glossary.text,property[propertyKey[0]],'textAlign',run);  
+        return  this.Tool.create('Wyrównanie:',data);
+    }
+    getExtendedAlign(property,propertyKey,ele){
+        console.log('ProjectStageTool::getExtendedAlign()');
+        var run = this.getAlign();
+        //var data=this.getAdvancedTool(property,key[0],ele);
+        var data=this.getCompleteTool(property,propertyKey,ele,this.Glossary.text,'textAlign');
+            data[0]['default']=this.getDefaultOption(property,propertyKey[0],propertyKey[1]);
+            data[0]['all']=this.getAllOptions(this.Glossary.text,property[propertyKey[0]],propertyKey[0],run);  
+        return  this.Tool.create('Wyrównanie:',data);
+    }
+    getAlign(){
         console.log('ProjectStageTool::getAlign()');
         var run = function(self,Glossary,key,i){
             return self.getExtendedOption(Glossary.getKeyPropertyAttribute(key,i,'v'),Glossary.getKeyPropertyAttribute(key,i,'n'),'#000000','#FFFFFF','');  
         };
-        var data=this.getAdvancedTool(property,'textAlign',ele);
-            data[0]['default']=this.getDefaultOption(property,'textAlign','textAlignName');
-            data[0]['all']=this.getAllOptions(this.Glossary.text,property,'textAlign',run);  
-        return  this.Tool.create('Wyrównanie:',data);
+        return run;
     }
     getListType(property){     
         var run = function(self,Glossary,key,i){
             return self.Utilities.getDefaultOptionProperties(Glossary.getKeyPropertyAttribute(key,i,'v'),Glossary.getKeyPropertyAttribute(key,i,'n'));
         };
         var key=['listType','listTypeName'];
-        var data=this.getExtendedTool(property,key,this.Glossary.list,key[0])
+        var data=this.getExtendedTool(property,key,this.Glossary.list,key[0]);
             data[0]['default']=this.getDefaultOption(property,key[0],key[1]);
-            data[0]['all']=this.getAllOptions(this.Glossary.list,property,key[0],run);  
+            data[0]['all']=this.getAllOptions(this.Glossary.list,property[key[0]],key[0],run);  
             
         return  this.Tool.create('Typ listy:',data); 
     }
@@ -470,7 +486,7 @@ class ProjectStageTool{
         };
         var data=this.getTool(property,'fontFamily');
             data[0]['default']=this.getDefaultOption(property,'fontFamily','fontFamily');
-            data[0]['all']=this.getAllOptions(this.Glossary.text,property,'fontFamily',run);  
+            data[0]['all']=this.getAllOptions(this.Glossary.text,property.fontFamily,'fontFamily',run);  
         return  data;
     }
     getSimpleFontFamily(property){
@@ -879,7 +895,7 @@ class ProjectStageTool{
         /* FONT FAMILY */
         tool2.appendChild(this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT ALIGN */
-        tool2.appendChild(this.getAlign(subsectionrow.paragraph.style,helplink.text.value));
+        tool2.appendChild(this.getExtendedAlign(subsectionrow.paragraph.style,['textAlign','textAlignName'],helplink.text.value));
         /* TAB STOP */
         tool2.appendChild(this.getTabStop(TabStop,isection,isub,isubrow,subsectionrow,helplink));    
         /* LEFT EJECTION */
@@ -906,6 +922,7 @@ class ProjectStageTool{
     getImageTool(isection,isub,isubrow,subsectionrow,helplink,TabStop){
         console.log('ProjectStageTool::getImageTool()');
         console.log(subsectionrow);
+        console.log(helplink);
         //throw 'test-stop-bbbb';
         var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
@@ -927,7 +944,7 @@ class ProjectStageTool{
         /* FONT FAMILY */
         //tool2.appendChild(this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
         /* IMAGE ALIGN */
-        tool2.appendChild(this.getAlign(subsectionrow.paragraph.style,helplink.text.value));
+        tool2.appendChild(this.getSimpleAlign(subsectionrow.image.style,['alignment','alignmentName']));
         /* TAB STOP */
         //tool2.appendChild(this.getTabStop(TabStop,isection,isub,isubrow,subsectionrow,helplink));    
         /* LEFT EJECTION */
@@ -1036,7 +1053,7 @@ class ProjectStageTool{
             control.classList.add('btn','btn-outline-dark','btn-sm');
             control.onclick = function (){
                 console.log(this);
-                //console.log(ele);
+                console.log(ele);
                 if(ele.classList.contains('d-none')){
                     ele.classList.remove('d-none');
                 }
@@ -1098,6 +1115,7 @@ class ProjectStageTool{
             mainDiv.appendChild(textTool);  
             mainDiv.appendChild(textTabStopTool);  
             mainDiv.appendChild(listTool);
+            mainDiv.appendChild(imageTool);
     }
     setSectionSubSection(iSection,subsection,helplinkSubsection,self){
         /* console.log('ProjectStageCreate::setSectionSubSection()'); */

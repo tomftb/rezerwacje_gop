@@ -83,6 +83,54 @@ class ProjectStageTool{
             ele.tool['indentation'] = tool;
         return  tool;
     }
+    getFile(property){
+        console.log('ProjectStageTool::getFile()');
+        /*
+         * property - reference for example subsectionrow.paragraph.style
+         * ele - reference for example helplink
+         */  
+        var mainDiv =  document.createElement('div');
+        var mainLabel = this.Tool.createLabel('Wskaż plik:');  
+        var inputDiv = document.createElement('div');
+            inputDiv.classList.add('custom-file','form-control-sm');//'custom-file',
+        var input = document.createElement('input');
+            input.classList.add('custom-file-input');//,'form-control-file','form-control-sm'
+            input.setAttribute('type','file');
+            input.setAttribute('id','validatedCustomFile');
+            input.setAttribute('name','test');
+        var label = document.createElement('label');
+            label.classList.add('custom-file-label');
+            input.setAttribute('for','validatedCustomFile');
+        var labelText=document.createTextNode('Choose file...');
+            label.appendChild(labelText);
+        var divErr = document.createElement('div');
+            divErr.classList.add('invalid-feedback');
+        var divErrText=document.createTextNode('Example invalid custom file feedback');
+            divErr.appendChild(divErrText);
+                //<div class="invalid-feedback">Example invalid custom file feedback</div>
+            //ele.tool['indentation'] = tool;
+            inputDiv.appendChild(input);
+            inputDiv.appendChild(label);
+            inputDiv.appendChild(divErr);
+            
+            input.onchange = function(t){
+                console.log(this);
+                console.log(t);
+                console.log(this.files);
+                console.log(this.files[0]);
+                console.log(this.files[0].name);
+                console.log(this.name);
+                console.log(label);
+                labelText.remove();
+                label.appendChild(document.createTextNode(this.files[0].name));
+                //labelText.innerText = this.files[0].name;
+            };
+            
+            mainDiv.appendChild(mainLabel);
+            mainDiv.appendChild(inputDiv);
+            
+        return  mainDiv;
+    }
     getEjection(property,keys,title){
         //console.log('ProjectStageTool::getEjection()');
         /*
@@ -928,13 +976,16 @@ class ProjectStageTool{
             mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
             mainDivCol.style.backgroundColor='#e6e6e6';
         var mainDiv=this.Html.getRow();
-            
+        var mainDivFile=this.Html.getRow();
+        var tool0=this.Html.getCol(12);
         var tool1=this.Html.getCol(3);
         var tool2=this.Html.getCol(3);
         var tool3=this.Html.getCol(3);
         var tool4=this.Html.getCol(3);
-            tool4.classList.add('pt-4');
-
+            //tool4.classList.add('pt-4');
+            /* INPUT UPLOAD IMAGE */
+            tool0.appendChild(this.getFile(subsectionrow.image));
+            
         /* FONT SIZE */
         //tool1.appendChild(this.getExtendedFontSize(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT COLOR */
@@ -944,7 +995,8 @@ class ProjectStageTool{
         /* FONT FAMILY */
         //tool2.appendChild(this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
         /* IMAGE ALIGN */
-        tool2.appendChild(this.getSimpleAlign(subsectionrow.image.style,['alignment','alignmentName']));
+        tool1.appendChild(this.getSimpleAlign(subsectionrow.image.style,['alignment','alignmentName']));
+        
         /* TAB STOP */
         //tool2.appendChild(this.getTabStop(TabStop,isection,isub,isubrow,subsectionrow,helplink));    
         /* LEFT EJECTION */
@@ -958,12 +1010,13 @@ class ProjectStageTool{
        
         /* SET CSS BOLD, ITALIC ... */
         //this.getTextDecoration(tool4,isection,isub,isubrow,subsectionrow.paragraph.style,helplink.text.value); 
-
+        mainDivFile.appendChild(tool0);
+        
         mainDiv.appendChild(tool1);
         mainDiv.appendChild(tool2);
         mainDiv.appendChild(tool3);
         mainDiv.appendChild(tool4);
-      
+        mainDivCol.appendChild(mainDivFile);
         mainDivCol.appendChild(mainDiv);
 
         return mainDivCol;
@@ -1052,8 +1105,8 @@ class ProjectStageTool{
             control.setAttribute('type','button');
             control.classList.add('btn','btn-outline-dark','btn-sm');
             control.onclick = function (){
-                console.log(this);
-                console.log(ele);
+                //console.log(this);
+                //console.log(ele);
                 if(ele.classList.contains('d-none')){
                     ele.classList.remove('d-none');
                 }

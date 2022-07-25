@@ -491,43 +491,76 @@ class ProjectStageTool{
             };
         return this.Tool.create('Czcionka:',data);
     }
-    getFontSize(property){
-        /* console.log('ProjectStageTool::getFontSize()'); */
+    getSizeMeasurement(property,k){
+        return {
+                key:k,
+                default:{
+                    0:this.Utilities.getDefaultOptionProperties(property[k[1]],property[k[1]])
+                },
+                all:this.Utilities.getDefaultList(this.Glossary.text.item.measurement,property[k[1]]),
+                property:property,
+                onchange:function(t){
+                    /* t - short this */
+                    this.property[this.key[1]] = t.value;
+                    this.ele.style[this.key[0]]=this.property[this.key[0]]+t.value;
+                },
+                type:'select',
+                attributes:{
+                    class:'w-25'
+                }
+            };
+    }
+    getInputSize(property,k){
+       /* console.log('ProjectStageTool::getSelectSize()'); */
         /*
          * property - reference for example subsectionrow.paragraph.style
          * ele - references for example helplink.text
-         */
-        var key=['fontSize','fontSizeMeasurement'];
+         * k (key) - example ['fontSize','fontSizeMeasurement']
+         */ 
         var data={
             0:{
+                key:k,
                 default:{
-                    0:this.Utilities.getDefaultOptionProperties(property['fontSize'],property['fontSize'])
+                    0:this.Utilities.getDefaultOptionProperties(property[k[0]],property[k[0]])
                 },
-                all:this.getFontSizeList(property['fontSize'],75),
-                key:key,
+                all:this.getSizeList(property[k[0]],75),
+                property:property,
+                type:'input',
+                attributes:{
+                    class:'w-75',
+                    type:'number'
+                }
+            },
+            1:this.getSizeMeasurement(property,k)
+        };
+        /* TO DO 
+        size max
+        size min               
+        */
+        return data;  
+    }
+    getSelectSize(property,k){
+        /* console.log('ProjectStageTool::getSelectSize()'); */
+        /*
+         * property - reference for example subsectionrow.paragraph.style
+         * ele - references for example helplink.text
+         * k (key) - example ['fontSize','fontSizeMeasurement']
+         */
+        //var k=['fontSize','fontSizeMeasurement'];
+        var data={
+            0:{
+                key:k,
+                default:{
+                    0:this.Utilities.getDefaultOptionProperties(property[k[0]],property[k[0]])
+                },
+                all:this.getSizeList(property[k[0]],75),
                 property:property,
                 type:'select',
                 attributes:{
                     class:'w-75'
                 }
             },
-            1:{
-                default:{
-                    0:this.Utilities.getDefaultOptionProperties(property['fontSizeMeasurement'],property['fontSizeMeasurement'])
-                },
-                all:this.Utilities.getDefaultList(this.Glossary.text.item.measurement,property['fontSizeMeasurement']),
-                key:key,
-                property:property,
-                onchange:function(t){
-                    /* t - this */
-                    this.property[this.key[1]] = t.value;
-                    this.ele.style[key[0]]=this.property[key[0]]+t.value;
-                },
-                type:'select',
-                attributes:{
-                    class:'w-25'
-                }
-            }
+            1:this.getSizeMeasurement(property,k)
         };
         /* TO DO 
         size max
@@ -536,7 +569,7 @@ class ProjectStageTool{
         return data;     
     }
     getSimpleFontSize(property){
-        var data = this.getFontSize(property);
+        var data = this.getSelectSize(property,['fontSize','fontSizeMeasurement']);
             data[0]['onchange']=function(t){
                 /* t - this */
                 this.property[this.key[0]] = t.value; 
@@ -548,7 +581,7 @@ class ProjectStageTool{
         return this.Tool.create('Rozmiar tekstu:',data);
     }
     getExtendedFontSize(property,ele){
-        var data = this.getFontSize(property);
+        var data = this.getSelectSize(property,['fontSize','fontSizeMeasurement']);
             data[0]['ele']=ele;
             data[0]['onchange']=function(t){
                 /* t - this */
@@ -571,7 +604,7 @@ class ProjectStageTool{
         d[0][value]=property[value];
         return d;
     }
-    getFontSizeList(exception,max){
+    getSizeList(exception,max){
         exception=parseInt(exception,10);
         max=parseInt(max,10);
         var value={};
@@ -870,6 +903,54 @@ class ProjectStageTool{
 
         return mainDivCol;
     }
+    getImageTool(isection,isub,isubrow,subsectionrow,helplink,TabStop){
+        console.log('ProjectStageTool::getImageTool()');
+        console.log(subsectionrow);
+        //throw 'test-stop-bbbb';
+        var mainDivCol=this.Html.getCol(12);
+            mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
+            mainDivCol.style.backgroundColor='#e6e6e6';
+        var mainDiv=this.Html.getRow();
+            
+        var tool1=this.Html.getCol(3);
+        var tool2=this.Html.getCol(3);
+        var tool3=this.Html.getCol(3);
+        var tool4=this.Html.getCol(3);
+            tool4.classList.add('pt-4');
+
+        /* FONT SIZE */
+        //tool1.appendChild(this.getExtendedFontSize(subsectionrow.paragraph.style,helplink.text.value));
+        /* TEXT COLOR */
+        //tool1.appendChild(this.getExtendedColor(subsectionrow.paragraph.style,helplink.text.value));
+        /* BACKGROUND COLOR */
+        //tool1.appendChild(this.getExtendedBackgroundColor(subsectionrow.paragraph.style,helplink.text.value));
+        /* FONT FAMILY */
+        //tool2.appendChild(this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
+        /* TEXT ALIGN */
+        //tool2.appendChild(this.getTextAlign(subsectionrow.paragraph.style,helplink.text.value));
+        /* TAB STOP */
+        //tool2.appendChild(this.getTabStop(TabStop,isection,isub,isubrow,subsectionrow,helplink));    
+        /* LEFT EJECTION */
+        //tool3.appendChild(this.getLeftEjection(subsectionrow.paragraph.style,helplink.text));
+         /* RIGHT EJECTION */
+        //tool3.appendChild(this.getRightEjection(subsectionrow.paragraph.style,helplink));
+         /* INDENTATION */
+        //tool3.appendChild(this.getIndentation(subsectionrow.paragraph.style,helplink));
+        /* PARAGRAPH TYPE */
+        //tool3.appendChild(this.getParagraph(subsectionrow.paragraph.property,helplink.tool));
+       
+        /* SET CSS BOLD, ITALIC ... */
+        //this.getTextDecoration(tool4,isection,isub,isubrow,subsectionrow.paragraph.style,helplink.text.value); 
+
+        mainDiv.appendChild(tool1);
+        mainDiv.appendChild(tool2);
+        mainDiv.appendChild(tool3);
+        mainDiv.appendChild(tool4);
+      
+        mainDivCol.appendChild(mainDiv);
+
+        return mainDivCol;
+    }
     getSectionHeadTool(iSection,section,helplink,ProjectStageCreate){// isection
         /* */
         console.log('ProjectStageCreate::getSectionHeadTool()');
@@ -954,6 +1035,8 @@ class ProjectStageTool{
             control.setAttribute('type','button');
             control.classList.add('btn','btn-outline-dark','btn-sm');
             control.onclick = function (){
+                console.log(this);
+                //console.log(ele);
                 if(ele.classList.contains('d-none')){
                     ele.classList.remove('d-none');
                 }
@@ -979,6 +1062,7 @@ class ProjectStageTool{
         var textTool = this.getTextTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,TabStop);
         /* CREATE TEXT TOOL */
         var textTabStopTool = this.getTabStopTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow.text,TabStop);
+        /* CREATE TAB STOP TOOL */
         var textTabStopToolControl = this.createControl('Tabulatory',textTabStopTool);
         /* SET LINK TO tabstopTool */
             helplinkISubRow.tool['tabstopControl']=textTabStopToolControl;
@@ -989,6 +1073,10 @@ class ProjectStageTool{
         /* SET LINK TO listTool */
             helplinkISubRow.tool['listControl']=listToolControl;
             helplinkISubRow.tool['list']=listTool;
+         /* CREATE IMAGE TOOL */
+         var imageTool = this.getImageTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,TabStop);
+        
+        
         var mainCol = this.Html.getCol(12);
             mainCol.classList.add('mt-1','mb-1');
         var mainDivControl=this.Html.getRow();   
@@ -1001,7 +1089,7 @@ class ProjectStageTool{
             mainDivControlCol.appendChild(this.createControl('Formatowanie',textTool));
             mainDivControlCol.appendChild(textTabStopToolControl);
             mainDivControlCol.appendChild(listToolControl);
-    
+            mainDivControlCol.appendChild(this.createControl('Obraz',imageTool));
             mainDivControl.appendChild(mainDivControlCol1);
             mainDivControl.appendChild(mainDivControlCol);
             mainDivControl.appendChild(mainDivControlCol2);

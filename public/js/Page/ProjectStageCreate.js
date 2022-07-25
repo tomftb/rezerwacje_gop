@@ -492,6 +492,12 @@ class ProjectStageCreate{
                 list:{
                     /* FAKE */
                     value:document.createElement('span')
+                },
+                image:{
+                    
+                },
+                table:{
+                    
                 }
             };
             labelDiv.appendChild(label);

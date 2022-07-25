@@ -138,7 +138,8 @@ class StageData{
                 image:{
                     style:{
                         /* See \PhpOffice\PhpWord\SimpleType\Jc class for the details. */
-                        'alignment':'LEFT',
+                        'alignment':'LEFT', 
+                        'alignmentName':'Lewo',
                         /* Height in pt. */
                         'height':'0',
                         'heightMeasurement':'px',

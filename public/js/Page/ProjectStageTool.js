@@ -369,8 +369,8 @@ class ProjectStageTool{
         this.setColorProperty(data,property,key,run);
         return  this.Tool.create('Kolor tekstu:',data);
     }
-    getTextAlign(property,ele){
-        console.log('ProjectStageTool::getTextAlign()');
+    getAlign(property,ele){
+        console.log('ProjectStageTool::getAlign()');
         var run = function(self,Glossary,key,i){
             return self.getExtendedOption(Glossary.getKeyPropertyAttribute(key,i,'v'),Glossary.getKeyPropertyAttribute(key,i,'n'),'#000000','#FFFFFF','');  
         };
@@ -879,7 +879,7 @@ class ProjectStageTool{
         /* FONT FAMILY */
         tool2.appendChild(this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT ALIGN */
-        tool2.appendChild(this.getTextAlign(subsectionrow.paragraph.style,helplink.text.value));
+        tool2.appendChild(this.getAlign(subsectionrow.paragraph.style,helplink.text.value));
         /* TAB STOP */
         tool2.appendChild(this.getTabStop(TabStop,isection,isub,isubrow,subsectionrow,helplink));    
         /* LEFT EJECTION */
@@ -926,8 +926,8 @@ class ProjectStageTool{
         //tool1.appendChild(this.getExtendedBackgroundColor(subsectionrow.paragraph.style,helplink.text.value));
         /* FONT FAMILY */
         //tool2.appendChild(this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
-        /* TEXT ALIGN */
-        //tool2.appendChild(this.getTextAlign(subsectionrow.paragraph.style,helplink.text.value));
+        /* IMAGE ALIGN */
+        tool2.appendChild(this.getAlign(subsectionrow.paragraph.style,helplink.text.value));
         /* TAB STOP */
         //tool2.appendChild(this.getTabStop(TabStop,isection,isub,isubrow,subsectionrow,helplink));    
         /* LEFT EJECTION */

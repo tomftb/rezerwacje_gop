@@ -136,8 +136,35 @@ class StageData{
                     property:{}
                 },
                 image:{
-                    style:{},
-                    property:{} 
+                    style:{
+                        /* See \PhpOffice\PhpWord\SimpleType\Jc class for the details. */
+                        'alignment':'LEFT',
+                        /* Height in pt. */
+                        'height':'0',
+                        'heightMeasurement':'px',
+                        /* Left margin in inches, can be negative. */
+                        'marginLeft':'0',
+                        'marginLeftMeasurement':'px',
+                        /* Top margin in inches, can be negative. */
+                        'marginTop':'0',
+                        'marginTopMeasurement':'px',
+                        /* Width in pt. */
+                        'width':'0',
+                        'widthMeasurement':'px',
+                        /* Wrapping style, inline, square, tight, behind, or infront. */
+                        'wrappingStyle':'infront',
+                        /* Top text wrapping in pixels. */
+                        'wrapDistanceTop':'',
+                        /* Bottom text wrapping in pixels. */
+                        'wrapDistanceBottom':'',
+                        /* Left text wrapping in pixels. */
+                        'wrapDistanceLeft':'',
+                        /* Right text wrapping in pixels. */
+                        'wrapDistanceRight':''
+                    },
+                    property:{
+                        
+                    } 
                 }
         };
     }

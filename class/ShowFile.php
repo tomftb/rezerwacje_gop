@@ -1,5 +1,5 @@
 <?php
-final class showFile {
+final class ShowFile {
     private $dir='';
     private $fileName='';
     private $fileExt='';

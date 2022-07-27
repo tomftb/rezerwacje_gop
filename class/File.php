@@ -1,18 +1,11 @@
 <?php
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  * Description of file
  *
  * @author tborczynski
  */
 class File {
-    private $newFileName='';
+    private $fileNamePrefix='';
     private $logData='';
     private $logDataRN='';
     private $errDataRN='';
@@ -39,14 +32,9 @@ class File {
         self::logMulti($ext);
         $this->acceptedFileExtension=$ext;
     }
-    public function setNewFileName($fName){
-        self::log(__METHOD__,$fName);
-        $this->newFileName=$fName;   
-        self::checkFileName();
-    }
-    public function setRandomFileName($prefix=''){
-        self::log(__METHOD__,"prefix: ".$prefix);
-        $this->newFileName=uniqid($prefix);
+    public function setFileNamePrefix($prefix){
+        self::log(__METHOD__,$prefix);
+        $this->fileNamePrefix=$prefix;   
     }
     public function setUploadDir($dir){
         self::log(__METHOD__,'dir: '.$dir);
@@ -70,15 +58,12 @@ class File {
     public function uploadFiles(){
         self::log(__METHOD__);
         if($this->err){ return array();}
-        $n=0;
+        //$n=0;
         try {
             self::log(__METHOD__,"FILES:");
             self::logMulti($_FILES);
             self::checkUploadDir();
-            foreach($_FILES as $k => $f){
-                self::setupFile($_FILES[$k],$k,$n);
-                $n++;
-            }
+            array_walk($_FILES,['self','setupFile']);
         } 
         catch (Throwable $t) { // Executed only in PHP 7, will not match in PHP 5.x         
             self::setErr(__METHOD__,$t->getMessage());
@@ -126,9 +111,6 @@ class File {
             //return false;
         }
     }
-    private function checkFileName(){
-        self::log(__METHOD__);
-    }
     private function checkFileSize($tmpFile){
         self::log(__METHOD__);
         if($tmpFile['size']>$this->maxFileSize){
@@ -143,9 +125,6 @@ class File {
             self::setErr('',$tmpFile['name']." wrong file type → ".$tmpFile['type']);
         }
     }
-    private function checkFile($tmpFile){
-        
-    }
     private function checkFilePresent($tmpFile){
         self::log(__METHOD__);
         if(intval($tmpFile['error'],10)===4){
@@ -154,7 +133,7 @@ class File {
         }
         return true;
     }
-    private function setupFile($tmpFile,$k,$n){
+    private function setupFile($tmpFile,$k){
         self::log(__METHOD__);
         //if($this->err){ return false;}
         if(!self::checkFilePresent($tmpFile)){
@@ -163,21 +142,23 @@ class File {
         else{
             self::checkFileSize($tmpFile);
             self::checkFileType($tmpFile);
-            self::moveFile($tmpFile,$k,$n);
+            self::moveFile($tmpFile,$k);
         }   
     }
-    private function moveFile($tmpFile,$k,$n){
+    private function moveFile($tmpFile,$k){
         self::log(__METHOD__);
         if($this->err){ return false;}
         $ext=explode('.',$tmpFile["name"]);
         $newExt=strtolower(end($ext));
-        $fullPath=$this->uploadDir.$this->newFileName.'_'.$n.'.'.$newExt;
+        $fileName=uniqid($this->fileNamePrefix);
+        $fullPath=$this->uploadDir.$fileName.'.'.$newExt;
         self::log(__METHOD__,"fullPath:\r\n".$fullPath);
         move_uploaded_file($tmpFile["tmp_name"],$fullPath);
         $this->files[$k]=[
-                            $this->url.$this->newFileName.'_'.$n.'.'.$newExt,
+                            $this->url.$fileName.'.'.$newExt,//$this->url.$this->newFileName.'_'.$n.'.'.$newExt,
                             $tmpFile
         ];
+         
     }
     public function __destruct(){
         

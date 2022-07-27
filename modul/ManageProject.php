@@ -986,8 +986,8 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
         $v['email']=$this->dbLink->squery('SELECT Pracownik,Pracownik_email AS Email FROM v_all_prac_proj_email WHERE Projekt_id=:id ORDER BY Projekt_id ASC',$sql);
         $this->utilities->jsonResponse($v,'pEmail');  
     }
-     # RETURN ALL AVALIABLE MEMBERS
-    public function getAllavaliableEmployee()
+     # RETURN ALL AVAILABLE MEMBERS
+    public function getAllavailableEmployee()
     {
         $this->valueToReturn=$this->query('SELECT * FROM v_udzial_sum_procent_prac WHERE sumProcentowyUdzial<? ORDER BY idPracownik ASC ',100);
     }
@@ -1114,8 +1114,8 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
     }
     public function showProjectReportFile(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $showFile=new showFile();
-        $showFile->getFile(filter_input(INPUT_GET,"dir"),filter_input(INPUT_GET,"file"));
+        $ShowFile=new ShowFile();
+        $ShowFile->getFile(filter_input(INPUT_GET,"dir"),filter_input(INPUT_GET,"file"));
     }
     public function getModulProjectDefaults(){
         $this->Log->log(0,"[".__METHOD__."]");

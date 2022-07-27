@@ -109,7 +109,8 @@ final class UrlManager{
         ['getProjectConstDetails','LOG_INTO_STAGE'],
         ['confirmProjectStageText','LOG_INTO_STAGE'],
         ['blockConst','LOG_INTO_STAGE'],
-        ['genProjectReportTestDoc','LOG_INTO_STAGE']
+        ['genProjectReportTestDoc','LOG_INTO_STAGE'],
+        ['uploadStageImage','LOG_INTO_STAGE']
     ];
         
     public function __construct(){

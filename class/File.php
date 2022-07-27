@@ -14,6 +14,8 @@
 class File {
     private $newFileName='';
     private $logData='';
+    private $logDataRN='';
+    private $errDataRN='';
     private $uploadDir='';
     private $acceptedFileExtension=array();
     private $maxFileSize=0;
@@ -72,6 +74,7 @@ class File {
         try {
             self::log(__METHOD__,"FILES:");
             self::logMulti($_FILES);
+            self::checkUploadDir();
             foreach($_FILES as $k => $f){
                 self::setupFile($_FILES[$k],$k,$n);
                 $n++;
@@ -85,7 +88,9 @@ class File {
         } 
     }
     private function log($m='',$d=''){
-        $this->logData.="[".$m."] ".$d."\r\n";
+        
+        $this->logData.=$this->logDataRN."[".$m."] ".$d;
+        $this->logDataRN="\r\n";
     }
     private function logMulti($a,$lvl=0){
         $this->logData.="LVL: ".$lvl." ";
@@ -104,20 +109,21 @@ class File {
                 $this->logData.="RESOURCE \r\n";
             }
             else{
-                $this->logData.="\r\n".$k." => ".$v."";
-            }
+                $this->logData.=$this->logDataRN.$k." => ".$v."";
+            }  
         }
-        $this->logData.="\r\n";
     }
     private function setErr($m='',$err=''){
-        $this->logData.="[".$m."] ".$err."\r\n";
-        $this->err.=$err."\r\n";
+        $this->logData.="[".$m."] ".$err;
+        $this->err.=$this->errDataRN.$err;
+        $this->errDataRN="\r\n";
     }
     private function checkUploadDir(){
         self::log(__METHOD__);
-        if(!is_dir($this->uploadDir) || !file_exists($this->uploadDir) || !is_writable($this->uploadDir)){
-            self::setErr(__METHOD__,$this->uploadDir.' not a dir OR not exist OR not writable');
-            return false;
+        if($this->uploadDir==='' || !is_dir($this->uploadDir) || !file_exists($this->uploadDir) || !is_writable($this->uploadDir)){
+            //self::setErr(__METHOD__,$this->uploadDir.' not a dir OR not exist OR not writable');
+            Throw New Exception ("Upload dir:\r\n".$this->uploadDir."Error:\r\nempty OR not a dir OR not exist OR not writable",0);
+            //return false;
         }
     }
     private function checkFileName(){
@@ -125,9 +131,17 @@ class File {
     }
     private function checkFileSize($tmpFile){
         self::log(__METHOD__);
+        if($tmpFile['size']>$this->maxFileSize){
+            self::setErr('',$tmpFile['name']." - size limit exceeded");
+            return false;
+        }
+        $this->maxFileSize-=$tmpFile['size'];
     }
     private function checkFileType($tmpFile){
         self::log(__METHOD__);
+        if(!in_array($tmpFile['type'],$this->acceptedFileExtension)){
+            self::setErr('',$tmpFile['name']." wrong file type → ".$tmpFile['type']);
+        }
     }
     private function checkFile($tmpFile){
         
@@ -142,7 +156,7 @@ class File {
     }
     private function setupFile($tmpFile,$k,$n){
         self::log(__METHOD__);
-        if($this->err){ return false;}
+        //if($this->err){ return false;}
         if(!self::checkFilePresent($tmpFile)){
             return false;
         }
@@ -155,10 +169,11 @@ class File {
     private function moveFile($tmpFile,$k,$n){
         self::log(__METHOD__);
         if($this->err){ return false;}
-        
         $ext=explode('.',$tmpFile["name"]);
         $newExt=strtolower(end($ext));
-        move_uploaded_file($tmpFile["tmp_name"], $this->uploadDir.$this->newFileName.'_'.$n.'.'.$newExt);
+        $fullPath=$this->uploadDir.$this->newFileName.'_'.$n.'.'.$newExt;
+        self::log(__METHOD__,"fullPath:\r\n".$fullPath);
+        move_uploaded_file($tmpFile["tmp_name"],$fullPath);
         $this->files[$k]=[
                             $this->url.$this->newFileName.'_'.$n.'.'.$newExt,
                             $tmpFile

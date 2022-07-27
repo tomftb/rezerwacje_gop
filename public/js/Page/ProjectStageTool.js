@@ -4,6 +4,9 @@ class ProjectStageTool{
     Utilities = new Object()
     Glossary = new Object();
     Html = new Object();
+    Stage = new Object();
+    //Files = new Object();
+    ProjectStageToolFile=new Object();
     //TabStop = new Object();
     
     constructor(Stage){
@@ -11,6 +14,8 @@ class ProjectStageTool{
         this.Glossary = Stage.Glossary;
         this.Html = Stage.Html;
         this.Tool = new Tool();
+        this.Stage = Stage;
+        this.ProjectStageToolFile = new ProjectStageToolFile(this);
         //this.TabStop = Stage.TabStop;
     }
     getAllOptions(Glossary,property,key,run){
@@ -83,54 +88,7 @@ class ProjectStageTool{
             ele.tool['indentation'] = tool;
         return  tool;
     }
-    getFile(property){
-        console.log('ProjectStageTool::getFile()');
-        /*
-         * property - reference for example subsectionrow.paragraph.style
-         * ele - reference for example helplink
-         */  
-        var mainDiv =  document.createElement('div');
-        var mainLabel = this.Tool.createLabel('Wskaż plik:');  
-        var inputDiv = document.createElement('div');
-            inputDiv.classList.add('custom-file','form-control-sm');//'custom-file',
-        var input = document.createElement('input');
-            input.classList.add('custom-file-input');//,'form-control-file','form-control-sm'
-            input.setAttribute('type','file');
-            input.setAttribute('id','validatedCustomFile');
-            input.setAttribute('name','test');
-        var label = document.createElement('label');
-            label.classList.add('custom-file-label');
-            input.setAttribute('for','validatedCustomFile');
-        var labelText=document.createTextNode('Choose file...');
-            label.appendChild(labelText);
-        var divErr = document.createElement('div');
-            divErr.classList.add('invalid-feedback');
-        var divErrText=document.createTextNode('Example invalid custom file feedback');
-            divErr.appendChild(divErrText);
-                //<div class="invalid-feedback">Example invalid custom file feedback</div>
-            //ele.tool['indentation'] = tool;
-            inputDiv.appendChild(input);
-            inputDiv.appendChild(label);
-            inputDiv.appendChild(divErr);
-            
-            input.onchange = function(t){
-                console.log(this);
-                console.log(t);
-                console.log(this.files);
-                console.log(this.files[0]);
-                console.log(this.files[0].name);
-                console.log(this.name);
-                console.log(label);
-                labelText.remove();
-                label.appendChild(document.createTextNode(this.files[0].name));
-                //labelText.innerText = this.files[0].name;
-            };
-            
-            mainDiv.appendChild(mainLabel);
-            mainDiv.appendChild(inputDiv);
-            
-        return  mainDiv;
-    }
+
     getEjection(property,keys,title){
         //console.log('ProjectStageTool::getEjection()');
         /*
@@ -583,11 +541,7 @@ class ProjectStageTool{
          */ 
         var data={
             0:{
-                key:k,
-                default:{
-                    0:this.Utilities.getDefaultOptionProperties(property[k[0]],property[k[0]])
-                },
-                all:this.getSizeList(property[k[0]],75),
+                key:k,                
                 property:property,
                 type:'input',
                 attributes:{
@@ -632,7 +586,19 @@ class ProjectStageTool{
         */
         return data;     
     }
-    getSimpleFontSize(property){
+    getSimpleInputSize(property,propertyKey,title){
+        var data = this.getInputSize(property,propertyKey);//['fontSize','fontSizeMeasurement']
+        data[0]['onchange']=function(t){
+                /* t - this */
+                this.property[this.key[0]] = t.value; 
+            };
+            data[1]['onchange']=function(t){
+                /* t - this */
+                this.property[this.key[1]] = t.value;
+            }; 
+        return this.Tool.create(title,data);
+    }
+    getSimpleSize(property){
         var data = this.getSelectSize(property,['fontSize','fontSizeMeasurement']);
             data[0]['onchange']=function(t){
                 /* t - this */
@@ -644,7 +610,7 @@ class ProjectStageTool{
             }; 
         return this.Tool.create('Rozmiar tekstu:',data);
     }
-    getExtendedFontSize(property,ele){
+    getExtendedSize(property,ele){
         var data = this.getSelectSize(property,['fontSize','fontSizeMeasurement']);
             data[0]['ele']=ele;
             data[0]['onchange']=function(t){
@@ -935,7 +901,7 @@ class ProjectStageTool{
             tool4.classList.add('pt-4');
 
         /* FONT SIZE */
-        tool1.appendChild(this.getExtendedFontSize(subsectionrow.paragraph.style,helplink.text.value));
+        tool1.appendChild(this.getExtendedSize(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT COLOR */
         tool1.appendChild(this.getExtendedColor(subsectionrow.paragraph.style,helplink.text.value));
         /* BACKGROUND COLOR */
@@ -971,6 +937,7 @@ class ProjectStageTool{
         console.log('ProjectStageTool::getImageTool()');
         console.log(subsectionrow);
         console.log(helplink);
+        console.log(this.Glossary);
         //throw 'test-stop-bbbb';
         var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
@@ -982,22 +949,32 @@ class ProjectStageTool{
         var tool2=this.Html.getCol(3);
         var tool3=this.Html.getCol(3);
         var tool4=this.Html.getCol(3);
+        
             //tool4.classList.add('pt-4');
             /* INPUT UPLOAD IMAGE */
-            tool0.appendChild(this.getFile(subsectionrow.image));
+             tool0.appendChild(this.ProjectStageToolFile.getFile(subsectionrow.image.files));
+            
             
         /* FONT SIZE */
-        //tool1.appendChild(this.getExtendedFontSize(subsectionrow.paragraph.style,helplink.text.value));
+        //tool1.appendChild(this.getExtendedSize(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT COLOR */
         //tool1.appendChild(this.getExtendedColor(subsectionrow.paragraph.style,helplink.text.value));
         /* BACKGROUND COLOR */
         //tool1.appendChild(this.getExtendedBackgroundColor(subsectionrow.paragraph.style,helplink.text.value));
         /* FONT FAMILY */
         //tool2.appendChild(this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
+        
         /* IMAGE ALIGN */
         tool1.appendChild(this.getSimpleAlign(subsectionrow.image.style,['alignment','alignmentName']));
+        tool1.appendChild(this.getSimpleAlign(subsectionrow.image.style,['alignment','alignmentName']));
+        tool2.appendChild(this.getSimpleInputSize(subsectionrow.image.style,['height','heightMeasurement'],'Wysokość zdjęcia:'));
+        tool2.appendChild(this.getSimpleInputSize(subsectionrow.image.style,['width','widthMeasurement'],'Szerokość zdjęcia:'));
+        tool3.appendChild(this.getSimpleInputSize(subsectionrow.image.style,['marginLeft','marginLeftMeasurement'],'Lewy margines:'));
+        tool3.appendChild(this.getSimpleInputSize(subsectionrow.image.style,['marginTop','marginTopMeasurement'],'Prawy margines:'));
         
-        /* TAB STOP */
+                 
+                            
+                            /* TAB STOP */
         //tool2.appendChild(this.getTabStop(TabStop,isection,isub,isubrow,subsectionrow,helplink));    
         /* LEFT EJECTION */
         //tool3.appendChild(this.getLeftEjection(subsectionrow.paragraph.style,helplink.text));
@@ -1053,7 +1030,7 @@ class ProjectStageTool{
         var tool3=this.Html.getCol(3);
         var tool4=this.Html.getCol(3);
     
-        tool1.appendChild(this.getSimpleFontSize(subsectionrow.list.style));
+        tool1.appendChild(this.getSimpleSize(subsectionrow.list.style));
         tool1.appendChild(this.getSimpleColor(subsectionrow.list.style));
         /* GET BackgroundColor */
         tool1.appendChild(this.getSimpleBackgroundColor(subsectionrow.list.style));
@@ -1127,48 +1104,56 @@ class ProjectStageTool{
             return control; 
     }
     getControlTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,mainDiv,TabStop){
-        helplinkISubRow['tool']={};
-        /* CREATE TEXT TOOL */
-        var textTool = this.getTextTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,TabStop);
-        /* CREATE TEXT TOOL */
-        var textTabStopTool = this.getTabStopTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow.text,TabStop);
-        /* CREATE TAB STOP TOOL */
-        var textTabStopToolControl = this.createControl('Tabulatory',textTabStopTool);
-        /* SET LINK TO tabstopTool */
-            helplinkISubRow.tool['tabstopControl']=textTabStopToolControl;
-            helplinkISubRow.tool['tabstop']=textTabStopTool;
-        /* CREATE LIST TOOL */
-        var listTool = this.getListTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
-        var listToolControl = this.createControl('Opcje listy',listTool);
-        /* SET LINK TO listTool */
-            helplinkISubRow.tool['listControl']=listToolControl;
-            helplinkISubRow.tool['list']=listTool;
-         /* CREATE IMAGE TOOL */
-         var imageTool = this.getImageTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,TabStop);
-        
-        
-        var mainCol = this.Html.getCol(12);
-            mainCol.classList.add('mt-1','mb-1');
-        var mainDivControl=this.Html.getRow();   
-        var mainDivControlCol = this.Html.getCol(4);
-        
-        var mainDivControlCol1 = this.Html.getCol(1);   
-        var mainDivControlCol2 = this.Html.getCol(7);
+        try{
+             helplinkISubRow['tool']={};
+            /* CREATE TEXT TOOL */
+            var textTool = this.getTextTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,TabStop);
+            /* CREATE TEXT TOOL */
+            var textTabStopTool = this.getTabStopTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow.text,TabStop);
+            /* CREATE TAB STOP TOOL */
+            var textTabStopToolControl = this.createControl('Tabulatory',textTabStopTool);
+            /* SET LINK TO tabstopTool */
+                helplinkISubRow.tool['tabstopControl']=textTabStopToolControl;
+                helplinkISubRow.tool['tabstop']=textTabStopTool;
+            /* CREATE LIST TOOL */
+            var listTool = this.getListTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
+            var listToolControl = this.createControl('Opcje listy',listTool);
+            /* SET LINK TO listTool */
+                helplinkISubRow.tool['listControl']=listToolControl;
+                helplinkISubRow.tool['list']=listTool;
+             /* CREATE IMAGE TOOL */
+             var imageTool = this.getImageTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,TabStop);
 
-            mainDivControlCol.classList.add('btn-group','btn-group-toggle');
-            mainDivControlCol.appendChild(this.createControl('Formatowanie',textTool));
-            mainDivControlCol.appendChild(textTabStopToolControl);
-            mainDivControlCol.appendChild(listToolControl);
-            mainDivControlCol.appendChild(this.createControl('Obraz',imageTool));
-            mainDivControl.appendChild(mainDivControlCol1);
-            mainDivControl.appendChild(mainDivControlCol);
-            mainDivControl.appendChild(mainDivControlCol2);
-            mainCol.appendChild(mainDivControl);
-            mainDiv.appendChild(mainCol);    
-            mainDiv.appendChild(textTool);  
-            mainDiv.appendChild(textTabStopTool);  
-            mainDiv.appendChild(listTool);
-            mainDiv.appendChild(imageTool);
+
+            var mainCol = this.Html.getCol(12);
+                mainCol.classList.add('mt-1','mb-1');
+            var mainDivControl=this.Html.getRow();   
+            var mainDivControlCol = this.Html.getCol(4);
+
+            var mainDivControlCol1 = this.Html.getCol(1);   
+            var mainDivControlCol2 = this.Html.getCol(7);
+
+                mainDivControlCol.classList.add('btn-group','btn-group-toggle');
+                mainDivControlCol.appendChild(this.createControl('Formatowanie',textTool));
+                mainDivControlCol.appendChild(textTabStopToolControl);
+                mainDivControlCol.appendChild(listToolControl);
+                mainDivControlCol.appendChild(this.createControl('Obraz',imageTool));
+                mainDivControl.appendChild(mainDivControlCol1);
+                mainDivControl.appendChild(mainDivControlCol);
+                mainDivControl.appendChild(mainDivControlCol2);
+                mainCol.appendChild(mainDivControl);
+                mainDiv.appendChild(mainCol);    
+                mainDiv.appendChild(textTool);  
+                mainDiv.appendChild(textTabStopTool);  
+                mainDiv.appendChild(listTool);
+                mainDiv.appendChild(imageTool);
+        }
+        catch(error){
+            console.log('ProjectStageTool::getControlTool() ERROR');
+            console.log(error);
+            //this.Html.showField(this.Modal.link['error'],'An Application Error Has Occurred!');
+        }
+       
     }
     setSectionSubSection(iSection,subsection,helplinkSubsection,self){
         /* console.log('ProjectStageCreate::setSectionSubSection()'); */

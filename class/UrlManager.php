@@ -5,10 +5,10 @@ final class UrlManager{
     private $urlData=[];
     private $taskPerm=[];
     private $returnType='json';
-    private $avaliableFunction=[
+    private $availableFunction=[
         "task"=>"task"
     ];
-    private $avaliableTask=[
+    private $availableTask=[
         ["pCreate",'ADD_PROJ'],
         ["pDelete",'DEL_PROJ'],
         ["getprojects",'LOG_INTO_PROJ'],
@@ -23,7 +23,7 @@ final class UrlManager{
         ["gettypeofagreement",''],
         ["getadditionaldictdoc",''],
         ["pTeamOff",'EDIT_TEAM_PROJ'],
-        ["getallavaliableemployeeprojsumperc",''],
+        ["getallavailableemployeeprojsumperc",''],
         ["pTeam",'EDIT_TEAM_PROJ'],
         ['pDoc','SHOW_DOK_PROJ'],
         ['pClose','CLOSE_PROJ'],
@@ -132,7 +132,7 @@ final class UrlManager{
     }
     private function checkUrlFunction(){
         $this->Log->log(0,"[".__METHOD__."]");
-        if(!array_key_exists($this->avaliableFunction["task"], $this->urlData)){  
+        if(!array_key_exists($this->availableFunction["task"], $this->urlData)){  
             $this->Log->logMulti(2,$this->urlGetData,__LINE__."::".__METHOD__." urlGetData");
             Throw New Exception('Wrong function to execute',0);
         }
@@ -141,11 +141,11 @@ final class UrlManager{
     {
         $this->Log->log(0,"[".__METHOD__."]");
         $found=false;
-        foreach($this->avaliableTask as $task)
+        foreach($this->availableTask as $task)
         {
             $this->Log->logMulti(2,$task);
             if($task[0]==$this->urlData['task']){
-                $this->Log->log(0,"[".__METHOD__."] task in avaliableTask => ".$task[0]); 
+                $this->Log->log(0,"[".__METHOD__."] task in availableTask => ".$task[0]); 
                 self::setTaskPerm($task[1]);
                 $found=true;
                 break;

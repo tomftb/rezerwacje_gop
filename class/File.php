@@ -11,7 +11,7 @@
  *
  * @author tborczynski
  */
-class file {
+class File {
     private $newFileName='';
     private $logData='';
     private $uploadDir='';

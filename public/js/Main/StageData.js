@@ -164,8 +164,17 @@ class StageData{
                         'wrapDistanceRight':''
                     },
                     property:{
+                        lastModified:'',
+                        lastModifiedDate:'',
+                        name:"",
+                        size:0,
+                        type:"",
+                        uid:'',
+                        uri:''
+                    },
+                    files:{
                         
-                    } 
+                    }
                 }
         };
     }

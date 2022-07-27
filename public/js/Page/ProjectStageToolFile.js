@@ -1,26 +1,20 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-
 class ProjectStageToolFile{
     infoRef=new Object();
     ProjectStageTool = new Object();
+    Files= new Object();
     
     constructor(ProjectStageTool){
         this.ProjectStageTool = ProjectStageTool;
     }
     
-    getFile(property){
+    getFile(Files){
         console.log('ProjectStageToolFile::getFile()');
         /*
          * property - reference for example subsectionrow.paragraph.style
          * ele - reference for example helplink
          */  
-        
-        property.uid=(new Date()).getTime();
+        this.Files = Files;
+        //image.property.uid=(new Date()).getTime();
         
         var mainDiv =  document.createElement('div');
         var mainLabel = this.ProjectStageTool.Tool.createLabel('Wskaż plik:');  
@@ -30,7 +24,7 @@ class ProjectStageToolFile{
             input.classList.add('custom-file-input');//,'form-control-file','form-control-sm'
             input.setAttribute('type','file');
             input.setAttribute('id','validatedCustomFile');
-            input.setAttribute('name',property.uid);
+            input.setAttribute('name','test');
             input.setAttribute('multiple','');
         var label = document.createElement('label');
             label.classList.add('custom-file-label');//,'border','border-danger','border-1'
@@ -99,6 +93,11 @@ class ProjectStageToolFile{
                     console.log(this.files);
                 
                     for (let i = 0; i < this.files.length; i++) {
+                        let uid=(new Date()).getTime()
+                        //+(new Date()).getMilliseconds();//(new Date()).getTime()+
+                        //let uid = Math.random();
+                        //let uid = Math.floor(Math.random() * 10000000);
+                        
                         /* SET DEFAULT */
                         infoClass='text-success';
                         errorValue='';
@@ -120,31 +119,31 @@ class ProjectStageToolFile{
                             infoClass='text-danger';
                             errorValue=' - not allowed type → '+this.files.item(i).type+'';
                         }
-                        var counterValue=  document.createTextNode('['+i+'] ');
+                        let counterValue=  document.createTextNode('['+i+'] ');
                         
-                        fileName=cut(this.files.item(i).name,138-counterValue.length-errorValue.length); 
-                        fileName+=errorValue;
-                        var text=document.createTextNode(fileName);
-                        var p = document.createElement('p');
+                            fileName=cut(this.files.item(i).name,138-counterValue.length-errorValue.length); 
+                            fileName+=errorValue;
+                        let text=document.createTextNode(fileName);
+                        let p = document.createElement('p');
                             p.classList.add(infoClass,'mt-0','mb-0');
                             p.setAttribute('title',this.files.item(i).name);
                         //var counterValue = document.createTextNode('['+i+'] ');
-                        var counterLabel=  document.createElement('span');
+                        let counterLabel=  document.createElement('span');
                             counterLabel.classList.add('text-secondary');
                             counterLabel.appendChild(counterValue);
                             
                             p.appendChild(counterLabel);
                             p.appendChild(text);       
                             info.appendChild(p);
-                            File={
+                            Files[uid]={
                                 lastModified:this.files.item(i).lastModified,
                                 lastModifiedDate:this.files.item(i).lastModifiedDate,
                                 name:this.files.item(i).name,
                                 size:this.files.item(i).size,
-                                type:this.files.item(i).type,
-                                data:this.files.item(i)
+                                type:this.files.item(i).type
+                                //uid:uid
                             };
-                            fd.append(property.uid+'-'+i,this.files.item(i),this.files.item(i).name);
+                            fd.append(uid,this.files.item(i),this.files.item(i).name);
                     }
                     
                     /* 
@@ -168,11 +167,7 @@ class ProjectStageToolFile{
                             divInfo.classList.remove('d-none');
                         }
                         divInfo.appendChild(info);
-                        property.lastModified='';
-                        property.lastModifiedDate='';
-                        property.name='';
-                        property.size=0;
-                        property.type='';
+                        Files={};
                     }
                     else{
                         if(label.classList.contains('border-danger')){
@@ -181,22 +176,14 @@ class ProjectStageToolFile{
                         label.classList.add('border-success');
                         if(!divInfo.classList.contains('d-none')){
                             divInfo.classList.add('d-none');
-                        }
-                        property.lastModified=File.lastModified;
-                        property.lastModifiedDate=File.lastModifiedDate;
-                        property.name=File.name;
-                        property.size=File.size;
-                        property.type=File.type;
-                        
+                        }   
                         var xhrRun=self.ProjectStageTool.Stage.getXhrParm('POST','uploadStageImage','setModalResponse');
                             xhrRun.o=self;
                             xhrRun.d=fd;
                             xhrRun.m='setFile';
                             self.ProjectStageTool.Stage.Xhr.run(xhrRun);  
                     }   
-                    console.log(divInfo);
-                    console.log(property);
-                        
+                    console.log(divInfo);                        
              };
            
             mainDiv.appendChild(mainLabel);
@@ -212,11 +199,14 @@ class ProjectStageToolFile{
         try{
             var data = this.ProjectStageTool.Stage.Items.parseResponse(response);
                 console.log(data.data.value);
-                
+                console.log(this.Files);
                 for(const prop in data.data.value){
-                    this.ProjectStageTool.Files[prop]=data.data.value[prop];
+                    //this.Property.files[prop]=data.data.value[prop];
+                    //this.ProjectStageTool.Files[prop]=data.data.value[prop];
+                    this.Files[prop]['uri']=data.data.value[prop];
                 }
-                console.log(this.ProjectStageTool.Files);
+                //console.log(this.ProjectStageTool.Files);
+                console.log(this.Files);
         }
         catch (error){
             //console.log('ERROR:');
@@ -232,7 +222,9 @@ class ProjectStageToolFile{
                 p.classList.add('text-danger','mt-0','mb-0');
                 p.appendChild(document.createTextNode(error));       
             this.infoRef.appendChild(p);
+            this.Files={};
             //alert('ProjectStageTool::setFile() Error occured!');
+            
         }
     }
 }

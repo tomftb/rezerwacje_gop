@@ -171,5 +171,44 @@ class Html{
             option.style.backgroundColor = '#FFFFFF';
         return option;
     }
+    removeClass(ele,className){
+        var action = function(){
+            if(ele.classList.contains(className)){
+                ele.classList.remove(className);
+            }
+        };
+        this.setClass(ele,className,action);
+    }
+    addClass(ele,className){
+        var action = function(){
+            if(!ele.classList.contains(className)){
+                ele.classList.add(className);
+            }
+        };
+        this.setClass(ele,className,action);
+    }
+    setClass(ele,className,action){
+       var type = typeof(ele);
+        var type2 = typeof(className);
+        if(type!=='object'){
+            console.log(type);
+            throw 'ELE IS NOT A OBJECT!';
+            return false;
+        }
+        if(type2==='string'){
+            //ele.classList[action](className);
+            action(ele,className);
+            return true;
+        }
+        if(type2==='object'){
+            for(const prop in className){
+                //ele.classList[action](className[prop]);
+                action(ele,className[prop]);
+            }
+            return true;
+        }
+        console.log(type2);
+        throw 'className IS NOT A STRING AND OBJECT!';   
+    }
 }
 

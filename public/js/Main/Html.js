@@ -196,14 +196,12 @@ class Html{
             return false;
         }
         if(type2==='string'){
-            //ele.classList[action](className);
-            action(ele,className);
+            action(ele,className.trim());
             return true;
         }
         if(type2==='object'){
             for(const prop in className){
-                //ele.classList[action](className[prop]);
-                action(ele,className[prop]);
+                action(ele,className[prop].trim());
             }
             return true;
         }

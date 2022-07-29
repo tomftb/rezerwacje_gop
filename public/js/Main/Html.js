@@ -8,7 +8,7 @@ class Html{
         console.log(ele);
         console.log(info);
         */
-        
+        this.isObject(ele);
         ele.classList.remove("d-none");
         ele.classList.add("d-block");
         if(info!==undefined && info!==null){
@@ -17,6 +17,7 @@ class Html{
        
     }
     hideField(ele){
+        this.isObject(ele);
         ele.classList.remove("d-block");
         ele.classList.add("d-none");
         //ele.innerHTML="";
@@ -25,13 +26,12 @@ class Html{
         this.hideField(ele);
         ele.innerHTML="";
     }
-    removeChilds(htmlElement)
-    {
+    removeChilds(ele){
+        this.isObject(ele);
         //console.log('---removeHtmlChilds()---');
-        while (htmlElement.firstChild)
-        {
+        while (ele.firstChild){
             //console.log(htmlElement.firstChild);
-            htmlElement.firstChild.remove(); 
+            ele.firstChild.remove(); 
         };
     }
     setDisabled(ele){
@@ -83,8 +83,7 @@ class Html{
         //console.log(s);
         return s;
     }
-    select(c,n)
-    {
+    select(c,n){
         var s=document.createElement("select");
             s.setAttribute("CLASS",c);  
             s.setAttribute("NAME",n);
@@ -188,13 +187,8 @@ class Html{
         this.setClass(ele,className,action);
     }
     setClass(ele,className,action){
-       var type = typeof(ele);
         var type2 = typeof(className);
-        if(type!=='object'){
-            console.log(type);
-            throw 'ELE IS NOT A OBJECT!';
-            return false;
-        }
+        this.isObject(ele);
         if(type2==='string'){
             action(ele,className.trim());
             return true;
@@ -207,7 +201,14 @@ class Html{
         }
         console.log(type2);
         throw 'className IS NOT A STRING AND OBJECT!';   
-        return false;
+    }
+    isObject(ele){
+        var type = typeof(ele);
+        if(type!=='object'){
+            console.log(ele);
+            console.log(type);
+            throw 'ELE IS NOT A OBJECT!';
+        }
     }
 }
 

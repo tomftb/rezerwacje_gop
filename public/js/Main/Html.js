@@ -207,6 +207,7 @@ class Html{
         }
         console.log(type2);
         throw 'className IS NOT A STRING AND OBJECT!';   
+        return false;
     }
 }
 

@@ -54,7 +54,13 @@ class ProjectStage{
             //this.Items.Glossary
             /* RUN MODAL */
             this.Items.Modal.clearData();
-            this.Items.setCloseModal(this,'show',this.defaultTask+data['data']['value']['stage'].i);
+            var self=this;
+            var run = function(){
+                self.Items.closeModal();
+                self.Items.reloadData(self,'setResponse','getprojectsstagelike&d=0&v=0&b='+data['data']['value']['stage'].i);
+            };
+            //this.Items.setCloseModal(this,'show',this.defaultTask+data['data']['value']['stage'].i);
+            this.Items.setCloseModal(run);
             this.Items.setChangeDataState(data['data']['value']['stage'].i,data['data']['value']['stage'].t,data['data']['function'],data['data']['value']['slo'],btnLabel,btnClass,this.StageTable,'run',window.router+this.defaultTask+data['data']['value']['stage'].i);
             this.Items.Modal.setInfo("Project Stage ID: "+data['data']['value']['stage'].i+", Create user: "+data['data']['value']['stage'].cu+" ("+data['data']['value']['stage'].cul+"), Create date: "+data['data']['value']['stage'].cd);
        
@@ -159,5 +165,11 @@ class ProjectStage{
             this.StageTable.Table.setError(error);
             return false;
         };
+    }
+    setResponse(response){
+        console.log('ProjectConstant::setResponse()');
+        if(this.Items.setModalResponse(response)){
+            this.StageTable.setBody(response);
+        }
     }
 }

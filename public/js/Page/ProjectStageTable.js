@@ -62,9 +62,13 @@ class ProjectStageTable{
     }
     setBody(response){
         console.log('ProjectStageTable::setBody()');
+        /* CLEAR TABLE */
+        this.Table.clearTable();   
+        /* SET HEAD */
+        this.Table.setHead(this.head);
         /* PARSE RESPONSE */
         var data = this.Parent.Items.setTableResponse(response);
-         if(this.Table.error){return false;};
+        if(this.Table.error){return false;};
         /* SET BODY DATA */
         for(const prop in data.data.value.data){
             this.setBodyRow(data.data.value.data[prop]);

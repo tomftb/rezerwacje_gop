@@ -133,10 +133,6 @@ class ProjectStageCreate{
     }
     setUndoTask(self){
         var run = function(){
-                
-                //this.Items.Modal.closeModal();
-                //Items.reloadData(classToRun,methodToRun,taskToRun);
-                 /* TO DO -> TURN OFF CLOSE MODAL */
                    let files = new Array();
                     for(const prop in self.StageData.Stage.section){           
                         for(const prop1 in self.StageData.Stage.section[prop].subsection){             
@@ -155,7 +151,9 @@ class ProjectStageCreate{
                         }
                     }
                     if(files.length<1){
+                        console.log(self);
                         self.Items.closeModal();
+                        self.Items.reloadData(self.Stage,'setResponse','getprojectsstagelike&d=0&v=0&b=');
                     }
                     else{
                         let ImageTool = new ProjectStageToolFile(self);
@@ -797,6 +795,8 @@ class ProjectStageCreate{
                         return false;
                     }
                }
+               console.log('run');
+               console.log(run);
                if (confirm('Anulować?') === true) {
                     run();
                }

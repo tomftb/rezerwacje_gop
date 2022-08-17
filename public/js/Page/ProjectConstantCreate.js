@@ -408,6 +408,7 @@ class ProjectConstantCreate{
             cancel.onclick=function(){
                 if (confirm('Anulować?') === true) {
                     console.log('ProjectItems::getCancelButton() cancel.onclick');
+                    window.onbeforeunload = null;
                     self.Constant.ConstantTable.run(window.router+'getprojectsconstantslike&u=0&v=0&b='+idRecord);
                     self.Modal.closeModal();
                 }

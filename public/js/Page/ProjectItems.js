@@ -309,6 +309,7 @@ class ProjectItems{
             cancel.onclick=function(){
                 if (confirm('Anulować?') === true) {
                     self.Modal.closeModal();
+                    window.onbeforeunload = null;
                     classToRun[methodToRun](taskToRun);
                 }
                 else{ 

@@ -230,7 +230,6 @@ class ProjectItems{
         var checkError = function (){
              if(self.ErrorStack.check()){
                     if (confirm('Opuścić okno bez zapisu?') === true) {
-                        //run();
                         self.closeModal();
                         return false;
                     }
@@ -238,6 +237,8 @@ class ProjectItems{
                         return false;
                     }
                }
+               console.log('run');
+               console.log(run);
                if (confirm('Wyjść?') === true) {
                     run();
                 }

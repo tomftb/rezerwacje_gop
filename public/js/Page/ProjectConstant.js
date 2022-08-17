@@ -72,7 +72,8 @@ class ProjectConstant{
     setUndoTask(self,task){
         var run = function(){
             self.Items.Modal.closeModal();
-            self.Items.reloadData(self,'show',task);          
+            //self.Items.reloadData(self,'show',task);      
+            self.Items.reloadData(self.Items.Constant,'setResponse',task);    
        };
        return run;          
     }

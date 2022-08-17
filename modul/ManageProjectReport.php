@@ -41,7 +41,7 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
     }
     public function setProjectReportImage(){
         $this->Log->log(0,"[".__METHOD__."]");
-        self::uploadFiles(APP_URL."router.php?task=showProjectReportFile&dir=".TMP_UPLOAD_DIR."&file=",TMP_UPLOAD_DIR); 
+        self::uploadFiles(APP_URL."router.php?task=showProjectTmpReportFile&file=",TMP_UPLOAD_DIR); 
         $this->utilities->jsonResponse($this->files,'showReportPreview'); 
     }
     public function getProjectReportData(){
@@ -62,11 +62,11 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         //$this->inpArray=json_decode($post['stage']);
         //print_r($this->inpArray);
         
-        $doc = new createDoc(json_decode($post['stage']),[],'TestProjectStage','.docx',APP_ROOT.UPLOAD_PROJECT_REPORT_DOC_DIR);
+        $doc = new createDoc(json_decode($post['stage']),[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
         $doc->genReportStage();
         //echo "DOC NAME: ".$doc->getDocName();
         
-        //downloadFile::getFile(APP_ROOT.UPLOAD_PROJECT_DOC_DIR,$doc->getDocName());
+        //FileDownload::getFile(APP_ROOT.UPLOAD_PROJECT_DOC_DIR,$doc->getDocName());
         $this->utilities->jsonResponse($doc->getDocName(),'downloadProjectReportDoc');
         
         //$this->utilities->jsonResponse('','cModal');
@@ -74,10 +74,11 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         //$this->utilities->jsonResponse($doc->getDocName(),'downloadProjectDoc');
     }
     private function uploadFiles($linkToFile='',$uploadDir=''){
-        $this->modul['FILE']=NEW file();
+        $this->modul['FILE']=NEW File();
         $this->modul['FILE']->setUrl($linkToFile);
-        $this->modul['FILE']->setNewFileName($_SESSION['uid']);
-        $this->modul['FILE']->setUploadDir(APP_ROOT.$uploadDir);
+        //$this->modul['FILE']->setNewFileName($_SESSION['uid']);
+        $this->modul['FILE']->setFileNamePrefix('reportImage');
+        $this->modul['FILE']->setUploadDir($uploadDir);
         $this->modul['FILE']->setAcceptedFileExtension(['image/jpeg','image/png','image/jpg']);
         $this->modul['FILE']->setMaxFileSize(100000);
         $this->modul['FILE']->uploadFiles();
@@ -160,10 +161,10 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
     }
     public function downloadProjectReportDoc(){
         $this->Log->log(0,"[".__METHOD__."]");
-        downloadFile::getFile(APP_ROOT.UPLOAD_PROJECT_REPORT_DOC_DIR,filter_input(INPUT_GET,"file"));
+        FileDownload::getFile(UPLOAD_PROJECT_REPORT_DOC_DIR,filter_input(INPUT_GET,"file"));
     } 
     public function downloadProjectReportImage(){
         $this->Log->log(0,"[".__METHOD__."]");
-        downloadFile::getFile(APP_ROOT.UPLOAD_PROJECT_REPORT_IMG_DIR,filter_input(INPUT_GET,"file"));
+        FileDownload::getFile(UPLOAD_PROJECT_REPORT_IMG_DIR,filter_input(INPUT_GET,"file"));
     }
 }

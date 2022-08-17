@@ -102,12 +102,12 @@ class Html{
             div.setAttribute('class','row');
         return div;
     }
-     getCol(columnNumber){
+    getCol(columnNumber){
         var div=document.createElement('div');
-            div.setAttribute('class','col-'+columnNumber);
+            div.setAttribute('class','col-'+columnNumber.toString());
         return div;
     }
-     getInput(name,value,type){
+    getInput(name,value,type){
         
         var input=document.createElement('INPUT');
             input.setAttribute('value',value);
@@ -127,7 +127,7 @@ class Html{
             i.setAttribute('aria-hidden','true');
             i.setAttribute('style','color:#ffffff;');         
         var div=document.createElement('div');
-            div.setAttribute('class','btn');//btn-danger
+            div.classList.add('btn');
             div.appendChild(i);
         return div;
     }
@@ -171,17 +171,25 @@ class Html{
         return option;
     }
     removeClass(ele,className){
-        var action = function(){
-            if(ele.classList.contains(className)){
-                ele.classList.remove(className);
+        var action = function(e,c){
+            /*
+             * e - DOM element
+             * c - class name
+             */
+            if(e.classList.contains(c)){
+                e.classList.remove(c);
             }
         };
         this.setClass(ele,className,action);
     }
     addClass(ele,className){
-        var action = function(){
-            if(!ele.classList.contains(className)){
-                ele.classList.add(className);
+        var action = function(e,c){
+            /*
+             * e - DOM element
+             * c - class name
+             */
+            if(!e.classList.contains(c)){
+                e.classList.add(c);
             }
         };
         this.setClass(ele,className,action);

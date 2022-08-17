@@ -88,6 +88,7 @@ final class UrlManager{
         ['downloadProjectDoc','GEN_DOC_PROJ'],
         ['downloadProjectReportImage','GEN_PROJ_REP_DOC'],
         ['showProjectReportFile','GEN_PROJ_REP_DOC'],
+        ['showProjectTmpReportFile','GEN_PROJ_REP_DOC'],
         ['setProjectReport','SAVE_PROJ_REPORT'],
         ['getModulClusterDefaultData','LOG_INTO_CLUSTR'],
         ['updateClustr','EDIT_CLUSTR'],
@@ -98,19 +99,32 @@ final class UrlManager{
         ['getModulEmployeesDefaults','LOG_INTO_EMPL'],
         ['getModulParametersDefaults','LOG_INTO_PARM'],
         ['getModulStageDefaults','LOG_INTO_STAGE'],
-        ['getProjectConstList','LOG_INTO_STAGE'],
-        ['confirmProjectConst','LOG_INTO_STAGE'],
-        ['getprojectsconstslike','LOG_INTO_STAGE'],
-        ['getProjectConstHideSlo','LOG_INTO_STAGE'],
-        ['getProjectConstDelSlo','LOG_INTO_STAGE'],
+        ['getProjectConstantsList','LOG_INTO_STAGE'],
+        ['confirmProjectConstant','LOG_INTO_STAGE'],
+        ['getprojectsconstantslike','LOG_INTO_STAGE'],
+        ['getProjectConstantHideSlo','LOG_INTO_STAGE'],
+        ['getProjectConstantDelSlo','LOG_INTO_STAGE'],
         ['pcDetails','LOG_INTO_STAGE'],
         ['pcHide','LOG_INTO_STAGE'],
         ['pcDelete','LOG_INTO_STAGE'],
-        ['getProjectConstDetails','LOG_INTO_STAGE'],
+        ['getProjectConstantDetails','LOG_INTO_STAGE'],
         ['confirmProjectStageText','LOG_INTO_STAGE'],
-        ['blockConst','LOG_INTO_STAGE'],
+        ['blockConstant','LOG_INTO_STAGE'],
         ['genProjectReportTestDoc','LOG_INTO_STAGE'],
-        ['uploadStageImage','LOG_INTO_STAGE']
+        ['uploadStageImage','LOG_INTO_STAGE'],
+        ['deleteStageImage','LOG_INTO_STAGE'],
+        ['deleteTmpStageImage','LOG_INTO_STAGE'],
+        ['getTmpStageImage','LOG_INTO_STAGE'],
+        ['getStageImage','LOG_INTO_STAGE'],
+        ['getProjectVariablesLike','LOG_INTO_STAGE'],
+        ['getProjectVariablesList','LOG_INTO_STAGE'],
+        ['confirmProjectVariable','LOG_INTO_STAGE'],
+        ['getProjectVariableDetails','LOG_INTO_STAGE'],
+        ['blockVariable','LOG_INTO_STAGE'],
+        ['getProjectVariableDelSlo','LOG_INTO_STAGE'],
+        ['getProjectVariableHideSlo','LOG_INTO_STAGE'],
+        ['pvHide','LOG_INTO_STAGE'],
+        ['pvDelete','LOG_INTO_STAGE']
     ];
         
     public function __construct(){
@@ -152,7 +166,7 @@ final class UrlManager{
             }   
         }
         if(!$found){
-            Throw New Exception(__METHOD__.' Task not exists => '.$this->urlData['task'],0);
+            Throw New Exception(__METHOD__.' Task not exists => '.$this->urlData['task'],1);
         }
     }
     private function setTaskPerm($perm){

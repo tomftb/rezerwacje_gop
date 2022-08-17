@@ -4,6 +4,7 @@
  * CLASS Xhr -> js/Main/Xhr.js
  */
 console.log(window.appUrl);
+var error = false;
 class ProjectItems{
     Modal = new Object();
     Html = new Object();
@@ -14,8 +15,10 @@ class ProjectItems{
     /* FOR MODAL */
     Xhr2 = new Object();
     Stage = new Object();
-    Const = new Object();
+    Constant = new Object();
+    Variable = new Object();
     Table = new Object();
+    ErrorStack = new Object();
 
     loadModal;
     //defaultTask='getprojectsstagelike&d=0&v=0&b=';
@@ -24,6 +27,7 @@ class ProjectItems{
             method:'',
             task:'getprojectsstagelike&d=0&v=0&b='
     };
+    
     Glossary=new Object();
 
 
@@ -33,20 +37,23 @@ class ProjectItems{
        
         this.Html=new Html();
         this.Modal=new Modal();
+        this.ErrorStack = new ErrorStack();
         this.Xhr=new Xhr2();
         this.Xhr2=new Xhr2();
         this.Table = new Table(this.Xhr);
         //Items.setLoadInfo();
         this.Glossary={
             text:new Glossary(),
-            list:new Glossary()
+            list:new Glossary(),
+            image:new Glossary()
         };
+        this.Utilities = new Utilities();
         this.setLoadInfo();
-        this.setLoadModalInfo(); 
+        this.setLoadModalInfo(this.Xhr2); 
         this.Xhr2.setOnError(this.modalXhrError()); 
         this.Stage=new ProjectStage(this);
-        this.Const=new ProjectConst(this);
-        
+        this.Constant=new ProjectConstant(this);  
+        this.Variable=new ProjectVariable(this);  
     }
     getXhrParm(type,task,method){
         return {
@@ -68,6 +75,7 @@ class ProjectItems{
         //console.log(data);
         this.Glossary['text'].fill(data.data.value['text']);
         this.Glossary['list'].fill(data.data.value['list']);
+        this.Glossary['image'].fill(data.data.value['image']);
         //console.log(this.Glossary);
         /* SETUP STAGE PROPERTY */
         this.Stage.Property.setData(this.Glossary);
@@ -173,43 +181,78 @@ class ProjectItems{
     prepareModal(title,titleClass){
         console.log('ProjectItems::prepareModal()');
         //this.Modal.setLink();
-        
+        var self= this;
+        var f5 = function (e){
+            //console.log('f5');
+            e = e || window.event;
+           if( self.wasPressed ) return; 
+
+            if (e.keyCode === 116) {
+                 //alert("f5 pressed");
+                
+            }else {
+                //alert("Window closed");
+            }
+        };
+        window.onbeforeunload = function() {
+            return "Opuścić okno bez zapisu?";
+        };
+        document.onkeydown = function(){
+            //console.log('onkeydown');
+            f5();
+        };
+        document.onkeypress = function(){
+            //console.log('onkeypress');
+            f5();
+        };
+        document.onkeyup = function(){
+            //console.log('onkeyup');
+            f5();
+        };
+
         this.Modal.setHead(title,titleClass);
         //$(ProjectItems.Modal.link['main']).modal('show');
         $(this.Modal.link['main']).modal({
             show:true,
             backdrop: 'static',
-            keyboard: false  // to prevent closing with Esc button (if you want this too)
+            keyboard: false  // to prevent closing with Esc button
         });
         // REMOVE data-dismiss="modal" 
         console.log(this.Modal.link['close'].parentNode);
         this.Modal.link['close'].parentNode.removeAttribute('data-dismiss');
     }
-    setCloseModal(classToRun,methodToRun,taskToRun){
+    setCloseModal(run){//classToRun,methodToRun,taskToRun,
         console.log('ProjectItems::setCloseModal()');
         /* SET CLOSE ACTION BUTTON */
-        var Items=this;
+        //var Items=this;
         /* CLOSURE */
+        var self = this;
+        var checkError = function (){
+             if(self.ErrorStack.check()){
+                    if (confirm('Opuścić okno bez zapisu?') === true) {
+                        //run();
+                        self.closeModal();
+                        return false;
+                    }
+                    else{ 
+                        return false;
+                    }
+               }
+               if (confirm('Wyjść?') === true) {
+                    run();
+                }
+            else{}
+        };
         this.Modal.link['close'].onclick = function (){
             /* TO DO */
-            if (confirm('Wyjść?') === true) {
-                Items.Modal.closeModal();
-                Items.reloadData(classToRun,methodToRun,taskToRun);
-            }
-            else{}
+            checkError();
         };
          /* SET CLOSE VIA MOUSE */
         this.Modal.link['main'].onclick = function (e){
             
             if(e.target.id === 'AdaptedModal'){
                 console.log('outside');
-                if (confirm('Wyjść?') === true) {
-                    /* TO DO -> TURN OFF CLOSE MODAL */
-                    Items.Modal.closeModal();
-                    Items.reloadData(classToRun,methodToRun,taskToRun);
-                }
-                else{ 
-                }
+                checkError();
             }
             else {}
         };
@@ -252,7 +295,7 @@ class ProjectItems{
         }
     }
     getCancelButton(classToRun,methodToRun,taskToRun){
-        /*
+        /**/
         console.log('ProjectItems::getCancelButton()');
         console.log('Oboject:');
         console.log(classToRun);
@@ -260,14 +303,13 @@ class ProjectItems{
         console.log(methodToRun);
         console.log('Task:');
         console.log(taskToRun);
-        */
+        
         var cancel=this.Html.cancelButton('Anuluj');
-        var Items = this;
+        var self = this;
             cancel.onclick=function(){
                 if (confirm('Anulować?') === true) {
-                    /* TO DO -> TURN OFF CLOSE MODAL */
-                    Items.Modal.closeModal();
-                    Items.reloadData(classToRun,methodToRun,taskToRun);
+                    self.Modal.closeModal();
+                    classToRun[methodToRun](taskToRun);
                 }
                 else{ 
                 }
@@ -302,7 +344,7 @@ class ProjectItems{
         this.Xhr.setOnLoadStart(start);
         this.Xhr.setOnLoadEnd(end);
     }
-    setLoadModalInfo(){
+    setLoadModalInfo(Xhr){
         console.log('ProjectItems::setLoadModalInfo()');
         var M = this.Modal;
             M.loadNotify='<img src="'+window.appUrl+'/img/loading_60_60.gif" alt="load_gif">';
@@ -312,8 +354,8 @@ class ProjectItems{
         var end = function(){
                 M.hideLoad();
             };
-        this.Xhr2.setOnLoadStart(start);
-        this.Xhr2.setOnLoadEnd(end);
+        Xhr.setOnLoadStart(start);
+        Xhr.setOnLoadEnd(end);
     }
     parseResponse(response){
         console.log('ProjectItems::parseResponse()');
@@ -325,30 +367,37 @@ class ProjectItems{
             console.log(response);
             console.log('ERROR:');
             console.log(error);
+            this.ErrorStack.add('main','Application error occurred! Contact with Administrator!');
             throw 'Application error occurred! Contact with Administrator!';
             return false;
         }
        
         if (!('status' in data) || !('info' in data)){
             console.log(data);
+            this.ErrorStack.add('main','Application error occurred! Contact with Administrator!');
             throw 'Application error occurred! Contact with Administrator!';
         }
         else if(data.status===1){
+            //this.ErrorStack.add('main',data.info);
             throw data.info;
         }
         else{
+            
             return data;       
         }   
         return data;
     }
-
-    setChangeDataState(i,t,f,g,btnLabel,titleClass){
+    setChangeDataState(i,t,f,g,btnLabel,titleClass,o,m,ta){
         console.log('ProjectItems::setChangeDataState()');
+        console.log(i);
         /*
             i - id
             t - tile
             f - function to run
             g - glossary
+            o - object
+            m - method
+            ta - task
         */
         
         var form=this.Html.getForm();
@@ -361,37 +410,53 @@ class ProjectItems{
         this.Modal.link['form']=form; 
         this.Modal.link['adapted'].appendChild(h);
         this.Modal.link['adapted'].appendChild(form);
-        var Items=this;
+        var self=this;
         var confirmButton=this.Html.confirmButton(btnLabel,'btn btn-'+titleClass,f);   
             /* CLOSURE */
             confirmButton.onclick = function () {  
                 console.log('ProjectItems::setChangeDataState() onclick()');
+                console.log('id:');
+                console.log(i);
+                console.log('title');
+                console.log(t);
+                console.log('function:');
+                console.log(f);
+                console.log('glossary:');
+                console.log(g);
+                console.log('object to run:');
+                console.log(o);
+                console.log('method to run:');
+                console.log(m);
+                console.log('method task:');
+                console.log(ta);
+
                 const fd = new FormData(form);
                 var xhrRun={
                     t:'POST',
-                    u:Items.router+f,
+                    u:self.router+f,
                     c:true,
                     d:fd,
-                    o:Items,
-                    m:'setModalResponse'
+                    o:o,//Items,
+                    m:m//'setModalResponse'
                 };
                 //var xhrError={
                 //    o:Items,
                 //    m:'setModalResponse'
                 //};
                 if(confirm('Potwierdź wykonanie akcji')){   
+                    console.log(xhrRun);
                     //Items.Xhr2.setOnError(xhrError);
-                    Items.Xhr2.run(xhrRun);
+                    self.Xhr2.run(xhrRun);
                 };
             };
-        this.Modal.link['button'].appendChild(this.getCancelButton(this.default.object,this.default.method,this.default.task+i));
+             //self.Constant.ConstantTable.run(window.router+'getprojectsconstantslike&u=0&v=0&b='+idRecord);
+        this.Modal.link['button'].appendChild(this.getCancelButton(o,m,ta));//this.default.object,this.default.method,this.default.task+i
         this.Modal.link['button'].appendChild(confirmButton);
     }
     closeModal(){
         console.log('ProjectItems::closeModal()');
+        window.onbeforeunload = null;
         $(this.Modal.link['main']).modal('hide');
-        /* TO DO SET CLASS, OBJECT */
-        this.reloadData(this.default.object,this.default.method,this.default.task);
     }
     setTableResponse(response){
         console.log('ProjectItems::setTableResponse()');
@@ -414,12 +479,15 @@ class ProjectItems{
             this.parseResponse(response);
             /* CLOSE MODAL IF OK */
             this.closeModal(); 
+            return true;
         }
         catch (error) {
             console.log(error);
             /* SHOW ERROR MODAL */ 
            this.Html.showField(this.Modal.link['error'],error);
+           return false;
         }
+        return false;
     }
     setFieldResponse(response){
         console.log('ProjectItems::setFieldResponse()');
@@ -477,20 +545,28 @@ class ProjectItems{
         return i;
     }
 }
-
-var Items = new ProjectItems(window.appUrl,window.appUrl+'/router.php?task=');
-
-window.addEventListener('load', function(){
-    //console.log('page is fully loaded');
-    try{
-        Items.Modal.setLink();
-        Items.Table.setLink();
-        /* SETUP PARAMETERS => Glossary */
-        Items.setUpParameters();
-    }
-    catch (error){
-        console.log(error);
-        alert('ProjectItems::load() Error occured!');
-    }
+try{
+    var Items = new ProjectItems(window.appUrl,window.appUrl+'/router.php?task=');
 }
-,false);
+catch (e){
+    console.log(e);
+    error=true;
+    alert('Something went wrong! Contact with administrator!');    
+}
+if(error===false){
+   window.addEventListener('load', function(){
+        //console.log('page is fully loaded');
+        try{
+            Items.Modal.setLink();
+            Items.Table.setLink();
+            /* SETUP PARAMETERS => Glossary */
+            Items.setUpParameters();
+        }
+        catch (error){
+            console.log(error);
+            alert('ProjectItems::load() Error occured!');
+        }
+    }
+    ,false); 
+}
+

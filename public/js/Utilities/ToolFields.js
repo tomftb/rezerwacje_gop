@@ -9,7 +9,7 @@ class ToolFields{
         this.Main=this.Html.getRow();
         for(var i= 0;i<Size.length;i++){     
             this.Field[i]=this.Html.getCol(Size[i]);
-            this.Main.appendChild(this.Tool[i]);
+            this.Main.appendChild(this.Field[i]);
         }
     }
     get(prop){

@@ -4,19 +4,15 @@ class ProjectStageTool{
     Utilities = new Object()
     Glossary = new Object();
     Html = new Object();
-    Stage = new Object();
-    //Files = new Object();
-    ProjectStageToolFile=new Object();
-    //TabStop = new Object();
-    
+    Stage = new Object();   
+    ErrorStack = new Object();
     constructor(Stage){
         this.Utilities = Stage.Utilities;
         this.Glossary = Stage.Glossary;
         this.Html = Stage.Html;
         this.Tool = new Tool();
         this.Stage = Stage;
-        this.ProjectStageToolFile = new ProjectStageToolFile(this);
-        //this.TabStop = Stage.TabStop;
+        this.ErrorStack = Stage.ErrorStack;
     }
     getAllOptions(Glossary,property,key,run){
         console.log('ProjectStageTool::getAllOptions()');
@@ -385,6 +381,15 @@ class ProjectStageTool{
             data[0]['all']=this.getAllOptions(this.Glossary.text,property[propertyKey[0]],'textAlign',run);  
         return  this.Tool.create('Wyrównanie:',data);
     }
+    getSimpleOrder(property,propertyKey){
+        console.log('ProjectStageTool::getSimpleOrder()');
+        console.log(this.Glossary.text);
+        var run = this.getOrder();
+        var data=this.getExtendedTool(property,propertyKey,this.Glossary.image,'order');
+            data[0]['default']=this.getDefaultOption(property,propertyKey[0],propertyKey[1]);
+            data[0]['all']=this.getAllOptions(this.Glossary.image,property[propertyKey[0]],'order',run);  
+        return  this.Tool.create('Kolejność:',data);
+    }
     getExtendedAlign(property,propertyKey,ele){
         console.log('ProjectStageTool::getExtendedAlign()');
         var run = this.getAlign();
@@ -396,6 +401,13 @@ class ProjectStageTool{
     }
     getAlign(){
         console.log('ProjectStageTool::getAlign()');
+        var run = function(self,Glossary,key,i){
+            return self.getExtendedOption(Glossary.getKeyPropertyAttribute(key,i,'v'),Glossary.getKeyPropertyAttribute(key,i,'n'),'#000000','#FFFFFF','');  
+        };
+        return run;
+    }
+    getOrder(){
+        console.log('ProjectStageTool::getOrder()');
         var run = function(self,Glossary,key,i){
             return self.getExtendedOption(Glossary.getKeyPropertyAttribute(key,i,'v'),Glossary.getKeyPropertyAttribute(key,i,'n'),'#000000','#FFFFFF','');  
         };
@@ -536,7 +548,6 @@ class ProjectStageTool{
        /* console.log('ProjectStageTool::getSelectSize()'); */
         /*
          * property - reference for example subsectionrow.paragraph.style
-         * ele - references for example helplink.text
          * k (key) - example ['fontSize','fontSizeMeasurement']
          */ 
         var data={
@@ -588,6 +599,7 @@ class ProjectStageTool{
     }
     getSimpleInputSize(property,propertyKey,title){
         var data = this.getInputSize(property,propertyKey);//['fontSize','fontSizeMeasurement']
+            data[0]['value']=property[propertyKey[0]];
         data[0]['onchange']=function(t){
                 /* t - this */
                 this.property[this.key[0]] = t.value; 
@@ -883,6 +895,7 @@ class ProjectStageTool{
     }
     getTextDecoration(tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
         //console.log('ProjectStageTool::createTextDecorationTool()');
+        tool4.classList.add('pt-4');
         for(const prop of this.Glossary.text.getKey('decoration').entries()) {
             this.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue);  
         } 
@@ -892,187 +905,87 @@ class ProjectStageTool{
         var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
             mainDivCol.style.backgroundColor='#e6e6e6';
-        var mainDiv=this.Html.getRow();
-            
-        var tool1=this.Html.getCol(3);
-        var tool2=this.Html.getCol(3);
-        var tool3=this.Html.getCol(3);
-        var tool4=this.Html.getCol(3);
-            tool4.classList.add('pt-4');
+        var Tool = new ToolFields([3,3,3,3]);
 
         /* FONT SIZE */
-        tool1.appendChild(this.getExtendedSize(subsectionrow.paragraph.style,helplink.text.value));
+        Tool.set(0,this.getExtendedSize(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT COLOR */
-        tool1.appendChild(this.getExtendedColor(subsectionrow.paragraph.style,helplink.text.value));
+        Tool.set(0,this.getExtendedColor(subsectionrow.paragraph.style,helplink.text.value));
         /* BACKGROUND COLOR */
-        tool1.appendChild(this.getExtendedBackgroundColor(subsectionrow.paragraph.style,helplink.text.value));
+        Tool.set(0,this.getExtendedBackgroundColor(subsectionrow.paragraph.style,helplink.text.value));
         /* FONT FAMILY */
-        tool2.appendChild(this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
+        Tool.set(1,this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT ALIGN */
-        tool2.appendChild(this.getExtendedAlign(subsectionrow.paragraph.style,['textAlign','textAlignName'],helplink.text.value));
+        Tool.set(1,this.getExtendedAlign(subsectionrow.paragraph.style,['textAlign','textAlignName'],helplink.text.value));
         /* TAB STOP */
-        tool2.appendChild(this.getTabStop(TabStop,isection,isub,isubrow,subsectionrow,helplink));    
+        Tool.set(1,this.getTabStop(TabStop,isection,isub,isubrow,subsectionrow,helplink));    
         /* LEFT EJECTION */
-        tool3.appendChild(this.getLeftEjection(subsectionrow.paragraph.style,helplink.text));
+        Tool.set(2,this.getLeftEjection(subsectionrow.paragraph.style,helplink.text));
          /* RIGHT EJECTION */
-        tool3.appendChild(this.getRightEjection(subsectionrow.paragraph.style,helplink));
+        Tool.set(2,this.getRightEjection(subsectionrow.paragraph.style,helplink));
          /* INDENTATION */
-        tool3.appendChild(this.getIndentation(subsectionrow.paragraph.style,helplink));
+        Tool.set(2,this.getIndentation(subsectionrow.paragraph.style,helplink));
         /* PARAGRAPH TYPE */
-        tool3.appendChild(this.getParagraph(subsectionrow.paragraph.property,helplink.tool));
+        Tool.set(2,this.getParagraph(subsectionrow.paragraph.property,helplink.tool));
        
         /* SET CSS BOLD, ITALIC ... */
-        this.getTextDecoration(tool4,isection,isub,isubrow,subsectionrow.paragraph.style,helplink.text.value); 
+        //Tool.Field[3].classList.add('pt-4');
+        this.getTextDecoration(Tool.get(3),isection,isub,isubrow,subsectionrow.paragraph.style,helplink.text.value); 
 
-        mainDiv.appendChild(tool1);
-        mainDiv.appendChild(tool2);
-        mainDiv.appendChild(tool3);
-        mainDiv.appendChild(tool4);
-      
-        mainDivCol.appendChild(mainDiv);
+        mainDivCol.appendChild(Tool.getMain());
 
         return mainDivCol;
     }
-    getImageTool(isection,isub,isubrow,subsectionrow,helplink,TabStop){
-        console.log('ProjectStageTool::getImageTool()');
-        console.log(subsectionrow);
-        console.log(helplink);
-        console.log(this.Glossary);
-        //throw 'test-stop-bbbb';
-        var mainDivCol=this.Html.getCol(12);
-            mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
-            mainDivCol.style.backgroundColor='#e6e6e6';
-        var mainDiv=this.Html.getRow();
-        var mainDivFile=this.Html.getRow();
-        var tool0=this.Html.getCol(12);
-        var tool1=this.Html.getCol(3);
-        var tool2=this.Html.getCol(3);
-        var tool3=this.Html.getCol(3);
-        var tool4=this.Html.getCol(3);
-        
-            //tool4.classList.add('pt-4');
-            /* INPUT UPLOAD IMAGE */
-             tool0.appendChild(this.ProjectStageToolFile.getFile(subsectionrow.image.files));
-            
-            
-        /* FONT SIZE */
-        //tool1.appendChild(this.getExtendedSize(subsectionrow.paragraph.style,helplink.text.value));
-        /* TEXT COLOR */
-        //tool1.appendChild(this.getExtendedColor(subsectionrow.paragraph.style,helplink.text.value));
-        /* BACKGROUND COLOR */
-        //tool1.appendChild(this.getExtendedBackgroundColor(subsectionrow.paragraph.style,helplink.text.value));
-        /* FONT FAMILY */
-        //tool2.appendChild(this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
-        
-        /* IMAGE ALIGN */
-        tool1.appendChild(this.getSimpleAlign(subsectionrow.image.style,['alignment','alignmentName']));
-        tool1.appendChild(this.getSimpleAlign(subsectionrow.image.style,['alignment','alignmentName']));
-        tool2.appendChild(this.getSimpleInputSize(subsectionrow.image.style,['height','heightMeasurement'],'Wysokość zdjęcia:'));
-        tool2.appendChild(this.getSimpleInputSize(subsectionrow.image.style,['width','widthMeasurement'],'Szerokość zdjęcia:'));
-        tool3.appendChild(this.getSimpleInputSize(subsectionrow.image.style,['marginLeft','marginLeftMeasurement'],'Lewy margines:'));
-        tool3.appendChild(this.getSimpleInputSize(subsectionrow.image.style,['marginTop','marginTopMeasurement'],'Prawy margines:'));
-        
-                 
-                            
-                            /* TAB STOP */
-        //tool2.appendChild(this.getTabStop(TabStop,isection,isub,isubrow,subsectionrow,helplink));    
-        /* LEFT EJECTION */
-        //tool3.appendChild(this.getLeftEjection(subsectionrow.paragraph.style,helplink.text));
-         /* RIGHT EJECTION */
-        //tool3.appendChild(this.getRightEjection(subsectionrow.paragraph.style,helplink));
-         /* INDENTATION */
-        //tool3.appendChild(this.getIndentation(subsectionrow.paragraph.style,helplink));
-        /* PARAGRAPH TYPE */
-        //tool3.appendChild(this.getParagraph(subsectionrow.paragraph.property,helplink.tool));
-       
-        /* SET CSS BOLD, ITALIC ... */
-        //this.getTextDecoration(tool4,isection,isub,isubrow,subsectionrow.paragraph.style,helplink.text.value); 
-        mainDivFile.appendChild(tool0);
-        
-        mainDiv.appendChild(tool1);
-        mainDiv.appendChild(tool2);
-        mainDiv.appendChild(tool3);
-        mainDiv.appendChild(tool4);
-        mainDivCol.appendChild(mainDivFile);
-        mainDivCol.appendChild(mainDiv);
 
-        return mainDivCol;
-    }
     getSectionHeadTool(iSection,section,helplink,ProjectStageCreate){// isection
         /* */
         console.log('ProjectStageCreate::getSectionHeadTool()');
         console.log('section');
         console.log(section);
-
-        var mainDivSection=this.Html.getRow();
-        var tool1=this.Html.getCol(3);
-        var tool2=this.Html.getCol(3);    
-        var tool3=this.Html.getCol(3);
-        var tool4=this.Html.getCol(3);  
+        var Tool = new ToolFields([3,3,3,3]);
         
-            tool1.appendChild(this.setSectionSubSection(iSection,section[iSection].subsection,helplink.section[iSection].subsection,ProjectStageCreate));
-            tool4.appendChild(this.createRemoveSectionButton(iSection,section,helplink.section));
+            Tool.set(0,this.setSectionSubSection(iSection,section[iSection].subsection,helplink.section[iSection].subsection,ProjectStageCreate));
+            Tool.set(3,this.createRemoveSectionButton(iSection,section,helplink.section));
 
-        mainDivSection.appendChild(tool1);
-        mainDivSection.appendChild(tool2);
-        mainDivSection.appendChild(tool3);
-        mainDivSection.appendChild(tool4);
-        return mainDivSection;
+        return Tool.getMain();
     }
     getListTool(isection,isub,isubrow,subsectionrow,helplink){
         // console.log('ProjectStageCreate::createListToolSection()');
         var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('d-none','pt-1','pb-1');
             mainDivCol.style.backgroundColor='#e6e6e6';
-        var mainDiv=this.Html.getRow();
-        var tool1=this.Html.getCol(3);
-        var tool2=this.Html.getCol(3);
-        var tool3=this.Html.getCol(3);
-        var tool4=this.Html.getCol(3);
-    
-        tool1.appendChild(this.getSimpleSize(subsectionrow.list.style));
-        tool1.appendChild(this.getSimpleColor(subsectionrow.list.style));
+        var Tool = new ToolFields([3,3,3,3]);
+
+        Tool.set(0,this.getSimpleSize(subsectionrow.list.style));
+        Tool.set(0,this.getSimpleColor(subsectionrow.list.style));
         /* GET BackgroundColor */
-        tool1.appendChild(this.getSimpleBackgroundColor(subsectionrow.list.style));
+        Tool.set(0,this.getSimpleBackgroundColor(subsectionrow.list.style));
         /* GET FONT FAMILY SELECT */
-        tool1.appendChild(this.getSimpleFontFamily(subsectionrow.list.style));
+        Tool.set(0,this.getSimpleFontFamily(subsectionrow.list.style));
         /* SET CSS BOLD, ITALIC ... */
-        this.getTextDecoration(tool4,isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
+        this.getTextDecoration(Tool.get(3),isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
         /* LIST LEVEL  */
-        tool2.appendChild(this.getListLevel(subsectionrow,helplink));
+        Tool.set(1,this.getListLevel(subsectionrow,helplink));
         /* LIST TYPE  */
-        tool2.appendChild(this.getListType(subsectionrow.list.style));
+        Tool.set(1,this.getListType(subsectionrow.list.style));
         /* CONTINUE/NEW ELEMENT */
-        tool2.appendChild(this.getNewList(subsectionrow.list.property));
+        Tool.set(2,this.getNewList(subsectionrow.list.property));
         
-        mainDiv.appendChild(tool1);
-        mainDiv.appendChild(tool2);
-        mainDiv.appendChild(tool3);
-        mainDiv.appendChild(tool4);
-        mainDivCol.appendChild(mainDiv);
+      
+        mainDivCol.appendChild(Tool.getMain());
         return mainDivCol;
     }
     getTabStopTool(isection,isub,isubrow,subsectionrow,helplink,TabStop){
         var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('d-none','bg-light','pt-1','pb-1');    //'bg-light',
             //mainDivCol.style.backgroundColor='#e6e6e6';
-        var mainDiv=this.Html.getRow();
-            
-        var tool1=this.Html.getCol(7);
-        var tool2=this.Html.getCol(1);
-        var tool3=this.Html.getCol(2);
-        var tool4=this.Html.getCol(2);
+       var Tool = new ToolFields([7,1,2,2]);
         //tool4.classList.add('pt-4'); 
         //console.log(this.ProjectStageTool.getTabStopList(isubrow));
         console.log(TabStop[isubrow]);
-        tool1.appendChild(TabStop[isubrow].create());//subsectionrow.paragraph.tabstop,isubrow
-        
-        mainDiv.appendChild(tool1);
-        mainDiv.appendChild(tool2);
-        mainDiv.appendChild(tool3);
-        mainDiv.appendChild(tool4);
-            
-        mainDivCol.appendChild(mainDiv);
+        Tool.set(0,TabStop[isubrow].create());//subsectionrow.paragraph.tabstop,isubrow
+
+        mainDivCol.appendChild(Tool.getMain());
         console.log(mainDivCol);
         return mainDivCol;
     }
@@ -1104,6 +1017,7 @@ class ProjectStageTool{
             return control; 
     }
     getControlTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,mainDiv,TabStop){
+        console.log('ProjectStageCreate::getControlTool()');
         try{
              helplinkISubRow['tool']={};
             /* CREATE TEXT TOOL */
@@ -1122,35 +1036,30 @@ class ProjectStageTool{
                 helplinkISubRow.tool['listControl']=listToolControl;
                 helplinkISubRow.tool['list']=listTool;
              /* CREATE IMAGE TOOL */
-             var imageTool = this.getImageTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,TabStop);
-
-
+            var ImageTool = new ProjectStageToolFile(this);
+                console.log(ImageTool);
+                ImageTool.setImage(subsectionrowISubRow);
+                ImageTool.setToolEle('img_'+isection.toString()+isub.toString()+iSubRow.toString());
             var mainCol = this.Html.getCol(12);
                 mainCol.classList.add('mt-1','mb-1');
-            var mainDivControl=this.Html.getRow();   
-            var mainDivControlCol = this.Html.getCol(4);
+            var Tool = new ToolFields([4,1,7]);
+                Tool.Field[0].classList.add('btn-group','btn-group-toggle');
+                Tool.set(0,this.createControl('Formatowanie',textTool));
+                Tool.set(0,textTabStopToolControl);
+                Tool.set(0,listToolControl);
+                Tool.set(0,this.createControl('Obraz',ImageTool.getToolEle()));
 
-            var mainDivControlCol1 = this.Html.getCol(1);   
-            var mainDivControlCol2 = this.Html.getCol(7);
-
-                mainDivControlCol.classList.add('btn-group','btn-group-toggle');
-                mainDivControlCol.appendChild(this.createControl('Formatowanie',textTool));
-                mainDivControlCol.appendChild(textTabStopToolControl);
-                mainDivControlCol.appendChild(listToolControl);
-                mainDivControlCol.appendChild(this.createControl('Obraz',imageTool));
-                mainDivControl.appendChild(mainDivControlCol1);
-                mainDivControl.appendChild(mainDivControlCol);
-                mainDivControl.appendChild(mainDivControlCol2);
-                mainCol.appendChild(mainDivControl);
+                mainCol.appendChild(Tool.getMain());
                 mainDiv.appendChild(mainCol);    
                 mainDiv.appendChild(textTool);  
                 mainDiv.appendChild(textTabStopTool);  
                 mainDiv.appendChild(listTool);
-                mainDiv.appendChild(imageTool);
+                mainDiv.appendChild(ImageTool.getToolEle());
         }
         catch(error){
             console.log('ProjectStageTool::getControlTool() ERROR');
             console.log(error);
+            throw error;
             //this.Html.showField(this.Modal.link['error'],'An Application Error Has Occurred!');
         }
        
@@ -1258,35 +1167,26 @@ class ProjectStageTool{
             mainDivCol.classList.add('bg-light','mt-1');
             mainDivCol.style.backgroundColor='#e6e6e6';
         var mainDiv=this.Html.getRow();
-        var mainDiv3=this.Html.getRow();
+
+        var Tool3 = new ToolFields([3,3,3,3]);
         var h5=document.createElement('h5');
             h5.setAttribute('class','w-100 text-center text-bold pt-0 pb-1 mt-0 bg-secondary');//  text-center
             //h5.style.backgroundColor='#e6e6e6';
             h5.innerHTML='<small class="text-white">Opcje odnoszące się do całej sekcji:</small>';//text-info
-        var toolMain1=this.Html.getCol(3);
-        var toolMain2=this.Html.getCol(3);    
-        var toolMain3=this.Html.getCol(3);
-        var toolMain4=this.Html.getCol(3);    
-
-            toolMain1.appendChild(this.getSimpleBackgroundColor(section.style));
+ 
+            Tool3.set(0,this.getSimpleBackgroundColor(section.style));
         var newPage = this.createTextToolRadioButton('valunewline-'+iSection,'Sekcja od nowej strony?',this.Tool.getYesNowRadio());
         var run=false;
                                         
         /* SET BUTTON RADIO TO PROPER VALUE */
-        this.setRadioButtonExtend(newPage.childNodes[1],section,run)
-        
-        
-        toolMain1.appendChild(newPage);    
+        this.setRadioButtonExtend(newPage.childNodes[1],section,run);
+ 
+        Tool3.set(0,newPage);    
         
         mainDiv.appendChild(h5);
         
-        mainDiv3.appendChild(toolMain1);
-        mainDiv3.appendChild(toolMain2);
-        mainDiv3.appendChild(toolMain3);
-        mainDiv3.appendChild(toolMain4);
-        
         mainDivCol.appendChild(mainDiv);
-        mainDivCol.appendChild(mainDiv3);
+        mainDivCol.appendChild(Tool3.getMain());
         return mainDivCol;
     }
     createTextToolRadioButton(id,title,value){
@@ -1354,10 +1254,7 @@ class ProjectStageTool{
     }
     createExtendedTextTool(isection,isub,isubrow,subsectionrow,helplink){
         // console.log('ProjectStageCreate::createExtendedTextTool()');
-        var mainDiv=this.Html.getRow();
-        var tool1=this.Html.getCol(5);
-        var tool2=this.Html.getCol(5);
-        var tool3=this.Html.getCol(2);
+        var Tool = new ToolFields([5,5,2]);
         var radio = this.createTextToolRadioButton('valuenewline-'+isection+'-'+isub+'-'+isubrow,'Tekst od nowej lini?',this.Tool.getYesNowRadio());//'valuenewline-'+isection+'-'+isub+'-'+isubrow
         var run={
             method:'setToolVisibility',
@@ -1365,11 +1262,8 @@ class ProjectStageTool{
             tool:['tabstopControl','tabstop','listControl','list']
         };
         this.setRadioButtonExtend(radio.childNodes[1],subsectionrow.paragraph,run);
-        tool1.appendChild(radio);
-        mainDiv.appendChild(tool1);
-        mainDiv.appendChild(tool2);
-        mainDiv.appendChild(tool3);
-        return mainDiv;
+        Tool.set(0,radio);
+        return Tool.getMain();
     }
     setToolVisibility(value,run){
         console.log('ProjectStageCreate::setToolVisibility()');

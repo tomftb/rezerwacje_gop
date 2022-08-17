@@ -2,62 +2,36 @@
  * WORD DOC PREVIEW
  * Author: Tomasz Borczynski
  */
-class DocPreview{
-    Html = new Object();
+class DocPreview extends DocPreviewPage{
+   
     Style = new Object();
     RomanList = new Object();
     AlphabeticalList = new Object();
-    Utilities = new Object();
+    
     helplink = new Object();
     data = new Object();
     constructor(){
+        super();
         console.log('DocPreview::constructor()');
-        this.Html=new Html();
+        
         this.Style = new Style();
         this.RomanList = new RomanList();
         this.AlphabeticalList = new AlphabeticalList();
-        this.Utilities = new Utilities();
+
     }
     run(helplink,data){
         console.log('DocPreview::setData()');
         this.helplink=helplink;
         this.data=data;
-        //this.getPage();
         this.setPageValue();
     }
-    getPage(){
-        //console.log('DocPreview::getPage()');   
-        this.helplink.preview.whole.style.backgroundColor='rgb(251,251,251)';
-        var wholePage=document.createElement('div');
-            wholePage.style.width='813px';
-            wholePage.style.height='1142px';
-            wholePage.style.backgroundColor='rgb(251,251,251)';
-            wholePage.style.paddingTop='10px';
-            wholePage.style.marginLeft='162px'; /* ALL 324, MAIN 10 */
-            wholePage.style.paddingLeft='10px'; /* ALL 324, MAIN 10 */
-        var blankPage=document.createElement('div');
-            blankPage.style.width='791px';
-            blankPage.style.height='1120px';   
-            blankPage.style.border='1px solid rgb(198,198,198)'; 
-            blankPage.style.backgroundColor=this.data.style.backgroundColor;
-        var writePage=document.createElement('div');
-            writePage.style.width='699px';
-            writePage.style.height='1028px';
-            /* IT IS DEPED OF FONT SIZE */
-            writePage.style.paddingTop='92px';
-            /* DEFAULT LEFT MARGIN 2,5 cm */ 
-            writePage.style.paddingLeft='92px'; /* ALL 314, MAIN 10 */
-        blankPage.appendChild(writePage);
-        wholePage.appendChild(blankPage);
-        this.helplink.preview.whole.appendChild(wholePage);
-        return blankPage;
-    }
+
     setPageValue(){
         // console.log('DocPreview::setPageValue()');
         var writePageSectionWidth=607;
         var subsectionCount=0;
         var firstSection = true;
-        var blankPage = this.getPage();
+        var blankPage = super.getPage();
 
         /* LOOP OVER  SECTION */   
         console.log(this.data.section);
@@ -138,7 +112,7 @@ class DocPreview{
         }
         if(property.property.valuenewline==='y'){
             console.log('SET NEW BLANK PAGE');
-            var newBlankPage = this.getPage();
+            var newBlankPage = super.getPage();
              /* UPDATE PAGE ATTRIBUTES */
             newBlankPage.style.backgroundColor=property.style.backgroundColor;
             console.log(newBlankPage);
@@ -260,7 +234,7 @@ class DocPreview{
         /* SET LIST BODY */
         //;
         //ele.appendChild(ele);
-        divWidth.appendChild(this.setParagraphEle(row.paragraph));
+        divWidth.appendChild(this.setParagraphEle(row));
         //divWidth.appendChild(divFloat);
         div.appendChild(divWidth);
         
@@ -272,12 +246,7 @@ class DocPreview{
             ele.style.border='0px solid orange';
             ele.style.padding='0px 0px 0px 0px';
             ele.style.margin='0px';
-            //ele.style.marginLeft=this.Utilities.setCmToPx(row.paragraph.style.leftEjection).toString()+'px';
-            //ele.style.paddingLeft=leftEjection.toString()+'px';
             ele.style.width=this.Utilities.setCmToPx(row.paragraph.style.indentation).toString()+'px';
-
-
-        //this.setTabStop(ele,row.paragraph);
         this.setEleStyle(ele,row.list.style);
         this.setListEleHeadType(ele,row.list.style.listType,listEleCounter);
         //ele.style.listStyleType=attributes.style.listType;
@@ -307,10 +276,10 @@ class DocPreview{
         var actTabStopPosition = 0;
         var end = paragraph.style.leftEjection;
         
-        console.log('TABSTOP IDX'); 
-        console.log(paragraph.property.tabstop);
-        console.log('TABSTOP'); 
-        console.log(paragraph.tabstop);
+        //console.log('TABSTOP IDX'); 
+        //console.log(paragraph.property.tabstop);
+        //console.log('TABSTOP'); 
+        //console.log(paragraph.tabstop);
         
         /* COMPARE LEFT EJECTION VALUE WITH TABSTOP VALUE */
         if(paragraph.property.tabstop<0){
@@ -503,7 +472,7 @@ class DocPreview{
                     row.paragraph.style.leftEjection=0;  
                     console.log('hasChildNodes');
                     console.log(mainDiv.hasChildNodes());
-                    mainDiv.lastChild.appendChild(this.setParagraphEle(row.paragraph));
+                    mainDiv.lastChild.appendChild(this.setParagraphEle(row));
                     return true;
                     
                 }
@@ -547,10 +516,10 @@ class DocPreview{
         
         /* LEFT EJECTION - WYSUNIECIE */
         this.setTabStopEjection(divWidth,row.paragraph.style.leftEjection);
-        divWidth.appendChild(this.setParagraphEle(row.paragraph));
+        divWidth.appendChild(this.setParagraphEle(row));
         mainDiv.appendChild(divWidth);
     }
-    setParagraphEle(paragraph){
+    setParagraphEle(row){
         console.log('DocPreview::setParagraphEle()'); 
         var ele = document.createElement('div');//'span','p'
             ele.style.display='inline-block';
@@ -559,15 +528,23 @@ class DocPreview{
             ele.style.margin='0px';
             
         //var span = document.createElement('span');//'span','p'
-            this.setEleStyle(ele,paragraph.style);
+            this.setEleStyle(ele,row.paragraph.style);
             /* SET TAB STOP */
-            this.setTabStop(ele,paragraph);
+            this.setTabStop(ele,row.paragraph);
             //span.style.marginLeft=this.Utilities.setCmToPx(paragraph.style[marginLeft]);//
-        var value = document.createTextNode(paragraph.property.value);
+        console.log(row);
+        var value = document.createTextNode(row.paragraph.property.value);
             ele.appendChild(value);
-            
-            console.log(ele);
-            
+            for(const prop in row.image){
+                var getImage = (row.image[prop].data.tmp==='n')? 'getStageImage' : 'getTmpStageImage';
+                var img = document.createElement('img');
+                    img.setAttribute('src',window.router+getImage+'&file='+row.image[prop].property.uri);
+                    img.setAttribute('alt',row.image[prop].property.name);
+                    img.setAttribute('width',row.image[prop].style.width);
+                    img.setAttribute('height',row.image[prop].style.height);
+                    ele.appendChild(img);
+            }     
+            console.log(ele);     
         return ele;
     }
     setEleStyle(ele,style){

@@ -366,6 +366,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
         
         $value['list'] = parent::getStageGlossaryList();
         $value['text'] = parent::getStageGlossaryText();
+        $value['image'] = parent::getStageGlossaryImage();
         /* SETUP PARAMETER */
         $parm=[];
         foreach(parent::getStageParameters('STAGE_TEXT_%') as $v){
@@ -467,4 +468,49 @@ class ManageProjectStage extends ManageProjectStageDatabase
             $prefix='<br/>';
         }
     }
+    public function uploadStageImage(){
+        $this->Log->log(0,"[".__METHOD__."]"); 
+        $File = New FileImage();
+        $File->setUploadDir(TMP_UPLOAD_DIR);
+        $File->setMaxFileSize(20971520);
+        $File->setAcceptedFileExtension(array(
+                        'image/bmp',
+                        'image/jpeg',
+                        'image/png'
+                        ));
+        $File->setFileNamePrefix('stageImage_');
+        $Error = $File->getErr();
+        $this->Log->log(0,$File->getLog());
+        if($Error){
+            $this->Log->log(0,"[".__METHOD__."] ERROR EXISTS"); 
+            Throw New Exception ($Error,0);
+        }
+        $this->utilities->jsonResponse($File->getImage(),'');           
+    }
+    public function deleteStageImage(){
+        self::deleteImage(UPLOAD_DIR);
+    }
+    public function deleteTmpStageImage(){
+        self::deleteImage(TMP_UPLOAD_DIR);
+    }
+    private function deleteImage($dir=''){
+        $this->Log->log(0,"[".__METHOD__."]"); 
+        $POST = filter_input_array(INPUT_POST);
+        $this->Log->log(0,$POST); 
+        if(empty($POST)){
+            Throw New Exception (__METHOD__.' No File to remove',1); 
+        }
+        array_walk($POST,['File','deleteFile'],$dir);
+        $this->utilities->jsonResponse('',''); 
+    }
+    public function getTmpStageImage(){
+        $this->Log->log(0,"[".__METHOD__."]");        
+        //FileDownload::getFile(TMP_UPLOAD_DIR,filter_input(INPUT_GET,"file"));
+        FileShow::getFile(TMP_UPLOAD_DIR,filter_input(INPUT_GET,"file")); 
+    } 
+    public function getStageImage(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        //FileDownload::getFile(UPLOAD_DIR,filter_input(INPUT_GET,"file"));
+        FileShow::getFile(UPLOAD_DIR,filter_input(INPUT_GET,"file")); 
+    } 
 }

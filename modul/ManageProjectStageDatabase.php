@@ -44,6 +44,13 @@ abstract class ManageProjectStageDatabase {
             
         ];
     }
+    protected function getStageGlossaryImage(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        return [
+            'wrapping'=>$this->dbUtilities->getSloList('w'),
+            'order'=>$this->dbUtilities->getSloList('o')
+        ];
+    }
     protected function getStageParameters($parm='STAGE_%'){
         return $this->dbUtilities->getParam($parm);
     }
@@ -60,7 +67,19 @@ abstract class ManageProjectStageDatabase {
         }
         return $data;
     }
-
+    private function getStageImageProperty(&$data,$tablePrefix,$id=0){
+        
+        foreach($this->dbLink->squery("SELECT `id` FROM `slo_project_stage_subsection_row_i` WHERE `id_parent`=:id AND wsk_u='0';",[':id'=>[$id,'INT']],'FETCH_OBJ','fetchAll') as $k => $v){
+            $data->{$k}=new stdClass();
+            //print_r($v);
+            //echo $v->id;
+            $data->{$k}->data=new stdClass();
+            $data->{$k}->data->id=intval($v->id,10);
+            $data->{$k}->data->tmp='n'; // FOR run function getTmpStageImage or getStageImage
+            self::assignProperty($data->{$k},$tablePrefix,'property',$v->id);
+            self::assignProperty($data->{$k},$tablePrefix,'style',$v->id);
+        }
+    }
     private function getStageEleProperty(&$data,$tablePrefix = '',$id=0){
         self::assignProperty($data,$tablePrefix,'property',$id);
         self::assignProperty($data,$tablePrefix,'style',$id);
@@ -139,7 +158,8 @@ abstract class ManageProjectStageDatabase {
                     'table'=>new stdClass(),
                 );
             $data->{$k}->data->id=intval($v->id,10);
-            self::getStageEleProperty($data->{$k}->image,'slo_project_stage_subsection_row_i',$data->{$k}->data->id);
+            self::getStageImageProperty($data->{$k}->image,'slo_project_stage_subsection_row_i',$data->{$k}->data->id);
+            //self::getStageEleProperty($data->{$k}->image,'slo_project_stage_subsection_row_i',$data->{$k}->data->id);
             self::getStageEleProperty($data->{$k}->list,'slo_project_stage_subsection_row_l',$data->{$k}->data->id);
             self::getStageEleProperty($data->{$k}->paragraph,'slo_project_stage_subsection_row_p',$data->{$k}->data->id);
             self::getStageEleProperty($data->{$k}->table,'slo_project_stage_subsection_row_t',$data->{$k}->data->id);
@@ -371,44 +391,58 @@ abstract class ManageProjectStageDatabase {
     }
     private function insertSubsectionRow($idSubsection=0,$data=[]){
         $this->Log->log(0,"[".__METHOD__."]\r\n ID DB SUBSECTION - ".$idSubsection);
-        $parm=[
-            ':id'=>[$idSubsection,'INT']
-        ];
         /* INSERT SUBSECTION ROWA DATA */
         $this->dbLink->query2(
             "INSERT INTO `slo_project_stage_subsection_row` (`id_parent`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:id,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
-            ,array_merge($parm, $this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm()));
-        $lastId=$this->dbLink->lastInsertId();
+            ,array_merge([':id'=>[$idSubsection,'INT']], $this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm()));
+        $IdRow=$this->dbLink->lastInsertId();
         /*
          * INSERT paragraph
          */
         $this->Log->log(0,"paragraph");
-        self::insertAttributes($lastId,$data->paragraph,'slo_project_stage_subsection_row_p');
+        self::insertAttributes($IdRow,$data->paragraph,'slo_project_stage_subsection_row_p');
         /* INSERT SUBSECTION ROW TABSTOP */
-        self::insertTabStop($lastId,$data->paragraph->tabstop);
+        self::insertTabStop($IdRow,$data->paragraph->tabstop);
         /*
          * INSERT list
          */
         $this->Log->log(0,"list");
-        self::insertAttributes($lastId,$data->list,'slo_project_stage_subsection_row_l');
+        self::insertAttributes($IdRow,$data->list,'slo_project_stage_subsection_row_l');
         /*
          * INSERT table
          */
         $this->Log->log(0,"table");
-        self::insertAttributes($lastId,$data->table,'slo_project_stage_subsection_row_t');
+        self::insertAttributes($IdRow,$data->table,'slo_project_stage_subsection_row_t');
         /*
          * INSERT image
          */
         $this->Log->log(0,"image");
-        self::insertAttributes($lastId,$data->image,'slo_project_stage_subsection_row_i');
+        /* REMOVE OLD */
+         ////$parm[':id']=[$id,'INT'];
+        //$this->dbLink->query2("DELETE FROM `".$table."_style` WHERE `id_parent`=:id;",$parm);
+        /* ADD NEW */
+        foreach($data->image as $v){
+            self::insertSubsectionRowImage($IdRow,$v);
+        }
+    }
+    private function insertSubsectionRowImage($IdRow,$v){
+        /* INSERT IMAGE */
+        $this->dbLink->query2(
+           "INSERT INTO `slo_project_stage_subsection_row_i` (`id_parent`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:id,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
+            ,array_merge([':id'=>[$IdRow,'INT']], $this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm())); 
+       /* INSERT IMAGE STYLE AND PROPERTIES */
+       self::insertAttributes($this->dbLink->lastInsertId(),$v,'slo_project_stage_subsection_row_i');
+       /* MOVE FILE from tmp_uplad to upload */
+       File::moveFile(TMP_UPLOAD_DIR.$v->property->uri,UPLOAD_DIR,$v->property->uri);
     }
     private function insertAttributes($id=0,$data=[],$table='slo_project_stage_subsection_row_p'){
-        $this->Log->log(0,"[".__METHOD__."]\r\n ID DB - ".$id);
+        $this->Log->log(0,"[".__METHOD__."]\r\nID - ".$id."\r\nTABLE: ".$table);
         $parm[':id']=[$id,'INT'];
         self::insertAttributesProperty($parm,$data->style,$table.'_style');
         self::insertAttributesProperty($parm,$data->property,$table.'_property'); 
     }
     private function deleteAttributes($id=0,$table='slo_project_stage_section'){
+        $this->Log->log(0,"[".__METHOD__."]\r\nID - ".$id."\r\nTABLE: ".$table."\r\n_style _property");
         $parm[':id']=[$id,'INT'];
         $this->dbLink->query2("DELETE FROM `".$table."_style` WHERE `id_parent`=:id;",$parm);
         $this->dbLink->query2("DELETE FROM `".$table."_property` WHERE `id_parent`=:id;",$parm);
@@ -528,6 +562,7 @@ abstract class ManageProjectStageDatabase {
         /* LOOP FOR DELETE */
     }
     private function updateSubSectionRow($v = []){
+        $this->Log->log(0,"[".__METHOD__."]");       
         $parm=[':id'=>[$v->data->id,'INT'] ];
         $this->dbLink->query2(
                 "UPDATE `slo_project_stage_subsection_row` SET "
@@ -562,7 +597,27 @@ abstract class ManageProjectStageDatabase {
         /*
          * INSERT image
          */
-        self::deleteAttributes($v->data->id,'slo_project_stage_subsection_row_i');
-        self::insertAttributes($v->data->id,$v->image,'slo_project_stage_subsection_row_i');
+        array_walk($v->image,['self','updateSubSectionRowImage'],$v->data->id);
+    }
+    private function updateSubSectionRowImage($v,$key=0,$IdRow=0){
+        $this->Log->log(0,"[".__METHOD__."]");      
+        if($v->data->id>0 && $v->data->tmp==='y'){
+            $this->Log->log(0,"UPDATE IMAGE");      
+            /* OLD FILE STAY FOR BACK FUNCTION IN FUTUTRE -> TO DO */
+            self::deleteAttributes($v->data->id,'slo_project_stage_subsection_row_i');
+            /* INSERT NEW ATTRBIUTES */
+            self::insertAttributes($v->data->id,$v,'slo_project_stage_subsection_row_i');
+            /* MOVE FILE */
+            File::moveFile(TMP_UPLOAD_DIR.$v->property->uri,UPLOAD_DIR,$v->property->uri);
+        }
+        else if($v->data->id>0 && $v->data->tmp==='n'){
+            $this->Log->log(0,"UPDATE ONLY IMAGE ATTRIBUTES");  
+            self::deleteAttributes($v->data->id,'slo_project_stage_subsection_row_i');
+            self::insertAttributes($v->data->id,$v,'slo_project_stage_subsection_row_i');
+        }
+        else{
+            $this->Log->log(0,"INSERT IMAGE");  
+            self::insertSubsectionRowImage($IdRow,$v);
+        }
     }
 }

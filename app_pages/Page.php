@@ -116,6 +116,7 @@ abstract class Page{
     private function loadVariable(){
         echo '<script>'
             .'window.appUrl ="'.APP_URL.'";'
+            .'window.router ="'.APP_URL.'/router.php?task=";'
             .'window.perm ='.self::getPerm().';'
             .'</script>';
     }

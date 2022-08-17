@@ -1,9 +1,9 @@
 <?php
-final class ShowFile {
-    private $dir='';
-    private $fileName='';
-    private $fileExt='';
-    private $avaFileExt=[
+final class FileShow extends File{
+    private static $dir='';
+    private static $fileName='';
+    private static $fileExt='';
+    private static $avaFileExt=[
         'jpeg'=>'image/jpg',
         'bmp'=>'image/bmp',
         'jpg'=>'image/jpg',
@@ -13,8 +13,10 @@ final class ShowFile {
     
     //put your code here
     //public function __construct($dir='',$file=''){
-    public function __construct(){}
-    public function getFile($dir='',$file=''){
+    public function __construct(){
+        parent::__construct();
+    }
+    public static function getFile($dir='',$file=''){
         self::setUpDir($dir);
         self::parseFile($file);
         self::setUpHeader();
@@ -23,7 +25,8 @@ final class ShowFile {
         if(trim($dir)===''){
            die('NO DIR INPUT'); 
         }
-        $this->dir=$dir;
+        File::checkUploadDir($dir);
+        self::$dir=$dir;
     }
     private function parseFile($file=''){
         if($file===''){
@@ -33,19 +36,20 @@ final class ShowFile {
         if(count($tmp)<2){
            die('NO FILE EXTENSION'); 
         }
-        $this->fileName=$file;
-        $this->fileExt=strtolower(end($tmp));
+        File::checkFile(self::$dir.$file);
+        self::$fileName=$file;
+        self::$fileExt=strtolower(end($tmp));
         
-        if(!array_key_exists($this->fileExt, $this->avaFileExt)){
+        if(!array_key_exists(self::$fileExt, self::$avaFileExt)){
             die('WRONG FILE EXTENSION');
         }
     }
     private function setUpHeader(){
-        $size = getimagesize("../".$this->dir."/".$this->fileName);
-        $fp = fopen("../".$this->dir."/" . $this->fileName, 'rb');
+        $size = getimagesize(self::$dir.self::$fileName);
+        $fp = fopen(self::$dir. self::$fileName, 'rb');
         if ($size and $fp){
-            header('Content-Type: '.$this->avaFileExt[$this->fileExt]);
-            header('Content-Length: '.filesize("../".$this->dir."/" . $this->fileName));
+            header('Content-Type: '.self::$avaFileExt[self::$fileExt]);
+            header('Content-Length: '.filesize(self::$dir. self::$fileName));
             fpassthru($fp);
         }
         exit;

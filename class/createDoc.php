@@ -207,6 +207,7 @@ class createDoc extends createDocAbstract {
                 //$rightTabStyleName = 'rightTab';
                 //$this->phpWord->addParagraphStyle($rightTabStyleName, array('tabs' => array(new \PhpOffice\PhpWord\Style\Tab('right', 1440,'dot'))));
                 $textrun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
+                array_walk($r->image,['self','setRunImage'],$textrun);
                 //$section->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style),$rightTabStyleName);
                 $run = $textrun;
                 break;
@@ -244,7 +245,14 @@ class createDoc extends createDocAbstract {
         $listItemRun = $section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r,$actListName), self::setListParagraph($r,$actTabStopName));
         //self::setText($listItemRun,$r);
         $listItemRun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
+        array_walk($r->image,['self','setRunImage'],$listItemRun);
+        
         $run = $listItemRun;
+    }
+    private function setRunImage($image,$key=0,&$item){
+        $imageDir = ($image->data->tmp==='n') ? UPLOAD_DIR : TMP_UPLOAD_DIR;
+        $item->addImage($imageDir.$image->property->uri, array('width' => $image->style->width, 'height' => $image->style->height));//, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
+        
     }
     private function setListStyle($r,$listName=''){
       

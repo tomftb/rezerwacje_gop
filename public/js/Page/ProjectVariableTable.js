@@ -1,8 +1,8 @@
-class ProjectConstTable{
+class ProjectVariableTable{
     Xhr= new Object();
     //XhrModal= new Object();
     Html= new Object();
-    Main = new Object();
+    Parent = new Object();
     Table = new Object ();
     /* FROM ProjectConst 'getprojectsconstslike&u=0&v=1&b=' */
     defaultTask='';
@@ -51,16 +51,16 @@ class ProjectConstTable{
     };
     tableColException=new Array('bl');
     tableBody;
-    constructor(Main){
-        console.log('ProjectConstTable::construct()');  
-        console.log(Main);
-        this.Main=Main;
-        this.Table=Main.Items.Table;
-        this.Xhr=Main.Items.Xhr;
-        this.Html=Main.Items.Html;
+    constructor(Parent){
+        console.log('ProjectVariableTable::construct()');  
+        console.log(Parent);
+        this.Parent=Parent;
+        this.Table=Parent.Items.Table;
+        this.Xhr=Parent.Items.Xhr;
+        this.Html=Parent.Items.Html;
     }
     setProperties(appUrl,url,defaultTask){
-        console.log('ProjectConstTable::setProperties()');
+        console.log('ProjectVariableTable::setProperties()');
         this.defaultTask=defaultTask;
         this.appUrl=appUrl;
         this.router=url;
@@ -72,10 +72,7 @@ class ProjectConstTable{
         try{
             this.Table.unsetError();
             this.defaultTask=task;
-             /* CLEAR TABLE */
-            this.Table.clearTable();   
-             /* SET HEAD */
-            this.Table.setHead(this.head);
+
             /* GET DATA => SET BODY */
             this.Table.getData(this,'setBody',task);
         }
@@ -83,14 +80,19 @@ class ProjectConstTable{
             console.log('ProjectConstCreate::prepare()');
             console.log(error);
             //throw 'An Application Error Has Occurred!';
-            this.Main.Table.setError('An Application Error Has Occurred!');
+            this.Parent.Table.setError('An Application Error Has Occurred!');
         }
         
     }
     setBody(response){
-        console.log('ProjectConstTable::setBody()');
+        console.log('ProjectVariableTable::setBody()');
+        /* CLEAR TABLE */
+        this.Table.clearTable();   
+        /* SET HEAD */
+        this.Table.setHead(this.head);
         /* PARSE RESPONSE */
-        var data = this.Main.Items.setTableResponse(response);
+        var data = this.Parent.Items.setTableResponse(response);
+        if(this.Table.error){return false;};
         /* SET BODY DATA */
         for(const prop in data.data.value.data){
             this.setBodyRow(data.data.value.data[prop]);
@@ -98,7 +100,7 @@ class ProjectConstTable{
     }
     setBodyRow(bodyRow){
         /*
-        console.log('ProjectConstTable::setBodyRow()');
+        console.log('ProjectVariableTable::setBodyRow()');
         console.log(bodyRow);
         */       
         var tr=document.createElement('TR');
@@ -111,7 +113,7 @@ class ProjectConstTable{
         this.Table.link['body'].appendChild(tr);
     }
     setBodyRowCol(){
-        //console.log('ProjectConstTable::setBodyRowCol()');
+        //console.log('ProjectVariableTable::setBodyRowCol()');
         var col=document.createElement('TD');
         /* TO DO SOME ATTRBIUTES */
         return col;
@@ -133,7 +135,7 @@ class ProjectConstTable{
             ele.appendChild(small);
     }
     setBodyRowColButton(value){
-        //console.log('ProjectConstTable::setBodyRowColButton()');
+        //console.log('ProjectVariableTable::setBodyRowColButton()');
         var col = this.setBodyRowCol();
         var buttonGroup=this.setButtonGroup(value);
             col.appendChild(buttonGroup);
@@ -162,9 +164,9 @@ class ProjectConstTable{
     getShowButton(Ajax,id){
         var btn  = this.getButton('Wyświetl','btn-info');    
         
-            var AjaxRun = this.getXhrRunProperty('getProjectConstDetails&id='+id);
+            var AjaxRun = this.getXhrRunProperty('getProjectVariableDetails&id='+id);
                 AjaxRun.m='details';
-                AjaxRun.o=this.Main;
+                AjaxRun.o=this.Parent;
                 btn.onclick = function (){
                     Ajax.run(AjaxRun);
                 };
@@ -178,7 +180,7 @@ class ProjectConstTable{
               this.Html.setDisabled(btn);
         }
         else{
-        var AjaxRun = this.getXhrRunProperty('getProjectConstHideSlo&id='+v[0]);
+        var AjaxRun = this.getXhrRunProperty('getProjectVariableHideSlo&id='+v[0]);
             btn.onclick = function (){
                 Ajax.run(AjaxRun);
             };
@@ -191,7 +193,7 @@ class ProjectConstTable{
               this.Html.setDisabled(btn);
         }
         else{
-            var AjaxRun = this.getXhrRunProperty('getProjectConstDelSlo&id='+v[0]);
+            var AjaxRun = this.getXhrRunProperty('getProjectVariableDelSlo&id='+v[0]);
                 /* CLOSURE */
                 AjaxRun.m='remove';
                 btn.onclick = function (){
@@ -208,7 +210,7 @@ class ProjectConstTable{
             u:this.router+task,
             c:true,
             d:null,
-            o:this.Main,
+            o:this.Parent,
             m:'hide'
         };
         return run;

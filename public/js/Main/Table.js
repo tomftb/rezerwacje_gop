@@ -7,6 +7,7 @@ class Table
     static ajaxLink;
     static errorLink;
     static errorDivId;
+    error=false;
     defaultTask='';
     data={};
     link={};
@@ -35,6 +36,7 @@ class Table
         //console.log('TABLE::setErrorLink()');
         Table.errorLink=eLink;
         Table.errorDivId=eDiv;
+        
         //console.log(Table.errorLink);
         //console.log(Table.errorDivId);
         //Table.errorDiv=eDiv;
@@ -331,6 +333,7 @@ class Table
         //console.log(this.link['error']);
         this.link['error'].classList.remove("d-none");
         this.link['error'].innerHTML=info;
+        this.error=true;
     }
     unsetError(){
         console.log('Table::unsetError()');

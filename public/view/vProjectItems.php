@@ -20,14 +20,26 @@
                         </div>
                     </div>
                     <div class="btn-group" role="group">
-                      <button class="btn btn-warning text-white" type="button" onclick="Items.Const.show()">
+                      <button class="btn btn-warning text-white" type="button" onclick="Items.Constant.show()">
                         Stałe
                       </button>
                       <button type="button" class="btn  btn-warning dropdown-toggle dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="sr-only">Toggle Dropdown</span>
                       </button>
                       <div class="dropdown-menu bg-warning text-white">
-                        <a id="createConst" class="dropdown-item bg-warning text-white" onclick="Items.Const.create()" href="#">Dodaj</a>
+                        <a id="createConst" class="dropdown-item bg-warning text-white" onclick="Items.Constant.create()" href="#">Dodaj</a>
+                        <!--<a class="dropdown-item" href="#">Pokaż</a>-->
+                      </div>
+                    </div>
+                     <div class="btn-group" role="group">
+                      <button class="btn btn-purple text-white" type="button" onclick="Items.Variable.show()">
+                        Zmienne
+                      </button>
+                      <button type="button" class="btn  btn-purple dropdown-toggle dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                      </button>
+                      <div class="dropdown-menu bg-purple text-white">
+                        <a id="createConst" class="dropdown-item bg-purple text-white" onclick="Items.Variable.create()" href="#">Dodaj</a>
                         <!--<a class="dropdown-item" href="#">Pokaż</a>-->
                       </div>
                     </div>

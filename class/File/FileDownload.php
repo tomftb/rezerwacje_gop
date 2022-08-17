@@ -1,6 +1,6 @@
 <?php
 
-final class downloadFile{
+final class FileDownload{
     //put your code here
     private static $FileExtensionContentType=[
         'docx'=>'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

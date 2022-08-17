@@ -1,91 +1,105 @@
-class ProjectConst{
-   
-    ConstTable = new Object();
-    ConstCreate = new Object ();
+class ProjectVariable{
+    VariableTable = new Object();
+    VariableCreate = new Object ();
     Items= new Object ();
-    defaultTask='getprojectsconstslike&u=0&v=0&b=';
+    defaultTask='getProjectVariablesLike&u=0&v=0&b=';
     
     constructor(Items) {
-        console.log('ProjectConst::constructor()');
+        console.log('ProjectVariable::constructor()');
         this.Items = Items;
-        this.ConstTable = new ProjectConstTable(this);  
-        this.ConstTable.setProperties(Items.appurl,Items.router,this.defaultTask);
-        this.ConstCreate = new ProjectConstCreate(this);
+        this.VariableTable = new ProjectVariableTable(this);  
+        this.VariableTable.setProperties(Items.appurl,Items.router,this.defaultTask);
+        this.VariableCreate = new ProjectVariableCreate(this);
     }
-    show(){
-        console.log('ProjectConst::show()');  
+    show(task){
+        console.log('ProjectVariable::show()');
+        if(task){
+            this.runShow(task);
+        }
+        else{
+            this.runShow(this.defaultTask);
+        }
+    }
+    runShow(t){
+        console.log('ProjectVariable::runShow()');
+        console.log(t);
         /* SET PAGE TITLE */
-        document.getElementById('headTitle').innerHTML='Stałe';
-        console.log(this.ConstTable);     
+        document.getElementById('headTitle').innerHTML='Zmienne';   
         this.Items.default={
-            task:this.defaultTask,
+            task:t,
             object:this,
             method:'show'
         };
-        this.ConstTable.run(this.Items.router+this.defaultTask);
+        //console.log(this.defaultTask); 
+        this.VariableTable.run(this.Items.router+t);
     }
     create(){
         try{
-            console.log('ProjectConst::create()');
+            console.log('ProjectVariable::create()');
             this.Items.default={
                 task:this.defaultTask,
                 object:this,
                 method:'show'
             };
-            this.ConstCreate.create();
+            this.VariableCreate.create();
         }
         catch(error){
             console.log(error);
-            this.ConstTable.Table.setError('An AnApplication Error Has Occurred!');
-            
+            this.VariableTable.Table.setError('An Application Error Has Occurred!');
             return false;
         };
     }
     details(response){
         try{
-            console.log('ProjectConst::create()');
+            console.log('ProjectVariable::create()');
             this.Items.default={
                 task:this.defaultTask,
                 object:this,
                 method:'show'
             };
-            this.ConstCreate.details(response);
+            this.VariableCreate.details(response);
         }
         catch(error){
             console.log(error);
-            this.ConstTable.Table.setError('An Application Error Has Occurred!');
+            this.VariableTable.Table.setError('An Application Error Has Occurred!');
             return false;
         };
     }
     prepare(response,btnLabel,btnClass){
-        console.log('ProjectStage::prepare()');
-        //console.log(response);
+        console.log('ProjectVariable::prepare()');
         /* SET UP STAGE DATA */
         var data=this.Items.parseResponse(response);
             this.Items.Modal.clearData();
-            this.Items.setCloseModal(this,'show',this.defaultTask+data['data']['value']['const'].i);
-            this.Items.setChangeDataState(data['data']['value']['const'].i,data['data']['value']['const'].n,data['data']['function'],data['data']['value']['slo'],btnLabel,btnClass);
-            this.Items.Modal.setInfo("Project Stage ID: "+data['data']['value']['const'].i+", Create user: "+data['data']['value']['const'].cu+" ("+data['data']['value']['const'].cul+"), Create date: "+data['data']['value']['const'].cd);
+            this.Items.setCloseModal(this.setUndoTask(this,this.defaultTask+data['data']['value']['variable'].i));
+            this.Items.setChangeDataState(data['data']['value']['variable'].i,data['data']['value']['variable'].n,data['data']['function'],data['data']['value']['slo'],btnLabel,btnClass,this,'setResponse',window.router+this.defaultTask+data['data']['value']['variable'].i);
+            this.Items.Modal.setInfo("Project Stage ID: "+data['data']['value']['variable'].i+", Create user: "+data['data']['value']['variable'].cu+" ("+data['data']['value']['variable'].cul+"), Create date: "+data['data']['value']['variable'].cd);
         
     }
+    setUndoTask(self,task){
+        var run = function(){
+            self.Items.Modal.closeModal();
+            self.Items.reloadData(self,'show',task);          
+       };
+       return run;          
+    }
     hide(response){
-        console.log('ProjectConst::hide()');
+        console.log('ProjectVariable::hide()');
         try{
             this.prepare(response,'Ukryj','secondary');
         }
         catch(error){
             console.log(error);
-            this.ConstTable.Table.setError('An Application Error Has Occurred!');
+            this.VariableTable.Table.setError('An Application Error Has Occurred!');
             return false;
         };
         //console.log(response);
         /* RUN MODAL IN second try to prevent hide error */
         try{
-            this.Items.prepareModal('Ukrywanie Stałej','bg-secondary');
+            this.Items.prepareModal('Ukrywanie zmiennej','bg-secondary');
         }
         catch(error){
             console.log(error);
-            this.ConstTable.Table.setError(error);
+            this.VariableTable.Table.setError(error);
         }
     }
     remove(response){ 
@@ -94,16 +108,21 @@ class ProjectConst{
         }
         catch(error){
             console.log(error);
-            this.ConstTable.Table.setError(error);
+            this.VariableTable.Table.setError(error);
             return false;
         };
         /* RUN MODAL IN second try to prevent hide error */
         try{
-            this.Items.prepareModal('Usuwanie Stałej','bg-danger');
+            this.Items.prepareModal('Usuwanie Zmiennej','bg-danger');
         }
         catch(error){
             console.log(error);
-            this.ConstTable.Table.setError('An Application Error Has Occurred!');
+            this.VariableTable.Table.setError('An Application Error Has Occurred!');
+        }
+    }
+    setResponse(response){
+        if(this.Items.setModalResponse(response)){
+            this.VariableTable.setBody(response);
         }
     }
 }

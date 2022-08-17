@@ -1,7 +1,7 @@
 class ProjectStageTable{
     Xhr= new Object();
     Html= new Object();
-    Main = new Object();
+    Parent = new Object();
     /* FROM ProjectConst 'getprojectsconstslike&u=0&v=1&b=' */
     defaultTask='';
     appUrl='';
@@ -36,12 +36,12 @@ class ProjectStageTable{
         0:'i',
         1:'t'
     };
-    constructor(Main){
+    constructor(Parent){
         console.log('ProjectConst::construct()');  
-        this.Stage=Main;
-        this.Table=Main.Items.Table;
-        this.Xhr=Main.Items.Xhr;
-        this.Html=Main.Items.Html;
+        this.Parent=Parent;
+        this.Table=Parent.Items.Table;
+        this.Xhr=Parent.Items.Xhr;
+        this.Html=Parent.Items.Html;
     }
     setProperties(appUrl,url){
         console.log('ProjectConst::setProperties()');
@@ -63,7 +63,8 @@ class ProjectStageTable{
     setBody(response){
         console.log('ProjectStageTable::setBody()');
         /* PARSE RESPONSE */
-        var data = this.Stage.Items.setTableResponse(response);
+        var data = this.Parent.Items.setTableResponse(response);
+         if(this.Table.error){return false;};
         /* SET BODY DATA */
         for(const prop in data.data.value.data){
             this.setBodyRow(data.data.value.data[prop]);
@@ -156,7 +157,7 @@ class ProjectStageTable{
             u:this.router+task,
             c:true,
             d:null,
-            o:this.Stage,
+            o:this.Parent,
             m:'hide'
         };
         return run;

@@ -28,10 +28,8 @@ class ProjectStage{
         this.Property = new ProjectStageProperty();
         this.StageTable = new ProjectStageTable(this);  
         this.StageTable.setProperties(this.Items.appurl,this.Items.router);
-        //this.CreateText = new ProjectStageCreateText(this);
         this.CreateImage = new ProjectStageCreateImage();
         this.CreateTable = new ProjectStageCreateTable();
-        //this.CreateList = new ProjectStageCreateList(this);
         this.Create = new ProjectStageCreate(this);
     }
     show(){
@@ -57,7 +55,7 @@ class ProjectStage{
             /* RUN MODAL */
             this.Items.Modal.clearData();
             this.Items.setCloseModal(this,'show',this.defaultTask+data['data']['value']['stage'].i);
-            this.Items.setChangeDataState(data['data']['value']['stage'].i,data['data']['value']['stage'].t,data['data']['function'],data['data']['value']['slo'],btnLabel,btnClass);
+            this.Items.setChangeDataState(data['data']['value']['stage'].i,data['data']['value']['stage'].t,data['data']['function'],data['data']['value']['slo'],btnLabel,btnClass,this.StageTable,'run',window.router+this.defaultTask+data['data']['value']['stage'].i);
             this.Items.Modal.setInfo("Project Stage ID: "+data['data']['value']['stage'].i+", Create user: "+data['data']['value']['stage'].cu+" ("+data['data']['value']['stage'].cul+"), Create date: "+data['data']['value']['stage'].cd);
        
     }

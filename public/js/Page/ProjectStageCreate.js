@@ -22,39 +22,38 @@ class ProjectStageCreate{
     link={};
     helplink={};
     resonse; 
-    Glossary={
-        'text':{},
-        'list':{}
-    };
+    Glossary={};
+        //'text':{},
+       // 'list':{}
+    //};
     /* rename data to stageData */
     data={};
     stageData={};
     fieldDisabled=false;
-    ErrorStack={};
     /* CREATE TEXT DEFAULT DATABASE PROPERTY */
     Property={};
     /* CREATE TEXT DEFAULT DATABASE DEPARTMENT LIST */
     Department={};
        // subsectionRowNewLine:'n'
     //};
-    constructor(Stage){
+    ErrorStack=new Object();
+    Utilites = new Object();
+    constructor(Parent){
         console.log('ProjectStageCreate::constructor()');
         /*
          * Stage - object
          */
-        this.Modal=Stage.Items.Modal;
-        this.Items=Stage.Items;
-        this.Stage=Stage;
-        this.Html=Stage.Items.Html;
-        this.Xhr=Stage.Items.Xhr2;
-        this.XhrTable=Stage.Items.Xhr;
+        this.Modal=Parent.Items.Modal;
+        this.Items=Parent.Items;
+        this.Stage=Parent;
+        this.Html=Parent.Items.Html;
+        this.Xhr=Parent.Items.Xhr2;
+        this.XhrTable=Parent.Items.Xhr;
+        this.ErrorStack = Parent.Items.ErrorStack;
         //this.Tool=Stage.Tool;
-        this.Glossary={
-            'text':Stage.Items.Glossary['text'],
-            'list':Stage.Items.Glossary['list']
-        };
+        this.Glossary=Parent.Items.Glossary;
         this.DocPreview = new DocPreview();
-        this.Utilities = new Utilities();
+        this.Utilities = Parent.Items.Utilities;
         this.ProjectStageTool = new ProjectStageTool(this);
     }
     getXhrParm(type,task,method){
@@ -81,6 +80,8 @@ class ProjectStageCreate{
             this.StageData = new StageData(this.Glossary,this.Stage.Property,type,null);
              /* SETUP CLEAR STAGE DATA */
             this.StageData.createDefault();
+            console.log(this.ErrorStack);
+            this.ErrorStack.clearStack();
         } 
         catch(err){
             console.log('ProjectStageCreate::create()\r\nERROR:');
@@ -98,8 +99,8 @@ class ProjectStageCreate{
             /* CLEAR DATA MODAL */
             this.Modal.clearData();
             /* SET CLOSE BUTTON */
-            //console.log(this.StageData.Stage);
-            this.Items.setCloseModal(this.Stage,'show',this.Stage.defaultTask+this.StageData.Stage.data.id);
+            //console.log(this.StageData.Stage); 
+            this.Items.setCloseModal(this.setUndoTask(this));
             /* SET FORM */
             var form=this.Html.getForm();
             /* ASSIGN TITLE DEPARTMENT FIELD */
@@ -129,7 +130,41 @@ class ProjectStageCreate{
             console.log(err);
             this.Items.Table.setError('An Application Error Has Occurred!');
         }
-    }    
+    }
+    setUndoTask(self){
+        var run = function(){
+                
+                //this.Items.Modal.closeModal();
+                //Items.reloadData(classToRun,methodToRun,taskToRun);
+                 /* TO DO -> TURN OFF CLOSE MODAL */
+                   let files = new Array();
+                    for(const prop in self.StageData.Stage.section){           
+                        for(const prop1 in self.StageData.Stage.section[prop].subsection){             
+                            for(const prop2 in self.StageData.Stage.section[prop].subsection[prop1].subsectionrow){
+                                //console.log(self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2]);
+                                console.log(self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image);
+                                for(const prop3 in self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image){
+                                    console.log(self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3]);
+                                    console.log(self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].property.uri);
+                                    if(self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data.tmp==='y'){
+                                        files.push(self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].property.uri);
+                                    }
+                                    
+                                }
+                            }
+                        }
+                    }
+                    if(files.length<1){
+                        self.Items.closeModal();
+                    }
+                    else{
+                        let ImageTool = new ProjectStageToolFile(self);
+                            ImageTool.deleteFiles(files,self.Stage.Items,'setModalResponse');  
+                    }
+                            
+       };
+       return run;          
+    }
     details(response){  
         try{
             /* SETUP STAGE DATA */
@@ -156,12 +191,12 @@ class ProjectStageCreate{
             /* TO DO IN FUTURE -> ADD setCloseModal multi id's */
             this.Modal.clearData();
             /* CLEAR ERROR STACK */
-            this.ErrorStack={};
+            this.ErrorStack.clearStack();
             /* SET CONSTS */
             //this.allConsts=this.data['data']['value']['all'];
             this.fieldDisabled=true;
-
-            this.Items.setCloseModal(this.Stage,'show',this.Stage.defaultTask+this.StageData.Stage.data.id);              
+            //this.Stage,'show',this.Stage.defaultTask+this.StageData.Stage.data.id
+            this.Items.setCloseModal(this.setUndoTask(this));              
             /* CREATE FORM */
             var form=this.Html.getForm();
             /* ASSIGN TITLE DEPARTMENT FIELD */
@@ -220,9 +255,8 @@ class ProjectStageCreate{
                 whole:{}
             },
             dynamic:{},
-            titleDiv:{},
             section:{},
-            title:{}
+            input:{}
         };
     }
     createPreview(){
@@ -233,8 +267,10 @@ class ProjectStageCreate{
         return mainDiv;
     }
     createHead(ele,department){
-        /* console.log('ProjectStageCreate::createHead()'); */
+        console.log('ProjectStageCreate::createHead()');
+        var self = this;
         var stageData = this.StageData.Stage;
+        var titleError=this.ProjectStageTool.Tool.getDivError();
         var titleDiv=this.Html.getRow();
             //this.helplink['titleDiv']=titleDiv;
         var titleLabelDiv=this.Html.getCol(1);
@@ -246,12 +282,17 @@ class ProjectStageCreate{
             };
             input.onblur = function(){
                 console.log('check data title');
+                //self.checkInput(input,'title');
+                self.checkInput('title');
             };
             input.classList.add('form-control');
             input.setAttribute('placeholder','Enter title');
             input.setAttribute('aria-describedby',"titleHelp" );
             titleInputDiv.appendChild(input);
-            //this.helplink['title']=input;
+            self.helplink.input['title']={
+                input:input,
+                error:titleError.div
+            };
         var helpValue=document.createTextNode('Staraj sie wprowadzić jednoznaczy tytuł.Należy wprowadzić minimalnie 1 znak, a maksymalnie 1024 znaki.');     
          
         var help=document.createElement('small');
@@ -260,11 +301,16 @@ class ProjectStageCreate{
             help.appendChild(helpValue);
             titleInputDiv.appendChild(help);
         
+        
+        
+            
         titleDiv.appendChild(titleLabelDiv);
         titleDiv.appendChild(titleInputDiv);
-
+        
         ele.appendChild(titleDiv);
+        ele.appendChild(titleError.ele);
         ele.appendChild(this.createHeadDepartment(stageData.data,department));
+        console.log(ele);
     }
     createHeadDepartment(stageData,defaultDepartment){
         console.log('ProjectStageCreate::createHeadDepartment()');        
@@ -421,6 +467,7 @@ class ProjectStageCreate{
                 body:{}
         };
     }
+    /* RUN AS DYNAMIC FUNCTION */
     createSubsectionRowGroup(isection,isub,iSubRow,subsectionrow,helplink){
         console.log('ProjectStageCreate::createSubsectionRowGroup()');
         var mainDiv=this.Html.getRow();
@@ -709,23 +756,56 @@ class ProjectStageCreate{
             preview.setAttribute('class','btn btn-warning');
         var previewLabel = document.createTextNode('Podgląd');
             preview.appendChild(previewLabel);
-            this.setPreviewButtonAction(preview);
-       
-        var confirm=document.createElement('button');
-            confirm.setAttribute('class','btn btn-info');
-            confirm.innerText=btnLabel;
-            /* SET AND SEND DATA */
-            this.setSendDataAction(confirm);    
+            this.setPreviewButtonAction(preview); 
         /*
          * BUTTONS
          */
-        this.Modal.link['button'].appendChild(this.Items.getCancelButton(this.Stage,'show',this.Stage.defaultTask+this.StageData.Stage.data.id));
+       
+        /*
+        console.log('ProjectItems::getCancelButton()');
+        console.log('Oboject:');
+        console.log(classToRun);
+        console.log('Method:');
+        console.log(methodToRun);
+        console.log('Task:');
+        console.log(taskToRun);
+        */
+
+        //this.Items.getCancelButton(this.Stage,'show',this.Stage.defaultTask+this.StageData.Stage.data.id);
+        this.Modal.link['button'].appendChild(this.getCancelButton());
         //this.Modal.link['button'].appendChild(this.Items.getCancelButton(this.Stage,'show',this.Stage.defaultTask+this.data.data['value']['stage'].id));
         this.Modal.link['button'].appendChild(preview);
-        this.Modal.link['button'].appendChild(this.docButton());
-        this.Modal.link['button'].appendChild(confirm);
+        this.Modal.link['button'].appendChild(this.getDocButton());
+        this.Modal.link['button'].appendChild(this.getConfirmButton(btnLabel));
     }
-    docButton(){
+    getCancelButton(){
+        var cancel=this.Html.cancelButton('Anuluj');
+        var self = this;
+        var run = this.setUndoTask(this);
+            cancel.onclick = 
+            cancel.onclick=function(){
+               console.clear();
+               console.log('ProjectStageCreate::getCancelButton() onclick()');
+               console.log(self.ErrorStack);
+               if(self.ErrorStack.check()){
+                    if (confirm('Opuścić okno bez zapisu?') === true) {
+                        //run();
+                        self.Items.closeModal();
+                        return false;
+                    }
+                    else{ 
+                        return false;
+                    }
+               }
+               if (confirm('Anulować?') === true) {
+                    run();
+               }
+               else{ 
+               }
+            };
+    return cancel;
+    }
+    getDocButton(){
         var doc=document.createElement('button');
             doc.setAttribute('class','btn btn-primary');
         var docLabel = document.createTextNode('DOC');
@@ -733,6 +813,7 @@ class ProjectStageCreate{
         var self = this;
             doc.onclick = function(){
                 console.clear();
+                if(self.ErrorStack.check()){return false;};
                 self.Html.hideField(self.Modal.link['error']);
                 console.log(self.StageData.Stage);
                 var fd = new FormData();
@@ -742,6 +823,7 @@ class ProjectStageCreate{
                     xhrRun.d=fd;
                     self.Xhr.run(xhrRun);  
             };
+            this.ErrorStack.setBlockEle(doc);
         return doc;
     }
     swapPreviewButton(ele){
@@ -790,18 +872,23 @@ class ProjectStageCreate{
             }
         };
     }
-    setSendDataAction(ele){
+    getConfirmButton(btnLabel){
+        var confirm = document.createElement('button');
+            confirm.setAttribute('class','btn btn-info');
+            confirm.innerText=btnLabel;  
         var self=this; 
-        ele.onclick = function (){
-            console.clear();
-            //console.log(self.StageData.Stage);
-            //throw 'asdasd';
-            self.Html.hideField(self.Modal.link['error']);
-            var fd = new FormData();
-                fd.append('stage',JSON.stringify(self.StageData.Stage));
-            self.checkInputData(self.StageData.Stage);
-            self.sendInputData(fd);
-        };
+            confirm.onclick = function (){
+                console.clear();
+                if(self.ErrorStack.check()){ return false;}
+                self.Html.hideField(self.Modal.link['error']);
+                var fd = new FormData();
+                    fd.append('stage',JSON.stringify(self.StageData.Stage));
+                self.checkInputData(self.StageData.Stage);
+                self.sendInputData(fd);
+            };
+            //this.helplink['confirm']=confirm;
+            this.ErrorStack.setBlockEle(confirm);
+        return confirm;
     }
     /* 
      * SEND INPUT DATA TO SEND 
@@ -809,11 +896,7 @@ class ProjectStageCreate{
     sendInputData(fd){
         console.log('ProjectStageCreate::sendInputData()');
         console.log(fd);
-        if(this.errorStatus){
-            console.log(this.errorStatus);
-            console.log('ERROR EXIST NO SEND DATA');
-            return false;
-        }
+        if(this.ErrorStack.check()){ return false;}
         var xhrRun=this.getXhrParm('POST','confirmProjectStageText','setModalResponse');
             xhrRun.o=this.Items;
             xhrRun.d=fd;
@@ -822,6 +905,35 @@ class ProjectStageCreate{
     checkInputData(data){
         console.log('ProjectStageCreate::checkInputData()');
         console.log(data); 
+        console.log(this.ErrorStack);
+        console.log(this.helplink);
+        this.checkInput('title');
+    }
+    checkInput(key){
+        console.log(key);
+        console.log(this.helplink.input[key]);
+        try{
+            var length=(this.helplink.input[key].input.value.trim()).length;
+                console.log(length);
+            if(length<1){
+                throw 'Wprowadź minimalną ilość znaków!'; 
+            }
+            if(length>1024){
+                throw 'Przekroczono maksymalną ilość znaków - '+length+'!';
+                //this.ErrorStack.add(key,'Przekroczono maksymalną ilość znaków!'); 
+            }
+            /* check ket exist, if exist remove */
+            this.ErrorStack.remove(key);     
+            this.Html.addClass(this.helplink.input[key].error,'d-none');
+            this.Html.removeChilds(this.helplink.input[key].error);
+        }
+        catch(e){
+            this.ErrorStack.add(key,e);
+            this.Html.removeClass(this.helplink.input[key].error,'d-none');
+            this.helplink.input[key].error.appendChild(document.createTextNode(e));
+        }
+        console.log(this.ErrorStack);
+        console.log(this.ErrorStack.check());
     }
 
 

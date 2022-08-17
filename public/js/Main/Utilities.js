@@ -63,4 +63,10 @@ class Utilities {
         //console.log(v);
         return v;
     }
+    cutName(value,max){
+        if(value.length>max){
+            return value.slice(0,max-3)+'...';
+        }
+        return value;
+   };
 }

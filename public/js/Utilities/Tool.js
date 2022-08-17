@@ -30,10 +30,12 @@ class Tool{
         return mainDiv;
     }
     getInput(data){
+        //console.log('Tool::getInput()');
+        //console.log(data);
         var input = document.createElement('INPUT');
             input.setAttribute('value',data.value);
             input.setAttribute('class','form-control form-control-sm '+data.attributes.class);
-            input.type=data.attributes.type;
+            input.type=data.attributes['type'];
             //input.setAttribute('type','number');
             this.setOnChange(input,data);
             return input;
@@ -96,10 +98,22 @@ class Tool{
             }
         };
     }
-    cutName(value,max){
-        if(value.length>max){
-            return value.slice(0,max-3)+'...';
-        }
-        return value;
-   };
+
+   getDivError(){
+       /* TITLE ERROR DIV */
+        var row=this.Html.getRow();
+            //this.helplink['titleDiv']=titleDiv;
+        var col1=this.Html.getCol(1);
+        var col2=this.Html.getCol(11);
+        var div=document.createElement('div');
+            this.Html.addClass(div,['alert','alert-danger','d-none']);
+            col2.appendChild(div);       
+            row.appendChild(col1);
+            row.appendChild(col2);
+        return {
+            ele:row,
+            div:div
+        };
+        //return row;
+   }
 }

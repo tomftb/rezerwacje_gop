@@ -319,17 +319,29 @@ class ProjectItems{
             };
         return cancel;
     }
-    filterData(value){
-        console.log('ProjectItems::filterData()');
+    filter(value){
+        console.log('ProjectItems::filter()');
         console.log(value);
     }
-    filterHiddenData(ele){
-        console.log('ProjectItems::filterData()');
+    hidden(ele){
+        console.log('ProjectItems::hidden()');
         console.log(ele);
-        //console.log('===showHidden()===\n'+ele.value);
-        //changeBoxValue(ele);
-        //defaultTask='getprojectsstagelike&v='+ele.value;
-        //findData(document.getElementById('findData').value);
+        if(ele.value==='n'){
+            ele.value='y';
+        }
+        else{
+            ele.value='n';
+        }
+    }
+    deleted(ele){
+        console.log('ProjectItems::deleted()');
+        console.log(ele);
+        if(ele.value==='n'){
+            ele.value='y';
+        }
+        else{
+            ele.value='n';
+        }
     }
     setLoadInfo(){
         console.log('ProjectItems::setLoadInfo()');

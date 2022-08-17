@@ -50,20 +50,34 @@
             <h2 class="text-center mb-3 mt-1 text-info">Elementy projektu (<span id="headTitle"></span>):</h2>
         </div>
         <div class="col-4" >
-             <div class="row float-right w-100 mr-0">
-                <div class="col-4">
-                    <h5 class="mt-3 text-secondary text-right" > 
-                        <i class="fa fa-search"></i>&nbspSzukaj:</span>
-                    </h5>
-                </div>
-                <div class="col-8 pl-0 pr-0">
-                    <div class="form-group mb-0">
-                    <input class="ml-1 form-control mt-2" id='findData' onchange="ProjectItems.filterData(this.value)"/>
-                    </div>
+                    <!--
                     <div class="form-group form-check mt-0">
-                    <label class="form-check-label"><input type="checkbox" class="form-check-input" value="0" onclick="ProjectItems.filterHiddenData(this)"><small>Pokaż ukryte</small></label></div>
-                </div>
-            </div>  
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" value="0" onclick="ProjectItems.filterHiddenData(this)">
+                        <small>Pokaż ukryte</small>
+                    </label>
+                    </div>
+                    -->
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search...">
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary" type="button" onclick="Items.filter(this.value)">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                  </div>
+                    <div class="form-group form-check-inline mt-0">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" value="n" onclick="Items.hidden(this)">
+                        <small class="text-secondary">Pokaż ukryte</small>
+                    </label>
+                    </div>
+                    <div class="form-group form-check-inline mt-0 ">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" value="n"  onclick="Items.deleted(this)">
+                        <small class="text-danger" onclick="Items.deleted()">Pokaż usunięte</small>
+                    </label>
+                    </div>
             </div>
         </div>
     </div>

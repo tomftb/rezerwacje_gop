@@ -1,49 +1,52 @@
-class ProjectConstCreate{
+class ProjectConstantCreate{
     ErrorStack={};
     iField=0;
     Modal = new Object();
     Html = new Object();
     Xhr = new Object();
-    Const = new Object();
+    Constant = new Object();
     Items = new Object();
     fieldDisabled=false;
     errorStatus=false;
-    allConsts=new Array();
+    //allConsts=new Array();
     data={};
     
-    constructor(Main){
-        console.log('ProjectConstCreate::constructor');
-        this.Modal=Main.Items.Modal;
-        this.Items=Main.Items;
-        this.Const=Main;
-        this.Html=Main.Items.Html;
-        this.Xhr=Main.Items.Xhr2;
+    constructor(Parent){
+        console.log('ProjectConstantCreate::constructor');
+        this.Modal=Parent.Items.Modal;
+        this.Items=Parent.Items;
+        this.Constant=Parent;
+        this.Html=Parent.Items.Html;
+        this.Xhr=Parent.Items.Xhr2;
     }
-    create(){
-        try{
-            this.getData('getProjectConstList','prepare');   
-        }
-        catch(error){
-            console.log('ProjectConstCreate::prepare()');
-            console.log(error);
-            throw 'An Application Error Has Occurred!';
-        }
+    //create(){
+      //  try{
+         //   this.fieldDisabled=false;
+            //this.getData('getProjectConstantsList','prepare');   
+            
+       // }
+      //  catch(error){
+         //   console.log('ProjectConstantCreate::prepare()');
+         //   console.log(error);
+          //  throw 'An Application Error Has Occurred!';
+       // }
         //this.Glossary=this.Items.Glossary['const'];
-    }
+    //}
     /* pcDetails */
     details(response){
         try{
-            console.log('ProjectConstCreate::details()');
+            console.log('ProjectConstantCreate::details()');
             this.data =this.Items.parseResponse(response);
             console.log(this.data);
             console.log(this.data['data']['value']['const']);
             /* TO DO IN FUTURE -> ADD setCloseModal multi id's */
             this.Modal.clearData();
-            this.Items.setCloseModal(this.Const,'show',this.Const.defaultTask+this.data['data']['value']['const'].i);
+            //this.Items.setCloseModal(this.Constant,'show',this.Constant.defaultTask+this.data['data']['value']['const'].i);
+            this.Items.setCloseModal(this.Constant.setUndoTask(this.Constant,this.Constant.defaultTask+this.data['data']['value']['const'].i));
             /* CLEAR ERROR STACK */
             this.ErrorStack={};
             /* SET CONSTS */
-            this.allConsts=this.data['data']['value']['all'];
+            //this.allConsts=this.data['data']['value']['all'];
             this.fieldDisabled=true;
             /* form,constName,constValue,constId,rmButton */
             /* TO DO -> Multi -> loop over data.value.const */
@@ -59,7 +62,7 @@ class ProjectConstCreate{
             
         }
         catch(error){
-            console.log('ProjectConstCreate::details()');
+            console.log('ProjectConstantCreate::details()');
             console.log(error);
             this.Items.Table.setError('An Application Error Has Occurred!');
             return false;
@@ -69,7 +72,7 @@ class ProjectConstCreate{
             this.Items.prepareModal('Podgląd Stałej','bg-warning');
         }
         catch(error){
-            console.log('ProjectConstCreate::prepare()');
+            console.log('ProjectConstantCreate::details()');
             console.log(error);
             this.Items.Table.setError('An Application Error Has Occurred!');
         }
@@ -77,11 +80,11 @@ class ProjectConstCreate{
     /* pcEdit */
     block(){
         try{
-            console.log('ProjectConstCreate::block()');
+            console.log('ProjectConstantCreate::block()');
             /* SEND BLOCK */
             var xhrParm={
                 t:"GET",
-                u:this.Items.router+'blockConst&id='+this.data['data']['value']['const'].i,
+                u:this.Items.router+'blockConstant&id='+this.data['data']['value']['const'].i,
                 /* FOR POST SET TRUE */
                 c:true,
                 d:null,
@@ -91,14 +94,14 @@ class ProjectConstCreate{
             this.Xhr.run(xhrParm);
         }
         catch(error){
-            console.log('ProjectConstCreate::block()');
+            console.log('ProjectConstantCreate::block()');
             console.log(error);
             this.Html.showField(this.Modal.link['error'],'An Application Error Has Occurred!');
         }
     }
     edit(response){
         try{
-            console.log('ProjectConstCreate::edit()');
+            console.log('ProjectConstantCreate::edit()');
             var blockData =this.Items.parseResponse(response);
             console.log(blockData);
         }
@@ -117,21 +120,21 @@ class ProjectConstCreate{
                 this.Modal.link['adapted'].appendChild(form);
                 this.Modal.link['adapted'].appendChild(this.createLegendRow()); 
                 this.Modal.link['form']=this.Modal.link['adapted'].childNodes[0];
-                this.setConfirmButtons(this.data['data']['value']['const'].i);
+                this.setConfirmButton(this.data['data']['value']['const'].i);
             /*
              * INFO
              */
             this.Items.Modal.setInfo("Project Const ID: "+this.data['data']['value']['const'].i+", Create user: "+this.data['data']['value']['const'].cu+" ("+this.data['data']['value']['const'].cul+"), Create date: "+this.data['data']['value']['const'].cd+", Modification made at date: "+this.data['data']['value']['const'].md+" by user: "+this.data['data']['value']['const'].mu);
         }
         catch(error){
-            console.log('ProjectConstCreate::edit() ERROR');
+            console.log('ProjectConstantCreate::edit() ERROR');
             console.log(error);
             //this.Items.Table.setError('An Application Error Has Occurred!');
             this.Html.showField(this.Modal.link['error'],'An Application Error Has Occurred!');
         }
     }
     getData(u,m){
-        console.log('ProjectConstCreate::getData()');
+        console.log('ProjectConstantCreate::getData()');
         var xhrParm={
             t:"GET",
             u:this.Items.router+u,
@@ -142,33 +145,31 @@ class ProjectConstCreate{
         };
         this.Xhr.run(xhrParm);
     }
-    prepareData(){
-        console.log('ProjectConstCreate::prepareData()');
-        this.iField=0;
-        this.ErrorStack={};
-    }
-    prepare(response){
-        console.log('ProjectConstCreate::prepareConst()');  
+    create(){//prepare(response)
+        console.log('ProjectConstantCreate::prepareConst()');  
         try{
-            this.data =this.Items.parseResponse(response);
-            this.allConsts=this.data['data']['value']['all'];
+            //this.data =this.Items.parseResponse(response);
+            /* disabled -> check in backend */
+            this.fieldDisabled=false;
+            //this.allConsts=this.data['data']['value']['all'];
             this.ErrorStack={};
-            console.log(this.allConsts);
+            //console.log(this.allConsts);
             /* RUN FROM XHR */
             //console.log(ProjectConst.data);
-            this.prepareData();
+            this.iField=0;
             this.Modal.clearData();
-            this.Items.setCloseModal(this.Const,'show',this.Const.defaultTask+'0');            
+            //this.Items.setCloseModal(this.Constant,'show',this.Constant.defaultTask+'0');    
+            this.Items.setCloseModal(this.Constant.setUndoTask(this.Constant,this.Constant.defaultTask+'0')); 
             var form=document.createElement('FORM');
             this.setInputConst(form,'','','0',this.getRemoveButtonCol(this.iField));
             this.Modal.link['adapted'].appendChild(form);
             this.Modal.link['adapted'].appendChild(this.createAddButtonRow()); 
             this.Modal.link['adapted'].appendChild(this.createLegendRow()); 
             this.Modal.link['form']=this.Modal.link['adapted'].childNodes[0];
-            this.setConfirmButtons('0');
+            this.setConfirmButton('0');
         }
         catch(error){
-            console.log('ProjectConstCreate::prepare()');
+            console.log('ProjectConstantCreate::prepare()');
             console.log(error);
             /* AFTER XHR -> RUN TABLE ERROR */
             this.Items.Table.setError('An Application Error Has Occurred!');
@@ -181,7 +182,7 @@ class ProjectConstCreate{
             this.Items.prepareModal('Nowa stała','bg-warning');
         }
         catch(error){
-            console.log('ProjectConstCreate::prepare()');
+            console.log('ProjectConstantCreate::prepare()');
             console.log(error);
             //throw 'An Application Error Has Occurred!';
             this.Items.Table.setError('An Application Error Has Occurred!');
@@ -190,7 +191,7 @@ class ProjectConstCreate{
         
     }
     setInputConst(form,constName,constValue,constId,rmButton){
-        console.log('ProjectConstCreate::setInputConst()\r\nCONST ID:'+constId+'\r\niField:'+this.iField);
+        console.log('ProjectConstantCreate::setInputConst()\r\nCONST ID:'+constId+'\r\niField:'+this.iField);
         console.log(this.Modal.link['adapted']);
         var hr=document.createElement('HR');
         var rowAll=this.Html.getRow();
@@ -252,7 +253,7 @@ class ProjectConstCreate{
         return(div); 
     }
     updateErrorStack(id){
-        console.log('ProjectConstCreate::updateErrorStack()\r\nid');
+        console.log('ProjectConstantCreate::updateErrorStack()\r\nid');
         console.log(id);
         
         //return true;
@@ -287,7 +288,7 @@ class ProjectConstCreate{
         ele.removeAttribute('disabled');
     }
     checkInputIsEmpty(){
-        console.log('ProjectConstCreate::checkInputIsEmpty()');
+        console.log('ProjectConstantCreate::checkInputIsEmpty()');
         console.log(this.ErrorStack);
         console.log(this.isObjectEmpty(this.ErrorStack));
         if(this.isObjectEmpty(this.ErrorStack)){
@@ -323,7 +324,7 @@ class ProjectConstCreate{
         return row;
     }
     createAddButton(){
-        console.log('ProjectConstCreate::createAddButton()');
+        console.log('ProjectConstantCreate::createAddButton()');
         var i=document.createElement('i');
             i.setAttribute('class','fa fa-plus');
             i.setAttribute("aria-hidden","true");
@@ -351,15 +352,15 @@ class ProjectConstCreate{
             col.setAttribute('class','col-sm-1');
         var col1=document.createElement('DIV');
             col1.setAttribute('class','col-sm-11');   
-            col1.innerHTML="<ul><li>Nazwa stałej musi spełniać następujące warunki:<ul><li>musi się rozpoczynać znakiem alfabetu;</li><li>nie może zawierać polskich znaków;</li><li>może zawierać tylko i wyłącznie litery alfabetu i liczby;</li><li>musi zawierać minimum 3 znaki;</li><li>nie może być dłuższa niż 30 znaków.</li></ul></li><li>Wartość stałej musi spełniać następujące warunki:<ul><li>musi zawierać minimum 1 znak;</li><li>nie może być dłuższa niż 1024 znaki.</li></ul></li></ul>";
+            col1.innerHTML="<ul><li>Nazwa stałej musi spełniać następujące warunki:<ul><li>musi rozpoczynać się znakiem alfabetu;</li><li>nie może zawierać polskich znaków;</li><li>może zawierać tylko i wyłącznie litery alfabetu i liczby;</li><li>musi zawierać minimum 3 znaki;</li><li>nie może zawierać więcej niż 30 znaków.</li></ul></li><li>Wartość stałej musi spełniać następujące warunki:<ul><li>musi zawierać minimum 1 znak;</li><li>nie może zawierać wiećej niż 1024 znaki.</li></ul></li></ul>";
             row.appendChild(col);
             row.appendChild(col1);
         return row;
     }
-    setConfirmButtons(){
-        console.log('ProjectConstCreate::setConfirmButtons()');
+    setConfirmButton(){
+        console.log('ProjectConstantCreate::setConfirmButton()');
         var group=this.Html.getGroupButton();
-            group.appendChild(this.Items.getCancelButton(this.Const,'show',this.Const.defaultTask+'0'));
+            group.appendChild(this.Items.getCancelButton(this.Constant,'show',this.Constant.defaultTask+'0'));
         var confirm=document.createElement('button');
             confirm.setAttribute('class','btn btn-primary');
             confirm.innerText='Zatwierdź';
@@ -376,10 +377,10 @@ class ProjectConstCreate{
         this.Modal.link['buttonConfirm']=confirm;
     }
     setEditButtons(idRecord,blockUser){
-        console.log('ProjectConstCreate::setEditButtons()');
+        console.log('ProjectConstantCreate::setEditButtons()');
         console.log(blockUser);
         var group=this.Items.Html.getGroupButton();
-            group.appendChild(this.Items.getCancelButton(this.Const,'show',this.Const.defaultTask+idRecord));
+            group.appendChild(this.getCancelButton(idRecord));
         var confirm=document.createElement('button');
             confirm.setAttribute('class','btn btn-warning');
             confirm.innerText='Edytuj';
@@ -401,8 +402,23 @@ class ProjectConstCreate{
         this.Items.Modal.link['button'].appendChild(group);
         this.Items.Modal.link['buttonConfirm']=confirm;
     }
+    getCancelButton(idRecord){
+        var cancel=this.Html.cancelButton('Anuluj');
+        var self = this;
+            cancel.onclick=function(){
+                if (confirm('Anulować?') === true) {
+                    console.log('ProjectItems::getCancelButton() cancel.onclick');
+                    self.Constant.ConstantTable.run(window.router+'getprojectsconstantslike&u=0&v=0&b='+idRecord);
+                    self.Modal.closeModal();
+                }
+                else{ 
+                }
+               
+            };
+        return cancel;
+    }
     checkConst(fd){
-        console.log('ProjectConstCreate::checkConst()');
+        console.log('ProjectConstantCreate::checkConst()');
         console.log(this.ErrorStack);
         console.log(fd);
         for(var pair of fd.entries()) {
@@ -414,27 +430,27 @@ class ProjectConstCreate{
         }
     }
     checkInputConst(id,value){
-        console.log('ProjectConstCreate::checkInputConst()\r\n'+id);
+        console.log('ProjectConstantCreate::checkInputConst()\r\n'+id);
         const input = id.split('-');
         switch (input[0]) {
             case 'nazwa':
                 value=value.toUpperCase();
                 this.checkInputConstValue(input[0],input[1],value,/^[a-zA-Z]([a-zA-Z]|\d){2,29}$/);
-                this.checkInputConstExist(input[0],input[1],value);
+                //this.checkInputConstExist(input[0],input[1],value);
               break;
             case 'wartosc':
                 this.checkInputConstValue(input[0],input[1],value,/^.{1,1024}$/);
-                this.checkInputConstExist(input[0],input[1],value);
+                //this.checkInputConstExist(input[0],input[1],value);
                 break;
             case 'id':
                 break;
             default:
-                alert('ProjectConstCreate::checkInputConst() Error occurred!');
-                console.log('ProjectConstCreate::checkInputConst() WRONG INPUT - '+input);
+                alert('ProjectConstantCreate::checkInputConst() Error occurred!');
+                console.log('ProjectConstantCreate::checkInputConst() WRONG INPUT - '+input);
           }
     }
     checkInputConstValue(inputName,inputNumber,value,regex){
-        console.log('ProjectConstCreate::checkInputConstValue()');
+        console.log('ProjectConstantCreate::checkInputConstValue()');
         if(!value.match(regex)){
             console.log('SET ERROR');
             this.ErrorStack[inputName+'Err'+inputNumber].err='y';
@@ -450,28 +466,29 @@ class ProjectConstCreate{
             this.setEnabled(this.Modal.link['buttonConfirm']);
         }   
     }
-    checkInputConstExist(inputName,inputNumber,inputValue){
-        console.log('ProjectConstCreate::checkInputConstExist()\r\n'+inputValue);
+    /* DISABLED -> CHECK ON BACKED */
+   // checkInputConstExist(inputName,inputNumber,inputValue){
+       // console.log('ProjectConstantCreate::checkInputConstExist()\r\n'+inputValue);
         /* CHECK IS NOT ALREADY ERROR SETUP */
-        if(this.ErrorStack[inputName+'Err'+inputNumber].err==='y'){
-            console.log('ALREADY ERROR');
-            return false;
-        }
-        inputValue=inputValue.trim();
-        console.log('CONSTS FROM DATABASE');
+      //  if(this.ErrorStack[inputName+'Err'+inputNumber].err==='y'){
+         //   console.log('ALREADY ERROR');
+         //   return false;
+       // }
+        //inputValue=inputValue.trim();
+       // console.log('CONSTS FROM DATABASE');
         //console.log(ProjectConst.allConsts);
-        for(var i=0; i<this.allConsts.length;i++){
+       // for(var i=0; i<this.allConsts.length;i++){
             //console.log(ProjectConst.allConsts[i]);
-            if(this.allConsts[i][inputName]===inputValue){
-                this.ErrorStack[inputName+'Err'+inputNumber].err='y';
+           // if(this.allConsts[i][inputName]===inputValue){
+               // this.ErrorStack[inputName+'Err'+inputNumber].err='y';
                 //this.Items.setError(this.ErrorStack[inputName+'Err'+inputNumber].ele,'Wprowadzona wartość już istnieje! Wartość modyfikowana <b>'+this.allConsts[i]['mod_date']+'</b> przez <b>'+this.allConsts[i]['mod_user_full_name']+'</b>.');
-                this.Html.showField(this.ErrorStack[inputName+'Err'+inputNumber].ele,'Wprowadzona wartość już istnieje! Wartość modyfikowana <b>'+this.allConsts[i]['mod_date']+'</b> przez <b>'+this.allConsts[i]['mod_user_full_name']+'</b>.');
-                this.errorStatus=true;
-                this.Html.setDisabled(this.Modal.link['buttonConfirm']);
-                break;
-            }
-        }
-    }
+                //this.Html.showField(this.ErrorStack[inputName+'Err'+inputNumber].ele,'Wprowadzona wartość już istnieje! Wartość modyfikowana <b>'+this.allConsts[i]['mod_date']+'</b> przez <b>'+this.allConsts[i]['mod_user_full_name']+'</b>.');
+                //this.errorStatus=true;
+               // this.Html.setDisabled(this.Modal.link['buttonConfirm']);
+               // break;
+           // }
+       // }
+   // }
     newConstRow(title,placeholder,id,value){
         var row=document.createElement('DIV');
             row.setAttribute('class','form-group row');
@@ -526,7 +543,7 @@ class ProjectConstCreate{
         return row;
     }
     sendConst(fd){
-        console.log('ProjectConstCreate::sendConst()');
+        console.log('ProjectConstantCreate::sendConstant()');
         try{
              console.log(this.Modal.link['form']);
             if(this.errorStatus){
@@ -539,33 +556,22 @@ class ProjectConstCreate{
 
             var xhrParm={
                 t:"POST",
-                u:this.Items.router+'confirmProjectConst',
+                u:this.Items.router+'confirmProjectConstant',
                 /* FOR POST SET TRUE */
                 c:true,
                 d:fd,
-                o:this.Items,
-                m:'setModalResponse'
+                //o:this.Items,
+                //m:'setModalResponse'
+                o:this.Constant,
+                m:'setResponse'
             };
-
-            //console.log(this.Xhr.LoadStart);
-
             this.Xhr.run(xhrParm);
         }
         catch(error){
-            console.log('ProjectConstCreate::prepare()');
+            console.log('ProjectConstantCreate::prepare()');
             console.log(error);
-            //throw 'An Application Error Has Occurred!';
-            //this.Items.Table.setError('An Application Error Has Occurred!');
             this.Html.showField(this.Modal.link['error'],'An Application Error Has Occurred!');
         }
-       
-        
-        //this.Modal.loadNotify='<img src="'+this.Items.appurl+'/img/loading_60_60.gif" alt="load_gif">';
-        //this.Modal.showLoad();
-        //ProjectConst.Xhr.setRun(ProjectConst,'runModal');
-        //ProjectConst.Xhr.run('POST',fd,ProjectConst.Items.router+'confirmProjectConst');
-        /* SEND DATA - XHR */
-        
     }
 }
 

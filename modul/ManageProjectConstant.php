@@ -5,24 +5,21 @@
  * @author tborczynski
  * MANAGE PROJECT CONSTS
  */
-class ManageProjectConsts extends ManageProjectConstsDatabase{
+class ManageProjectConstant extends ManageProjectConstantDatabase{
     private $Utilities;
-    private $Items;
     
     public function __construct(){
         parent::__construct();
         $this->Log->log(0,"[".__METHOD__."]");
         $this->Utilities=NEW Utilities();
-        $this->Items=NEW ManageProjectItems();
     }
     public function __destruct(){
         parent::__destruct();
     }
-    public function getProjectConstList(){
-        $v['all']=parent::getConsts();
-        $this->Utilities->jsonResponse($v,'prepareConst');
+    public function getProjectConstantsList(){
+        $this->Utilities->jsonResponse(['all'=>parent::getConstants()],'prepareConst');
     }
-    public function confirmProjectConst(){
+    public function confirmProjectConstant(){
         $this->inpArray= filter_input_array(INPUT_POST);
         //echo "POST\r\n";
         /* inpArray => ManageProjectConstDatabase() */
@@ -30,18 +27,20 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
             Throw New Exception('Wprowadź co najmniej jedną stałą.',0); 
         }
         //print_r($this->inpArray);
-        array_walk($this->inpArray, array($this,'parseConsts'));
-        
-        array_walk($this->newData, array($this,'parseConstsUnique'));
+        array_walk($this->inpArray, array($this,'parseConstant'));
+
+        array_walk($this->newData, array($this,'parseConstantUnique'));
         if($this->error){
            Throw New Exception($this->error,0); 
         }
         //Throw New Exception('['.__METHOD__.'::'.__LINE__.'] TEST STOP',0); 
-        array_map([$this,'dbManageConst'],$this->newData);
+        
+        array_map([$this,'dbManageConstant'],$this->newData);
+        
         //Throw New Exception('['.__METHOD__.'::'.__LINE__.'] TEST STOP',0); 
-        $this->Utilities->jsonResponse([],'cModal');
+        self::getprojectsconstantslike();
     }
-    private function parseConsts(&$value='',$key=''){
+    private function parseConstant(&$value='',$key=''){
         $this->Log->log(0,"[".__METHOD__."]");
         /*
          * REMOVE WHITE CHAR FROM BEGINING AND END OF STRING
@@ -76,7 +75,7 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
             break;
         }
     }
-    private function parseConstsUnique(&$value='',$key=''){
+    private function parseConstantUnique(&$value='',$key=''){
         $this->Log->log(0,"[".__METHOD__."]\r\nKEY => ".$key);
         $this->Log->logMulti(0,$value);
         if(!array_key_exists('id', $value)){
@@ -85,12 +84,12 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
         $value['nazwa']=mb_strtoupper($value['nazwa']);
         $value['id']=intval($value['id'],10);
         /* PARSE CONST UNIQUE */
-        parent::checkConstUniqe($key,$value['nazwa'],'nazwa',$value['id']);
-        parent::checkConstUniqe($key,$value['wartosc'],'wartosc',$value['id']);
+        parent::checkConstantUnique($key,$value['nazwa'],'nazwa',$value['id']);
+        parent::checkConstantUnique($key,$value['wartosc'],'wartosc',$value['id']);
        
     }
         # RETURN ALL NOT DELETED PROJECT FROM DB
-    public function getprojectsconstslike(){ 
+    public function getprojectsconstantslike(){ 
         /*FILTER_SANITIZE_STRING => Remove all HTML tags from a string:*/
         //$f="%".filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING)."%";
         $f=htmlentities(nl2br(filter_input(INPUT_GET,'filter')), ENT_QUOTES,'UTF-8',FALSE);
@@ -98,7 +97,7 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
         //$f='a';
         $this->Log->log(0,"[".__METHOD__."] FILTER => ".$f);
         $this->Log->logMulti(0,filter_input_array(INPUT_GET));
-        $select="SELECT s.`id` as 'i', s.`nazwa` as 'n',s.`wartosc` as 'v',s.`buffer_user_id` as 'bu',b.`login` as 'bl' FROM `project_stage_const` s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id`";
+        $select="SELECT s.`id` as 'i', s.`nazwa` as 'n',s.`wartosc` as 'v',s.`buffer_user_id` as 'bu',b.`login` as 'bl' FROM `slo_project_stage_const` s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id`";
         $where='';
         $query_data=[];
         if(is_numeric($f)){
@@ -115,7 +114,7 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
         $this->inpArray['u']=$this->Items->setGetWsk('u');
         $this->inpArray['b']=$this->Items->setGetWsk('b');
         $this->inpArray['v']=$this->Items->setGetWsk('v');
-        $this->inpArray['wskb']=$this->Items->unsetBlock($this->inpArray['b'],'project_stage_const','buffer_user_id',$_SESSION['userid']);
+        $this->inpArray['wskb']=$this->Items->unsetBlock($this->inpArray['b'],'slo_project_stage_const','buffer_user_id',$_SESSION['userid']);
         $query_data[':wsk_u']=array($this->inpArray['u'],'STR');
         $query_data[':wsk_v']=array($this->inpArray['v'],'STR');
         $query_data[':nazwa']=array('%'.$f.'%','STR');
@@ -126,86 +125,74 @@ class ManageProjectConsts extends ManageProjectConstsDatabase{
          * 
          */
  
-        $return['data']=parent::getConstsLike($select.$where,$query_data);  
+        $return['data']=parent::getConstantsLike($select.$where,$query_data);  
         $return['headTitle']='Stałe';
         // Throw New Exception('['.__METHOD__.']'.__LINE__.' TEST',1);
         $this->Utilities->jsonResponse($return,'runModal');
     }
-     public function getProjectConstHideSlo(){
+     public function getProjectConstantHideSlo(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->newData=array();
-        $this->Utilities->setGet('id',$this->newData);
-        parent::getConstData();
+        $this->newData=[
+            'id'=>filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT)
+        ];
+        $this->newData['const']=parent::getConstantData($this->newData['id']);
         $this->Items->checkBlock($this->newData['const']['bu'],$this->newData['const']['bl'],$_SESSION['userid']);
         self::block($this->newData['id'],$_SESSION['userid']);
         $this->newData['slo']=$this->Items->getSlo('pcHide');
         $this->Utilities->jsonResponse($this->newData,'pcHide');  
     }
-    public function getProjectConstDelSlo(){
+    public function getProjectConstantDelSlo(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->newData=array();
-        $this->Utilities->setGet('id',$this->newData);
-        parent::getConstData();
+        $this->newData=[
+            'id'=>filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT)
+        ];
+        $this->newData['const']=parent::getConstantData($this->newData['id']);
         $this->Items->checkBlock($this->newData['const']['bu'],$this->newData['const']['bl'],$_SESSION['userid']);
         self::block($this->newData['id']);
         $this->newData['slo']=$this->Items->getSlo('pcDelete');
         $this->Utilities->jsonResponse($this->newData,'pcDelete');  
     }
-    public function getProjectConstDetails(){
-        $this->Log->log(0,"[".__METHOD__."]");
-        $this->newData=array();
-        $this->Utilities->setGet('id',$this->newData);
-        parent::getConstData();
-        $this->newData['all']=parent::getConstWithoutRecord($this->newData['id']);
-        //$v['data']=parent::getConsts();
-        $this->Utilities->jsonResponse($this->newData,'pcDetails');
+    public function getProjectConstantDetails(){
+        $this->Log->log(0,"[".__METHOD__."]");       
+        $this->Utilities->jsonResponse(['const'=>parent::getConstantData(filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT))],'pcDetails');
     }
     public function pcDetails(){
         $this->Log->log(0,"[".__METHOD__."]");
-        //$this->newData=array();
-        //$this->Utilities->setGet('id',$this->newData);
-        //parent::getConstData();
-        //$v['data']=parent::getConsts();
         $this->Utilities->jsonResponse([],'cModal');
     }
     public function pcHide(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->newData=$this->Items->setPostId();
         $this->newData['reason']=$this->Items->setReason($this->newData);
-        $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'project_stage_const','buffer_user_id');
+        $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'slo_project_stage_const','buffer_user_id');
         $this->Items->checkBlock($this->newData['wskb']['bu'],$this->newData['wskb']['bl'],$_SESSION['userid']);
-        parent::hideConst();
+        parent::hideConstant();
         self::block($this->newData['id'],$_SESSION['userid']);
-        $this->Utilities->jsonResponse('','cModal');
+        self::getprojectsconstantslike();
     }
     public function pcDelete(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->newData=$this->Items->setPostId();
         $this->newData['reason']=$this->Items->setReason($this->newData);
-        $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'project_stage_const','buffer_user_id');
+        $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'slo_project_stage_const','buffer_user_id');
         $this->Items->checkBlock($this->newData['wskb']['bu'],$this->newData['wskb']['bl'],$_SESSION['userid']);
-        parent::deleteConst();
+        parent::deleteConstant();
         self::block($this->newData['id'],'');
-        $this->Utilities->jsonResponse('','cModal');
+        self::getprojectsconstantslike();
     }
-    public function blockConst(){
+    public function blockConstant(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->newData=array();
         //$this->newData=$this->Items->setPostId();
         $this->Utilities->setGet('id',$this->newData);
         /* CHECK FOR ACT BLOCK STATUS */
-        $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'project_stage_const','buffer_user_id');
-        
-        $this->Log->logMulti(0,$this->newData);
-        
+        $this->newData['wskb']= $this->Items->getBufferUserId($this->newData['id'],'slo_project_stage_const','buffer_user_id');
+        $this->Log->logMulti(0,$this->newData);   
         $this->Items->checkBlock($this->newData['wskb']['bu'],$this->newData['wskb']['bl'],$_SESSION['userid']);
-        
-        
         self::block($this->newData['id'],$_SESSION['userid']);
         $this->Utilities->jsonResponse('','');
     }
     private function block($id=0,$user=''){
-         $this->Items->setBlock($id,"project_stage_const","buffer_user_id",$user);
+         $this->Items->setBlock($id,"slo_project_stage_const","buffer_user_id",$user);
     }
-
 }

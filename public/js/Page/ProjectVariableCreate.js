@@ -29,20 +29,7 @@ class ProjectVariableCreate{
                 error:this.Modal.link.error
             };
     }
-    create(){
-        try{
-            this.Helplink=this.getHelplink();
-            /* TURN OFF */
-            //this.getData('getProjectVariablesList','prepare');   
-            this.prepare();
-        }
-        catch(error){
-            console.log('ProjectVariableCreate::prepare()');
-            console.log(error);
-            throw 'An Application Error Has Occurred!';
-        }
-        //this.Glossary=this.Items.Glossary['const'];
-    }
+
     /* pcDetails */
     details(response){
         try{
@@ -162,15 +149,16 @@ class ProjectVariableCreate{
         };
         this.Xhr.run(xhrParm);
     }
-    prepare(){//TURN OFF response
-        console.log('ProjectVariableCreate::prepare()');  
+    create(){
+        console.log('ProjectVariableCreate::create()');         
         try{
+            this.Helplink=this.getHelplink();
+            this.fieldDisabled=false;
             /* TURN OFF */
             //this.data =this.Items.parseResponse(response);
             //this.defined=this.data['data']['value']['all'];
             //console.log(this.defined);
             this.ErrorStack.clearStack();
-            
             /* RUN FROM XHR */
             //console.log(ProjectConst.data);
             this.iField=0;
@@ -186,7 +174,7 @@ class ProjectVariableCreate{
             this.setConfirmButton(0);
         }
         catch(error){
-            console.log('ProjectVariableCreate::prepare()');
+            console.log('ProjectVariableCreate::create()');
             console.log(error);
             /* AFTER XHR -> RUN TABLE ERROR */
             this.Items.Table.setError('An Application Error Has Occurred!');
@@ -199,7 +187,7 @@ class ProjectVariableCreate{
             this.Items.prepareModal('Nowa zmienna','bg-purple');
         }
         catch(error){
-            console.log('ProjectVariableCreate::prepare()');
+            console.log('ProjectVariableCreate::create()');
             console.log(error);
             //throw 'An Application Error Has Occurred!';
             this.Items.Table.setError('An Application Error Has Occurred!');

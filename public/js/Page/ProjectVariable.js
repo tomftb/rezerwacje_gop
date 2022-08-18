@@ -2,8 +2,7 @@ class ProjectVariable{
     VariableTable = new Object();
     VariableCreate = new Object ();
     Items= new Object ();
-    defaultTask='getProjectVariablesLike&u=0&v=0&b=';
-    
+    defaultTask='getProjectVariablesLike&u=0&v=0&b=';    
     constructor(Items) {
         console.log('ProjectVariable::constructor()');
         this.Items = Items;

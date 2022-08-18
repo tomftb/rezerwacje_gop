@@ -10,6 +10,7 @@ class StageData{
     defaultSection={};
     tabStop={};
     type='';
+    title='lista';
     constructor(Glossary,Property,type,tabstop){
         this.Glossary = Glossary;
         this.Property=Property;
@@ -173,10 +174,12 @@ class StageData{
         };
         switch(this.type){
             case 'l':
+                this.title='lista';
                 return sectionTextStyle;
                 break;
             default:
             case 'p':
+                this.title='tekst';
                 return sectionListStyle;
                 break;
         };
@@ -295,5 +298,23 @@ class StageData{
             return false;
         }
         this.tabStop = tabstop;
+    }
+    getTitle(){
+        return this.title;
+    }
+    getFiles(){
+        let files = new Array();
+        for(const prop in this.Stage.section){           
+            for(const prop1 in this.Stage.section[prop].subsection){             
+                for(const prop2 in this.Stage.section[prop].subsection[prop1].subsectionrow){
+                    for(const prop3 in this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image){
+                        if(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data.tmp==='y'){
+                            files.push(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].property.uri);
+                        }            
+                    }
+                }
+            }
+        }
+        return files;
     }
 }

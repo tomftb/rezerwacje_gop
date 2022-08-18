@@ -435,9 +435,6 @@ class ManageProjectStage extends ManageProjectStageDatabase
             /* NO SECTION */
             Throw New Exception ('POST DATA PROPERTY NOT EXIST',1);
         }
-        //if(!is_object($this->data->data)){
-        //    Throw New Exception ('POST DATA PARAMETER DATA IS NOT A OBJECT',1);
-       // }
         if(!property_exists($this->data,'section')){
             /* NO SECTION */
             Throw New Exception ('POST SECTION PROEPRTY NOT EXIST',1);
@@ -449,9 +446,8 @@ class ManageProjectStage extends ManageProjectStageDatabase
         if($this->error){
             Throw New Exception ($this->error,0);
         }
-        parent::manageStage();
-        //Throw New Exception ('TEST LINE:'.__LINE__,0);
-        $this->utilities->jsonResponse('','cModal');    
+        parent::manageStage();  
+        self::getprojectsstagelike();
     }
     private function checkValue($key='',&$prefix){
         $this->Log->log(0,"[".__METHOD__."]\r\nKEY - ".$key); 

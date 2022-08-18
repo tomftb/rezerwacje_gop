@@ -51,9 +51,9 @@ class ProjectItems{
         this.setLoadInfo();
         this.setLoadModalInfo(this.Xhr2); 
         this.Xhr2.setOnError(this.modalXhrError()); 
-        this.Stage=new ProjectStage(this);
         this.Constant=new ProjectConstant(this);  
-        this.Variable=new ProjectVariable(this);  
+        this.Variable=new ProjectVariable(this); 
+        this.Stage=new ProjectStage(this);
     }
     getXhrParm(type,task,method){
         return {

@@ -56,16 +56,6 @@ class ProjectStageCreate{
         this.Utilities = Parent.Items.Utilities;
         this.ProjectStageTool = new ProjectStageTool(this);
     }
-    getXhrParm(type,task,method){
-        return {
-                t:type,
-                u:this.Items.router+task,
-                c:true,
-                d:null,
-                o:this,
-                m:method
-            };
-    }
     create(type){
         console.clear();
         console.log('ProjectStageCreate::create(type)');
@@ -229,17 +219,6 @@ class ProjectStageCreate{
             console.log('ProjectStageCreate::details()');
             console.log(error);
             throw 'An Application Error Has Occurred!';
-        }
-    }
-    block(){
-        try{
-            console.log('ProjectStageCreate::block()');
-            this.Xhr.run(this.getXhrParm('GET','blockConst&id='+this.data['data']['value']['const'].i,'edit'));
-        }
-        catch(error){
-            console.log('ProjectConstCreate::block()');
-            console.log(error);
-            this.Html.showField(this.Modal.link['error'],'An Application Error Has Occurred!');
         }
     }
     edit(response){
@@ -818,10 +797,14 @@ class ProjectStageCreate{
                 console.log(self.StageData.Stage);
                 var fd = new FormData();
                     fd.append('stage',JSON.stringify(self.StageData.Stage));
-                var xhrRun=self.getXhrParm('POST','genProjectReportTestDoc','uploadFile');
-                    xhrRun.o=self.Items;
-                    xhrRun.d=fd;
-                    self.Xhr.run(xhrRun);  
+                    self.Xhr.run({
+                        t:'POST',
+                        u:window.router+'genProjectReportTestDoc',
+                        c:true,
+                        d:fd,
+                        o:self.Items,
+                        m:'uploadFile'
+                    }); 
             };
             this.ErrorStack.setBlockEle(doc);
         return doc;
@@ -884,7 +867,7 @@ class ProjectStageCreate{
                 var fd = new FormData();
                     fd.append('stage',JSON.stringify(self.StageData.Stage));
                 self.checkInputData(self.StageData.Stage);
-                self.sendInputData(fd);
+                self.sendInputData(fd,self);
             };
             //this.helplink['confirm']=confirm;
             this.ErrorStack.setBlockEle(confirm);
@@ -893,14 +876,17 @@ class ProjectStageCreate{
     /* 
      * SEND INPUT DATA TO SEND 
      */
-    sendInputData(fd){
+    sendInputData(fd,self){
         console.log('ProjectStageCreate::sendInputData()');
-        console.log(fd);
-        if(this.ErrorStack.check()){ return false;}
-        var xhrRun=this.getXhrParm('POST','confirmProjectStageText','setModalResponse');
-            xhrRun.o=this.Items;
-            xhrRun.d=fd;
-        this.Xhr.run(xhrRun);      
+        if(self.ErrorStack.check()){ return false;}
+        this.Xhr.run({
+                t:'POST',
+                u:window.router+'confirmProjectStageText',
+                c:true,
+                d:fd,
+                o:self.Stage,
+                m:'setResponse'
+        });      
     }
     checkInputData(data){
         console.log('ProjectStageCreate::checkInputData()');
@@ -935,7 +921,4 @@ class ProjectStageCreate{
         console.log(this.ErrorStack);
         console.log(this.ErrorStack.check());
     }
-
-
-
 }

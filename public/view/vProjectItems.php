@@ -75,7 +75,7 @@
                     <div class="form-group form-check-inline mt-0 ">
                     <label class="form-check-label">
                         <input type="checkbox" class="form-check-input" value="n"  onclick="Items.deleted(this)">
-                        <small class="text-danger" onclick="Items.deleted()">Pokaż usunięte</small>
+                        <small class="text-danger">Pokaż usunięte</small>
                     </label>
                     </div>
             </div>

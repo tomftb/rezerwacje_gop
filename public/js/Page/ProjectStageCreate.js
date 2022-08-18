@@ -38,6 +38,10 @@ class ProjectStageCreate{
     //};
     ErrorStack=new Object();
     Utilites = new Object();
+    Variable=new Object();
+    VariableList=new Object();
+    type='l';
+    
     constructor(Parent){
         console.log('ProjectStageCreate::constructor()');
         /*
@@ -55,19 +59,20 @@ class ProjectStageCreate{
         this.DocPreview = new DocPreview();
         this.Utilities = Parent.Items.Utilities;
         this.ProjectStageTool = new ProjectStageTool(this);
+        this.Variable=Parent.Items.Variable;
+        
     }
-    create(type){
-        console.clear();
-        console.log('ProjectStageCreate::create(type)');
+    prepare(response){
+        console.log('ProjectStageCreate::prepare()');
+        console.log(response);
         try{
-            /* SETUP EJECTION MULTIPLIER */
-            //this.ejectionMultiplier=parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
+            this.VariableList=this.Items.parseResponse(response);
             this.TabStop = new TabStop();
              /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
             /* SET STAGE CREATE TEXT DEFAULT DEPARTMENT LIST */
             this.Department=this.Stage.Property.department;
-            this.StageData = new StageData(this.Glossary,this.Stage.Property,type,null);
+            this.StageData = new StageData(this.Glossary,this.Stage.Property,this.type,null);
              /* SETUP CLEAR STAGE DATA */
             this.StageData.createDefault();
             console.log(this.ErrorStack);
@@ -80,6 +85,26 @@ class ProjectStageCreate{
         };
         /* SETUP MODAL */
         this.setUpModal();
+    }
+    create(type){
+        console.clear();
+        console.log('ProjectStageCreate::create(type)');
+        this.type=type;
+        try{
+            this.Xhr.run({
+                t:'GET',
+                u:window.router+'getProjectVariablesLike&u=0&v=0&b=0',
+                c:true,
+                d:null,
+                o:this,
+                m:'prepare'
+            });
+        } 
+        catch(err){
+            console.log('ProjectStageCreate::create()\r\nERROR:');
+            console.log(err);
+            throw 'An Application Error Has Occurred!';
+        };
     }
     setUpModal(){
         console.log('ProjectStageCreate::setUpModal()');
@@ -113,7 +138,7 @@ class ProjectStageCreate{
         /* IN ANOTHER BLOCK TRY CATCH TO PREVENT OPEN MODAL IF ERROR EXISTS TO HIDE ERROR SHOWED IN TABLE  */
         try{
             /* RUN MODAL */ 
-            this.Items.prepareModal('Dodaj etap projektu - lista','bg-info');
+            this.Items.prepareModal('Dodaj etap projektu - '+this.StageData.getTitle(),'bg-info');
         }
         catch(err){
             console.log('ProjectStageCreate::setUpModal()\r\nERROR:');
@@ -123,33 +148,16 @@ class ProjectStageCreate{
     }
     setUndoTask(self){
         var run = function(){
-                   let files = new Array();
-                    for(const prop in self.StageData.Stage.section){           
-                        for(const prop1 in self.StageData.Stage.section[prop].subsection){             
-                            for(const prop2 in self.StageData.Stage.section[prop].subsection[prop1].subsectionrow){
-                                //console.log(self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2]);
-                                console.log(self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image);
-                                for(const prop3 in self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image){
-                                    console.log(self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3]);
-                                    console.log(self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].property.uri);
-                                    if(self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data.tmp==='y'){
-                                        files.push(self.StageData.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].property.uri);
-                                    }
-                                    
-                                }
-                            }
-                        }
-                    }
-                    if(files.length<1){
-                        console.log(self);
-                        self.Items.closeModal();
-                        self.Items.reloadData(self.Stage,'setResponse','getprojectsstagelike&d=0&v=0&b=');
-                    }
-                    else{
-                        let ImageTool = new ProjectStageToolFile(self);
-                            ImageTool.deleteFiles(files,self.Stage.Items,'setModalResponse');  
-                    }
-                            
+            let files = self.StageData.getFiles();
+            if(files.length<1){
+                console.log(self);
+                self.Items.closeModal();
+                self.Items.reloadData(self.Stage,'setResponse','getprojectsstagelike&d=0&v=0&b=');
+            }
+            else{
+                let ImageTool = new ProjectStageToolFile(self);
+                    ImageTool.deleteFiles(files,self.Stage.Items,'setModalResponse');  
+            }                
        };
        return run;          
     }

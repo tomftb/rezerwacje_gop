@@ -39,6 +39,7 @@ final class ProjectItems extends Page{
         'Main/StageData.js',
         'Utilities/DocPreviewPage.js',
         'Utilities/DocPreview.js',
+        'Page/ProjectStageToolVariable.js',
         'Page/ProjectStageToolFile.js',
         'Page/ProjectStageTool.js',
         'Page/ProjectStageProperty.js',

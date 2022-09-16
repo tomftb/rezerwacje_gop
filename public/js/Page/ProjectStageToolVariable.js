@@ -185,6 +185,7 @@ class ProjectStageToolVariable{
                     self.Row.paragraph.variable.push(prop);
                     self.Row.paragraph.property.value+='['+prop[1]+']';
                     self.Helplink.text.value.value=tmpValue+'['+prop[1]+']';
+                    prop[3]='zmienna';
                     self.appendListRow(self.ChosenListEle,prop,self.Row.paragraph.variable.length - 1);
                 }
                 /* ON START OF INPUT */
@@ -245,7 +246,7 @@ class ProjectStageToolVariable{
             this.appendListRow(this.ChosenListEle,this.Row.paragraph['variable'][prop],prop);
         }
     }
-    listRow(variableProperty,idx){
+    getListRow(variableProperty,idx){
         var tr = document.createElement('tr');
         var ele='th';
             for(const prop in variableProperty){
@@ -255,18 +256,18 @@ class ProjectStageToolVariable{
                     tr.appendChild(td);
                     ele='td';  
             }
-            ele='th'; 
+
             /* OPTION COLUMN */
             this.getChosenVariablesAction(tr,variableProperty,idx);
             return tr;
     }
     prependListRow(ele,variableProperty,idx){
          /* ele -> tBody */
-         ele.prepend(this.listRow(variableProperty,idx));
+         ele.prepend(this.getListRow(variableProperty,idx));
     }
     appendListRow(ele,variableProperty,idx){
         /* ele -> tBody */
-         ele.append(this.listRow(variableProperty,idx));
+         ele.append(this.getListRow(variableProperty,idx));
     }
     getChosenVariablesAction(tr,prop,idx){
         var td = document.createElement('td');
@@ -484,6 +485,7 @@ class ProjectStageToolVariable{
                         //console.log(self.VariableList[prop][1]); 
                         console.log('found variable in VariableList');
                         self.Row.paragraph.variable.push(self.VariableList[prop]);
+                        self.VariableList[prop][3]='zmienna';
                         self.appendListRow(self.ChosenListEle,self.VariableList[prop],vCount);
                         //found=self.VariableList[prop];
                         vCount++;

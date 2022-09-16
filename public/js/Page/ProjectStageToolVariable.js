@@ -214,7 +214,7 @@ class ProjectStageToolVariable{
                     console.log(head);
                     console.log(tail);
                     self.Helplink.text.value.value=head+'['+prop[1]+']'+tail;
-                    
+                    self.Row.paragraph.property.value=head+'['+prop[1]+']'+tail;
                     /* FIX SELECTED AT END OF PROPERTY */
                     self.parseInputValue(self,self.Helplink.text.value.value);
                 }
@@ -226,6 +226,7 @@ class ProjectStageToolVariable{
                     console.log(head);
                     console.log(tail);
                     self.Helplink.text.value.value=head+'['+prop[1]+']'+tail;
+                    self.Row.paragraph.property.value=head+'['+prop[1]+']'+tail;
                     /* FIX SELECTED AT END OF PROPERTY */
                     self.parseInputValue(self,self.Helplink.text.value.value);
                 }
@@ -327,7 +328,10 @@ class ProjectStageToolVariable{
                 }
                 console.log('newValue');
                 console.log(newValue);
+                /* UPDATE INPUT VALUE */
                 self.Helplink.text.value.value=newValue;
+                /* UPDATE Row property value */
+                self.Row.paragraph.property.value=newValue;
                 /* REMOVE TABLE ROW */
                 tr.remove();
                 /* REMOVE VALUE FOR ARRAY VIA IDX */

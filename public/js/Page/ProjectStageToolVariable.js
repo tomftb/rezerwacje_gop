@@ -447,7 +447,7 @@ class ProjectStageToolVariable{
             for(var i = 0; i<value.length;i++){
                 char = value.substr(i, 1);
                 //console.log(char);
-                if(value.substr(i, 1)==='['){
+                if(char==='['){
                     /* [[[ is available */
                     //console.log('found open char');
                     open=true;

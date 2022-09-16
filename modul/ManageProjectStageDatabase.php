@@ -106,7 +106,7 @@ abstract class ManageProjectStageDatabase {
         }
     }
     private function assignVariableProperty(&$data,$id = 0){
-        $data->variable=$this->dbLink->squery("SELECT `id_variable`,`name`,`value`, CASE WHEN `type`='v' THEN 'zmienna' WHEN `type`='t' THEN 'tekst' ELSE 'error_type' END FROM `slo_project_stage_subsection_row_p_variable` WHERE `id_parent`=:id ORDER BY `id` ASC;",[':id'=>[$id,'INT']],'FETCH_ARRAY','fetchAll');
+        $data->variable=$this->dbLink->squery("SELECT `id_variable`,`name`,`value`, (CASE WHEN `type`='v' THEN 'zmienna' WHEN `type`='t' THEN 'tekst' ELSE 'error_type' END) as 'type' FROM `slo_project_stage_subsection_row_p_variable` WHERE `id_parent`=:id ORDER BY `id` ASC;",[':id'=>[$id,'INT']],'FETCH_ARRAY','fetchAll');        
     }
     protected function getStageFullData($id=0){
         $this->Log->log(0,"[".__METHOD__."] ID => ".$id);

@@ -105,6 +105,9 @@ abstract class ManageProjectStageDatabase {
                 );
         }
     }
+    private function assignVariableProperty(&$data,$id = 0){
+        $data->variable=$this->dbLink->squery("SELECT `id_variable`,`name`,`value`, CASE WHEN `type`='v' THEN 'zmienna' WHEN `type`='t' THEN 'tekst' ELSE 'error_type' END FROM `slo_project_stage_subsection_row_p_variable` WHERE `id_parent`=:id ORDER BY `id` ASC;",[':id'=>[$id,'INT']],'FETCH_ARRAY','fetchAll');
+    }
     protected function getStageFullData($id=0){
         $this->Log->log(0,"[".__METHOD__."] ID => ".$id);
         //$parm[':id']=[$id,'INT'];
@@ -165,6 +168,8 @@ abstract class ManageProjectStageDatabase {
             self::getStageEleProperty($data->{$k}->table,'slo_project_stage_subsection_row_t',$data->{$k}->data->id);
             /* SET TAB STOP */
             self::assignTabStopProperty($data->{$k}->paragraph,$data->{$k}->data->id);
+            /* SET VARIABLE */
+            self::assignVariableProperty($data->{$k}->paragraph,$data->{$k}->data->id);
         }
     }
     
@@ -403,6 +408,7 @@ abstract class ManageProjectStageDatabase {
         self::insertAttributes($IdRow,$data->paragraph,'slo_project_stage_subsection_row_p');
         /* INSERT SUBSECTION ROW TABSTOP */
         self::insertTabStop($IdRow,$data->paragraph->tabstop);
+        self::insertVariable($IdRow,$data->paragraph->variable);
         /*
          * INSERT list
          */
@@ -478,6 +484,23 @@ abstract class ManageProjectStageDatabase {
                 ];
                 $this->dbLink->query2(
                     "INSERT INTO `slo_project_stage_subsection_row_p_tabstop` (`id_parent`,`lp`,`position`,`measurement`,`measurementName`,`alignment`,`alignmentName`,`leadingSign`,`leadingSignName`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:id,:lp,:position,:measurement,:measurementName,:alignment,:alignmentName,:leadingSign,:leadingSignName,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
+                    ,array_merge($parm,$value,$this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm())
+                );
+        }
+    }
+     private function insertVariable($id=0,$data=[]){
+        $this->Log->log(0,"[".__METHOD__."]\r\n ID DB SUBSECTION ROW - ".$id);
+        $parm[':id']=[$id,'INT'];
+        $value=[];
+        foreach($data as $v){
+                $value=[
+                    'id_variable'=>[$v[0],'INT'],/* PDO NOT ACCEPT FLOAT */
+                    'name'=>[$v[1],'STR'],
+                    'value'=>[$v[2],'STR'],
+                    'type'=>['v','STR'] /* TO DO IN FUTURE v - variable, t - text */
+                ];
+                $this->dbLink->query2(
+                    "INSERT INTO `slo_project_stage_subsection_row_p_variable` (`id_parent`,`id_variable`,`name`,`value`,`type`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:id,:id_variable,:name,:value,:type,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
                     ,array_merge($parm,$value,$this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm())
                 );
         }
@@ -579,11 +602,11 @@ abstract class ManageProjectStageDatabase {
         self::deleteAttributes($v->data->id,'slo_project_stage_subsection_row_p');
         self::insertAttributes($v->data->id,$v->paragraph,'slo_project_stage_subsection_row_p');
         /* INSERT SUBSECTION ROW TABSTOP */
-        //print_r($parm);
         $this->dbLink->query2("DELETE FROM `slo_project_stage_subsection_row_p_tabstop` WHERE `id_parent`=:id;",$parm);
-        //print_r($v->data->id);
-        //print_r($v->paragraph->tabstop);
         self::insertTabStop($v->data->id,$v->paragraph->tabstop);
+        /* INSERT SUBSECTION ROW VARIABLE */
+        $this->dbLink->query2("DELETE FROM `slo_project_stage_subsection_row_p_variable` WHERE `id_parent`=:id;",$parm);
+        self::insertVariable($v->data->id,$v->paragraph->variable);
         /*
          * INSERT list
          */

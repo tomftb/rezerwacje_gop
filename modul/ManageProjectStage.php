@@ -84,7 +84,9 @@ class ManageProjectStage extends ManageProjectStageDatabase
     public function psDetails(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->utilities->setGet('id',$this->inpArray);
-        $data = parent::getStageFullData($this->inpArray['id']);
+        $data['stage'] = parent::getStageFullData($this->inpArray['id']);
+        $Variable = new ManageProjectVariable();
+        $data['variable'] = $Variable->getSimpleAll();
         $this->utilities->jsonResponseData($data);
     }
     private function setChangeState(){

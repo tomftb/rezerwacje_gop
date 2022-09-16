@@ -66,7 +66,8 @@ class ProjectStageCreate{
         console.log('ProjectStageCreate::prepare()');
         console.log(response);
         try{
-            this.VariableList=this.Items.parseResponse(response);
+            this.VariableList=this.Items.parseResponse(response).data.value;
+            console.log(this.VariableList);
             this.TabStop = new TabStop();
              /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
@@ -93,7 +94,7 @@ class ProjectStageCreate{
         try{
             this.Xhr.run({
                 t:'GET',
-                u:window.router+'getProjectVariablesLike&u=0&v=0&b=0',
+                u:window.router+'getProjectVariablesSimpleList&u=0&v=0&b=0',
                 c:true,
                 d:null,
                 o:this,
@@ -165,7 +166,9 @@ class ProjectStageCreate{
         try{
             /* SETUP STAGE DATA */
             this.StageData = new StageData(this.Glossary,this.Stage.Property,null);
-            this.StageData.setStage(this.Items.parseResponse(response).data);
+            var r = this.Items.parseResponse(response).data;
+            this.StageData.setStage(r['stage']);
+            this.VariableList=r['variable'];
         }catch(error){
             console.log('ProjectStageCreate::details()');
             console.log(error);
@@ -460,7 +463,7 @@ class ProjectStageCreate{
         mainDiv.appendChild(this.createSubsectionRow(isection,isub,iSubRow,subsectionrow,helplink));
         /* CREATE ERROR DIV */
         mainDiv.appendChild(this.createTextError(helplink[iSubRow]));  
-        this.ProjectStageTool.getControlTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow],mainDiv,this.TabStop);
+        this.ProjectStageTool.getControlTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow],mainDiv,this.TabStop,this.VariableList);
         /* SETUP HELPLINK */
         helplink[iSubRow]['all']=mainDiv;
         return mainDiv;

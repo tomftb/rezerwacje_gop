@@ -989,11 +989,11 @@ class ProjectStageTool{
         console.log(mainDivCol);
         return mainDivCol;
     }
-    createControl(label,ele){
+    createControl(label,ele,color,color2){
         /* CONTROL */
         var control = document.createElement('button');
             control.setAttribute('type','button');
-            control.classList.add('btn','btn-outline-dark','btn-sm');
+            control.classList.add('btn',color,'btn-sm');
             control.onclick = function (){
                 //console.log(this);
                 //console.log(ele);
@@ -1003,20 +1003,20 @@ class ProjectStageTool{
                 else{
                     ele.classList.add('d-none');
                 };
-                if(this.classList.contains('btn-outline-dark')){
-                    this.classList.remove('btn-outline-dark');
-                    this.classList.add('btn-dark');
+                if(this.classList.contains(color)){
+                    this.classList.remove(color);
+                    this.classList.add(color2);
                 }
                 else{
-                    this.classList.add('btn-outline-dark');
-                    this.classList.remove('btn-dark');
+                    this.classList.add(color);
+                    this.classList.remove(color2);
                 };
                 
             };
             control.innerText = label;
             return control; 
     }
-    getControlTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,mainDiv,TabStop){
+    getControlTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,mainDiv,TabStop,VariableList){
         console.log('ProjectStageCreate::getControlTool()');
         try{
              helplinkISubRow['tool']={};
@@ -1025,13 +1025,13 @@ class ProjectStageTool{
             /* CREATE TEXT TOOL */
             var textTabStopTool = this.getTabStopTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow.text,TabStop);
             /* CREATE TAB STOP TOOL */
-            var textTabStopToolControl = this.createControl('Tabulatory',textTabStopTool);
+            var textTabStopToolControl = this.createControl('Tabulatory',textTabStopTool,'btn-outline-dark','btn-dark');
             /* SET LINK TO tabstopTool */
                 helplinkISubRow.tool['tabstopControl']=textTabStopToolControl;
                 helplinkISubRow.tool['tabstop']=textTabStopTool;
             /* CREATE LIST TOOL */
             var listTool = this.getListTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow);
-            var listToolControl = this.createControl('Opcje listy',listTool);
+            var listToolControl = this.createControl('Opcje listy',listTool,'btn-outline-dark','btn-dark');
             /* SET LINK TO listTool */
                 helplinkISubRow.tool['listControl']=listToolControl;
                 helplinkISubRow.tool['list']=listTool;
@@ -1040,14 +1040,16 @@ class ProjectStageTool{
                 console.log(ImageTool);
                 ImageTool.setImage(subsectionrowISubRow);
                 ImageTool.setToolEle('img_'+isection.toString()+isub.toString()+iSubRow.toString());
+            var VariableTool = new ProjectStageToolVariable(this,isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,VariableList);
             var mainCol = this.Html.getCol(12);
                 mainCol.classList.add('mt-1','mb-1');
-            var Tool = new ToolFields([4,1,7]);
+            var Tool = new ToolFields([5,1,6]);
                 Tool.Field[0].classList.add('btn-group','btn-group-toggle');
-                Tool.set(0,this.createControl('Formatowanie',textTool));
+                Tool.set(0,this.createControl('Formatowanie',textTool,'btn-outline-dark','btn-dark'));
                 Tool.set(0,textTabStopToolControl);
                 Tool.set(0,listToolControl);
-                Tool.set(0,this.createControl('Obraz',ImageTool.getToolEle()));
+                Tool.set(0,this.createControl('Obraz',ImageTool.getToolEle(),'btn-outline-dark','btn-dark'));
+                Tool.set(0,this.createControl('Zmienne',VariableTool.getTool(),'btn-outline-dark','btn-dark'));
 
                 mainCol.appendChild(Tool.getMain());
                 mainDiv.appendChild(mainCol);    
@@ -1055,6 +1057,7 @@ class ProjectStageTool{
                 mainDiv.appendChild(textTabStopTool);  
                 mainDiv.appendChild(listTool);
                 mainDiv.appendChild(ImageTool.getToolEle());
+                mainDiv.appendChild(VariableTool.getTool());
         }
         catch(error){
             console.log('ProjectStageTool::getControlTool() ERROR');

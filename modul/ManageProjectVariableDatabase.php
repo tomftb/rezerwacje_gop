@@ -72,6 +72,13 @@ abstract class ManageProjectVariableDatabase {
         }
         return $data;
     }
+    public function getSimpleAll(){
+        $data=[];
+        foreach($this->dbLink->squery("SELECT s.`id` as 'i', s.`name` as 'n',s.`value` as 'v' FROM `slo_project_stage_variable` s WHERE s.`deleted`='0' and s.`hidden`='0' ORDER BY s.`id` ASC;",[]) as $v){
+            array_push($data,[$v['i'],$v['n'],html_entity_decode($v['v'])]);
+        }
+        return $data;
+    }
     protected function getVariableData($id=0){
         $this->Log->log(0,"[".__METHOD__."] ID RECORD => ".$id);
         $variable=$this->dbLink->squery("SELECT s.`id` as 'i',s.`name` as 'n',s.`value` as 'v',s.`create_user_full_name` as 'cu',s.`create_user_login` as 'cul',s.`create_date` as 'cd',s.`mod_user_login` as 'mu',s.`mod_date` as 'md',s.`buffer_user_id` as 'bu',s.`deleted` as 'wu',b.`login` as 'bl' FROM `slo_project_stage_variable` as s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id` WHERE s.`id`=:id AND s.`deleted`='0' LIMIT 0,1",[':id'=>[$id,'INT']]);

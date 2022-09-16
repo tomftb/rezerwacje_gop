@@ -124,7 +124,8 @@ final class UrlManager{
         ['getProjectVariableDelSlo','LOG_INTO_STAGE'],
         ['getProjectVariableHideSlo','LOG_INTO_STAGE'],
         ['pvHide','LOG_INTO_STAGE'],
-        ['pvDelete','LOG_INTO_STAGE']
+        ['pvDelete','LOG_INTO_STAGE'],
+        ['getProjectVariablesSimpleList','LOG_INTO_STAGE']
     ];
         
     public function __construct(){

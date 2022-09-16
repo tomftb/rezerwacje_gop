@@ -73,11 +73,7 @@ abstract class ManageProjectVariableDatabase {
         return $data;
     }
     public function getSimpleAll(){
-        $data=[];
-        foreach($this->dbLink->squery("SELECT s.`id` as 'i', s.`name` as 'n',s.`value` as 'v' FROM `slo_project_stage_variable` s WHERE s.`deleted`='0' and s.`hidden`='0' ORDER BY s.`id` ASC;",[]) as $v){
-            array_push($data,[$v['i'],$v['n'],html_entity_decode($v['v'])]);
-        }
-        return $data;
+        return $this->dbLink->squery("SELECT `id` as \"id_variable\",`name`,`value` FROM `slo_project_stage_variable` WHERE `deleted`='0' and `hidden`='0' ORDER BY `id` ASC;",[],'FETCH_OBJ','fetchAll'); 
     }
     protected function getVariableData($id=0){
         $this->Log->log(0,"[".__METHOD__."] ID RECORD => ".$id);

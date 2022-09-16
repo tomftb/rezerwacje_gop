@@ -533,6 +533,8 @@ class DocPreview extends DocPreviewPage{
             this.setTabStop(ele,row.paragraph);
             //span.style.marginLeft=this.Utilities.setCmToPx(paragraph.style[marginLeft]);//
         console.log(row);
+        /* PARSE VALUE - VARIABLE */
+        this.swapVariablePropertyWithValue(row.paragraph);
         var value = document.createTextNode(row.paragraph.property.value);
             ele.appendChild(value);
             for(const prop in row.image){
@@ -566,5 +568,84 @@ class DocPreview extends DocPreviewPage{
         if(style.fontStyle==='1'){
             ele.style.fontStyle='italic';
         }
+    }
+    swapVariablePropertyWithValue(paragraph){
+        
+        //&$value='',$variable=[]
+        console.log('DocPreview::swapVariablePropertyWithValue()');
+        console.log(paragraph.property.value);
+        console.log(paragraph.variable);
+        if(paragraph.variable.length===0){
+            return false;
+        }
+        var newValue='';
+        var open=false;
+        var tmpVariable='';
+        for(var i = 0; i<paragraph.property.value.length;i++){
+            let char = paragraph.property.value.substr(i,1);
+                //console.log(char);
+                if(char==='['){
+                    open=true;     
+                    newValue+=char;
+                    /*SKIP NEXT CHECK*/
+                    continue;
+                }
+                /*IN FUTER SKIP WHITE SPACES */
+                if(open===true && char!==']'){
+                    tmpVariable+=char;
+                    /*SKIP NEXT CHECK*/
+                    continue;
+                }
+                if(char===']' && open===true && tmpVariable!==''){
+                    newValue=this.swapProperty(newValue,tmpVariable,paragraph.variable);
+                    tmpVariable='';
+                    open=false; 
+                    /* skip */
+                    continue;
+                }
+                newValue+=char;
+            }
+            paragraph.property.value=newValue;
+        return true;
+    }
+    swapProperty(newValue,tmpVariable,variable){
+        console.log("DocPreview::swapProperty()");
+        console.log("tmp value:");
+        console.log(newValue);
+        console.log("tmp variable:");
+        console.log(tmpVariable);
+        var tmpVariableList=new Array();
+        var found=false;
+
+        for(var i=0; i<variable.length;i++){
+            console.log("act variable:");
+            console.log(variable[i]);
+            console.log(variable[i].name);
+            console.log(typeof(variable[i].name));
+            if(variable[i].name===tmpVariable){
+                console.log("found variable name");
+                //echo $tmpVariable."\r\n";
+                if(variable[i].type==='zmienna'){
+                    console.log(" -- zmienna -- ");
+                    /* cut last [ char ];*/
+                    newValue=newValue.substr(0,newValue.length -1);
+                    newValue+=variable[i].value;
+                    found=true;
+                }
+                /* SKIP */
+                continue;
+            }
+            //echo "set new variable list array\r\n";
+            
+            tmpVariableList.push(variable[i]);
+        }
+        /* IF NOT FOUND OR IS A VARIABLE TEXT */
+        if(!found){
+            newValue+=tmpVariable+']';
+        }
+        //echo "ACT TMP VARIABLE LIST:\r\n";
+       // print_r($tmpVariableList);
+        variable=tmpVariableList;
+        return newValue;
     }
 }

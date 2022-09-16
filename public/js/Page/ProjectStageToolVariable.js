@@ -167,43 +167,34 @@ class ProjectStageToolVariable{
                 console.log(self.selectInputEnd);
                 console.log(self.Helplink.text.value.value);
                 console.log(self.Helplink.text.value.value.length);
-                //console.log(this);
-                //console.log(prop);
-                //console.log(self);
-                //console.log(self.Helplink.text.value);
                 
                 /* ON REMOVE BLOCK INPUT */
-                
-                //let lastIdx=self.Row.paragraph.variable.length - 1;
-               
+
                 let tmpValue=self.Helplink.text.value.value;
                 let valueLength=self.Helplink.text.value.value.length;
-                //self.Helplink.text.value.innerHTML=tmpValue+'['+prop[1]+']';
+                //self.Helplink.text.value.innerHTML=tmpValue+'['+prop.name+']';
                 /* ON END OF INPUT */
                 if((self.selectInputStart===-1 && self.selectInputEnd===-1) || (self.selectInputStart===self.selectInputEnd && self.selectInputEnd===valueLength)){
                     console.log('END');
                     self.Row.paragraph.variable.push(prop);
-                    self.Row.paragraph.property.value+='['+prop[1]+']';
-                    self.Helplink.text.value.value=tmpValue+'['+prop[1]+']';
-                    prop[3]='zmienna';
+                    self.Row.paragraph.property.value+='['+prop.name+']';
+                    self.Helplink.text.value.value=tmpValue+'['+prop.name+']';
+                    prop['type']='zmienna';
                     self.appendListRow(self.ChosenListEle,prop,self.Row.paragraph.variable.length - 1);
                 }
                 /* ON START OF INPUT */
                 else if(self.selectInputStart===0 && self.selectInputEnd===0){
                     console.log('BEGINNING');
                     /* APPEND PROP TO INPUT START */
-                    self.Helplink.text.value.value='['+prop[1]+']'+tmpValue;
+                    self.Helplink.text.value.value='['+prop.name+']'+tmpValue;
                     /* APPEND PROPER TO Row paragraph object value */
-                    self.Row.paragraph.property.value='['+prop[1]+']'+tmpValue;
+                    self.Row.paragraph.property.value='['+prop.name+']'+tmpValue;
                     /* SET VARIABLE PROPERTY AT BEGINING OF ARRAY */
                     self.Row.paragraph.variable.unshift(prop);
                     /* REWRITE ALL CHOSEN LIST - IMPORTANT INDEXES! */               
                     self.Html.removeChilds(self.ChosenListEle);
                     self.setChosenVariables();
-                    
                     //self.prependListRow(self.ChosenListEle,prop,0);
-                  
-                   
                 }
                 else if(self.selectInputStart===self.selectInputEnd){
                     console.log('INSIDE - PARSE ALL INPUT');
@@ -213,8 +204,8 @@ class ProjectStageToolVariable{
                     console.log(self.Helplink.text.value.value);
                     console.log(head);
                     console.log(tail);
-                    self.Helplink.text.value.value=head+'['+prop[1]+']'+tail;
-                    self.Row.paragraph.property.value=head+'['+prop[1]+']'+tail;
+                    self.Helplink.text.value.value=head+'['+prop.name+']'+tail;
+                    self.Row.paragraph.property.value=head+'['+prop.name+']'+tail;
                     /* FIX SELECTED AT END OF PROPERTY */
                     self.parseInputValue(self,self.Helplink.text.value.value);
                 }
@@ -225,15 +216,14 @@ class ProjectStageToolVariable{
                     console.log(self.Helplink.text.value.value);
                     console.log(head);
                     console.log(tail);
-                    self.Helplink.text.value.value=head+'['+prop[1]+']'+tail;
-                    self.Row.paragraph.property.value=head+'['+prop[1]+']'+tail;
+                    self.Helplink.text.value.value=head+'['+prop.name+']'+tail;
+                    self.Row.paragraph.property.value=head+'['+prop.name+']'+tail;
                     /* FIX SELECTED AT END OF PROPERTY */
                     self.parseInputValue(self,self.Helplink.text.value.value);
                 }
                 else{
                     /* unavailable  */
                 }
-                
                 console.log(self.Helplink.text.value.value);
                 console.log(self.Row.paragraph.variable);
             };
@@ -243,8 +233,8 @@ class ProjectStageToolVariable{
         return this.Ele;
     }
     setChosenVariables(){
-        for(const prop in this.Row.paragraph['variable']){
-            this.appendListRow(this.ChosenListEle,this.Row.paragraph['variable'][prop],prop);
+        for(const prop in this.Row.paragraph.variable){
+            this.appendListRow(this.ChosenListEle,this.Row.paragraph.variable[prop],prop);
         }
     }
     getListRow(variableProperty,idx){
@@ -288,7 +278,7 @@ class ProjectStageToolVariable{
                 let variableOrdinalNumber =-1;
                 for(var i = 0;self.Row.paragraph.variable.length>i;i++){
                     //console.log(self.Row.paragraph.variable[i][1]);
-                    if(self.Row.paragraph.variable[i][1]===prop[1]){
+                    if(self.Row.paragraph.variable[i].name===prop.name){
                         //variableIdx.push(i);
                         //console.log('FOUND VARIABLE PROPERTY');
                         variableOrdinalNumber++;
@@ -307,7 +297,7 @@ class ProjectStageToolVariable{
                  * SPACES BETWEEN KEYS IN ARRAY ARE FOUND VARIABLE KEY
                  * */
                 console.log('SPLIT:');
-                var valueSplit=self.Helplink.text.value.value.split('['+prop[1]+']');
+                var valueSplit=self.Helplink.text.value.value.split('['+prop.name+']');
                 console.log(valueSplit);
 
                 var newValue='';
@@ -318,7 +308,7 @@ class ProjectStageToolVariable{
                     newValue+=tmpValue+valueSplit[j];       
                     if(j!==variableOrdinalNumber){
                         console.log('IDX NOT MATCH - ADD');
-                        tmpValue='['+prop[1]+']';
+                        tmpValue='['+prop.name+']';
                     }
                     else{
                         console.log('IDX MATCH - NOT ADD');
@@ -485,11 +475,11 @@ class ProjectStageToolVariable{
                 console.log('variable - '+list[i]);
                 /* LOOP OVER AVAILABLE VARIABLE LIST */
                 for(const prop in self.VariableList){
-                    if(list[i]===self.VariableList[prop][1]){
+                    if(list[i]===self.VariableList[prop].name){
                         //console.log(self.VariableList[prop][1]); 
                         console.log('found variable in VariableList');
                         self.Row.paragraph.variable.push(self.VariableList[prop]);
-                        self.VariableList[prop][3]='zmienna';
+                        self.VariableList[prop]['type']='zmienna';
                         self.appendListRow(self.ChosenListEle,self.VariableList[prop],vCount);
                         //found=self.VariableList[prop];
                         vCount++;

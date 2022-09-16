@@ -172,4 +172,90 @@ class ManageProjectVariable extends ManageProjectVariableDatabase{
     private function block($id=0,$user=''){
          $this->Items->setBlock($id,"slo_project_stage_variable","buffer_user_id",$user);
     }
+    private function swapVariablePropertyWithValue(&$value='',$variable=[]){
+        $this->Log->log(0,"[".__METHOD__."]");
+        if(count($variable)===0){
+            return false;
+        }
+        $newValue='';
+        $open=false;
+        $tmpVariable='';
+        //echo $value;
+        //print_r($variable);
+        for($i = 0; $i<strlen($value);$i++){
+                 $char = substr($value,$i, 1);
+                //console.log(char);
+                if($char==='['){
+                    $open=true;     
+                    $newValue.=$char;
+                    /*SKIP NEXT CHECK*/
+                    continue;
+                }
+                /*IN FUTER SKIP WHITE SPACES */
+                if($open===true && $char!==']'){
+                    $tmpVariable.=$char;
+                    /*SKIP NEXT CHECK*/
+                    continue;
+                }
+                if($char===']' && $open===true && $tmpVariable!==''){
+                    self::swapProperty($newValue,$tmpVariable,$variable);
+                    $tmpVariable='';
+                    $open=false; 
+                    /* skip */
+                    continue;
+                }
+                $newValue.=$char;
+            }
+            $value=$newValue;
+            //echo "new value = ".$newValue."\r\n";
+        return true;
+    }
+    private function swapProperty(&$newValue='',$tmpVariable='',&$variable=[]){
+        //echo "tmp value:\r\n";
+        //echo $newValue."\r\n";
+        //echo "tmp variable:\r\n";
+       // echo $tmpVariable."\r\n";
+        $tmpVariableList=[];
+        $found=false;
+        foreach($variable as $v){
+            //echo "act variable:\r\n";
+            //print_r($v);
+            if($v->name===$tmpVariable){
+                //echo "found variable name \r\n";
+                //echo $tmpVariable."\r\n";
+                if($v->type==='zmienna'){
+                    //echo " -- zmienna -- \r\n";
+                    /* cut last [ char ];*/
+                    $newValue=substr($newValue,0,-1);
+                    $newValue.=$v->value;
+                    //echo "NEW VALUE:\r\n";
+                   // echo $newValue."\r\n";
+                     $found=true;
+                    //$newValue=$v->value;
+                }
+                /* SKIP */
+                continue;
+            }
+            //echo "set new variable list array\r\n";
+            array_push($tmpVariableList,$v);
+        }
+        /* IF NOT FOUND OR IS A VARIABLE TEXT */
+        if(!$found){
+            $newValue.=$tmpVariable.']';
+        }
+        //echo "ACT TMP VARIABLE LIST:\r\n";
+       // print_r($tmpVariableList);
+        $variable=$tmpVariableList;
+        return false;
+    }
+    public function parseStageVariable(&$stage){
+        $this->Log->log(0,"[".__METHOD__."]");
+        foreach($stage->section as $s){
+            foreach($s->subsection as $su){
+                foreach($su->subsectionrow as $r){
+                    self::swapVariablePropertyWithValue($r->paragraph->property->value,$r->paragraph->variable);
+                }
+            }
+        }
+    }
 }

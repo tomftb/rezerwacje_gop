@@ -102,7 +102,7 @@ class ProjectStageToolVariable{
     }
     setAvailableList(Tool){
 
-        var table = this.getListTable();
+        var table = this.getListTable(['#','Nazwa:','Wartość:','Opcje:']);
             for(const prop in this.VariableList){
                 let tr = document.createElement('tr');
                 //let ele='th';
@@ -130,7 +130,7 @@ class ProjectStageToolVariable{
     }
     setChosenList(Tool){
        this.setTitle(Tool,'Wskazane:','h6');
-       var table = this.getListTable();
+       var table = this.getListTable(['#','Nazwa:','Wartość:','Typ:','Opcje:']);
             console.log(table);
             console.log(table.childNodes[1]);
             this.ChosenListEle = table.childNodes[1];   
@@ -138,31 +138,19 @@ class ProjectStageToolVariable{
        Tool.set(0,table);
        this.Html.addClass(Tool.Field[0],'d-none');
     }
-    getListTable(){
+    getListTable(head){
         var table = document.createElement('table');
             this.Html.addClass(table,['table','table-striped']);
         var tHead = document.createElement('thead');
         var tBody = document.createElement('tbody');
         var trHead = document.createElement('tr');
-        var th1 = document.createElement('th');
-            th1.setAttribute('scope','col');
-        var th1l = document.createTextNode('#');
-            th1.appendChild(th1l);
-        var th2 = document.createElement('th');
-            th2.setAttribute('scope','col');
-        var th2l = document.createTextNode('Nazwa:');
-            th2.appendChild(th2l);
-        var th3 = document.createElement('th');
-            th3.setAttribute('scope','col');
-        var th3l = document.createTextNode('Wartość:');
-            th3.appendChild(th3l);
-        var th4 = document.createElement('th');
-        var th4l = document.createTextNode('Opcje:');
-            th4.appendChild(th4l);
-            trHead.appendChild(th1);
-            trHead.appendChild(th2);
-            trHead.appendChild(th3);
-            trHead.appendChild(th4);
+            for(var i=0;i<head.length;i++){
+                let th = document.createElement('th');
+                    th.setAttribute('scope','col');
+                let thValue = document.createTextNode(head[i]);
+                    th.appendChild(thValue);
+                    trHead.append(th);
+            };
             tHead.appendChild(trHead);
             table.appendChild(tHead);
             table.appendChild(tBody);

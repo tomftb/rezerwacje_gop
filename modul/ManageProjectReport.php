@@ -60,9 +60,14 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         if(empty($post)){ Throw New Exception ('NO STAGE REPORT DATA',0);}
         if(!array_key_exists('stage', $post)){Throw New Exception ('POST STAGE DATA KEY NOT EXIST',1);}
         //$this->inpArray=json_decode($post['stage']);
-        //print_r($this->inpArray);
+        //print_r($post);
+        $dataJson=json_decode($post['stage']);
+        //print_r($dataJson);
         
-        $doc = new createDoc(json_decode($post['stage']),[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
+        /* SWAP VARIABLE PROPERTY KEY WITH VALUE */
+        $variable = New ManageProjectVariable();
+        $variable->parseStageVariable($dataJson);
+        $doc = new createDoc($dataJson,[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
         $doc->genReportStage();
         //echo "DOC NAME: ".$doc->getDocName();
         

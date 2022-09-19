@@ -4,19 +4,16 @@ class Error
     static div='';
     static divId='';
     
-    constructor() 
-    {
+    constructor() {
         console.log('Error::constructor()');
     }
-    checkStatusExist(d)
-    {
+    checkStatusExist(d){
         console.log('Error::checkStatusExist()');
         if (!d.hasOwnProperty("status")) {
             throw 'Key `status` not exist';
         }
     }
-    checkStatusResponse  (d)
-    {
+    checkStatusResponse  (d){
         /*
          * d => data
          * d['status'] => status
@@ -25,19 +22,17 @@ class Error
         console.log('Error::checkStatusResponse()\n STATUS: '+d['status']);
         //console.log(d);
         //this.clearError();
-        if(d['status']===1)
-        {
+        if(d['status']===1){
             Error.show(d['info']);
             Error.error=true;
         }
-        else if(d['status']===0)
-        {
+        else if(d['status']===0){
             Error.clear();
             Error.error=false;
         }
-        else
-        {
+        else{
             console.log('Error::checkStatusResponse() => wrong status => '+d['status']);
+            console.log(d);
             //console.log(d);
             alert('Error::ERROR OCCURED!');
             Error.error=true;

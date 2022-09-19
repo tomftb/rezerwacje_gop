@@ -11,6 +11,7 @@ final class Projekty extends Page{
         'Main/Footer.php'
         ];
     private $js=[
+        'Main/Html.js',
         'Main/Ajax.js',
         'Main/headerView.js',
         'Main/Table.js',

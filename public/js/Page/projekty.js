@@ -1,8 +1,8 @@
 var ajax = new Ajax();
 var error = new Error();
     //MyError.setDiv('errDiv-Adapted-overall');
-var report = new ProjectReport();
-    report.setAjax(ajax);
+var Report = new ProjectReport();
+    Report.setAjax(ajax);
 var table=new Table();
     table.setAjaxLink(ajax);
     table.setErrorLink(error,'errDiv-Adapted-overall');
@@ -149,93 +149,97 @@ table.setButtonsType('dropdown');
 
 function runFunction(response)
 {
-    console.log('===runFunction()===');
+    console.log('runFunction()');
     try{
         var dJson=JSON.parse(response);
-        // RUN FUNCTION
-        error.checkStatusExist(dJson);
-        projectData=dJson; 
-        console.log('FUNCTION TO RUN:\n'+dJson['data']['function']);
-    switch(dJson['data']['function'])
-    {
-        case 'pCreate':
-                fieldDisabled='n';
-                projectManage('Dodaj','DODAJ PROJEKT:','info');
-            break;
-        case 'pDetails':
-                //pDetails(d,'Edytuj');
-                actProject=dJson['data']['value']['project'];
-                fieldDisabled='y';
-                /* INFO */
-                document.getElementById('AdaptedModalInfo').appendChild(createTag("Project ID: "+actProject.i+", Create user: "+actProject.cu+" ("+actProject.cum+"), Create date: "+actProject.du,'small','text-left text-secondary ml-1'));
-                projectManage('Edytuj','SZCZEGÓŁY PROJEKTU:','info');
-            break;
-        case 'pDoc':
-                actProject=dJson['data']['value']['project'];
-                fieldDisabled='y';
-                projectDocManage('Edytuj','DOKUMENTY PROJEKTU:','info');
-                break;
-        case 'cModal':
-                reloadData();
-            break;
-        case 'pEmail':
-                pEmail();
-            break;
-        case 'pClose':
-                projectRemove('Zamknij','ZAMKNIJ PROJEKT:','secondary');
-            break;
-        case 'pDelete':
-                projectRemove('Usuń','USUŃ PROJEKT:','danger');
-            break;
-        case 'downloadProjectPdf':
-        case 'downloadProjectDoc':
-        case 'downloadProjectReportDoc':
-                console.log(dJson['data']['value']);
-                var win = window.open('router.php?task='+dJson['data']['function']+'&file='+dJson['data']['value'], '_blank');
-                win.focus();
-            break;
-        case 'pTeamOff':
-                actProject=dJson['data']['value']['project'];
-                pTeam(false);
-                break;
-        case 'pTeam':
-                clearAdaptedModalData();
-                setAvaTeam();
-                pTeam(true);
-                break;
-        case 'showReportPreview':
-                console.log(dJson);
-                report.showReportPreview(dJson['data']['value']);
-                break;
-        case 'pReportOff':
-                //pReport();
-                report.setData(dJson,loggedUserPerm);
-                report.setErrorStack(new ErrorStack());
-                report.create();
-                break;
-        case 'runMain':
-                loggedUserPerm=dJson['data']['value']['perm'];
-                setButtonDisplay(document.getElementById('createData'),'ADD_PROJ');
-        case 'sAll':
-                displayAll(dJson);
-            break;
-        default:
-                console.log('DEFAULT');
-                console.log(response);
-                dJson['status']=1;
-                if(dJson['info']===''){
-                    dJson['info']='Wrong function to run '+dJson['data']['function'];
-                };
-                error.checkStatusResponse(dJson);
-            break;
-    }
+            error.checkStatusExist(dJson);
+            projectData=dJson; 
     }
     catch(e){
-        console.log(response);
         console.log(e);
-        response['status']=1;
-        response['info']=e;
-        error.checkStatusResponse(response);
+        return false;
+    }
+    try{
+        console.log('FUNCTION TO RUN:\n'+dJson['data']['function']);
+        switch(dJson['data']['function'])
+        {
+            case 'pCreate':
+                    fieldDisabled='n';
+                    projectManage('Dodaj','DODAJ PROJEKT:','info');
+                break;
+            case 'pDetails':
+                    //pDetails(d,'Edytuj');
+                    actProject=dJson['data']['value']['project'];
+                    fieldDisabled='y';
+                    /* INFO */
+                    document.getElementById('AdaptedModalInfo').appendChild(createTag("Project ID: "+actProject.i+", Create user: "+actProject.cu+" ("+actProject.cum+"), Create date: "+actProject.du,'small','text-left text-secondary ml-1'));
+                    projectManage('Edytuj','SZCZEGÓŁY PROJEKTU:','info');
+                break;
+            case 'pDoc':
+                    actProject=dJson['data']['value']['project'];
+                    fieldDisabled='y';
+                    projectDocManage('Edytuj','DOKUMENTY PROJEKTU:','info');
+                    break;
+            case 'cModal':
+                    reloadData();
+                break;
+            case 'pEmail':
+                    pEmail();
+                break;
+            case 'pClose':
+                    projectRemove('Zamknij','ZAMKNIJ PROJEKT:','secondary');
+                break;
+            case 'pDelete':
+                    projectRemove('Usuń','USUŃ PROJEKT:','danger');
+                break;
+            case 'downloadProjectPdf':
+            case 'downloadProjectDoc':
+            case 'downloadProjectReportDoc':
+                    console.log(dJson['data']['value']);
+                    var win = window.open('router.php?task='+dJson['data']['function']+'&file='+dJson['data']['value'], '_blank');
+                    win.focus();
+                break;
+            case 'pTeamOff':
+                    actProject=dJson['data']['value']['project'];
+                    pTeam(false);
+                    break;
+            case 'pTeam':
+                    clearAdaptedModalData();
+                    setAvaTeam();
+                    pTeam(true);
+                    break;
+            case 'showReportPreview':
+                    console.log(dJson);
+                    Report.showReportPreview(dJson['data']['value']);
+                    break;
+            case 'pReportOff':
+                    Report.setData(dJson,loggedUserPerm);
+                    Report.setErrorStack(new ErrorStack());
+                    Report.create();
+                    break;
+            case 'runMain':
+                    loggedUserPerm=dJson['data']['value']['perm'];
+                    setButtonDisplay(document.getElementById('createData'),'ADD_PROJ');
+            case 'sAll':
+                    displayAll(dJson);
+                break;
+            default:
+                    console.log('DEFAULT');
+                    console.log(response);
+                    dJson['status']=1;
+                    if(dJson['info']===''){
+                        dJson['info']='Wrong function to run '+dJson['data']['function'];
+                    };
+                    error.checkStatusResponse(dJson);
+                break;
+        }
+    }
+    catch(e){
+        console.log(dJson);
+        console.log(e);
+        dJson['status']=1;
+        dJson['info']=e;
+        error.checkStatusResponse(dJson);
     }
 }
 function pEmail()

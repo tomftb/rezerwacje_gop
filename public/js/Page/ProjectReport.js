@@ -1,56 +1,40 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-class ProjectReport
+class ProjectReport extends ProjectReportPreview
 {
-    static modal=new Object();
-    static stageData=new Array();
+
+    stageData=new Array();
     stageActData=new Array();
-    static projectId='';
-    static fieldCounter=0;
-    static perm=new Array();
-    static defaultFilePostion='top';
-    static imgUrl='http://rezerwacje-gop.local:8080/router.php?task=downloadProjectReportImage&file=';
-    static link={
-        dynamicData:new Object(),
-        adaptedDynamicData:new Object(),
-        buttons:new Object(),
-        final:new Object(),
-        overAllErr:new Object(),
-        info:new Object(),
-        extra:new Object(),
-        allProjectReportData:new Object(),
-        previewProjectReportData:new Object(),
-        form:new Object()
-    }
-    static fileProp={
+    projectId='';
+    fieldCounter=0;
+    perm=new Array();
+    defaultFilePostion='top';
+    imgUrl='http://rezerwacje-gop.local:8080/router.php?task=downloadProjectReportImage&file=';
+
+    fileProp={
         max:20971520, /* 20 MB 1024 * 1024 * 20 */
         type:[
             'image/jpeg','image/bmp','image/png','image/gif','image/jpg'
         ]
     };
-    static actStage=new Object();
-    static confirmBtn;
-    static ErrorStack=new Object();
-    static Ajax=new Object();
+    actStage=new Object();
+    confirmBtn;
+    ErrorStack=new Object();
+    Ajax=new Object();
     
     constructor() {
         console.log('ProjectReport::constructor()');
-       
+        super();
     }
     setErrorStack(obj){
         console.log('ProjectReport::setErrorStack(obj)');
-        ProjectReport.ErrorStack=obj;
-        console.log(ProjectReport.ErrorStack);
+        this.ErrorStack=obj;
+        console.log(this.ErrorStack);
     }
     setAjax(obj){
         console.log('ProjectReport::setAjax(obj)');
-        ProjectReport.Ajax=obj;
-        console.log(ProjectReport.Ajax);
+        this.Ajax=obj;
+        console.log(this.Ajax);
     }
-    static getFormName(){
+    getFormName(){
         /* SIMILAR TO CONST */
         return 'setProjectReport';
     }
@@ -58,60 +42,60 @@ class ProjectReport
         /* TO DO => PARSE RESPONSE STATUS */
         //console.log(projectStageData);
         this.stageActData=projectStageData['data']['value']['act'];
-        ProjectReport.stageData=projectStageData['data']['value']['data'];
-        ProjectReport.projectId=projectStageData['data']['value']['id'];
-        ProjectReport.perm=perm;
-        //console.log(ProjectReport.perm);
+        this.stageData=projectStageData['data']['value']['data'];
+        this.projectId=projectStageData['data']['value']['id'];
+        this.perm=perm;
+        //console.log(this.perm);
         /* TO DO +. DYNAMIC CHANGE */
-        //ProjectReport.formName=projectStageData['data']['function'];
+        //this.formName=projectStageData['data']['function'];
     }
-    static showProjectReportPreview(){
+    showProjectReportPreview(){
         console.log('ProjectReport::showProjectReportPreview()');
         /*
          * PREVIEW DIV
          * f => files
          */
-        console.log(ProjectReport.link.dynamicData);
-        console.log(ProjectReport.actStage);
+        console.log(this.Modal.link['dynamic']);
+        console.log(this.actStage);
         /* SET DATA */
-        ProjectReport.setProjectReportPreviewData();
+        this.setProjectReportPreviewData();
         
         
         /* CREATE AVAILABLE STAGE DATA */
-        for(const prop in ProjectReport.actStage){
-                ProjectReport.link.previewProjectReportData.appendChild(ProjectReport.createDiv(ProjectReport.actStage[prop].t,'col-12'));
-                for(const prop2 in ProjectReport.actStage[prop].v){
+        for(const prop in this.actStage){
+                this.Modal.link['selectedStages'].appendChild(this.createDiv(this.actStage[prop].t,'col-12'));
+                for(const prop2 in this.actStage[prop].v){
                     /*
                      * CHECK FILE POSITION
                      */
-                    switch (ProjectReport.actStage[prop].v[prop2].fp) {
+                    switch (this.actStage[prop].v[prop2].fp) {
                         case 'top':
                             console.log('top');
-                            ProjectReport.setupPreviewImage(ProjectReport.actStage[prop].v[prop2],ProjectReport.link.previewProjectReportData,'col-12 text-center');
-                            ProjectReport.link.previewProjectReportData.appendChild(ProjectReport.createDiv(ProjectReport.actStage[prop].v[prop2].v,'col-12'));
+                            this.setupPreviewImage(this.actStage[prop].v[prop2],this.Modal.link['selectedStages'],'col-12 text-center');
+                            this.Modal.link['selectedStages'].appendChild(this.createDiv(this.actStage[prop].v[prop2].v,'col-12'));
                             break;
                         case 'bottom':
                             console.log('bottom');
-                            ProjectReport.link.previewProjectReportData.appendChild(ProjectReport.createDiv(ProjectReport.actStage[prop].v[prop2].v,'col-12'));
-                            ProjectReport.setupPreviewImage(ProjectReport.actStage[prop].v[prop2],ProjectReport.link.previewProjectReportData,'col-12 text-center');
+                            this.Modal.link['selectedStages'].appendChild(this.createDiv(this.actStage[prop].v[prop2].v,'col-12'));
+                            this.setupPreviewImage(this.actStage[prop].v[prop2],this.Modal.link['selectedStages'],'col-12 text-center');
                             break;
                         case 'left':
                             console.log('left');
-                            ProjectReport.setupPreviewImage(ProjectReport.actStage[prop].v[prop2],ProjectReport.link.previewProjectReportData,'col-6 text-center');
-                            ProjectReport.link.previewProjectReportData.appendChild(ProjectReport.createDiv(ProjectReport.actStage[prop].v[prop2].v,'col-6'));
+                            this.setupPreviewImage(this.actStage[prop].v[prop2],this.Modal.link['selectedStages'],'col-6 text-center');
+                            this.Modal.link['selectedStages'].appendChild(this.createDiv(this.actStage[prop].v[prop2].v,'col-6'));
                             break;
                         case 'right':
                             console.log('right');
-                            ProjectReport.link.previewProjectReportData.appendChild(ProjectReport.createDiv(ProjectReport.actStage[prop].v[prop2].v,'col-6'));
-                            ProjectReport.setupPreviewImage(ProjectReport.actStage[prop].v[prop2],ProjectReport.link.previewProjectReportData,'col-6 text-center');              
+                            this.Modal.link['selectedStages'].appendChild(this.createDiv(this.actStage[prop].v[prop2].v,'col-6'));
+                            this.setupPreviewImage(this.actStage[prop].v[prop2],this.Modal.link['selectedStages'],'col-6 text-center');              
                             break;
                         default:
-                            console.log(`WRONG POSITION ${ProjectReport.actStage[prop].v[prop2].fp}`);
+                            console.log(`WRONG POSITION ${this.actStage[prop].v[prop2].fp}`);
                       }
                 }
         } 
     }
-    static setupPreviewImage(v,ele,colClass){
+    setupPreviewImage(v,ele,colClass){
         console.log('ProjectReport::setupPreviewImage()');
         console.log(v);
          /*
@@ -122,129 +106,131 @@ class ProjectReport
             console.log('FILE INSERTED');
             var eleImg=document.getElementById(v['f']).files[0];
             var src=URL.createObjectURL(eleImg);
-            ele.appendChild(ProjectReport.addImg(src,eleImg.name,colClass));
+            ele.appendChild(this.addImg(src,eleImg.name,colClass));
             return true;
         }
         if(v.fa){
             console.log('FILE ACTUALL');
-            ele.appendChild(ProjectReport.addImg(ProjectReport.imgUrl+v.fa,v.fo,colClass));  
+            ele.appendChild(this.addImg(this.imgUrl+v.fa,v.fo,colClass));  
             return true;
         }
     }
-    static addImg(imgSrc,imgKey,colClass){
+    addImg(imgSrc,imgKey,colClass){
         let img=document.createElement('img');
             img.setAttribute('class','img-fluid');
             img.setAttribute('src',imgSrc);
             img.setAttribute('alt',imgKey);
-        let div=ProjectReport.createDiv('',colClass);
+        let div=this.createDiv('',colClass);
             div.appendChild(img);
             return div;
     }
     setDefaultData(){
         console.log('ProjectReport::setDefaultData()');
-        console.log(ProjectReport.actStage);
-        for(const prop in ProjectReport.actStage){
-            delete ProjectReport.actStage[prop];
+        console.log(this.actStage);
+        for(const prop in this.actStage){
+            delete this.actStage[prop];
         };
-        ProjectReport.fieldCounter=0;
+        this.fieldCounter=0;
     }
     create(){
-        console.log('ProjectReport::create()');
-        this.setDefaultData();
-        prepareModal('Raport:','bg-primary');
-        this.setModal(document.getElementById('AdaptedModal'));
-        this.createLinks();
-        this.createButtons();   
+        try{
+            console.log('ProjectReport::create()');
+            this.setDefaultData();            
+            this.Modal.setLink();
+            this.Modal.clearData();
+            /* createHtmlElement ?? */
+            this.Modal.setHead('Raport:','bg-primary');
+            this.createButtons();   
+      
+        var rowDivResult=document.createElement('div');/* ALL */
+            rowDivResult.setAttribute('class','row d-none');
+            rowDivResult.setAttribute('style','border:1px solid #b3b3b3; width:800px;margin-left:150px;margin-bottom:10px;');
+            rowDivResult.setAttribute('id','previewProjectReportData');
 
-    var rowDiv=document.createElement('div');/* ALL */
-        rowDiv.setAttribute('class','row block');
-        rowDiv.setAttribute('id','allProjectReportData');
-    var rowDivResult=document.createElement('div');/* ALL */
-        rowDivResult.setAttribute('class','row d-none');
-        rowDivResult.setAttribute('style','border:1px solid #b3b3b3; width:800px;margin-left:150px;margin-bottom:10px;');
-        rowDivResult.setAttribute('id','previewProjectReportData');
-    //var rowDivResultInside=document.createElement('div');/* ALL */
-    //    rowDivResultInside.setAttribute('class','row d-none');
-    //    rowDivResultInside.setAttribute('style','width:400px;');
-    //    rowDivResultInside.setAttribute('id','previewProjectReportData');   
-    var optionDiv=document.createElement('div');
-        optionDiv.setAttribute('class','col-md-6');
-        optionDiv.setAttribute('id','staticData');
-    var rowLabel=document.createElement('div');
-        rowLabel.setAttribute('class','row pl-1 pr-1');
-    var rowData=document.createElement('div');
-        rowLabel.setAttribute('class','row pl-1 pr-1');
-    var optionLabel=createTag('Dostępne etapy projektu:','h5','text-info');
-        rowLabel.appendChild(optionLabel);
-        optionDiv.appendChild(rowLabel);
-        this.createAvaliableStage(rowData);
-        optionDiv.appendChild(rowData);
-        
-    var dataDiv=document.createElement('div');
-        dataDiv.setAttribute('class','col-md-6');
-        dataDiv.setAttribute('id','dynamicData');
-    var dataDivRowLabel=document.createElement('div');
-        dataDivRowLabel.setAttribute('class','row pl-1 pr-1');
-    var dataDivRow=document.createElement('div');
-        dataDivRow.setAttribute('class','row pl-1 pr-1');
-    var dataLabel=createTag('Aktualny raport:','h5','text-center text-info'); 
-        dataDivRowLabel.appendChild(dataLabel);
-        dataDiv.appendChild(dataDivRowLabel);
-        dataDiv.appendChild(this.setForm());
-        
-        dataDiv.childNodes[1].appendChild(dataDivRow);
-        
-        rowDiv.appendChild(optionDiv);
-        rowDiv.appendChild(dataDiv); 
-        //rowDivResult.appendChild(rowDivResultInside);
-        ProjectReport.link.adaptedDynamicData.appendChild(rowDiv);
-        ProjectReport.link.adaptedDynamicData.appendChild(rowDivResult);
-        ProjectReport.link.allProjectReportData=ProjectReport.link.adaptedDynamicData.childNodes[0];
-        ProjectReport.link.previewProjectReportData=ProjectReport.link.adaptedDynamicData.childNodes[1];
-        console.log(ProjectReport.link.adaptedDynamicData);
-        /* ADD FORM TO DIV RESULT */
-        /* APPEND CURRENT STAGE DATA */
-        ProjectReport.link.form=ProjectReport.link.adaptedDynamicData.childNodes[0].childNodes[1].childNodes[1];
-         /* ADD DYNAMIC STAGE SHORTCUT */
-        ProjectReport.link.dynamicData=ProjectReport.link.adaptedDynamicData.childNodes[0].childNodes[1].childNodes[1].childNodes[1];
-        this.addCurrentStageData();
-       
-        
-        console.log(rowDiv);
-        ProjectReport.ErrorStack.setBlock(ProjectReport.confirmBtn);
-        //ErrorStack.setBlock(ProjectReport.stackName,ProjectReport.confirmBtn);
+            this.Modal.link['adapted'].appendChild(this.getReportHead());
+            this.Modal.link['adapted'].appendChild(this.getReportDataBody());
+            this.Modal.link['adapted'].appendChild(rowDivResult); 
+            this.addCurrentStageData();
+            this.ErrorStack.setBlock(this.confirmBtn);
+             console.log(this.Modal.link['adapted']);
+
+        }
+        catch(e){
+            console.log(e);
+            this.Html.removeClass(this.Modal.link['error'],'d-none');
+            this.Modal.link.error.innerHTML=e;
+        }
     }
-    createLinks(){
-        console.log('ProjectReport::createLinks()');
-        console.log(ProjectReport.modal);
-        console.log(ProjectReport.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0]); 
-        ProjectReport.link.adaptedDynamicData=ProjectReport.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[1].childNodes[0];
-        ProjectReport.link.buttons=ProjectReport.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[2].childNodes[0].childNodes[0];
-        ProjectReport.link.extra=ProjectReport.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[4];
-        ProjectReport.link.overAllErr=ProjectReport.modal.childNodes[0].childNodes[0].childNodes[1].childNodes[3];
-        ProjectReport.link.info=ProjectReport.modal.childNodes[0].childNodes[0].childNodes[2].childNodes[0];
+    getReportHead(){
+        console.log('ProjectReport::getReportHead()');
+        var mainRow=this.Html.getRow();
+        return mainRow;
+    }
+    getReportDataBody(){
+        console.log('ProjectReport::getReportDataBody()');
+        /* */
+        var rowDiv=document.createElement('div');/* ALL */
+            rowDiv.setAttribute('class','row block');
+            rowDiv.setAttribute('id','allProjectReportData');
+        /* */
+        var optionDiv=document.createElement('div');
+            optionDiv.setAttribute('class','col-md-6');
+            optionDiv.setAttribute('id','staticData');
+        var rowLabel=document.createElement('div');
+            rowLabel.setAttribute('class','row pl-1 pr-1');
+        var rowData=document.createElement('div');
+            rowLabel.setAttribute('class','row pl-1 pr-1');
+        var optionLabel=createTag('Dostępne etapy projektu:','h5','text-info');
+            rowLabel.appendChild(optionLabel);
+            optionDiv.appendChild(rowLabel);
+            this.createAvaliableStage(rowData);
+            optionDiv.appendChild(rowData);
+        /* */
+        var dataDiv=document.createElement('div');
+            dataDiv.setAttribute('class','col-md-6');
+            dataDiv.setAttribute('id','dynamicData');
+        var dataDivRowLabel=document.createElement('div');
+            dataDivRowLabel.setAttribute('class','row pl-1 pr-1');
+        var dataDivRow=document.createElement('div');
+            dataDivRow.setAttribute('class','row pl-1 pr-1');
+        var dataLabel=createTag('Aktualny raport:','h5','text-center text-info'); 
+            dataDivRowLabel.appendChild(dataLabel);
+            dataDiv.appendChild(dataDivRowLabel);
+            dataDiv.appendChild(this.setForm());
+            /* APPEND LINK DYNAMIC DATA TO FORM */
+            this.Modal.link['form'].appendChild(dataDivRow);
+
+            /* APPEND */
+            rowDiv.appendChild(optionDiv);
+            rowDiv.appendChild(dataDiv); 
+            console.log(rowDiv);
+             /* APPEND AVAILABLE STAGE DATA */
+            this.Modal.addLink('availableStages',optionDiv);
+             /* APPEND CURRENT STAGE DATA */
+            this.Modal.addLink('selectedStages',dataDiv);
+             /* ADD DYNAMIC STAGE SHORTCUT */
+            this.Modal.addLink('dynamic',dataDivRow);
+            return rowDiv;
     }
     createButtons(){
-        ProjectReport.link.buttons.appendChild(ProjectReport.btnCancelProjectReport());
-        ProjectReport.link.buttons.appendChild(ProjectReport.btnShowProjectReport());
-        ProjectReport.link.buttons.appendChild(ProjectReport.btnExportToDoc());
-        ProjectReport.link.buttons.appendChild(ProjectReport.btnConfirmProjectReport());
-    }
-    setModal(modal){
-        console.log('ProjectReport::setModal()');
-        ProjectReport.modal=modal;
+        this.Modal.link['button'].appendChild(this.btnCancelProjectReport());
+        this.Modal.link['button'].appendChild(this.btnShowProjectReport());
+        this.Modal.link['button'].appendChild(this.btnExportToDoc());
+        this.Modal.link['button'].appendChild(this.btnConfirmProjectReport());
     }
     setForm(){
         console.log('ProjectReport::setForm()');
-        var form = createForm('POST',ProjectReport.getFormName(),'form-horizontal','OFF');  
-        form.appendChild(createInput('hidden','id',ProjectReport.projectId,'form-control','','n'));
+        var form = createForm('POST',this.getFormName(),'form-horizontal','OFF');  
+            form.appendChild(createInput('hidden','id',this.projectId,'form-control','','n'));
+        /* SET FORM LINK */
+        this.Modal.addLink('form',form);
         return form;
     }
     createAvaliableStage(ele){
-        for(const prop in ProjectReport.stageData){
+        for(const prop in this.stageData){
             var divRowStage=createTag('','div','col-12 border border-info mt-1 mb-1 rounded');
             this.createStageHead(divRowStage,prop);
-            for(const propBody in ProjectReport.stageData[prop]['v']){
+            for(const propBody in this.stageData[prop]['v']){
                 this.createStageBody(divRowStage,prop,propBody);
             }
             this.createStageFooter(divRowStage,prop);
@@ -257,11 +243,11 @@ class ProjectReport
         var divRowHeadN=createTag('','div','col-1 bg-info text-white border-bottom border-info text-center pt-3');  
         var divRowHeadT=createTag('','div','col-10 border-bottom border-info pt-3'); 
         var divRowHeadA=createTag('','div','col-1 border-bottom border-info pl-1'); 
-        var number=createTag(ProjectReport.stageData[prop]['n'],'span',''); 
+        var number=createTag(this.stageData[prop]['n'],'span',''); 
         //var pMain=createTag('','p','');    
             divRowHeadN.appendChild(number);
-            divRowHeadT.innerHTML=ProjectReport.stageData[prop]['t'];
-            divRowHeadA.appendChild(this.addBtn(ProjectReport.stageData[prop]['i']));
+            divRowHeadT.innerHTML=this.stageData[prop]['t'];
+            divRowHeadA.appendChild(this.addBtn(this.stageData[prop]['i']));
             //divRowHead.appendChild(pMain);
         divRow.appendChild(divRowHeadN);
         divRow.appendChild(divRowHeadT);
@@ -272,137 +258,137 @@ class ProjectReport
         //console.log('ProjectReport::createStageBody()');
         var divRowBody=createTag('','div','row');
         //var pMain=createTag('','p','');    
-            divRowBody.innerHTML=ProjectReport.stageData[prop]['v'][propBody]['v'];
+            divRowBody.innerHTML=this.stageData[prop]['v'][propBody]['v'];
             //divRowBody.appendChild(pMain);
             ele.appendChild(divRowBody);
     }
     createStageFooter(ele,prop){
         //console.log('ProjectReport::createStageFooter()');
         var div=createTag('','div','row border-top border-info text-secondary');     
-            div.innerHTML='<small>Stage ID: '+ProjectReport.stageData[prop]['i']+', Create user: '+ProjectReport.stageData[prop]['cu']+'</small>';
+            div.innerHTML='<small>Stage ID: '+this.stageData[prop]['i']+', Create user: '+this.stageData[prop]['cu']+'</small>';
         ele.appendChild(div);
     }
 
     addCurrentStageData(){
         console.log('ProjectReport::addCurrentStageData()');
-        console.log( ProjectReport.link.dynamicData);
+        console.log( this.Modal.link['dynamic']);
         //console.log(this.stageActData);
         /* ADD FORM */
         
         for(const prop in this.stageActData ){
             /* SET DATA */
-            ProjectReport.setActStageData(ProjectReport.fieldCounter,this.stageActData[prop]['n'],this.stageActData[prop]['t'],this.stageActData[prop]['data']);
-            ProjectReport.link.dynamicData.appendChild(ProjectReport.editedStageField());
+            this.setActStageData(this.fieldCounter,this.stageActData[prop]['n'],this.stageActData[prop]['t'],this.stageActData[prop]['data']);
+            this.Modal.link['dynamic'].appendChild(this.editedStageField());
         }
     }
-    static addStageData(idp){
-        ProjectReport.getStageData(idp);
+    addStageData(idp){
+        this.getStageData(idp);
         //console.log(ele);
-        ProjectReport.link.dynamicData.appendChild(ProjectReport.editedStageField());
+        this.Modal.link['dynamic'].appendChild(this.editedStageField());
     }
-    static getStageData(idp){
+    getStageData(idp){
         console.log('ProjectReport::getStageData('+idp+')');
-        //console.log(ProjectReport.stageData);
+        //console.log(this.stageData);
          /* GET NUMBER, TITLE, VALUE */
-        for(const prop in ProjectReport.stageData){
-            if(parseInt(ProjectReport.stageData[prop]['i'],10)===parseInt(idp,10)){
-                console.log(ProjectReport.stageData[prop]['v']);
-                ProjectReport.setActStageData(idp,ProjectReport.stageData[prop]['n'],ProjectReport.stageData[prop]['t'],ProjectReport.stageData[prop]['v']);
+        for(const prop in this.stageData){
+            if(parseInt(this.stageData[prop]['i'],10)===parseInt(idp,10)){
+                console.log(this.stageData[prop]['v']);
+                this.setActStageData(idp,this.stageData[prop]['n'],this.stageData[prop]['t'],this.stageData[prop]['v']);
                 return true;
             }
         }
         /* SET DEFAULT */
         
         var emptyArr=new Array();
-        //ProjectReport.setActStageData(0,0,'ERROR - ELEMENT NOT FOUND',emptyArr);
+        //this.setActStageData(0,0,'ERROR - ELEMENT NOT FOUND',emptyArr);
         return true;
     }
-    static setActStageData(i,n,t,v){
+    setActStageData(i,n,t,v){
         console.log('ProjectReport::setActStageData()');
-        ProjectReport.actStage[ProjectReport.fieldCounter]={
+        this.actStage[this.fieldCounter]={
             'i':i,
             'n':n,
             't':t,
             'v':v
         };
-        //console.log(ProjectReport.actStage);
+        //console.log(this.actStage);
     }
-    static editedStageField(){
+    editedStageField(){
         //console.log('ProjectReport::editedStageField()');
-        //console.log(ProjectReport.actStage[ProjectReport.fieldCounter]);
+        //console.log(this.actStage[this.fieldCounter]);
         var counter=0;
         
         var divInput=createTag('','div','col-12');
-            divInput.setAttribute('id','div-'+ProjectReport.fieldCounter);
+            divInput.setAttribute('id','div-'+this.fieldCounter);
             /* ADD DIV ROW FOR REMOVE BUTTON */
         var divInputRow=createTag('','div','row border border-primary rounded mt-1 mb-1 pt-2 pb-2');  
-            divInputRow.setAttribute('id','divAll-'+ProjectReport.fieldCounter);
+            divInputRow.setAttribute('id','divAll-'+this.fieldCounter);
         var div0=createTag('','div','col-1 pr-0 pl-2');  
-            div0.setAttribute('id','divMV-'+ProjectReport.fieldCounter);
+            div0.setAttribute('id','divMV-'+this.fieldCounter);
         var div1=createTag('','div','col-2  pl-1 pr-1');    
-            div1.setAttribute('id','divNumber-'+ProjectReport.fieldCounter);
+            div1.setAttribute('id','divNumber-'+this.fieldCounter);
         var div2=createTag('','div','col-8  pl-0 pr-1');
-            div2.setAttribute('id','divTitle-'+ProjectReport.fieldCounter);
+            div2.setAttribute('id','divTitle-'+this.fieldCounter);
         var div3=createTag('','div','col-1 pl-0');
-            div3.setAttribute('id','divRM-'+ProjectReport.fieldCounter);
-            div0.appendChild(ProjectReport.mvBtn());
-            div1.appendChild(createInput('number',ProjectReport.fieldCounter+'-n',ProjectReport.actStage[ProjectReport.fieldCounter].n,'form-control ','','n'));
-            div2.appendChild(createInput('text',ProjectReport.fieldCounter+'-t',ProjectReport.actStage[ProjectReport.fieldCounter].t,'form-control ','','n'));
-            div3.appendChild(ProjectReport.rmBtn(divInput));
+            div3.setAttribute('id','divRM-'+this.fieldCounter);
+            div0.appendChild(this.mvBtn());
+            div1.appendChild(createInput('number',this.fieldCounter+'-n',this.actStage[this.fieldCounter].n,'form-control ','','n'));
+            div2.appendChild(createInput('text',this.fieldCounter+'-t',this.actStage[this.fieldCounter].t,'form-control ','','n'));
+            div3.appendChild(this.rmBtn(divInput));
             
         divInputRow.appendChild(div0);
         divInputRow.appendChild(div1);
         divInputRow.appendChild(div2);
         divInputRow.appendChild(div3);
         divInput.appendChild(divInputRow);
-        for(const prop in ProjectReport.actStage[ProjectReport.fieldCounter].v){
+        for(const prop in this.actStage[this.fieldCounter].v){
             var textarea=document.createElement('textarea');
                 textarea.setAttribute('class','form-control w-100 mt-2 ml-2 mr-2');
-                textarea.setAttribute('name',ProjectReport.fieldCounter+'-'+counter+'-value');
-                textarea.setAttribute('id',ProjectReport.fieldCounter+'-'+counter+'-data-stage-value');
+                textarea.setAttribute('name',this.fieldCounter+'-'+counter+'-value');
+                textarea.setAttribute('id',this.fieldCounter+'-'+counter+'-data-stage-value');
                 textarea.setAttribute('style','height:200px; ');//
                 textarea.setAttribute('contenteditable','true');
-                textarea.appendChild(document.createTextNode(ProjectReport.actStage[ProjectReport.fieldCounter].v[prop]['v']));
+                textarea.appendChild(document.createTextNode(this.actStage[this.fieldCounter].v[prop]['v']));
                 divInputRow.appendChild(textarea);
-                divInputRow.appendChild(ProjectReport.createFileInputDiv(prop,counter));
+                divInputRow.appendChild(this.createFileInputDiv(prop,counter));
                 counter++;
         }
-        ProjectReport.fieldCounter++;
+        this.fieldCounter++;
         
         //console.log(divInput);
         return divInput;
     }
-    static createFileInputDiv(prop,counter){
+    createFileInputDiv(prop,counter){
         var divFile=document.createElement('div');
             divFile.setAttribute('class','col-12 pl-1 ');//border border-success
-            divFile.setAttribute('id','divFile-'+ProjectReport.fieldCounter);
-            ProjectReport.createNewFileDiv(divFile,prop,counter);
+            divFile.setAttribute('id','divFile-'+this.fieldCounter);
+            this.createNewFileDiv(divFile,prop,counter);
             
-            ProjectReport.createActuallFileDiv(divFile,prop,counter);
-        var defaultFilePosition=ProjectReport.actStage[ProjectReport.fieldCounter].v[prop]['fp'];
+            this.createActuallFileDiv(divFile,prop,counter);
+        var defaultFilePosition=this.actStage[this.fieldCounter].v[prop]['fp'];
             /* IF NO FILE, THEN SETUP FILEPOSTION TO DEFAULT TOP */
             if(defaultFilePosition===null){
                 defaultFilePosition='top';
             }
-            divFile.appendChild(ProjectReport.createFilePositionElement(ProjectReport.fieldCounter,counter,defaultFilePosition));
+            divFile.appendChild(this.createFilePositionElement(this.fieldCounter,counter,defaultFilePosition));
         return divFile;
     }
-    static createNewFileDiv(ele,prop,counter){
+    createNewFileDiv(ele,prop,counter){
         var divRow=document.createElement('div');
             divRow.setAttribute('class','row ml-0 mr-0 mt-1 mb-1 ');//border border-info rounded
-            divRow.setAttribute('id',ProjectReport.fieldCounter+'-'+counter+'-newFileDiv');
+            divRow.setAttribute('id',this.fieldCounter+'-'+counter+'-newFileDiv');
         var divRowErr=document.createElement('div');
             divRowErr.setAttribute('class','row ml-0 mr-0 mt-1 mb-1 alert alert-danger d-none');  
-            divRowErr.setAttribute('id',ProjectReport.fieldCounter+'-'+counter+'-fileDataErr');  
+            divRowErr.setAttribute('id',this.fieldCounter+'-'+counter+'-fileDataErr');  
         var divCol1=document.createElement('div');
             divCol1.setAttribute('class','col-sm-11 pl-0 pt-1  '); //border border-danger
         var divCol2=document.createElement('div');
             divCol2.setAttribute('class','col-sm-1 pl-0 pr-0 form-check '); //border border-primary
-        var input=createInput('file',ProjectReport.fieldCounter+'-'+counter+'-fileData','','form-control-file','','n');
+        var input=createInput('file',this.fieldCounter+'-'+counter+'-fileData','','form-control-file','','n');
             input.onchange = function (e){
                 console.log(e);
                 console.log(this);
-                ProjectReport.parseFile(this,e,divRowErr);
+                this.parseFile(this,e,divRowErr);
                
             };
             divCol1.appendChild(input);
@@ -411,6 +397,7 @@ class ProjectReport
             i.setAttribute('style','color:#ffffff;');
         var button=document.createElement('button');
             button.setAttribute('class','btn btn-warning');
+            var self=this;
             button.onclick=function(){
                 console.log(this.parentNode.parentNode.childNodes[1].childNodes[0]);
                  /*
@@ -418,15 +405,15 @@ class ProjectReport
                  */
                 this.parentNode.parentNode.childNodes[1].childNodes[0].value='';
                 /*
-                 * UPDATE ProjectReport.actStage
+                 * UPDATE this.actStage
                  */
-                ProjectReport.updActStageValue(this.parentNode.parentNode.childNodes[1].childNodes[0].id,'f',null);
+                self.updActStageValue(this.parentNode.parentNode.childNodes[1].childNodes[0].id,'f',null);
                 //console.log();
                 /*
                  * HIDDE error
                  */
                 //console.log(this.parentNode.parentNode.parentNode.childNodes[1]);
-                ProjectReport.hiddeEle(this.parentNode.parentNode.parentNode.childNodes[1]);
+                self.hiddeEle(this.parentNode.parentNode.parentNode.childNodes[1]);
             };
             button.appendChild(i);
             divCol2.appendChild(button);
@@ -436,13 +423,13 @@ class ProjectReport
             ele.appendChild(divRow);
             ele.appendChild(divRowErr);
     }
-    static parseFile(t,e,divRowErr){
+    parseFile(t,e,divRowErr){
         var divErr=t.parentNode.parentNode.parentNode.childNodes[1];
         var errSize=document.createTextNode('');
         var errType=document.createTextNode('');
             
                 console.log('INPUT FILE');
-                console.log('MAX: '+ProjectReport.fileProp.max);
+                console.log('MAX: '+this.fileProp.max);
                 console.log(e);
                 console.log(e.srcElement.files[0].size);
                 console.log(e.srcElement.files[0].type);
@@ -456,52 +443,52 @@ class ProjectReport
                 /* CLEAR DIV */
                 removeHtmlChilds(divRowErr);
                 
-                if(e.srcElement.files[0].size>ProjectReport.fileProp.max){
+                if(e.srcElement.files[0].size>this.fileProp.max){
                     errSize.nodeValue='File larger than 20MB! ';
-                    ProjectReport.ErrorStack.add(t.id+'-size','File larger than 20MB! ');
-                    //ErrorStack.add(ProjectReport.stackName,t.id+'-size','File larger than 20MB! ');
+                    this.ErrorStack.add(t.id+'-size','File larger than 20MB! ');
+                    //ErrorStack.add(this.stackName,t.id+'-size','File larger than 20MB! ');
                 }
                 else{
                     errSize.nodeValue='';
-                    ProjectReport.ErrorStack.remove(t.id+'-size');
+                    this.ErrorStack.remove(t.id+'-size');
                 }
-                console.log('ProjectReport',ProjectReport.fileProp.type);
+                console.log('ProjectReport',this.fileProp.type);
                 
-                if(ProjectReport.fileProp.type.indexOf(e.srcElement.files[0].type)===-1){
+                if(this.fileProp.type.indexOf(e.srcElement.files[0].type)===-1){
                     errType.nodeValue='Wrong file extension ('+e.srcElement.files[0].type+') ! ';
-                    ProjectReport.ErrorStack.add(t.id+"-ext",'Wrong file extension ('+e.srcElement.files[0].type+') ! ');
+                    this.ErrorStack.add(t.id+"-ext",'Wrong file extension ('+e.srcElement.files[0].type+') ! ');
                 }
                 else{
                     errType.nodeValue='';
-                    ProjectReport.ErrorStack.remove(t.id+'-ext');
+                    this.ErrorStack.remove(t.id+'-ext');
                 }
                 if(errSize.nodeValue!=='' || errType.nodeValue!==''){
                     divErr.appendChild(errSize);
                     divErr.appendChild(errType);
-                    ProjectReport.showEle(divErr);
+                    this.showEle(divErr);
                 }
                 else{
-                    ProjectReport.updActStageValue(t.id,'f',t.id);//this.value
-                    ProjectReport.hiddeEle(divErr);
+                    this.updActStageValue(t.id,'f',t.id);//this.value
+                    this.hiddeEle(divErr);
                 }
-                console.log(ProjectReport.actStage);
-                console.log(ProjectReport.confirmBtn);
+                console.log(this.actStage);
+                console.log(this.confirmBtn);
     }
-    static hiddeEle(ele){
+    hiddeEle(ele){
         ele.classList.remove("d-block");
         ele.classList.add("d-none");
     }
-    static showEle(ele){
+    showEle(ele){
         ele.classList.remove("d-none");
         ele.classList.add("d-block");
     }
-    static createActuallFileDiv(ele,prop,counter){
+    createActuallFileDiv(ele,prop,counter){
         console.log('ProjectReport::createActuallFileDiv() FILE:');
-        //console.log(ProjectReport.actStage[ProjectReport.fieldCounter].v[prop]['fa']);
-        if(ProjectReport.actStage[ProjectReport.fieldCounter].v[prop]['fa']){
+        //console.log(this.actStage[this.fieldCounter].v[prop]['fa']);
+        if(this.actStage[this.fieldCounter].v[prop]['fa']){
             var divRow=document.createElement('div');
                 divRow.setAttribute('class','row ml-0 mt-1 mb-1 mr-0 border border-info rounded');//border border-danger
-                divRow.setAttribute('id',ProjectReport.fieldCounter+'-'+prop+'-actFileDiv');
+                divRow.setAttribute('id',this.fieldCounter+'-'+prop+'-actFileDiv');
             var divCol1=document.createElement('div');
                 divCol1.setAttribute('class','col-sm-10 '); //border border-info
             var divCol2=document.createElement('div');
@@ -511,22 +498,22 @@ class ProjectReport
                     box.setAttribute('class','form-check-input');
                     box.setAttribute('type','checkbox');
                     /* box.setAttribute('checked','checked'); */
-                    box.setAttribute('name',ProjectReport.fieldCounter+'-'+counter+'-actFileRemove');
-                    box.setAttribute('id',ProjectReport.fieldCounter+'-'+counter+'-actFileRemove');
+                    box.setAttribute('name',this.fieldCounter+'-'+counter+'-actFileRemove');
+                    box.setAttribute('id',this.fieldCounter+'-'+counter+'-actFileRemove');
                 var label=document.createElement('label');
                     label.setAttribute('class','form-check-label');
-                    label.setAttribute('for',ProjectReport.fieldCounter+'-'+counter+'-actFile');
+                    label.setAttribute('for',this.fieldCounter+'-'+counter+'-actFile');
                     label.appendChild(document.createTextNode('Usunąć?'));
                
                     /* ADD DATA ABOUT INSERTED FILE */   
                 var actFile=document.createElement('a');
-                    actFile.setAttribute('href','router.php?task=downloadProjectReportImage&file='+ProjectReport.actStage[ProjectReport.fieldCounter].v[prop]['fa']);
+                    actFile.setAttribute('href','router.php?task=downloadProjectReportImage&file='+this.actStage[this.fieldCounter].v[prop]['fa']);
                     actFile.setAttribute('target','_blank');
-                    actFile.appendChild(document.createTextNode(ProjectReport.actStage[ProjectReport.fieldCounter].v[prop]['fo']));
+                    actFile.appendChild(document.createTextNode(this.actStage[this.fieldCounter].v[prop]['fo']));
                 var actFileInput=document.createElement('input');
-                    actFileInput.setAttribute('name',ProjectReport.fieldCounter+'-'+counter+'-actFile');
+                    actFileInput.setAttribute('name',this.fieldCounter+'-'+counter+'-actFile');
                     actFileInput.setAttribute('type','hidden');
-                    actFileInput.setAttribute('value',ProjectReport.actStage[ProjectReport.fieldCounter].v[prop]['fa']);
+                    actFileInput.setAttribute('value',this.actStage[this.fieldCounter].v[prop]['fa']);
                     divCol2.appendChild(box);
                     divCol2.appendChild(label);
                     divCol1.appendChild(actFile);
@@ -539,15 +526,15 @@ class ProjectReport
         }  
         else{
             /* SETUP DEFAULT */
-            ProjectReport.actStage[ProjectReport.fieldCounter].v[prop]['fp']=ProjectReport.defaultFilePostion;
+            this.actStage[this.fieldCounter].v[prop]['fp']=this.defaultFilePostion;
         }
     }
-    static createFilePositionElement(counter,fileCounter,defFilePosition){
+    createFilePositionElement(counter,fileCounter,defFilePosition){
         //console.log('ProjectReport::createFilePositionElement('+fileCounter+')');
         //var fpCounter=0;
         var div=document.createElement('div');
             div.setAttribute('class','row ml-0 ');//border border-warning
-            div.setAttribute('id',ProjectReport.fieldCounter+'-'+fileCounter+'-filepositionDiv');
+            div.setAttribute('id',this.fieldCounter+'-'+fileCounter+'-filepositionDiv');
         var divFormFile1=document.createElement('div');
             divFormFile1.setAttribute('div','form-check form-check-inline mt-1 mb-1');
         var inputFileLabel=createTag('Wskazana pozycja obrazu:','label','form-check-label mr-3');
@@ -561,43 +548,44 @@ class ProjectReport
             };
         for (const property in filePositionData){   
             
-            divFormFile1.appendChild(ProjectReport.createFilePosition(property,filePositionData[property],defFilePosition,fileCounter));
+            divFormFile1.appendChild(this.createFilePosition(property,filePositionData[property],defFilePosition,fileCounter));
             //fpCounter++;
         }
         div.appendChild(divFormFile1);
         return (div);
        
     }
-    static rmBtn(ele){
+    rmBtn(ele){
     var i=createTag('','i','fa fa-minus');
         i.setAttribute('aria-hidden','true');
         i.setAttribute('style','color:#ffffff;');
     var div=createTag('','div','btn btn-danger');
+    var self = this;
         div.onclick=function(){
             console.log(this.parentNode.id);
             let tmp=this.parentNode.id.split('-');
                 tmp[1]=parseInt(tmp[1],10);
                 ele.remove();
                 console.log(tmp);
-                console.log(ProjectReport.actStage);
-            if(ProjectReport.actStage[tmp[1]]){
+                console.log(self.actStage);
+            if(self.actStage[tmp[1]]){
                 console.log('OBJECT PROP EXIST');
-                delete ProjectReport.actStage[tmp[1]];
+                delete self.actStage[tmp[1]];
             }
             /* remove data from actStage */
         };
         div.appendChild(i);
         return(div); 
     }
-    static mvBtn(){
+    mvBtn(){
     var i=createTag('','i','fa fa-long-arrow-up text-dark text-center ml-2 ml-1 ');
         i.setAttribute('aria-hidden','true');
-        ProjectReport.changeArrow(i);
-        ProjectReport.mvUp(i);
+        this.changeArrow(i);
+        this.mvUp(i);
     var i1=createTag('','i','fa fa-long-arrow-down text-dark text-center ml-1 mr-1 ');
         i1.setAttribute('aria-hidden','true');
-        ProjectReport.changeArrow(i1);
-        ProjectReport.mvDown(i1);
+        this.changeArrow(i1);
+        this.mvDown(i1);
     var div=createTag('','div',' mt-2');
         
         div.appendChild(i);
@@ -608,8 +596,9 @@ class ProjectReport
         var btn=createTag('','button','btn  btn-success mt-2 mb-2');
             btn.setAttribute('type','button');
             btn.setAttribute('id',idp);
+        var self = this;
             btn.onclick = function(){    
-                ProjectReport.addStageData(this.id);
+                self.addStageData(this.id);
             }; 
         var text=document.createTextNode(' ');
         var arrow=createTag('','i','fa fa-caret-right');
@@ -617,7 +606,7 @@ class ProjectReport
            btn.appendChild(arrow);
             return (btn);
     }
-    static changeArrow(ele){
+    changeArrow(ele){
         ele.onmouseover = function (){
             this.classList.remove("text-dark");
             this.classList.add("text-info");
@@ -630,9 +619,10 @@ class ProjectReport
             this.style.cursor='auto';
         };
     }
-    static mvUp(ele){
+    mvUp(ele){
+        var self = this;
         ele.onclick=function(){
-            console.log(ProjectReport.actStage);
+            console.log(self.actStage);
             console.log(this.parentNode.parentNode.parentNode.parentNode);
             console.log(this.parentNode.parentNode.parentNode.parentNode.id);
             //console.log(this.parentNode.parentNode.parentNode.parentNode);
@@ -646,7 +636,7 @@ class ProjectReport
             }    
         };
     }
-    static mvDown(ele){
+    mvDown(ele){
         ele.onclick=function(){
             if(this.parentNode.parentNode.parentNode.parentNode.nextSibling!==null){
                 console.log('nextSibling exist');
@@ -657,7 +647,7 @@ class ProjectReport
             }
         };
     }
-    static createFilePosition(property,value,checked,fileCounter)
+    createFilePosition(property,value,checked,fileCounter)
     {
         //console.log('ProjectReport::createFilePosition()');   
         //console.log(checked);
@@ -666,8 +656,9 @@ class ProjectReport
         var div=document.createElement('div');
             div.setAttribute('class','form-check form-check-inline mt-1 mb-1');
             
-        var inputRadioFileTop=createInput('radio',ProjectReport.fieldCounter+'-'+fileCounter+'-fileposition',property,'form-check-input','','n');
-            inputRadioFileTop.setAttribute('id',ProjectReport.fieldCounter+'-'+fileCounter+'-fileposition-'+property);
+        var inputRadioFileTop=createInput('radio',this.fieldCounter+'-'+fileCounter+'-fileposition',property,'form-check-input','','n');
+            inputRadioFileTop.setAttribute('id',this.fieldCounter+'-'+fileCounter+'-fileposition-'+property);
+            var self = this;
             inputRadioFileTop.onclick=function(){ 
                 let id=this.id.split('-');
                 console.log(id);
@@ -681,84 +672,84 @@ class ProjectReport
                 /*
                  * UPDATE
                  */
-                ProjectReport.updActStageValue(this.id,'fp',id[3]);
+                self.updActStageValue(this.id,'fp',id[3]);
             };
         if(checked===property){
             inputRadioFileTop.setAttribute('checked','checked');
         }
         
         var inputRadioFileTopLabel=createTag(value,'label','form-check-label');
-        inputRadioFileTopLabel.setAttribute('for',ProjectReport.fieldCounter+'-'+fileCounter+'-fileposition-'+property);
+        inputRadioFileTopLabel.setAttribute('for',this.fieldCounter+'-'+fileCounter+'-fileposition-'+property);
         div.appendChild(inputRadioFileTop);
         div.appendChild(inputRadioFileTopLabel);
         /* SETUP DEFAULT */
         
         return div;
     }
-    static btnShowProjectReport(){
+    btnShowProjectReport(){
         console.log('ProjectReport::btnShowProjectReport()');   
         
         var btn=createBtn('Podgląd','btn btn-info','psShowStage');
             btn.onclick= function() {
-                console.log(ProjectReport.link.allProjectReportData);
-                console.log(ProjectReport.link.previewProjectReportData);
-                if(ProjectReport.link.previewProjectReportData.classList.contains("d-none")){
-                    ProjectReport.link.previewProjectReportData.classList.remove("d-none");
-                    ProjectReport.link.previewProjectReportData.classList.add("block");
-                    ProjectReport.link.allProjectReportData.classList.remove("block");
-                    ProjectReport.link.allProjectReportData.classList.add("d-none");
+                console.log(this.Modal.link['availableStages']);
+                console.log(this.Modal.link['selectedStages']);
+                if(this.Modal.link['selectedStages'].classList.contains("d-none")){
+                    this.Modal.link['selectedStages'].classList.remove("d-none");
+                    this.Modal.link['selectedStages'].classList.add("block");
+                    this.Modal.link['availableStages'].classList.remove("block");
+                    this.Modal.link['availableStages'].classList.add("d-none");
                     this.innerText='Edytuj';
-                    ProjectReport.showProjectReportPreview();
+                    this.showProjectReportPreview();
                 }
                 else{
-                    ProjectReport.link.previewProjectReportData.classList.remove("block");
-                    ProjectReport.link.previewProjectReportData.classList.add("d-none");
-                    ProjectReport.link.allProjectReportData.classList.remove("d-none");
-                    ProjectReport.link.allProjectReportData.classList.add("block");
+                    this.Modal.link['selectedStages'].classList.remove("block");
+                    this.Modal.link['selectedStages'].classList.add("d-none");
+                    this.Modal.link['availableStages'].classList.remove("d-none");
+                    this.Modal.link['availableStages'].classList.add("block");
                     this.innerText='Podgląd'; 
                 } 
         };     
         return btn;
     }
-    static btnConfirmProjectReport(){
+    btnConfirmProjectReport(){
         console.log('ProjectReport::btnConfirmProjectReport()');   
         var btn=createBtn('Zatwierdź','btn btn-success','confirmData');
         /* CHECK PERMISSIONS */
-        if(ProjectReport.perm.includes('GEN_PROJECT_REPORT')){
+        if(this.perm.includes('GEN_PROJECT_REPORT')){
             /* POST DATA */
             btn.onclick= function() {
                 /* CHECK IS ERROR */
-                //if(ErrorStack.check(ProjectReport.stackName)){
-                if(ProjectReport.ErrorStack.check()){
+                //if(ErrorStack.check(this.stackName)){
+                if(this.ErrorStack.check()){
                     alert('ErrorStack exist errors');
                     return false;
                 }
-                ProjectReport.link.form.name=ProjectReport.getFormName();
-                console.log(ProjectReport.link.form.name);
-                console.log(ProjectReport.link.form);
-                ProjectReport.Ajax.sendData(ProjectReport.link.form,'POST'); 
+                this.Modal.link['form'].name=this.getFormName();
+                console.log(this.Modal.link['form'].name);
+                console.log(this.Modal.link['form']);
+                this.Ajax.sendData(this.Modal.link['form'],'POST'); 
             };
         }
         else{
             btn.classList.add("disabled");
         }
-        ProjectReport.confirmBtn=btn;
-        console.log(ProjectReport.confirmBtn);
+        this.confirmBtn=btn;
+        console.log(this.confirmBtn);
         return btn;
     }
     /* TO DO -> WYSKAKUJACE OKIENKA W PRZEGLADARCE */
     
-    static btnExportToDoc(){
+    btnExportToDoc(){
         console.log('ProjectReport::btnExportToDoc()');   
         var btn=createBtn('DOC','btn btn-primary','btnExportToDoc');
         /* CHECK PERMISSIONS */
-        if(ProjectReport.perm.includes('GEN_PROJ_REP_DOC')){
+        if(this.perm.includes('GEN_PROJ_REP_DOC')){
             /* POST DATA */
             btn.onclick= function() {
                 console.log(this);
-                console.log(ProjectReport.getFormName());
-                ProjectReport.link.form.name=ProjectReport.getFormName()+'Doc';
-                ProjectReport.Ajax.sendData(ProjectReport.link.form,'POST');
+                console.log(this.getFormName());
+                this.Modal.link['form'].name=this.getFormName()+'Doc';
+                this.Ajax.sendData(this.Modal.link['form'],'POST');
                 //var win = window.open('test', '_blank');
                 //    win.focus();
             };
@@ -768,8 +759,8 @@ class ProjectReport
         }
         return btn;
     }
-    static xhr(PersonId){
-        console.log('---static show()---\r\nID:'+PersonId);
+    xhr(PersonId){
+        console.log('---show()---\r\nID:'+PersonId);
         /* AJAX GET */
        var xhr=new XMLHttpRequest();
             //xhr.addEventListener("error",PersonShow.runErrorView,false);
@@ -782,25 +773,25 @@ class ProjectReport
             xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             xhr.send('id='+PersonId);
     }
-    static setLoadGif(){
+    setLoadGif(){
         
     }
-    static btnCancelProjectReport(){
+    btnCancelProjectReport(){
         /* REMOVE TMP FILES */
         return functionBtn('cancel',createBtn('Anuluj','btn btn-dark','cancelBtn'),'');
     }
-    static setProjectReportPreviewData(){
+    setProjectReportPreviewData(){
         console.log('ProjectReport::setProjectReportPreviewData()');  
-        //console.log(ProjectReport.link.dynamicData);  
+        //console.log(this.Modal.link['dynamic']);  
 
         var subLink=new Object();
         var fieldName=new Array();
         //var fileInputid=null;
         var textAreaInputid=null;
-        removeHtmlChilds(ProjectReport.link.previewProjectReportData);
-        for (var i=0;i<ProjectReport.link.dynamicData.childElementCount;i++){
-            //console.log(ProjectReport.link.dynamicData.childNodes[i]);
-            subLink=ProjectReport.link.dynamicData.childNodes[i].childNodes[0];
+        removeHtmlChilds(this.Modal.link['selectedStages']);
+        for (var i=0;i<this.Modal.link['dynamic'].childElementCount;i++){
+            //console.log(this.Modal.link['dynamic'].childNodes[i]);
+            subLink=this.Modal.link['dynamic'].childNodes[i].childNodes[0];
             //console.log(subLink);
             for(var j=0;j<subLink.childElementCount;j++){
                 //console.log(subLink.childNodes[j]);
@@ -817,64 +808,63 @@ class ProjectReport
                             console.log('divNumber');
                             //console.log(subLink.childNodes[j].childNodes[0].id);
                             //console.log(subLink.childNodes[j].childNodes[0].value);
-                            ProjectReport.updActStageData(subLink.childNodes[j].childNodes[0].id,subLink.childNodes[j].childNodes[0].value);
+                            this.updActStageData(subLink.childNodes[j].childNodes[0].id,subLink.childNodes[j].childNodes[0].value);
                             break;
                         case 'divTitle':
                             console.log('divTitle');
                             //console.log();
                             //console.log();
-                            ProjectReport.updActStageData(subLink.childNodes[j].childNodes[0].id,subLink.childNodes[j].childNodes[0].value);
+                            this.updActStageData(subLink.childNodes[j].childNodes[0].id,subLink.childNodes[j].childNodes[0].value);
                             break;
                         case 'divFile':
                             console.log('divFile');
-                            //ProjectReport.setPreviewImageData(subLink.childNodes[j]);
+                            //this.setPreviewImageData(subLink.childNodes[j]);
                           break;
                         default:
                             console.log('REST:');
                             console.log(fieldName);
                     }
                 }
-                
                 else if(subLink.childNodes[j].nodeName==='TEXTAREA'){
                      console.log('TEXTAREA');
                     //console.log(subLink.childNodes[j].id,subLink.childNodes[j].value);
                     textAreaInputid=subLink.childNodes[j].id;
-                    ProjectReport.updActStageValue(subLink.childNodes[j].id,'v',subLink.childNodes[j].value);
+                    this.updActStageValue(subLink.childNodes[j].id,'v',subLink.childNodes[j].value);
                 }
                 else{
                     console.log('WRONG FIELD');
                 }
-                //ProjectReport.setNewDataFromInput();
-                //ProjectReport.setImageTextPosition(subLink,i,j,textAreaInputid,fileInputid);
+                //this.setNewDataFromInput();
+                //this.setImageTextPosition(subLink,i,j,textAreaInputid,fileInputid);
                 textAreaInputid=null;
                 //fileInputid=null;
             }
         }
     }
-    static updActStageValue(id,key,value){
+    updActStageValue(id,key,value){
         //console.log('ProjectReport::setNewDataFromInput(id,value)');
         //console.log(id);
         //console.log(value);
         var inputId=id.split('-');
             //console.log(inputId);
-            //console.log(ProjectReport.actStage[inputId[0]].v[inputId[1]].v);
-            ProjectReport.actStage[inputId[0]].v[inputId[1]][key]=value;
-            console.log(ProjectReport.actStage[inputId[0]]['v']);
+            //console.log(this.actStage[inputId[0]].v[inputId[1]].v);
+            this.actStage[inputId[0]].v[inputId[1]][key]=value;
+            console.log(this.actStage[inputId[0]]['v']);
     }
-    static updActStageData(id,value){
+    updActStageData(id,value){
         console.log('ProjectReport::setActStageTitle(id,value)');
         /*
          * TITLE/NUMBER
          */
         //console.log(id);
         var inputId=id.split('-');
-        ProjectReport.actStage[inputId[0]][inputId[1]]=value;
-        //console.log(ProjectReport.actStage);
+        this.actStage[inputId[0]][inputId[1]]=value;
+        //console.log(this.actStage);
     }
 
-    static setImageTextPosition(subLink,i,j,textAreaId,fileExist){
+    setImageTextPosition(subLink,i,j,textAreaId,fileExist){
         console.log(subLink);
-        console.log(ProjectReport.actStage);
+        console.log(this.actStage);
         /* ELEMENT ID */
         var id=subLink.id.split('-');
         var inputId=new Array();
@@ -884,13 +874,13 @@ class ProjectReport
         if(textAreaId){
             console.log('textAreaId: '+textAreaId);
             inputId=textAreaId.split('-');
-            console.log(ProjectReport.actStage[inputId[0]].v[inputId[1]]);
+            console.log(this.actStage[inputId[0]].v[inputId[1]]);
         }
         if(fileExist){
         }
         
     }
-    static createDiv(value,c){
+    createDiv(value,c){
         var div=document.createElement('div');
             div.setAttribute('class',c);
             div.innerHTML=value;

@@ -19,7 +19,6 @@ class Modal{
     constructor() {
         console.log('Modal::construct()'); 
         this.Html = new Html();
-
     }
     getModal(){
         //console.log('Modal::getModal()'); 
@@ -54,6 +53,9 @@ class Modal{
         console.log(this.link['main']);
         console.log(this.link['close']);
         */
+    }
+    addLink(label,ele){
+        this.link[label]=ele;
     }
     clearData(){
         console.log('Modal::clearData()');

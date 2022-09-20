@@ -1,4 +1,4 @@
-class ProjectReport extends ProjectReportPreview
+class ProjectReport extends ProjectReportView
 {
 
     stageData=new Array();
@@ -147,7 +147,7 @@ class ProjectReport extends ProjectReportPreview
             rowDivResult.setAttribute('style','border:1px solid #b3b3b3; width:800px;margin-left:150px;margin-bottom:10px;');
             rowDivResult.setAttribute('id','previewProjectReportData');
 
-            this.Modal.link['adapted'].appendChild(this.getReportHead());
+            this.Modal.link['adapted'].appendChild(super.getReportHead());
             this.Modal.link['adapted'].appendChild(this.getReportDataBody());
             this.Modal.link['adapted'].appendChild(rowDivResult); 
             this.addCurrentStageData();
@@ -161,11 +161,7 @@ class ProjectReport extends ProjectReportPreview
             this.Modal.link.error.innerHTML=e;
         }
     }
-    getReportHead(){
-        console.log('ProjectReport::getReportHead()');
-        var mainRow=this.Html.getRow();
-        return mainRow;
-    }
+
     getReportDataBody(){
         console.log('ProjectReport::getReportDataBody()');
         /* */

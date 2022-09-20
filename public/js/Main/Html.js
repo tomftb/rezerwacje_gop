@@ -171,52 +171,69 @@ class Html{
         return option;
     }
     removeClass(ele,className){
-        var action = function(e,c){
-            /*
-             * e - DOM element
-             * c - class name
-             */
-            if(e.classList.contains(c)){
-                e.classList.remove(c);
+        /* CLOSURE */
+        var action = function(){
+            if(ele.classList.contains(className)){
+                ele.classList.remove(className);
             }
         };
         this.setClass(ele,className,action);
     }
     addClass(ele,className){
-        var action = function(e,c){
-            /*
-             * e - DOM element
-             * c - class name
-             */
-            if(!e.classList.contains(c)){
-                e.classList.add(c);
+        /* CLOSURE */
+        var action = function(){
+            if(!ele.classList.contains('className')){
+                ele.classList.add('className');
             }
         };
         this.setClass(ele,className,action);
     }
     setClass(ele,className,action){
-        var type2 = typeof(className);
+        var classNameType = typeof(className);
         this.isObject(ele);
-        if(type2==='string'){
+        if(classNameType==='string'){
             action(ele,className.trim());
             return true;
         }
-        if(type2==='object'){
+        if(classNameType==='object'){
             for(const prop in className){
                 action(ele,className[prop].trim());
             }
             return true;
         }
-        console.log(type2);
+        console.log(classNameType);
         throw 'className IS NOT A STRING AND OBJECT!';   
     }
-    isObject(ele){
-        var type = typeof(ele);
-        if(type!=='object'){
-            console.log(ele);
-            console.log(type);
-            throw 'ELE IS NOT A OBJECT!';
+    removeStyle(ele,styleName){
+        console.log('Html::removeStyle');
+        //console.log(ele);
+        console.log(styleName);
+        //this.isObject(ele);
+        this.isString(styleName);
+        const elementStyle = ele.style;
+        const computedStyle = window.getComputedStyle(ele, null);
+        for (const prop in elementStyle) {
+            if (Object.hasOwn(elementStyle, prop)) {
+                if(prop===styleName){
+                    //console.log('FOUND - set clear');
+                    ele.style[prop]='';
+                }
+            }
         }
+    }
+    isObject(ele){
+        this.is(ele,'object');
+    }
+    isString(ele){
+        this.is(ele,'string');
+    }
+    is(item,expect){
+        var type = typeof(item);
+        if(type!==expect){
+            console.log(item);
+            console.log(type);
+            throw item+' IS NOT A '+expect+ '!';
+        } 
     }
 }
 

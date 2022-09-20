@@ -172,33 +172,52 @@ class Html{
     }
     removeClass(ele,className){
         /* CLOSURE */
-        var action = function(){
+        var actionString = function(){
             if(ele.classList.contains(className)){
                 ele.classList.remove(className);
             }
         };
-        this.setClass(ele,className,action);
+        var actionObject = function(){
+            for(const prop in className){
+                if(!ele.classList.contains(className)){
+                    console.log('addClass:');
+                    console.log(className[prop]);
+                    ele.classList.remove(className[prop].trim());
+                }
+            } 
+        };
+        this.setClass(ele,className,actionString,actionObject);
     }
     addClass(ele,className){
         /* CLOSURE */
-        var action = function(){
-            if(!ele.classList.contains('className')){
-                ele.classList.add('className');
+        var actionString = function(){
+            if(!ele.classList.contains(className)){
+                console.log('addClass:');
+                console.log(className);
+                ele.classList.add(className);
             }
         };
-        this.setClass(ele,className,action);
+        var actionObject = function(){
+            for(const prop in className){
+                if(!ele.classList.contains(className)){
+                    console.log('addClass:');
+                    console.log(className[prop]);
+                    ele.classList.add(className[prop].trim());
+                }
+            } 
+        };
+        this.setClass(ele,className,actionString,actionObject);
     }
-    setClass(ele,className,action){
+    setClass(ele,className,actionString,actionObject){
         var classNameType = typeof(className);
+        console.log(classNameType);
         this.isObject(ele);
         if(classNameType==='string'){
-            action(ele,className.trim());
+            actionString(ele,className.trim());
             return true;
         }
         if(classNameType==='object'){
-            for(const prop in className){
-                action(ele,className[prop].trim());
-            }
+            actionObject(ele,className);
             return true;
         }
         console.log(classNameType);

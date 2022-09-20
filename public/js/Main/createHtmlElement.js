@@ -446,7 +446,7 @@ function clearAdaptedModalData()
     removeHtmlChilds(document.getElementById('AdaptedBodyExtra'));
     removeHtmlChilds(document.getElementById('AdaptedModalInfo'));
     document.getElementById('errDiv-Adapted-overall').innerText='';
-    document.getElementById('errDiv-Adapted-overall').style.display='none';
+    //document.getElementById('errDiv-Adapted-overall').style.display='none';
     document.getElementById("AdaptedBgTitle").removeAttribute('class');
     document.getElementById("AdaptedBgTitle").classList.add('modal-header');
 }

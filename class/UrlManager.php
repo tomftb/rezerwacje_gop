@@ -79,6 +79,7 @@ final class UrlManager{
         ['getProjectStageDelSlo','DEL_STAGE'],
         ['getProjectStageHideSlo','DEL_STAGE'],
         ['psDetails','SHOW_STAGE','user'],
+        ['psShortDetails','SHOW_STAGE','user'],
         ['getNewStageDefaults','ADD_STAGE'],
         ['setProjectStageWskB','EDIT_STAGE'],
         ['setProjectReportImage','GEN_PROJECT_REPORT'],

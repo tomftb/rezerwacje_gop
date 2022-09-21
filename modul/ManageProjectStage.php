@@ -22,6 +22,11 @@ class ManageProjectStage extends ManageProjectStageDatabase
     # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getprojectsstagelike(){ 
         $this->Log->log(0,"[".__METHOD__."]");
+        $data['data']=self::getAllStage();
+        $data['headTitle']='Etapy';
+        $this->utilities->jsonResponse($data,'');
+    }
+    public function getAllStage(){
         /*FILTER_SANITIZE_STRING => Remove all HTML tags from a string:*/
         //$f="%".filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING)."%";
         $f=htmlentities(nl2br(filter_input(INPUT_GET,'filter')), ENT_QUOTES,'UTF-8',FALSE);
@@ -51,12 +56,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
            $query_data[':value']=array('%'.$f.'%','STR');
          * 
          */
-        $return['data']=parent::getStages($where,$parm);
-        $return['headTitle']='Etapy';
-        //Throw New Exception ('test'.__LINE__,0);
-        //echo ;asd
-        $this->utilities->jsonResponse($return,'');
-        //echo true;
+        return parent::getStages($where,$parm);
     }
     private function getProjectStage(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -88,6 +88,11 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $Variable = new ManageProjectVariable();
         $data['variable'] = $Variable->getSimpleAll();
         $this->utilities->jsonResponseData($data);
+    }
+    public function psShortDetails(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->utilities->setGet('id',$this->inpArray);
+        $this->utilities->jsonResponseData(parent::getStageFullData($this->inpArray['id']));
     }
     private function setChangeState(){
         $this->data=$this->Items->setPostId();
@@ -398,20 +403,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $this->Items->setBlock($this->inpArray['id'],"SLO_PROJEKT_ETAP","buffer_user_id",$_SESSION['userid']);
         $this->utilities->jsonResponse('','block');
     }
-    public function getAllStage(){
-        $data=[];
-        $head=$this->dbLink->squery("SELECT s.`id` as 'i',s.`number` as 'n',s.`title` as 't',s.`create_user_login` as 'cu' FROM `slo_projekt_etap` s WHERE s.`id`>0 AND s.`wsk_v`='0' AND s.`wsk_u`='0' ORDER BY s.`id`");   
-        foreach($head as $v){
-            /* GET STAGE BODY */
-            /* REMOVE s.`file_selected` */
-            $body=$this->dbLink->squery("SELECT s.`value` as 'v', null as 'f',s.`file_position` as 'fp' FROM `slo_projekt_etap_ele` s WHERE s.`id_projekt_etap`=".$v['i']." AND s.`wsk_v`='0' AND s.`wsk_u`='0' ORDER BY s.`id`");   
-            foreach($body as $kb => $vb){
-                $body[$kb]['v']=html_entity_decode($body[$kb]['v']);
-            }
-            array_push($data,array('i'=>$v['i'],'n'=>$v['n'],'t'=>html_entity_decode($v['t']),'cu'=>$v['cu'],'v'=>$body));
-        }
-        return $data;
-    }
+
     public function getModulStageDefaults(){
         /*
          * NOT USED 04.02.2022

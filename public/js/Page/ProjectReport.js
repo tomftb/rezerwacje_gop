@@ -1,12 +1,16 @@
 class ProjectReport extends ProjectReportView
 {
-
+    actStage=new Object();
+    jsonResponse=new Object();
     stageData=new Array();
     stageActData=new Array();
     projectId='';
     fieldCounter=0;
     perm=new Array();
     defaultFilePostion='top';
+    confirmBtn;
+    ErrorStack=new Object();
+    Xhr=new Object();
     imgUrl='http://rezerwacje-gop.local:8080/router.php?task=downloadProjectReportImage&file=';
 
     fileProp={
@@ -15,39 +19,20 @@ class ProjectReport extends ProjectReportView
             'image/jpeg','image/bmp','image/png','image/gif','image/jpg'
         ]
     };
-    actStage=new Object();
-    confirmBtn;
-    ErrorStack=new Object();
-    Ajax=new Object();
-    
+
     constructor() {
         console.log('ProjectReport::constructor()');
         super();
+        this.ErrorStack = new ErrorStack();
+        this.Xhr=new Xhr2();
     }
-    setErrorStack(obj){
-        console.log('ProjectReport::setErrorStack(obj)');
-        this.ErrorStack=obj;
-        console.log(this.ErrorStack);
-    }
-    setAjax(obj){
-        console.log('ProjectReport::setAjax(obj)');
-        this.Ajax=obj;
-        console.log(this.Ajax);
-    }
-    getFormName(){
-        /* SIMILAR TO CONST */
-        return 'setProjectReport';
-    }
+
+
     setData(projectStageData,perm){
-        /* TO DO => PARSE RESPONSE STATUS */
-        //console.log(projectStageData);
         this.stageActData=projectStageData['data']['value']['act'];
         this.stageData=projectStageData['data']['value']['data'];
         this.projectId=projectStageData['data']['value']['id'];
         this.perm=perm;
-        //console.log(this.perm);
-        /* TO DO +. DYNAMIC CHANGE */
-        //this.formName=projectStageData['data']['function'];
     }
     showProjectReportPreview(){
         console.log('ProjectReport::showProjectReportPreview()');
@@ -132,12 +117,27 @@ class ProjectReport extends ProjectReportView
         };
         this.fieldCounter=0;
     }
-    create(){
+    setModalLoad(){
+        console.log('ProjectReport::setModalLoad()');
+        //this.Modal.loadNotify='<img src="'+window.appurl+'/img/loading_60_60.gif" alt="load_gif">';
+        var M = this.Modal;
+            M.loadNotify='<img src="'+window.appUrl+'/img/loading_60_60.gif" alt="load_gif">';
+        var start = function(){
+                M.showLoad(); 
+            };
+        var end = function(){
+                M.hideLoad();
+            };
+            this.Xhr.setLoad(start,end);
+    }
+    create(projectStageData,perm){
         try{
             console.log('ProjectReport::create()');
+            this.setData(projectStageData,perm);
             this.setDefaultData();            
             this.Modal.setLink();
             this.Modal.clearData();
+            this.setModalLoad();
             /* createHtmlElement ?? */
             this.Modal.setHead('Raport:','bg-primary');
             this.createButtons();   
@@ -146,67 +146,33 @@ class ProjectReport extends ProjectReportView
             rowDivResult.setAttribute('class','row d-none');
             rowDivResult.setAttribute('style','border:1px solid #b3b3b3; width:800px;margin-left:150px;margin-bottom:10px;');
             rowDivResult.setAttribute('id','previewProjectReportData');
-
             this.Modal.link['adapted'].appendChild(super.getReportHead());
-            this.Modal.link['adapted'].appendChild(this.getReportDataBody());
+            this.Modal.link['adapted'].appendChild(super.getReportHeadData());
+            this.Modal.link['adapted'].appendChild(super.getReportDataBody());
             this.Modal.link['adapted'].appendChild(rowDivResult); 
+            /* SET PROEJCT REPORT ID */
+            //this.projectId
+
+            /* SET AVAILABLE DATA */
+            this.createAvaliableStage();
+            /* SET CHOSEN DATA */
             this.addCurrentStageData();
             this.ErrorStack.setBlock(this.confirmBtn);
-             console.log(this.Modal.link['adapted']);
-
+            console.log(this.Modal.link['adapted']);
+            console.log(this.Modal.link);
         }
         catch(e){
-            console.log(e);
-            this.Html.removeClass(this.Modal.link['error'],'d-none');
-            this.Modal.link.error.innerHTML=e;
+            this.setError(e);
         }
     }
-
-    getReportDataBody(){
-        console.log('ProjectReport::getReportDataBody()');
-        /* */
-        var rowDiv=document.createElement('div');/* ALL */
-            rowDiv.setAttribute('class','row block');
-            rowDiv.setAttribute('id','allProjectReportData');
-        /* */
-        var optionDiv=document.createElement('div');
-            optionDiv.setAttribute('class','col-md-6');
-            optionDiv.setAttribute('id','staticData');
-        var rowLabel=document.createElement('div');
-            rowLabel.setAttribute('class','row pl-1 pr-1');
-        var rowData=document.createElement('div');
-            rowLabel.setAttribute('class','row pl-1 pr-1');
-        var optionLabel=createTag('Dostępne etapy projektu:','h5','text-info');
-            rowLabel.appendChild(optionLabel);
-            optionDiv.appendChild(rowLabel);
-            this.createAvaliableStage(rowData);
-            optionDiv.appendChild(rowData);
-        /* */
-        var dataDiv=document.createElement('div');
-            dataDiv.setAttribute('class','col-md-6');
-            dataDiv.setAttribute('id','dynamicData');
-        var dataDivRowLabel=document.createElement('div');
-            dataDivRowLabel.setAttribute('class','row pl-1 pr-1');
-        var dataDivRow=document.createElement('div');
-            dataDivRow.setAttribute('class','row pl-1 pr-1');
-        var dataLabel=createTag('Aktualny raport:','h5','text-center text-info'); 
-            dataDivRowLabel.appendChild(dataLabel);
-            dataDiv.appendChild(dataDivRowLabel);
-            dataDiv.appendChild(this.setForm());
-            /* APPEND LINK DYNAMIC DATA TO FORM */
-            this.Modal.link['form'].appendChild(dataDivRow);
-
-            /* APPEND */
-            rowDiv.appendChild(optionDiv);
-            rowDiv.appendChild(dataDiv); 
-            console.log(rowDiv);
-             /* APPEND AVAILABLE STAGE DATA */
-            this.Modal.addLink('availableStages',optionDiv);
-             /* APPEND CURRENT STAGE DATA */
-            this.Modal.addLink('selectedStages',dataDiv);
-             /* ADD DYNAMIC STAGE SHORTCUT */
-            this.Modal.addLink('dynamic',dataDivRow);
-            return rowDiv;
+    setError(e){
+        console.log(e);
+        this.Html.removeClass(this.Modal.link['error'],'d-none');
+        this.Modal.link.error.innerHTML=e;
+    }
+    unsetError(){
+        this.Html.addClass(this.Modal.link['error'],'d-none');
+        this.Modal.link.error.innerHTML='';
     }
     createButtons(){
         this.Modal.link['button'].appendChild(this.btnCancelProjectReport());
@@ -214,57 +180,127 @@ class ProjectReport extends ProjectReportView
         this.Modal.link['button'].appendChild(this.btnExportToDoc());
         this.Modal.link['button'].appendChild(this.btnConfirmProjectReport());
     }
-    setForm(){
-        console.log('ProjectReport::setForm()');
-        var form = createForm('POST',this.getFormName(),'form-horizontal','OFF');  
-            form.appendChild(createInput('hidden','id',this.projectId,'form-control','','n'));
-        /* SET FORM LINK */
-        this.Modal.addLink('form',form);
-        return form;
-    }
-    createAvaliableStage(ele){
+    createAvaliableStage(){      
         for(const prop in this.stageData){
-            var divRowStage=createTag('','div','col-12 border border-info mt-1 mb-1 rounded');
-            this.createStageHead(divRowStage,prop);
-            for(const propBody in this.stageData[prop]['v']){
-                this.createStageBody(divRowStage,prop,propBody);
-            }
-            this.createStageFooter(divRowStage,prop);
-            ele.appendChild(divRowStage);
+            let row=this.Html.getRow();
+                this.Html.addClass(row,['mt-0','mb-0']);//'border','border-info',,'rounded','border-bottom','border-info',
+            /* SET ROW */
+            this.createAvaliableStageRow(row,this.stageData[prop]);
+            this.Modal.link['availableData'].appendChild(row);
         }
     }
-    createStageHead(ele,prop){
+    createAvaliableStageRow(ele,prop){
         //console.log('ProjectReport::createStageHead()');
-        var divRow=createTag('','div','row'); 
-        var divRowHeadN=createTag('','div','col-1 bg-info text-white border-bottom border-info text-center pt-3');  
-        var divRowHeadT=createTag('','div','col-10 border-bottom border-info pt-3'); 
-        var divRowHeadA=createTag('','div','col-1 border-bottom border-info pl-1'); 
-        var number=createTag(this.stageData[prop]['n'],'span',''); 
-        //var pMain=createTag('','p','');    
-            divRowHeadN.appendChild(number);
-            divRowHeadT.innerHTML=this.stageData[prop]['t'];
-            divRowHeadA.appendChild(this.addBtn(this.stageData[prop]['i']));
-            //divRowHead.appendChild(pMain);
-        divRow.appendChild(divRowHeadN);
-        divRow.appendChild(divRowHeadT);
-        divRow.appendChild(divRowHeadA);
-        ele.appendChild(divRow);
+        var self=this;
+        var col=this.Html.getCol(12);
+        var spanBull=document.createElement('span');
+            this.Html.addClass(spanBull,'text-info');
+            spanBull.innerHTML='&bull;&nbsp;';
+        var spanText=document.createElement('span');     
+            spanText.append(document.createTextNode(prop.t));
+        var self = this;
+            spanText.onclick = function(){
+                console.log(window.router);
+                console.log(prop);     
+                self.Xhr.run({
+                    t:'GET',
+                    u:window.router+'psShortDetails&id='+prop.i,
+                    c:true,
+                    d:null,
+                    o:self,
+                    m:'createChosenStageRow'
+                });
+                 
+                //self.createChosenStageRow(self,prop);
+            };
+            /* SET POINTER */
+            spanText.onmouseover = function(){
+                this.style.cursor='pointer';
+            };
+
+        col.appendChild(spanBull);
+        col.appendChild(spanText);
+        ele.appendChild(col);        
+    }
+    createChosenStageRow(response){
+        if(!this.parseResponse(response)){
+            return false;
+        };
+        if(!this.parseJsonResponse()){
+            return false;
+        };
+        return true;
+        //console.log(prop);
+        //console.log(self.Xhr);
+        //console.log(self.Modal.link['dynamic']);
+        var row=self.Html.getRow();
+            self.Html.addClass(row,['mt-0','mb-0']);
+        var col=self.Html.getCol(12);
+        var spanBull=document.createElement('span');
+            this.Html.addClass(spanBull,'text-primary');
+            spanBull.innerHTML='&bull;&nbsp;';
+        var spanText=document.createElement('span');     
+            spanText.append(document.createTextNode(prop.t));
+            spanText.onclick = function(){
+                //self.createChosenStageRow(self,prop);
+            };
+            col.append(spanBull);
+            col.append(spanText);
+            row.append(col);
+        /* UPDATE LIST */
+        self.Modal.link['dynamic'].append(row);
+        /* CHECK AND UPDATE VARIABLE LIST */
+        self.Modal.link['variables'].append(row);
+    }
+    parseResponse(response){
+        try{
+            console.log(response);
+            this.jsonResponse = JSON.parse(response);
+            console.log(this.jsonResponse);
+            return true;
+        }
+        catch(e){
+             this.setError(e);
+             return false;
+        }
+    }
+    parseJsonResponse(){
+        //var notify='Application error occurred! Contact with Administrator!';
+        var err=false;
+        try{
+            console.log('ProjectReport::parseJsonResponse()');
+            if(!this.jsonResponse.hasOwnProperty('status')){
+                console.log('no status property');
+                err=true;
+            }
+            if(!this.jsonResponse.hasOwnProperty('info')){
+                console.log('no info property');
+                err=true;
+            }
+            if(!this.jsonResponse.hasOwnProperty('data')){
+                console.log('no data property');
+                err=true;
+            }
+            return true;
+        }
+        catch(e){
+            console.log(e);
+            err=true;
+        }
+        if(err){
+            this.setError('Application error occurred! Contact with Administrator!');
+            return false;
+        }
+        return true;
     }
     createStageBody(ele,prop,propBody){
         //console.log('ProjectReport::createStageBody()');
-        var divRowBody=createTag('','div','row');
-        //var pMain=createTag('','p','');    
-            divRowBody.innerHTML=this.stageData[prop]['v'][propBody]['v'];
-            //divRowBody.appendChild(pMain);
-            ele.appendChild(divRowBody);
+        var col=this.Html.getCol(12);
+        var row=this.Html.getRow();
+            row.innerHTML=this.stageData[prop]['v'][propBody]['v'];
+            col.appendChild(row);
+            ele.append(col);
     }
-    createStageFooter(ele,prop){
-        //console.log('ProjectReport::createStageFooter()');
-        var div=createTag('','div','row border-top border-info text-secondary');     
-            div.innerHTML='<small>Stage ID: '+this.stageData[prop]['i']+', Create user: '+this.stageData[prop]['cu']+'</small>';
-        ele.appendChild(div);
-    }
-
     addCurrentStageData(){
         console.log('ProjectReport::addCurrentStageData()');
         console.log( this.Modal.link['dynamic']);
@@ -314,8 +350,11 @@ class ProjectReport extends ProjectReportView
         //console.log(this.actStage[this.fieldCounter]);
         var counter=0;
         
-        var divInput=createTag('','div','col-12');
-            divInput.setAttribute('id','div-'+this.fieldCounter);
+        var divInput=this.Html.getRow();
+             divInput.setAttribute('id','div-'+this.fieldCounter);
+        var divInputCol=this.Html.getCol(12);
+
+            
             /* ADD DIV ROW FOR REMOVE BUTTON */
         var divInputRow=createTag('','div','row border border-primary rounded mt-1 mb-1 pt-2 pb-2');  
             divInputRow.setAttribute('id','divAll-'+this.fieldCounter);
@@ -336,7 +375,7 @@ class ProjectReport extends ProjectReportView
         divInputRow.appendChild(div1);
         divInputRow.appendChild(div2);
         divInputRow.appendChild(div3);
-        divInput.appendChild(divInputRow);
+        divInputCol.appendChild(divInputRow);
         for(const prop in this.actStage[this.fieldCounter].v){
             var textarea=document.createElement('textarea');
                 textarea.setAttribute('class','form-control w-100 mt-2 ml-2 mr-2');
@@ -352,6 +391,7 @@ class ProjectReport extends ProjectReportView
         this.fieldCounter++;
         
         //console.log(divInput);
+        divInput.append(divInputCol);
         return divInput;
     }
     createFileInputDiv(prop,counter){
@@ -686,22 +726,23 @@ class ProjectReport extends ProjectReportView
         console.log('ProjectReport::btnShowProjectReport()');   
         
         var btn=createBtn('Podgląd','btn btn-info','psShowStage');
+        var self=this;    
             btn.onclick= function() {
-                console.log(this.Modal.link['availableStages']);
-                console.log(this.Modal.link['selectedStages']);
-                if(this.Modal.link['selectedStages'].classList.contains("d-none")){
-                    this.Modal.link['selectedStages'].classList.remove("d-none");
-                    this.Modal.link['selectedStages'].classList.add("block");
-                    this.Modal.link['availableStages'].classList.remove("block");
-                    this.Modal.link['availableStages'].classList.add("d-none");
+                console.log(self.Modal.link['availableStages']);
+                console.log(self.Modal.link['selectedStages']);
+                if(self.Modal.link['selectedStages'].classList.contains("d-none")){
+                    self.Modal.link['selectedStages'].classList.remove("d-none");
+                    self.Modal.link['selectedStages'].classList.add("block");
+                    self.Modal.link['availableStages'].classList.remove("block");
+                    self.Modal.link['availableStages'].classList.add("d-none");
                     this.innerText='Edytuj';
-                    this.showProjectReportPreview();
+                    self.showProjectReportPreview();
                 }
                 else{
-                    this.Modal.link['selectedStages'].classList.remove("block");
-                    this.Modal.link['selectedStages'].classList.add("d-none");
-                    this.Modal.link['availableStages'].classList.remove("d-none");
-                    this.Modal.link['availableStages'].classList.add("block");
+                    self.Modal.link['selectedStages'].classList.remove("block");
+                    self.Modal.link['selectedStages'].classList.add("d-none");
+                    self.Modal.link['availableStages'].classList.remove("d-none");
+                    self.Modal.link['availableStages'].classList.add("block");
                     this.innerText='Podgląd'; 
                 } 
         };     
@@ -713,17 +754,18 @@ class ProjectReport extends ProjectReportView
         /* CHECK PERMISSIONS */
         if(this.perm.includes('GEN_PROJECT_REPORT')){
             /* POST DATA */
+            var self = this;
             btn.onclick= function() {
                 /* CHECK IS ERROR */
                 //if(ErrorStack.check(this.stackName)){
-                if(this.ErrorStack.check()){
+                if(self.ErrorStack.check()){
                     alert('ErrorStack exist errors');
                     return false;
                 }
-                this.Modal.link['form'].name=this.getFormName();
-                console.log(this.Modal.link['form'].name);
-                console.log(this.Modal.link['form']);
-                this.Ajax.sendData(this.Modal.link['form'],'POST'); 
+                self.Modal.link['form'].name=self.super.getFormName();
+                console.log(self.Modal.link['form'].name);
+                console.log(self.Modal.link['form']);
+                self.Ajax.sendData(self.Modal.link['form'],'POST'); 
             };
         }
         else{
@@ -741,11 +783,12 @@ class ProjectReport extends ProjectReportView
         /* CHECK PERMISSIONS */
         if(this.perm.includes('GEN_PROJ_REP_DOC')){
             /* POST DATA */
+            var self = this;
             btn.onclick= function() {
                 console.log(this);
-                console.log(this.getFormName());
-                this.Modal.link['form'].name=this.getFormName()+'Doc';
-                this.Ajax.sendData(this.Modal.link['form'],'POST');
+                console.log(self.super.getFormName());
+                self.Modal.link['form'].name=self.super.getFormName()+'Doc';
+                self.Ajax.sendData(self.Modal.link['form'],'POST');
                 //var win = window.open('test', '_blank');
                 //    win.focus();
             };

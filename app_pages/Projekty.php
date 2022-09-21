@@ -14,6 +14,7 @@ final class Projekty extends Page{
         'Main/Html.js',
         'Main/Modal.js',
         'Main/Ajax.js',
+        'Main/Xhr.js',
         'Main/headerView.js',
         'Main/Table.js',
         'Main/ErrorStack.js',

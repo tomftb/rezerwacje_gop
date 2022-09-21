@@ -123,6 +123,10 @@ class Xhr2 {
             req.onloadstart = function (e){
                 //console.log('Xhr2::onloadstart()');   
                 /*Request started transferring data! - TURN OF*/
+                if(typeof(LoadStart)!=='function'){
+                    console.log('Xhr2::onloadstart()\r\nLoadStart not setup');
+                    return true;
+                }
                 LoadStart();
             };
                   
@@ -147,6 +151,10 @@ class Xhr2 {
             req.onloadend =  function(e){
                 /* Occurs when the request has finish, regardless if it was successful or not*/
                 //console.log('Xhr2::onloadend()');   
+                if(typeof(LoadEnd)!=='function'){
+                    console.log('Xhr2::onloadend()\r\nLoadEnd not setup');
+                    return true;
+                }
                 LoadEnd(); 
                 
             };

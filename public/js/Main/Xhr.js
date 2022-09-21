@@ -216,4 +216,9 @@ class Xhr2 {
         console.log('Xhr2::setOnLoadStart()');
         this.LoadStart=f;
     }
+    setLoad(start,end){
+        console.log('Xhr2::setLoad()');
+        this.setOnLoadStart(start);
+        this.setOnLoadEnd(end);
+    }
 }

@@ -2,7 +2,7 @@ var ajax = new Ajax();
 var error = new Error();
     //MyError.setDiv('errDiv-Adapted-overall');
 var Report = new ProjectReport();
-    Report.setAjax(ajax);
+    //Report.setAjax(ajax);
 var table=new Table();
     table.setAjaxLink(ajax);
     table.setErrorLink(error,'errDiv-Adapted-overall');
@@ -150,6 +150,7 @@ table.setButtonsType('dropdown');
 function runFunction(response)
 {
     console.log('runFunction()');
+    console.log(response);
     try{
         var dJson=JSON.parse(response);
             error.checkStatusExist(dJson);
@@ -213,9 +214,9 @@ function runFunction(response)
                     Report.showReportPreview(dJson['data']['value']);
                     break;
             case 'pReportOff':
-                    Report.setData(dJson,loggedUserPerm);
-                    Report.setErrorStack(new ErrorStack());
-                    Report.create();
+                    //Report.setData(dJson,loggedUserPerm);
+                    //Report.setErrorStack(new ErrorStack());
+                    Report.create(dJson,loggedUserPerm);
                     break;
             case 'runMain':
                     loggedUserPerm=dJson['data']['value']['perm'];

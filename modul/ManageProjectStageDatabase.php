@@ -498,16 +498,27 @@ abstract class ManageProjectStageDatabase {
         $parm[':id']=[$id,'INT'];
         $value=[];
         foreach($data as $v){
+            //print_r($v);
                 $value=[
-                    'id_variable'=>[$v[0],'INT'],/* PDO NOT ACCEPT FLOAT */
-                    'name'=>[$v[1],'STR'],
-                    'value'=>[$v[2],'STR'],
-                    'type'=>['v','STR'] /* TO DO IN FUTURE v - variable, t - text */
+                    'id_variable'=>[$v->id_variable,'INT'],/* PDO NOT ACCEPT FLOAT */
+                    'name'=>[$v->name,'STR'],
+                    'value'=>[$v->value,'STR'],
+                    'type'=>[self::parseVariableType($v->type),'STR'] /* TO DO IN FUTURE v - variable, t - text */
                 ];
                 $this->dbLink->query2(
                     "INSERT INTO `slo_project_stage_subsection_row_p_variable` (`id_parent`,`id_variable`,`name`,`value`,`type`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:id,:id_variable,:name,:value,:type,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
                     ,array_merge($parm,$value,$this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm())
                 );
+        }
+    }
+    private function parseVariableType($v=''){
+        switch ($v){
+            case 'zmienna':
+                return 'v';
+            case 'tekst':
+                return 't';
+            default :
+                Throw New Exception ('Wrong variable type!',0);
         }
     }
     private function manageSubSection($idSection,$subsection=[]){

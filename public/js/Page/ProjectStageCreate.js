@@ -11,6 +11,7 @@ class ProjectStageCreate{
     XhrTable=new Object();
     TabStop = new Object();
     StageData = new Object();
+    Department=new Object();
     //Tool = new Object();
     ProjectStageTool = new Object();
     /* FIELD COUNTER */
@@ -33,7 +34,7 @@ class ProjectStageCreate{
     /* CREATE TEXT DEFAULT DATABASE PROPERTY */
     Property={};
     /* CREATE TEXT DEFAULT DATABASE DEPARTMENT LIST */
-    Department={};
+    DepartmentData={};
        // subsectionRowNewLine:'n'
     //};
     ErrorStack=new Object();
@@ -60,7 +61,7 @@ class ProjectStageCreate{
         this.Utilities = Parent.Items.Utilities;
         this.ProjectStageTool = new ProjectStageTool(this);
         this.Variable=Parent.Items.Variable;
-        
+        this.Department=Parent.Items.Department;
     }
     prepare(response){
         console.log('ProjectStageCreate::prepare()');
@@ -72,7 +73,7 @@ class ProjectStageCreate{
              /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
             /* SET STAGE CREATE TEXT DEFAULT DEPARTMENT LIST */
-            this.Department=this.Stage.Property.department;
+            this.DepartmentData=this.Stage.Property.department;
             this.StageData = new StageData(this.Glossary,this.Stage.Property,this.type,null);
              /* SETUP CLEAR STAGE DATA */
             this.StageData.createDefault();
@@ -120,7 +121,7 @@ class ProjectStageCreate{
             /* SET FORM */
             var form=this.Html.getForm();
             /* ASSIGN TITLE DEPARTMENT FIELD */
-            this.createHead(form,this.Department.defaultDepartment);
+            this.createHead(form,this.DepartmentData.defaultDepartment);
             /* ASSING PREVIEW FIELD */
             form.appendChild(this.createPreview());
             /* ASSING WORKING FIELD */
@@ -184,7 +185,7 @@ class ProjectStageCreate{
             /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
             /* SET STAGE CREATE TEXT DEFAULT DEPARTMENT LIST */
-            this.Department=this.Stage.Property.department;
+            this.DepartmentData=this.Stage.Property.department;
             /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
             this.helplink=this.getEmptyHelpLink();
             /* TO DO IN FUTURE -> ADD setCloseModal multi id's */
@@ -288,46 +289,25 @@ class ProjectStageCreate{
             help.classList.add('form-text','text-muted');
             help.appendChild(helpValue);
             titleInputDiv.appendChild(help);
-        
-        
-        
-            
         titleDiv.appendChild(titleLabelDiv);
         titleDiv.appendChild(titleInputDiv);
-        
+
         ele.appendChild(titleDiv);
         ele.appendChild(titleError.ele);
-        ele.appendChild(this.createHeadDepartment(stageData.data,department));
+        ele.appendChild(this.setDepartment(stageData.data,department));
         console.log(ele);
     }
-    createHeadDepartment(stageData,defaultDepartment){
-        console.log('ProjectStageCreate::createHeadDepartment()');        
-        var departmentDiv=this.Html.getRow();
-        var departmentLabelDiv=this.Html.getCol(1);
-        var departmentInputDiv=this.Html.getCol(11);
-            departmentLabelDiv.appendChild(this.createLabel('h3','Dział:'));
-        var department=this.createSelect('department','department','form-control w-100');
-            department.setAttribute('aria-describedby',"departmentHelp" );
-            department.appendChild(this.createSelectOption('Aktualny:',defaultDepartment));  
-            department.appendChild(this.createSelectOption('Dostępne:',this.Department.avaDepartmentList)); 
-        var departmentListNames = this.Department.departmentListNames; 
-            department.onchange = function () {              
+    setDepartment(stageData,defaultDepartment){
+        console.log('ProjectStageCreate::setDepartment()');
+        this.Department.setData(this.DepartmentData,defaultDepartment);
+        var departmentDiv=this.Department.get();
+        this.helplink['department']=this.Department.getLink();
+        var departmentListNames = this.DepartmentData.departmentListNames; 
+        /* CLOUSURE */
+        this.helplink['department'].onchange = function () {              
                 stageData.departmentId = this.value;
                 stageData.departmentName = departmentListNames[this.selectedIndex];  
-                console.log(stageData);
             };
-        this.helplink['department']=department;
-        var departmentHelpValue=document.createTextNode('Wskaż dział.');     
-        var departmentHelp=document.createElement('small');
-            departmentHelp.setAttribute('id','departmentHelp');
-            departmentHelp.classList.add('form-text','text-muted');
-            departmentHelp.appendChild(departmentHelpValue);
-        
-        departmentInputDiv.appendChild(department);
-        departmentInputDiv.appendChild(departmentHelp);
-        
-        departmentDiv.appendChild(departmentLabelDiv);
-        departmentDiv.appendChild(departmentInputDiv);
         return departmentDiv;
     }
     createLabel(h,value){

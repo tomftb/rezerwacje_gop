@@ -90,7 +90,7 @@ final class UrlManager{
         ['downloadProjectReportImage','GEN_PROJ_REP_DOC'],
         ['showProjectReportFile','GEN_PROJ_REP_DOC'],
         ['showProjectTmpReportFile','GEN_PROJ_REP_DOC'],
-        ['setProjectReport','SAVE_PROJ_REPORT'],
+        //['setProjectReport','SAVE_PROJ_REPORT'],
         ['getModulClusterDefaultData','LOG_INTO_CLUSTR'],
         ['updateClustr','EDIT_CLUSTR'],
         ['getModulUsersDefaults','LOG_INTO_USER'],
@@ -126,7 +126,8 @@ final class UrlManager{
         ['getProjectVariableHideSlo','LOG_INTO_STAGE'],
         ['pvHide','LOG_INTO_STAGE'],
         ['pvDelete','LOG_INTO_STAGE'],
-        ['getProjectVariablesSimpleList','LOG_INTO_STAGE']
+        ['getProjectVariablesSimpleList','LOG_INTO_STAGE'],
+        ['saveProjectReport','SAVE_PROJ_REPORT']
     ];
         
     public function __construct(){

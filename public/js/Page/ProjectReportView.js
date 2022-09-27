@@ -226,6 +226,7 @@ class ProjectReportView{
             li.append(spanTitle);
             li.append(ulVariable);
             this.Modal.link['variables'].append(li);
+        return li;
     }
     move(){
         var span=document.createElement('div');

@@ -6,9 +6,10 @@
  * 
  * MANAGE PROJECT CONSTS DATABASE QUERY
  */
-abstract class ManageProjectStageDatabase {
+//abstract
+class ManageProjectStageDatabase {
     private $dbLink;
-    private $dbUtilities;
+    private $DatabaseUtilities;
     protected $Log;
     //protected $inpArray=array();
     protected $data=array();
@@ -18,41 +19,41 @@ abstract class ManageProjectStageDatabase {
     public function __construct(){
         $this->Log=Logger::init(__METHOD__);
         $this->dbLink=LoadDb::load();
-        $this->dbUtilities=new DatabaseUtilities();
+        $this->DatabaseUtilities=new DatabaseUtilities();
     }
     public function __destruct(){}
     protected function getStageGlossaryText(){
         $this->Log->log(0,"[".__METHOD__."]");
         return [
-            'color'=>$this->dbUtilities->getColor(),
-            'fontFamily'=>$this->dbUtilities->getFontFamily(),
-            'decoration'=>$this->dbUtilities->getStyle(0),
-            'textAlign'=>$this->dbUtilities->getStyle(1),
-            'measurement'=>$this->dbUtilities->getStyle(2),
-            'department'=>$this->dbUtilities->getUserDepartment($_SESSION['userid']),
-            'leading'=>$this->dbUtilities->getSloList('l'),
-            'indentationSpecial'=>$this->dbUtilities->getSloList('s'),
-            'listMeasurement'=>$this->dbUtilities->getSloList('m'),
-            'leadingSign'=>$this->dbUtilities->getSloList('ls'),
-            'tabstopAlign'=>$this->dbUtilities->getSloList('a')
+            'color'=>$this->DatabaseUtilities->getColor(),
+            'fontFamily'=>$this->DatabaseUtilities->getFontFamily(),
+            'decoration'=>$this->DatabaseUtilities->getStyle(0),
+            'textAlign'=>$this->DatabaseUtilities->getStyle(1),
+            'measurement'=>$this->DatabaseUtilities->getStyle(2),
+            'department'=>$this->DatabaseUtilities->getUserDepartment($_SESSION['userid']),
+            'leading'=>$this->DatabaseUtilities->getSloList('l'),
+            'indentationSpecial'=>$this->DatabaseUtilities->getSloList('s'),
+            'listMeasurement'=>$this->DatabaseUtilities->getSloList('m'),
+            'leadingSign'=>$this->DatabaseUtilities->getSloList('ls'),
+            'tabstopAlign'=>$this->DatabaseUtilities->getSloList('a')
         ];
     }
     protected function getStageGlossaryList(){
         $this->Log->log(0,"[".__METHOD__."]");
         return [
-            'listType'=>$this->dbUtilities->getListType()
+            'listType'=>$this->DatabaseUtilities->getListType()
             
         ];
     }
     protected function getStageGlossaryImage(){
         $this->Log->log(0,"[".__METHOD__."]");
         return [
-            'wrapping'=>$this->dbUtilities->getSloList('w'),
-            'order'=>$this->dbUtilities->getSloList('o')
+            'wrapping'=>$this->DatabaseUtilities->getSloList('w'),
+            'order'=>$this->DatabaseUtilities->getSloList('o')
         ];
     }
     protected function getStageParameters($parm='STAGE_%'){
-        return $this->dbUtilities->getParam($parm);
+        return $this->DatabaseUtilities->getParam($parm);
     }
     protected function getStages($where='',$parm=[]){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -67,22 +68,21 @@ abstract class ManageProjectStageDatabase {
         }
         return $data;
     }
-    private function getStageImageProperty(&$data,$tablePrefix,$id=0){
+    public function getStageImageProperty(&$data,$tablePrefix,$id=0){
         
-        foreach($this->dbLink->squery("SELECT `id` FROM `slo_project_stage_subsection_row_i` WHERE `id_parent`=:id AND wsk_u='0';",[':id'=>[$id,'INT']],'FETCH_OBJ','fetchAll') as $k => $v){
+        foreach($this->dbLink->squery("SELECT `id` FROM `".$tablePrefix."` WHERE `id_parent`=:id AND wsk_u='0';",[':id'=>[$id,'INT']],'FETCH_OBJ','fetchAll') as $k => $v){
             $data->{$k}=new stdClass();
             //print_r($v);
             //echo $v->id;
             $data->{$k}->data=new stdClass();
             $data->{$k}->data->id=intval($v->id,10);
             $data->{$k}->data->tmp='n'; // FOR run function getTmpStageImage or getStageImage
-            self::assignProperty($data->{$k},$tablePrefix,'property',$v->id);
-            self::assignProperty($data->{$k},$tablePrefix,'style',$v->id);
+            self::assignAllProperty($data->{$k},$tablePrefix,$v->id);
         }
     }
-    private function getStageEleProperty(&$data,$tablePrefix = '',$id=0){
-        self::assignProperty($data,$tablePrefix,'property',$id);
-        self::assignProperty($data,$tablePrefix,'style',$id);
+    public function assignAllProperty(&$Data,$tablePrefix='',$id=0){
+        self::assignProperty($Data,$tablePrefix,'property',$id);
+        self::assignProperty($Data,$tablePrefix,'style',$id);
     }
     private function assignProperty(&$data,$tablePrefix = '',$key='property',$id = 0){
         $data->{$key}=new stdClass();
@@ -90,9 +90,9 @@ abstract class ManageProjectStageDatabase {
             $data->{$key}->{$v->property} = $v->value;
         }
     }
-    private function assignTabStopProperty(&$data,$id = 0){
+    public function assignTabStopProperty(&$data,$id=0,$table='slo_project_stage_subsection_row_p_tabstop'){
         $data->tabstop=new stdClass();
-        foreach($this->dbLink->squery("SELECT `lp`,`position`,`measurement`,`measurementName`,`alignment`,`alignmentName`,`leadingSign`,`leadingSignName` FROM `slo_project_stage_subsection_row_p_tabstop` WHERE `id_parent`=:id ORDER BY `lp` asc;",[':id'=>[$id,'INT']],'FETCH_OBJ','fetchAll') as $v){
+        foreach($this->dbLink->squery("SELECT `lp`,`position`,`measurement`,`measurementName`,`alignment`,`alignmentName`,`leadingSign`,`leadingSignName` FROM `".$table."` WHERE `id_parent`=:id ORDER BY `lp` asc;",[':id'=>[$id,'INT']],'FETCH_OBJ','fetchAll') as $v){
             //$data->{$key}->{$v->property} = $v->value;
             $data->tabstop->{$v->lp} = (object) array(
                     'position'=>floatval($v->position),
@@ -105,13 +105,9 @@ abstract class ManageProjectStageDatabase {
                 );
         }
     }
-    private function assignVariableProperty(&$data,$id = 0){
-       // $data->variable=[];
-        //foreach($this->dbLink->squery("SELECT s.`id` as 'i', s.`name` as 'n',s.`value` as 'v',(CASE WHEN s.`type`='v' THEN 'zmienna' WHEN s.`type`='t' THEN 'tekst' ELSE 'error_type' END) as 't' FROM `slo_project_stage_subsection_row_p_variable` s WHERE s.`id_parent`=:id ORDER BY s.`id` ASC;",[':id'=>[$id,'INT']]) as $v){
-           // array_push($data->variable,[$v['i'],$v['n'],html_entity_decode($v['v']),$v['t']]);
-       // }
-        //return $data;
-        $data->variable=$this->dbLink->squery("SELECT `id_variable`,`name`,`value`, (CASE WHEN `type`='v' THEN 'zmienna' WHEN `type`='t' THEN 'tekst' ELSE 'error_type' END) as 'type' FROM `slo_project_stage_subsection_row_p_variable` WHERE `id_parent`=:id ORDER BY `id` ASC;",[':id'=>[$id,'INT']],'FETCH_OBJ','fetchAll');        
+    
+    public function assignVariableProperty(&$data,$id=0,$table='slo_project_stage_subsection_row_p_variable'){
+        $data->variable=$this->dbLink->squery("SELECT `id_variable`,`name`,`value`, (CASE WHEN `type`='v' THEN 'zmienna' WHEN `type`='t' THEN 'tekst' ELSE 'error_type' END) as 'type' FROM `".$table."` WHERE `id_parent`=:id ORDER BY `id` ASC;",[':id'=>[$id,'INT']],'FETCH_OBJ','fetchAll');        
     }
     protected function getStageFullData($id=0){
         $this->Log->log(0,"[".__METHOD__."] ID => ".$id);
@@ -124,7 +120,7 @@ abstract class ManageProjectStageDatabase {
         /* FIX STRING TO INT */
         $this->stage->data->id=intval($this->stage->data->id,10);
         /* SET STAGE STYLE AND PROPERTY */
-        self::getStageEleProperty($this->stage,'slo_project_stage',$this->stage->data->id);
+        self::assignAllProperty($this->stage,'slo_project_stage',$this->stage->data->id);
         /* SET STAGE SECTION */
         self::getStageSection($this->stage,$id);
         return $this->stage;
@@ -138,7 +134,7 @@ abstract class ManageProjectStageDatabase {
                     'subsection'=>new stdClass()
                 );
             $data->section->{$k}->data->id=intval($v->id,10);
-            self::getStageEleProperty($data->section->{$k},'slo_project_stage_section',$data->section->{$k}->data->id);
+            self::assignAllProperty($data->section->{$k},'slo_project_stage_section',$data->section->{$k}->data->id);
             self::getStageSubsection($data->section->{$k}->subsection,$data->section->{$k}->data->id);
         }
     }
@@ -151,7 +147,7 @@ abstract class ManageProjectStageDatabase {
                     'subsectionrow'=>new stdClass()
                 );
             $data->{$k}->data->id=intval($v->id,10);
-            self::getStageEleProperty($data->{$k},'slo_project_stage_section',$data->{$k}->data->id);
+            self::assignAllProperty($data->{$k},'slo_project_stage_section',$data->{$k}->data->id);
             self::getStageSubsectionRow($data->{$k}->subsectionrow,$data->{$k}->data->id);
         }
     }
@@ -167,14 +163,13 @@ abstract class ManageProjectStageDatabase {
                 );
             $data->{$k}->data->id=intval($v->id,10);
             self::getStageImageProperty($data->{$k}->image,'slo_project_stage_subsection_row_i',$data->{$k}->data->id);
-            //self::getStageEleProperty($data->{$k}->image,'slo_project_stage_subsection_row_i',$data->{$k}->data->id);
-            self::getStageEleProperty($data->{$k}->list,'slo_project_stage_subsection_row_l',$data->{$k}->data->id);
-            self::getStageEleProperty($data->{$k}->paragraph,'slo_project_stage_subsection_row_p',$data->{$k}->data->id);
-            self::getStageEleProperty($data->{$k}->table,'slo_project_stage_subsection_row_t',$data->{$k}->data->id);
+            self::assignAllProperty($data->{$k}->list,'slo_project_stage_subsection_row_l',$data->{$k}->data->id);
+            self::assignAllProperty($data->{$k}->paragraph,'slo_project_stage_subsection_row_p',$data->{$k}->data->id);
+            self::assignAllProperty($data->{$k}->table,'slo_project_stage_subsection_row_t',$data->{$k}->data->id);
             /* SET TAB STOP */
-            self::assignTabStopProperty($data->{$k}->paragraph,$data->{$k}->data->id);
+            self::assignTabStopProperty($data->{$k}->paragraph,$data->{$k}->data->id,'slo_project_stage_subsection_row_p_tabstop');
             /* SET VARIABLE */
-            self::assignVariableProperty($data->{$k}->paragraph,$data->{$k}->data->id);
+            self::assignVariableProperty($data->{$k}->paragraph,$data->{$k}->data->id,'slo_project_stage_subsection_row_p_variable');
         }
     }
     
@@ -194,38 +189,38 @@ abstract class ManageProjectStageDatabase {
     protected function hideStage(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->Log->logMulti(0,$this->data);
-        $this->dbLink->query("UPDATE `slo_project_stage` SET `wsk_v`=:wsk,`hide_reason`=:reason,".$this->dbUtilities->getAlterSql()." WHERE `id`=:id",
-            array_merge(self::setChangeStageParm(),$this->dbUtilities->getAlterParm()));
+        $this->dbLink->query("UPDATE `slo_project_stage` SET `wsk_v`=:wsk,`hide_reason`=:reason,".$this->DatabaseUtilities->getAlterSql()." WHERE `id`=:id",
+            array_merge(self::setChangeStageParm(),$this->DatabaseUtilities->getAlterParm()));
     }
     protected function deleteStage(){
         $parm=self::setChangeStageParm();
-        $parm[':delete_date']=[$this->dbUtilities->getDate(),'STR'];
-        $this->dbLink->query("UPDATE `slo_project_stage` SET `wsk_u`=:wsk,`delete_reason`=:reason,`delete_date`=:delete_date,".$this->dbUtilities->getAlterSql()." WHERE `id`=:id",
-                array_merge($parm,$this->dbUtilities->getAlterParm()));
+        $parm[':delete_date']=[$this->DatabaseUtilities->getDate(),'STR'];
+        $this->dbLink->query("UPDATE `slo_project_stage` SET `wsk_u`=:wsk,`delete_reason`=:reason,`delete_date`=:delete_date,".$this->DatabaseUtilities->getAlterSql()." WHERE `id`=:id",
+                array_merge($parm,$this->DatabaseUtilities->getAlterParm()));
     }
     private function deleteSection($id = 0){  
         $parm=[
             ':id'=>[$id,'INT'],
-            ':dat_u'=>[$this->dbUtilities->getDate(),'STR']
+            ':dat_u'=>[$this->DatabaseUtilities->getDate(),'STR']
         ];
-        $this->dbLink->query("UPDATE `slo_project_stage_section` SET `wsk_u`='1',`delete_reason`='Removed by edit',`dat_u`=:dat_u,".$this->dbUtilities->getAlterSql()." WHERE `id_parent`=:id AND `wsk_u`='0'",
-                array_merge($parm,$this->dbUtilities->getAlterParm()));
+        $this->dbLink->query("UPDATE `slo_project_stage_section` SET `wsk_u`='1',`delete_reason`='Removed by edit',`dat_u`=:dat_u,".$this->DatabaseUtilities->getAlterSql()." WHERE `id_parent`=:id AND `wsk_u`='0'",
+                array_merge($parm,$this->DatabaseUtilities->getAlterParm()));
     }
     private function deleteSubsection($id = 0){
         $parm=[
             ':id'=>[$id,'INT'],
-            ':dat_u'=>[$this->dbUtilities->getDate(),'STR']
+            ':dat_u'=>[$this->DatabaseUtilities->getDate(),'STR']
         ];
-        $this->dbLink->query("UPDATE `slo_project_stage_subsection` SET `wsk_u`='1',`delete_reason`='Removed by edit',`dat_u`=:dat_u,".$this->dbUtilities->getAlterSql()." WHERE `id_parent`=:id AND `wsk_u`='0'",
-                array_merge($parm,$this->dbUtilities->getAlterParm()));
+        $this->dbLink->query("UPDATE `slo_project_stage_subsection` SET `wsk_u`='1',`delete_reason`='Removed by edit',`dat_u`=:dat_u,".$this->DatabaseUtilities->getAlterSql()." WHERE `id_parent`=:id AND `wsk_u`='0'",
+                array_merge($parm,$this->DatabaseUtilities->getAlterParm()));
     }
     private function deleteSubsectionRow($id = 0){
         $parm=[
             ':id'=>[$id,'INT'],
-            ':dat_u'=>[$this->dbUtilities->getDate(),'STR']
+            ':dat_u'=>[$this->DatabaseUtilities->getDate(),'STR']
         ];
-        $this->dbLink->query("UPDATE `slo_project_stage_subsection_row` SET `wsk_u`='1',`delete_reason`='Removed by edit',`dat_u`=:dat_u,".$this->dbUtilities->getAlterSql()." WHERE `id_parent`=:id AND `wsk_u`='0'",
-                array_merge($parm,$this->dbUtilities->getAlterParm()));
+        $this->dbLink->query("UPDATE `slo_project_stage_subsection_row` SET `wsk_u`='1',`delete_reason`='Removed by edit',`dat_u`=:dat_u,".$this->DatabaseUtilities->getAlterSql()." WHERE `id_parent`=:id AND `wsk_u`='0'",
+                array_merge($parm,$this->DatabaseUtilities->getAlterParm()));
     }
     private function setChangeStageParm(){
         return [
@@ -240,7 +235,7 @@ abstract class ManageProjectStageDatabase {
         $this->dbLink->beginTransaction(); //PHP 5.1 and new
         try{
             /* CHECK DEPARTMENT EXIST */
-            $this->dbUtilities->exist('department',"id=".$this->data->data->departmentId);
+            $this->DatabaseUtilities->exist('department',"id=".$this->data->data->departmentId);
             
             //self::runQuery();
             $this->data->data->id=intval($this->data->data->id,10);
@@ -248,6 +243,7 @@ abstract class ManageProjectStageDatabase {
             $this->dbLink->commit();  //PHP 5 and new
         }
         catch (PDOException $e){
+            //$this->Log->log(0,$e);
             $this->dbLink->rollback(); 
             Throw New Exception("[".__METHOD__."] DATABASE ERROR: ".$e->getMessage(),1);
         }
@@ -284,8 +280,8 @@ abstract class ManageProjectStageDatabase {
     private function insertStage(){
         $this->Log->log(0,"[".__METHOD__."]");  
         $this->dbLink->query2(
-                "INSERT INTO `slo_project_stage` (`departmentId`,`departmentName`,`title`,`type`,`new_page`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:departmentId,:departmentName,:title,:type,:new_page,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
-                ,array_merge(self::sqlStageParm(), $this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm()));
+                "INSERT INTO `slo_project_stage` (`departmentId`,`departmentName`,`title`,`type`,`new_page`,".$this->DatabaseUtilities->getCreateSql()[0].",".$this->DatabaseUtilities->getCreateAlterSql()[0].") VALUES (:departmentId,:departmentName,:title,:type,:new_page,".$this->DatabaseUtilities->getCreateSql()[1].",".$this->DatabaseUtilities->getCreateAlterSql()[1].");"
+                ,array_merge(self::sqlStageParm(), $this->DatabaseUtilities->getCreateParm(),$this->DatabaseUtilities->getAlterParm()));
     }
     private function updateStage(){
         $this->Log->log(0,"[".__METHOD__."]");  
@@ -297,10 +293,10 @@ abstract class ManageProjectStageDatabase {
                 . ",`title`=:title"
                 . ",`type`=:type"
                 . ",`new_page`=:new_page"
-                . ",".$this->dbUtilities->getAlterSql().""
+                . ",".$this->DatabaseUtilities->getAlterSql().""
                 . " WHERE"
                 . "`id`=:id;"
-                ,array_merge(self::sqlStageParm(),[':id'=>[$this->data->data->id,'INT']],$this->dbUtilities->getAlterParm())
+                ,array_merge(self::sqlStageParm(),[':id'=>[$this->data->data->id,'INT']],$this->DatabaseUtilities->getAlterParm())
         );
     }
     private function sqlStageParm() : array{
@@ -320,8 +316,8 @@ abstract class ManageProjectStageDatabase {
         ];
         /* INSERT SECTION */
         $this->dbLink->query2(
-            "INSERT INTO `slo_project_stage_section` (`id_parent`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:id,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
-            ,array_merge($parm, $this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm()));   
+            "INSERT INTO `slo_project_stage_section` (`id_parent`,".$this->DatabaseUtilities->getCreateSql()[0].",".$this->DatabaseUtilities->getCreateAlterSql()[0].") VALUES (:id,".$this->DatabaseUtilities->getCreateSql()[1].",".$this->DatabaseUtilities->getCreateAlterSql()[1].");"
+            ,array_merge($parm, $this->DatabaseUtilities->getCreateParm(),$this->DatabaseUtilities->getAlterParm()));   
          /* INSERT SUBSECTION [COLUMNS] */
         $idSection = $this->dbLink->lastInsertId();
         self::insertAttributes($idSection,$section,'slo_project_stage_section');    
@@ -338,10 +334,10 @@ abstract class ManageProjectStageDatabase {
                 "UPDATE `slo_project_stage_section` SET "
                 . "`delete_reason`=''"
                 . ",`wsk_u`='0'"
-                . ",".$this->dbUtilities->getAlterSql().""
+                . ",".$this->DatabaseUtilities->getAlterSql().""
                 . " WHERE"
                 . "`id`=:id;"
-                ,array_merge($parm,$this->dbUtilities->getAlterParm())
+                ,array_merge($parm,$this->DatabaseUtilities->getAlterParm())
         );
         self::deleteAttributes($v->data->id,'slo_project_stage_section');  
         self::insertAttributes($v->data->id,$v,'slo_project_stage_section');  
@@ -386,8 +382,8 @@ abstract class ManageProjectStageDatabase {
          * v -> subsectionrow
         */
         $this->dbLink->query2(
-                    "INSERT INTO `slo_project_stage_subsection` (`id_parent`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:id,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
-                    ,array_merge([':id'=>[$idSection,'INT']], $this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm()));
+                    "INSERT INTO `slo_project_stage_subsection` (`id_parent`,".$this->DatabaseUtilities->getCreateSql()[0].",".$this->DatabaseUtilities->getCreateAlterSql()[0].") VALUES (:id,".$this->DatabaseUtilities->getCreateSql()[1].",".$this->DatabaseUtilities->getCreateAlterSql()[1].");"
+                    ,array_merge([':id'=>[$idSection,'INT']], $this->DatabaseUtilities->getCreateParm(),$this->DatabaseUtilities->getAlterParm()));
         /* INSERT SUBSECTION ROW [COLUMNS] */
         $lastId=$this->dbLink->lastInsertId();
         
@@ -403,8 +399,8 @@ abstract class ManageProjectStageDatabase {
         $this->Log->log(0,"[".__METHOD__."]\r\n ID DB SUBSECTION - ".$idSubsection);
         /* INSERT SUBSECTION ROWA DATA */
         $this->dbLink->query2(
-            "INSERT INTO `slo_project_stage_subsection_row` (`id_parent`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:id,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
-            ,array_merge([':id'=>[$idSubsection,'INT']], $this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm()));
+            "INSERT INTO `slo_project_stage_subsection_row` (`id_parent`,".$this->DatabaseUtilities->getCreateSql()[0].",".$this->DatabaseUtilities->getCreateAlterSql()[0].") VALUES (:id,".$this->DatabaseUtilities->getCreateSql()[1].",".$this->DatabaseUtilities->getCreateAlterSql()[1].");"
+            ,array_merge([':id'=>[$idSubsection,'INT']], $this->DatabaseUtilities->getCreateParm(),$this->DatabaseUtilities->getAlterParm()));
         $IdRow=$this->dbLink->lastInsertId();
         /*
          * INSERT paragraph
@@ -412,8 +408,8 @@ abstract class ManageProjectStageDatabase {
         $this->Log->log(0,"paragraph");
         self::insertAttributes($IdRow,$data->paragraph,'slo_project_stage_subsection_row_p');
         /* INSERT SUBSECTION ROW TABSTOP */
-        self::insertTabStop($IdRow,$data->paragraph->tabstop);
-        self::insertVariable($IdRow,$data->paragraph->variable);
+        self::insertExtendedTabStop($IdRow,$data->paragraph->tabstop,'slo_project_stage_subsection_row_p_tabstop');
+        self::insertExtendedVariable($IdRow,$data->paragraph->variable,'slo_project_stage_subsection_row_p_variable');
         /*
          * INSERT list
          */
@@ -433,26 +429,49 @@ abstract class ManageProjectStageDatabase {
         //$this->dbLink->query2("DELETE FROM `".$table."_style` WHERE `id_parent`=:id;",$parm);
         /* ADD NEW */
         foreach($data->image as $v){
-            self::insertSubsectionRowImage($IdRow,$v);
+            self::insertExtendedSubsectionRowImage($IdRow,$v,'slo_project_stage_subsection_row_i');
         }
     }
-    private function insertSubsectionRowImage($IdRow,$v){
-        /* INSERT IMAGE */
-        $this->dbLink->query2(
-           "INSERT INTO `slo_project_stage_subsection_row_i` (`id_parent`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:id,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
-            ,array_merge([':id'=>[$IdRow,'INT']], $this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm())); 
-       /* INSERT IMAGE STYLE AND PROPERTIES */
-       self::insertAttributes($this->dbLink->lastInsertId(),$v,'slo_project_stage_subsection_row_i');
-       /* MOVE FILE from tmp_uplad to upload */
-       File::moveFile(TMP_UPLOAD_DIR.$v->property->uri,UPLOAD_DIR,$v->property->uri);
+    public function insertExtendedSubsectionRowImage($IdRow,$v,$table){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $run = function($IdRow,$table,$t,$v){
+            /*
+             * t - $this
+             */
+            //$this->dbLink,$this->DatabaseUtilities
+            $t->dbLink->query2(
+                "INSERT INTO `".$table."` (`id_parent`,".$t->DatabaseUtilities->getCreateSql()[0].",".$t->DatabaseUtilities->getCreateAlterSql()[0].") VALUES (:id,".$t->DatabaseUtilities->getCreateSql()[1].",".$t->DatabaseUtilities->getCreateAlterSql()[1].");"
+                ,array_merge([':id'=>[$IdRow,'INT']], $t->DatabaseUtilities->getCreateParm(),$t->DatabaseUtilities->getAlterParm())); 
+            /* INSERT IMAGE STYLE AND PROPERTIES */
+            $t->insertAttributes($t->dbLink->lastInsertId(),$v,$table);
+            /* MOVE FILE from tmp_uplad to upload */
+            File::moveFile(TMP_UPLOAD_DIR.$v->property->uri,UPLOAD_DIR,$v->property->uri);
+        };
+        self::insertSubsectionRowImage($IdRow,$v,$table,$run);
     }
-    private function insertAttributes($id=0,$data=[],$table='slo_project_stage_subsection_row_p'){
+    public function insertSimpleSubsectionRowImage($IdRow,$v,$table){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $run = function($IdRow,$table,$t,$v){
+             $t->dbLink->query2("INSERT INTO `".$table."` (`id_parent`) VALUES (:id);",[':id'=>[$IdRow,'INT']]); 
+              /* INSERT IMAGE STYLE AND PROPERTIES */
+            $t->insertSimpleAttributes($t->dbLink->lastInsertId(),$v,$table);
+             /* MOVE FILE from tmp_uplad to upload IF CHANGED !!!! */
+            //File::moveFile(TMP_UPLOAD_DIR.$v->property->uri,UPLOAD_DIR,$v->property->uri);
+        };
+        self::insertSubsectionRowImage($IdRow,$v,$table,$run);
+    }
+    private function insertSubsectionRowImage($IdRow=0,$v,$table,$run){
+        /* INSERT IMAGE */
+        $run($IdRow,$table,$this,$v);
+      
+    }
+    public function insertAttributes($id=0,$data=[],$table='slo_project_stage_subsection_row_p'){
         $this->Log->log(0,"[".__METHOD__."]\r\nID - ".$id."\r\nTABLE: ".$table);
         $parm[':id']=[$id,'INT'];
         self::insertAttributesProperty($parm,$data->style,$table.'_style');
         self::insertAttributesProperty($parm,$data->property,$table.'_property'); 
     }
-    private function deleteAttributes($id=0,$table='slo_project_stage_section'){
+    public function deleteAttributes($id=0,$table='slo_project_stage_section'){
         $this->Log->log(0,"[".__METHOD__."]\r\nID - ".$id."\r\nTABLE: ".$table."\r\n_style _property");
         $parm[':id']=[$id,'INT'];
         $this->dbLink->query2("DELETE FROM `".$table."_style` WHERE `id_parent`=:id;",$parm);
@@ -465,50 +484,93 @@ abstract class ManageProjectStageDatabase {
             //$this->Log->log(0,$k);
             //$this->Log->log(0,$v);
             $this->dbLink->query2(
-                 "INSERT INTO `".$table."` (`id_parent`,`property`,`value`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:id,:property,:value,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
-                  ,array_merge($parm, $this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm())
+                 "INSERT INTO `".$table."` (`id_parent`,`property`,`value`,".$this->DatabaseUtilities->getCreateSql()[0].",".$this->DatabaseUtilities->getCreateAlterSql()[0].") VALUES (:id,:property,:value,".$this->DatabaseUtilities->getCreateSql()[1].",".$this->DatabaseUtilities->getCreateAlterSql()[1].");"
+                  ,array_merge($parm, $this->DatabaseUtilities->getCreateParm(),$this->DatabaseUtilities->getAlterParm())
             );
         }
     }
-    private function insertTabStop($id=0,$data=[]){
-        $this->Log->log(0,"[".__METHOD__."]\r\n ID DB SUBSECTION ROW - ".$id);
+    public function insertSimpleAttributes($id=0,$data,$table=''){
+        $this->Log->log(0,"[".__METHOD__."]\r\nID - ".$id."\r\nTABLE: ".$table);
         $parm[':id']=[$id,'INT'];
-        $value=[];
+        self::inserSimpletAttributesProperty($parm,$data->style,$table.'_style');
+        self::inserSimpletAttributesProperty($parm,$data->property,$table.'_property'); 
+    }
+    private function inserSimpletAttributesProperty($parm=[],$data=[],$table='slo_project_stage_subsection_row_p_style'){
         foreach($data as $k => $v){
-                //print_r($v);
-                //throw new exception('aaaaa');
-                $value=[
-                    'lp'=>[$k,'INT'],
-                    'position'=>[$v->position,'STR'],/* PDO NOT ACCEPT FLOAT */
-                    'measurement'=>[$v->measurement,'STR'],
-                    'measurementName'=>[$v->measurementName,'STR'],
-                    'alignment'=>[$v->alignment,'STR'],
-                    'alignmentName'=>[$v->alignmentName,'STR'],
-                    'leadingSign'=>[$v->leadingSign,'STR'],
-                    'leadingSignName'=>[$v->leadingSignName,'STR']
-                ];
-                $this->dbLink->query2(
-                    "INSERT INTO `slo_project_stage_subsection_row_p_tabstop` (`id_parent`,`lp`,`position`,`measurement`,`measurementName`,`alignment`,`alignmentName`,`leadingSign`,`leadingSignName`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:id,:lp,:position,:measurement,:measurementName,:alignment,:alignmentName,:leadingSign,:leadingSignName,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
-                    ,array_merge($parm,$value,$this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm())
-                );
+            $parm[':property']=[$k,'STR']; 
+            $parm[':value']=[$v,'STR']; 
+            $this->dbLink->query2("INSERT INTO `".$table."` (`id_parent`,`property`,`value`) VALUES (:id,:property,:value);",$parm);
         }
     }
-     private function insertVariable($id=0,$data=[]){
-        $this->Log->log(0,"[".__METHOD__."]\r\n ID DB SUBSECTION ROW - ".$id);
-        $parm[':id']=[$id,'INT'];
-        $value=[];
-        foreach($data as $v){
-            //print_r($v);
-                $value=[
-                    'id_variable'=>[$v->id_variable,'INT'],/* PDO NOT ACCEPT FLOAT */
-                    'name'=>[$v->name,'STR'],
-                    'value'=>[$v->value,'STR'],
-                    'type'=>[self::parseVariableType($v->type),'STR'] /* TO DO IN FUTURE v - variable, t - text */
-                ];
-                $this->dbLink->query2(
-                    "INSERT INTO `slo_project_stage_subsection_row_p_variable` (`id_parent`,`id_variable`,`name`,`value`,`type`,".$this->dbUtilities->getCreateSql()[0].",".$this->dbUtilities->getCreateAlterSql()[0].") VALUES (:id,:id_variable,:name,:value,:type,".$this->dbUtilities->getCreateSql()[1].",".$this->dbUtilities->getCreateAlterSql()[1].");"
-                    ,array_merge($parm,$value,$this->dbUtilities->getCreateParm(),$this->dbUtilities->getAlterParm())
+    public function insertSimpleTabStop($id=0,$data=[],$table='slo_project_stage_subsection_row_p_tabstop'){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $run = function($parm,$table,$dbLink,$dbUtilities){
+            $dbLink->query2(
+                    "INSERT INTO `".$table."` (`id_parent`,`lp`,`position`,`measurement`,`measurementName`,`alignment`,`alignmentName`,`leadingSign`,`leadingSignName`) VALUES (:id_parent,:lp,:position,:measurement,:measurementName,:alignment,:alignmentName,:leadingSign,:leadingSignName);"
+                    ,$parm);
+        };
+         self::insertTabStop($id,$data,$table,$run);
+    }
+    public function insertExtendedTabStop($id=0,$data,$table='slo_project_stage_subsection_row_p_tabstop'){
+         $this->Log->log(0,"[".__METHOD__."]");
+         $this->Log->log(0,$data);
+        //var_dump($data);
+        $run = function($parm,$table,$dbLink,$dbUtilities){
+            $dbLink->query2(
+                    "INSERT INTO `".$table."` (`id_parent`,`lp`,`position`,`measurement`,`measurementName`,`alignment`,`alignmentName`,`leadingSign`,`leadingSignName`,".$dbUtilities->getCreateSql()[0].",".$dbUtilities->getCreateAlterSql()[0].") VALUES (:id_parent,:lp,:position,:measurement,:measurementName,:alignment,:alignmentName,:leadingSign,:leadingSignName,".$dbUtilities->getCreateSql()[1].",".$dbUtilities->getCreateAlterSql()[1].");"
+                    ,array_merge($parm,$dbUtilities->getCreateParm(),$dbUtilities->getAlterParm())
                 );
+        };
+        self::insertTabStop($id,$data,$table,$run);
+    }
+    private function insertTabStop($id=0,$data=[],$table='slo_project_stage_subsection_row_p_tabstop',$run){
+        $this->Log->log(0,"[".__METHOD__."]\r\n ID DB SUBSECTION ROW - ".$id);
+        $parm=[];
+        foreach($data as $k => $v){
+            $this->Log->log(0,$k);
+            $this->Log->log(0,$v);
+                $parm=[
+                    ':id_parent'=>[$id,'INT'],
+                    ':lp'=>[$k,'INT'],
+                    ':position'=>[$v->position,'STR'],/* PDO NOT ACCEPT FLOAT */
+                    ':measurement'=>[$v->measurement,'STR'],
+                    ':measurementName'=>[$v->measurementName,'STR'],
+                    ':alignment'=>[$v->alignment,'STR'],
+                    ':alignmentName'=>[$v->alignmentName,'STR'],
+                    ':leadingSign'=>[$v->leadingSign,'STR'],
+                    ':leadingSignName'=>[$v->leadingSignName,'STR']
+                ];
+                $run($parm,$table,$this->dbLink,$this->DatabaseUtilities);
+        }
+    }
+    public function insertSimpleVariable($id=0,$data=[],$table='project_report_stage_subsection_row_p_variable'){
+         $run = function($parm,$table,$dbLink,$dbUtilities){
+            $dbLink->query2(
+                    "INSERT INTO `".$table."` (`id_parent`,`id_variable`,`name`,`value`,`type`) VALUES (:id,:id_variable,:name,:value,:type);"
+                    ,$parm);
+        };
+        self::insertVariable($id,$data,$table,$run);
+    }
+    public function insertExtendedVariable($id=0,$data=[],$table='slo_project_stage_subsection_row_p_variable'){
+         $run = function($parm,$table,$dbLink,$dbUtilities){
+            $dbLink->query2(
+                    "INSERT INTO `".$table."` (`id_parent`,`id_variable`,`name`,`value`,`type`,".$dbUtilities->getCreateSql()[0].",".$dbUtilities->getCreateAlterSql()[0].") VALUES (:id,:id_variable,:name,:value,:type,".$dbUtilities->getCreateSql()[1].",".$dbUtilities->getCreateAlterSql()[1].");"
+                    ,array_merge($parm,$dbUtilities->getCreateParm(),$dbUtilities->getAlterParm())
+                );
+        };
+        self::insertVariable($id,$data,$table,$run);
+    }
+    private function insertVariable($id=0,$data=[],$table,$run){
+        $this->Log->log(0,"[".__METHOD__."]\r\n ID DB SUBSECTION ROW - ".$id);
+        foreach($data as $v){
+                $parm=[
+                    ':id'=>[$id,'INT'],
+                    ':id_variable'=>[$v->id_variable,'INT'],/* PDO NOT ACCEPT FLOAT */
+                    ':name'=>[$v->name,'STR'],
+                    ':value'=>[$v->value,'STR'],
+                    ':type'=>[self::parseVariableType($v->type),'STR'] /* TO DO IN FUTURE v - variable, t - text */
+                ];
+                $run($parm,$table,$this->dbLink,$this->DatabaseUtilities);
         }
     }
     private function parseVariableType($v=''){
@@ -558,12 +620,12 @@ abstract class ManageProjectStageDatabase {
         ];
         $this->dbLink->query2(
                 "UPDATE `slo_project_stage_subsection` SET "
-                . "".$this->dbUtilities->getAlterSql().""
+                . "".$this->DatabaseUtilities->getAlterSql().""
                 .",`delete_reason`=''"
                 .",`wsk_u`='0'"
                 . " WHERE"
                 . "`id`=:id;"
-                ,array_merge($parm,$this->dbUtilities->getAlterParm())
+                ,array_merge($parm,$this->DatabaseUtilities->getAlterParm())
         );
         self::deleteAttributes($v->data->id,'slo_project_stage_subsection');
         self::insertAttributes($v->data->id,$v,'slo_project_stage_subsection');
@@ -607,10 +669,10 @@ abstract class ManageProjectStageDatabase {
                 "UPDATE `slo_project_stage_subsection_row` SET "
                 ."`delete_reason`=''"
                 .",`wsk_u`='0'"
-                . ",".$this->dbUtilities->getAlterSql().""
+                . ",".$this->DatabaseUtilities->getAlterSql().""
                 . " WHERE"
                 . "`id`=:id;"
-                ,array_merge($parm,$this->dbUtilities->getAlterParm()));
+                ,array_merge($parm,$this->DatabaseUtilities->getAlterParm()));
         /* DELETE AND INSTERT - STYLE AND PROPERTY TEXT,LIST,TABLE,LIST, IT PREVENT FOR CHANGES ON FRONT-END WHEN NEW STYLES OR PROPERTY APPEARS */    
         /*
          * INSERT paragraph
@@ -619,10 +681,10 @@ abstract class ManageProjectStageDatabase {
         self::insertAttributes($v->data->id,$v->paragraph,'slo_project_stage_subsection_row_p');
         /* INSERT SUBSECTION ROW TABSTOP */
         $this->dbLink->query2("DELETE FROM `slo_project_stage_subsection_row_p_tabstop` WHERE `id_parent`=:id;",$parm);
-        self::insertTabStop($v->data->id,$v->paragraph->tabstop);
+        self::insertExtendedTabStop($v->data->id,$v->paragraph->tabstop,'slo_project_stage_subsection_row_p_tabstop');
         /* INSERT SUBSECTION ROW VARIABLE */
         $this->dbLink->query2("DELETE FROM `slo_project_stage_subsection_row_p_variable` WHERE `id_parent`=:id;",$parm);
-        self::insertVariable($v->data->id,$v->paragraph->variable);
+        self::insertExtendedVariable($v->data->id,$v->paragraph->variable,'slo_project_stage_subsection_row_p_variable');
         /*
          * INSERT list
          */
@@ -656,7 +718,7 @@ abstract class ManageProjectStageDatabase {
         }
         else{
             $this->Log->log(0,"INSERT IMAGE");  
-            self::insertSubsectionRowImage($IdRow,$v);
+            self::insertExtendedSubsectionRowImage($IdRow,$v,'slo_project_stage_subsection_row_i');
         }
     }
 }

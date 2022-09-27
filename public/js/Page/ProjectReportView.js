@@ -249,7 +249,8 @@ class ProjectReportView{
             return i;
     }
     remove(){
-        var i=createTag('','i','fa fa-minus');
+        var i=document.createElement('i');
+            this.Html.addClass(i,['fa','fa-minus']);
             i.setAttribute('aria-hidden','true');
             i.setAttribute('style','color:#ffffff;');
         var div=document.createElement('button');

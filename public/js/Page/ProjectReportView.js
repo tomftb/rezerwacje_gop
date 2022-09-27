@@ -228,28 +228,25 @@ class ProjectReportView{
             this.Modal.link['variables'].append(li);
     }
     move(){
-        var i=createTag('','i','fa fa-long-arrow-up text-dark text-center ml-2 ml-1 ');
-            i.setAttribute('aria-hidden','true');
-            i.style.cursor='pointer';
-            this.changeArrow(i);
-        var i1=createTag('','i','fa fa-long-arrow-down text-dark text-center ml-1 mr-1 ');
-            i1.setAttribute('aria-hidden','true');
-            i1.style.cursor='pointer';
-            this.changeArrow(i1);
         var span=document.createElement('div');
             this.Html.addClass(span,['float-left','pt-1']);
-            span.append(i,i1);
+            span.append(this.getArrow(['fa-long-arrow-up']),this.getArrow(['fa-long-arrow-down','mr-1']));
             return(span); 
     }
-    changeArrow(ele){
-        ele.onmouseover = function (){
-            this.classList.remove("text-dark");
-            this.classList.add("text-white");
-        };
-        ele.onmouseleave = function (){
-            this.classList.remove("text-white");
-            this.classList.add("text-dark");
-        };
+    getArrow(c){
+        var i=document.createElement('i');
+            this.Html.addClass(i,['fa','text-dark','text-center','ml-1'].concat(c));
+            i.setAttribute('aria-hidden','true');
+            i.style.cursor='pointer';
+            i.onmouseover = function (){
+                this.classList.remove("text-dark");
+                this.classList.add("text-white");
+            };
+            i.onmouseleave = function (){
+                this.classList.remove("text-white");
+                this.classList.add("text-dark");
+            };
+            return i;
     }
     remove(){
         var i=createTag('','i','fa fa-minus');

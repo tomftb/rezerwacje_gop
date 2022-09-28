@@ -73,9 +73,9 @@ class ManagePermission
     private function addUserToPerm()
     {
         $this->Log->log(0,"[".__METHOD__."]");
-        foreach($this->inpArray as $id => $user)
+        foreach($this->inpArray as $key => $user)
         {
-            if(!self::addPerm($id,$user)){
+            if(!self::addPerm($key,$user)){
                 break;
             }
         }
@@ -102,10 +102,12 @@ class ManagePermission
             Throw New Exception("PERMISSION (ID:".$this->idPerm.") DATABASE ERROR",1);
         }
     }
-    private function addPerm($id,$user)
+    private function addPerm($key,$user)
     {
         $this->Log->log(0,"[".__METHOD__."]");
-        if(preg_match('/^user_(\d)+$/i', $id) && (intval($user,10)>0 ) && self::checkUserExist($user))
+        $this->Log->log(0,"USER KEY:".$key);
+        $this->Log->log(0,"ID USER:".$user);
+        if(preg_match('/^user_(\d)+$/i', $key) && (intval($user,10)>0 ) && self::checkUserExist($user))
         {
             $this->Log->log(0,"INSERT => ".$user);
             $sql=[
@@ -116,7 +118,7 @@ class ManagePermission
         }
         else
         {
-            Throw New Exception("WRONG INPUT KEY (".$id."), OR WRONG ID USER (".$user.") OR USER WITH ID => ".$user." NOT EXIST OR USER IS DELETED",1); 
+            Throw New Exception("WRONG INPUT KEY (".$key."!=user_\\d), OR WRONG ID USER (".$user.") OR USER WITH ID => ".$user." NOT EXIST OR USER IS DELETED",1); 
         } 
     }
     # RETURN ALL NOT DELETED PROJECT FROM DB

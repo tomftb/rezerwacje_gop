@@ -230,7 +230,7 @@ function createPermRow(ele,i,id,user)
             correctAvaUsers(actTeamMember,false);
             /* REMOVE SET WORKER SELECT */
             removeHtmlChilds(this.parentNode);
-            tmpNode.appendChild(createUsersArray(this.value,'pers_'+tmp_name[1],tmp_member.ImieNazwisko));
+            tmpNode.appendChild(createUsersArray(this.value,'user_'+tmp_name[1],tmp_member.ImieNazwisko));
         };
 
     var rmBtn=createRemoveButton(i,'n');

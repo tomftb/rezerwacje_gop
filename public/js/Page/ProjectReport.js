@@ -51,9 +51,7 @@ class ProjectReport extends ProjectReportView
         }
     }
     parseJsonResponse(){
-         console.log('ProjectReport::parseJsonResponse()');
-        //var notify='Application error occurred! Contact with Administrator!';
-        var err=false;
+        console.log('ProjectReport::parseJsonResponse()');
         var defaultErr='Application error occurred! Contact with Administrator!';
         try{
             console.log('ProjectReport::parseJsonResponse()');
@@ -70,7 +68,6 @@ class ProjectReport extends ProjectReportView
                 throw defaultErr;
             }
             if(this.jsonResponse.status===1){
-                
                 throw this.jsonResponse.info;
             }
             return true;
@@ -78,9 +75,7 @@ class ProjectReport extends ProjectReportView
         catch(e){
             console.log(e);
             this.ErrorStack.add('overall',e);
-            this.Modal.setError(this.ErrorStack.info['overall']);
-            //this.Modal.setError(e);
-            
+            this.Modal.setError(this.ErrorStack.info['overall']);            
             return false;
         }
         return true;
@@ -216,7 +211,6 @@ class ProjectReport extends ProjectReportView
             this.Modal.setError(e);
         }
     }
-
     createButtons(){
         this.Modal.link['button'].appendChild(this.btnCancelProjectReport());
         this.Modal.link['button'].appendChild(this.btnShowProjectReport());
@@ -309,20 +303,17 @@ class ProjectReport extends ProjectReportView
         //console.log('ProjectReport::createChosenStageRow()');
         //console.log(Report);
         //console.log(id);
-        
         try{
             var self=this;
             var row=super.getChosenStageRow();
-                row.tx.append(document.createTextNode(Report.stage[id].data.title));
-                
-                
+                row.tx.append(document.createTextNode(Report.stage[id].data.title));        
            function swap(ReportData,id,last,self){
                //console.log('ProjectReport::createChosenStageRow().swap()');
                //console.log(ReportData);
                 if(last===''){
-                    //console.log('NO STAGE BEFORE');
+                    //console.log('NO STAGE BEFORE/AFTER');
                     return true;
-                }
+                };
                 //console.log('STAGE BEFORE PROPERTY - '+last);
                 ReportData.data.change='y';
                 /* SWAP REPORT OBJECT */
@@ -339,7 +330,21 @@ class ProjectReport extends ProjectReportView
 
                     self.Html.removeChilds(self.Helplink.stage[id].stage);
                     self.Html.removeChilds(self.Helplink.stage[last].stage);
-
+                    
+                    var checkVariableWindow=function(selfRef,idAct,lastId){
+                        //console.log('ProjectReport::createChosenStageRow().swap().checkVariableWindow()');
+                        //console.log(selfRef);
+                        //console.log(idAct);
+                        //console.log(lastId);
+                        //self.Html.removeChilds();
+                        //console.log();
+                        selfRef.Html.removeChilds(selfRef.Modal.link['variablesLabel']);
+                        selfRef.Modal.link['variablesInput'].value='';
+                        selfRef.Modal.link['variablesSaveButton'].onclick=function(){};
+                        selfRef.Html.addClass(selfRef.Modal.link['variablesEle'],'d-none');
+                       // console.log();
+                        //console.log(self.Modal.link['variablesSaveButton']);
+                    };
                     /* assignVariable function */
                     var assignVariable = function(selfRef,ReportDataIn,idChange){
                         //console.log('ProjectReport::createChosenStageRow().swap().assignVariable()');
@@ -358,12 +363,13 @@ class ProjectReport extends ProjectReportView
                     };
                     
                     /* checkVariable function */
-                    function checkVariable(selfRef,ReportDataIn,idAct,lastId,assignVariable){
+                    function checkVariable(selfRef,ReportDataIn,idAct,lastId,assignVariable,checkVariableWindow){
                         //console.log('ProjectReport::createChosenStageRow().swap().checkVariable()');
                        // let variableNew={
                         //    id:{},
                         //    last:{}
                        // };
+                        checkVariableWindow(selfRef,idAct,lastId);
                         let tmpVariableEle={};
                         //console.log('ID:');
                        // console.log(id);
@@ -439,7 +445,10 @@ class ProjectReport extends ProjectReportView
                         //return variableNew;
                     }
                     /* END checkVariable function */
-                    checkVariable(self,ReportData,id,last,assignVariable);
+                    
+                    
+                    
+                    checkVariable(self,ReportData,id,last,assignVariable,checkVariableWindow);
                     //let variableAll=
                   
                     /* SETUP STAGE VARIABLE ELE */ 
@@ -456,7 +465,6 @@ class ProjectReport extends ProjectReportView
                         //console.log(self.Modal.link['dynamic']);
                        // console.log(self.Modal.link['variables']);   
            };
-                
                 row.tx.onclick = function(){
                     //console.log(Report);
                     //console.log(id);
@@ -531,7 +539,7 @@ class ProjectReport extends ProjectReportView
             throw 'Application error occurred! Contact with Administrator!';
         }
     }
-    createChosenStageVariable(Report,stageId,variable){     
+    createChosenStageVariable(Report,stageId,variable){  
         try{
             variable.list=document.createElement('ul');
                 this.Html.addClass(variable.list,['mt-0','mb-0','text-dark']);
@@ -549,7 +557,7 @@ class ProjectReport extends ProjectReportView
                                 spanLi.append(document.createTextNode(Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].name));
                                 spanLi.style.cursor='pointer';
                                 spanLi.onclick = function(){
-                                    console.log('ProjectReport::createChosenStageVariable()\nSTAGE ID:');
+                                    console.log('ProjectReport::createChosenStageVariable().onclick()\nSTAGE ID:');
                                     console.log(stageId);
                                     console.log(variable);
                                     //console.log(Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v]);

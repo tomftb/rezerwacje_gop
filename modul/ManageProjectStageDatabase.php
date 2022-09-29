@@ -650,7 +650,7 @@ class ManageProjectStageDatabase {
             }
             $v->data->id = intval($v->data->id,10);
             $this->Log->log(0,'ID SUBSECTION ROW - '.$v->data->id);
-            $this->Log->log(0,$v);
+            //$this->Log->log(0,$v);
             if($v->data->id>0){
                 /* SQL UPDATE SUB SECTION */
                 self::updateSubSectionRow($v);  
@@ -698,10 +698,14 @@ class ManageProjectStageDatabase {
         /*
          * INSERT image
          */
+        self::updateImageWskU($v->data->id);
+        /* SET wsk_u to OLD IMAGE */
         array_walk($v->image,['self','updateSubSectionRowImage'],$v->data->id);
     }
     private function updateSubSectionRowImage($v,$key=0,$IdRow=0){
-        $this->Log->log(0,"[".__METHOD__."]");      
+        $this->Log->log(0,"[".__METHOD__."]");  
+        $this->Log->log(0,$v->data->id);  
+        $this->Log->log(0,$v->data->tmp);  
         if($v->data->id>0 && $v->data->tmp==='y'){
             $this->Log->log(0,"UPDATE IMAGE");      
             /* OLD FILE STAY FOR BACK FUNCTION IN FUTUTRE -> TO DO */
@@ -713,12 +717,27 @@ class ManageProjectStageDatabase {
         }
         else if($v->data->id>0 && $v->data->tmp==='n'){
             $this->Log->log(0,"UPDATE ONLY IMAGE ATTRIBUTES");  
+            
             self::deleteAttributes($v->data->id,'slo_project_stage_subsection_row_i');
             self::insertAttributes($v->data->id,$v,'slo_project_stage_subsection_row_i');
         }
         else{
-            $this->Log->log(0,"INSERT IMAGE");  
+            $this->Log->log(0,"INSERT IMAGE");
             self::insertExtendedSubsectionRowImage($IdRow,$v,'slo_project_stage_subsection_row_i');
         }
+    }
+    private function updateImageWskU($imageId=0){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->Log->log(0,$imageId);
+        
+           $this->dbLink->query2(
+                "UPDATE `slo_project_stage_subsection_row_i` SET "
+                ."`delete_reason`='NEW VERSION'"
+                .",`wsk_u`='1'"
+                . ",".$this->DatabaseUtilities->getAlterSql().""
+                . " WHERE"
+                . "`id_parent`=:id_parent;"
+                ,array_merge([':id_parent'=>[$imageId,'INT']],$this->DatabaseUtilities->getAlterParm()));
+        return true;
     }
 }

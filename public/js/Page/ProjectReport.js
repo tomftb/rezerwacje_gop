@@ -22,6 +22,9 @@ class ProjectReport extends ProjectReportView
     /* Ordinal number */
     //ordinalNumber=0;
     perm=new Array();
+    Helplink={
+        'stage':{}
+    };
     imgUrl='http://rezerwacje-gop.local:8080/router.php?task=downloadProjectReportImage&file=';
     fileProp={
         max:20971520, /* 20 MB 1024 * 1024 * 20 */
@@ -362,127 +365,329 @@ class ProjectReport extends ProjectReportView
         console.log(Object.keys(this.ChosenReport[0].stage).length);
         console.log('New:');
         console.log(this.jsonResponse.data);
-        var length = Object.keys(this.ChosenReport[0].stage).length;
+        var length = (Object.keys(this.ChosenReport[0].stage).length).toString();
         this.ChosenReport[0].data.change='y';
         this.ChosenReport[0].stage[length]=this.jsonResponse.data;
         this.ChosenReport[0].stage[length].data['ordinal_number']=1;
         //throw 'asaaaa';
         /* ADD NET ITEM */
-        this.createChosenStageRow(this.ChosenReport[0],length);
+        let variable={
+                    list:{},
+                    found:false,
+                    all:null
+                };
+        this.createChosenStageVariable(this.ChosenReport[0],length,variable);
+            
+        if(variable.found){
+            this.Html.removeClass(this.Modal.link['variables'],'d-none');
+               variable.all=super.getVariableEle(this.ChosenReport[0].stage[length],variable.list);
+            this.Modal.link['variables'].append(variable.all);
+        }
+
+        var rowAll=this.createChosenStageRow(this.ChosenReport[0],length);//variable.all
+        this.Modal.link['dynamic'].append(rowAll);
+        /* SET Helplink */
+        this.Helplink.stage[length]={
+            stage:rowAll,
+            variable:variable.all,
+            image:{}
+         };
     }
-    createChosenStageRow(Report,id){
+    createChosenStageRow(Report,id){//,variable
         //console.log('ProjectReport::createChosenStageRow()');
-        //console.log(Stage);
+        //console.log(Report);
+        //console.log(id);
+        
         try{
             var self=this;
             var row=super.getChosenStageRow();
-                /* UPDATE LIST */
-                self.Modal.link['dynamic'].append(row.all);
-                /* CHECK AND UPDATE VARIABLE LIST */
-            var variable=self.createChosenStageVariable(Report.stage[id]);
-                //console.log(row);
                 row.tx.append(document.createTextNode(Report.stage[id].data.title));
+                
+                
+           function swap(ReportData,id,last,self){
+               //console.log('ProjectReport::createChosenStageRow().swap()');
+               //console.log(ReportData);
+                if(last===''){
+                    //console.log('NO STAGE BEFORE');
+                    return true;
+                }
+                //console.log('STAGE BEFORE PROPERTY - '+last);
+                ReportData.data.change='y';
+                /* SWAP REPORT OBJECT */
+                var tmpStage=ReportData.stage[last];
+                    ReportData.stage[last]=ReportData.stage[id];
+                    ReportData.stage[id]=tmpStage;
+                    //console.log('Report stage new:');
+                    //console.log(ReportData.stage[last]);
+                    //console.log('Report stage old:');
+                    //console.log(ReportData.stage[id]);
+                    //console.log('Helplink:');
+                    //console.log(self.Helplink.stage);
+                    /* CLEAR STAGE ELE */
+
+                    self.Html.removeChilds(self.Helplink.stage[id].stage);
+                    self.Html.removeChilds(self.Helplink.stage[last].stage);
+
+                    /* assignVariable function */
+                    var assignVariable = function(selfRef,ReportDataIn,idChange){
+                        //console.log('ProjectReport::createChosenStageRow().swap().assignVariable()');
+                        //console.log(ReportDataIn.stage[idChange]);
+                        let variable={
+                            list:{},
+                            found:false,
+                            all:null
+                         };
+                         selfRef.createChosenStageVariable(ReportDataIn,idChange,variable);
+                         if(variable.found){
+                                variable.all=selfRef.getVariableEle(ReportDataIn.stage[idChange],variable.list);
+                                selfRef.Helplink.stage[idChange].variable.append(variable.all.childNodes[0],variable.all.childNodes[1]);
+                         }
+                         //return variable;
+                    };
+                    
+                    /* checkVariable function */
+                    function checkVariable(selfRef,ReportDataIn,idAct,lastId,assignVariable){
+                        //console.log('ProjectReport::createChosenStageRow().swap().checkVariable()');
+                       // let variableNew={
+                        //    id:{},
+                        //    last:{}
+                       // };
+                        let tmpVariableEle={};
+                        //console.log('ID:');
+                       // console.log(id);
+                       // console.log('SWAP WITH (LAST) ID:');
+                        //console.log(last);
+                       // console.log('ID STAGE:');
+                        //console.log(ReportDataIn.stage[id]);
+                       // console.log(self.Helplink.stage[id]);
+                       // console.log(self.Helplink.stage[id].variable);
+                        //console.log('SWAP WITH (LAST) ID STAGE:');
+                        //console.log(ReportDataIn.stage[last]);
+                        //console.log(self.Helplink.stage[last]);
+                        //console.log(self.Helplink.stage[last].variable);
+                        if(selfRef.Helplink.stage[idAct].variable && selfRef.Helplink.stage[lastId].variable){
+                            //console.log('STAGE ID AND LAST HAVE VARIABLE - SWAP');
+                            selfRef.Html.removeChilds(selfRef.Helplink.stage[idAct].variable);
+                            selfRef.Html.removeChilds(selfRef.Helplink.stage[lastId].variable);
+                            assignVariable(selfRef,ReportDataIn,idAct);
+                            assignVariable(selfRef,ReportDataIn,lastId);
+                            //variableNew.id=
+                           // variableNew.last=
+                        }
+                        else if(!selfRef.Helplink.stage[idAct].variable && selfRef.Helplink.stage[lastId].variable){
+                             //console.log('STAGE ID DONT HAVE VARIABLE');
+                             //console.log(self.Helplink.stage);
+                             
+                             tmpVariableEle=selfRef.Helplink.stage[lastId].variable;
+                             selfRef.Helplink.stage[lastId].variable=selfRef.Helplink.stage[idAct].variable;
+                             selfRef.Helplink.stage[idAct].variable=tmpVariableEle;
+                             
+                             //console.log('NEW HELPLINK');
+                            // console.log(self.Helplink.stage);
+                             selfRef.Html.removeChilds(selfRef.Helplink.stage[idAct].variable);
+                             assignVariable(selfRef,ReportDataIn,idAct);
+                             assignVariable(selfRef,ReportDataIn,lastId);   
+                             //variableNew.id=
+                             //variableNew.last=                          
+                             //console.log('NEW HELPLINK 2');
+                             //console.log(self.Helplink.stage);   
+                        }
+                        else if(selfRef.Helplink.stage[idAct].variable && !selfRef.Helplink.stage[lastId].variable){
+                           // console.log('STAGE LAST DONT HAVE VARIABLE');
+                           // console.log('ID');
+                           // console.log(self.Helplink.stage[id].variable);
+                           // console.log('LAST');
+                            //console.log(self.Helplink.stage[last].variable);
+                            tmpVariableEle=selfRef.Helplink.stage[lastId].variable;
+                            selfRef.Helplink.stage[lastId].variable=selfRef.Helplink.stage[idAct].variable;
+                            selfRef.Helplink.stage[idAct].variable=tmpVariableEle;
+                            //console.log('NEW HELPLINK (AFTER SWAP)');
+                           // console.log(self.Helplink.stage);
+                            //console.log('ID');
+                            //console.log(self.Helplink.stage[id].variable);
+                            //console.log('LAST');
+                           // console.log(self.Helplink.stage[last].variable);
+                            selfRef.Html.removeChilds(selfRef.Helplink.stage[lastId].variable);
+                            assignVariable(selfRef,ReportDataIn,idAct);
+                            assignVariable(selfRef,ReportDataIn,lastId);
+                            //variableNew.id=
+                            //variableNew.last=  
+                            //console.log('NEW HELPLINK 2 (AFTER SWAP)');
+                           // console.log(self.Helplink.stage);
+                            //console.log('ID');
+                            //console.log(self.Helplink.stage[id].variable);
+                            //console.log('LAST');
+                            //console.log(self.Helplink.stage[last].variable);
+                        }
+                        else{
+                             //console.log('STAGE ID AND LAST DONT HAVE VARIABLE - NOTHING TO DO');
+                        };
+                        //console.log(variableNew);
+                       
+                        //return variableNew;
+                    }
+                    /* END checkVariable function */
+                    checkVariable(self,ReportData,id,last,assignVariable);
+                    //let variableAll=
+                  
+                    /* SETUP STAGE VARIABLE ELE */ 
+                       
+                        self.Helplink.stage[id].stage.append(self.createChosenStageRow(ReportData,id).childNodes[0]);//,variableAll.id.all
+                        self.Helplink.stage[last].stage.append(self.createChosenStageRow(ReportData,last).childNodes[0]);//,variableAll.last.all
+                        
+                         /* UPDATE ROW ELE */
+                        //console.log(row.parentNode);
+                        //console.log(row);
+                        //console.log(row.nextSibling);
+                        
+                        //console.log(self.Helplink);
+                        //console.log(self.Modal.link['dynamic']);
+                       // console.log(self.Modal.link['variables']);   
+           };
+                
                 row.tx.onclick = function(){
-                    console.log(Report);
-                    console.log(Report.stage[id]);
+                    //console.log(Report);
+                    //console.log(id);
+                    //console.log(Report.stage[id]);
                     //self.createChosenStageRow(self,prop);
                 };
                 row.rm.onclick=function(){
-                    //Report.data.change='y';
-                    console.log(Report.data);
-                    console.log(Report.stage[id]);
-                    console.log(variable);
-                    row.all.remove();
-                    variable.remove();
+                    //console.log('ProjectReport::createChosenStageRow().rm()');
+                    //console.log(id);
+                    Report.data.change='y';
+                    //console.log(Report);
+                    //console.log(Report.data);
+                    //console.log(Report.stage[id]);
+                    //console.log(variable);
+                    //console.log(row);
+                    //console.log(this.parentNode);
+                    //console.log(self.Helplink.stage[id]);
+                    self.Helplink.stage[id].stage.remove();
+                    if(self.Helplink.stage[id].variable){
+                        self.Helplink.stage[id].variable.remove();
+                    };
                     delete Report.stage[id];
                 };
                 row.mvUp.onclick=function(){
-                    console.log(Report.stage[id]);
+                    //console.log(id);
+                    //console.log(Report.stage);
+                    //console.log(Report.stage[id]);
+                    var last='';
+                    for(const i in Report.stage){
+                        //console.log('Report stage - '+i);
+                        //console.log(typeof(i));
+                        //console.log(typeof(id));
+                        if(i===id){
+                        //if(parseInt(i,10)===parseInt(id,10)){
+                            //console.log('found break - get one before');
+                            break;
+                        }
+                        last=i;
+                    }
+                    //console.log(last);
+                    //console.log(self.Helplink);
+                    swap(Report,id,last,self);
                 };
                 row.mvDown.onclick=function(){
-                    console.log(Report.stage[id]);
+                    //console.log('Actual Report id:');
+                    //console.log(id);
+                    //console.log('Actual Report id stage data:');
+                    //console.log(Report.stage[id]);
+                    var last='';
+                    var found=false;
+                    for(const i in Report.stage){
+                        //console.log('Report stage - '+i);
+                        //last=i;
+                        if(found){
+                            last=i;
+                            break;
+                        }
+                        if(i===id){
+                            //console.log('found - check for next');
+                            found=true;
+                        }
+                    }
+                    //console.log(self.Helplink);
+                    swap(Report,id,last,self);
+                    //console.log('Report:');
+                    //console.log(Report);
                 };
+                return row.all;
+        }
+        catch(e){
+            console.log(e);
+            throw 'Application error occurred! Contact with Administrator!';
+        }
+    }
+    createChosenStageVariable(Report,stageId,variable){     
+        try{
+            variable.list=document.createElement('ul');
+                this.Html.addClass(variable.list,['mt-0','mb-0','text-dark']);
+                variable.list.style.listStyleType='disc'; 
+            
+            var self=this;   
+            for(const s in Report.stage[stageId].section){     
+                for(const su in Report.stage[stageId].section[s].subsection){  
+                    for(const r in Report.stage[stageId].section[s].subsection[su].subsectionrow){
+                        //f(Stage.section[s].subsection[su].subsectionrow[r],o);
+                        for(const v in Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable){
+                            let rowLi = document.createElement('li'); 
+                            let spanLi = document.createElement('span');
+                                this.Html.addClass(spanLi,['text-dark']);
+                                spanLi.append(document.createTextNode(Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].name));
+                                spanLi.style.cursor='pointer';
+                                spanLi.onclick = function(){
+                                    console.log('ProjectReport::createChosenStageVariable()\nSTAGE ID:');
+                                    console.log(stageId);
+                                    console.log(variable);
+                                    //console.log(Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v]);
+                                    //console.log(this);
+                                    //console.log(self.Modal.link['variablesEle']);
+                                    /* SET VARIABLE NAME */
+                                    self.Html.removeChilds(self.Modal.link['variablesLabel']);
+                                    self.Modal.link['variablesLabel'].append(document.createTextNode(Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].name));
+                                    /* SET VARIABLE VALUE */
+                                    self.Modal.link['variablesInput'].value=Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].value;
+                                    /* SHOW DIV */
+                                    self.Html.removeClass(self.Modal.link['variablesEle'],'d-none');
+                                    //self.t.Modal.link['variablesInput'];
+                                    self.Modal.link['variablesSaveButton'].onclick=function(){
+                                        if(self.Modal.link['variablesInput'].value!==Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].value){
+                                             /* SET CHANGE */
+                                            Report.data.change='y';
+                                            Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].value=self.Modal.link['variablesInput'].value;
+                                        }
+                                        //console.log(self.ChosenReport[0].data.change='y');
+                                        self.Html.addClass(self.Modal.link['variablesEle'],'d-none');  
+                                        self.Html.removeChilds(self.Modal.link['variablesLabel']);
+                                        //console.log(self.Modal.link['variablesInput'].value);
+                                        Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].value=self.Modal.link['variablesInput'].value;
+                                        //console.log('Actual Report change proeprty value:');
+                                        //console.log(Report.data.change);
+                                    };
+                                };
+                                spanLi.onmouseover = function (){
+                                    self.Html.removeClass(this,"text-dark");
+                                    self.Html.addClass(this,"text-purple");
+                                };
+                                spanLi.onmouseleave = function (){
+                                    self.Html.removeClass(this,"text-purple");
+                                    self.Html.addClass(this,"text-dark");
+                                };
+                                rowLi.append(spanLi);
+                                variable.list.append(rowLi);  
+                                variable.found=true;
+                        }
+                    }
+                }
+            }
            
         }
         catch(e){
             console.log(e);
             throw 'Application error occurred! Contact with Administrator!';
         }
-        
-    }
-    createChosenStageVariable(Stage){     
-        var ul=document.createElement('ul');
-            this.Html.addClass(ul,['mt-0','mb-0','text-dark']);
-            ul.style.listStyleType='disc'; 
-        var self={
-            t:this,
-            found:false,
-            u:ul
-        };
-        var f = function (row,o){
-            /* 
-              * s - self{
-              *     t:this - object
-              *     f:found - boolean
-              *     u:ul - ele
-              * }
-              * row - Stage row data
-              */
-            //console.log(row);
-            //console.log(o);
-            for(const v in row.paragraph.variable){
-                var rowLi = document.createElement('li');
-                var spanLi = document.createElement('span');
-                    self.t.Html.addClass(spanLi,['text-dark']);
-                    spanLi.append(document.createTextNode(row.paragraph.variable[v].name));
-                    spanLi.style.cursor='pointer';
-                    spanLi.onclick = function(){
-                        console.log(row.paragraph.variable[v]);
-                        console.log(this);
-                        //console.log(self.t.ChosenReport[0].data);
-                        //o.t.Html.removeChilds(this);
-                        //this.append(document.createTextNode('aaaaa'));
-                        //row.paragraph.variable[v].value='aaaaa';
-                        console.log(row);
-                        console.log(self.t.Modal.link['variablesEle']);
-                        /* SET VARIABLE NAME */
-                        self.t.Html.removeChilds(self.t.Modal.link['variablesLabel']);
-                        self.t.Modal.link['variablesLabel'].append(document.createTextNode(row.paragraph.variable[v].name));
-                        /* SET VARIABLE VALUE */
-                        self.t.Modal.link['variablesInput'].value=row.paragraph.variable[v].value;
-                        /* SHOW DIV */
-                        self.t.Html.removeClass(self.t.Modal.link['variablesEle'],'d-none');
-                        //self.t.Modal.link['variablesInput'];
-                        
-                        self.t.Modal.link['variablesSaveButton'].onclick=function(){
-                            /* SET CHANGE */
-                            console.log(self.t.ChosenReport[0].data.change='y');
-                            self.t.Html.addClass(self.t.Modal.link['variablesEle'],'d-none');  
-                            self.t.Html.removeChilds(self.t.Modal.link['variablesLabel']);
-                            console.log(self.t.Modal.link['variablesInput'].value);
-                            row.paragraph.variable[v].value=self.t.Modal.link['variablesInput'].value;
-
-                        };
-                    };
-                    spanLi.onmouseover = function (){
-                        self.t.Html.removeClass(this,"text-dark");
-                        self.t.Html.addClass(this,"text-purple");
-                    };
-                    spanLi.onmouseleave = function (){
-                        self.t.Html.removeClass(this,"text-purple");
-                        self.t.Html.addClass(this,"text-dark");
-                    };
-                    rowLi.append(spanLi);
-                    o.u.append(rowLi);  
-                    o.found=true;
-            } 
-        };
-
-       this.StageDataUtilities.loopOverRow(Stage,f,self);
-       if(self.found){
-           return super.appendVariable(Stage,self.u);
-       }
-       return document.createTextNode('');
+       //return document.createTextNode('');
     }
     setChosenReport(){
         console.log('ProjectReport::setChosenReport()');
@@ -492,8 +697,25 @@ class ProjectReport extends ProjectReportView
              //console.log(this.ChosenReport[report]);
             for(const id in this.ChosenReport[report].stage){
                 /* SET DATA */
-                //console.log(this.ChosenReport[report].stage[stage]);
-                this.createChosenStageRow(this.ChosenReport[report],id);
+                let variable={
+                    list:{},
+                    found:false,
+                    all:null
+                };
+                this.createChosenStageVariable(this.ChosenReport[report],id,variable);
+                if(variable.found){
+                    this.Html.removeClass(this.Modal.link['variables'],'d-none');
+                    variable.all=super.getVariableEle(this.ChosenReport[0].stage[id],variable.list);
+                    this.Modal.link['variables'].append(variable.all);
+                }
+                let rowAll=this.createChosenStageRow(this.ChosenReport[report],id);//,variable.all
+                this.Modal.link['dynamic'].append(rowAll);
+                /* SET Helplink */
+                this.Helplink.stage[id]={
+                    stage:rowAll,
+                    variable:variable.all,
+                    image:{}
+                 };
             }
         }
        //throw 'aaaaa';

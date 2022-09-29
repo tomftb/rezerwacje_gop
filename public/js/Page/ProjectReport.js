@@ -155,9 +155,10 @@ class ProjectReport extends ProjectReportView
             };
         return departmentDiv;
     }
-    showProjectReportPreview(){
+    showProjectReportPreview(self){
         console.log('ProjectReport::showProjectReportPreview()');
         console.log('TO DO');
+        self.Modal.setSuccess('Not available');
         return true;
     }
     setModalLoad(){
@@ -649,7 +650,7 @@ class ProjectReport extends ProjectReportView
             button.onclick= function() {
                 //this.innerText='Edytuj';
                 //this.innerText='Podgląd'; 
-                self.showProjectReportPreview();
+                self.showProjectReportPreview(self);
         };     
         return button;
     }

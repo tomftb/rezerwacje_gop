@@ -217,15 +217,13 @@ class ProjectReportView{
         /* SIMILAR TO CONST */
         return 'setProjectReport';
     }
-    appendVariable(Stage,ulVariable){
-        this.Html.removeClass(this.Modal.link['variables'],'d-none');
+    getVariableEle(Stage,ulVariable){
         var li=document.createElement('li');
         var spanTitle=document.createElement('span');
             this.Html.addClass(spanTitle,['text-dark','font-weight-bold']);
             spanTitle.append(document.createTextNode(Stage.data.title));
             li.append(spanTitle);
             li.append(ulVariable);
-            this.Modal.link['variables'].append(li);
         return li;
     }
     move(){

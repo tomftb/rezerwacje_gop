@@ -5,31 +5,17 @@ class ProjectReport extends ProjectReportView
             avaDepartmentList:new Array(),
             defaultDepartment:new Array()
     };
-    AvailableStages=new Object();
-    actVariables=new Array();
     jsonResponse=new Object();
-    stageData=new Array();
-    stageActData=new Array();
-    projectId='';
-    fieldCounter=0;
-    defaultFilePostion='top';
     ErrorStack=new Object();
     Xhr=new Object();
     StageDataUtilities = new Object();
+    Department = new Object();
     router='';
     appUrl='';
     perm=new Array();
     Helplink={
         'stage':{}
     };
-    imgUrl='http://rezerwacje-gop.local:8080/router.php?task=downloadProjectReportImage&file=';
-    fileProp={
-        max:20971520, /* 20 MB 1024 * 1024 * 20 */
-        type:[
-            'image/jpeg','image/bmp','image/png','image/gif','image/jpg'
-        ]
-    };
-    Department = new Object();
     
     constructor(router,appUrl,perm){
         console.log('ProjectReport::constructor()');
@@ -146,7 +132,7 @@ class ProjectReport extends ProjectReportView
         }
         //console.log(this.ChosenReport);
         //throw 'aa';
-        this.AvailableStages=projectStageData.data.value.all;
+        return projectStageData.data.value.all;
     }
     getReportDepartment(){
         console.log('ProjectReport::getReportDepartment()');
@@ -195,7 +181,7 @@ class ProjectReport extends ProjectReportView
     create(projectStageData){
         try{
             console.log('ProjectReport::create()');
-            this.setData(projectStageData);
+            var AvailableStages=this.setData(projectStageData);
             this.Modal.setLink();
             this.Modal.clearData();
             this.setModalLoad();
@@ -220,7 +206,7 @@ class ProjectReport extends ProjectReportView
             //this.projectId
 
             /* SET AVAILABLE DATA */
-            this.createAvaliableStage();
+            this.createAvaliableStage(AvailableStages);
             /* SET CHOSEN DATA */
             this.setChosenReport();
             console.log(this.Modal.link['adapted']);
@@ -237,12 +223,12 @@ class ProjectReport extends ProjectReportView
         this.Modal.link['button'].appendChild(this.btnExportToDoc());
         this.Modal.link['button'].appendChild(this.btnSaveReport());
     }
-    createAvaliableStage(){      
-        for(const prop in this.AvailableStages){
+    createAvaliableStage(AvailableStages){      
+        for(const prop in AvailableStages){
             let row=this.Html.getRow();
                 this.Html.addClass(row,['mt-0','mb-0']);//'border','border-info',,'rounded','border-bottom','border-info',
             /* SET ROW */
-            this.createAvaliableStageRow(row,this.AvailableStages[prop]);
+            this.createAvaliableStageRow(row,AvailableStages[prop]);
             this.Modal.link['availableData'].appendChild(row);
         }
     }

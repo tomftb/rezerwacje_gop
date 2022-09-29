@@ -12,15 +12,12 @@ class ProjectReport extends ProjectReportView
     stageActData=new Array();
     projectId='';
     fieldCounter=0;
-    //perm=new Array();
     defaultFilePostion='top';
     ErrorStack=new Object();
     Xhr=new Object();
     StageDataUtilities = new Object();
     router='';
     appUrl='';
-    /* Ordinal number */
-    //ordinalNumber=0;
     perm=new Array();
     Helplink={
         'stage':{}
@@ -179,80 +176,9 @@ class ProjectReport extends ProjectReportView
     }
     showProjectReportPreview(){
         console.log('ProjectReport::showProjectReportPreview()');
-        /*
-         * PREVIEW DIV
-         * f => files
-         */
-        console.log(this.Modal.link['dynamic']);
-        console.log(this.actStage);
-        /* SET DATA */
-        this.setProjectReportPreviewData();
-        
-        
-        /* CREATE AVAILABLE STAGE DATA */
-        for(const prop in this.actStage){
-                this.Modal.link['selectedStages'].appendChild(this.createDiv(this.actStage[prop].t,'col-12'));
-                for(const prop2 in this.actStage[prop].v){
-                    /*
-                     * CHECK FILE POSITION
-                     */
-                    switch (this.actStage[prop].v[prop2].fp) {
-                        case 'top':
-                            console.log('top');
-                            this.setupPreviewImage(this.actStage[prop].v[prop2],this.Modal.link['selectedStages'],'col-12 text-center');
-                            this.Modal.link['selectedStages'].appendChild(this.createDiv(this.actStage[prop].v[prop2].v,'col-12'));
-                            break;
-                        case 'bottom':
-                            console.log('bottom');
-                            this.Modal.link['selectedStages'].appendChild(this.createDiv(this.actStage[prop].v[prop2].v,'col-12'));
-                            this.setupPreviewImage(this.actStage[prop].v[prop2],this.Modal.link['selectedStages'],'col-12 text-center');
-                            break;
-                        case 'left':
-                            console.log('left');
-                            this.setupPreviewImage(this.actStage[prop].v[prop2],this.Modal.link['selectedStages'],'col-6 text-center');
-                            this.Modal.link['selectedStages'].appendChild(this.createDiv(this.actStage[prop].v[prop2].v,'col-6'));
-                            break;
-                        case 'right':
-                            console.log('right');
-                            this.Modal.link['selectedStages'].appendChild(this.createDiv(this.actStage[prop].v[prop2].v,'col-6'));
-                            this.setupPreviewImage(this.actStage[prop].v[prop2],this.Modal.link['selectedStages'],'col-6 text-center');              
-                            break;
-                        default:
-                            console.log(`WRONG POSITION ${this.actStage[prop].v[prop2].fp}`);
-                      }
-                }
-        } 
+        console.log('TO DO');
+        return true;
     }
-    setupPreviewImage(v,ele,colClass){
-        console.log('ProjectReport::setupPreviewImage()');
-        console.log(v);
-         /*
-         * FIRST CHECK NEW INSERTED FILE
-         * SECOND CHECK ACTUALL FILE
-         */
-        if(v.f){
-            console.log('FILE INSERTED');
-            var eleImg=document.getElementById(v['f']).files[0];
-            var src=URL.createObjectURL(eleImg);
-            ele.appendChild(this.addImg(src,eleImg.name,colClass));
-            return true;
-        }
-        if(v.fa){
-            console.log('FILE ACTUALL');
-            ele.appendChild(this.addImg(this.imgUrl+v.fa,v.fo,colClass));  
-            return true;
-        }
-    }
-    addImg(imgSrc,imgKey,colClass){
-        let img=document.createElement('img');
-            img.setAttribute('class','img-fluid');
-            img.setAttribute('src',imgSrc);
-            img.setAttribute('alt',imgKey);
-        let div=this.createDiv('',colClass);
-            div.appendChild(img);
-            return div;
-    }
-
     setModalLoad(){
         console.log('ProjectReport::setModalLoad()');
         //this.Modal.loadNotify='<img src="'+window.appurl+'/img/loading_60_60.gif" alt="load_gif">';
@@ -720,56 +646,18 @@ class ProjectReport extends ProjectReportView
         }
        //throw 'aaaaa';
     }
-    createFilePositionElement(counter,fileCounter,defFilePosition){
-        //console.log('ProjectReport::createFilePositionElement('+fileCounter+')');
-        //var fpCounter=0;
-        var div=document.createElement('div');
-            div.setAttribute('class','row ml-0 ');//border border-warning
-            div.setAttribute('id',this.fieldCounter+'-'+fileCounter+'-filepositionDiv');
-        var divFormFile1=document.createElement('div');
-            divFormFile1.setAttribute('div','form-check form-check-inline mt-1 mb-1');
-        var inputFileLabel=createTag('Wskazana pozycja obrazu:','label','form-check-label mr-3');
-            inputFileLabel.setAttribute('for',counter+'-'+fileCounter+'-file');
-            divFormFile1.appendChild(inputFileLabel);
-        var filePositionData={
-            top:'Góra',
-            bottom:'Dół',
-            left:'Lewo',
-            right:'Prawo'
-            };
-        for (const property in filePositionData){   
-            divFormFile1.appendChild(this.createFilePosition(property,filePositionData[property],defFilePosition,fileCounter));
-            //fpCounter++;
-        }
-        div.appendChild(divFormFile1);
-        return (div);
-       
-    }
     btnShowProjectReport(){
-        console.log('ProjectReport::btnShowProjectReport()');   
-        
-        var btn=createBtn('Podgląd','btn btn-info','psShowStage');
+        console.log('ProjectReport::btnShowProjectReport()');  
+        var button=document.createElement('button');
+            button.classList.add('btn','btn-info');
+            button.appendChild(document.createTextNode('Podgląd')); 
         var self=this;    
-            btn.onclick= function() {
-                console.log(self.Modal.link['availableStages']);
-                console.log(self.Modal.link['selectedStages']);
-                if(self.Modal.link['selectedStages'].classList.contains("d-none")){
-                    self.Modal.link['selectedStages'].classList.remove("d-none");
-                    self.Modal.link['selectedStages'].classList.add("block");
-                    self.Modal.link['availableStages'].classList.remove("block");
-                    self.Modal.link['availableStages'].classList.add("d-none");
-                    this.innerText='Edytuj';
-                    self.showProjectReportPreview();
-                }
-                else{
-                    self.Modal.link['selectedStages'].classList.remove("block");
-                    self.Modal.link['selectedStages'].classList.add("d-none");
-                    self.Modal.link['availableStages'].classList.remove("d-none");
-                    self.Modal.link['availableStages'].classList.add("block");
-                    this.innerText='Podgląd'; 
-                } 
+            button.onclick= function() {
+                //this.innerText='Edytuj';
+                //this.innerText='Podgląd'; 
+                self.showProjectReportPreview();
         };     
-        return btn;
+        return button;
     }
     btnSaveReport(){
         console.log('ProjectReport::btnSaveReport()');   
@@ -896,110 +784,8 @@ class ProjectReport extends ProjectReportView
             };
         return button;
     }
-    xhr(PersonId){
-        console.log('---show()---\r\nID:'+PersonId);
-        /* AJAX GET */
-       var xhr=new XMLHttpRequest();
-            //xhr.addEventListener("error",PersonShow.runErrorView,false);
-            //xhr.addEventListener("load", PersonShow.runView, false);
-            //xhr.addEventListener("progress",this.xhrProgress,false);
-            //xhr.addEventListener("timeout", this.xhrTimeout, false);
-            //xhr.addEventListener("loadstart",this.xhrLoadStart,false);
-            //xhr.addEventListener("loadend", PersonShow.runView, false);
-            //xhr.open('POST', APP_URL+LANG+'/showperson', true);
-            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            xhr.send('id='+PersonId);
-    }
-
     btnCancelProjectReport(){
         /* REMOVE TMP FILES */
         return functionBtn('cancel',createBtn('Wyjdź','btn btn-dark','cancelBtn'),'');
-    }
-    setProjectReportPreviewData(){
-        console.log('ProjectReport::setProjectReportPreviewData()');  
-        //console.log(this.Modal.link['dynamic']);  
-
-        var subLink=new Object();
-        var fieldName=new Array();
-        //var fileInputid=null;
-        var textAreaInputid=null;
-        removeHtmlChilds(this.Modal.link['selectedStages']);
-        for (var i=0;i<this.Modal.link['dynamic'].childElementCount;i++){
-            //console.log(this.Modal.link['dynamic'].childNodes[i]);
-            subLink=this.Modal.link['dynamic'].childNodes[i].childNodes[0];
-            //console.log(subLink);
-            for(var j=0;j<subLink.childElementCount;j++){
-                //console.log(subLink.childNodes[j]);
-                console.log(subLink.childNodes[j].nodeName);
-                //console.log(subLink.childNodes[j].id);
-                //console.log(subLink.childNodes[j].hasOwnProperty('id'));
-                
-                if(subLink.childNodes[j].nodeName==='DIV'){
-                    //console.log('DIV EXIST');
-                    /* PARSE ID */
-                    fieldName=subLink.childNodes[j].id.split("-");
-                    switch (fieldName[0]) {
-                        case 'divNumber':
-                            console.log('divNumber');
-                            //console.log(subLink.childNodes[j].childNodes[0].id);
-                            //console.log(subLink.childNodes[j].childNodes[0].value);
-                            this.updActStageData(subLink.childNodes[j].childNodes[0].id,subLink.childNodes[j].childNodes[0].value);
-                            break;
-                        case 'divTitle':
-                            console.log('divTitle');
-                            //console.log();
-                            //console.log();
-                            this.updActStageData(subLink.childNodes[j].childNodes[0].id,subLink.childNodes[j].childNodes[0].value);
-                            break;
-                        case 'divFile':
-                            console.log('divFile');
-                            //this.setPreviewImageData(subLink.childNodes[j]);
-                          break;
-                        default:
-                            console.log('REST:');
-                            console.log(fieldName);
-                    }
-                }
-                else if(subLink.childNodes[j].nodeName==='TEXTAREA'){
-                     console.log('TEXTAREA');
-                    //console.log(subLink.childNodes[j].id,subLink.childNodes[j].value);
-                    textAreaInputid=subLink.childNodes[j].id;
-                    this.updActStageValue(subLink.childNodes[j].id,'v',subLink.childNodes[j].value);
-                }
-                else{
-                    console.log('WRONG FIELD');
-                }
-                //this.setNewDataFromInput();
-                //this.setImageTextPosition(subLink,i,j,textAreaInputid,fileInputid);
-                textAreaInputid=null;
-                //fileInputid=null;
-            }
-        }
-    }
-    updActStageValue(id,key,value){
-        //console.log('ProjectReport::setNewDataFromInput(id,value)');
-        //console.log(id);
-        //console.log(value);
-        var inputId=id.split('-');
-            //console.log(inputId);
-            //console.log(this.actStage[inputId[0]].v[inputId[1]].v);
-            this.actStage[inputId[0]].v[inputId[1]][key]=value;
-            console.log(this.actStage[inputId[0]]['v']);
-    }
-    updActStageData(id,value){
-        console.log('ProjectReport::setActStageTitle(id,value)');
-        /*
-         * TITLE/NUMBER
-         */
-        //console.log(id);
-        var inputId=id.split('-');
-        this.actStage[inputId[0]][inputId[1]]=value;
-        //console.log(this.actStage);
-    }
-    createDiv(value,c){
-        var div=document.createElement('div');
-            div.setAttribute('class',c);
-            div.innerHTML=value;
-        return div;
     }
 }

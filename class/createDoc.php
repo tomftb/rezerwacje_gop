@@ -88,16 +88,34 @@ class createDoc extends createDocAbstract {
         //$objWriter->setOutputEscapingEnabled(true);
         $objWriter->save($this->docDir.$this->fileName);
     }
+    public function genProjectReport(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        //var_dump($this->projectData);
+        try{
+           self::setReportStagePage();
+            foreach($this->projectData->stage as $s){
+                    //var_dump($s);
+                 self::setReportStageSection($s->section);
+            }
+            $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
+            $objWriter->save($this->docDir.$this->fileName); 
+        }
+        catch(Exception $e){
+            throw new Exception($e, 1);//->getMessage()
+        }
+        
+    }
     public function genReportStage(){
         $this->Log->log(0,"[".__METHOD__."]");
         //print_r($this->projectData);
         /* MOVE data->valuenewline to property */
         self::setReportStagePage();
-        self::setReportStageSection();
+        self::setReportStageSection($this->projectData->section);
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
         $objWriter->save($this->docDir.$this->fileName);
     }
     private function setReportStagePage(){
+        $this->Log->log(0,"[".__METHOD__."]");
         /* TO DO */
         
         //print_r($this->projectData->style);
@@ -105,7 +123,8 @@ class createDoc extends createDocAbstract {
         unset($this->projectData->style);
         unset($this->projectData->property);
     }
-    private function setReportStageSection(){
+    private function setReportStageSection($Stagesection){
+        $this->Log->log(0,"[".__METHOD__."]");
         //print_r($this->projectData->section);
         
         $firstRow=true;
@@ -114,7 +133,7 @@ class createDoc extends createDocAbstract {
         $run=null;
         $actListName=uniqid('list_');
         $actTabStopName=uniqid('tabstop_');
-        foreach($this->projectData->section as $s){
+        foreach($Stagesection as $s){
             /*
              * (twips )Twip to miara typograficzna, zdefiniowana jako 1⁄20 punktu typograficznego. Jeden twip ma 1⁄1440 cala lub 17,64 μm
              */
@@ -250,9 +269,10 @@ class createDoc extends createDocAbstract {
         $run = $listItemRun;
     }
     private function setRunImage($image,$key=0,&$item){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->Log->log(0,$image);
         $imageDir = ($image->data->tmp==='n') ? UPLOAD_DIR : TMP_UPLOAD_DIR;
         $item->addImage($imageDir.$image->property->uri, array('width' => $image->style->width, 'height' => $image->style->height));//, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
-        
     }
     private function setListStyle($r,$listName=''){
       

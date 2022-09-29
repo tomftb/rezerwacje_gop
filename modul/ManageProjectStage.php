@@ -417,9 +417,9 @@ class ManageProjectStage extends ManageProjectStageDatabase
     public function confirmProjectStageText(){
         $this->Log->log(0,"[".__METHOD__."]");
         //$input=filter_input_array(INPUT_POST);
-        $this->Log->logMulti(0,filter_input(INPUT_POST,'stage'));
+        //$this->Log->logMulti(0,filter_input(INPUT_POST,'stage'));
         $this->data=json_decode(filter_input(INPUT_POST,'stage'));
-        $this->Log->log(0,$this->data);
+        //$this->Log->log(0,$this->data);
         $this->error='';
         $prefix="";
         if(!is_object($this->data)){

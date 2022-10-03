@@ -83,7 +83,7 @@ final class UrlManager{
         ['getNewStageDefaults','ADD_STAGE'],
         ['setProjectStageWskB','EDIT_STAGE'],
         ['setProjectReportImage','GEN_PROJECT_REPORT'],
-        ['setProjectReportDoc','GEN_PROJ_REP_DOC'],
+       
         ['downloadProjectReportDoc','GEN_PROJ_REP_DOC'],
         ['pGenDoc','GEN_DOC_PROJ','user'],
         ['downloadProjectDoc','GEN_DOC_PROJ'],
@@ -127,7 +127,8 @@ final class UrlManager{
         ['pvHide','LOG_INTO_STAGE'],
         ['pvDelete','LOG_INTO_STAGE'],
         ['getProjectVariablesSimpleList','LOG_INTO_STAGE'],
-        ['saveProjectReport','SAVE_PROJ_REPORT']
+        ['saveProjectReport','SAVE_PROJ_REPORT'],
+        ['getProjectReportDoc','GEN_PROJ_REP_DOC'],
     ];
         
     public function __construct(){

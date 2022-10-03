@@ -215,7 +215,7 @@ class ProjectStageCreate{
             /* APPEND FORM */
             this.Modal.link['adapted'].appendChild(form);
              /* ASSING ACTION BUTTONS */
-            this.createManageButton('Edytuj');          
+            this.createManageButton('Zapisz');          
         }
         catch(error){
             console.log('ProjectStageCreate::details()');
@@ -725,19 +725,6 @@ class ProjectStageCreate{
         var previewLabel = document.createTextNode('Podgląd');
             preview.appendChild(previewLabel);
             this.setPreviewButtonAction(preview); 
-        /*
-         * BUTTONS
-         */
-       
-        /*
-        console.log('ProjectItems::getCancelButton()');
-        console.log('Oboject:');
-        console.log(classToRun);
-        console.log('Method:');
-        console.log(methodToRun);
-        console.log('Task:');
-        console.log(taskToRun);
-        */
 
         //this.Items.getCancelButton(this.Stage,'show',this.Stage.defaultTask+this.StageData.Stage.data.id);
         this.Modal.link['button'].appendChild(this.getCancelButton());
@@ -747,7 +734,7 @@ class ProjectStageCreate{
         this.Modal.link['button'].appendChild(this.getConfirmButton(btnLabel));
     }
     getCancelButton(){
-        var cancel=this.Html.cancelButton('Anuluj');
+        var cancel=this.Html.cancelButton('Wyjdź');
         var self = this;
         var run = this.setUndoTask(this);
             cancel.onclick = 
@@ -875,8 +862,8 @@ class ProjectStageCreate{
                 u:window.router+'confirmProjectStageText',
                 c:true,
                 d:fd,
-                o:self.Stage,
-                m:'setResponse'
+                o:self,
+                m:'Save'
         });      
     }
     checkInputData(data){
@@ -911,5 +898,14 @@ class ProjectStageCreate{
         }
         console.log(this.ErrorStack);
         console.log(this.ErrorStack.check());
+    }
+    Save(response){
+        console.log('ProjectStageCreate::Save');
+        var jsonResponse=this.Items.setFieldResponse(response);
+        console.log(jsonResponse);
+        if(!jsonResponse){
+            return false;
+        }
+        this.Modal.setSuccess(jsonResponse.data.function);
     }
 }

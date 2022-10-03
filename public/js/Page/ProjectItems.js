@@ -19,6 +19,7 @@ class ProjectItems{
     Variable = new Object();
     Table = new Object();
     ErrorStack = new Object();
+    Department = new Object();
 
     loadModal;
     //defaultTask='getprojectsstagelike&d=0&v=0&b=';
@@ -40,6 +41,7 @@ class ProjectItems{
         this.ErrorStack = new ErrorStack();
         this.Xhr=new Xhr2();
         this.Xhr2=new Xhr2();
+        this.Department=new Department();
         this.Table = new Table(this.Xhr);
         //Items.setLoadInfo();
         this.Glossary={
@@ -498,7 +500,8 @@ class ProjectItems{
         catch (error) {
             console.log(error);
             /* SHOW ERROR MODAL */ 
-           this.Html.showField(this.Modal.link['error'],error);
+           this.Modal.setError(error);
+           //this.Html.showField(this.Modal.link['error'],error);
            return false;
         }
         return false;

@@ -441,7 +441,8 @@ class ManageProjectStage extends ManageProjectStageDatabase
             Throw New Exception ($this->error,0);
         }
         parent::manageStage();  
-        self::getprojectsstagelike();
+        //self::getprojectsstagelike();
+        $this->utilities->jsonResponse('','Zapis się powiódł');   
     }
     private function checkValue($key='',&$prefix){
         $this->Log->log(0,"[".__METHOD__."]\r\nKEY - ".$key); 

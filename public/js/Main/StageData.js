@@ -317,4 +317,20 @@ class StageData{
         }
         return files;
     }
+    updateTmpImages(){
+       console.log('StageData->updateTmpImages()');
+       for(const prop in this.Stage.section){           
+            for(const prop1 in this.Stage.section[prop].subsection){             
+                for(const prop2 in this.Stage.section[prop].subsection[prop1].subsectionrow){
+                    for(const prop3 in this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image){
+                        this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data.tmp='n';
+                        console.log(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data);
+                        //if(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data.tmp==='y'){
+                           // files.push(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].property.uri);
+                       // }            
+                    }
+                }
+            }
+        } 
+    }
 }

@@ -151,6 +151,8 @@ class ProjectStageCreate{
     setUndoTask(self){
         var run = function(){
             let files = self.StageData.getFiles();
+            //console.log('ProjectStageCreate->setUndoTask()');
+            //console.log(files);
             if(files.length<1){
                 console.log(self);
                 self.Items.closeModal();
@@ -754,7 +756,7 @@ class ProjectStageCreate{
                }
                console.log('run');
                console.log(run);
-               if (confirm('Anulować?') === true) {
+               if (confirm('Wyjść?') === true) {
                     run();
                }
                else{ 
@@ -906,6 +908,10 @@ class ProjectStageCreate{
         if(!jsonResponse){
             return false;
         }
+        /* UPDATE FILES tmp = n*/
+        //this.StageData.getFiles();
+        this.StageData.updateTmpImages();
+        /* CLEAR INPUT FILE */
         this.Modal.setSuccess(jsonResponse.data.function);
     }
 }

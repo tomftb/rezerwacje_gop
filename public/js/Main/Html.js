@@ -180,8 +180,8 @@ class Html{
         var actionObject = function(){
             for(const prop in className){
                 if(!ele.classList.contains(className)){
-                    console.log('addClass:');
-                    console.log(className[prop]);
+                    //console.log('addClass:');
+                    //console.log(className[prop]);
                     ele.classList.remove(className[prop].trim());
                 }
             } 
@@ -192,16 +192,16 @@ class Html{
         /* CLOSURE */
         var actionString = function(){
             if(!ele.classList.contains(className)){
-                console.log('addClass:');
-                console.log(className);
+                //console.log('addClass:');
+                //console.log(className);
                 ele.classList.add(className);
             }
         };
         var actionObject = function(){
             for(const prop in className){
                 if(!ele.classList.contains(className)){
-                    console.log('addClass:');
-                    console.log(className[prop]);
+                    //console.log('addClass:');
+                    //console.log(className[prop]);
                     ele.classList.add(className[prop].trim());
                 }
             } 
@@ -210,7 +210,7 @@ class Html{
     }
     setClass(ele,className,actionString,actionObject){
         var classNameType = typeof(className);
-        console.log(classNameType);
+        //console.log(classNameType);
         this.isObject(ele);
         if(classNameType==='string'){
             actionString(ele,className.trim());
@@ -220,7 +220,7 @@ class Html{
             actionObject(ele,className);
             return true;
         }
-        console.log(classNameType);
+        //console.log(classNameType);
         throw 'className IS NOT A STRING AND OBJECT!';   
     }
     removeStyle(ele,styleName){

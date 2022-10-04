@@ -7,12 +7,17 @@ class ProjectStageToolFile{
     Utilities = new Object();
     /* Image - references to property Image */
     Image= new Object();
-    OldImage = new Array();
+    //TmpImage = new Object();
+    //NewImage= new Object();
     Helplink = {
         info:new Object(),
         progress:new Object(),
         progressbar:new Object(),
-        progresscomplete:new Object()
+        progresscomplete:new Object(),
+        inputfile:new Object(),
+        inputfilelabel:new Object(),
+        inputfileinfo:new Object(),
+        inputfilemain:new Object()
     };
     fileUpload=0;
     fileSelected=0;
@@ -39,22 +44,21 @@ class ProjectStageToolFile{
     //isection,isub,isubrow,subsectionrow
     setToolEle(name){
         console.log('ProjectStageToolFile::setToolEle()');
-        var mainDivCol=this.Html.getCol(12);
-            mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
-            mainDivCol.style.backgroundColor='#e6e6e6';
-        var Tool = new ToolFields([12]);
-        var Tool1 = new ToolFields([12]);
-        
+      
+            var mainDivCol=this.Html.getCol(12);
+                mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
+                mainDivCol.style.backgroundColor='#e6e6e6';
+            var Tool = new ToolFields([12]);
+            var Tool1 = new ToolFields([12]);
             var label = this.assignImage(Tool1.getMain().childNodes[0]);
-            Tool.set(0,this.getFile(name));//label turn off - because in load there is no file
-            console.log( this.Image);
-            //throw 'asdasd';
+                Tool.set(0,this.getFile(name));//label turn off - because in load there is no file
+                console.log( this.Image);
+                //throw 'asdasd';
           
-        mainDivCol.appendChild(Tool.getMain());
-        mainDivCol.appendChild(Tool1.getMain());
-        this.Helplink['file']=Tool1.getMain().childNodes[0];
-        
-        this.ToolEle=mainDivCol;
+                mainDivCol.appendChild(Tool.getMain());
+                mainDivCol.appendChild(Tool1.getMain());
+                this.Helplink['file']=Tool1.getMain().childNodes[0];
+                this.ToolEle=mainDivCol;
     }
     assignImage(ele){
         console.log('ProjectStageToolFile::assignImage()');
@@ -116,15 +120,189 @@ class ProjectStageToolFile{
             ele.appendChild(p);
     }
     getFile(name){//inputLabel
-        console.log('ProjectStageToolFile::getFile()');
+        console.log('ProjectStageToolFile.getFile()');
         /*
          * property - reference for example subsectionrow.paragraph.style
          * ele - reference for example helplink
          */  
         
-        //image.property.uid=(new Date()).getTime();
-        
-        var mainDiv =  document.createElement('div');
+        //image.property.uid=(new Date()).getTime(); 
+            this.setFileEle(); 
+            var self = this;
+            /* CLOSURE */
+            this.Helplink['inputfile'].onchange = function(){
+                console.log('INPUT FILE NAME:');
+                console.log(name);
+                console.log('ERROR STACK:');
+                console.log(self.ErrorStack);
+                self.fileUpload=0;
+                //let ImageToRemove={};
+                let setFilesToDelete=function(Image){//Image
+
+                    for(const prop in Image){   
+                        console.log('SETUP OLD IMAGE:'); 
+                        console.log(Image[prop]);
+                        switch (Image[prop].data.tmp) {
+                            case 'n':
+                                console.log('(n) SET TMP = d');
+                                Image[prop].data.tmp='d';
+                                break;
+                            case 'y':
+                                console.log('(y) Image to delete');
+                                //ImageToRemove[prop]=self.Image[prop];
+                                //self.Image[prop].data.tmp='d';
+                                break
+                            case 'd':
+                                console.log('(d) already d');
+                                break;
+                            default:
+                                throw 'tmp type not in (y,n,d) - '+Image[prop].data.tmp;
+                         };   
+                    };
+                };
+                let uploadFiles=function(self,t){
+                    /*
+                     * t - this input object
+                     */
+                    try{
+                        let error=false;
+                        let info=document.createElement('div');
+                        let fileName='';
+                        let errorValue='';
+                        let infoClass='';
+                        let namesList='';
+                        let space='';
+                        self.fileSelected=t.files.length;
+                        /* IN bytes */
+                        //let size=0;
+                        let maxSize =20971520;/* MAX DEFAULT 20 Mb - SIZE, not size on hard drive */
+                        let type=new Array(
+                            'image/bmp',
+                            'image/jpeg',
+                            'image/png'
+                        );
+                        if(self.fileSelected===0){
+                            console.log('no files');
+                            self.Helplink['inputfilelabel'].appendChild(document.createTextNode('Nie wskazano pliku...'));
+                            self.Html.removeClass(self.Helplink['inputfilelabel'],['border-success','border-danger']);              
+                            return true;
+                        }
+                    
+                        console.log('this files:');
+                        console.log(t.files);
+                        console.log(self.fileSelected);
+                       
+                        for (let i = 0; i < self.fileSelected; i++) {
+                            //let uid=(new Date()).getTime();
+                            //+(new Date()).getMilliseconds();//(new Date()).getTime()+
+                            //let uid = Math.random();
+                            let uid = 'new'+(Math.floor(Math.random() * 10000000)).toString();
+                            /* SET DEFAULT */
+                            infoClass='text-success';
+                            errorValue='';
+                            //console.log(this.files.item(i));
+                            console.log(t.files.item(i).name);
+                            namesList+=space+t.files.item(i).name.trim();
+                            space=' ';
+                            if(t.files.item(i).size>maxSize){
+                                error=true;
+                                infoClass='text-danger';
+                                errorValue+=' - size limit exceeded'; 
+                            }
+                            if(!type.includes(t.files.item(i).type,0)){
+                                error=true;
+                                infoClass='text-danger';
+                                errorValue+=' - not allowed type → '+t.files.item(i).type+'';
+                            }
+                            let counterValue=  document.createTextNode('['+i+'] ');
+                                fileName=self.Utilities.cutName(t.files.item(i).name,138-counterValue.length-errorValue.length); 
+                                fileName+=errorValue;
+                           
+                            let text=document.createTextNode(fileName);
+                            let p = document.createElement('p');
+                                p.classList.add(infoClass,'mt-0','mb-0');
+                                p.setAttribute('title',t.files.item(i).name);
+                            //var counterValue = document.createTextNode('['+i+'] ');
+                            let counterLabel=  document.createElement('span');
+                                counterLabel.classList.add('text-secondary');
+                                counterLabel.appendChild(counterValue);
+                                p.append(counterLabel,text);      
+                                info.appendChild(p);
+                                if(error){ continue; }
+                                self.Image[uid]=self.getNewImageProperty();
+                                self.setNewImageProperty(self.Image[uid],t.files.item(i));
+                         }
+                        /* 
+                        * cut names
+                        * max - 127 char without dot and extension
+                        * 
+                        */
+                       self.Helplink['inputfilelabel'].appendChild(document.createTextNode(self.Utilities.cutName(namesList,127)));
+
+                       console.log(self.Image);
+                       //throw 'test-stop-155';    
+                       if(error){
+                           self.ErrorStack.add(name,errorValue);
+                           self.Html.removeClass(self.Helplink['inputfilelabel'],['border-success']);
+                           self.Html.addClass(self.Helplink['inputfilelabel'],['border-danger']);
+                           self.Html.removeClass(self.Helplink['inputfileinfo'],['d-none']);
+                           self.Helplink['inputfileinfo'].appendChild(info);
+                           /* delete proeprty not set emty image */
+                           //self.Image={};
+                       }
+                       else{
+                           self.setProgress();
+                           self.Html.removeClass(self.Helplink['inputfilelabel'],['border-danger']);
+                           self.Html.addClass(self.Helplink['inputfilelabel'],['border-success']);
+                           self.Html.addClass(self.Helplink['inputfileinfo'],['d-none']); 
+                           console.log(self.Image);
+                           /* DELETE OLD FILES */
+                           //self.checkBeforeDelete(self);
+                           self.sendFiles(self);             
+                       }   
+                       //console.log(divInfo);  
+                    }
+                    catch(e){
+                        throw e;
+                    }
+                    
+                };
+                if (confirm('Zastąpić pliki?') !== true) {
+                   return true;
+                }
+                try{
+                    /* CLEAR FIELD progrss */
+                    self.Html.removeClass(self.Helplink['progress'],'d-none');//
+                    /* SET IMAGE FILES To DELETE */
+                    setFilesToDelete(self.Image);//ImageToRemove
+                    console.log('Image:');
+                    console.log(self.Image);
+                    /* DELETE TMP IMAGE FILE() */
+                    self.deleteFiles(self);
+                    /* CLEAR INFO */
+                    self.Html.removeChilds(self.Helplink['inputfilelabel']);
+                    self.Html.removeChilds(self.Helplink['inputfileinfo']);
+                    self.Html.removeChilds(self.Helplink['file']);
+                    self.Html.removeChilds(self.Helplink['progress']);
+                    self.Html.removeChilds(self.Helplink['progresscomplete']);
+                    /* DELETE from ErrorStack */
+                    self.ErrorStack.remove(name);
+                    /* UPLOAD SELECTED IMAGES */
+                    uploadFiles(self,this);     
+                }
+                catch(e){
+                    console.log('ProjectStageToolFile.getFile()');
+                    console.log('Error:');
+                    console.log(e);
+                    self.errorProgress('Application error occurred! Contact with Administrator!');
+                    return false;
+                }      
+             };
+            //console.log(self.Image);
+            return this.Helplink['inputfilemain'];
+    }
+    setFileEle(){
+        var mainDiv=document.createElement('div');
         var mainLabel = this.Parent.Tool.createLabel('Wskaż plik:');  
         var inputDiv = document.createElement('div');
             inputDiv.classList.add('custom-file');//'custom-file',
@@ -149,212 +327,24 @@ class ProjectStageToolFile{
             inputDiv.appendChild(label);
             inputDiv.appendChild(divInfo);
             inputDiv.appendChild(divProgress);
-            /* SetUp DIV ERROR REFERENCE */
-            this.Helplink['info'] = divInfo;
-            this.Helplink['progress'] = divProgress;
-        var self = this;
-            /* CLOSURE */
-            input.onchange = function(){
-                console.log(name);
-                console.log(self.ErrorStack);
-                /* CLEAR FIELD progrss */
-                self.Html.removeClass(self.Helplink['progress'],'d-none');//
-                
-                /* SET OLD IMAGE FILE NAME TO DELETE */
-                //console.log('SET OLD IMAGE PROPERTY FILE NAMES:');
-                self.OldImage=new Array();
-                for(const prop in self.Image){   
-                    console.log('SETUP OLD IMAGE:');
-                    console.log(self.Image[prop]);
-                    console.log(self.Image[prop].property.uri);     
-                    if(self.Image[prop].data.tmp!=='n'){
-                        self.OldImage.push(self.Image[prop].property.uri);
-                    }
-                    //self.OldImage[prop]=self.Image[prop].property.uri;     
-                };
-                //throw 'test-stop-155';
-                self.deleteImageProperty(self.Image); 
-                //console.log(self.OldImage);
-                /* CLEAR IMAGE  - delete not set empty object */
-                //self.Image={};
-                let error=false;
-                let info=document.createElement('div');
-                let fileName='';
-                let errorValue='';
-                let infoClass='';
-                let namesList='';
-                let space='';
-                self.fileSelected=this.files.length;
-                self.fileUpload=0;
-                /* IN bytes */
-                //let size=0;
-                
-                let maxSize =20971520;/* MAX DEFAULT 20 Mb - SIZE, not size on hard drive */
-                let type=new Array(
-                        'image/bmp',
-                        'image/jpeg',
-                        'image/png'
-                        );
-                //console.log('this:');
-                //console.log(this);
-                //console.log(this.parentNode);
-                //console.log(label);
-                self.Html.removeChilds(label);
-                self.Html.removeChilds(divInfo);
-                self.Html.removeChilds(self.Helplink['file']);
-                self.Html.removeChilds(self.Helplink['progress']);
-                self.Html.removeChilds(self.Helplink['progresscomplete']);
-                
-                
-                /* DELETE from ErrorStack */
-                self.ErrorStack.remove(name);
-                /* DELETE OLD FILES */
-                self.checkBeforeDelete(self);   
-                
-                    if(self.fileSelected===0){
-                        console.log('no files');
-                        label.appendChild(document.createTextNode('Nie wskazano pliku...'));
-                        self.Html.removeClass(label,['border-success','border-danger']);
-                                  
-                        return true;
-                    }
-                    
-                console.log('this files:');
-                console.log(this.files);
-                console.log(self.fileSelected);
-                    for (let i = 0; i < self.fileSelected; i++) {
-                        //let uid=(new Date()).getTime();
-                        //+(new Date()).getMilliseconds();//(new Date()).getTime()+
-                        //let uid = Math.random();
-                        let uid = Math.floor(Math.random() * 10000000);
-                        
-                        /* SET DEFAULT */
-                        infoClass='text-success';
-                        errorValue='';
-                        //console.log(this.files.item(i));
-                        console.log(this.files.item(i).name);
-                        namesList+=space+this.files.item(i).name.trim();
-                        //console.log(typeof(this.files.item(i).size));
-                        //size=size + this.files.item(i).size;
-                        space=' ';
-                        if(this.files.item(i).size>maxSize){
-                        //if(size>maxSize){
-                            error=true;
-                            infoClass='text-danger';
-                            errorValue+=' - size limit exceeded'; 
-                        }
-                        if(!type.includes(this.files.item(i).type,0)){
-                            error=true;
-                            infoClass='text-danger';
-                            errorValue+=' - not allowed type → '+this.files.item(i).type+'';
-                        }
-                        let counterValue=  document.createTextNode('['+i+'] ');
-                        
-                            fileName=self.Utilities.cutName(this.files.item(i).name,138-counterValue.length-errorValue.length); 
-                            fileName+=errorValue;
-                           
-                        let text=document.createTextNode(fileName);
-                        let p = document.createElement('p');
-                            p.classList.add(infoClass,'mt-0','mb-0');
-                            p.setAttribute('title',this.files.item(i).name);
-                        //var counterValue = document.createTextNode('['+i+'] ');
-                        let counterLabel=  document.createElement('span');
-                            counterLabel.classList.add('text-secondary');
-                            counterLabel.appendChild(counterValue);
-                            
-                            p.appendChild(counterLabel);
-                            p.appendChild(text);       
-                            info.appendChild(p);
-                            if(error){ continue; }
-                            self.Image[uid]={
-                                    data:{
-                                        id:0,
-                                        tmp:'y'
-                                    },
-                                    style:{
-                                       alignment:'LEFT', 
-                                       alignmentName:'Lewo',
-                                       height:'0',
-                                       heightMeasurement:'px',
-                                       marginLeft:0,
-                                       marginLeftMeasurement:'px',
-                                       marginTop:0,
-                                       marginTopMeasurement:'px',
-                                       width:'0',
-                                       widthMeasurement:'px',
-                                       wrappingStyle:'infront',
-                                       wrapDistanceTop:'',
-                                       wrapDistanceBottom:'',
-                                       wrapDistanceLeft:'',
-                                       wrapDistanceRight:''
-                                   },
-                                   property:{
-                                        lastModified:this.files.item(i).lastModified,
-                                        lastModifiedDate:this.files.item(i).lastModifiedDate,
-                                        name:this.files.item(i).name,
-                                        size:this.files.item(i).size,
-                                        type:this.files.item(i).type,
-                                        uri:'',
-                                        order:'beforetext',//after
-                                        orderName:'Przed tekstem'//Za
-                                        
-                                    },
-                                    dataFile:this.files.item(i)
-                                //uid:uid
-                            };
-                            
-                    }
-                    
-                    /* 
-                     * cut names
-                     * max - 127 char without dot and extension
-                     * 
-                     */
-                    label.appendChild(document.createTextNode(self.Utilities.cutName(namesList,127)));
-                    
-                    //console.log('NAMES Length:');
-                    //console.log(namesList.length);
-                    //console.log('OVERALL Files size:');
-                    //console.log(typeof(size));
-                    //console.log(size);
-                    if(error){
-                        self.ErrorStack.add(name,errorValue);
-                        self.Html.removeClass(label,['border-success']);
-                        self.Html.addClass(label,['border-danger']);
-                        self.Html.removeClass(divInfo,['d-none']);
-                        divInfo.appendChild(info);
-                        /* delete proeprty not set emty image */
-                        //self.Image={};
-                    }
-                    else{
-                        self.setProgress();
-                        self.Html.removeClass(label,['border-danger']);
-                        self.Html.addClass(label,['border-success']);
-                        self.Html.addClass(divInfo,['d-none']); 
-                        console.log(self.Image);
-                        /* DELETE OLD FILES */
-                        self.checkBeforeDelete(self);
-                                       
-                    }   
-                    //console.log(divInfo);                        
-             };
-            //console.log(self.Image);
+            
             mainDiv.appendChild(mainLabel);
             mainDiv.appendChild(inputDiv);
             
-        return  mainDiv;
+            /* SetUp HELPLINK REFERENCE */
+            this.Helplink['info'] = divInfo;
+            this.Helplink['progress'] = divProgress;
+            this.Helplink['inputfile']=input;
+            this.Helplink['inputfilelabel']=label;
+            this.Helplink['inputfileinfo']=divInfo;
+            this.Helplink['inputfilemain']=mainDiv;
+
     }
-    deleteImageProperty(image){
-        for(const prop in image){
-            delete image[prop];
-                    //self.OldImage[prop]=self.Image[prop].property.uri;     
-        };
-    }
-    setUploadImage(response){
-        console.log('ProjectStageToolFile::setUploadImage()');
-        //console.log(response);
-        //console.log(this);
-        //console.log(this.FileDivErrRef);
+
+
+    updateTmpImageProperty(response){
+        console.log('ProjectStageToolFile.updateTmpImageProperty()');
+        console.log(response);
         try{
             var data = this.Parent.Stage.Items.parseResponse(response);
                 
@@ -414,84 +404,130 @@ class ProjectStageToolFile{
            this.Helplink['progresscomplete'].appendChild(document.createTextNode('Upload complete '+this.fileUpload+'/'+this.fileSelected+'!')); 
        }
        else{
-           this.Helplink['progresscomplete'].appendChild(document.createTextNode('Something went wrong! Upload process not complete '+this.fileUpload+'/'+this.fileSelected+'!')); 
+           this.errorProgress('Something went wrong! Upload process not complete '+this.fileUpload+'/'+this.fileSelected+'!');
        }
     }
-    uploadFiles(response){
-         console.log('ProjectStageToolFile::uploadFiles()');
+    errorProgress(e){
+        console.log('ProjectStageToolFile.errorProgress()');
+        console.log(this.Helplink['progress']);
+        console.log(this.Helplink['progresscomplete']);
+        this.Html.removeClass(this.Helplink['progress'],['d-none']);
+        this.Html.removeChilds(this.Helplink['progresscomplete']);
+        this.Helplink['progresscomplete'].classList.add('text-danger','mt-0','mb-0');
+        this.Helplink['progresscomplete'].append(document.createTextNode(e));
+        this.Helplink['progress'].appendChild(this.Helplink['progresscomplete']);    
+    }
+    sendFiles(self){
+         console.log('ProjectStageToolFile.sendFiles()');
+         console.log(self.Parent.Stage.Items);
+         //throw 'aaaa';
          try{
-            var data = this.Parent.Stage.Items.parseResponse(response);
-            this.upload(this);
+            for(const prop in self.Image){
+                if(self.Image[prop].data.tmp==='y'){
+                    console.log(self.Image[prop]);
+                    let fd = new FormData();
+                        fd.append(prop,self.Image[prop].dataFile,self.Image[prop].property.name);  
+                    let Xhr= new Xhr2();
+                        self.Parent.Stage.Items.setLoadModalInfo(Xhr); 
+                        Xhr.setOnError(self.Parent.Stage.Items.modalXhrError()); 
+                        Xhr.run({
+                            t:'POST',
+                            u:self.Parent.Stage.Items.router+'uploadTmpStageImage',
+                            c:true,
+                            d:fd,
+                            o:self,
+                            m:'updateTmpImageProperty'
+                        });
+                }  
+            }
+            console.log('Finish');
+            console.log(self.Image);
         }
-        catch (error){
-            //console.log('ERROR:');
-            //console.log(error);
-            this.Html.removeClass(this.Helplink['info'],'border-success');
-            this.Html.removeClass(this.Helplink['info'],['d-none']);
-            this.Html.addClass(this.Helplink['info'],['border-danger']);
-          
-            var p = document.createElement('p');
-                p.classList.add('text-danger','mt-0','mb-0');
-                p.appendChild(document.createTextNode(error));       
-            this.Helplink['info'].appendChild(p);
+        catch (e){
+            //console.log('ERROR:');     
+            throw e;
+          };
+    }
+    deleteFiles(self){
+        try{
+            console.log('ProjectStageToolFile.deleteFiles()');       
+            console.log('file list:');
+            console.log(self.Image);
+            //throw 'aaaaaa';
+         
+            var fd = new FormData();
+            var found=false;
+            for(const prop in self.Image){
+                //console.log(self.Image[prop].property.uri);
+                if(self.Image[prop].data.tmp==='y'){
+                    fd.append(prop,self.Image[prop].property.uri); 
+                    delete self.Image[prop];
+                    found=true;
+                }
+            }
+            if(found){
+                var Xhr= new Xhr2();
+                    self.Parent.Stage.Items.setLoadModalInfo(Xhr); 
+                    Xhr.setOnError(self.Parent.Stage.Items.modalXhrError()); 
+                    Xhr.run({
+                        t:'POST',
+                        u:self.Parent.Stage.Items.router+'deleteTmpStageImage',
+                        c:true,
+                        d:fd,
+                        o:self,
+                        m:'successfullyDeleted'
+                    });
+            }
             
-                //this.Image={};        
-          }
-    }
-    upload(t){
-        /* t - thsis / self */
-        console.log('ProjectStageToolFile::upload()');
-        
-        for(const prop in t.Image){
-            //for(let i = 0; i<self.Image.length;i++){
-            console.log(t.Image[prop]);
-            let fd = new FormData();
-                fd.append(prop,t.Image[prop].dataFile,t.Image[prop].property.name);  
-            let Xhr= new Xhr2();
-                this.Parent.Stage.Items.setLoadModalInfo(Xhr); 
-                Xhr.setOnError(this.Parent.Stage.Items.modalXhrError()); 
-                Xhr.run({
-                    t:'POST',
-                    u:window.router+'uploadStageImage',
-                    c:true,
-                    d:fd,
-                    o:t,
-                    m:'setUploadImage'
-                });
         }
-        console.log('Finish');
-        console.log(t.Image);
-    }
-    checkBeforeDelete(self){
-        console.log('ProjectStageToolFile::checkBeforeDelete()');
-        console.log(self.OldImage);
-        //throw 'asdasd';
-        if(self.OldImage.length===0){
-            self.upload(self);
-            return true;
-        }
-        self.deleteFiles(self.OldImage,self,'uploadFiles');    
-    }
-    deleteFiles(file,o,m){
-        console.log('ProjectStageToolFile::deleteFiles()');       
-        console.log('file list:');
-        console.log(file);
-        //throw 'aaaaaa';
-        var Xhr= new Xhr2();
-            this.Parent.Stage.Items.setLoadModalInfo(Xhr); 
-            Xhr.setOnError(this.Parent.Stage.Items.modalXhrError()); 
-        var fd = new FormData();
-        for(var prop=0; prop<file.length;prop++){      
-            console.log(file[prop]);   
-            fd.append(prop,file[prop]);  
+        catch (e){
+            //console.log('ERROR:');     
+            throw e;
         };
-        Xhr.run({
-                t:'POST',
-                u:window.router+'deleteTmpStageImage',
-                c:true,
-                d:fd,
-                o:o,
-                m:m
-            });
+    }
+    getNewImageProperty(){
+        console.log('ProjectStageToolFile.getNewImageProperty()');
+        return {
+            data:{
+                id:0,
+                tmp:'y'
+            },
+            style:{
+                alignment:'LEFT', 
+                alignmentName:'Lewo',
+                height:'0',
+                heightMeasurement:'px',
+                marginLeft:0,
+                marginLeftMeasurement:'px',
+                marginTop:0,
+                marginTopMeasurement:'px',
+                width:'0',
+                widthMeasurement:'px',
+                wrappingStyle:'infront',
+                wrapDistanceTop:'',
+                wrapDistanceBottom:'',
+                wrapDistanceLeft:'',
+                wrapDistanceRight:''
+            },
+                property:{},
+                dataFile:{} 
+            };
+    }
+    setNewImageProperty(image,file){
+        console.log('ProjectStageToolFile.setNewImageProperty()');
+        image.property={
+            lastModified:file.lastModified,
+                 lastModifiedDate:file.lastModifiedDate,
+                 name:file.name,
+                 size:file.size,
+                 type:file.type,
+                 uri:'',
+                 order:'beforetext',//after
+                 orderName:'Przed tekstem'//Za
+        };
+        image.dataFile=file;
+    }
+    successfullyDeleted(){
+        console.log('ProjectStageToolFile.successfullyDeleted()');
     }
 }

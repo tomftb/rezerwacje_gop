@@ -9,7 +9,7 @@
 //abstract
 class ManageProjectStageDatabase {
     private $dbLink;
-    private $DatabaseUtilities;
+    protected $DatabaseUtilities;
     protected $Log;
     //protected $inpArray=array();
     protected $data=array();
@@ -239,7 +239,7 @@ class ManageProjectStageDatabase {
             
             //self::runQuery();
             $this->data->data->id=intval($this->data->data->id,10);
-            self::setStage();
+            $id=self::setStage();
             $this->dbLink->commit();  //PHP 5 and new
         }
         catch (PDOException $e){
@@ -249,6 +249,7 @@ class ManageProjectStageDatabase {
         }
         finally{
             //$this->queryList=[];
+            return $id;
         }
     }
     private function setStage(){
@@ -263,6 +264,7 @@ class ManageProjectStageDatabase {
             foreach($this->data->section as $v){
                 self::insertSection($lastStage,$v);
             }
+            return $lastStage;
         }
         else{
             /* ADD TO JS NEW PAGE!!!!*/
@@ -275,6 +277,7 @@ class ManageProjectStageDatabase {
             foreach($this->data->section as $v){
                 self::manageSection($v);
             }
+            return $this->data->data->id;
         }
     }
     private function insertStage(){

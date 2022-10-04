@@ -1,11 +1,11 @@
 <?php
 interface InterfaceProjectReport{
-    public function setProjectReportDoc();
+    public function getProjectReportDoc();
     public function setProjectReportImage();
     public function getProjectReportData();
     public function setProjectReport();
 }
-final class ManageProjectReport extends DatabaseProjectReport implements InterfaceProjectReport{
+final class ManageProjectReport extends ManageProjectReportDatabase implements InterfaceProjectReport{
     private $files=[];
     private $inpArray=[];
     private $documentName='';
@@ -13,70 +13,72 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
     private $reportData=[];
     private $Log;
     private $Parser;
-    
+
     public function __construct(){
         parent::__construct();
-        $this->Log=Logger::init(__METHOD__);
-        $this->utilities=NEW Utilities();
+        $this->Log=Logger::init(__METHOD__);       
     }
-    public function setProjectReportDoc(){
+    public function getProjectReportDoc(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->inpArray=filter_input_array(INPUT_POST);
-        /* parse data */
-        if(empty($this->inpArray)){ Throw New Exception ('NO STAGE SELECTED',0);}
-        /* parse file */
-        self::uploadFiles(APP_ROOT.UPLOAD_PROJECT_REPORT_IMG_DIR,UPLOAD_PROJECT_REPORT_IMG_DIR); 
-        /* create Report */
-        /* PARSE ACTUALL FILE WITH DELETE CHECKBOX AND INSERTED FILE*/
-        $this->Parser=ParserProjectReport::init();
-        $this->Parser->parseDocImage($this->inpArray,$this->files);
-        $this->inpArray=$this->Parser->getPost();
-        $this->files=$this->Parser->getFiles();    
-        $this->Log->LogMulti(0,$this->inpArray,__METHOD__);
-        //sleep(10);
-        //Throw New Exception (__METHOD__.__LINE__.' TEST ERROR',0);
-        self::createDocument();
         
-        $this->utilities->jsonResponse($this->documentName,'downloadProjectReportDoc');
+        $variable = New ManageProjectVariable();
+        $post=filter_input_array(INPUT_POST);
+        $stageExists=false;
+        /* parse data */
+        if(empty($post)){ Throw New Exception ('NO PROJECT REPORT DATA',0);}
+        $dataJson=json_decode($post['data']);
+        //print_r($dataJson);
+        if(!property_exists($dataJson,'data')){Throw New Exception ('POST PROJECT REPORT data KEY NOT EXIST',1);}
+        if(!property_exists($dataJson,'stage')){Throw New Exception ('POST PROJECT REPORT stage KEY NOT EXIST',1);}
+        //echo gettype($dataJson->stage)."\n"; 
+        foreach($dataJson->stage as $s){
+                $stageExists=true;
+                break;
+        }
+        if(!$stageExists){
+            //Throw New Exception ('NO STAGE SELECTED',2);
+            $this->Utilities->jsonResponse('','NO STAGE SELECTED');
+            return true;
+        }
+        
+        /* SWAP VARIABLE PROPERTY KEY WITH VALUE */
+        foreach($dataJson->stage as $s){
+            //print_r($s);
+            $variable->parseStageVariable($s);
+        }
+        $Doc = new createDoc($dataJson,[],'ProjectReport','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
+        $Doc->genProjectReport();
+        $this->Utilities->jsonResponse($Doc->getDocName(),'');
     }
-    public function setProjectReportImage(){
-        $this->Log->log(0,"[".__METHOD__."]");
-        self::uploadFiles(APP_URL."router.php?task=showProjectTmpReportFile&file=",TMP_UPLOAD_DIR); 
-        $this->utilities->jsonResponse($this->files,'showReportPreview'); 
-    }
-    public function getProjectReportData(){
-        $this->Log->log(0,"[".__METHOD__."]");
-        $this->utilities->setGet('id',$this->inpArray);
-        $stage=new manageProjectStage();
-        $v['id']=$this->inpArray['id'];
-        $v['data']=$stage->getAllStage();
-        $v['act']=parent::getProjectStage(['idp'=>[$this->inpArray['id'],'INT']]);
-        $this->utilities->jsonResponse($v,'pReportOff'); 
-    }
-    public function genProjectReportTestDoc(){
+     public function genProjectReportTestDoc(){
         $this->Log->log(0,"[".__METHOD__."]");
         $post=filter_input_array(INPUT_POST);
         /* parse data */
         if(empty($post)){ Throw New Exception ('NO STAGE REPORT DATA',0);}
         if(!array_key_exists('stage', $post)){Throw New Exception ('POST STAGE DATA KEY NOT EXIST',1);}
-        //$this->inpArray=json_decode($post['stage']);
-        //print_r($post);
         $dataJson=json_decode($post['stage']);
-        //print_r($dataJson);
-        
         /* SWAP VARIABLE PROPERTY KEY WITH VALUE */
         $variable = New ManageProjectVariable();
         $variable->parseStageVariable($dataJson);
         $doc = new createDoc($dataJson,[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
-        $doc->genReportStage();
-        //echo "DOC NAME: ".$doc->getDocName();
-        
+        $doc->genReportStage();        
         //FileDownload::getFile(APP_ROOT.UPLOAD_PROJECT_DOC_DIR,$doc->getDocName());
-        $this->utilities->jsonResponse($doc->getDocName(),'downloadProjectReportDoc');
-        
-        //$this->utilities->jsonResponse('','cModal');
-       
-        //$this->utilities->jsonResponse($doc->getDocName(),'downloadProjectDoc');
+        $this->Utilities->jsonResponse($doc->getDocName(),'downloadProjectReportDoc');
+    }
+    public function setProjectReportImage(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        self::uploadFiles(APP_URL."router.php?task=showProjectTmpReportFile&file=",TMP_UPLOAD_DIR); 
+        $this->Utilities->jsonResponse($this->files,'showReportPreview'); 
+    }
+    public function getProjectReportData(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->Utilities->setGet('id',$this->inpArray);
+        $stage=new ManageProjectStage();
+        $v['id']=$this->inpArray['id'];
+        $v['all']=$stage->getAllStage();
+        $v['act']=parent::getReport(['id_project'=>[$this->inpArray['id'],'INT']]);
+        $v['department']=$this->DatabaseUtilities->getUserDepartment($_SESSION['userid']);
+        $this->Utilities->jsonResponse($v,'pReportOff'); 
     }
     private function uploadFiles($linkToFile='',$uploadDir=''){
         $this->modul['FILE']=NEW File();
@@ -107,7 +109,7 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
         /* ADD DATA TO DB -> DatabaseProjectReport class*/
         parent::addReport($this->idProject,$this->reportData);
         /* Throw New Exception('TEST',0); */
-        $this->utilities->jsonResponse('','cModal');
+        $this->Utilities->jsonResponse('','cModal');
     }
     private function setReportData(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -123,13 +125,6 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
             $this->Log->logMulti(0,$this->files,'_FILES:');
             throw New Exception('SOME EXTRA DATA SENDED VIA POST / FILES => WRONG KEY?',1);
         }
-    }
-    private function createDocument(){
-        $this->Log->log(0,"[".__METHOD__."]");
-        /* create doc */
-        $doc=new createDoc($this->inpArray,$this->files,'ProjectReport1','.docx',APP_ROOT.UPLOAD_PROJECT_REPORT_DOC_DIR);
-        $doc->createProjectStageReport();
-        $this->documentName=$doc->getDocName();
     }
     private function setProjectId(){
         if(!array_key_exists('id', $this->inpArray)){ throw New Exception('NO ID KEY IN POST',1);}
@@ -171,5 +166,11 @@ final class ManageProjectReport extends DatabaseProjectReport implements Interfa
     public function downloadProjectReportImage(){
         $this->Log->log(0,"[".__METHOD__."]");
         FileDownload::getFile(UPLOAD_PROJECT_REPORT_IMG_DIR,filter_input(INPUT_GET,"file"));
+    }
+    public function saveProjectReport(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $Report=json_decode(filter_input(INPUT_POST,'data'));
+        $idReport=parent::updateReport($Report);
+        $this->Utilities->jsonResponse(['SAVED SUCCESSFULY',$idReport],'');
     }
 }

@@ -1,17 +1,23 @@
 <?php
-class DatabaseProjectReport{
+class ManageProjectReportDatabase{
     private $dbLink;
-    private $utilities;
+    protected $Utilities;
     private $Log;
     private $stageDbId=0;
+    private $projectStage;
     private $projectStageDb=[];
     private $stageValueDbId=0;
     private $idProject=0;
+    private $Report;
+    private $DatabaseUtilities;
+    private $StageDatabase;
     
     protected function __construct(){
         $this->Log=Logger::init(__METHOD__);
         $this->dbLink=LoadDb::load();
-        $this->utilities=NEW Utilities();
+        $this->Utilities=NEW Utilities();
+        $this->DatabaseUtilities=new DatabaseUtilities();
+        $this->StageDatabase = new ManageProjectStageDatabase();
     }
     protected function addReport($ProjectId=0,$ProjectData=[]){
         $this->Log->log(0,"[".__METHOD__."]"); 
@@ -35,7 +41,7 @@ class DatabaseProjectReport{
      * ADD SQL USER FIELDS
      */
     private function setAddOns(&$data){
-        $this->utilities->mergeArray($data,[
+        $this->Utilities->mergeArray($data,[
                 ':userid'=>[$_SESSION["userid"],'INT'],
                 ':userlogin'=>[$_SESSION["username"],'STR'],
                 ':userfullname'=>[$_SESSION["nazwiskoImie"],'STR'],
@@ -47,48 +53,243 @@ class DatabaseProjectReport{
     /*
      * GET PROJECT ALL STAGE AND STAGE VALUE FROM DATABASE
      */
-    public function getProjectStage($sql){
-        $this->Log->log(0,"[".__METHOD__."]"); 
-        $this->projectStageDb=$this->dbLink->squery("SELECT `id`,`stageId` as 'i',`number` as 'n',`title` as 't' FROM `projekt_etap` WHERE idProject=:idp AND wsk_u='0'",$sql);
-        array_walk($this->projectStageDb,[$this,'getProjectStageValue']);
-        $this->Log->logMulti(2,$this->projectStageDb,__METHOD__); 
-        return $this->projectStageDb;
+    public function updateReport($Report){
+        $LastInserted='';
+         try{
+            $this->dbLink->beginTransaction(); //PHP 5.1 and new
+            foreach($Report as $r){
+                //$this->Log->log(0,$r->data);
+                $this->Log->log(0,"[".__METHOD__."] ID Report:".$r->data->id);
+                
+                /* ADD CHANGE ONLY DEPARTMENT */
+                
+                /* ADD CHANGE ONLY VARIABLRE */
+                         
+                /* CHANGE ALL */
+                if($r->data->change==='n'){
+                    $this->Log->log(0,"[".__METHOD__."] NO CHANGE");
+                    /* NO CHANGE -> EXIT */
+                    $this->Log->log(0,"[".__METHOD__."] NO CHANGE -> EXIT");
+                    $LastInserted=$r->data->id;
+                    break;
+                }
+                /* SET OLD REPORT wsk_u = 1 */
+                $this->dbLink->query("UPDATE `project_report` SET `wsk_u`='1',`delete_reason`='NEW VERSION',".$this->DatabaseUtilities->getAlterSql()." WHERE `id`=:id", 
+                        array_merge(['id'=>[$r->data->id,'INT']],$this->DatabaseUtilities->getAlterParm()));
+                /* INSERT NEW REPORT */
+                $LastInserted=self::insertReport($r->data);
+                self::insertReportStage($r->stage,$LastInserted);
+            }
+            $this->dbLink->commit();  //PHP 5 and new
+        }
+        catch (PDOException $e){
+            $this->dbLink->rollback(); 
+            //die();
+            Throw New Exception("[".__METHOD__."] DATABASE ERROR: ".$e->getMessage(),1);
+        }
+        finally{
+            
+        }
+        return $LastInserted;
     }
-    /*
-     * GET PROJECT ALL STAGE VALUE FROM DATABASE
+    private function insertReport($ReportData){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $parm=[
+            ':id_project'=>[$ReportData->id_project,'INT'],
+            ':departmentId'=>[$ReportData->departmentId,'INT'],
+            ':departmentName'=>[$ReportData->departmentName,'STR']
+        ];
+        $this->dbLink->query2(
+                "INSERT INTO `project_report` (`id_project`,`departmentId`,`departmentName`,".$this->DatabaseUtilities->getCreateSql()[0].",".$this->DatabaseUtilities->getCreateAlterSql()[0].") VALUES (:id_project,:departmentId,:departmentName,".$this->DatabaseUtilities->getCreateSql()[1].",".$this->DatabaseUtilities->getCreateAlterSql()[1].");"
+                ,array_merge($parm, $this->DatabaseUtilities->getCreateParm(),$this->DatabaseUtilities->getAlterParm()));
+        return $this->dbLink->lastInsertId();
+    }
+    private function insertReportStage($ReportStage,$ReportId){
+        $this->Log->log(0,"[".__METHOD__."]");
+        foreach($ReportStage as $s){
+             $this->Log->log(0,'Report stage:');
+             //$this->Log->log(0,$s); 
+            /* INSERT DATA */
+            $LastInserted=self::insertReportStageData($s->data,$ReportId);
+            $this->StageDatabase->insertSimpleAttributes($LastInserted,$s,$table='project_report_stage');
+            /* INSERT SECTION */
+            self::insertReportSection($s->section,$LastInserted);
+        }
+    }
+    private function insertReportStageData($ReportStageData,$ReportId){
+         $parm=[
+            ':id_parent'=>[$ReportId,'INT'],
+            ':ordinal_number'=>[$ReportStageData->ordinal_number,'INT'],
+            ':title'=>[$ReportStageData->title,'STR'],
+            ':new_page'=>[$ReportStageData->valuenewline,'STR']
+        ];
+        $this->dbLink->query2(
+                "INSERT INTO `project_report_stage` (`id_parent`,`ordinal_number`,`title`,`new_page`,".$this->DatabaseUtilities->getCreateSql()[0].",".$this->DatabaseUtilities->getCreateAlterSql()[0].") VALUES (:id_parent,:ordinal_number,:title,:new_page,".$this->DatabaseUtilities->getCreateSql()[1].",".$this->DatabaseUtilities->getCreateAlterSql()[1].");"
+                ,array_merge($parm, $this->DatabaseUtilities->getCreateParm(),$this->DatabaseUtilities->getAlterParm()));
+        return $this->dbLink->lastInsertId();
+    }
+    private function insertReportSection($ReportStageSection,$StageId){
+        foreach($ReportStageSection as $s){
+             $this->Log->log(0,'Report stage section :');
+             //$this->Log->log(0,$s); 
+             /* INSERT DATA */
+            $LastInserted=self::insertReportStageSectionData($StageId);
+            $this->StageDatabase->insertSimpleAttributes($LastInserted,$s,$table='project_report_stage_section');
+            /* INSERT SUBSECTION */
+            self::insertReportSubsection($s->subsection,$LastInserted);
+        }
+    }
+    private function insertReportStageSectionData($StageId){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->dbLink->query2("INSERT INTO `project_report_stage_section` (`id_parent`) VALUES (:id_parent);"
+                ,[':id_parent'=>[$StageId,'INT']]);
+            return $this->dbLink->lastInsertId();
+    }
+    private function insertReportSubsection($ReportStageSubsection,$SectionId){
+        foreach($ReportStageSubsection as $s){
+            $this->Log->log(0,'Report stage section :');
+            //$this->Log->log(0,$s); 
+             /* INSERT DATA */
+            $LastInserted=self::insertReportStageSubsectionData($SectionId);
+            $this->StageDatabase->insertSimpleAttributes($LastInserted,$s,$table='project_report_stage_subsection');
+            /* INSERT SUBSECTION */
+            foreach($s->subsectionrow as $r){
+                self::insertSubsectionRow($LastInserted,$r); 
+            }
+        }
+    }
+    private function insertReportStageSubsectionData($SectionId){
+        $this->dbLink->query2("INSERT INTO `project_report_stage_subsection` (`id_parent`) VALUES (:id_parent);"
+                ,[':id_parent'=>[$SectionId,'INT']]);
+            return $this->dbLink->lastInsertId();
+    }
+    private function insertSubsectionRow($idSubsection=0,$data=[]){
+        $this->Log->log(0,"[".__METHOD__."]\r\n ID DB SUBSECTION - ".$idSubsection);
+        /* INSERT SUBSECTION ROWA DATA */
+        $this->dbLink->query2(
+            "INSERT INTO `project_report_stage_subsection_row` (`id_parent`) VALUES (:id);"
+            ,[':id'=>[$idSubsection,'INT']]);
+        $IdRow=$this->dbLink->lastInsertId();
+        /*
+         * INSERT paragraph
+         */
+        $this->Log->log(0,"paragraph");
+        $this->StageDatabase->insertSimpleAttributes($IdRow,$data->paragraph,'project_report_stage_subsection_row_p');
+        /* INSERT SUBSECTION ROW TABSTOP */
+        $this->StageDatabase->insertSimpleTabStop($IdRow,$data->paragraph->tabstop,'project_report_stage_subsection_row_p_tabstop');
+        /* INSERT SUBSECTION ROW VARIABLE */
+        $this->StageDatabase->insertSimpleVariable($IdRow,$data->paragraph->variable,'project_report_stage_subsection_row_p_variable');
+        /*
+         * INSERT list
+         */
+        $this->Log->log(0,"list");
+        $this->StageDatabase->insertSimpleAttributes($IdRow,$data->list,'project_report_stage_subsection_row_l');
+        /*
+         * INSERT table
+         */
+        $this->Log->log(0,"table");
+        $this->StageDatabase->insertSimpleAttributes($IdRow,$data->table,'project_report_stage_subsection_row_t');
+        /*
+         * INSERT image
+         */
+        $this->Log->log(0,"image");
+        /* REMOVE OLD */
+         ////$parm[':id']=[$id,'INT'];
+        //$this->dbLink->query2("DELETE FROM `".$table."_style` WHERE `id_parent`=:id;",$parm);
+        /* ADD NEW */
+        foreach($data->image as $v){
+             $this->StageDatabase->insertSimpleSubsectionRowImage($IdRow,$v,'project_report_stage_subsection_row_i');
+        }
+    }
+    public function getReport($parm=[]){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->Report=new stdClass();
+        /* LIMIT 0,1 */
+        foreach($this->dbLink->squery("SELECT `id`,`id_project`,`departmentId`,`departmentName`,`buffer_user_id`,'n' as 'change' FROM `project_report` WHERE `id_project`=:id_project AND wsk_u='0' ORDER BY `id` ASC Limit 0,1",$parm,'FETCH_OBJ','fetchAll') as $k => $v){
+            $this->Report->{$k}=new stdClass();
+            $this->Report->{$k}->data=$v;
+            self::getReportStage($this->Report->{$k});          
+        }
+        return $this->Report;
+    }
+    private function getReportStage(&$Report){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $Report->stage=new stdClass();
+        foreach($this->dbLink->squery("SELECT `id`,`id_parent`,`ordinal_number`,`title`,`new_page` as 'valuenewline' FROM `project_report_stage` WHERE `id_parent`=:id_parent AND wsk_u='0' ORDER BY `ordinal_number` ASC",['id_parent'=>[$Report->data->id,'INT']],'FETCH_OBJ','fetchAll') as $k => $v){
+            //$Report->stage->data=new stdClass();
+            $Report->stage->{$k}=new stdClass();
+            $Report->stage->{$k}->data=$v;
+            $this->StageDatabase->assignAllProperty($Report->stage->{$k},'project_report_stage',$v->id);
+            self::getReportSection($Report->stage->{$k});
+        }
+    }
+        /*
+     * GET REPORT PROJECT STAGE SECTION DATA
      */
-    private function getProjectStageValue(&$stage){
-        /* GET VALUE AND LAST IMAGE */
-        $this->Log->log(2,"[".__METHOD__."]"); 
-        $sql[':id']=[$stage['id'],'INT'];
-        $stage['data']=$this->dbLink->squery("SELECT 
-                `w`.`id`,
-		`w`.`idProjectStage`,
-                `w`.`valueId`,
-                `w`.`value` as v,
-                `pl`.`fileposition` as fp,
-                `pl`.`filename` as fa,
-                null as f,
-                `pl`.`originalname` as fo
-                 FROM 
-                `projekt_etap_wartosc` as w left outer join (
-                                                            SELECT 
-                    						`idProjectStageValue`,
-                    						max(`id`) as max_id
-                                                            FROM 
-								`projekt_etap_wartosc_plik` 
-                                                            WHERE `wsk_u`='0'
-                                                            GROUP by `idProjectStageValue`
-				) as p ON `w`.`id`=`p`.`idProjectStageValue`
-				LEFT outer JOIN `projekt_etap_wartosc_plik`  as pl
-				ON pl.`idProjectStageValue`=p.`idProjectStageValue`
-				AND p.`max_id`=pl.`id`
-                WHERE
-                `w`.`idProjectStage`=:id
-                AND `w`.`wsk_u`='0'"
-                ,$sql);
+    private function getReportSection(&$ReportStage){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $ReportStage->section=new stdClass();
+        foreach($this->dbLink->squery("SELECT `id` FROM `project_report_stage_section` WHERE `id_parent`=:id_parent",['id_parent'=>[$ReportStage->data->id,'INT']],'FETCH_OBJ','fetchAll') as $k => $v){
+            $ReportStage->section->{$k}=new stdClass();
+            $ReportStage->section->{$k}->data=$v;
+            $this->StageDatabase->assignAllProperty($ReportStage->section->{$k},'project_report_stage_section',$v->id);
+             /* ASSIGN STAGE SECTION */
+            self::getReportSubsection($ReportStage->section->{$k});
+        }
     }
     /*
+     * GET REPORT PROJECT STAGE SECTION SUBSECTIONS DATA
+     */
+    private function getReportSubsection(&$ReportSection){
+        $this->Log->log(0,"[".__METHOD__."]"); 
+        $ReportSection->subsection=new stdClass();
+        foreach($this->dbLink->squery("SELECT `id` FROM `project_report_stage_subsection` WHERE `id_parent`=:id_parent",['id_parent'=>[$ReportSection->data->id,'INT']],'FETCH_OBJ','fetchAll') as $k => $v){
+            $ReportSection->subsection->{$k}=new stdClass();
+            $ReportSection->subsection->{$k}->data=$v;
+            $this->StageDatabase->assignAllProperty($ReportSection->subsection->{$k},'project_report_stage_subsection',$v->id);
+            /* ASSIGN SUBSECTION ROW */
+            self::getReportRow($ReportSection->subsection->{$k});
+        }
+    }
+     /*
+     * GET REPORT PROJECT STAGE SECTION SUBSECTION ROWS DATA
+     */
+    private function getReportRow(&$ReportSubsection){
+        $this->Log->log(0,"[".__METHOD__."]"); 
+        $ReportSubsection->subsectionrow=new stdClass();
+        foreach($this->dbLink->squery("SELECT `id`,`type` FROM `project_report_stage_subsection_row` WHERE `id_parent`=:id_parent",['id_parent'=>[$ReportSubsection->data->id,'INT']],'FETCH_OBJ','fetchAll') as $k => $v){
+            $ReportSubsection->subsectionrow->{$k}=new stdClass();
+            /* PARAGRAPH */
+            $ReportSubsection->subsectionrow->{$k}->paragraph=new stdClass();
+            $ReportSubsection->subsectionrow->{$k}->data=$v;
+            $ReportSubsection->subsectionrow->{$k}->data->id=intval($v->id,10);
+            $this->StageDatabase->assignAllProperty($ReportSubsection->subsectionrow->{$k}->paragraph,'project_report_stage_subsection_row_p',$ReportSubsection->subsectionrow->{$k}->data->id);
+             /* SET TAB STOP */
+            $this->StageDatabase->assignTabStopProperty($ReportSubsection->subsectionrow->{$k}->paragraph,$ReportSubsection->subsectionrow->{$k}->data->id,'project_report_stage_subsection_row_p_tabstop');
+            /* SET VARIABLE */
+            $this->StageDatabase->assignVariableProperty($ReportSubsection->subsectionrow->{$k}->paragraph,$ReportSubsection->subsectionrow->{$k}->data->id,'project_report_stage_subsection_row_p_variable');   
+            /* LIST */
+            $ReportSubsection->subsectionrow->{$k}->list=new stdClass();
+            $this->StageDatabase->assignAllProperty($ReportSubsection->subsectionrow->{$k}->list,'project_report_stage_subsection_row_l',$ReportSubsection->subsectionrow->{$k}->data->id);
+            /* TABLE */
+            $ReportSubsection->subsectionrow->{$k}->table=new stdClass();
+            $this->StageDatabase->assignAllProperty($ReportSubsection->subsectionrow->{$k}->table,'project_report_stage_subsection_row_t',$ReportSubsection->subsectionrow->{$k}->data->id);
+            /* IMAGE */
+            $ReportSubsection->subsectionrow->{$k}->image=new stdClass();
+            //self::getReportRowImage($ReportSubsection->subsectionrow->{$k});
+            $this->StageDatabase->getStageImageProperty($ReportSubsection->subsectionrow->{$k}->image,'project_report_stage_subsection_row_i',$ReportSubsection->subsectionrow->{$k}->data->id);
+        }
+    }
+    private function getReportRowImage(&$ReportRow){
+        $this->Log->log(0,"[".__METHOD__."]"); 
+        $ReportRow->image=new stdClass();
+        foreach($this->dbLink->squery("SELECT `id` FROM `project_report_stage_subsection_row_i` WHERE `id_parent`=:id_parent",['id_parent'=>[$ReportRow->data->id,'INT']],'FETCH_OBJ','fetchAll') as $k => $v){
+            $ReportRow->image->{$k}=new stdClass();
+            $ReportRow->image->{$k}->data=$v;
+            self::assignAllProperty($ReportRow->image->{$k},'project_report_stage_subsection_row_i',$v->id);
+        }
+    }
+     /*
      * CHECK AND UPDATE OR INSERT STAGE TO PROJECT
      */
     private function manageStage($ProjectDataValue,$ProjectDataId,$sql){

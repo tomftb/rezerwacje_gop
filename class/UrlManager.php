@@ -113,6 +113,7 @@ final class UrlManager{
         ['blockConstant','LOG_INTO_STAGE'],
         ['genProjectReportTestDoc','LOG_INTO_STAGE'],
         ['uploadStageImage','LOG_INTO_STAGE'],
+        ['uploadTmpStageImage','LOG_INTO_STAGE'],
         ['deleteStageImage','LOG_INTO_STAGE'],
         ['deleteTmpStageImage','LOG_INTO_STAGE'],
         ['getTmpStageImage','LOG_INTO_STAGE'],

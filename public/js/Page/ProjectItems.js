@@ -515,7 +515,8 @@ class ProjectItems{
         catch (error) {
             console.log(error);
             /* SHOW ERROR MODAL */ 
-            this.Html.showField(this.Modal.link['error'],error);
+            this.Modal.setError(error);
+            //this.Html.showField(this.Modal.link['error'],error);
             return false;
         }
         return false;

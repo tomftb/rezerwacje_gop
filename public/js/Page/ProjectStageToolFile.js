@@ -267,10 +267,16 @@ class ProjectStageToolFile{
                     }
                     
                 };
-                if (confirm('Zastąpić pliki?') !== true) {
-                   return true;
-                }
+               
                 try{
+                    console.log('Image:');
+                    console.log();
+                    if(Object.keys(self.Image).length>0){
+                        if (confirm('Zastąpić pliki?') !== true) {
+                            return true;
+                        }
+                    }
+                    
                     /* CLEAR FIELD progrss */
                     self.Html.removeClass(self.Helplink['progress'],'d-none');//
                     /* SET IMAGE FILES To DELETE */

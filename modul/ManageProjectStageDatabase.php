@@ -698,7 +698,9 @@ class ManageProjectStageDatabase {
         /*
          * INSERT image
          */
-        self::updateImageWskU($v->data->id);
+        
+        //
+        
         /* SET wsk_u to OLD IMAGE */
         array_walk($v->image,['self','updateSubSectionRowImage'],$v->data->id);
     }
@@ -707,7 +709,7 @@ class ManageProjectStageDatabase {
         $this->Log->log(0,$v->data->id);  
         $this->Log->log(0,$v->data->tmp);  
         if($v->data->id>0 && $v->data->tmp==='y'){
-            $this->Log->log(0,"UPDATE IMAGE");      
+            $this->Log->log(0,"UPDATE IMAGE - TO DO");      
             /* OLD FILE STAY FOR BACK FUNCTION IN FUTUTRE -> TO DO */
             self::deleteAttributes($v->data->id,'slo_project_stage_subsection_row_i');
             /* INSERT NEW ATTRBIUTES */
@@ -717,9 +719,14 @@ class ManageProjectStageDatabase {
         }
         else if($v->data->id>0 && $v->data->tmp==='n'){
             $this->Log->log(0,"UPDATE ONLY IMAGE ATTRIBUTES");  
-            
             self::deleteAttributes($v->data->id,'slo_project_stage_subsection_row_i');
             self::insertAttributes($v->data->id,$v,'slo_project_stage_subsection_row_i');
+        }
+        else if($v->data->id>0 && $v->data->tmp==='d'){
+            $this->Log->log(0,"REMOVE IMAGE");  
+            self::updateImageWskU($IdRow);
+            //self::deleteAttributes($v->data->id,'slo_project_stage_subsection_row_i');
+            //self::insertAttributes($v->data->id,$v,'slo_project_stage_subsection_row_i');
         }
         else{
             $this->Log->log(0,"INSERT IMAGE");
@@ -732,7 +739,7 @@ class ManageProjectStageDatabase {
         
            $this->dbLink->query2(
                 "UPDATE `slo_project_stage_subsection_row_i` SET "
-                ."`delete_reason`='NEW VERSION'"
+                ."`delete_reason`='REMOVED'"
                 .",`wsk_u`='1'"
                 . ",".$this->DatabaseUtilities->getAlterSql().""
                 . " WHERE"

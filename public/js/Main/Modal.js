@@ -103,4 +103,20 @@ class Modal{
             textInfo.innerHTML=value;
             this.link['info'].appendChild(textInfo);
     }
+    setError(e){
+        //console.log(e);
+        //console.log(this.link.error);
+        this.Html.removeClass(this.link['error'],['d-none','alert-success']);
+        this.Html.addClass(this.link['error'],['alert-danger']);
+        this.link.error.innerHTML=e;
+    }
+    unsetError(){
+        this.Html.addClass(this.link['error'],'d-none');
+        this.link.error.innerHTML='';
+    }
+    setSuccess(i){
+        this.Html.removeClass(this.link['error'],['d-none','alert-danger']);
+        this.Html.addClass(this.link['error'],['alert-success']);
+        this.link.error.innerHTML=i;
+    }
 }

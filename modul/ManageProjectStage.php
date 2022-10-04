@@ -436,13 +436,14 @@ class ManageProjectStage extends ManageProjectStageDatabase
         self::checkValue('title',$prefix);
         self::checkValue('departmentId',$prefix);
         self::checkValue('departmentName',$prefix);
+        self::checkTitle();
         $this->error.=$prefix.$this->utilities->checkValueLength($this->data->data->title,'[title]',1,1024);
         if($this->error){
             Throw New Exception ($this->error,0);
         }
-        parent::manageStage();  
+        $id=parent::manageStage();  
         //self::getprojectsstagelike();
-        $this->utilities->jsonResponse('','Zapis się powiódł');   
+        $this->utilities->jsonResponse(self::getStageFullData($id),'Zapis się powiódł');   
     }
     private function checkValue($key='',&$prefix){
         $this->Log->log(0,"[".__METHOD__."]\r\nKEY - ".$key); 
@@ -459,7 +460,21 @@ class ManageProjectStage extends ManageProjectStageDatabase
             $prefix='<br/>';
         }
     }
-    public function uploadStageImage(){
+    private function checkTitle(){
+        $id=intval($this->data->data->id,10);
+        $stage=[];
+
+        if($id>0){
+            $stage=$this->dbLink->squery("SELECT s.`id` FROM `slo_project_stage` s WHERE s.`title`=:t AND s.`id`!=:i AND s.`wsk_u`='0'",[':t'=>[$this->data->data->title,'STR'],':i'=>[$id,'INT']]);
+        }
+        else{
+            $stage=$this->dbLink->squery("SELECT s.`id` FROM `slo_project_stage` s WHERE s.`title`=:t AND s.`wsk_u`='0'",[':t'=>[$this->data->data->title,'STR']]);
+        }
+        if(count($stage)>0){
+            throw new exception ('TITLE ISN\'T UNIQUE',0);
+        }  
+    }
+    public function uploadTmpStageImage(){
         $this->Log->log(0,"[".__METHOD__."]"); 
         $File = New FileImage();
         $File->setUploadDir(TMP_UPLOAD_DIR);

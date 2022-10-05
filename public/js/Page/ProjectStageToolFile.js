@@ -230,7 +230,7 @@ class ProjectStageToolFile{
                                 info.appendChild(p);
                                 if(error){ continue; }
                                 self.Image[uid]=self.getNewImageProperty();
-                                self.setNewImageProperty(self.Image[uid],t.files.item(i));
+                                self.setNewImageProperty(self.Image[uid],uid,t.files.item(i));
                          }
                         /* 
                         * cut names
@@ -519,7 +519,7 @@ class ProjectStageToolFile{
                 dataFile:{} 
             };
     }
-    setNewImageProperty(image,file){
+    setNewImageProperty(image,uid,file){
         console.log('ProjectStageToolFile.setNewImageProperty()');
         image.property={
             lastModified:file.lastModified,
@@ -529,7 +529,8 @@ class ProjectStageToolFile{
                  type:file.type,
                  uri:'',
                  order:'beforetext',//after
-                 orderName:'Przed tekstem'//Za
+                 orderName:'Przed tekstem',//Za
+                 tmpid:uid
         };
         image.dataFile=file;
     }

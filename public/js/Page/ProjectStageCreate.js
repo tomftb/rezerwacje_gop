@@ -841,7 +841,8 @@ class ProjectStageCreate{
             confirm.innerText=btnLabel;  
         var self=this; 
             confirm.onclick = function (){
-                console.clear();
+                this.innerText='Zapisz';
+                //console.clear();
                 if(self.ErrorStack.check()){ return false;}
                 self.Html.hideField(self.Modal.link['error']);
                 var fd = new FormData();
@@ -857,7 +858,7 @@ class ProjectStageCreate{
      * SEND INPUT DATA TO SEND 
      */
     sendInputData(fd,self){
-        console.log('ProjectStageCreate::sendInputData()');
+        console.log('ProjectStageCreate.sendInputData()');
         if(self.ErrorStack.check()){ return false;}
         this.Xhr.run({
                 t:'POST',
@@ -869,18 +870,19 @@ class ProjectStageCreate{
         });      
     }
     checkInputData(data){
-        console.log('ProjectStageCreate::checkInputData()');
-        console.log(data); 
-        console.log(this.ErrorStack);
-        console.log(this.helplink);
+        //console.log('ProjectStageCreate.checkInputData()');
+        //console.log(data); 
+        //console.log(this.ErrorStack);
+        //console.log(this.helplink);
         this.checkInput('title');
     }
     checkInput(key){
-        console.log(key);
-        console.log(this.helplink.input[key]);
+        //console.log('ProjectStageCreate.checkInput()');
+        //console.log(key);
+        //console.log(this.helplink.input[key]);
         try{
             var length=(this.helplink.input[key].input.value.trim()).length;
-                console.log(length);
+                //console.log(length);
             if(length<1){
                 throw 'Wprowadź minimalną ilość znaków!'; 
             }
@@ -898,20 +900,25 @@ class ProjectStageCreate{
             this.Html.removeClass(this.helplink.input[key].error,'d-none');
             this.helplink.input[key].error.appendChild(document.createTextNode(e));
         }
-        console.log(this.ErrorStack);
-        console.log(this.ErrorStack.check());
+        //console.log(this.ErrorStack);
+        //console.log(this.ErrorStack.check());
     }
     Save(response){
         console.log('ProjectStageCreate::Save');
         var jsonResponse=this.Items.setFieldResponse(response);
-        console.log(jsonResponse);
+        //console.log(jsonResponse);
         if(!jsonResponse){
             return false;
+        }        
+        try{
+             /* UPDATE STAGE DATA */
+            this.StageData.updateStageData(jsonResponse.data.value);
+            /* CLEAR INPUT FILE */
+            this.Modal.setSuccess(jsonResponse.data.function);
         }
-        /* UPDATE FILES tmp = n*/
-        //this.StageData.getFiles();
-        this.StageData.updateTmpImages();
-        /* CLEAR INPUT FILE */
-        this.Modal.setSuccess(jsonResponse.data.function);
+        catch(e){
+            this.ErrorStack.add('updatestage',e);
+            this.Modal.setError('An Application Error Has Occurred!');
+        }
     }
 }

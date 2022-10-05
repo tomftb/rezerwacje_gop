@@ -73,7 +73,7 @@ class ErrorStack{
         this.block.push(ele);
     }
     setBlock(){
-        console.log('ErrorStack::block()');
+        console.log('ErrorStack::setBlock()');
         var action = function(t,b){
                 t.Html.addClass(b,"disabled");
                 b.setAttribute("disabled",'');

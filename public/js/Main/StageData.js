@@ -11,6 +11,7 @@ class StageData{
     tabStop={};
     type='';
     title='lista';
+    change=false;
     constructor(Glossary,Property,type,tabstop){
         this.Glossary = Glossary;
         this.Property=Property;
@@ -34,7 +35,9 @@ class StageData{
                     /* SET SQL new_page to valuenewline */
                     valuenewline:this.getValueChar(this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_PAGE_FROM_NEW','v'))
                },
-               property:{},
+               property:{
+                   tmpid:'0'
+               },
                style:{
                     /* MOVE TO SECTION */
                     //backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
@@ -317,14 +320,41 @@ class StageData{
         }
         return files;
     }
-    updateTmpImages(){
-       console.log('StageData->updateTmpImages()');
+    updateStageData(NewStageData){
+       console.log('StageData.updateStageData()');
+       console.log('Actual Stage Data:');
+       console.log(this.Stage);
+       console.log(this.Stage);
+       console.log('New Stage Data:');
+       console.log(NewStageData);
+       /* UPDATE STAGE ID */
+
+       this.updateStageId(NewStageData);
        for(const prop in this.Stage.section){           
             for(const prop1 in this.Stage.section[prop].subsection){             
                 for(const prop2 in this.Stage.section[prop].subsection[prop1].subsectionrow){
                     for(const prop3 in this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image){
-                        this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data.tmp='n';
                         console.log(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data);
+                        switch (this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data.tmp) {
+                            case 'y':
+                                console.log('(y) SET TMP = n, update id');
+                                this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data.tmp='n';
+                                
+                                break;
+                            case 'n':
+                                console.log('(n) nothing to do ');
+                                //ImageToRemove[prop]=self.Image[prop];
+                                //self.Image[prop].data.tmp='d';
+                                break
+                            case 'd':
+                                console.log('(d) delete');
+                                delete this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3];
+                                break;
+                            default:
+                                throw 'tmp type not in (y,n,d) - '+Image[prop].data.tmp;
+                         };
+                        
+                        //console.log(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data);
                         //if(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data.tmp==='y'){
                            // files.push(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].property.uri);
                        // }            
@@ -332,5 +362,41 @@ class StageData{
                 }
             }
         } 
+    }
+    updateStageId(NewStageData){
+       //console.log(this.Stage.data.id);
+       //console.log(typeof(this.Stage.data.id));
+       //console.log(NewStageData.data.id);
+       //console.log(typeof(NewStageData.data.id));
+       this.checkStageDataId(NewStageData,1);
+       this.checkStageDataId(this.Stage,0);
+       
+       if(this.Stage.data.id===0){
+           this.Stage.data.id=NewStageData.data.id;
+       }
+    }
+    checkStageDataId(Data,maxId){
+       if(!Data.hasOwnProperty('data')){
+            console.log(Data);
+            throw 'StageData.checkStageDataId()\nno `data` property';
+       }
+       if(!Data.data.hasOwnProperty('id')){
+            console.log(Data.data);
+            throw 'StageData.checkStageDataId()\nno id `property`';
+       }
+       if(typeof(Data.data.id)!=='number'){
+            console.log(typeof(Data.data.id));
+            throw 'StageData.checkStageDataId()\nwrong data id `type`';
+       }
+       if(Data.data.id<maxId){
+           console.log(Data.data.id);
+           throw 'StageData.checkStageDataId()\ndata `id` lower than '+maxId;
+       } 
+    }
+    updateStageDataId(NewStageData){
+       console.log(this.Stage.data.id);
+       console.log(typeof(this.Stage.data.id));
+       console.log(NewStageData.data.id);
+       console.log(typeof(NewStageData.data.id));
     }
 }

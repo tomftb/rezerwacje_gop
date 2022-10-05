@@ -44,8 +44,8 @@ class StageData{
                     //backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
                     //backgroundImage:''
                     //,newPage:1
-                },
-                section:{}
+               },
+               section:{}
         };
         this.createDefaultSection();
     }
@@ -61,7 +61,8 @@ class StageData{
             },
             style:this.getDefaultSectionStyle(),
             property:{
-                valuenewline:'y'
+                valuenewline:'y',
+                tmpid:this.iSection
             },
             /* CREATE EMPTY STAGE SUBSECTION - COLUMN  */
             subsection:this.createDefaultSubsection()
@@ -70,35 +71,39 @@ class StageData{
         return this.Stage.section;
     }
     createDefaultSubsection(){
-        //console.log('ProjectStageCreateList::setUpNewStageSubsection()');
+        //console.log('StageData.createDefaultSubsection()');
         var subsection = {};
         for(var i=0;i<this.Property.text.subsectionMin;i++){  
-            subsection[i]=this.createSubsection();
+            subsection[i]=this.createSubsection(i);
         }
         return subsection;
     }
-    createSubsection(){
+    createSubsection(tmpid){
+        console.log('StageData.createSubsection()');
         return {
                 data:{
                     id:0
                 },
                 style:{},
-                property:{},
+                property:{
+                    tmpid:tmpid
+                },
                 subsectionrow:this.createDefaultSubsectionRow()
             };
     }
     createDefaultSubsectionRow(){
+        console.log('StageData.createDefaultSubsectionRow()');
         var subsectionRow = {};
             /* FIRST ALWAYS NEW LINE */
             //var newLine = 'y';
             for(var i=0;i<this.Property.text.subsectionRowMin;i++){  
-                subsectionRow[i]=this.createSubsectionRow();
+                subsectionRow[i]=this.createSubsectionRow(i);
                // subsectionRow[i].paragraph.property.valuenewline=newLine;
                // newLine = this.Property.subsectionRowNewLine;
             };
             return subsectionRow;
     }
-    createSubsectionRow(){
+    createSubsectionRow(tmpid){
         /* RUN SET DEFAULT -> TO PREVENT REFERENCES */
         //this.setSubsectionRowDefault(this.type);
         return {
@@ -141,7 +146,11 @@ class StageData{
                 },
                 image:{
                     
-                }
+                },
+                property:{
+                    tmpid:tmpid 
+                },
+                style:{}
         };
     }
     getValueChar(value){
@@ -226,9 +235,7 @@ class StageData{
                         paragraphName:'Nowy akapit',
                         tabstop:'-1'
                     },
-                    tabstop:this.tabStop
-                
-                
+                    tabstop:this.tabStop      
         };
         var rowList={ 
                 
@@ -312,7 +319,7 @@ class StageData{
                 for(const prop2 in this.Stage.section[prop].subsection[prop1].subsectionrow){
                     for(const prop3 in this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image){
                         if(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data.tmp==='y'){
-                            files.push(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].property.uri);
+            files.push(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].property.uri);
                         }            
                     }
                 }
@@ -324,41 +331,15 @@ class StageData{
        console.log('StageData.updateStageData()');
        console.log('Actual Stage Data:');
        console.log(this.Stage);
-       console.log(this.Stage);
        console.log('New Stage Data:');
        console.log(NewStageData);
        /* UPDATE STAGE ID */
-
        this.updateStageId(NewStageData);
-       for(const prop in this.Stage.section){           
+       for(const prop in this.Stage.section){         
             for(const prop1 in this.Stage.section[prop].subsection){             
                 for(const prop2 in this.Stage.section[prop].subsection[prop1].subsectionrow){
-                    for(const prop3 in this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image){
-                        console.log(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data);
-                        switch (this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data.tmp) {
-                            case 'y':
-                                console.log('(y) SET TMP = n, update id');
-                                this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data.tmp='n';
-                                
-                                break;
-                            case 'n':
-                                console.log('(n) nothing to do ');
-                                //ImageToRemove[prop]=self.Image[prop];
-                                //self.Image[prop].data.tmp='d';
-                                break
-                            case 'd':
-                                console.log('(d) delete');
-                                delete this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3];
-                                break;
-                            default:
-                                throw 'tmp type not in (y,n,d) - '+Image[prop].data.tmp;
-                         };
-                        
-                        //console.log(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data);
-                        //if(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].data.tmp==='y'){
-                           // files.push(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image[prop3].property.uri);
-                       // }            
-                    }
+                    /* UPDATE STAGE DATA IMAGE */
+                    this.updateStageDataImage(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image,NewStageData);
                 }
             }
         } 
@@ -391,12 +372,34 @@ class StageData{
        if(Data.data.id<maxId){
            console.log(Data.data.id);
            throw 'StageData.checkStageDataId()\ndata `id` lower than '+maxId;
-       } 
+       }
     }
     updateStageDataId(NewStageData){
        console.log(this.Stage.data.id);
        console.log(typeof(this.Stage.data.id));
        console.log(NewStageData.data.id);
        console.log(typeof(NewStageData.data.id));
+    }
+    updateStageDataImage(Image,NewStageData){
+        for(const prop3 in Image){
+            console.log(Image[prop3].data);
+            switch (Image[prop3].data.tmp) {
+            case 'y':
+                console.log('(y) SET TMP = n, update id');
+                Image[prop3].data.tmp='n';
+                break;
+            case 'n':
+                console.log('(n) nothing to do ');
+                //ImageToRemove[prop]=self.Image[prop];
+                //self.Image[prop].data.tmp='d';
+                break
+            case 'd':
+                console.log('(d) delete');
+                delete Image[prop3];
+                break;
+            default:
+                throw 'tmp type not in (y,n,d) - '+Image[prop3].data.tmp;
+           };         
+        }
     }
 }

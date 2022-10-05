@@ -1068,7 +1068,7 @@ class ProjectStageTool{
        
     }
     setSectionSubSection(iSection,subsection,helplinkSubsection,self){
-        /* console.log('ProjectStageCreate::setSectionSubSection()'); */
+        console.log('ProjectStageCreate.setSectionSubSection()');
         var subSectionCount = Object.keys(subsection).length;
         var data={
             0:{
@@ -1085,12 +1085,13 @@ class ProjectStageTool{
                 glossary:this.Glossary.text,
                 /* Anonymous Function */
                 onchange:function(t){
+                    console.log('ProjectStageCreate.setSectionSubSection().onchange()');
                     /* t - this */
                     this.oldValue=parseInt(this.oldValue,10);
                     var newValue=parseInt(t.value,10);
                         if(this.oldValue<newValue){
                             for(var i = this.oldValue+1; i<newValue+1 ;i++ ){
-                                this.subsection[i]=this.self.StageData.createSubsection();
+                                this.subsection[i]=this.self.StageData.createSubsection(i);
                                 /* FIRST ALWAYS NEW LINE */
                                 //subsection[i].subsectionrow[0].data.valuenewline='n';
                                 this.subsection[i].subsectionrow[0].paragraph.property.valuenewline='y';

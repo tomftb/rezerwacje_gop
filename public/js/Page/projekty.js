@@ -1,7 +1,7 @@
 var ajax = new Ajax();
 var error = new Error();
     //MyError.setDiv('errDiv-Adapted-overall');
-var Report = new ProjectReport();
+var Report = new ProjectReport(window.router,window.appUrl,window.perm);
     //Report.setAjax(ajax);
 var table=new Table();
     table.setAjaxLink(ajax);
@@ -150,13 +150,14 @@ table.setButtonsType('dropdown');
 function runFunction(response)
 {
     console.log('runFunction()');
-    console.log(response);
+    //console.log(response);
     try{
         var dJson=JSON.parse(response);
             error.checkStatusExist(dJson);
             projectData=dJson; 
     }
     catch(e){
+        console.log(response);
         console.log(e);
         return false;
     }
@@ -195,7 +196,7 @@ function runFunction(response)
                 break;
             case 'downloadProjectPdf':
             case 'downloadProjectDoc':
-            case 'downloadProjectReportDoc':
+           // case 'downloadProjectReportDoc':
                     console.log(dJson['data']['value']);
                     var win = window.open('router.php?task='+dJson['data']['function']+'&file='+dJson['data']['value'], '_blank');
                     win.focus();
@@ -216,7 +217,7 @@ function runFunction(response)
             case 'pReportOff':
                     //Report.setData(dJson,loggedUserPerm);
                     //Report.setErrorStack(new ErrorStack());
-                    Report.create(dJson,loggedUserPerm);
+                    Report.create(dJson);
                     break;
             case 'runMain':
                     loggedUserPerm=dJson['data']['value']['perm'];

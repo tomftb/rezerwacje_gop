@@ -147,7 +147,7 @@ class ManageProjectStageDatabase {
                     'subsectionrow'=>new stdClass()
                 );
             $data->{$k}->data->id=intval($v->id,10);
-            self::assignAllProperty($data->{$k},'slo_project_stage_section',$data->{$k}->data->id);
+            self::assignAllProperty($data->{$k},'slo_project_stage_subsection',$data->{$k}->data->id);
             self::getStageSubsectionRow($data->{$k}->subsectionrow,$data->{$k}->data->id);
         }
     }
@@ -162,6 +162,7 @@ class ManageProjectStageDatabase {
                     'table'=>new stdClass(),
                 );
             $data->{$k}->data->id=intval($v->id,10);
+            self::assignAllProperty($data->{$k},'slo_project_stage_subsection_row',$data->{$k}->data->id);
             self::getStageImageProperty($data->{$k}->image,'slo_project_stage_subsection_row_i',$data->{$k}->data->id);
             self::assignAllProperty($data->{$k}->list,'slo_project_stage_subsection_row_l',$data->{$k}->data->id);
             self::assignAllProperty($data->{$k}->paragraph,'slo_project_stage_subsection_row_p',$data->{$k}->data->id);
@@ -241,6 +242,7 @@ class ManageProjectStageDatabase {
             $this->data->data->id=intval($this->data->data->id,10);
             $id=self::setStage();
             $this->dbLink->commit();  //PHP 5 and new
+            return $id;
         }
         catch (PDOException $e){
             //$this->Log->log(0,$e);
@@ -249,22 +251,23 @@ class ManageProjectStageDatabase {
         }
         finally{
             //$this->queryList=[];
-            return $id;
+            //return $id;
         }
     }
     private function setStage(){
-        $this->Log->log(0,"[".__METHOD__."]\r\nID DB - ".$this->data->data->id);    
+        $this->Log->log(0,"[".__METHOD__."]\r\nID DB - ".$this->data->data->id);  
+        $lastStage=$this->data->data->id;
         /* ADD/UPDATE STAGE */
         if($this->data->data->id===0){
             $this->Log->log(0,"INSERT STAGE"); 
             /* SQL INSERT STAGE */
             self::insertStage();
             $lastStage = $this->dbLink->lastInsertId();
+            /* 
             /* SQL INSERT STAGE SECTION */
             foreach($this->data->section as $v){
                 self::insertSection($lastStage,$v);
             }
-            return $lastStage;
         }
         else{
             /* ADD TO JS NEW PAGE!!!!*/
@@ -277,8 +280,10 @@ class ManageProjectStageDatabase {
             foreach($this->data->section as $v){
                 self::manageSection($v);
             }
-            return $this->data->data->id;
         }
+        self::deleteAttributes($lastStage,'slo_project_stage');  
+        self::insertAttributes($lastStage,$this->data,'slo_project_stage');  
+        return $lastStage;
     }
     private function insertStage(){
         $this->Log->log(0,"[".__METHOD__."]");  
@@ -395,7 +400,9 @@ class ManageProjectStageDatabase {
         //self::insertAttributes($lastId,$v->property,'slo_project_stage_subsection_property');
         
         foreach($v->subsectionrow as $v){
-            self::insertSubsectionRow($lastId,$v); 
+            $IdRow=self::insertSubsectionRow($lastId,$v); 
+            self::deleteAttributes($IdRow,'slo_project_stage_subsection_row');  
+            self::insertAttributes($IdRow,$v,'slo_project_stage_subsection_row');
         }
     }
     private function insertSubsectionRow($idSubsection=0,$data=[]){
@@ -434,6 +441,7 @@ class ManageProjectStageDatabase {
         foreach($data->image as $v){
             self::insertExtendedSubsectionRowImage($IdRow,$v,'slo_project_stage_subsection_row_i');
         }
+        return $IdRow;
     }
     public function insertExtendedSubsectionRowImage($IdRow,$v,$table){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -471,6 +479,8 @@ class ManageProjectStageDatabase {
     public function insertAttributes($id=0,$data=[],$table='slo_project_stage_subsection_row_p'){
         $this->Log->log(0,"[".__METHOD__."]\r\nID - ".$id."\r\nTABLE: ".$table);
         $parm[':id']=[$id,'INT'];
+        self::checkProperty($data,'style',$table);
+        self::checkProperty($data,'property',$table);
         self::insertAttributesProperty($parm,$data->style,$table.'_style');
         self::insertAttributesProperty($parm,$data->property,$table.'_property'); 
     }
@@ -653,6 +663,7 @@ class ManageProjectStageDatabase {
             }
             $v->data->id = intval($v->data->id,10);
             $this->Log->log(0,'ID SUBSECTION ROW - '.$v->data->id);
+            $lastRow=$v->data->id;
             //$this->Log->log(0,$v);
             if($v->data->id>0){
                 /* SQL UPDATE SUB SECTION */
@@ -660,8 +671,10 @@ class ManageProjectStageDatabase {
             }
             else{
                 /* INSERT SUBSECTION [COLUMNS] */
-                self::insertSubsectionRow($idSubSection,$v);  
-            } 
+                $lastRow=self::insertSubsectionRow($idSubSection,$v);  
+            }
+            self::deleteAttributes($lastRow,'slo_project_stage_subsection_row');  
+            self::insertAttributes($lastRow,$v,'slo_project_stage_subsection_row');
         }
         /* LOOP FOR DELETE */
     }
@@ -749,5 +762,12 @@ class ManageProjectStageDatabase {
                 . "`id_parent`=:id_parent;"
                 ,array_merge([':id_parent'=>[$imageId,'INT']],$this->DatabaseUtilities->getAlterParm()));
         return true;
+    }
+    private function checkProperty($data,$property='',$table=''){
+         $this->Log->log(0,"[".__METHOD__."]");
+         if(!property_exists($data, $property)){
+            $this->Log->log(0,$data);
+            Throw New Exception('Property `'.$property.'` not exist for table - '.$table,1);
+        }
     }
 }

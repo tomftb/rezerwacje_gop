@@ -73,8 +73,9 @@ class Ajax
     }
     runXhr(fd,task)
     {
+        console.log('Ajax::runXhr()');
         var xhr=new XMLHttpRequest();
-        console.log(xhr);
+        //console.log(xhr);
         //console.log('AJAX::runXhr()'); 
         xhr.addEventListener("error",this.xhrError,false);
         xhr.addEventListener("load", this.xhrLoad, false);
@@ -85,12 +86,12 @@ class Ajax
         xhr.upload.addEventListener("progress", function (event) {
             if (event.lengthComputable) {
                 var complete = (event.loaded / event.total * 100 | 0);
-                console.log(complete);
+                //console.log(complete);
                 //$('.meter').css('width', complete + '%');
             }
         });
         xhr.open(this.type, this.link+task, true);
-        console.log(this.type,this.link+task);
+        //console.log(this.type,this.link+task);
         //xhr.open(type, this.url, true);
         //xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(fd);

@@ -693,7 +693,7 @@ class ProjectStageCreate{
             div.onclick=function(){       
                 console.log('ProjectStageCreate::addSubsectionRow() onclick()');
                 /* ADD NEW stageData subsectionrow object */
-                subsectionrow[iRow]=self.StageData.createSubsectionRow();
+                subsectionrow[iRow]=self.StageData.createSubsectionRow(iRow);
                 subsectionrow[iRow].paragraph.property.valuenewline=self.Property.subsectionRowNewLine;
                 console.log(iRow);
                 console.log(subsectionrow[iRow]);

@@ -122,12 +122,10 @@ class ProjectStageCreate{
             var form=this.Html.getForm();
             /* ASSIGN TITLE DEPARTMENT FIELD */
             this.createHead(form,this.DepartmentData.defaultDepartment);
-            /* ASSING PREVIEW FIELD */
-            form.appendChild(this.createPreview());
-            /* ASSING WORKING FIELD */
-            form.appendChild(this.createDynamicView(this.helplink));
+            /* ASSING PREVIEW FIELD, ASSING WORKING FIELD */
+            form.append(this.createPreview(),this.createDynamicView(this.helplink));
             /* ASSIGN FORM TO ADAPTED */
-            this.Modal.link['adapted'].appendChild(form);
+            this.Modal.link['adapted'].append(form);
             /* ASSING ACTION BUTTONS */
             this.createManageButton('Dodaj');
         }
@@ -209,13 +207,11 @@ class ProjectStageCreate{
                     v:this.StageData.Stage.data.departmentId
                 }
             };
-            this.createHead(form,stageDepartment);      
-             /* ASSING PREVIEW FIELD */           
-            form.appendChild(this.createPreview());  
-             /* ASSING WORKING FIELD */   
-            form.appendChild(this.createDynamicView(this.helplink));
-            /* APPEND FORM */
-            this.Modal.link['adapted'].appendChild(form);
+            this.createHead(form.stageDepartment);   //  form 
+             /* ASSING PREVIEW FIELD, ASSING WORKING FIELD */   
+            form.append(this.createPreview(),this.createDynamicView(this.helplink));
+                        /* APPEND FORM */
+            this.Modal.link['adapted'].append(form);
              /* ASSING ACTION BUTTONS */
             this.createManageButton('Zapisz');          
         }
@@ -257,7 +253,7 @@ class ProjectStageCreate{
             this.helplink['preview'].whole=mainDiv;
         return mainDiv;
     }
-    createHead(ele,department){
+    createHead(ele,department){//ele
         console.log('ProjectStageCreate::createHead()');
         var self = this;
         var stageData = this.StageData.Stage;
@@ -293,11 +289,7 @@ class ProjectStageCreate{
             titleInputDiv.appendChild(help);
         titleDiv.appendChild(titleLabelDiv);
         titleDiv.appendChild(titleInputDiv);
-
-        ele.appendChild(titleDiv);
-        ele.appendChild(titleError.ele);
-        ele.appendChild(this.setDepartment(stageData.data,department));
-        console.log(ele);
+        ele.append(titleDiv,titleError.ele,this.setDepartment(stageData.data,department));
     }
     setDepartment(stageData,defaultDepartment){
         console.log('ProjectStageCreate::setDepartment()');

@@ -346,14 +346,14 @@ class ProjectStageToolVariable{
          */
         var self =this; 
         this.Helplink.text.value.onclick = function(){
-            console.log('onclick');
+            //console.log('onclick');
            // console.log(self.Row.paragraph);
           //  console.log('chosen list:');
            // console.log(self.ChosenList);
-            console.log('SELECT START:');
-            console.log(this.selectionStart);
-            console.log('SELECT END:');
-            console.log(this.selectionEnd);
+            //console.log('SELECT START:');
+            //console.log(this.selectionStart);
+            //console.log('SELECT END:');
+            //console.log(this.selectionEnd);
             self.selectInputStart=this.selectionStart;
             self.selectInputEnd=this.selectionEnd;
           //  console.log('ALL VALUE LENGTH:');
@@ -371,8 +371,8 @@ class ProjectStageToolVariable{
         //};
         this.Helplink.text.value.onkeyup = function(){
             var KeyID = event.keyCode;
-                console.log('onkeyup - key:');
-                console.log(KeyID);
+                //console.log('onkeyup - key:');
+                //console.log(KeyID);
             switch(KeyID){
                 case 8://console.log("backspace");
                 case 46://console.log("delete");
@@ -403,19 +403,19 @@ class ProjectStageToolVariable{
                 case 121:
                 case 122:
                 case 123:
-                    console.log('RETURN TRUE');
+                    //console.log('RETURN TRUE');
                     return true;
                 default:
                     break;
             }            
-            console.log('START PARSE INPUT VALUE');
+            //console.log('START PARSE INPUT VALUE');
             self.parseInputValue(self,this.value);
         };
         this.Helplink.text.value.onblur = function(){
              var KeyID = event.keyCode;
-                console.log('onblur - key:');
+                //console.log('onblur - key:');
                 /* F1, F3, F5, F6, F7, Tab, Left Alt */
-                console.log(KeyID);
+                //console.log(KeyID);
                 /* reset selected - TURN OFF - MOVE TO ADD BUTTON NOT WORKS PROEPRTY BECAUSE IDX === -1 */
                 //console.log('RESET SELECTED IDX');
                 //self.selectInputStart=-1;

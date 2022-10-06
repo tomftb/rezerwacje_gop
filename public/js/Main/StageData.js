@@ -333,13 +333,26 @@ class StageData{
        console.log(this.Stage);
        console.log('New Stage Data:');
        console.log(NewStageData);
+       var idSection='';
+       var idSubsection='';
+
        /* UPDATE STAGE ID */
        this.updateStageId(NewStageData);
-       for(const prop in this.Stage.section){         
-            for(const prop1 in this.Stage.section[prop].subsection){             
-                for(const prop2 in this.Stage.section[prop].subsection[prop1].subsectionrow){
-                    /* UPDATE STAGE DATA IMAGE */
-                    this.updateStageDataImage(this.Stage.section[prop].subsection[prop1].subsectionrow[prop2].image,NewStageData);
+       for(const s in this.Stage.section){       
+           /* 
+            * UPDATE STAGE DATA SECTION 
+            * */
+            idSection=this.updateStageDataSection(this.Stage.section[s],s,NewStageData);
+            for(const su in this.Stage.section[s].subsection){  
+                    /* 
+                    * UPDATE STAGE DATA SUBSECTION 
+                    * */
+                idSubsection=this.updateStageDataSubsection(this.Stage.section[s].subsection[su],su,NewStageData,idSection);
+                for(const r in this.Stage.section[s].subsection[su].subsectionrow){
+                    /* 
+                    * UPDATE STAGE DATA SUBSECTION ROW
+                    * */
+                    this.updateStageDataSubsectionRow(this.Stage.section[s].subsection[su].subsectionrow[r],r,NewStageData,idSection,idSubsection);
                 }
             }
         } 
@@ -357,6 +370,7 @@ class StageData{
        }
     }
     checkStageDataId(Data,maxId){
+        //console.log('StageData.checkStageDataId()');
        if(!Data.hasOwnProperty('data')){
             console.log(Data);
             throw 'StageData.checkStageDataId()\nno `data` property';
@@ -374,32 +388,182 @@ class StageData{
            throw 'StageData.checkStageDataId()\ndata `id` lower than '+maxId;
        }
     }
-    updateStageDataId(NewStageData){
-       console.log(this.Stage.data.id);
-       console.log(typeof(this.Stage.data.id));
-       console.log(NewStageData.data.id);
-       console.log(typeof(NewStageData.data.id));
+    updateStageDataSection(Data,key,NewStageData){
+        //console.log('StageData.updateStageDataSection()');
+        let idDb=0;
+        let idSection='';
+        //console.log(NewStageData);
+        //console.log(NewStageData.section);
+        if(!NewStageData.hasOwnProperty('section')){
+            throw 'NewStageData hasn\'t `section` property';
+        }
+                for(const prop in NewStageData.section){
+                     //console.log(prop);
+                     //console.log(typeof(prop));
+                     //console.log(NewStageData.section[prop].property);
+                     //console.log(NewStageData.section[prop].property);
+                     this.checkStageDataId(NewStageData.section[prop],1);
+                     if(!NewStageData.section[prop].property.hasOwnProperty('tmpid')){
+                        throw 'New stage data section prop `'+prop+'` hasn\'t `tmpid` property';
+                        }
+                        if(NewStageData.section[prop].property.tmpid===key){
+                            idDb=NewStageData.section[prop].data.id;
+                            idSection=prop;
+                            break;
+                        }
+                }
+                if(idDb===0){
+                    throw 'NewStageData section data id property - wrong database id - '+idDb;
+                }
+                Data.data.id=idDb;
+                return idSection;
+                //console.log('ID DB - '+Data.data.id);
     }
-    updateStageDataImage(Image,NewStageData){
-        for(const prop3 in Image){
-            console.log(Image[prop3].data);
-            switch (Image[prop3].data.tmp) {
+    updateStageDataSubsection(Data,key,NewStageData,idSection){
+        //console.log('StageData.updateStageDataSubsection()');
+        //console.log(Data);
+        //console.log(key);
+        let idDb=0;
+        let idSubsection='';
+                //console.log(NewStageData);
+                //console.log(NewStageData.section);
+                //if(idSection===''){
+                 //   console.log('NO SECTION');
+                 //   return idSubsection;
+                //}
+                if(!NewStageData.section[idSection].hasOwnProperty('subsection')){
+                        throw 'NewStageData section prop `'+idSection+'` hasn\'t `subsection` property';
+                }        
+                for(const su in NewStageData.section[idSection].subsection){
+                     //console.log(su);
+                     //console.log(NewStageData.section[idSection].subsection[su]);
+                     if(NewStageData.section[idSection].subsection[su].property.tmpid===key){
+                            idDb=NewStageData.section[idSection].subsection[su].data.id;
+                            idSubsection=su;
+                            break;
+                      }
+                }
+                if(idDb===0){
+                    throw 'NewStageData subsection data id property - wrong database id - '+idDb;
+                }
+                Data.data.id=idDb;
+        return idSubsection;
+    }
+    updateStageDataSubsectionRow(Data,key,NewStageData,idSection,idSubsection){
+        //console.log('StageData.updateStageDataSubsectionRow()');
+        //console.log(Data);
+        //console.log(key);
+        let idDb=0;
+        let idRow='';
+            if(!NewStageData.section[idSection].subsection[idSubsection].hasOwnProperty('subsectionrow')){
+                throw 'New stage data subsection prop `'+idSubsection+'` hasn\'t `subsectionrow` property';
+            }  
+            for(const r in NewStageData.section[idSection].subsection[idSubsection].subsectionrow){
+                //console.log(r);
+                //console.log(NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r]);
+                if(NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r].property.tmpid===key){
+                    idDb=NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r].data.id;
+                    idRow=r;
+                    break;
+                }
+            }
+            if(idDb===0){
+                throw 'NewStageData subsectionrow data id property - wrong database id - '+idDb;
+            }
+            Data.data.id=idDb;
+            if(idRow===''){
+                //console.log('NO SUBSECTION ROW');
+                return true;
+            }
+        /* UPDATE STAGE DATA IMAGE */
+        this.updateStageDataRow(Data,NewStageData.section[idSection].subsection[idSubsection].subsectionrow[idRow]);
+    }
+    updateStageDataRow(Row,NewStageDataRow){
+        //console.log('StageData.updateStageDataSubsectionRow()');
+        //console.log('ActualStage ROW:');
+        //console.log(Row);
+        //console.log(Object.keys(Row).length);
+        //console.log('NewStageDataRow');
+        //console.log(NewStageDataRow);
+        //console.log(Object.keys(Image).length);
+        
+        if(!Row.hasOwnProperty('image')){
+            throw 'ActualStage data row hasn\'t `image` property';
+        } 
+        if(!NewStageDataRow.hasOwnProperty('image')){
+            throw 'New stage data row hasn\'t `image` property';
+        } 
+        this.updateStageDataRowImage(Row.image,NewStageDataRow);
+        
+        
+    }
+    updateStageDataRowImage(Image,NewStageDataRow){
+        //console.log('StageData.updateStageDataSubsectionRow()');
+        //console.log('ActualStage ROW Image:');
+        //console.log(Image);
+        var ImageLength=Object.keys(Image).length;
+        //console.log(ImageLength);
+        //console.log('NewStageDataRow Image:');
+        //console.log(NewStageDataRow.image);
+        var NewImageLength=Object.keys(NewStageDataRow.image).length;
+        //console.log(NewImageLength);
+
+        var ImageToRemove=new Array();
+        
+        //if(ImageLength!==NewImageLength){
+           // throw 'Row image property length != New Row property image length';
+        //}
+        if(ImageLength===0){
+            //console.log('No Row Images');
+            return true;
+        }
+        for(const key in Image){
+            //console.log(key);
+            //console.log(Image[key]);
+            let idDb=0;
+            this.checkStageDataId(Image[key],0);
+            for(const i in NewStageDataRow.image){
+                console.log(i);
+                console.log(NewStageDataRow.image[i]);
+                this.checkStageDataId(NewStageDataRow.image[i],1);
+                if(NewStageDataRow.image[i].property.tmpid===key){
+                    idDb=NewStageDataRow.image[i].data.id;
+                    break;
+                }
+            }
+            /* NOT FOUND IN RESPONSE NEW IMAGE AND NO DATA TMP===y*/
+            if(Image[key].data.tmp==='d' && idDb===0){
+                 ImageToRemove.push(key);
+                 continue;
+            }
+            if(idDb===0){
+                throw 'NewStageData row image data id property - wrong database id - '+idDb;
+            }
+            switch (Image[key].data.tmp) {
             case 'y':
-                console.log('(y) SET TMP = n, update id');
-                Image[prop3].data.tmp='n';
+                //console.log('(y) SET TMP = n, update id');
+                Image[key].data.tmp='n';
+                Image[key].data.id=idDb;
                 break;
             case 'n':
                 console.log('(n) nothing to do ');
-                //ImageToRemove[prop]=self.Image[prop];
-                //self.Image[prop].data.tmp='d';
+                Image[key].data.id=idDb;
                 break
-            case 'd':
-                console.log('(d) delete');
-                delete Image[prop3];
-                break;
             default:
-                throw 'tmp type not in (y,n,d) - '+Image[prop3].data.tmp;
+                throw 'tmp type not in (y,n) - '+Image[key].data.tmp;
            };         
+        }
+         /* SAFE REMOVE */
+        //console.log('SAFE REMOVE');
+        delete NewStageDataRow.image;
+        //console.log('Image with keys to remove');
+        //console.log(ImageToRemove);
+        //console.log('image');
+        //console.log(Image);
+        for(var i=0;i<ImageToRemove.length;i++){
+            //console.log('Remove image - '+i);
+            //console.log(Image[ImageToRemove[i]]);
+            delete Image[ImageToRemove[i]];
         }
     }
 }

@@ -721,11 +721,12 @@ class ManageProjectStageDatabase {
         array_walk($v->image,['self','updateSubSectionRowImage'],$v->data->id);
     }
     private function updateSubSectionRowImage($v,$key=0,$IdRow=0){
-        $this->Log->log(0,"[".__METHOD__."]");  
+        $this->Log->log(0,"[".__METHOD__."]\rID:");  
         $this->Log->log(0,$v->data->id);  
+        $this->Log->log(0,"[".__METHOD__."]\rTMP:");  
         $this->Log->log(0,$v->data->tmp);  
         if($v->data->id>0 && $v->data->tmp==='y'){
-            $this->Log->log(0,"UPDATE IMAGE - TO DO");      
+            $this->Log->log(0,"UPDATE IMAGE");      
             /* OLD FILE STAY FOR BACK FUNCTION IN FUTUTRE -> TO DO */
             self::deleteAttributes($v->data->id,'slo_project_stage_subsection_row_i');
             /* INSERT NEW ATTRBIUTES */
@@ -744,9 +745,12 @@ class ManageProjectStageDatabase {
             //self::deleteAttributes($v->data->id,'slo_project_stage_subsection_row_i');
             //self::insertAttributes($v->data->id,$v,'slo_project_stage_subsection_row_i');
         }
-        else{
+        else if($v->data->id===0 && $v->data->tmp==='y'){
             $this->Log->log(0,"INSERT IMAGE");
             self::insertExtendedSubsectionRowImage($IdRow,$v,'slo_project_stage_subsection_row_i');
+        }
+        else{
+           throw New Exception ('Wrong CASE: ID - '.$v->data->id.' tmp - '.$v->data->tmp,1);
         }
     }
     private function updateImageWskU($imageId=0){

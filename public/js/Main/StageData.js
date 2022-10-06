@@ -390,7 +390,7 @@ class StageData{
            throw 'StageData.checkStageDataId()\ndata `id` lower than '+maxId;
        }
     }
-    updateStageDataSection(Data,key,NewStageData){
+    updateStageDataSection(Data,idSection,NewStageData){
         //console.log('StageData.updateStageDataSection()');
             //console.log('Actual Stage');
             //console.log(Data);
@@ -400,8 +400,8 @@ class StageData{
             if(!NewStageData.hasOwnProperty('section')){
                throw 'NewStageData hasn\'t `section` property';
             }
-            if(!NewStageData.section.hasOwnProperty(key)){
-               throw 'NewStageData section hasn\'t `property` - '+key;
+            if(!NewStageData.section.hasOwnProperty(idSection)){
+               throw 'NewStageData section hasn\'t `property` - '+idSection;
             }
             //console.log('Actual Stage section:');
             //console.log(Data);
@@ -410,23 +410,29 @@ class StageData{
             //console.log(typeof(key));
             //console.log('NewStageData section');
             //console.log(NewStageData.section);   
-            this.checkStageDataId(NewStageData.section[key],1);
+            this.checkStageDataId(NewStageData.section[idSection],1);
             /* CHECK ID */
-            if(Data.data.id===NewStageData.section[key].data.id){
+            if(Data.data.id===NewStageData.section[idSection].data.id){
                 /* THE SAME - RETURN TRUE */
                 return true;
             }
             else{
                 /* NEW DB ID */
-                Data.data.id=NewStageData.section[key].data.id;
+                Data.data.id=NewStageData.section[idSection].data.id;
             }
     }
-    updateStageDataSubsection(Data,key,NewStageData,idSection){
+    updateStageDataSubsection(Data,idSubsection,NewStageData,idSection){
         console.log('StageData.updateStageDataSubsection()');
         console.log(Data);
-        console.log(key);
+        console.log(idSubsection);
         let idDb=0;
         let idSubsection='';
+            if(!NewStageData.section[idSection].hasOwnProperty('subsection')){
+               throw 'NewStageData hasn\'t `subsection` property';
+            }
+            if(!NewStageData.section[idSection].subsection.hasOwnProperty(idSubsection)){
+               throw 'NewStageData section '+idSection+' subsection hasn\'t `property` - '+idSubsection;
+            }
                 //console.log(NewStageData);
                 //console.log(NewStageData.section);
                 //if(idSection===''){

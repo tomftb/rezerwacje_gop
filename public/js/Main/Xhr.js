@@ -97,8 +97,8 @@ class Xhr2 {
     run(property){
         console.log('Xhr2::run()\r\nUID:');
         console.log(this.uid);
-        console.log('TYPE:');
-        console.log(property.t);
+        //console.log('TYPE:');
+        //console.log(property.t);
         /*
          * property:
          * t = type GET/POST 
@@ -217,15 +217,15 @@ class Xhr2 {
         }
     }
     setOnLoadEnd(f){
-        console.log('Xhr2::setOnLoadEnd()');
+        //console.log('Xhr2::setOnLoadEnd()');
         this.LoadEnd=f;
     }
     setOnLoadStart(f){
-        console.log('Xhr2::setOnLoadStart()');
+        //console.log('Xhr2::setOnLoadStart()');
         this.LoadStart=f;
     }
     setLoad(start,end){
-        console.log('Xhr2::setLoad()');
+        //console.log('Xhr2::setLoad()');
         this.setOnLoadStart(start);
         this.setOnLoadEnd(end);
     }

@@ -333,7 +333,7 @@ class StageData{
        console.log(this.Stage);
        console.log('New Stage Data:');
        console.log(NewStageData);
-       var idSubsection='';
+
 
        /* UPDATE STAGE ID */
        this.updateStageId(NewStageData);
@@ -346,15 +346,13 @@ class StageData{
                     /* 
                     * UPDATE STAGE DATA SUBSECTION 
                     * */
-                console.log('Act subsection - '+su);  
-                idSubsection=this.updateStageDataSubsection(this.Stage.section[s].subsection[su],su,NewStageData,s);
-                console.log('ID Subsection for NewStageData - '+idSubsection);
+                this.updateStageDataSubsection(this.Stage.section[s].subsection[su],su,NewStageData,s);
                 for(const r in this.Stage.section[s].subsection[su].subsectionrow){
                     /* 
                     * UPDATE STAGE DATA SUBSECTION ROW
                     * */
                     console.log('Act Row - '+r);
-                    this.updateStageDataSubsectionRow(this.Stage.section[s].subsection[su].subsectionrow[r],r,NewStageData,s,idSubsection);
+                    this.updateStageDataSubsectionRow(this.Stage.section[s].subsection[su].subsectionrow[r],r,NewStageData,s,su);
                 }
             }
         } 
@@ -414,7 +412,6 @@ class StageData{
             /* CHECK ID */
             if(Data.data.id===NewStageData.section[idSection].data.id){
                 /* THE SAME - RETURN TRUE */
-                return true;
             }
             else{
                 /* NEW DB ID */
@@ -425,47 +422,20 @@ class StageData{
         console.log('StageData.updateStageDataSubsection()');
         console.log(Data);
         console.log(idSubsection);
-        let idDb=0;
-        let idSubsection='';
             if(!NewStageData.section[idSection].hasOwnProperty('subsection')){
                throw 'NewStageData hasn\'t `subsection` property';
             }
             if(!NewStageData.section[idSection].subsection.hasOwnProperty(idSubsection)){
                throw 'NewStageData section '+idSection+' subsection hasn\'t `property` - '+idSubsection;
             }
-                //console.log(NewStageData);
-                //console.log(NewStageData.section);
-                //if(idSection===''){
-                 //   console.log('NO SECTION');
-                 //   return idSubsection;
-                //}
-                if(!NewStageData.section[idSection].hasOwnProperty('subsection')){
-                        throw 'NewStageData section prop `'+idSection+'` hasn\'t `subsection` property';
-                }        
-                for(const su in NewStageData.section[idSection].subsection){
-                     //console.log(su);
-                     //console.log(NewStageData.section[idSection].subsection[su]);
-                     /* CHECK ID */
-                    if(Data.data.id===NewStageData.section[idSection].subsection[su].data.id){
-                        /* ALREADY SETUP */
-                        idDb=Data.data.id;
-                        idSubsection=su;
-                        break;
-                    }
-                     if(!NewStageData.section[idSection].subsection[su].property.hasOwnProperty('tmpid')){
-                        throw 'New stage data section subsection prop `'+su+'` hasn\'t `tmpid` property';
-                        }
-                     if(NewStageData.section[idSection].subsection[su].property.tmpid===key){
-                            idDb=NewStageData.section[idSection].subsection[su].data.id;
-                            idSubsection=su;
-                            break;
-                      }
-                }
-                if(idDb===0){
-                    throw 'NewStageData subsection data id property - wrong database id - '+idDb;
-                }
-                Data.data.id=idDb;
-        return idSubsection;
+            this.checkStageDataId(NewStageData.section[idSection].subsection[idSubsection],1);
+            if(Data.data.id===NewStageData.section[idSection].subsection[idSubsection].data.id){
+                /* THE SAME - RETURN TRUE */
+            }
+            else{
+                /* NEW DB ID */
+                Data.data.id=NewStageData.section[idSection].subsection[idSubsection].data.id;
+            }
     }
     updateStageDataSubsectionRow(Data,key,NewStageData,idSection,idSubsection){
         console.log('StageData.updateStageDataSubsectionRow()');

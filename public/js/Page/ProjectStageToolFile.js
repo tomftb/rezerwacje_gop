@@ -98,17 +98,30 @@ class ProjectStageToolFile{
        console.log(ele);
     }
     setToolLabel(ele,image){
-        var task = ((image.data.tmp==='n')? 'getStageImage' : 'getTmpStageImage');
+       
         var label = this.Utilities.cutName(image.property.name,140);
-        var sizeInMb = Math.round((image.property.size/1048576)*100)/100;//1024 * 1024
-        var a = document.createElement('a');
-            a.setAttribute('href',window.router+task+'&file='+image.property.uri);
-            a.setAttribute('target','_blank');
-            a.setAttribute('title',label);
+        var sizeInMb = Math.round((image.property.size/1048576)*100)/100;//1024 * 1024      
+        var self=this;  
+        var s=document.createElement('span');
+            s.style.cursor='pointer';
+            s.append(document.createTextNode(label));
+            s.onmouseover=function(){
+                this.style.textDecoration='underline';
+            };
+            s.onmouseleave=function(){
+                this.style.textDecoration='';
+            };
+            s.onclick=function(){
+                console.log('ProjectStageToolFile.setToolLabel().onclick()');
+                console.log(image);
+                console.log(self.Parent.Stage.Items.router);
+                
+                let task = ((image.data.tmp==='n')? 'getStageImage' : 'getTmpStageImage');
+                window.open(self.Parent.Stage.Items.router+task+'&file='+image.property.uri,'_blank','','');
+            };
         var h = document.createElement('h6');
             h.classList.add('text-primary','mt-1','mb-0','font-weight-bold');
-            a.appendChild(document.createTextNode(label));
-            h.appendChild(a);
+            h.append(s);            
         var p = document.createElement('p');
             
             this.Html.addClass(p,['mt-0','mb-0']);

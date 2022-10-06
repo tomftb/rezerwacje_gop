@@ -207,7 +207,7 @@ class ProjectStageCreate{
                     v:this.StageData.Stage.data.departmentId
                 }
             };
-            this.createHead(form.stageDepartment);   //  form 
+            this.createHead(form,stageDepartment);   //  form 
              /* ASSING PREVIEW FIELD, ASSING WORKING FIELD */   
             form.append(this.createPreview(),this.createDynamicView(this.helplink));
                         /* APPEND FORM */

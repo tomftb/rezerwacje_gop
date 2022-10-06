@@ -347,11 +347,14 @@ class StageData{
                     /* 
                     * UPDATE STAGE DATA SUBSECTION 
                     * */
+                console.log('Act subsection - '+su);  
                 idSubsection=this.updateStageDataSubsection(this.Stage.section[s].subsection[su],su,NewStageData,idSection);
+                console.log('ID Subsection for NewStageData - '+idSubsection);
                 for(const r in this.Stage.section[s].subsection[su].subsectionrow){
                     /* 
                     * UPDATE STAGE DATA SUBSECTION ROW
                     * */
+                    console.log('Act Row - '+r);
                     this.updateStageDataSubsectionRow(this.Stage.section[s].subsection[su].subsectionrow[r],r,NewStageData,idSection,idSubsection);
                 }
             }
@@ -391,38 +394,48 @@ class StageData{
     updateStageDataSection(Data,key,NewStageData){
         //console.log('StageData.updateStageDataSection()');
         let idDb=0;
-        let idSection='';
-            //console.log(NewStageData);
-            //console.log(NewStageData.section);
+            //console.log('Actual Stage');
+            //console.log(Data);
+            //console.log('Key');
+            //console.log(key);
+            //console.log(typeof(key));
             if(!NewStageData.hasOwnProperty('section')){
-                throw 'NewStageData hasn\'t `section` property';
+               throw 'NewStageData hasn\'t `section` property';
             }
-            for(const prop in NewStageData.section){
-                //console.log(prop);
-                //console.log(typeof(prop));
-                //console.log(NewStageData.section[prop].property);
-                //console.log(NewStageData.section[prop].property);
-                this.checkStageDataId(NewStageData.section[prop],1);
-                if(!NewStageData.section[prop].property.hasOwnProperty('tmpid')){
-                    throw 'New stage data section prop `'+prop+'` hasn\'t `tmpid` property';
-                }
-                if(NewStageData.section[prop].property.tmpid===key){
-                    idDb=NewStageData.section[prop].data.id;
-                    idSection=prop;
-                    break;
-                }
+            if(!NewStageData.section.hasOwnProperty(key)){
+               throw 'NewStageData section hasn\'t `property` - '+key;
+            }
+            //console.log('Actual Stage section:');
+            //console.log(Data);
+            //console.log('Actual Stage section key:');
+            //console.log(key);
+            //console.log(typeof(key));
+            //console.log('NewStageData section');
+            //console.log(NewStageData.section);   
+            this.checkStageDataId(NewStageData.section[key],1);
+            /* CHECK ID */
+            if(Data.data.id===NewStageData.section[key].data.id){
+                /* ALREADY SETUP */
+                idDb=Data.data.id;
+                return key;
+            };
+            if(!NewStageData.section[key].property.hasOwnProperty('tmpid')){
+                throw 'New stage data section prop `'+key+'` hasn\'t `tmpid` property';
+            }
+            /* CHECK FOR NEW POSITION */
+            if(NewStageData.section[key].property.tmpid===key){
+                idDb=NewStageData.section[key].data.id;
+                return key;
             }
             if(idDb===0){
                 throw 'NewStageData section data id property - wrong database id - '+idDb;
             }
-            Data.data.id=idDb;
-            return idSection;
-            //console.log('ID DB - '+Data.data.id);
+            return key;
     }
     updateStageDataSubsection(Data,key,NewStageData,idSection){
-        //console.log('StageData.updateStageDataSubsection()');
-        //console.log(Data);
-        //console.log(key);
+        console.log('StageData.updateStageDataSubsection()');
+        console.log(Data);
+        console.log(key);
         let idDb=0;
         let idSubsection='';
                 //console.log(NewStageData);
@@ -437,6 +450,16 @@ class StageData{
                 for(const su in NewStageData.section[idSection].subsection){
                      //console.log(su);
                      //console.log(NewStageData.section[idSection].subsection[su]);
+                     /* CHECK ID */
+                    if(Data.data.id===NewStageData.section[idSection].subsection[su].data.id){
+                        /* ALREADY SETUP */
+                        idDb=Data.data.id;
+                        idSubsection=su;
+                        break;
+                    }
+                     if(!NewStageData.section[idSection].subsection[su].property.hasOwnProperty('tmpid')){
+                        throw 'New stage data section subsection prop `'+su+'` hasn\'t `tmpid` property';
+                        }
                      if(NewStageData.section[idSection].subsection[su].property.tmpid===key){
                             idDb=NewStageData.section[idSection].subsection[su].data.id;
                             idSubsection=su;
@@ -450,7 +473,7 @@ class StageData{
         return idSubsection;
     }
     updateStageDataSubsectionRow(Data,key,NewStageData,idSection,idSubsection){
-        //console.log('StageData.updateStageDataSubsectionRow()');
+        console.log('StageData.updateStageDataSubsectionRow()');
         //console.log(Data);
         //console.log(key);
         let idDb=0;
@@ -458,9 +481,22 @@ class StageData{
             if(!NewStageData.section[idSection].subsection[idSubsection].hasOwnProperty('subsectionrow')){
                 throw 'New stage data subsection prop `'+idSubsection+'` hasn\'t `subsectionrow` property';
             }  
+            console.log(NewStageData.section[idSection].subsection[idSubsection].subsectionrow);
             for(const r in NewStageData.section[idSection].subsection[idSubsection].subsectionrow){
                 //console.log(r);
                 //console.log(NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r]);
+                //console.log(NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r]);
+                /* CHECK ID */
+                
+                if(Data.data.id===NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r].data.id){
+                    /* ALREADY SETUP */
+                    idDb=Data.data.id;
+                    idRow=r;
+                    break;
+                }
+                if(!NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r].property.hasOwnProperty('tmpid')){
+                    throw 'New stage data section prop `'+r+'` hasn\'t `tmpid` property';
+                }
                 if(NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r].property.tmpid===key){
                     idDb=NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r].data.id;
                     idRow=r;
@@ -468,6 +504,18 @@ class StageData{
                 }
             }
             if(idDb===0){
+                console.log('Actual subsection row data:');
+                console.log(Data);
+                console.log('NewStageData idSection:');
+                console.log(idSection);
+                console.log('NewStageData idSubsection:');
+                console.log(idSubsection);
+                console.log('NewStageData section'+idSection+':');
+                console.log(NewStageData.section[idSection]);
+                console.log('NewStageData subsection'+idSubsection+':');
+                console.log(NewStageData.section[idSection].subsection[idSubsection]);
+                console.log('NewStageData subsection row data:');
+                console.log(NewStageData.section[idSection].subsection[idSubsection].subsectionrow);
                 throw 'NewStageData subsectionrow data id property - wrong database id - '+idDb;
             }
             Data.data.id=idDb;

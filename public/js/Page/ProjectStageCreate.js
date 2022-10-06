@@ -95,7 +95,7 @@ class ProjectStageCreate{
         try{
             this.Xhr.run({
                 t:'GET',
-                u:window.router+'getProjectVariablesSimpleList&u=0&v=0&b=0',
+                u:this.Items.router+'getProjectVariablesSimpleList&u=0&v=0&b=0',
                 c:true,
                 d:null,
                 o:this,
@@ -779,7 +779,7 @@ class ProjectStageCreate{
                     fd.append('stage',JSON.stringify(self.StageData.Stage));
                     self.Xhr.run({
                         t:'POST',
-                        u:window.router+'genProjectReportTestDoc',
+                        u:self.Items.router+'genProjectReportTestDoc',
                         c:true,
                         d:fd,
                         o:self.Items,
@@ -862,7 +862,7 @@ class ProjectStageCreate{
         if(self.ErrorStack.check()){ return false;}
         this.Xhr.run({
                 t:'POST',
-                u:window.router+'confirmProjectStageText',
+                u:this.Items.router+'confirmProjectStageText',
                 c:true,
                 d:fd,
                 o:self,

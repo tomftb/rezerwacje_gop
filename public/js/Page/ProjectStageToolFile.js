@@ -66,7 +66,7 @@ class ProjectStageToolFile{
         var label = '';
         var defaultlabel='Wskaż plik...';
          for(const prop in this.Image){       
-            this.setTool(ele,this.Image[prop]);
+            this.setTool(ele,this.Image,prop);
             label+=this.Image[prop].property.name;
          }
          label=this.Utilities.cutName(label,127);
@@ -76,29 +76,32 @@ class ProjectStageToolFile{
         console.log('ProjectStageToolFile::getToolEle()');
         return this.ToolEle;
     }
-    setTool(ele,image){
+    setTool(ele,image,prop){
         console.log('ProjectStageToolFile::setTool()');
         var ToolAll = new ToolFields([12]);
-        var ToolLabel = new ToolFields([12]);
-            this.setToolLabel(ToolLabel.get(0),image);
+        var ToolLabel = new ToolFields([11,1]);
+            this.setToolLabel(ToolLabel.get(0),image[prop]);
+            this.setToolRemove(ToolLabel.get(1),image,prop,ToolAll.getMain());
         var Tool = new ToolFields([3,3,3,3]);
             //Tool.set(0,this.Parent.getSimpleAlign(image.style,['alignment','alignmentName']));
             //Tool.set(0,this.Parent.getSimpleOrder(image.property,['order','orderName']));
             //Tool.set(0,this.Parent.getSimpleAlign(image.style,['alignment','alignmentName']));
-            Tool.set(0,this.Parent.getSimpleInputSize(image.style,['height','heightMeasurement'],'Wysokość zdjęcia:'));
-            Tool.set(1,this.Parent.getSimpleInputSize(image.style,['width','widthMeasurement'],'Szerokość zdjęcia:'));
-            Tool.set(2,this.Parent.getSimpleInputSize(image.style,['marginLeft','marginLeftMeasurement'],'Lewy margines:'));
-            Tool.set(3,this.Parent.getSimpleInputSize(image.style,['marginTop','marginTopMeasurement'],'Prawy margines:'));
+            Tool.set(0,this.Parent.getSimpleInputSize(image[prop].style,['height','heightMeasurement'],'Wysokość zdjęcia:'));
+            Tool.set(1,this.Parent.getSimpleInputSize(image[prop].style,['width','widthMeasurement'],'Szerokość zdjęcia:'));
+            Tool.set(2,this.Parent.getSimpleInputSize(image[prop].style,['marginLeft','marginLeftMeasurement'],'Lewy margines:'));
+            Tool.set(3,this.Parent.getSimpleInputSize(image[prop].style,['marginTop','marginTopMeasurement'],'Prawy margines:'));
        //ToolLabel.Main.classList.add('border','border-primary','border-bottom-0');
        //Tool.Main.classList.add('border','border-primary','border-top-0');
         ToolAll.set(0,ToolLabel.getMain());
         ToolAll.set(0,Tool.getMain());  
         ToolAll.set(0,document.createElement('hr'));
         ele.appendChild(ToolAll.getMain());
-       console.log(ele);
+        
+        console.log(ele);
     }
     setToolLabel(ele,image){
-       
+       console.log('ProjectStageToolFile.setToolLabel()');
+       console.log(ele);
         var label = this.Utilities.cutName(image.property.name,140);
         var sizeInMb = Math.round((image.property.size/1048576)*100)/100;//1024 * 1024      
         var self=this;  
@@ -129,8 +132,42 @@ class ProjectStageToolFile{
             this.Html.addClass(small,'text-muted');
             small.appendChild(document.createTextNode('size: '+sizeInMb+' MB type: '+image.property.type+' mime: '+image.property.mime+' width: '+image.style.width+'px height:'+image.style.height+'px'));
             p.appendChild(small);
-            ele.appendChild(h);
-            ele.appendChild(p);
+            ele.append(h,p);
+    }
+    setToolRemove(ele,Image,prop,eleMain){
+        //console.log('ProjectStageToolFile.setToolRemove()');
+        //console.log(ele);
+        //console.log(eleMain);
+        //console.log(image);
+        //console.log(prop);
+        this.Html.addClass(ele,['pt-1']);
+        var button=this.Html.removeButton();
+        var self=this;
+        button.onclick=function(){
+            console.log('ProjectStageToolFile.setToolRemove()');
+            console.log(Image);
+            console.log(prop);
+            console.log(ele);
+            console.log(eleMain);
+            var remove=function(Image,prop,self){
+                console.log('remove');
+                console.log(Image);
+                console.log(prop);
+                var fileList={
+                    prop:Image[prop].property.uri
+                };
+                delete Image[prop];
+                self.deleteFiles(self,fileList);
+            };
+            var setToRemove=function(image){
+                 console.log('setToRemove');
+                 image.data.tmp='d';
+            };
+            Image[prop].data.tmp==='n' ? setToRemove(Image[prop]) : remove(Image,prop,self);
+            eleMain.remove();
+        };
+        ele.append(button);
+        //eleMain.remove();
     }
     getFile(name){//inputLabel
         console.log('ProjectStageToolFile.getFile()');
@@ -297,7 +334,7 @@ class ProjectStageToolFile{
                     console.log('Image:');
                     console.log(self.Image);
                     /* DELETE TMP IMAGE FILE() */
-                    self.deleteFiles(self);
+                    self.deleteAllTmpFiles(self);
                     /* CLEAR INFO */
                     self.Html.removeChilds(self.Helplink['inputfilelabel']);
                     self.Html.removeChilds(self.Helplink['inputfileinfo']);
@@ -359,8 +396,6 @@ class ProjectStageToolFile{
             this.Helplink['inputfilemain']=mainDiv;
 
     }
-
-
     updateTmpImageProperty(response){
         console.log('ProjectStageToolFile.updateTmpImageProperty()');
         console.log(response);
@@ -380,7 +415,7 @@ class ProjectStageToolFile{
                     this.Image[prop].property['mime']=data.data.value[prop].m;
                     /* MOVE TO ACTION "DODAJ" */
                     delete this.Image[prop].dataFile;
-                    this.setTool(this.Helplink['file'],this.Image[prop]);
+                    this.setTool(this.Helplink['file'],this.Image,prop);
                     //this.setProgress();
                     this.updateProgress();
                 }
@@ -467,25 +502,33 @@ class ProjectStageToolFile{
             throw e;
           };
     }
-    deleteFiles(self){
+    deleteAllTmpFiles(self){
         try{
-            console.log('ProjectStageToolFile.deleteFiles()');       
+            console.log('ProjectStageToolFile.deleteAllTmpFiles()');       
             console.log('file list:');
-            console.log(self.Image);
-            //throw 'aaaaaa';
-         
-            var fd = new FormData();
-            var found=false;
+            console.log(self.Image);         
+            var fileList={};
             for(const prop in self.Image){
                 //console.log(self.Image[prop].property.uri);
                 if(self.Image[prop].data.tmp==='y'){
-                    fd.append(prop,self.Image[prop].property.uri); 
+                    fileList[prop]=self.Image[prop].property.uri;
                     delete self.Image[prop];
-                    found=true;
                 }
             }
-            if(found){
-                var Xhr= new Xhr2();
+            this.deleteFiles(self,fileList);
+        }
+        catch (e){
+            //console.log('ERROR:');     
+            throw e;
+        };
+    }
+    deleteFiles(self,fileList){
+        try{
+            var fd = new FormData(); 
+            for(const prop in fileList){
+                fd.append(prop,fileList[prop]); 
+            }
+            var Xhr= new Xhr2();
                     self.Parent.Stage.Items.setLoadModalInfo(Xhr); 
                     Xhr.setOnError(self.Parent.Stage.Items.modalXhrError()); 
                     Xhr.run({
@@ -496,8 +539,6 @@ class ProjectStageToolFile{
                         o:self,
                         m:'successfullyDeleted'
                     });
-            }
-            
         }
         catch (e){
             //console.log('ERROR:');     

@@ -149,6 +149,9 @@ class ProjectStageToolFile{
             console.log(prop);
             console.log(ele);
             console.log(eleMain);
+            if (confirm('Usunąć pliki?') !== true) {
+                return true;
+            };
             var remove=function(Image,prop,self){
                 console.log('remove');
                 console.log(Image);

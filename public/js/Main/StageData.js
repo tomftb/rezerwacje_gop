@@ -392,32 +392,32 @@ class StageData{
         //console.log('StageData.updateStageDataSection()');
         let idDb=0;
         let idSection='';
-        //console.log(NewStageData);
-        //console.log(NewStageData.section);
-        if(!NewStageData.hasOwnProperty('section')){
-            throw 'NewStageData hasn\'t `section` property';
-        }
-                for(const prop in NewStageData.section){
-                     //console.log(prop);
-                     //console.log(typeof(prop));
-                     //console.log(NewStageData.section[prop].property);
-                     //console.log(NewStageData.section[prop].property);
-                     this.checkStageDataId(NewStageData.section[prop],1);
-                     if(!NewStageData.section[prop].property.hasOwnProperty('tmpid')){
-                        throw 'New stage data section prop `'+prop+'` hasn\'t `tmpid` property';
-                        }
-                        if(NewStageData.section[prop].property.tmpid===key){
-                            idDb=NewStageData.section[prop].data.id;
-                            idSection=prop;
-                            break;
-                        }
+            //console.log(NewStageData);
+            //console.log(NewStageData.section);
+            if(!NewStageData.hasOwnProperty('section')){
+                throw 'NewStageData hasn\'t `section` property';
+            }
+            for(const prop in NewStageData.section){
+                //console.log(prop);
+                //console.log(typeof(prop));
+                //console.log(NewStageData.section[prop].property);
+                //console.log(NewStageData.section[prop].property);
+                this.checkStageDataId(NewStageData.section[prop],1);
+                if(!NewStageData.section[prop].property.hasOwnProperty('tmpid')){
+                    throw 'New stage data section prop `'+prop+'` hasn\'t `tmpid` property';
                 }
-                if(idDb===0){
-                    throw 'NewStageData section data id property - wrong database id - '+idDb;
+                if(NewStageData.section[prop].property.tmpid===key){
+                    idDb=NewStageData.section[prop].data.id;
+                    idSection=prop;
+                    break;
                 }
-                Data.data.id=idDb;
-                return idSection;
-                //console.log('ID DB - '+Data.data.id);
+            }
+            if(idDb===0){
+                throw 'NewStageData section data id property - wrong database id - '+idDb;
+            }
+            Data.data.id=idDb;
+            return idSection;
+            //console.log('ID DB - '+Data.data.id);
     }
     updateStageDataSubsection(Data,key,NewStageData,idSection){
         //console.log('StageData.updateStageDataSubsection()');
@@ -518,13 +518,21 @@ class StageData{
             return true;
         }
         for(const key in Image){
+            //console.log('Image:');
             //console.log(key);
+            //console.log(typeof(key));
             //console.log(Image[key]);
             let idDb=0;
             this.checkStageDataId(Image[key],0);
+            if(Image[key].data.id>0 && Image[key].data.tmp==='n'){
+                /* SKIP - NO CHANGE*/
+                continue;
+            }
             for(const i in NewStageDataRow.image){
-                console.log(i);
-                console.log(NewStageDataRow.image[i]);
+                //console.log('NewImage:');
+                //console.log(i);
+                //console.log(typeof(i));
+                //console.log(NewStageDataRow.image[i]);
                 this.checkStageDataId(NewStageDataRow.image[i],1);
                 if(NewStageDataRow.image[i].property.tmpid===key){
                     idDb=NewStageDataRow.image[i].data.id;

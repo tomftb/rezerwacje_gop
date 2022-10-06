@@ -437,59 +437,26 @@ class StageData{
                 Data.data.id=NewStageData.section[idSection].subsection[idSubsection].data.id;
             }
     }
-    updateStageDataSubsectionRow(Data,key,NewStageData,idSection,idSubsection){
+    updateStageDataSubsectionRow(Data,idRow,NewStageData,idSection,idSubsection){
         console.log('StageData.updateStageDataSubsectionRow()');
         //console.log(Data);
         //console.log(key);
-        let idDb=0;
-        let idRow='';
+
             if(!NewStageData.section[idSection].subsection[idSubsection].hasOwnProperty('subsectionrow')){
-                throw 'New stage data subsection prop `'+idSubsection+'` hasn\'t `subsectionrow` property';
-            }  
-            console.log(NewStageData.section[idSection].subsection[idSubsection].subsectionrow);
-            for(const r in NewStageData.section[idSection].subsection[idSubsection].subsectionrow){
-                //console.log(r);
-                //console.log(NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r]);
-                //console.log(NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r]);
-                /* CHECK ID */
-                
-                if(Data.data.id===NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r].data.id){
-                    /* ALREADY SETUP */
-                    idDb=Data.data.id;
-                    idRow=r;
-                    break;
-                }
-                if(!NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r].property.hasOwnProperty('tmpid')){
-                    throw 'New stage data section prop `'+r+'` hasn\'t `tmpid` property';
-                }
-                if(NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r].property.tmpid===key){
-                    idDb=NewStageData.section[idSection].subsection[idSubsection].subsectionrow[r].data.id;
-                    idRow=r;
-                    break;
-                }
+                throw 'NewStageData section '+idSection+' subsection - `'+idSubsection+'` hasn\'t `subsectionrow` property';
             }
-            if(idDb===0){
-                console.log('Actual subsection row data:');
-                console.log(Data);
-                console.log('NewStageData idSection:');
-                console.log(idSection);
-                console.log('NewStageData idSubsection:');
-                console.log(idSubsection);
-                console.log('NewStageData section'+idSection+':');
-                console.log(NewStageData.section[idSection]);
-                console.log('NewStageData subsection'+idSubsection+':');
-                console.log(NewStageData.section[idSection].subsection[idSubsection]);
-                console.log('NewStageData subsection row data:');
-                console.log(NewStageData.section[idSection].subsection[idSubsection].subsectionrow);
-                throw 'NewStageData subsectionrow data id property - wrong database id - '+idDb;
+            if(!NewStageData.section[idSection].subsection[idSubsection].subsectionrow.hasOwnProperty(idRow)){
+               throw 'NewStageData section '+idSection+' subsection -'+idSubsection+' subsectionrow hasn\'t `property` - '+idRow;
             }
-            Data.data.id=idDb;
-            if(idRow===''){
-                //console.log('NO SUBSECTION ROW');
-                return true;
+            
+            if(Data.data.id===NewStageData.section[idSection].subsection[idSubsection].subsectionrow[idRow].data.id){
+                    /* THE SAME - RETURN TRUE */
             }
-        /* UPDATE STAGE DATA IMAGE */
-        this.updateStageDataRow(Data,NewStageData.section[idSection].subsection[idSubsection].subsectionrow[idRow]);
+            else{
+               Data.data.id=NewStageData.section[idSection].subsection[idSubsection].subsectionrow[idRow].data.id;
+            }
+            /* UPDATE STAGE DATA ROW */
+            this.updateStageDataRow(Data,NewStageData.section[idSection].subsection[idSubsection].subsectionrow[idRow]);
     }
     updateStageDataRow(Row,NewStageDataRow){
         //console.log('StageData.updateStageDataSubsectionRow()');

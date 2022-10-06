@@ -471,13 +471,13 @@ class ProjectStageToolVariable{
              */
             for(var i=0;i<list.length;i++){
                 /*CHECK IN ChosenList*/
-                console.log('i - '+i);
-                console.log('variable - '+list[i]);
+                //console.log('i - '+i);
+                //console.log('variable - '+list[i]);
                 /* LOOP OVER AVAILABLE VARIABLE LIST */
                 for(const prop in self.VariableList){
                     if(list[i]===self.VariableList[prop].name){
                         //console.log(self.VariableList[prop][1]); 
-                        console.log('found variable in VariableList');
+                        //console.log('found variable in VariableList');
                         self.Row.paragraph.variable.push(self.VariableList[prop]);
                         self.VariableList[prop]['type']='zmienna';
                         self.appendListRow(self.ChosenListEle,self.VariableList[prop],vCount);
@@ -488,6 +488,6 @@ class ProjectStageToolVariable{
                 };
 
             };
-            console.log(self.Row.paragraph.variable);
+            //console.log(self.Row.paragraph.variable);
     }
 }

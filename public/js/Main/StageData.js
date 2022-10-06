@@ -392,7 +392,6 @@ class StageData{
     }
     updateStageDataSection(Data,key,NewStageData){
         //console.log('StageData.updateStageDataSection()');
-        let idDb=0;
             //console.log('Actual Stage');
             //console.log(Data);
             //console.log('Key');
@@ -414,18 +413,12 @@ class StageData{
             this.checkStageDataId(NewStageData.section[key],1);
             /* CHECK ID */
             if(Data.data.id===NewStageData.section[key].data.id){
-                /* ALREADY SETUP */
-                idDb=Data.data.id;
-            };
-            if(!NewStageData.section[key].property.hasOwnProperty('tmpid')){
-                throw 'New stage data section prop `'+key+'` hasn\'t `tmpid` property';
+                /* THE SAME - RETURN TRUE */
+                return true;
             }
-            /* CHECK FOR NEW POSITION */
-            if(NewStageData.section[key].property.tmpid===key){
-                idDb=NewStageData.section[key].data.id;
-            }
-            if(idDb===0){
-                throw 'NewStageData section data id property - wrong database id - '+idDb;
+            else{
+                /* NEW DB ID */
+                Data.data.id=NewStageData.section[key].data.id;
             }
     }
     updateStageDataSubsection(Data,key,NewStageData,idSection){

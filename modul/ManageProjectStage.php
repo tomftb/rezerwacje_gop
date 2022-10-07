@@ -109,14 +109,16 @@ class ManageProjectStage extends ManageProjectStageDatabase
         parent::hideStage();
         $this->Items->setBlock($this->data['id'],"slo_project_stage","buffer_user_id",'');
         //Throw new Exception('TEST'.__LINE__,0);
-        $this->utilities->jsonResponse('','cModal');
+        //$this->utilities->jsonResponse(self::getPro,'cModal');
+        self::getprojectsstagelike();
     }
     public function psDelete(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::setChangeState();
         parent::deleteStage();
         $this->Items->setBlock($this->data['id'],"slo_project_stage","buffer_user_id",'');
-        $this->utilities->jsonResponse('','cModal');
+        //$this->utilities->jsonResponse('','cModal');
+        self::getprojectsstagelike();
     }
     public function psCreate()
     {

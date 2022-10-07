@@ -149,7 +149,7 @@ class ProjectStageToolFile{
             console.log(prop);
             console.log(ele);
             console.log(eleMain);
-            if (confirm('Usunąć pliki?') !== true) {
+            if (confirm('Usunąć plik?') !== true) {
                 return true;
             };
             var remove=function(Image,prop,self){

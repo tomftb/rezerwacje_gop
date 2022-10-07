@@ -243,10 +243,9 @@ class Table
     /* NEW - 15.03.2022 */
     getData(o,m,task){ 
         console.log('ProjectStageTable::getData()');
-        /*
-         * o - object to run
-         * m - method to run
-         */
+        console.log(o);
+        console.log(m);
+        console.log(task);
         /*
          * property:
          * t = type GET/POST 

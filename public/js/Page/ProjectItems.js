@@ -431,11 +431,11 @@ class ProjectItems{
             /* CLOSURE */
             confirmButton.onclick = function () {  
                 console.log('ProjectItems::setChangeDataState() onclick()');
-                console.log('id:');
+                console.log('id data:');
                 console.log(i);
-                console.log('title');
+                console.log('modal title');
                 console.log(t);
-                console.log('function:');
+                console.log('function to execute :');
                 console.log(f);
                 console.log('glossary:');
                 console.log(g);
@@ -443,7 +443,7 @@ class ProjectItems{
                 console.log(o);
                 console.log('method to run:');
                 console.log(m);
-                console.log('method task:');
+                console.log('method cancel task:');
                 console.log(ta);
 
                 const fd = new FormData(form);
@@ -469,6 +469,7 @@ class ProjectItems{
         this.Modal.link['button'].appendChild(this.getCancelButton(o,m,ta));//this.default.object,this.default.method,this.default.task+i
         this.Modal.link['button'].appendChild(confirmButton);
     }
+    
     closeModal(){
         console.log('ProjectItems::closeModal()');
         window.onbeforeunload = null;

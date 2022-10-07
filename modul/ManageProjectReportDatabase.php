@@ -9,7 +9,7 @@ class ManageProjectReportDatabase{
     private $stageValueDbId=0;
     private $idProject=0;
     private $Report;
-    private $DatabaseUtilities;
+    protected $DatabaseUtilities;
     private $StageDatabase;
     
     protected function __construct(){

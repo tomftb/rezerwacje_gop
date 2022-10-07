@@ -37,7 +37,7 @@ class ProjectStageTable{
         1:'t'
     };
     constructor(Parent){
-        console.log('ProjectConst::construct()');  
+        console.log('ProjectStageTable.construct()');  
         this.Parent=Parent;
         this.Table=Parent.Items.Table;
         this.Xhr=Parent.Items.Xhr;
@@ -50,7 +50,9 @@ class ProjectStageTable{
         console.log(appUrl);
         console.log(url);
     }
-    run (task){
+    run(task){
+        console.log('ProjectStageTable.run()\ntask');
+        console.log(task);
         this.Table.unsetError();
         this.defaultTask=task;
          /* CLEAR TABLE */

@@ -68,7 +68,7 @@ class ProjectItems{
             };
     }
     setUpParameters(){
-        console.log('ProjectItems::setUpParameters()'); 
+        //console.log('ProjectItems::setUpParameters()'); 
         /* TO DO -> EXTEND FOR ALL GLOSSARY */
         this.Xhr.run(this.getXhrParm('GET','getNewStageDefaults&type=tx','setUpGlossary'));
     }
@@ -85,7 +85,7 @@ class ProjectItems{
         this.Stage.show();
     }
     setUrl(appurl,url){
-        console.log('ProjectItems::setUrl()'); 
+        //console.log('ProjectItems::setUrl()'); 
         this.router=url;
         this.appurl=appurl; 
     }
@@ -102,7 +102,7 @@ class ProjectItems{
         return false;
     }
     checkResponseError(ele,jsonResponse){
-        console.log('ProjectItems::checkResponseError()');
+        //console.log('ProjectItems::checkResponseError()');
         /*
          * ele -> link to html element
          * jsonResponse -> response data from backend
@@ -126,15 +126,11 @@ class ProjectItems{
         ProjectItems.Html.hideAndClearField(ele);
     }
 
-    setChangeStateFields(ele,sloData)
-    { 
-        console.log('ProjectItems::setChangeStateFields()');
-       
-        
+    setChangeStateFields(ele,sloData){ 
+        //console.log('ProjectItems::setChangeStateFields()');
         var p=document.createElement('P');
             p.setAttribute('class','text-left');
             p.innerText='Podaj Powód:';
-            
         var extraSelect=document.createElement('INPUT');
             extraSelect.setAttribute('type','text');
             extraSelect.setAttribute('id','extra');
@@ -142,7 +138,6 @@ class ProjectItems{
             extraSelect.setAttribute('class','form-control mb-1');
             extraSelect.setAttribute('PLACEHOLDER','Wprowadź powód');
             extraSelect.style.display = "none";
-            
             sloData.push({
                             'ID' : "0",
                             'Nazwa' : 'Inny:'
@@ -158,7 +153,7 @@ class ProjectItems{
         return '';
     }
     checkReason(t,id){
-        console.log('ProjectItems::checkReason()');
+        //console.log('ProjectItems::checkReason()');
         var splitValue=t.value.split("|");
         if(splitValue[0]==='0'){
             document.getElementById(id).style.display = "block";
@@ -168,7 +163,7 @@ class ProjectItems{
         };
     }
     setDefaultModal(){
-        console.log('ProjectItems::setDefaultModal()');
+        //console.log('ProjectItems::setDefaultModal()');
         try{
             ProjectItems.Modal.setLink();
             ProjectItems.Modal.clearData();
@@ -181,7 +176,7 @@ class ProjectItems{
         }
     }
     prepareModal(title,titleClass){
-        console.log('ProjectItems::prepareModal()');
+        //console.log('ProjectItems::prepareModal()');
         //this.Modal.setLink();
         var self= this;
         var f5 = function (e){
@@ -224,7 +219,7 @@ class ProjectItems{
         this.Modal.link['close'].parentNode.removeAttribute('data-dismiss');
     }
     setCloseModal(run){//classToRun,methodToRun,taskToRun,
-        console.log('ProjectItems::setCloseModal()');
+        //console.log('ProjectItems::setCloseModal()');
         /* SET CLOSE ACTION BUTTON */
         //var Items=this;
         /* CLOSURE */
@@ -288,7 +283,7 @@ class ProjectItems{
         this.Xhr.run(xhrRun);
     }
     setProperties(){
-        console.log('ProjectItems::setProperties()');
+        //console.log('ProjectItems::setProperties()');
         try{
             ProjectItems.Xhr.load=document.getElementById('appLoadNotify');
         }
@@ -298,7 +293,7 @@ class ProjectItems{
         }
     }
     getCancelButton(classToRun,methodToRun,taskToRun){
-        /**/
+        /*
         console.log('ProjectItems::getCancelButton()');
         console.log('Oboject:');
         console.log(classToRun);
@@ -306,7 +301,7 @@ class ProjectItems{
         console.log(methodToRun);
         console.log('Task:');
         console.log(taskToRun);
-        
+        */
         var cancel=this.Html.cancelButton('Anuluj');
         var self = this;
             cancel.onclick=function(){
@@ -346,7 +341,7 @@ class ProjectItems{
         }
     }
     setLoadInfo(){
-        console.log('ProjectItems::setLoadInfo()');
+        //console.log('ProjectItems::setLoadInfo()');
         var start = function(){
                     var g = document.getElementById('appLoadNotify');
                     g.classList.remove("d-none");
@@ -361,7 +356,7 @@ class ProjectItems{
         this.Xhr.setOnLoadEnd(end);
     }
     setLoadModalInfo(Xhr){
-        console.log('ProjectItems::setLoadModalInfo()');
+        //console.log('ProjectItems::setLoadModalInfo()');
         var M = this.Modal;
             M.loadNotify='<img src="'+window.appUrl+'/img/loading_60_60.gif" alt="load_gif">';
         var start = function(){
@@ -374,7 +369,7 @@ class ProjectItems{
         Xhr.setOnLoadEnd(end);
     }
     parseResponse(response){
-        console.log('ProjectItems::parseResponse()');
+        //console.log('ProjectItems::parseResponse()');
         try {
             var data = JSON.parse(response);  
         }
@@ -389,7 +384,7 @@ class ProjectItems{
         }
        
         if (!('status' in data) || !('info' in data)){
-            console.log(data);
+            //console.log(data);
             this.ErrorStack.add('main','Application error occurred! Contact with Administrator!');
             throw 'Application error occurred! Contact with Administrator!';
         }
@@ -404,8 +399,8 @@ class ProjectItems{
         return data;
     }
     setChangeDataState(i,t,f,g,btnLabel,titleClass,o,m,ta){
-        console.log('ProjectItems::setChangeDataState()');
-        console.log(i);
+        //console.log('ProjectItems::setChangeDataState()');
+        //console.log(i);
         /*
             i - id
             t - tile
@@ -430,6 +425,7 @@ class ProjectItems{
         var confirmButton=this.Html.confirmButton(btnLabel,'btn btn-'+titleClass,f);   
             /* CLOSURE */
             confirmButton.onclick = function () {  
+                /*
                 console.log('ProjectItems::setChangeDataState() onclick()');
                 console.log('id data:');
                 console.log(i);
@@ -445,7 +441,7 @@ class ProjectItems{
                 console.log(m);
                 console.log('method cancel task:');
                 console.log(ta);
-
+                */
                 const fd = new FormData(form);
                 var xhrRun={
                     t:'POST',
@@ -460,7 +456,7 @@ class ProjectItems{
                 //    m:'setModalResponse'
                 //};
                 if(confirm('Potwierdź wykonanie akcji')){   
-                    console.log(xhrRun);
+                    //console.log(xhrRun);
                     //Items.Xhr2.setOnError(xhrError);
                     self.Xhr2.run(xhrRun);
                 };
@@ -508,7 +504,7 @@ class ProjectItems{
         return false;
     }
     setFieldResponse(response){
-        console.log('ProjectItems::setFieldResponse()');
+        //console.log('ProjectItems::setFieldResponse()');
         try {
             return this.parseResponse(response);
             /* TO DO -> set value to field if ok */
@@ -546,7 +542,7 @@ class ProjectItems{
         return data;
     }
     modalXhrError(){
-        console.log('ProjectItems::modalXhrError()');
+        //console.log('ProjectItems::modalXhrError()');
          var xhrError={
             o:this,
             m:'setModalError'

@@ -116,6 +116,8 @@ final class UrlManager{
         ['uploadTmpStageImage','LOG_INTO_STAGE'],
         ['deleteStageImage','LOG_INTO_STAGE'],
         ['deleteTmpStageImage','LOG_INTO_STAGE'],
+        ['replaceTmpStageImage','LOG_INTO_STAGE'],
+        ['replaceTmpStageDbImage','LOG_INTO_STAGE'],
         ['getTmpStageImage','LOG_INTO_STAGE'],
         ['getStageImage','LOG_INTO_STAGE'],
         ['getProjectVariablesLike','LOG_INTO_STAGE'],

@@ -478,8 +478,11 @@ class ManageProjectStage extends ManageProjectStageDatabase
     }
     public function uploadTmpStageImage(){
         $this->Log->log(0,"[".__METHOD__."]"); 
+        $this->utilities->jsonResponse(self::uploadImage(TMP_UPLOAD_DIR),'');           
+    }
+    private function uploadImage($DIR=''){
         $File = New FileImage();
-        $File->setUploadDir(TMP_UPLOAD_DIR);
+        $File->setUploadDir($DIR);
         $File->setMaxFileSize(20971520);
         $File->setAcceptedFileExtension(array(
                         'image/bmp',
@@ -493,13 +496,30 @@ class ManageProjectStage extends ManageProjectStageDatabase
             $this->Log->log(0,"[".__METHOD__."] ERROR EXISTS"); 
             Throw New Exception ($Error,0);
         }
-        $this->utilities->jsonResponse($File->getImage(),'');           
+        return $File->getImage();
+    }
+    public function replaceTmpStageImage(){
+         $this->Log->log(0,"[".__METHOD__."]"); 
+         self::deleteImage(TMP_UPLOAD_DIR);
+         self::uploadTmpStageImage();
+         //$this->utilities->jsonResponse('ok',''); 
+    }
+    public function replaceTmpStageDbImage(){
+        $this->Log->log(0,"[".__METHOD__."]"); 
+        $data['old']=filter_input(INPUT_POST,'old');
+        if(is_null($data['old'])){
+            Throw New Exception ('Wrong value for key in post',0); 
+        }
+        $data['new']=self::uploadImage(TMP_UPLOAD_DIR);
+        $this->utilities->jsonResponse($data,'');     
     }
     public function deleteStageImage(){
         self::deleteImage(UPLOAD_DIR);
+        $this->utilities->jsonResponse('',''); 
     }
     public function deleteTmpStageImage(){
         self::deleteImage(TMP_UPLOAD_DIR);
+        $this->utilities->jsonResponse('',''); 
     }
     private function deleteImage($dir=''){
         $this->Log->log(0,"[".__METHOD__."]"); 
@@ -509,7 +529,6 @@ class ManageProjectStage extends ManageProjectStageDatabase
             Throw New Exception (__METHOD__.' No File to remove',1); 
         }
         array_walk($POST,['File','deleteFile'],$dir);
-        $this->utilities->jsonResponse('',''); 
     }
     public function getTmpStageImage(){
         $this->Log->log(0,"[".__METHOD__."]");        

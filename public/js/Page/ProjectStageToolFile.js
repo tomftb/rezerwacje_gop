@@ -731,7 +731,7 @@ class ProjectStageToolFile{
     }
 
     getNewImageProperty(){
-        console.log('ProjectStageToolFile.getNewImageProperty()');
+        //console.log('ProjectStageToolFile.getNewImageProperty()');
         return {
             data:{
                 id:0,
@@ -759,7 +759,7 @@ class ProjectStageToolFile{
             };
     }
     setNewImageProperty(image,uid,file){
-        console.log('ProjectStageToolFile.setNewImageProperty()');
+        //console.log('ProjectStageToolFile.setNewImageProperty()');
         image.property={
             lastModified:file.lastModified,
                  lastModifiedDate:file.lastModifiedDate,
@@ -798,8 +798,8 @@ class ProjectStageToolFile{
                         );
     }
     updateReplacedFile(response){
-        console.log('ProjectStageToolFile.updateReplacedFile()');
-        console.log(response);
+        //console.log('ProjectStageToolFile.updateReplacedFile()');
+        //console.log(response);
         var errField=false;
         var actprop='';
         var errInfo='Update image file failed! Contact with Administrator!';
@@ -816,9 +816,9 @@ class ProjectStageToolFile{
         }
           try{
             var json = this.Parent.Stage.Items.parseResponse(response);
-            console.log(json.data.value);
-            console.log(this.Helplink.file);
-            console.log(this.Image);
+            //console.log(json.data.value);
+            //console.log(this.Helplink.file);
+            //console.log(this.Image);
             
             for(const prop in json.data.value){
                 console.log(prop);
@@ -927,8 +927,8 @@ class ProjectStageToolFile{
         };
     }
     updateDbImageProperty(jsonValue){
-        console.log('ProjectStageToolFile::updateImageProperty()');
-        console.log(jsonValue);
+        //console.log('ProjectStageToolFile::updateImageProperty()');
+        //console.log(jsonValue);
         /* MOVE OLD TO NEW IMAGE PROEPRTY
          * db and tmp property
          */
@@ -938,12 +938,12 @@ class ProjectStageToolFile{
                     tmp:'d'
                 }
             };
-        console.log(this.Image);
+        //console.log(this.Image);
         /* UPDATE CURRENT */
         this.updateChosenImageProperty(jsonValue.old,jsonValue.new.new);
     }
     updateImageHelplink(prop){
-        console.log('ProjectStageToolFile::updateImageHelplink()');
+        //console.log('ProjectStageToolFile::updateImageHelplink()');
         /* UPDATE DOM */
         this.Html.removeChilds(this.Helplink.file[prop].name);
         this.Helplink.file[prop].name.append(this.getImageHref(this,this.Image[prop]));   
@@ -952,11 +952,13 @@ class ProjectStageToolFile{
     }
     updateChosenImageProperty(prop,jsonValue){
         /* SET IMAGE PROEPRTY FROM BACK-END */
+        this.Image[prop].data.id=0;
         this.Image[prop].data.tmp='y';
         this.Image[prop].property.height=jsonValue.h;
         this.Image[prop].property.width=jsonValue.w;
         this.Image[prop].property.mime=jsonValue.m;
         this.Image[prop].property.uri=jsonValue.n;
+        this.Image[prop].property.tmpid=prop;
         /* GET AND SET IMAGE PROPERTY FROM INPUT */
         this.Image[prop].property.lastModified=this.Helplink.file[prop].input.files[0].lastModified;
         this.Image[prop].property.lastModifiedDate=this.Helplink.file[prop].input.files[0].lastModifiedDate;

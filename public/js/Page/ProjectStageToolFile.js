@@ -14,10 +14,12 @@ class ProjectStageToolFile{
         progress:new Object(),
         progressbar:new Object(),
         progresscomplete:new Object(),
+        allfile:new Object(),
         inputfile:new Object(),
         inputfilelabel:new Object(),
         inputfileinfo:new Object(),
-        inputfilemain:new Object()
+        inputfilemain:new Object(),
+        file:new Object()
     };
     fileUpload=0;
     fileSelected=0;
@@ -57,7 +59,7 @@ class ProjectStageToolFile{
           
                 mainDivCol.appendChild(Tool.getMain());
                 mainDivCol.appendChild(Tool1.getMain());
-                this.Helplink['file']=Tool1.getMain().childNodes[0];
+                this.Helplink['allfile']=Tool1.getMain().childNodes[0];
                 this.ToolEle=mainDivCol;
     }
     assignImage(ele){
@@ -65,9 +67,9 @@ class ProjectStageToolFile{
         console.log(ele);
         var label = '';
         var defaultlabel='Wskaż plik...';
-         for(const prop in this.Image){       
-            this.setTool(ele,this.Image,prop);
-            label+=this.Image[prop].property.name;
+            for(const prop in this.Image){       
+                this.setTool(ele,this.Image,prop,this.Helplink.file);
+                label+=this.Image[prop].property.name;
          }
          label=this.Utilities.cutName(label,127);
          return (label==='')? defaultlabel : label;
@@ -76,20 +78,36 @@ class ProjectStageToolFile{
         console.log('ProjectStageToolFile::getToolEle()');
         return this.ToolEle;
     }
-    setTool(ele,image,prop){
+    setTool(ele,image,prop,HelplinkFile){
         console.log('ProjectStageToolFile::setTool()');
+        
+        HelplinkFile[prop]={
+                name:new Object(),
+                size:new Object(),
+                input:new Object(),
+                //inputlabel:new Object(),
+                //progress:new Object(),
+                info:new Object(),
+                height:this.Parent.getSimpleInputSize(image[prop].style,['height','heightMeasurement'],'Wysokość zdjęcia:'),
+                width:this.Parent.getSimpleInputSize(image[prop].style,['width','widthMeasurement'],'Szerokość zdjęcia:'),
+                leftmargin:this.Parent.getSimpleInputSize(image[prop].style,['marginLeft','marginLeftMeasurement'],'Lewy margines:'),
+                rightmargin:this.Parent.getSimpleInputSize(image[prop].style,['marginTop','marginTopMeasurement'],'Prawy margines:')
+            };
         var ToolAll = new ToolFields([12]);
-        var ToolLabel = new ToolFields([11,1]);
-            this.setToolLabel(ToolLabel.get(0),image[prop]);
-            this.setToolRemove(ToolLabel.get(1),image,prop,ToolAll.getMain());
+        var ToolLabel = new ToolFields([7,4,1]);
+            this.setToolLabel(ToolLabel.get(0),image,prop,HelplinkFile);
+            this.setToolChange(ToolLabel.get(1),image,prop,ToolAll.getMain(),HelplinkFile);
+            this.setToolRemove(ToolLabel.get(2),image,prop,ToolAll.getMain(),HelplinkFile);
         var Tool = new ToolFields([3,3,3,3]);
             //Tool.set(0,this.Parent.getSimpleAlign(image.style,['alignment','alignmentName']));
             //Tool.set(0,this.Parent.getSimpleOrder(image.property,['order','orderName']));
             //Tool.set(0,this.Parent.getSimpleAlign(image.style,['alignment','alignmentName']));
-            Tool.set(0,this.Parent.getSimpleInputSize(image[prop].style,['height','heightMeasurement'],'Wysokość zdjęcia:'));
-            Tool.set(1,this.Parent.getSimpleInputSize(image[prop].style,['width','widthMeasurement'],'Szerokość zdjęcia:'));
-            Tool.set(2,this.Parent.getSimpleInputSize(image[prop].style,['marginLeft','marginLeftMeasurement'],'Lewy margines:'));
-            Tool.set(3,this.Parent.getSimpleInputSize(image[prop].style,['marginTop','marginTopMeasurement'],'Prawy margines:'));
+            //this.Helplink.file[prop]={};
+            
+            Tool.set(0,HelplinkFile[prop].height);
+            Tool.set(1,HelplinkFile[prop].width);
+            Tool.set(2,HelplinkFile[prop].leftmargin);
+            Tool.set(3,HelplinkFile[prop].rightmargin);
        //ToolLabel.Main.classList.add('border','border-primary','border-bottom-0');
        //Tool.Main.classList.add('border','border-primary','border-top-0');
         ToolAll.set(0,ToolLabel.getMain());
@@ -99,12 +117,29 @@ class ProjectStageToolFile{
         
         console.log(ele);
     }
-    setToolLabel(ele,image){
+    setToolLabel(ele,image,prop,HelplinkFile){
        console.log('ProjectStageToolFile.setToolLabel()');
        console.log(ele);
-        var label = this.Utilities.cutName(image.property.name,140);
-        var sizeInMb = Math.round((image.property.size/1048576)*100)/100;//1024 * 1024      
         var self=this;  
+        var h = document.createElement('h6');
+            h.classList.add('text-primary','mt-1','mb-0','font-weight-bold');
+            h.append(this.getImageHref(self,image[prop]));     
+        var p = document.createElement('p');
+            this.Html.addClass(p,['mt-0','mb-0']);
+        var small = document.createElement('small');
+            this.Html.addClass(small,'text-muted');
+            small.appendChild(this.getImagePropertyInfo(image[prop]));
+            p.appendChild(small);
+            ele.append(h,p);
+            HelplinkFile[prop].name=h;
+            HelplinkFile[prop].size=small;
+    }
+    getImagePropertyInfo(ImageProp){
+         var sizeInMb = Math.round((ImageProp.property.size/1048576)*100)/100;//1024 * 1024   
+         return document.createTextNode('size: '+sizeInMb+' MB type: '+ImageProp.property.type+' mime: '+ImageProp.property.mime+' width: '+ImageProp.property.width+'px height:'+ImageProp.property.height+'px');
+    }
+    getImageHref(self,imageProp){
+        var label = this.Utilities.cutName(imageProp.property.name,140);
         var s=document.createElement('span');
             s.style.cursor='pointer';
             s.append(document.createTextNode(label));
@@ -116,61 +151,156 @@ class ProjectStageToolFile{
             };
             s.onclick=function(){
                 console.log('ProjectStageToolFile.setToolLabel().onclick()');
-                console.log(image);
+                console.log(imageProp);
                 console.log(self.Parent.Stage.Items.router);
                 
-                let task = ((image.data.tmp==='n')? 'getStageImage' : 'getTmpStageImage');
-                window.open(self.Parent.Stage.Items.router+task+'&file='+image.property.uri,'_blank','','');
+                let task = ((imageProp.data.tmp==='n')? 'getStageImage' : 'getTmpStageImage');
+                window.open(self.Parent.Stage.Items.router+task+'&file='+imageProp.property.uri,'_blank','','');
             };
-        var h = document.createElement('h6');
-            h.classList.add('text-primary','mt-1','mb-0','font-weight-bold');
-            h.append(s);            
-        var p = document.createElement('p');
-            
-            this.Html.addClass(p,['mt-0','mb-0']);
-        var small = document.createElement('small');
-            this.Html.addClass(small,'text-muted');
-            small.appendChild(document.createTextNode('size: '+sizeInMb+' MB type: '+image.property.type+' mime: '+image.property.mime+' width: '+image.style.width+'px height:'+image.style.height+'px'));
-            p.appendChild(small);
-            ele.append(h,p);
+            return s;
     }
-    setToolRemove(ele,Image,prop,eleMain){
+    setToolRemove(ele,Image,prop,eleMain,HelplinkFile){
         //console.log('ProjectStageToolFile.setToolRemove()');
         //console.log(ele);
         //console.log(eleMain);
         //console.log(image);
         //console.log(prop);
-        this.Html.addClass(ele,['pt-1']);
+        this.Html.addClass(ele,['pt-1','bg-primary']);
         var button=this.Html.removeButton();
         var self=this;
         button.onclick=function(){
-            console.log('ProjectStageToolFile.setToolRemove()');
-            console.log(Image);
-            console.log(prop);
-            console.log(ele);
-            console.log(eleMain);
+            //console.log('ProjectStageToolFile.setToolRemove()');
+            //console.log(Image);
+            //console.log(prop);
+            //console.log(ele);
+            //console.log(eleMain);
             if (confirm('Usunąć plik?') !== true) {
                 return true;
             };
             var remove=function(Image,prop,self){
-                console.log('remove');
-                console.log(Image);
-                console.log(prop);
+                //console.log('remove');
+                //console.log(Image);
+                //console.log(prop);
                 var fileList={
                     prop:Image[prop].property.uri
                 };
                 delete Image[prop];
-                self.deleteFiles(self,fileList);
+                
+                self.deleteFiles(fileList,self.Parent.Stage.Items,'successfully');
             };
             var setToRemove=function(image){
-                 console.log('setToRemove');
+                 //console.log('setToRemove');
                  image.data.tmp='d';
+                 
             };
-            Image[prop].data.tmp==='n' ? setToRemove(Image[prop]) : remove(Image,prop,self);
-            eleMain.remove();
+            Image[prop].data.tmp==='n' ? setToRemove(Image[prop],HelplinkFile) : remove(Image,prop,self,HelplinkFile);
+            delete HelplinkFile[prop];
+            eleMain.remove();   
         };
         ele.append(button);
         //eleMain.remove();
+    }
+    setToolChange(ele,Image,prop,eleMain,HelplinkFile){
+        //var mainLabel = this.Parent.Tool.createLabel('Wskaż plik:');  
+        this.Html.addClass(ele,['pt-1','bg-primary','rounded-left']);
+        var inputDiv = document.createElement('div');
+            inputDiv.classList.add('row','pl-2');//'custom-file','row''custom-file',
+        var inputDivFile = document.createElement('div');
+            inputDivFile.classList.add('custom-file');//'custom-file','row''custom-file',   
+        var input = document.createElement('input');
+            input.classList.add('custom-file-input');//,'form-control-file','form-control-sm'
+            input.setAttribute('type','file');
+            input.setAttribute('name',this.getUid('new'));
+        var label = document.createElement('label');
+            label.classList.add('custom-file-label','text-primary');//,'border','border-danger','border-1'
+            input.setAttribute('for','validatedCustomFile');
+            label.appendChild(document.createTextNode('Zamień...'));
+        var divInfoRow=this.Html.getRow();
+            divInfoRow.classList.add('pl-2');//'custom-file','row''custom-file',
+        var divInfo = document.createElement('div');
+            divInfo.classList.add('col-12','alert','alert-danger','d-none');//'text-danger','d-none'
+            //divInfo.append(document.createTextNode('aaaa'));
+        var divProgress = document.createElement('div');
+            divProgress.classList.add('pl-2','row');//'text-danger','d-none'
+            //divProgress.append(document.createTextNode('bbb'));
+            //divInfo.style.display='none';
+        var self=this;
+            input.onchange = function(){
+                //console.log(ele);
+                //console.log(eleMain);
+                //console.log(Image[prop]);
+                //console.log(prop);
+                //console.log(HelplinkFile[prop]);
+                let t=this;
+
+
+
+                let checkImage=function(self,files){
+                     console.log('setToolChange.onchange().checkImage()');
+                     console.log(files);
+                     /* CLEAR NAMES */
+                     self.Html.removeChilds(label);
+                    
+                     let error='';
+                     let space='';
+                     let size=0;
+                     let type='';
+                     let name='';
+                     /* ONLY ONE */
+                     for (let i = 0; i <files.length;i++) {
+                            size=files.item(i).size;
+                            type=files.item(i).type;
+                            //console.log(files.item(i).name);
+                            if(size>self.getMaxImageSize()){
+                                error+='size limit exceeded → '+size;
+                                space="<br/>";
+                            }
+                            if(!self.getAcceptedImageExtensions().includes(type,0)){
+                                error+=space+'not allowed type → '+type;
+                            }
+                            name=self.Utilities.cutName(t.files.item(i).name,34);
+                            label.append(document.createTextNode(name));
+                         };
+                         if(error!==''){
+                             throw error;
+                         }
+                         
+                };
+                
+                let removeError=function(){
+                     self.Html.addClass(divInfo,['d-none']);
+                     self.Html.removeChilds(divInfo);
+                };
+                if (confirm('Zastąpić pliki?') !== true) {
+                            return true;
+                        }
+                 if(this.files.length===0){
+                     return true;
+                 }
+                 try{
+                    removeError();
+                    checkImage(self,this.files);
+                    //HelplinkFile[prop]['inputlabel'].append(document.createTextNode(this.files));
+                    //self.Html.removeClass(self.Helplink['inputlabel'],['border-success','border-danger']);
+                    Image[prop].data.tmp==='n' ? self.replaceDbFile(self,prop,t.files[0]) : self.replaceTmpFile(self,Image[prop].property.uri,prop,t.files[0]);//Image,prop,self,HelplinkFile
+                    //HelplinkFile[prop]['inputlabel'].appendChild(document.createTextNode('Nie wskazano pliku...'));
+                 }
+                 catch(e){
+                    console.log(e);
+                    self.setImageFieldError(self,prop,e);
+                    return false;
+                 };
+            };
+            divInfoRow.append(divInfo);
+            inputDivFile.append(input,label);
+            inputDiv.append(inputDivFile);
+            ele.append(inputDiv,divInfoRow,divProgress);
+            HelplinkFile[prop].input=input;
+            HelplinkFile[prop].inputlabel=label;
+            HelplinkFile[prop].info=divInfo;
+            //HelplinkFile[prop].progress=divProgress;
+            console.log(ele.parentNode);
+            
     }
     getFile(name){//inputLabel
         console.log('ProjectStageToolFile.getFile()');
@@ -179,7 +309,7 @@ class ProjectStageToolFile{
          * ele - reference for example helplink
          */  
         
-        //image.property.uid=(new Date()).getTime(); 
+
             this.setFileEle(); 
             var self = this;
             /* CLOSURE */
@@ -225,15 +355,9 @@ class ProjectStageToolFile{
                         let infoClass='';
                         let namesList='';
                         let space='';
-                        self.fileSelected=t.files.length;
-                        /* IN bytes */
-                        //let size=0;
-                        let maxSize =20971520;/* MAX DEFAULT 20 Mb - SIZE, not size on hard drive */
-                        let type=new Array(
-                            'image/bmp',
-                            'image/jpeg',
-                            'image/png'
-                        );
+                            self.fileSelected=t.files.length;
+                        let maxSize =self.getMaxImageSize();
+                        let type=self.getAcceptedImageExtensions();
                         if(self.fileSelected===0){
                             console.log('no files');
                             self.Helplink['inputfilelabel'].appendChild(document.createTextNode('Nie wskazano pliku...'));
@@ -246,10 +370,8 @@ class ProjectStageToolFile{
                         console.log(self.fileSelected);
                        
                         for (let i = 0; i < self.fileSelected; i++) {
-                            //let uid=(new Date()).getTime();
-                            //+(new Date()).getMilliseconds();//(new Date()).getTime()+
-                            //let uid = Math.random();
-                            let uid = 'new'+(Math.floor(Math.random() * 10000000)).toString();
+                            
+                            let uid = self.getUid('new');
                             /* SET DEFAULT */
                             infoClass='text-success';
                             errorValue='';
@@ -309,8 +431,7 @@ class ProjectStageToolFile{
                            self.Html.addClass(self.Helplink['inputfilelabel'],['border-success']);
                            self.Html.addClass(self.Helplink['inputfileinfo'],['d-none']); 
                            console.log(self.Image);
-                           /* DELETE OLD FILES */
-                           //self.checkBeforeDelete(self);
+
                            self.sendFiles(self);             
                        }   
                        //console.log(divInfo);  
@@ -341,7 +462,7 @@ class ProjectStageToolFile{
                     /* CLEAR INFO */
                     self.Html.removeChilds(self.Helplink['inputfilelabel']);
                     self.Html.removeChilds(self.Helplink['inputfileinfo']);
-                    self.Html.removeChilds(self.Helplink['file']);
+                    self.Html.removeChilds(self.Helplink['allfile']);
                     self.Html.removeChilds(self.Helplink['progress']);
                     self.Html.removeChilds(self.Helplink['progresscomplete']);
                     /* DELETE from ErrorStack */
@@ -418,7 +539,8 @@ class ProjectStageToolFile{
                     this.Image[prop].property['mime']=data.data.value[prop].m;
                     /* MOVE TO ACTION "DODAJ" */
                     delete this.Image[prop].dataFile;
-                    this.setTool(this.Helplink['file'],this.Image,prop);
+                    this.Helplink.file={};
+                    this.setTool(this.Helplink['allfile'],this.Image,prop,this.Helplink.file);
                     //this.setProgress();
                     this.updateProgress();
                 }
@@ -435,6 +557,10 @@ class ProjectStageToolFile{
                 p.appendChild(document.createTextNode(error));       
             this.Helplink['info'].appendChild(p);
           }
+    }
+    createTmpImageProperty(response){
+        console.log('ProjectStageToolFile.createTmpImageProperty()');
+        console.log(response);
     }
     setProgress(){
         //console.log('ProjectStageToolFile::setProgress()');  
@@ -475,6 +601,10 @@ class ProjectStageToolFile{
         this.Helplink['progress'].appendChild(this.Helplink['progresscomplete']);    
     }
     sendFiles(self){
+        /*
+         * t - task to run
+         * m - method to execute
+         */
          console.log('ProjectStageToolFile.sendFiles()');
          console.log(self.Parent.Stage.Items);
          //throw 'aaaa';
@@ -497,8 +627,6 @@ class ProjectStageToolFile{
                         });
                 }  
             }
-            console.log('Finish');
-            console.log(self.Image);
         }
         catch (e){
             //console.log('ERROR:');     
@@ -509,7 +637,7 @@ class ProjectStageToolFile{
         try{
             console.log('ProjectStageToolFile.deleteAllTmpFiles()');       
             console.log('file list:');
-            console.log(self.Image);         
+            console.log(self.Image);        
             var fileList={};
             for(const prop in self.Image){
                 //console.log(self.Image[prop].property.uri);
@@ -518,29 +646,35 @@ class ProjectStageToolFile{
                     delete self.Image[prop];
                 }
             }
-            this.deleteFiles(self,fileList);
+            this.deleteFiles(fileList,self.Parent.Stage.Items,'successfully');
         }
         catch (e){
-            //console.log('ERROR:');     
+            console.log('ERROR:');     
             throw e;
         };
     }
-    deleteFiles(self,fileList){
+    deleteFiles(fileList,StageItems,methodToRun){
         try{
             var fd = new FormData(); 
             for(const prop in fileList){
                 fd.append(prop,fileList[prop]); 
             }
             var Xhr= new Xhr2();
-                    self.Parent.Stage.Items.setLoadModalInfo(Xhr); 
-                    Xhr.setOnError(self.Parent.Stage.Items.modalXhrError()); 
+            //console.log(fileList);
+            //console.log(self);
+            console.log(StageItems);
+            
+            //console.log(self.Parent.Stage);
+               //     console.log(self.Parent.Stage.Items);
+                    StageItems.setLoadModalInfo(Xhr); 
+                    Xhr.setOnError(StageItems.modalXhrError()); 
                     Xhr.run({
                         t:'POST',
-                        u:self.Parent.Stage.Items.router+'deleteTmpStageImage',
+                        u:StageItems.router+'deleteTmpStageImage',
                         c:true,
                         d:fd,
-                        o:self,
-                        m:'successfullyDeleted'
+                        o:StageItems,
+                        m:methodToRun
                     });
         }
         catch (e){
@@ -548,6 +682,54 @@ class ProjectStageToolFile{
             throw e;
         };
     }
+    replaceTmpFile(self,ImageUri,prop,newFile){
+        console.log('ProjectStageTool.replaceTmpFile()');
+        try{
+            var fd = new FormData();
+                fd.append('old',ImageUri);
+                fd.append(prop,newFile,newFile.name);      
+                this.replaceFile(self,fd,'replaceTmpStageImage','updateReplacedFile');
+        }
+        catch(e){
+            console.log(e);
+        }
+    }
+    replaceDbFile(self,ImageProp,newFile){ 
+        try{
+            var fd = new FormData();
+                fd.append('old',ImageProp);
+                fd.append('new',newFile,newFile.name);      
+                this.replaceFile(self,fd,'replaceTmpStageDbImage','updateReplacedDbFile');
+        }
+        catch(e){
+            console.log(e);
+        }
+    }
+    replaceFile(self,fd,t,m){
+        console.log('ProjectStageTool.replaceFile()');
+        /*
+         * t - task to run
+         * m - method to execute
+         */
+        try{    
+            var Xhr= new Xhr2();
+                    self.Parent.Stage.Items.setLoadModalInfo(Xhr); 
+                    Xhr.setOnError(self.Parent.Stage.Items.modalXhrError()); 
+                    Xhr.run({
+                        t:'POST',
+                        u:self.Parent.Stage.Items.router+t,
+                        c:true,
+                        d:fd,
+                        o:self,
+                        m:m
+                    });
+        }
+        catch (e){
+            //console.log('ERROR:');     
+            throw e;
+        };
+    }
+
     getNewImageProperty(){
         console.log('ProjectStageToolFile.getNewImageProperty()');
         return {
@@ -591,7 +773,195 @@ class ProjectStageToolFile{
         };
         image.dataFile=file;
     }
-    successfullyDeleted(){
-        console.log('ProjectStageToolFile.successfullyDeleted()');
+    successfully(){
+        console.log('ProjectStageToolFile.successfully()');
+    }
+    getUid(prefix){
+        //image.property.uid=(new Date()).getTime(); 
+        //let uid=(new Date()).getTime();
+        //+(new Date()).getMilliseconds();//(new Date()).getTime()+
+        //let uid = Math.random();
+        //'new'+(Math.floor(Math.random() * 10000000)).toString()
+        return prefix+(Math.floor(Math.random() * 10000000)).toString();
+    }
+    getMaxImageSize(){
+        /* IN bytes */
+        //let size=0;
+        //return 1;
+        return 20971520;/* MAX DEFAULT 20 Mb - SIZE, not size on hard drive */
+    }
+    getAcceptedImageExtensions(){
+        return new Array(
+                            'image/bmp',
+                            'image/jpeg',
+                            'image/png'
+                        );
+    }
+    updateReplacedFile(response){
+        console.log('ProjectStageToolFile.updateReplacedFile()');
+        console.log(response);
+        var errField=false;
+        var actprop='';
+        var errInfo='Update image file failed! Contact with Administrator!';
+        try{
+            if(!this.Helplink.hasOwnProperty('file')){
+                
+                throw 'No Helplink file property';
+            };
+        }
+        catch(e){
+            console.log(e);
+            alert(errInfo);
+            return false;
+        }
+          try{
+            var json = this.Parent.Stage.Items.parseResponse(response);
+            console.log(json.data.value);
+            console.log(this.Helplink.file);
+            console.log(this.Image);
+            
+            for(const prop in json.data.value){
+                console.log(prop);
+                actprop=prop;
+                if(!this.Helplink.file.hasOwnProperty(prop)){
+                    errField=true;
+                    throw 'No Helplink file property - '+prop;
+                }
+                this.checkReplaceImage(prop);
+                this.updateChosenImageProperty(prop,json.data.value[prop]);
+                this.updateImageHelplink(prop); 
+            };  
+        }
+        catch(e){
+            console.log('ProjectStageToolFile::updateReplacedFile() ERROR:');
+            console.log(e);
+            if(errField){
+                console.log(e);
+                alert(errInfo);
+            }
+            else{
+                this.setImageFieldError(this,actprop,errInfo);
+            }
+            
+        }
+    }
+    updateReplacedDbFile(response){
+        console.log('ProjectStageToolFile.updateReplacedDbFile()');
+        //console.log(response);
+        var errInfo='Update image file failed! Contact with Administrator!';
+        try{
+            var json = this.Parent.Stage.Items.parseResponse(response);
+                //console.log(json.data.value);
+                this.checkReplaceResponse(json.data.value);
+                this.checkReplaceResponseImageProperty(json.data.value.new);
+                this.checkReplaceHelplink(json.data.value);  
+        }
+        catch(e){
+            console.log(response);
+            console.log(e);  
+            alert(errInfo);
+        }
+        try{
+            //console.log(this.Helplink.file);
+            //console.log(this.Image);
+            this.checkReplaceImage(json.data.value.old);     
+            this.updateDbImageProperty(json.data.value); 
+            this.updateImageHelplink(json.data.value.old); 
+        }
+        catch(e){
+            console.log('ProjectStageToolFile::updateReplacedDbFile() ERROR:');
+            console.log(response);
+            console.log(e);
+            this.setImageFieldError(this,json.data.value.old,errInfo);
+        }
+    }
+    setImageFieldError(self,prop,e){
+        //console.log('setImageError()');
+        //console.log(self);
+        //console.log(self.Helplink.file[prop].info);
+        let span=document.createElement('span');
+            span.innerHTML=e;
+            self.Html.removeClass(self.Helplink.file[prop].info,'d-none');
+            self.Html.removeChilds(self.Helplink.file[prop].info);
+            self.Helplink.file[prop].info.append(span);
+            //console.log(self.Helplink.file[prop].info);
+    };
+    checkReplaceResponse(jsonValue){
+        if(!jsonValue.hasOwnProperty('old')){
+            throw 'No `old` property in response';
+        }
+        if(jsonValue.old.trim()===''){
+            throw 'Empty `old` property in response';
+        }
+        if(!jsonValue.hasOwnProperty('new')){             
+            throw 'No `new` property in response';
+        }
+    }
+    checkReplaceResponseImageProperty(jsonImage){
+        //console.log(jsonImage);
+        var newImageProp=new Array('h','w','n','m');
+        var propertyImageExists=false;
+        for(const prop in jsonImage){
+            for(var i=0;i<newImageProp.length;i++){
+                if(!jsonImage[prop].hasOwnProperty(newImageProp[i])){             
+                    throw 'No '+newImageProp+' property in response new image';
+                };
+            };
+            propertyImageExists=true;
+        };
+        if(!propertyImageExists){
+             throw 'No property in response new image';
+        }
+    }
+    checkReplaceHelplink(jsonValue){
+        if(!this.Helplink.hasOwnProperty('file')){
+            throw 'No Helplink file property';
+        };
+        if(!this.Helplink.file.hasOwnProperty(jsonValue.old)){
+            throw 'No Helplink file property - '+jsonValue.old;
+        };
+    }
+    checkReplaceImage(prop){
+        if(!this.Image.hasOwnProperty(prop)){
+            throw 'No Image property - '+prop;
+        };
+    }
+    updateDbImageProperty(jsonValue){
+        console.log('ProjectStageToolFile::updateImageProperty()');
+        console.log(jsonValue);
+        /* MOVE OLD TO NEW IMAGE PROEPRTY
+         * db and tmp property
+         */
+        this.Image[this.getUid('old')]={
+                data:{
+                    id:this.Image[jsonValue.old].data.id,
+                    tmp:'d'
+                }
+            };
+        console.log(this.Image);
+        /* UPDATE CURRENT */
+        this.updateChosenImageProperty(jsonValue.old,jsonValue.new.new);
+    }
+    updateImageHelplink(prop){
+        console.log('ProjectStageToolFile::updateImageHelplink()');
+        /* UPDATE DOM */
+        this.Html.removeChilds(this.Helplink.file[prop].name);
+        this.Helplink.file[prop].name.append(this.getImageHref(this,this.Image[prop]));   
+        this.Html.removeChilds(this.Helplink.file[prop].size);
+        this.Helplink.file[prop].size.append(this.getImagePropertyInfo(this.Image[prop]));
+    }
+    updateChosenImageProperty(prop,jsonValue){
+        /* SET IMAGE PROEPRTY FROM BACK-END */
+        this.Image[prop].data.tmp='y';
+        this.Image[prop].property.height=jsonValue.h;
+        this.Image[prop].property.width=jsonValue.w;
+        this.Image[prop].property.mime=jsonValue.m;
+        this.Image[prop].property.uri=jsonValue.n;
+        /* GET AND SET IMAGE PROPERTY FROM INPUT */
+        this.Image[prop].property.lastModified=this.Helplink.file[prop].input.files[0].lastModified;
+        this.Image[prop].property.lastModifiedDate=this.Helplink.file[prop].input.files[0].lastModifiedDate;
+        this.Image[prop].property.name=this.Helplink.file[prop].input.files[0].name;
+        this.Image[prop].property.type=this.Helplink.file[prop].input.files[0].type;
+        this.Image[prop].property.size=this.Helplink.file[prop].input.files[0].size;
     }
 }

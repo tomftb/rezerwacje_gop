@@ -477,7 +477,7 @@ class ManageProjectStageDatabase {
       
     }
     public function insertAttributes($id=0,$data=[],$table='slo_project_stage_subsection_row_p'){
-        $this->Log->log(0,"[".__METHOD__."]\r\nID - ".$id."\r\nTABLE: ".$table);
+        $this->Log->log(2,"[".__METHOD__."]\r\nID - ".$id."\r\nTABLE: ".$table);
         $parm[':id']=[$id,'INT'];
         self::checkProperty($data,'style',$table);
         self::checkProperty($data,'property',$table);
@@ -485,7 +485,7 @@ class ManageProjectStageDatabase {
         self::insertAttributesProperty($parm,$data->property,$table.'_property'); 
     }
     public function deleteAttributes($id=0,$table='slo_project_stage_section'){
-        $this->Log->log(0,"[".__METHOD__."]\r\nID - ".$id."\r\nTABLE: ".$table."\r\n_style _property");
+        $this->Log->log(2,"[".__METHOD__."]\r\nID - ".$id."\r\nTABLE: ".$table."\r\n_style _property");
         $parm[':id']=[$id,'INT'];
         $this->dbLink->query2("DELETE FROM `".$table."_style` WHERE `id_parent`=:id;",$parm);
         $this->dbLink->query2("DELETE FROM `".$table."_property` WHERE `id_parent`=:id;",$parm);
@@ -721,10 +721,8 @@ class ManageProjectStageDatabase {
         array_walk($v->image,['self','updateSubSectionRowImage'],$v->data->id);
     }
     private function updateSubSectionRowImage($v,$key=0,$IdRow=0){
-        $this->Log->log(0,"[".__METHOD__."]\rID:");  
-        $this->Log->log(0,$v->data->id);  
-        $this->Log->log(0,"[".__METHOD__."]\rTMP:");  
-        $this->Log->log(0,$v->data->tmp);  
+        $this->Log->log(0,"[".__METHOD__."]\rID: ".$v->data->id);  
+        $this->Log->log(0,"[".__METHOD__."]\rTMP:".$v->data->tmp);  
         if($v->data->id>0 && $v->data->tmp==='y'){
             $this->Log->log(0,"UPDATE IMAGE");      
             /* OLD FILE STAY FOR BACK FUNCTION IN FUTUTRE -> TO DO */
@@ -741,7 +739,8 @@ class ManageProjectStageDatabase {
         }
         else if($v->data->id>0 && $v->data->tmp==='d'){
             $this->Log->log(0,"REMOVE IMAGE");  
-            self::updateImageWskU($IdRow);
+            //self::updateImageWskU($IdRow,);
+            self::updateImageWskU($v->data->id);
             //self::deleteAttributes($v->data->id,'slo_project_stage_subsection_row_i');
             //self::insertAttributes($v->data->id,$v,'slo_project_stage_subsection_row_i');
         }
@@ -759,16 +758,16 @@ class ManageProjectStageDatabase {
         
            $this->dbLink->query2(
                 "UPDATE `slo_project_stage_subsection_row_i` SET "
-                ."`delete_reason`='REMOVED'"
+                ."`delete_reason`='REMOVED BY USER'"
                 .",`wsk_u`='1'"
                 . ",".$this->DatabaseUtilities->getAlterSql().""
                 . " WHERE"
-                . "`id_parent`=:id_parent;"
-                ,array_merge([':id_parent'=>[$imageId,'INT']],$this->DatabaseUtilities->getAlterParm()));
+                . "`id`=:id;"
+                ,array_merge([':id'=>[$imageId,'INT']],$this->DatabaseUtilities->getAlterParm()));
         return true;
     }
     private function checkProperty($data,$property='',$table=''){
-         $this->Log->log(0,"[".__METHOD__."]");
+         $this->Log->log(2,"[".__METHOD__."]");
          if(!property_exists($data, $property)){
             $this->Log->log(0,$data);
             Throw New Exception('Property `'.$property.'` not exist for table - '.$table,1);

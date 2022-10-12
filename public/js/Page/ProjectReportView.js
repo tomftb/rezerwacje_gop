@@ -147,6 +147,7 @@ class ProjectReportView{
         this.Modal.addLink('variablesSaveButton',buttonSave);
         return row;
     }
+    /* NOT USED */
     getHeadDynamicImage(){
         var row=this.Html.getRow();
             this.Html.addClass(row,['ml-1','mr-1','mt-1','d-none']);

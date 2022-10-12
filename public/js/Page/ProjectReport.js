@@ -16,20 +16,25 @@ class ProjectReport extends ProjectReportView
     Helplink={
         'stage':{}
     };
-    
     constructor(router,appUrl,perm){
         console.log('ProjectReport::constructor()');
-        super();
-        this.ErrorStack = new ErrorStack();
-        this.Xhr=new Xhr2();
-        this.StageDataUtilities = new StageDataUtilities();
-        this.router=router;
-        this.appUrl=appUrl;
-        this.perm=perm;
-        this.Department = new Department();
+        try{
+            super();
+            this.ErrorStack = new ErrorStack();
+            this.Xhr=new Xhr2();
+            this.StageDataUtilities = new StageDataUtilities();
+            this.router=router;
+            this.appUrl=appUrl;
+            this.perm=perm;
+            this.Department = new Department();
+            this.ProjectReportVariable=new ProjectReportVariable();
         //console.log(this.router);
         //console.log(this.appUrl);
         //console.log(this.perm);
+        }
+        catch(e){
+            throw e;
+        };
     }
     parseResponse(response){
         console.log('ProjectReport::parseResponse()');
@@ -192,7 +197,7 @@ class ProjectReport extends ProjectReportView
             this.Modal.link['adapted'].appendChild(this.getReportDepartment());
             this.Modal.link['adapted'].appendChild(super.getHead());
             this.Modal.link['adapted'].appendChild(super.getHeadDynamicVariable());
-            this.Modal.link['adapted'].appendChild(super.getHeadDynamicImage());
+            //this.Modal.link['adapted'].appendChild(super.getHeadDynamicImage());
             this.Modal.link['adapted'].appendChild(super.getHeadData());
 
             this.Modal.link['adapted'].appendChild(super.getDataBody());
@@ -540,7 +545,8 @@ class ProjectReport extends ProjectReportView
             throw 'Application error occurred! Contact with Administrator!';
         }
     }
-    createChosenStageVariable(Report,stageId,variable){  
+    createChosenStageVariable(Report,stageId,variable){
+        console.log('ProjectReport.createChosenStageVariable()');
         try{
             variable.list=document.createElement('ul');
                 this.Html.addClass(variable.list,['mt-0','mb-0','text-dark']);
@@ -551,11 +557,13 @@ class ProjectReport extends ProjectReportView
                 for(const su in Report.stage[stageId].section[s].subsection){  
                     for(const r in Report.stage[stageId].section[s].subsection[su].subsectionrow){
                         //f(Stage.section[s].subsection[su].subsectionrow[r],o);
+                        /* VARIABLE */
+                        //console.log(Report.stage[stageId].section[s].subsection[su].subsectionrow[r]);
                         for(const v in Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable){
                             let rowLi = document.createElement('li'); 
                             let spanLi = document.createElement('span');
                                 this.Html.addClass(spanLi,['text-dark']);
-                                spanLi.append(document.createTextNode(Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].name));
+                                spanLi.append(document.createTextNode('[v] '+Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].name));
                                 spanLi.style.cursor='pointer';
                                 spanLi.onclick = function(){
                                     console.log('ProjectReport::createChosenStageVariable().onclick()\nSTAGE ID:');
@@ -593,6 +601,27 @@ class ProjectReport extends ProjectReportView
                                 };
                                 spanLi.onmouseleave = function (){
                                     self.Html.removeClass(this,"text-purple");
+                                    self.Html.addClass(this,"text-dark");
+                                };
+                                rowLi.append(spanLi);
+                                variable.list.append(rowLi);  
+                                variable.found=true;
+                        }
+                        /* IMAGE */
+                        for(const i in Report.stage[stageId].section[s].subsection[su].subsectionrow[r].image){
+                            //console.log(Report.stage[stageId].section[s].subsection[su].subsectionrow[r].image[i]);
+                            //return true;
+                            let rowLi = document.createElement('li'); 
+                            let spanLi = document.createElement('span');
+                                this.Html.addClass(spanLi,['text-dark']);
+                                spanLi.append(document.createTextNode('[i] '+Report.stage[stageId].section[s].subsection[su].subsectionrow[r].image[i].property.name));
+                                spanLi.style.cursor='pointer';
+                                spanLi.onmouseover = function (){
+                                    self.Html.removeClass(this,"text-dark");
+                                    self.Html.addClass(this,"text-warning");
+                                };
+                                spanLi.onmouseleave = function (){
+                                    self.Html.removeClass(this,"text-warning");
                                     self.Html.addClass(this,"text-dark");
                                 };
                                 rowLi.append(spanLi);
@@ -642,7 +671,7 @@ class ProjectReport extends ProjectReportView
        //throw 'aaaaa';
     }
     btnShowProjectReport(){
-        console.log('ProjectReport::btnShowProjectReport()');  
+        //console.log('ProjectReport::btnShowProjectReport()');  
         var button=document.createElement('button');
             button.classList.add('btn','btn-info');
             button.appendChild(document.createTextNode('Podgląd')); 
@@ -655,7 +684,7 @@ class ProjectReport extends ProjectReportView
         return button;
     }
     btnSaveReport(){
-        console.log('ProjectReport::btnSaveReport()');   
+        //console.log('ProjectReport::btnSaveReport()');   
         //var btn=createBtn('Zapisz','btn btn-success','confirmData');
         var save=document.createElement('button');
             save.classList.add('btn','btn-success');
@@ -736,7 +765,7 @@ class ProjectReport extends ProjectReportView
             win.focus();
     }
     btnExportToDoc(){
-        console.log('ProjectReport::btnExportToDoc()');
+        //console.log('ProjectReport::btnExportToDoc()');
         //var btn=createBtn('Zapisz','btn btn-success','confirmData');
         var button=document.createElement('button');
             button.classList.add('btn','btn-primary');

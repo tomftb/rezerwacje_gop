@@ -17,7 +17,7 @@ class Modal{
     loadNotify='';
     exist = false;
     constructor() {
-        console.log('Modal::construct()'); 
+        //console.log('Modal::construct()'); 
         this.Html = new Html();
     }
     getModal(){
@@ -58,7 +58,7 @@ class Modal{
         this.link[label]=ele;
     }
     clearData(){
-        console.log('Modal::clearData()');
+        //console.log('Modal::clearData()');
         this.Html.removeChilds(this.link['error']);
         this.Html.hideField(this.link['error']);
         this.Html.removeChilds(this.link['adapted']);
@@ -85,19 +85,19 @@ class Modal{
         //console.log(this.link['head']);
     }
     showLoad(){
-        console.log('Modal::showLoad()');
+        //console.log('Modal::showLoad()');
         if(this.loadNotify!==''){
             this.Html.showField(this.link['extra'],this.loadNotify);
         }
     }
     hideLoad(){
-        console.log('Modal::hideLoad()');
+        //console.log('Modal::hideLoad()');
         if(this.loadNotify!==''){
             this.Html.hideField(this.link['extra']);
         }
     }
     setInfo(value){
-        console.log('Modal::setInfo()');
+        //console.log('Modal::setInfo()');
         var textInfo=document.createElement('small');
             textInfo.setAttribute('class','text-left text-secondary ml-1');
             textInfo.innerHTML=value;

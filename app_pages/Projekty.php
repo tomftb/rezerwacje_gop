@@ -20,6 +20,7 @@ final class Projekty extends Page{
         'Main/headerView.js',
         'Main/Table.js',
         'Main/ErrorStack.js',
+        'Page/ProjectReportVariable.js',
         'Page/ProjectReportView.js',
         'Page/ProjectReport.js',
         'Page/projekty.js',

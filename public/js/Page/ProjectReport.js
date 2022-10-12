@@ -27,7 +27,7 @@ class ProjectReport extends ProjectReportView
             this.appUrl=appUrl;
             this.perm=perm;
             this.Department = new Department();
-            this.ProjectReportVariable=new ProjectReportVariable();
+            this.ProjectReportVariable=new ProjectReportVariable(this);
         //console.log(this.router);
         //console.log(this.appUrl);
         //console.log(this.perm);
@@ -288,7 +288,7 @@ class ProjectReport extends ProjectReportView
                     found:false,
                     all:null
                 };
-        this.createChosenStageVariable(this.ChosenReport[0],length,variable);
+        this.ProjectReportVariable.createChosenStageVariable(this.ChosenReport[0],length,variable);
             
         if(variable.found){
             this.Html.removeClass(this.Modal.link['variables'],'d-none');
@@ -360,7 +360,7 @@ class ProjectReport extends ProjectReportView
                             found:false,
                             all:null
                          };
-                         selfRef.createChosenStageVariable(ReportDataIn,idChange,variable);
+                         selfRef.ProjectReportVariable.createChosenStageVariable(ReportDataIn,idChange,variable);
                          if(variable.found){
                                 variable.all=selfRef.getVariableEle(ReportDataIn.stage[idChange],variable.list);
                                 selfRef.Helplink.stage[idChange].variable.append(variable.all.childNodes[0],variable.all.childNodes[1]);
@@ -545,100 +545,7 @@ class ProjectReport extends ProjectReportView
             throw 'Application error occurred! Contact with Administrator!';
         }
     }
-    createChosenStageVariable(Report,stageId,variable){
-        console.log('ProjectReport.createChosenStageVariable()');
-        try{
-            variable.list=document.createElement('ul');
-                this.Html.addClass(variable.list,['mt-0','mb-0','text-dark']);
-                variable.list.style.listStyleType='disc'; 
-            
-            var self=this;   
-            for(const s in Report.stage[stageId].section){     
-                for(const su in Report.stage[stageId].section[s].subsection){  
-                    for(const r in Report.stage[stageId].section[s].subsection[su].subsectionrow){
-                        //f(Stage.section[s].subsection[su].subsectionrow[r],o);
-                        /* VARIABLE */
-                        //console.log(Report.stage[stageId].section[s].subsection[su].subsectionrow[r]);
-                        for(const v in Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable){
-                            let rowLi = document.createElement('li'); 
-                            let spanLi = document.createElement('span');
-                                this.Html.addClass(spanLi,['text-dark']);
-                                spanLi.append(document.createTextNode('[v] '+Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].name));
-                                spanLi.style.cursor='pointer';
-                                spanLi.onclick = function(){
-                                    console.log('ProjectReport::createChosenStageVariable().onclick()\nSTAGE ID:');
-                                    console.log(stageId);
-                                    console.log(variable);
-                                    //console.log(Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v]);
-                                    //console.log(this);
-                                    //console.log(self.Modal.link['variablesEle']);
-                                    /* SET VARIABLE NAME */
-                                    self.Html.removeChilds(self.Modal.link['variablesLabel']);
-                                    self.Modal.link['variablesLabel'].append(document.createTextNode(Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].name));
-                                    /* SET VARIABLE VALUE */
-                                    self.Modal.link['variablesInput'].value=Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].value;
-                                    /* SHOW DIV */
-                                    self.Html.removeClass(self.Modal.link['variablesEle'],'d-none');
-                                    //self.t.Modal.link['variablesInput'];
-                                    self.Modal.link['variablesSaveButton'].onclick=function(){
-                                        if(self.Modal.link['variablesInput'].value!==Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].value){
-                                             /* SET CHANGE */
-                                            Report.data.change='y';
-                                            Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].value=self.Modal.link['variablesInput'].value;
-                                        }
-                                        //console.log(self.ChosenReport[0].data.change='y');
-                                        self.Html.addClass(self.Modal.link['variablesEle'],'d-none');  
-                                        self.Html.removeChilds(self.Modal.link['variablesLabel']);
-                                        //console.log(self.Modal.link['variablesInput'].value);
-                                        Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].value=self.Modal.link['variablesInput'].value;
-                                        //console.log('Actual Report change proeprty value:');
-                                        //console.log(Report.data.change);
-                                    };
-                                };
-                                spanLi.onmouseover = function (){
-                                    self.Html.removeClass(this,"text-dark");
-                                    self.Html.addClass(this,"text-purple");
-                                };
-                                spanLi.onmouseleave = function (){
-                                    self.Html.removeClass(this,"text-purple");
-                                    self.Html.addClass(this,"text-dark");
-                                };
-                                rowLi.append(spanLi);
-                                variable.list.append(rowLi);  
-                                variable.found=true;
-                        }
-                        /* IMAGE */
-                        for(const i in Report.stage[stageId].section[s].subsection[su].subsectionrow[r].image){
-                            //console.log(Report.stage[stageId].section[s].subsection[su].subsectionrow[r].image[i]);
-                            //return true;
-                            let rowLi = document.createElement('li'); 
-                            let spanLi = document.createElement('span');
-                                this.Html.addClass(spanLi,['text-dark']);
-                                spanLi.append(document.createTextNode('[i] '+Report.stage[stageId].section[s].subsection[su].subsectionrow[r].image[i].property.name));
-                                spanLi.style.cursor='pointer';
-                                spanLi.onmouseover = function (){
-                                    self.Html.removeClass(this,"text-dark");
-                                    self.Html.addClass(this,"text-warning");
-                                };
-                                spanLi.onmouseleave = function (){
-                                    self.Html.removeClass(this,"text-warning");
-                                    self.Html.addClass(this,"text-dark");
-                                };
-                                rowLi.append(spanLi);
-                                variable.list.append(rowLi);  
-                                variable.found=true;
-                        }
-                    }
-                }
-            }
-           
-        }
-        catch(e){
-            console.log(e);
-            throw 'Application error occurred! Contact with Administrator!';
-        }
-       //return document.createTextNode('');
-    }
+
     setChosenReport(){
         console.log('ProjectReport::setChosenReport()');
         //console.log(this.Modal.link['dynamic']);
@@ -652,7 +559,7 @@ class ProjectReport extends ProjectReportView
                     found:false,
                     all:null
                 };
-                this.createChosenStageVariable(this.ChosenReport[report],id,variable);
+                this.ProjectReportVariable.createChosenStageVariable(this.ChosenReport[report],id,variable);
                 if(variable.found){
                     this.Html.removeClass(this.Modal.link['variables'],'d-none');
                     variable.all=super.getVariableEle(this.ChosenReport[0].stage[id],variable.list);

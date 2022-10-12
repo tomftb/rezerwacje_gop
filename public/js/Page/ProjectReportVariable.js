@@ -29,7 +29,7 @@ class ProjectReportVariable{
             throw e;
         };
     }
-    createChosenStageVariable(Report,stageId,variable){
+    createEntry(Report,stageId,variable){
         console.log('ProjectReportVariable.createChosenStageVariable()');
         try{
             variable.list=document.createElement('ul');

@@ -288,7 +288,7 @@ class ProjectReport extends ProjectReportView
                     found:false,
                     all:null
                 };
-        this.ProjectReportVariable.createChosenStageVariable(this.ChosenReport[0],length,variable);
+        this.ProjectReportVariable.createEntry(this.ChosenReport[0],length,variable);
             
         if(variable.found){
             this.Html.removeClass(this.Modal.link['variables'],'d-none');
@@ -360,7 +360,7 @@ class ProjectReport extends ProjectReportView
                             found:false,
                             all:null
                          };
-                         selfRef.ProjectReportVariable.createChosenStageVariable(ReportDataIn,idChange,variable);
+                         selfRef.ProjectReportVariable.createEntry(ReportDataIn,idChange,variable);
                          if(variable.found){
                                 variable.all=selfRef.getVariableEle(ReportDataIn.stage[idChange],variable.list);
                                 selfRef.Helplink.stage[idChange].variable.append(variable.all.childNodes[0],variable.all.childNodes[1]);
@@ -559,7 +559,7 @@ class ProjectReport extends ProjectReportView
                     found:false,
                     all:null
                 };
-                this.ProjectReportVariable.createChosenStageVariable(this.ChosenReport[report],id,variable);
+                this.ProjectReportVariable.createEntry(this.ChosenReport[report],id,variable);
                 if(variable.found){
                     this.Html.removeClass(this.Modal.link['variables'],'d-none');
                     variable.all=super.getVariableEle(this.ChosenReport[0].stage[id],variable.list);

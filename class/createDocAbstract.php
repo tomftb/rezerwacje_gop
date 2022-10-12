@@ -1,5 +1,9 @@
 <?php
 class createDocAbstract {
+    protected $Log;
+    public function construct__(){
+        $this->Log=Logger::init();
+    }
     protected function getTwip($size=0,$measurement='cm'){
         /* check - minus size */
         switch($measurement):
@@ -138,6 +142,60 @@ class createDocAbstract {
             Throw New Exception('NOT SUPPORTED SIGN -> '.$sign,0);
         }
         return $available[$sign];
+    }
+    protected function firstCheckImage($Image){
+        $this->Log->log(0,"[".__METHOD__."]");
+        if(!is_object($Image)){
+            throw new Exception('Variable `Image` is not a object!',1);
+        }
+        if(!property_exists($Image,'data')){
+            throw new Exception('Variable `Image` doesn\'t have `data` property!',1);
+        }
+        if(!property_exists($Image->data,'tmp')){
+            throw new Exception('Variable `Image` `data` property doesn\'t have `tmp` property!',1);
+        }
+        $tmp=['d','n','y'];
+        $type=gettype($Image->data->tmp);
+        if($type!=='string'){
+            throw new Exception('Variable `Image` `data` `tmp` property not a string - `'.$type.'`!',1);
+        }
+        if(!in_array($Image->data->tmp,$tmp)){
+             throw new Exception('Variable `Image` `data` property doesn\'t have proper value - `'.$Image->data->tmp.'`!',1);
+        }
+    }
+    protected function secondCheckImage($Image){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->Log->log(0,$Image);
+        /* ONLY CHECK MAIN PROPERTY */ 
+        self::checkPropertyStyle($Image);
+        self::checkPropertyProperty($Image);
+    }
+    private function checkPropertyStyle($Image){
+        $style=['width','height'];
+        if(!property_exists($Image,'style')){
+            throw new Exception('Variable `Image` doesn\'t have `style` property!',1);
+        }
+        foreach($style as $value){
+             self::checkProperty($Image->style,'Image style',$value,'string');
+        }
+    }
+    private function checkPropertyProperty($Image){
+        $property=['uri','name'];
+        if(!property_exists($Image,'property')){
+            throw new Exception('Variable `Image` doesn\'t have `style` property!',1);
+        }
+        foreach($property as $value){
+             self::checkProperty($Image->property,'Image property',$value,'string');
+        }
+    }
+    private function checkProperty($Object,$ObjectName='',$property='',$type=''){
+        if(!property_exists($Object,$property)){
+            throw new Exception($ObjectName.' doesn\'t have `'.$property.'` property!',1);
+        }
+        $t=gettype($Object->{$property});
+        if($t!==$type){
+            throw new Exception($ObjectName.' property `'.$property.'` != `'.$type.'`!',1);
+        }
     }
 }
 

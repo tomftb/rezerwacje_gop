@@ -5,7 +5,6 @@ class createDoc extends createDocAbstract {
     private $projectData=array();
     private $mainSection;
     private $files=[];
-    private $Log;
     private $ActFontStyle=array();
     private $paragraphStyle=array();
     private $styleStack=array();
@@ -25,7 +24,7 @@ class createDoc extends createDocAbstract {
     private $docDir='';
     
     function __construct($projectDetails,$files,$fileName,$ext='',$dir=''){
-        $this->Log=Logger::init();
+        parent::construct__();
         $this->Log->log(0,"[".__METHOD__."] FILENAME => ".$fileName);
         $this->Log->log(0,"[".__METHOD__."] EXTENSION => ".$ext);
         /*
@@ -271,7 +270,13 @@ class createDoc extends createDocAbstract {
     private function setRunImage($image,$key=0,&$item){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->Log->log(0,$image);
+        parent::firstCheckImage($image);
+        if($image->data->tmp==='d'){
+            $this->Log->log(0,"[".__METHOD__."] Image tmp = d -> SKIP;");
+            return false;
+        }
         $imageDir = ($image->data->tmp==='n') ? UPLOAD_DIR : TMP_UPLOAD_DIR;
+        parent::secondCheckImage($image);
         $item->addImage($imageDir.$image->property->uri, array('width' => $image->style->width, 'height' => $image->style->height));//, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
     }
     private function setListStyle($r,$listName=''){

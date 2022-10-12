@@ -28,8 +28,9 @@ class ProjectReport extends ProjectReportView
             this.appUrl=appUrl;
             this.perm=perm;
             this.Department = new Department();
-            this.ProjectReportVariable=new ProjectReportVariable(this);
             this.Utilities=new Utilities();
+            this.ProjectReportVariable=new ProjectReportVariable(this);
+            
         //console.log(this.router);
         //console.log(this.appUrl);
         //console.log(this.perm);

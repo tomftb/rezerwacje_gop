@@ -6,13 +6,16 @@ class ProjectStageTool{
     Html = new Object();
     Stage = new Object();   
     ErrorStack = new Object();
-    constructor(Stage){
-        this.Utilities = Stage.Utilities;
-        this.Glossary = Stage.Glossary;
-        this.Html = Stage.Html;
+    constructor(){
+        
+    }
+    setParent(Parent){
+        this.Utilities = Parent.Utilities;
+        this.Glossary = Parent.Glossary;
+        this.Html = Parent.Html;
         this.Tool = new Tool();
-        this.Stage = Stage;
-        this.ErrorStack = Stage.ErrorStack;
+        this.Stage = Parent;
+        this.ErrorStack = Parent.ErrorStack; 
     }
     getAllOptions(Glossary,property,key,run){
         console.log('ProjectStageTool::getAllOptions()');

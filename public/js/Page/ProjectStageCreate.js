@@ -59,7 +59,8 @@ class ProjectStageCreate{
         this.Glossary=Parent.Items.Glossary;
         this.DocPreview = new DocPreview();
         this.Utilities = Parent.Items.Utilities;
-        this.ProjectStageTool = new ProjectStageTool(this);
+        this.ProjectStageTool = new ProjectStageTool();
+        this.ProjectStageTool.setParent(this);
         this.Variable=Parent.Items.Variable;
         this.Department=Parent.Items.Department;
     }

@@ -13,6 +13,7 @@ final class Projekty extends Page{
     private $js=[
         'Main/Html.js',
         'Main/Modal.js',
+        'Main/Utilities.js',
         'Main/Ajax.js',
         'Main/Xhr.js',
         'Utilities/Department.js',

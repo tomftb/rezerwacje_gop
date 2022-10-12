@@ -80,8 +80,26 @@ class ProjectStageToolFile{
     }
     setTool(ele,image,prop,HelplinkFile){
         console.log('ProjectStageToolFile::setTool()');
+        this.setHelplinkFile(HelplinkFile,image,prop);
+        var ToolAll = new ToolFields([12]);
+        var ToolLabel = new ToolFields([7,4,1]);
+            this.setToolLabel(ToolLabel.get(0),image,prop,HelplinkFile);
+            this.setToolChange(ToolLabel.get(1),image,prop,ToolAll.getMain(),HelplinkFile);
+            this.setToolRemove(ToolLabel.get(2),image,prop,ToolAll.getMain(),HelplinkFile);
+        var Tool = new ToolFields([3,3,3,3]);
+            Tool.set(0,HelplinkFile[prop].height);
+            Tool.set(1,HelplinkFile[prop].width);
+            Tool.set(2,HelplinkFile[prop].leftmargin);
+            Tool.set(3,HelplinkFile[prop].rightmargin);
+        ToolAll.set(0,ToolLabel.getMain());
+        ToolAll.set(0,Tool.getMain());  
+        ToolAll.set(0,document.createElement('hr'));
+        ele.appendChild(ToolAll.getMain());
         
-        HelplinkFile[prop]={
+        console.log(ele);
+    }
+    setHelplinkFile(HelplinkFile,image,prop){
+       HelplinkFile[prop]={
                 name:new Object(),
                 size:new Object(),
                 input:new Object(),
@@ -92,30 +110,7 @@ class ProjectStageToolFile{
                 width:this.Parent.getSimpleInputSize(image[prop].style,['width','widthMeasurement'],'Szerokość zdjęcia:'),
                 leftmargin:this.Parent.getSimpleInputSize(image[prop].style,['marginLeft','marginLeftMeasurement'],'Lewy margines:'),
                 rightmargin:this.Parent.getSimpleInputSize(image[prop].style,['marginTop','marginTopMeasurement'],'Prawy margines:')
-            };
-        var ToolAll = new ToolFields([12]);
-        var ToolLabel = new ToolFields([7,4,1]);
-            this.setToolLabel(ToolLabel.get(0),image,prop,HelplinkFile);
-            this.setToolChange(ToolLabel.get(1),image,prop,ToolAll.getMain(),HelplinkFile);
-            this.setToolRemove(ToolLabel.get(2),image,prop,ToolAll.getMain(),HelplinkFile);
-        var Tool = new ToolFields([3,3,3,3]);
-            //Tool.set(0,this.Parent.getSimpleAlign(image.style,['alignment','alignmentName']));
-            //Tool.set(0,this.Parent.getSimpleOrder(image.property,['order','orderName']));
-            //Tool.set(0,this.Parent.getSimpleAlign(image.style,['alignment','alignmentName']));
-            //this.Helplink.file[prop]={};
-            
-            Tool.set(0,HelplinkFile[prop].height);
-            Tool.set(1,HelplinkFile[prop].width);
-            Tool.set(2,HelplinkFile[prop].leftmargin);
-            Tool.set(3,HelplinkFile[prop].rightmargin);
-       //ToolLabel.Main.classList.add('border','border-primary','border-bottom-0');
-       //Tool.Main.classList.add('border','border-primary','border-top-0');
-        ToolAll.set(0,ToolLabel.getMain());
-        ToolAll.set(0,Tool.getMain());  
-        ToolAll.set(0,document.createElement('hr'));
-        ele.appendChild(ToolAll.getMain());
-        
-        console.log(ele);
+            }; 
     }
     setToolLabel(ele,image,prop,HelplinkFile){
        console.log('ProjectStageToolFile.setToolLabel()');

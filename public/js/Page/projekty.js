@@ -1,76 +1,68 @@
-var ajax = new Ajax();
-var error = new Error();
-    //MyError.setDiv('errDiv-Adapted-overall');
-var Report = new ProjectReport(window.router,window.appUrl,window.perm);
-    //Report.setAjax(ajax);
-var table=new Table();
-    table.setAjaxLink(ajax);
-    table.setErrorLink(error,'errDiv-Adapted-overall');
-var defaultTask='getprojectslike';
-var fieldDisabled='y';
-var projectData=new Object();
-var actDay = getActDate();
-var actProject=new Object();
-var loggedUserPerm=new Array();
-/* 
- * TURN OFF 
- * setButtonDisplay(document.getElementById('pCreate'),'ADD_PROJ');
- * */
-
-console.log(loggedUserPerm);
-
-const mainTableColumns={
-    ID:{
-        style:'width:70px;',
-        scope:'col'
-    },
-    Numer:{
-        style:'',
-        scope:'col'
-    },
-    Klient:{
-        style:'',
-        scope:'col'
-    },
-    Temat:{
-        style:'',
-        scope:'col'
-    },
-    Typ:{
-        style:'',
-        scope:'col'
-    },
-    "Data utworzenia":{
-        style:'',
-        scope:'col'
-    },
-    Lider:{
-        style:'',
-        scope:'col'
-    },
-    Manager:{
-        style:'',
-        scope:'col'
-    },
-    "Start Projektu":{
-        style:'',
-        scope:'col'
-    },
-    "Koniec Projektu":{
-        style:'',
-        scope:'col'
-    },
-    "Status":{
-        style:'',
-        scope:'col'
-    },
-    "":{
-        style:'width:200px;',
-        scope:'col'
-    }
-};
-/* OBJECT ELEMENT IS A NAME OF PERMISSION */
-var defaultTableBtnConfig=
+try{
+    var ajax = new Ajax();
+    var error = new Error();
+    var Report = new ProjectReport(window.router,window.appUrl,window.perm);
+    var table=new Table();
+        table.setAjaxLink(ajax);
+        table.setErrorLink(error,'errDiv-Adapted-overall');
+    var defaultTask='getprojectslike';
+    var fieldDisabled='y';
+    var projectData=new Object();
+    var actDay = getActDate();
+    var actProject=new Object();
+    var loggedUserPerm=new Array();
+    console.log(loggedUserPerm);
+    const mainTableColumns={
+        ID:{
+            style:'width:70px;',
+            scope:'col'
+        },
+        Numer:{
+            style:'',
+            scope:'col'
+        },
+        Klient:{
+            style:'',
+            scope:'col'
+        },
+        Temat:{
+            style:'',
+            scope:'col'
+        },
+        Typ:{
+            style:'',
+            scope:'col'
+        },
+        "Data utworzenia":{
+            style:'',
+            scope:'col'
+        },
+        Lider:{
+            style:'',
+            scope:'col'
+        },
+        Manager:{
+            style:'',
+            scope:'col'
+        },
+        "Start Projektu":{
+            style:'',
+            scope:'col'
+        },
+        "Koniec Projektu":{
+            style:'',
+            scope:'col'
+        },
+        "Status":{
+            style:'',
+            scope:'col'
+        },
+        "":{
+            style:'width:200px;',
+            scope:'col'
+        }
+    };
+    var defaultTableBtnConfig=
         {
         SHOW_PROJ : {
             label : 'Szczegóły',
@@ -138,14 +130,28 @@ var defaultTableBtnConfig=
             attributes : { 'data-toggle' : 'modal', 'data-target': '#AdaptedModal' }
         }
     };
-var defaultTableExceptionCol=new Array();
+    var defaultTableExceptionCol=new Array();
 
-setButtonAvaliable();  
-table.setIdFiled('i');
-table.setButtons(defaultTableBtnConfig);
-table.setColumns(mainTableColumns);
-table.setColExceptions(defaultTableExceptionCol);
-table.setButtonsType('dropdown');
+    setButtonAvaliable();  
+    table.setIdFiled('i');
+    table.setButtons(defaultTableBtnConfig);
+    table.setColumns(mainTableColumns);
+    table.setColExceptions(defaultTableExceptionCol);
+    table.setButtonsType('dropdown');
+    loadData();
+}
+catch(e){
+    console.log('projekty.js ERROR:');
+    console.log(e);
+    alert('Application error occurred! Contact with Administrator!');
+};
+/* 
+ * TURN OFF 
+ * setButtonDisplay(document.getElementById('pCreate'),'ADD_PROJ');
+ * */
+
+/* OBJECT ELEMENT IS A NAME OF PERMISSION */
+
 
 function runFunction(response)
 {
@@ -764,4 +770,3 @@ function checkResponseFunction(d){
     }
     //console.log('KEY `data`.`function` exist');
 }
-loadData();

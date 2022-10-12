@@ -9,6 +9,7 @@ class ProjectReport extends ProjectReportView
     ErrorStack=new Object();
     Xhr=new Object();
     StageDataUtilities = new Object();
+    Utilities=new Object();
     Department = new Object();
     router='';
     appUrl='';
@@ -28,6 +29,7 @@ class ProjectReport extends ProjectReportView
             this.perm=perm;
             this.Department = new Department();
             this.ProjectReportVariable=new ProjectReportVariable(this);
+            this.Utilities=new Utilities();
         //console.log(this.router);
         //console.log(this.appUrl);
         //console.log(this.perm);

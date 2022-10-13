@@ -368,14 +368,18 @@ class ManageProjectStage extends ManageProjectStageDatabase
             }
         }
     }
-    public function getNewStageDefaults(){
-        $type=htmlentities(nl2br(filter_input(INPUT_GET,'type')), ENT_QUOTES,'UTF-8',FALSE);
-        $this->Log->log(0,"[".__METHOD__."]\r\nTYPE - ".$type);
+    public function getGlossary(){
+        $value=array();
         /* GET DEFAULT PARAMETERS */
-        
         $value['list'] = parent::getStageGlossaryList();
         $value['text'] = parent::getStageGlossaryText();
         $value['image'] = parent::getStageGlossaryImage();
+        return $value;
+    }
+    public function getNewStageDefaults(){
+        $type=htmlentities(nl2br(filter_input(INPUT_GET,'type')), ENT_QUOTES,'UTF-8',FALSE);
+        $this->Log->log(0,"[".__METHOD__."]\r\nTYPE - ".$type);
+        $value=self::getGlossary();
         /* SETUP PARAMETER */
         $parm=[];
         foreach(parent::getStageParameters('STAGE_TEXT_%') as $v){

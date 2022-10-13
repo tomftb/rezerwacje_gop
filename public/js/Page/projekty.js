@@ -11,7 +11,13 @@ try{
     var actDay = getActDate();
     var actProject=new Object();
     var loggedUserPerm=new Array();
+    var AllGlossary={
+            text:new Glossary(),
+            list:new Glossary(),
+            image:new Glossary()
+        };
     console.log(loggedUserPerm);
+    console.log(window);
     const mainTableColumns={
         ID:{
             style:'width:70px;',
@@ -223,10 +229,12 @@ function runFunction(response)
             case 'pReportOff':
                     //Report.setData(dJson,loggedUserPerm);
                     //Report.setErrorStack(new ErrorStack());
-                    Report.create(dJson);
+                    Report.create(dJson,AllGlossary);
                     break;
             case 'runMain':
                     loggedUserPerm=dJson['data']['value']['perm'];
+                    setUpGlossary(dJson['data']['value']['glossary']);
+                    
                     setButtonDisplay(document.getElementById('createData'),'ADD_PROJ');
             case 'sAll':
                     displayAll(dJson);
@@ -770,3 +778,15 @@ function checkResponseFunction(d){
     }
     //console.log('KEY `data`.`function` exist');
 }
+function setUpGlossary(dataValue){
+        //var data = this.setTableResponse(response);
+        //console.log(data);
+        AllGlossary['text'].fill(dataValue['text']);
+        AllGlossary['list'].fill(dataValue['list']);
+        AllGlossary['image'].fill(dataValue['image']);
+        //console.log(this.Glossary);
+        /* SETUP STAGE PROPERTY */
+        //this.Stage.Property.setData(this.Glossary);
+        /* run default table table */
+        //this.Stage.show();
+    }

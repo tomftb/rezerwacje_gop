@@ -101,15 +101,16 @@ class Tool{
 
    getDivError(){
        /* TITLE ERROR DIV */
-        var row=this.Html.getRow();
-            //this.helplink['titleDiv']=titleDiv;
-        var col1=this.Html.getCol(1);
-        var col2=this.Html.getCol(11);
+        var row=document.createElement('div');
+            row.classList.add('row');
+        var col1=document.createElement('div');
+            col1.classList.add('col-1');
+        var col2=document.createElement('div');
+            col2.classList.add('col-11');
         var div=document.createElement('div');
-            this.Html.addClass(div,['alert','alert-danger','d-none']);
+            div.classList.add('alert','alert-danger','d-none');
             col2.appendChild(div);       
-            row.appendChild(col1);
-            row.appendChild(col2);
+            row.append(col1,col2);
         return {
             ele:row,
             div:div

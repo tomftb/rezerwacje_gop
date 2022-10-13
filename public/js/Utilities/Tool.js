@@ -1,8 +1,8 @@
 class Tool{
     Html = new Object();
     
-    constructor(){
-        this.Html = new Html();
+    constructor(Html){
+        this.Html = Html;
     }
     create(label,data){
         /*

@@ -1124,8 +1124,10 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
     }
     public function getModulProjectDefaults(){
         $this->Log->log(0,"[".__METHOD__."]");
+        $Stage=new ManageProjectStage();
         $v['perm']=$_SESSION['perm'];
         $v['data']=self::getProjects();
+        $v['glossary']=$Stage->getGlossary();
         $this->utilities->jsonResponse($v,'runMain'); 
     }
     function __destruct(){}

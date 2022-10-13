@@ -6,7 +6,11 @@ class ProjectReportVariable{
     router='';
     appUrl='';
     perm=new Array();
-    Modal=new Object();
+    //Modal=new Object();
+    Utilities=new Object();
+    ImageAction=new Object();
+    VariableAction=new Object();
+    Glossary=new Object();
     constructor(Parent){
         console.log('ProjectReportVariable::constructor()');
         try{
@@ -17,12 +21,10 @@ class ProjectReportVariable{
             this.appUrl=Parent.appUrl;
             this.perm=Parent.perm;
             this.Html=Parent.Html;
-            this.Modal=Parent.Modal;
-            //this.Department = new Department();
-            //this.ProjectReportVariable=new ProjectReportVariable();
-            //console.log(this.router);
-            //console.log(this.appUrl);
-            //console.log(this.perm);
+            this.Utilities=Parent.Utilities;
+            this.Glossary=Parent.Glossary;
+            this.ImageAction=new ProjectReportVariableImageAction(Parent.Modal.link['imageShiftField'],this);
+            this.VariableAction=new ProjectReportVariableAction(Parent.Modal.link['variableShiftField']);
             console.log(this);
         }
         catch(e){
@@ -30,97 +32,78 @@ class ProjectReportVariable{
         };
     }
     createEntry(Report,stageId,variable){
-        console.log('ProjectReportVariable.createChosenStageVariable()');
+        //console.log('ProjectReportVariable.createChosenStageVariable()');
         try{
             variable.list=document.createElement('ul');
                 this.Html.addClass(variable.list,['mt-0','mb-0','text-dark']);
                 variable.list.style.listStyleType='disc'; 
-            
-            var self=this;   
             for(const s in Report.stage[stageId].section){     
                 for(const su in Report.stage[stageId].section[s].subsection){  
                     for(const r in Report.stage[stageId].section[s].subsection[su].subsectionrow){
-                        //f(Stage.section[s].subsection[su].subsectionrow[r],o);
                         /* VARIABLE */
-                        //console.log(Report.stage[stageId].section[s].subsection[su].subsectionrow[r]);
-                        for(const v in Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable){
-                            let rowLi = document.createElement('li'); 
-                            let spanLi = document.createElement('span');
-                                this.Html.addClass(spanLi,['text-dark']);
-                                spanLi.append(document.createTextNode('[v] '+Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].name));
-                                spanLi.style.cursor='pointer';
-                                spanLi.onclick = function(){
-                                    console.log('ProjectReportVariable.createChosenStageVariable().onclick()\nSTAGE ID:');
-                                    console.log(stageId);
-                                    console.log(variable);
-                                    //console.log(Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v]);
-                                    //console.log(this);
-                                    //console.log(self.Modal.link['variablesEle']);
-                                    /* SET VARIABLE NAME */
-                                    self.Html.removeChilds(self.Modal.link['variablesLabel']);
-                                    self.Modal.link['variablesLabel'].append(document.createTextNode(Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].name));
-                                    /* SET VARIABLE VALUE */
-                                    self.Modal.link['variablesInput'].value=Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].value;
-                                    /* SHOW DIV */
-                                    self.Html.removeClass(self.Modal.link['variablesEle'],'d-none');
-                                    //self.t.Modal.link['variablesInput'];
-                                    self.Modal.link['variablesSaveButton'].onclick=function(){
-                                        if(self.Modal.link['variablesInput'].value!==Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].value){
-                                             /* SET CHANGE */
-                                            Report.data.change='y';
-                                            Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].value=self.Modal.link['variablesInput'].value;
-                                        }
-                                        //console.log(self.ChosenReport[0].data.change='y');
-                                        self.Html.addClass(self.Modal.link['variablesEle'],'d-none');  
-                                        self.Html.removeChilds(self.Modal.link['variablesLabel']);
-                                        //console.log(self.Modal.link['variablesInput'].value);
-                                        Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph.variable[v].value=self.Modal.link['variablesInput'].value;
-                                        //console.log('Actual Report change proeprty value:');
-                                        //console.log(Report.data.change);
-                                    };
-                                };
-                                spanLi.onmouseover = function (){
-                                    self.Html.removeClass(this,"text-dark");
-                                    self.Html.addClass(this,"text-purple");
-                                };
-                                spanLi.onmouseleave = function (){
-                                    self.Html.removeClass(this,"text-purple");
-                                    self.Html.addClass(this,"text-dark");
-                                };
-                                rowLi.append(spanLi);
-                                variable.list.append(rowLi);  
-                                variable.found=true;
-                        }
+                        this.getVariableEntry(Report,Report.stage[stageId].section[s].subsection[su].subsectionrow[r].paragraph,variable);
                         /* IMAGE */
-                        for(const i in Report.stage[stageId].section[s].subsection[su].subsectionrow[r].image){
-                            //console.log(Report.stage[stageId].section[s].subsection[su].subsectionrow[r].image[i]);
-                            //return true;
-                            let rowLi = document.createElement('li'); 
-                            let spanLi = document.createElement('span');
-                                this.Html.addClass(spanLi,['text-dark']);
-                                spanLi.append(document.createTextNode('[i] '+Report.stage[stageId].section[s].subsection[su].subsectionrow[r].image[i].property.name));
-                                spanLi.style.cursor='pointer';
-                                spanLi.onmouseover = function (){
-                                    self.Html.removeClass(this,"text-dark");
-                                    self.Html.addClass(this,"text-warning");
-                                };
-                                spanLi.onmouseleave = function (){
-                                    self.Html.removeClass(this,"text-warning");
-                                    self.Html.addClass(this,"text-dark");
-                                };
-                                rowLi.append(spanLi);
-                                variable.list.append(rowLi);  
-                                variable.found=true;
-                        }
+                        this.getImageEntry(Report,Report.stage[stageId].section[s].subsection[su].subsectionrow[r],variable);
                     }
                 }
             }
-           
         }
         catch(e){
             console.log(e);
             throw 'Application error occurred! Contact with Administrator!';
         }
-       //return document.createTextNode('');
+    }
+    getVariableEntry(Report,Paragraph,variable){
+        //console.log(Paragraph);
+        if(!Paragraph.hasOwnProperty('variable')){
+            throw 'No variable property';
+        }
+        var self=this;
+        for(const v in Paragraph.variable){
+            let entry=this.getEntryEle(Paragraph.variable[v].name,'v',"text-purple");
+                entry.onclick = function(){
+                    self.VariableAction.change(Report,Paragraph.variable,v);
+                };
+                variable.list.append(entry);  
+                variable.found=true;
+        }
+    }
+    getImageEntry(Report,Paragraph,variable){
+        //console.log('ProjectReportVariable.getImageEntry()');
+        //console.log(Paragraph);
+        if(!Paragraph.hasOwnProperty('image')){
+            throw 'No image property';
+        }
+        var self=this;
+        for(const i in Paragraph.image){
+            let entry=this.getEntryEle(Paragraph.image[i].property.name,'i',"text-warning");
+                entry.onclick = function(){
+                    self.ImageAction.change(Report,Paragraph.image,i);
+                };
+                variable.list.append(entry);  
+                variable.found=true;
+        }
+    }
+    getEntryEle(name,type,color){
+        //var self=this;
+        var li=document.createElement('li'); 
+        var span=document.createElement('span');
+            span.classList.add(color);    
+            span.append(document.createTextNode('['+type+'] '));
+        var span2=document.createElement('span');
+            span2.classList.add('text-dark');
+            span2.append(document.createTextNode(this.Utilities.cutName(name,55)));
+            span2.title=name;
+            span2.style.cursor='pointer';
+            span2.onmouseover = function (){
+                this.classList.remove("text-dark");
+                this.classList.add(color);
+            };
+            span2.onmouseleave = function (){
+                this.classList.remove(color);
+                this.classList.add("text-dark");
+            };
+            li.append(span,span2);
+        return li;
     }
 }

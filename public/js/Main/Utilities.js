@@ -69,4 +69,20 @@ class Utilities {
         }
         return value;
    };
+   cloneProperty(newObject,o){
+        console.log(o);
+        for(const prop in o){
+            //console.log(typeof o[prop]);
+            if(typeof o[prop] === 'object' ){
+                newObject[prop]=new Object();
+                this.cloneProperty(newObject[prop],o[prop]);
+            }
+            else{
+                newObject[prop]=o[prop];
+            }
+        };
+    }
+    getUid(prefix){
+        return prefix+(Math.floor(Math.random() * 10000000)).toString();
+    }
 }

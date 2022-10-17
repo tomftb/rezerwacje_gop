@@ -37,7 +37,7 @@ class Section{
         //var mainDiv=this.Html.getRow(); 
         this.Link.main=this.Html.getRow(); 
         //var mainDivHeader=this.creteSectionHead(iSection); 
-        this.Link.head=this.creteSectionHead(iSection); 
+        this.Link.head=this.getHead(iSection); 
         //var mainDivBody=this.Html.getCol(12); 
         this.Link.body=this.Html.getCol(12); 
             Helplink.section[iSection]={
@@ -53,7 +53,7 @@ class Section{
             //return mainDiv;
             return this.Link;
     }
-    creteSectionHead(isection){
+    getHead(isection){
         var mainDivHeader=this.Html.getCol(12); 
         var hr=document.createElement('hr');
             hr.setAttribute('class','w-100 border-1 border-secondary mt-2');//

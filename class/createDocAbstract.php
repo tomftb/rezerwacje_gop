@@ -166,6 +166,8 @@ class createDocAbstract {
     protected function secondCheckImage($Image){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->Log->log(0,$Image);
+        $this->Log->log(0,$Image->style);
+        $this->Log->log(0,gettype($Image->style->width));
         /* ONLY CHECK MAIN PROPERTY */ 
         self::checkPropertyStyle($Image);
         self::checkPropertyProperty($Image);

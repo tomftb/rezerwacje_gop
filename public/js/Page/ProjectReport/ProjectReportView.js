@@ -85,89 +85,15 @@ class ProjectReportView{
         return main;
     }
     getHeadDynamicVariable(){
-        var self=this;
-        var row=this.Html.getRow();
-            this.Html.addClass(row,['ml-1','mr-1','d-none']);
-        var col=this.Html.getCol(12);
-            this.Html.addClass(col,['border','border-purple']);
-        
-        /* LABEL VARIABLE NAME */
-        var span=document.createElement('span');
-        //var t2=document.createTextNode('Zmienna:');
-            this.Html.addClass(span,[,'text-dark','font-weight-normal']);
-        /* LABEL */
-        var p=document.createElement('p');
-        var t=document.createTextNode('Zmienna ');
-            this.Html.addClass(p,['h4','text-purple','m-0']);
-            p.append(t,span,document.createTextNode(' :'));
-            //p.append(t);
-           // p.append(span);
-            //p.append(document.createElement(' :'));
-        
-            //p2.append(t2);
-        /* TEXTAREA */
-        var input=document.createElement('textarea');
-            this.Html.addClass(input,['form-control','mb-1']);
-            input.setAttribute('rows','4');
-
-        /* BUTTONS */
-        var divRowButton=this.Html.getRow();
-             this.Html.addClass(divRowButton,['ml-1','mt-1','mb-1','mr-0']);
-        var divColButton=this.Html.getCol(12);
-            this.Html.addClass(divColButton,['text-right','pr-0']);
-        var divButton=document.createElement('div');
-            this.Html.addClass(divButton,['btn-group']);
-            divButton.setAttribute('role','group');
-            divButton.setAttribute('aria-label','BTN-VARIABLE-GROUP');
-        var buttonCancel=document.createElement('button');
-            buttonCancel.setAttribute('type','button');
-            this.Html.addClass(buttonCancel,['btn','btn-dark']);
-        var cancelText=document.createTextNode('Anuluj');  
-            buttonCancel.append(cancelText);
-            buttonCancel.onclick = function(){
-                self.Html.addClass(row,'d-none');  
-                self.Html.removeChilds(span);
-            };
-        var buttonSave=document.createElement('button');
-            buttonSave.setAttribute('type','button');
-            this.Html.addClass(buttonSave,['btn','btn-purple']);
-            divButton.append(buttonCancel,buttonSave);
-
-        var saveText=document.createTextNode('Zapisz');  
-            buttonSave.append(saveText);
-            divColButton.append(divButton);
-            divRowButton.append(divColButton);
-            col.append(p,input,divRowButton);
-            row.append(col);
-
-        /* SET LINKS */
-        this.Modal.addLink('variablesLabel',span);
-        this.Modal.addLink('variablesEle',row);
-        this.Modal.addLink('variablesInput',input);
-        this.Modal.addLink('variablesSaveButton',buttonSave);
+        var row=document.createElement('div');
+            row.classList.add('row','ml-1','mr-1','d-none');
+        this.Modal.addLink('variableShiftField',row);
         return row;
     }
-    /* NOT USED */
     getHeadDynamicImage(){
-        var row=this.Html.getRow();
-            this.Html.addClass(row,['ml-1','mr-1','mt-1','d-none']);
-        var col=this.Html.getCol(12);
-            this.Html.addClass(col,['border','border-warning']);
-        /* LABEL */
-        var p=document.createElement('p');
-        var t=document.createTextNode('Obraz:');
-            this.Html.addClass(p,['h4','text-warning']);
-            p.append(t);
-            /* TEXTAREA */
-        var input=document.createElement('input');
-            this.Html.addClass(input,['form-control-file','mb-1']);
-            input.setAttribute('type','file');
-            col.append(p);
-            col.append(input);
-            row.append(col);
-        /* SET LINKS */
-        this.Modal.addLink('imageEle',row);
-        this.Modal.addLink('imageInput',input);
+        var row=document.createElement('div');
+            row.classList.add('row','ml-1','mr-1','mt-1','d-none');
+        this.Modal.addLink('imageShiftField',row);
         return row;
     }
     getHeadAvailableStages(){
@@ -180,7 +106,7 @@ class ProjectReportView{
             return main;
     }
     getDataBody(){
-        console.log('ProjectReport::getReportDataBody()');
+        console.log('ProjectReportView::getReportDataBody()');
         /* */
         var rowDiv=this.Html.getRow();
              this.Html.addClass(rowDiv,['border-left','border-right','border-bottom','ml-1','mr-1','mt-0','mb-1','pt-0']);
@@ -203,7 +129,7 @@ class ProjectReportView{
             /* APPEND */
             rowDiv.appendChild(optionDiv);
             rowDiv.appendChild(dataDiv); 
-            console.log(rowDiv);
+            //console.log(rowDiv);
              /* APPEND AVAILABLE STAGE DATA */
             this.Modal.addLink('availableStages',optionDiv);
              /* APPEND CURRENT STAGE DATA */
@@ -259,6 +185,7 @@ class ProjectReportView{
             return(div); 
     }
     getChosenStageRow(){
+        console.log('ProjectReportView::getChosenStageRow()');
         var link={
             all:{},
             mvUp:{},

@@ -28,7 +28,7 @@ class TabStop{
         this.default = this.getDefault(p);
     }
     create(){//data
-        console.log('TabStop::create()');
+        //console.log('TabStop::create()');
         /* PUNKT TABULACJI */
         /* mainDiv - blok calosci */
         var main = document.createElement('DIV');
@@ -45,7 +45,7 @@ class TabStop{
         return main;
     }
     createList(){
-        console.log('TabStop::setData');
+        //console.log('TabStop::setData');
         for(var index in this.paragraph.data.tabstop){
             this.paragraph.list.appendChild(this.createListRow(index,this.paragraph.data.tabstop[index]));
         }
@@ -65,7 +65,7 @@ class TabStop{
         };                  
     }
     createInputRow(){
-        console.log('TabStop::createInputRow()');          
+        //console.log('TabStop::createInputRow()');          
         var divTool = document.createElement('DIV');
             divTool.classList.add('input-group');
             /* VALUE INPUT */
@@ -203,14 +203,14 @@ class TabStop{
         return divAll;
     }
     addButton(){
-        console.log('TabStop:addButton()');
+        //console.log('TabStop:addButton()');
         var self = this;
         var btnDiv = this.Html.addButton();
             btnDiv.classList.add('btn-sm','rounded-0');
             btnDiv.classList.remove('btn-success');
             btnDiv.classList.add('btn-warning');
             btnDiv.onclick = function(){
-                console.clear();
+                //console.clear();
                 var found = false;
                 var lp = 0;
                 /* REFERENCJA */
@@ -236,12 +236,12 @@ class TabStop{
                 };
                 /* EXCEPTION IF self.paragraph.property.tabstop = '-1' = NONE */
                 //throw 'stop-193';
-                console.log('Paragraph:');
-                console.log(self.paragraph);
-                console.log('Paragraph data property:');
-                console.log(self.paragraph.data.property);
-                console.log('Paragraph data property - tabstop:');
-                console.log(self.paragraph.data.property.tabstop);
+                //console.log('Paragraph:');
+                //console.log(self.paragraph);
+                //console.log('Paragraph data property:');
+                //console.log(self.paragraph.data.property);
+                //console.log('Paragraph data property - tabstop:');
+                //console.log(self.paragraph.data.property.tabstop);
                 if(self.paragraph.data.property.tabstop!=='-1'){
                     selectedData={
                         position: self.paragraph.data.tabstop[self.paragraph.data.property.tabstop].position,
@@ -268,9 +268,9 @@ class TabStop{
                         self.paragraph.data.tabstop[prop]['positionInMM']=self.paragraph.data.tabstop[prop].position;
                     }
                     
-                    console.log('ACT positionInMM');
-                    console.log(typeof(self.paragraph.data.tabstop[prop]['positionInMM']));
-                    console.log(self.paragraph.data.tabstop[prop]['positionInMM']);
+                    //console.log('ACT positionInMM');
+                    //console.log(typeof(self.paragraph.data.tabstop[prop]['positionInMM']));
+                    //console.log(self.paragraph.data.tabstop[prop]['positionInMM']);
                     if(self.paragraph.data.tabstop[prop]['positionInMM']<tmpData.positionInMM){
                         //console.log('LOWER');
                        newData.add(self.paragraph.data.tabstop[prop]);
@@ -341,10 +341,10 @@ class TabStop{
                  * UPDATE OBJECT TabStop data PROPERTY AND paragraph.tabsStop PROPERTY WITH NEW TAB STOP
                  */
                 self.paragraph.data.tabstop = newData.data;
-                console.log('Paragraph data tabstop list:');
-                console.log(self.paragraph.data.tabstop);
-                console.log('Paragraph data tabstop list (newData):');
-                console.log(newData.data);
+                //console.log('Paragraph data tabstop list:');
+                //console.log(self.paragraph.data.tabstop);
+                //console.log('Paragraph data tabstop list (newData):');
+                //console.log(newData.data);
             };
         return btnDiv;
     }

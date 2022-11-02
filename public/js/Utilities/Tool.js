@@ -38,6 +38,7 @@ class Tool{
             input.type=data.attributes['type'];
             //input.setAttribute('type','number');
             this.setOnChange(input,data);
+            this.setOnClick(input,data);
             return input;
     }
     getSelect(data){
@@ -70,6 +71,14 @@ class Tool{
         };
         ele.onchange = function(){
             data.onchange(this);
+        };
+    }
+    setOnClick(ele,data){
+        if(!data.hasOwnProperty('onclick')){
+            return null;
+        };
+        ele.onclick = function(){
+            data.onclick(this);
         };
     }
     setOnFocus(ele,data){

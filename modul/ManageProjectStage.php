@@ -22,11 +22,13 @@ class ManageProjectStage extends ManageProjectStageDatabase
     # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getprojectsstagelike(){ 
         $this->Log->log(0,"[".__METHOD__."]");
-        $data['data']=self::getAllStage();
+        $data['data']=self::getAllStage(filter_input(INPUT_GET,'p'));
         $data['headTitle']='Etapy';
         $this->utilities->jsonResponse($data,'');
     }
-    public function getAllStage(){
+    public function getAllStage($part){
+        $this->Log->log(0,"[".__METHOD__."]part:");
+        $this->Log->log(0,$part);
         /*FILTER_SANITIZE_STRING => Remove all HTML tags from a string:*/
         //$f="%".filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING)."%";
         $f=htmlentities(nl2br(filter_input(INPUT_GET,'filter')), ENT_QUOTES,'UTF-8',FALSE);
@@ -34,23 +36,23 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $this->Log->logMulti(0,filter_input_array(INPUT_GET));
         $where='';
         $parm=[];
-
+        
         if(is_numeric($f)){
             $this->Log->log(0,"[".__METHOD__."] filter is numeric ");
             $f_int=intval($f,10);
             $parm[':id']=array($f_int,'INT');
             $parm[':number']=array($f_int,'INT');
-            $where="WHERE s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`id` LIKE (:id) OR s.`number` LIKE (:number) OR s.`title` LIKE :title) ORDER BY s.`id` ASC";
+            $where="WHERE s.`part`=:part AND s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`id` LIKE (:id) OR s.`number` LIKE (:number) OR s.`title` LIKE :title) ORDER BY s.`id` ASC";
         }
         else{
             $this->Log->log(0,"[".__METHOD__."] filter not numeric ");
-            $where="WHERE s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`title` LIKE :title) ORDER BY s.`id` ASC";
+            $where="WHERE s.`part`=:part AND s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`title` LIKE :title) ORDER BY s.`id` ASC";
         }
         $this->inpArray['wskb']=$this->Items->unsetBlock($this->Items->setGetWsk('b'),'slo_project_stage','buffer_user_id',$_SESSION['userid']);
         $parm[':wsk_u']=[$this->Items->setGetWsk('d'),'STR'];
         $parm[':wsk_v']=[$this->Items->setGetWsk('v'),'STR'];
+        $parm[':part']=[$part,'STR'];
         $parm[':title']=['%'.$f.'%','STR'];
-        
         /* 
          * TO DO => SEARCH IN VALUE (LEFT JOIN)
            $query_data[':value']=array('%'.$f.'%','STR');
@@ -89,10 +91,11 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $data['variable'] = $Variable->getSimpleAll();
         $this->utilities->jsonResponseData($data);
     }
+
     public function psShortDetails(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->utilities->setGet('id',$this->inpArray);
-        $this->utilities->jsonResponseData(parent::getStageFullData($this->inpArray['id']));
+        $StageUtilities=new ManageProjectStageUtilities();
+        $this->utilities->jsonResponseData($StageUtilities->removeImageid(parent::getStageFullData(filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT))));
     }
     private function setChangeState(){
         $this->data=$this->Items->setPostId();
@@ -110,7 +113,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $this->Items->setBlock($this->data['id'],"slo_project_stage","buffer_user_id",'');
         //Throw new Exception('TEST'.__LINE__,0);
         //$this->utilities->jsonResponse(self::getPro,'cModal');
-        self::getprojectsstagelike();
+        self::getprojectsstagelike('b');
     }
     public function psDelete(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -118,7 +121,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
         parent::deleteStage();
         $this->Items->setBlock($this->data['id'],"slo_project_stage","buffer_user_id",'');
         //$this->utilities->jsonResponse('','cModal');
-        self::getprojectsstagelike();
+        self::getprojectsstagelike('b');
     }
     public function psCreate()
     {
@@ -449,7 +452,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
         }
         $id=parent::manageStage();  
         //self::getprojectsstagelike();
-        $this->utilities->jsonResponse(self::getStageFullData($id),'Zapis się powiódł');   
+        $this->utilities->jsonResponse(parent::getStageFullData($id),'Zapis się powiódł');   
     }
     private function checkValue($key='',&$prefix){
         $this->Log->log(0,"[".__METHOD__."]\r\nKEY - ".$key); 
@@ -482,7 +485,15 @@ class ManageProjectStage extends ManageProjectStageDatabase
     }
     public function uploadTmpStageImage(){
         $this->Log->log(0,"[".__METHOD__."]"); 
-        $this->utilities->jsonResponse(self::uploadImage(TMP_UPLOAD_DIR),'');           
+        /* TO STRING */
+        $image=self::uploadImage(TMP_UPLOAD_DIR);
+        //print_r($image);
+        foreach($image as &$v){
+            foreach($v as &$v2){
+                $v2=strval($v2);
+            }    
+        }
+        $this->utilities->jsonResponse($image,'');           
     }
     private function uploadImage($DIR=''){
         $File = New FileImage();

@@ -4,14 +4,14 @@ class ProjectVariable{
     Items= new Object ();
     defaultTask='getProjectVariablesLike&u=0&v=0&b=';    
     constructor(Items) {
-        console.log('ProjectVariable::constructor()');
+        //console.log('ProjectVariable::constructor()');
         this.Items = Items;
         this.VariableTable = new ProjectVariableTable(this);  
         this.VariableTable.setProperties(Items.appurl,Items.router,this.defaultTask);
         this.VariableCreate = new ProjectVariableCreate(this);
     }
     show(task){
-        console.log('ProjectVariable::show()');
+        //console.log('ProjectVariable::show()');
         if(task){
             this.runShow(task);
         }
@@ -20,8 +20,8 @@ class ProjectVariable{
         }
     }
     runShow(t){
-        console.log('ProjectVariable::runShow()');
-        console.log(t);
+        //console.log('ProjectVariable::runShow()');
+        //console.log(t);
         /* SET PAGE TITLE */
         document.getElementById('headTitle').innerHTML='Zmienne';   
         this.Items.default={
@@ -34,7 +34,7 @@ class ProjectVariable{
     }
     create(){
         try{
-            console.log('ProjectVariable::create()');
+            //console.log('ProjectVariable::create()');
             this.Items.default={
                 task:this.defaultTask,
                 object:this,
@@ -65,7 +65,7 @@ class ProjectVariable{
         };
     }
     prepare(response,btnLabel,btnClass){
-        console.log('ProjectVariable::prepare()');
+        //console.log('ProjectVariable::prepare()');
         /* SET UP STAGE DATA */
         var data=this.Items.parseResponse(response);
             this.Items.Modal.clearData();
@@ -82,7 +82,7 @@ class ProjectVariable{
        return run;          
     }
     hide(response){
-        console.log('ProjectVariable::hide()');
+        //console.log('ProjectVariable::hide()');
         try{
             this.prepare(response,'Ukryj','secondary');
         }

@@ -1,7 +1,12 @@
 <?php if(!defined("APP_URL")){ die('Direct access not permitted');} ?>
-<div class="container-fluid pl-0 pr-5 mr-5"  style="margin-top:-65px; position:fixed; z-index:996;">
+<div class="container-fluid pl-0 pr-5 mr-5"  style="margin-top:-100px; position:fixed; z-index:996;">
     <div class="row">
-        <div class="col-4" >
+        <div class="col-12" >
+            <h2 class="text-center mb-2 m-0 text-info">Elementy projektu (<span id="headTitle"></span>):</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6 mb-0 mt-0" >
             <div class="btn pull-left mt-0" > 
                 <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
                     <div class="btn-group" role="group">
@@ -43,13 +48,34 @@
                         <!--<a class="dropdown-item" href="#">Pokaż</a>-->
                       </div>
                     </div>
+                     <div class="btn-group" role="group">
+                      <button class="btn btn-brown text-white" type="button" onclick="Items.Stage.showHeading()">
+                        Nagłówek
+                      </button>
+                      <button type="button" class="btn btn-brown dropdown-toggle dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                      </button>
+                      <div class="dropdown-menu bg-brown text-white">
+                        <a id="createConst" class="dropdown-item bg-brown text-white" onclick="Items.Stage.createHeading()" href="#">Dodaj</a>
+                        <!--<a class="dropdown-item" href="#">Pokaż</a>-->
+                      </div>
+                    </div>
+                     <div class="btn-group" role="group">
+                      <button class="btn btn-brown text-white" type="button" onclick="Items.Stage.showFooter()">
+                        Stopka
+                      </button>
+                      <button type="button" class="btn  btn-brown dropdown-toggle dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                      </button>
+                      <div class="dropdown-menu bg-brown text-white">
+                        <a id="createConst" class="dropdown-item bg-brown text-white" onclick="Items.Stage.createFooter()" href="#">Dodaj</a>
+                        <!--<a class="dropdown-item" href="#">Pokaż</a>-->
+                      </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-4" >
-            <h2 class="text-center mb-3 mt-1 text-info">Elementy projektu (<span id="headTitle"></span>):</h2>
-        </div>
-        <div class="col-4" >
+        <div class="col-6 mb-0 mt-0" >
                     <!--
                     <div class="form-group form-check mt-0">
                     <label class="form-check-label">
@@ -80,6 +106,7 @@
                     </div>
             </div>
         </div>
+    
     </div>
 <!-- LEGEND -->
 <div class="modal fade mb-0 pb-0 col-sm-12" id="legendDiv">

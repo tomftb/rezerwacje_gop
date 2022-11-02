@@ -6,7 +6,7 @@ class ProjectConstant{
     defaultTask='getprojectsconstantslike&u=0&v=0&b=';
     Utilities = new Object();
     constructor(Items) {
-        console.log('ProjectConstant::constructor()');
+        //console.log('ProjectConstant::constructor()');
         this.Items = Items;
         this.Utilities = Items.Utilites;
         this.ConstantTable = new ProjectConstantTable(this);  
@@ -14,7 +14,7 @@ class ProjectConstant{
         this.ConstantCreate = new ProjectConstantCreate(this);
     }
     show(){
-        console.log('ProjectConstant::show()');  
+        //console.log('ProjectConstant::show()');  
         /* SET PAGE TITLE */
         document.getElementById('headTitle').innerHTML='Stałe';
         //console.log(this.ConstantTable);     
@@ -23,7 +23,7 @@ class ProjectConstant{
             object:this,
             method:'show'
         };
-        console.log(this.defaultTask); 
+        //console.log(this.defaultTask); 
         this.ConstantTable.run(this.Items.router+this.defaultTask);
     }
     create(){

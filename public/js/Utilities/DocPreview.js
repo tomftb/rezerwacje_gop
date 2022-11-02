@@ -8,37 +8,45 @@ class DocPreview extends DocPreviewPage{
     RomanList = new Object();
     AlphabeticalList = new Object();
     
-    helplink = new Object();
-    data = new Object();
+
     constructor(){
         super();
-        console.log('DocPreview::constructor()');
-        
+        //console.log('DocPreview::constructor()');
         this.Style = new Style();
         this.RomanList = new RomanList();
         this.AlphabeticalList = new AlphabeticalList();
-
     }
     run(helplink,data){
-        console.log('DocPreview::setData()');
+        console.log('DocPreview.run()');
         this.helplink=helplink;
         this.data=data;
-        this.setPageValue();
+        this.setPageValue('body','checkNewPage');
     }
-
-    setPageValue(){
+    runFooter(helplink,data){
+        console.log('DocPreview.runFooter()');
+        this.helplink=helplink;
+        this.data=data;
+        this.setPageValue('footer','noNewPage');
+    }
+    runHeading(helplink,data){
+        console.log('DocPreview.runHeading()');
+        this.helplink=helplink;
+        this.data=data;
+        this.setPageValue('heading','noNewPage');
+    }
+    setPageValue(part,checkNewPage){
         // console.log('DocPreview::setPageValue()');
         var writePageSectionWidth=607;
         var subsectionCount=0;
         var firstSection = true;
         var blankPage = super.getPage();
-
         /* LOOP OVER  SECTION */   
         console.log(this.data.section);
         //throw 'aaa';
         for(const property in this.data.section){
             
-            blankPage = this.checkNewPage(firstSection,this.data.section[property],blankPage);
+            blankPage = this[checkNewPage](firstSection,this.data.section[property],blankPage,part);
+            console.log(blankPage);
             //var writePage = 
             subsectionCount=Object.keys(this.data.section[property].subsection).length;
             /* CHECK AND SETUP COLUMNS NUMBER */
@@ -48,14 +56,17 @@ class DocPreview extends DocPreviewPage{
             console.log(subsectionCount);
             console.log(this.data.section[property]);
             var divSection=document.createElement('div');
+                //divSection.style.backgroundColor=this.data.style.backgroundColor;
                 divSection.style.width='699px';
                 divSection.style.border='0px solid green';
                 divSection.style.margin='0px';
                 divSection.style.padding='0px 0px 0px 0px';
+                console.log(divSection);
                 //divSection.style.display='block';
             //throw 'aaaa';
             for(var i=0;i<subsectionCount;i++){
                 var writePageSection=document.createElement('div');
+                    //writePageSection.style.backgroundColor=this.data.style.backgroundColor;
                     writePageSection.style.width=writePageSectionWidth+'px';
                     writePageSection.style.border='0px solid blue';
                     writePageSection.style.margin='0px';
@@ -96,28 +107,37 @@ class DocPreview extends DocPreviewPage{
                 /* IMPORTANT Why I am getting Element offsetHeight "0"? even element original height is not showing */
 
                 divSection.appendChild(writePageSection);
-                blankPage.childNodes[0].appendChild(divSection);
+                blankPage[part].appendChild(divSection);
             }
         firstSection = false;
         /* END LOOP OVER SECTION */     
         };
     }
-    checkNewPage(firstSection,property,blankPage){
+    checkNewPage(firstSection,property,blankPage,part){
         console.log('DocPreview::checkNewPage()');
-        
         if(firstSection){
             /* UPDATE PAGE ATTRIBUTES */
-            blankPage.style.backgroundColor=property.style.backgroundColor;
+            //blankPage[part].style.backgroundColor=property.style.backgroundColor;
             return blankPage;
         }
         if(property.property.valuenewline==='y'){
             console.log('SET NEW BLANK PAGE');
             var newBlankPage = super.getPage();
              /* UPDATE PAGE ATTRIBUTES */
-            newBlankPage.style.backgroundColor=property.style.backgroundColor;
+            //newBlankPage.style.backgroundColor=property.style.backgroundColor;
             console.log(newBlankPage);
             return newBlankPage;
         }
+        return blankPage;
+    }
+    noNewPage(firstSection,property,blankPage,part){
+        /* SET OPACITY - MS WORD SET 0.5 */
+        //blankPage[part].style.backgroundColor=property.style.backgroundColor;
+        
+        blankPage[part].style.opacity='0.5';
+        //console.log(blankPage[part].style);
+        //throw 'aaaaaaa';
+        //blankPage[part].style.opacity='0,6';
         return blankPage;
     }
     setPageValueEle(mainDiv,row,actLvl,lastLevelCounter,lastParagraphType,firstLine){

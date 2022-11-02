@@ -3,13 +3,12 @@
  * CLASS TableNew -> js/Main/TableNew.js
  * CLASS Xhr -> js/Main/Xhr.js
  */
-console.log(window.appUrl);
 var error = false;
 class ProjectItems{
     Modal = new Object();
     Html = new Object();
     router='';
-    appurl='';
+    appUrl='';
     /* FOR TABLE */
     Xhr = new Object();
     /* FOR MODAL */
@@ -20,7 +19,8 @@ class ProjectItems{
     Table = new Object();
     ErrorStack = new Object();
     Department = new Object();
-
+    Footer=new Object();
+    Heading=new Object();
     loadModal;
     //defaultTask='getprojectsstagelike&d=0&v=0&b=';
     default={
@@ -30,12 +30,10 @@ class ProjectItems{
     };
     
     Glossary=new Object();
-
-
-    constructor(appurl,url){
-        console.log('ProjectItems::constructor()'); 
-        this.setUrl(appurl,url);
-       
+    constructor(appUrl,url){
+        //console.log('ProjectItems::constructor()'); 
+        this.setUrl(appUrl,url);
+        this.Parse=new Parse();
         this.Html=new Html();
         this.Modal=new Modal();
         this.ErrorStack = new ErrorStack();
@@ -51,7 +49,8 @@ class ProjectItems{
         };
         this.Utilities = new Utilities();
         this.setLoadInfo();
-        this.setLoadModalInfo(this.Xhr2); 
+        //this.setLoadModalInfo(this.Xhr2); 
+        this.Modal.setLoad(this.Xhr2,appUrl);
         this.Xhr2.setOnError(this.modalXhrError()); 
         this.Constant=new ProjectConstant(this);  
         this.Variable=new ProjectVariable(this); 
@@ -73,8 +72,13 @@ class ProjectItems{
         this.Xhr.run(this.getXhrParm('GET','getNewStageDefaults&type=tx','setUpGlossary'));
     }
     setUpGlossary(response){
+        //console.log('ProjectItems.setUpGlossary()');
         var data = this.setTableResponse(response);
         //console.log(data);
+        //console.log(typeof(data));
+        if(!data.hasOwnProperty('data')){
+            return false;
+        }
         this.Glossary['text'].fill(data.data.value['text']);
         this.Glossary['list'].fill(data.data.value['list']);
         this.Glossary['image'].fill(data.data.value['image']);
@@ -84,14 +88,14 @@ class ProjectItems{
         /* run default table table */
         this.Stage.show();
     }
-    setUrl(appurl,url){
+    setUrl(appUrl,url){
         //console.log('ProjectItems::setUrl()'); 
         this.router=url;
-        this.appurl=appurl; 
+        this.appUrl=appUrl; 
     }
     getJsonResponse(errLink,response){
-        console.log('ProjectItems::getJsonResponse()');
-        console.log(response);
+        //console.log('ProjectItems::getJsonResponse()');
+        //console.log(response);
         try {
             return JSON.parse(response);    
         }
@@ -117,11 +121,7 @@ class ProjectItems{
             return false;
         }
     }
-    setModalError(response){
-        console.log('ProjectItems::setModalError()');
-        console.log(response);
-        this.Html.showField(this.Modal.link['error'],response);
-    }
+
     unsetError(ele){
         ProjectItems.Html.hideAndClearField(ele);
     }
@@ -167,7 +167,7 @@ class ProjectItems{
         try{
             ProjectItems.Modal.setLink();
             ProjectItems.Modal.clearData();
-            ProjectItems.Modal.loadNotify='<img src="'+ProjectItems.appurl+'/img/loading_60_60.gif" alt="load_gif">';
+            ProjectItems.Modal.loadNotify='<img src="'+ProjectItems.appUrl+'/img/loading_60_60.gif" alt="load_gif">';
             ProjectItems.Modal.showLoad();
         }
         catch (error){
@@ -215,7 +215,7 @@ class ProjectItems{
             keyboard: false  // to prevent closing with Esc button
         });
         // REMOVE data-dismiss="modal" 
-        console.log(this.Modal.link['close'].parentNode);
+        //console.log(this.Modal.link['close'].parentNode);
         this.Modal.link['close'].parentNode.removeAttribute('data-dismiss');
     }
     setCloseModal(run){//classToRun,methodToRun,taskToRun,
@@ -234,8 +234,8 @@ class ProjectItems{
                         return false;
                     }
                }
-               console.log('run');
-               console.log(run);
+               //console.log('run');
+               //console.log(run);
                if (confirm('Wyjść?') === true) {
                     run();
                 }
@@ -256,10 +256,10 @@ class ProjectItems{
         };
     }
     reloadData(classToRun,methodToRun,taskToRun){
-        console.log('ProjectItems::reloadData()');
-        console.log(classToRun);
-        console.log(methodToRun);
-        console.log(taskToRun);
+        //console.log('ProjectItems::reloadData()');
+        //console.log(classToRun);
+        //console.log(methodToRun);
+        //console.log(taskToRun);
         /* CLEAR TABLE */
         this.Table.clearTable();   
         /*
@@ -355,48 +355,27 @@ class ProjectItems{
         this.Xhr.setOnLoadStart(start);
         this.Xhr.setOnLoadEnd(end);
     }
-    setLoadModalInfo(Xhr){
-        //console.log('ProjectItems::setLoadModalInfo()');
-        var M = this.Modal;
-            M.loadNotify='<img src="'+window.appUrl+'/img/loading_60_60.gif" alt="load_gif">';
-        var start = function(){
-                M.showLoad(); 
-            };
-        var end = function(){
-                M.hideLoad();
-            };
-        Xhr.setOnLoadStart(start);
-        Xhr.setOnLoadEnd(end);
-    }
     parseResponse(response){
         //console.log('ProjectItems::parseResponse()');
         try {
-            var data = JSON.parse(response);  
+            var json=this.Parse.getJson(response);
+            //var data = JSON.parse(response);  
         }
-        catch (error){
-            console.log('RESPONSE:');
+        catch (e){
+            console.log('ProjectItems.parseResponse()');
             console.log(response);
             console.log('ERROR:');
-            console.log(error);
+            console.log(e);
             this.ErrorStack.add('main','Application error occurred! Contact with Administrator!');
             throw 'Application error occurred! Contact with Administrator!';
             return false;
         }
-       
-        if (!('status' in data) || !('info' in data)){
-            //console.log(data);
+        if(json.error!==''){
+            console.log(json.error);
             this.ErrorStack.add('main','Application error occurred! Contact with Administrator!');
             throw 'Application error occurred! Contact with Administrator!';
         }
-        else if(data.status===1){
-            //this.ErrorStack.add('main',data.info);
-            throw data.info;
-        }
-        else{
-            
-            return data;       
-        }   
-        return data;
+        return json.value;
     }
     setChangeDataState(i,t,f,g,btnLabel,titleClass,o,m,ta){
         //console.log('ProjectItems::setChangeDataState()');
@@ -467,12 +446,12 @@ class ProjectItems{
     }
     
     closeModal(){
-        console.log('ProjectItems::closeModal()');
+        //console.log('ProjectItems::closeModal()');
         window.onbeforeunload = null;
         $(this.Modal.link['main']).modal('hide');
     }
     setTableResponse(response){
-        console.log('ProjectItems::setTableResponse()');
+        //console.log('ProjectItems::setTableResponse()');
         //console.log(response);
         try {
             return this.parseResponse(response);
@@ -486,8 +465,8 @@ class ProjectItems{
         return {};
     }
     setModalResponse(response){
-        console.log('ProjectItems::setModalResponse()');
-        console.log(response);
+        //console.log('ProjectItems::setModalResponse()');
+        //console.log(response);
         try {
             this.parseResponse(response);
             /* CLOSE MODAL IF OK */
@@ -530,7 +509,7 @@ class ProjectItems{
             win.focus();
     }
     setUpModalData(response){
-        console.log('ProjectItems::setUpModalData()');
+        //console.log('ProjectItems::setUpModalData()');
         var data={};
         try {
             data=this.parseResponse(response);
@@ -544,8 +523,8 @@ class ProjectItems{
     modalXhrError(){
         //console.log('ProjectItems::modalXhrError()');
          var xhrError={
-            o:this,
-            m:'setModalError'
+            o:this.Modal,
+            m:'setError'
         };
         return xhrError;
     }
@@ -560,7 +539,7 @@ class ProjectItems{
         return i;
     }
     successfully(){
-        console.log('ProjectItems.successfully()');
+       // console.log('ProjectItems.successfully()');
     }
 }
 try{

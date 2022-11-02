@@ -18,6 +18,7 @@ final class ManageProjectReport extends ManageProjectReportDatabase implements I
         parent::__construct();
         $this->Log=Logger::init(__METHOD__);       
     }
+    
     public function getProjectReportDoc(){
         $this->Log->log(0,"[".__METHOD__."]");
         
@@ -30,6 +31,8 @@ final class ManageProjectReport extends ManageProjectReportDatabase implements I
         //print_r($dataJson);
         if(!property_exists($dataJson,'data')){Throw New Exception ('POST PROJECT REPORT data KEY NOT EXIST',1);}
         if(!property_exists($dataJson,'stage')){Throw New Exception ('POST PROJECT REPORT stage KEY NOT EXIST',1);}
+        if(!property_exists($dataJson,'footer')){Throw New Exception ('POST PROJECT REPORT footer KEY NOT EXIST',1);}
+        if(!property_exists($dataJson,'heading')){Throw New Exception ('POST PROJECT REPORT heading KEY NOT EXIST',1);}
         //echo gettype($dataJson->stage)."\n"; 
         foreach($dataJson->stage as $s){
                 $stageExists=true;
@@ -44,25 +47,47 @@ final class ManageProjectReport extends ManageProjectReportDatabase implements I
         /* SWAP VARIABLE PROPERTY KEY WITH VALUE */
         foreach($dataJson->stage as $s){
             //print_r($s);
-            $variable->parseStageVariable($s);
+            $variable->parsePartVariable($s);
+        }
+        foreach($dataJson->heading as $s){
+            //print_r($s);
+            $variable->parsePartVariable($s);
+        }
+        foreach($dataJson->footer as $s){
+            //print_r($s);
+            $variable->parsePartVariable($s);
         }
         $Doc = new createDoc($dataJson,[],'ProjectReport','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
         $Doc->genProjectReport();
         $this->Utilities->jsonResponse($Doc->getDocName(),'');
     }
-     public function genProjectReportTestDoc(){
-        $this->Log->log(0,"[".__METHOD__."]");
+    private function preareReportTestDoc(){
         $post=filter_input_array(INPUT_POST);
-        /* parse data */
+         /* parse data */
         if(empty($post)){ Throw New Exception ('NO STAGE REPORT DATA',0);}
         if(!array_key_exists('stage', $post)){Throw New Exception ('POST STAGE DATA KEY NOT EXIST',1);}
         $dataJson=json_decode($post['stage']);
-        /* SWAP VARIABLE PROPERTY KEY WITH VALUE */
+         /* SWAP VARIABLE PROPERTY KEY WITH VALUE */
         $variable = New ManageProjectVariable();
-        $variable->parseStageVariable($dataJson);
-        $doc = new createDoc($dataJson,[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
-        $doc->genReportStage();        
-        //FileDownload::getFile(APP_ROOT.UPLOAD_PROJECT_DOC_DIR,$doc->getDocName());
+        $variable->parsePartVariable($dataJson);
+        return $dataJson;
+    }
+    public function genProjectReportTestDocFooter(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $doc = new createDoc(self::preareReportTestDoc(),[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
+        $doc->genReportStageFooter();
+        $this->Utilities->jsonResponse($doc->getDocName(),'downloadProjectReportDoc');
+    }
+    public function genProjectReportTestDocHeading(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $doc = new createDoc(self::preareReportTestDoc(),[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
+        $doc->genReportStageHeading();
+        $this->Utilities->jsonResponse($doc->getDocName(),'downloadProjectReportDoc');
+    }
+     public function genProjectReportTestDoc(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $doc = new createDoc(self::preareReportTestDoc(),[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
+        $doc->genReportStage();
         $this->Utilities->jsonResponse($doc->getDocName(),'downloadProjectReportDoc');
     }
     public function setProjectReportImage(){
@@ -70,15 +95,21 @@ final class ManageProjectReport extends ManageProjectReportDatabase implements I
         self::uploadFiles(APP_URL."router.php?task=showProjectTmpReportFile&file=",TMP_UPLOAD_DIR); 
         $this->Utilities->jsonResponse($this->files,'showReportPreview'); 
     }
+    private function getProjectReportFullData($id=0){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $stage=new ManageProjectStage();
+        $v['id']=$id;
+        $v['all']=$stage->getAllStage('b');
+        $v['footer']=$stage->getAllStage('f');
+        $v['heading']=$stage->getAllStage('h');
+        $v['act']=parent::getReport(['id_project'=>[$id,'INT']]);
+        $v['department']=$this->DatabaseUtilities->getUserDepartment($_SESSION['userid']);
+        return $v;
+    }
     public function getProjectReportData(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->Utilities->setGet('id',$this->inpArray);
-        $stage=new ManageProjectStage();
-        $v['id']=$this->inpArray['id'];
-        $v['all']=$stage->getAllStage();
-        $v['act']=parent::getReport(['id_project'=>[$this->inpArray['id'],'INT']]);
-        $v['department']=$this->DatabaseUtilities->getUserDepartment($_SESSION['userid']);
-        $this->Utilities->jsonResponse($v,'pReportOff'); 
+        $this->Utilities->jsonResponse(self::getProjectReportFullData($this->inpArray['id']),'pReportOff'); 
     }
     private function uploadFiles($linkToFile='',$uploadDir=''){
         $this->modul['FILE']=NEW File();
@@ -170,7 +201,8 @@ final class ManageProjectReport extends ManageProjectReportDatabase implements I
     public function saveProjectReport(){
         $this->Log->log(0,"[".__METHOD__."]");
         $Report=json_decode(filter_input(INPUT_POST,'data'));
+        //$this->Log->log(0,$Report);
         $idReport=parent::updateReport($Report);
-        $this->Utilities->jsonResponse(['SAVED SUCCESSFULY',$idReport],'');
+        $this->Utilities->jsonResponse(parent::getReportById(['id'=>[$idReport,'INT']]),'Zapis się powiódł'); 
     }
 }

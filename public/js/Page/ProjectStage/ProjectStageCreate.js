@@ -1,5 +1,4 @@
 /*
- * 
  * Author: Tomasz Borczynski
  */
 class ProjectStageCreate{
@@ -11,43 +10,50 @@ class ProjectStageCreate{
     XhrTable=new Object();
     TabStop = new Object();
     StageData = new Object();
-    Department=new Object();
-    //Tool = new Object();
+    /*
+     * DOC PART:
+     * b - body
+     * h - head
+     * f - footer
+     */
+    part='b';
+    type='l';
+    CreateProperty={
+        modal:{
+            title:'Dodaj etap projektu - tekst',
+            bg:'bg-info'
+        },
+        preview:{
+            f:'run'
+        }
+    };
     ProjectStageTool = new Object();
     /* FIELD COUNTER */
     i=0;
-    sectionCount=1;
-    /* FLOAT */
-    //ejectionMultiplier=0.0;
-    
+    sectionCount=1;    
     link={};
     helplink={};
     resonse; 
     Glossary={};
-        //'text':{},
-       // 'list':{}
-    //};
     /* rename data to stageData */
     data={};
     stageData={};
     fieldDisabled=false;
     /* CREATE TEXT DEFAULT DATABASE PROPERTY */
     Property={};
-    /* CREATE TEXT DEFAULT DATABASE DEPARTMENT LIST */
-    DepartmentData={};
-       // subsectionRowNewLine:'n'
-    //};
     ErrorStack=new Object();
     Utilites = new Object();
     Variable=new Object();
     VariableList=new Object();
-    type='l';
     
     constructor(Parent){
-        console.log('ProjectStageCreate::constructor()');
+        //console.log('ProjectStageCreate::constructor()');
+       
         /*
          * Stage - object
          */
+        this.router=Parent.Items.router;
+        this.appUrl=Parent.Items.appUrl;
         this.Modal=Parent.Items.Modal;
         this.Items=Parent.Items;
         this.Stage=Parent;
@@ -62,55 +68,118 @@ class ProjectStageCreate{
         this.ProjectStageTool = new ProjectStageTool();
         this.ProjectStageTool.setParent(this);
         this.Variable=Parent.Items.Variable;
-        this.Department=Parent.Items.Department;
+   
+        /* SECTION CLASS */
+        this.Section=new Section(Parent.Items.Html,this.Utilities);
+        /* ROW CLASS */
+        this.SubSection=new SubSection(Parent.Items.Html,this.Utilities);
+        /* Page/Head.js */
+        this.ProjectStageCreateHead=new ProjectStageCreateHead(this,Parent.Items.Department);
+    }
+    prepareText(response){
+        this.CreateProperty={
+            modal:{
+                title:'Dodaj etap projektu - tekst',
+                bg:'bg-info'
+            },
+            preview:{
+                f:'run'
+            },
+            doc:{
+                f:'genProjectReportTestDoc'
+            }
+        };
+        this.prepare(response);
+        /* SETUP MODAL */
+        this.setUpTextModal();
+    }
+    prepareList(response){      
+         this.CreateProperty={
+            modal:{
+                title:'Dodaj etap projektu - tekst',
+                bg:'bg-info'
+            },
+            preview:{
+                f:'run'
+            }
+        };
+        this.prepare(response);
+        this.setUpListModal();
+    }
+    prepareHeading(response){
+         this.CreateProperty={
+            modal:{
+                title:'Dodaj nagłówek',
+                bg:'bg-brown'
+            },
+            preview:{
+                f:'runHeading'
+            },
+            doc:{
+                f:'genProjectReportTestDocHeading'
+            }
+        };
+        this.prepare(response);
+        this.setUpHeadingModal();
+    }
+    prepareFooter(response){
+        this.CreateProperty={
+            modal:{
+                title:'Dodaj stopke',
+                bg:'bg-brown'
+            },
+            preview:{
+                f:'runFooter'
+            },
+            doc:{
+                f:'genProjectReportTestDocFooter'
+            }
+        };
+        this.prepare(response);
+        this.setUpFooterModal();
     }
     prepare(response){
-        console.log('ProjectStageCreate::prepare()');
-        console.log(response);
         try{
             this.VariableList=this.Items.parseResponse(response).data.value;
-            console.log(this.VariableList);
+                //console.log(this.VariableList);
             this.TabStop = new TabStop();
              /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
-            /* SET STAGE CREATE TEXT DEFAULT DEPARTMENT LIST */
-            this.DepartmentData=this.Stage.Property.department;
-            this.StageData = new StageData(this.Glossary,this.Stage.Property,this.type,null);
+            this.StageData = new StageData();
+            this.StageData.setProperty(this.Glossary,this.Stage.Property,this.type,null,this.part);
              /* SETUP CLEAR STAGE DATA */
             this.StageData.createDefault();
-            console.log(this.ErrorStack);
+            //console.log(this.ErrorStack);
             this.ErrorStack.clearStack();
         } 
         catch(err){
-            console.log('ProjectStageCreate::create()\r\nERROR:');
+            console.log('ProjectStageCreate.prepare()\rERROR:');
             console.log(err);
             throw 'An Application Error Has Occurred!';
         };
-        /* SETUP MODAL */
-        this.setUpModal();
+        
     }
-    create(type){
-        console.clear();
-        console.log('ProjectStageCreate::create(type)');
-        this.type=type;
-        try{
-            this.Xhr.run({
-                t:'GET',
-                u:this.Items.router+'getProjectVariablesSimpleList&u=0&v=0&b=0',
-                c:true,
-                d:null,
-                o:this,
-                m:'prepare'
-            });
-        } 
-        catch(err){
-            console.log('ProjectStageCreate::create()\r\nERROR:');
-            console.log(err);
-            throw 'An Application Error Has Occurred!';
-        };
+    setUpTextModal(){
+        this.setUpModal();
+        //console.log(this.Modal.link);
+        /* ASSING PREVIEW FIELD, ASSING WORKING FIELD */
+        this.Modal.link.form.append(this.createPreview(),this.createDynamicView(this.helplink,'createExtendedSection'));
+    }
+    setUpListModal(){
+        this.setUpModal();
+         /* ASSING PREVIEW FIELD, ASSING WORKING FIELD */
+        this.Modal.link.form.append(this.createPreview(),this.createDynamicView(this.helplink,'createExtendedSection'));
+    }
+    setUpHeadingModal(){
+        this.setUpModal();
+        this.Modal.link.form.append(this.createPreview(),this.createDynamicView(this.helplink,'createSection'));
+    }
+    setUpFooterModal(){
+        this.setUpModal();
+        this.Modal.link.form.append(this.createPreview(),this.createDynamicView(this.helplink,'createSection'));
     }
     setUpModal(){
-        console.log('ProjectStageCreate::setUpModal()');
+        //console.log('ProjectStageCreate::setUpModal()');
         try{
              /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
             this.helplink=this.getEmptyHelpLink();
@@ -122,9 +191,9 @@ class ProjectStageCreate{
             /* SET FORM */
             var form=this.Html.getForm();
             /* ASSIGN TITLE DEPARTMENT FIELD */
-            this.createHead(form,this.DepartmentData.defaultDepartment);
-            /* ASSING PREVIEW FIELD, ASSING WORKING FIELD */
-            form.append(this.createPreview(),this.createDynamicView(this.helplink));
+            this.ProjectStageCreateHead.setData(this.StageData,this.Stage.Property.department,this.Stage.Property.department.defaultDepartment,this.helplink);
+            this.ProjectStageCreateHead.set(form);
+            this.Modal.link.form=form;
             /* ASSIGN FORM TO ADAPTED */
             this.Modal.link['adapted'].append(form);
             /* ASSING ACTION BUTTONS */
@@ -137,40 +206,89 @@ class ProjectStageCreate{
             return false;
         }
         /* IN ANOTHER BLOCK TRY CATCH TO PREVENT OPEN MODAL IF ERROR EXISTS TO HIDE ERROR SHOWED IN TABLE  */
-        try{
-            /* RUN MODAL */ 
-            this.Items.prepareModal('Dodaj etap projektu - '+this.StageData.getTitle(),'bg-info');
-        }
-        catch(err){
-            console.log('ProjectStageCreate::setUpModal()\r\nERROR:');
-            console.log(err);
-            this.Items.Table.setError('An Application Error Has Occurred!');
-        }
+        this.runModal();
     }
+
     setUndoTask(self){
         var run = function(){
             let files = self.StageData.getFiles();
-            //console.log('ProjectStageCreate->setUndoTask()');
+            //console.log('ProjectStageCreate.setUndoTask()');
+            //console.log('This object data:');
+            //console.log(self);
+            //console.log('Stage object data:');
+            //console.log(self.Stage);
+            //console.log('Items defaultTask:');
+            //console.log(self.Items.default);
             //console.log(files);
             if(files.length<1){
                 console.log(self);
                 self.Items.closeModal();
-                self.Items.reloadData(self.Stage,'setResponse','getprojectsstagelike&d=0&v=0&b=');
+                self.Items.reloadData(self.Items.default.object,'setResponse',self.Items.default.task+self.StageData.Stage.data.id);
             }
             else{
-                let ImageTool = new ProjectStageToolFile(self);
+                let ImageTool = new ProjectStageToolFile();
+                    ImageTool.setParent(self);
                     ImageTool.deleteFiles(files,self.Stage.Items,'setModalResponse');  
             }                
        };
        return run;          
     }
-    details(response){  
+    detailsText(response){
+        this.CreateProperty={
+            modal:{
+                title:'Edycja etapu',
+                bg:'bg-info'
+            },
+            preview:{
+                f:'run'
+            },
+            doc:{
+                f:'genProjectReportTestDoc'
+            }
+        };
+        this.details(response,'createExtendedSection');
+    }
+    detailsHeading(response){
+        this.CreateProperty={
+            modal:{
+                title:'Edycja nagłówka',
+                bg:'bg-brown'
+            },
+            preview:{
+                f:'runHeading'
+            }
+            ,
+            doc:{
+                f:'genProjectReportTestDocHeading'
+            }
+        };
+        this.details(response,'createSection');
+    }
+    detailsFooter(response){
+        this.CreateProperty={
+            modal:{
+                title:'Edycja stopki',
+                bg:'bg-brown'
+            },
+            preview:{
+                f:'runFooter'
+            },
+            doc:{
+                f:'genProjectReportTestDocFooter'
+            }
+        };
+        this.details(response,'createSection');
+    }
+    details(response,sectionType){  
         try{
+            //console.log('ProjectStageCreate.details()');
+            //console.log(sectionType);
+            //throw 'aaaaaaaaaaa';
             /* SETUP STAGE DATA */
-            this.StageData = new StageData(this.Glossary,this.Stage.Property,null);
-            var r = this.Items.parseResponse(response).data;
-            this.StageData.setStage(r['stage']);
-            this.VariableList=r['variable'];
+            this.StageData = new StageData();
+            this.StageData.setProperty(this.Glossary,this.Stage.Property,null,this.part);
+            this.StageData.setStage(response['stage']);
+            this.VariableList=response['variable'];
         }catch(error){
             console.log('ProjectStageCreate::details()');
             console.log(error);
@@ -179,14 +297,12 @@ class ProjectStageCreate{
         }
         try{
             //console.clear();
-            console.log('ProjectStageCreate::details()');   
+            //console.log('ProjectStageCreate::details()');   
             /* SETUP EJECTION MULTIPLIER */
             //this.ejectionMultiplier=parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
             this.TabStop = new TabStop();
             /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
             this.Property=this.Stage.Property.text;
-            /* SET STAGE CREATE TEXT DEFAULT DEPARTMENT LIST */
-            this.DepartmentData=this.Stage.Property.department;
             /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
             this.helplink=this.getEmptyHelpLink();
             /* TO DO IN FUTURE -> ADD setCloseModal multi id's */
@@ -201,17 +317,18 @@ class ProjectStageCreate{
             /* CREATE FORM */
             var form=this.Html.getForm();
             /* ASSIGN TITLE DEPARTMENT FIELD */
-            console.log(this.StageData.Stage);
+            //console.log(this.StageData.Stage);
             var stageDepartment = {
                 0:{
                     n:this.StageData.Stage.data.departmentName,
                     v:this.StageData.Stage.data.departmentId
                 }
             };
-            this.createHead(form,stageDepartment);   //  form 
+            this.ProjectStageCreateHead.setData(this.StageData,this.Stage.Property.department,stageDepartment,this.helplink);
+            this.ProjectStageCreateHead.set(form);   //  form 
              /* ASSING PREVIEW FIELD, ASSING WORKING FIELD */   
-            form.append(this.createPreview(),this.createDynamicView(this.helplink));
-                        /* APPEND FORM */
+            form.append(this.createPreview(),this.createDynamicView(this.helplink,sectionType));
+            /* APPEND FORM */
             this.Modal.link['adapted'].append(form);
              /* ASSING ACTION BUTTONS */
             this.createManageButton('Zapisz');          
@@ -223,18 +340,18 @@ class ProjectStageCreate{
             return false;
         }
         /* IN ANOTHER BLOCK TRY CATCH TO PREVENT OPEN MODAL IF ERROR EXISTS TO HIDE ERROR SHOWED IN TABLE  */
+        this.runModal();
+        
+    }
+    runModal(){
         try{
-            this.Items.prepareModal('Podgląd Etapu projektu','bg-info');   
+            this.Items.prepareModal(this.CreateProperty.modal.title,this.CreateProperty.modal.bg);   
         }
         catch(error){
             console.log('ProjectStageCreate::details()');
             console.log(error);
             throw 'An Application Error Has Occurred!';
         }
-    }
-    edit(response){
-        console.log('ProjectStageCreate::edit()');
-        console.log(response);
     }
     getEmptyHelpLink(){
         //console.log('ProjectStageCreate::getEmptyHelpLink()');
@@ -254,102 +371,51 @@ class ProjectStageCreate{
             this.helplink['preview'].whole=mainDiv;
         return mainDiv;
     }
-    createHead(ele,department){//ele
-        console.log('ProjectStageCreate::createHead()');
-        var self = this;
-        var stageData = this.StageData.Stage;
-        var titleError=this.ProjectStageTool.Tool.getDivError();
-        var titleDiv=this.Html.getRow();
-            //this.helplink['titleDiv']=titleDiv;
-        var titleLabelDiv=this.Html.getCol(1);
-        var titleInputDiv=this.Html.getCol(11);
-            titleLabelDiv.appendChild(this.createLabel('h3','Tytuł:'));
-        var input=this.Html.getInput('title',this.StageData.Stage.data.title,'text');   
-            input.oninput = function(){
-                stageData.data.title=this.value;
-            };
-            input.onblur = function(){
-                console.log('check data title');
-                //self.checkInput(input,'title');
-                self.checkInput('title');
-            };
-            input.classList.add('form-control');
-            input.setAttribute('placeholder','Enter title');
-            input.setAttribute('aria-describedby',"titleHelp" );
-            titleInputDiv.appendChild(input);
-            self.helplink.input['title']={
-                input:input,
-                error:titleError.div
-            };
-        var helpValue=document.createTextNode('Staraj sie wprowadzić jednoznaczy tytuł.Należy wprowadzić minimalnie 1 znak, a maksymalnie 1024 znaki.');     
-         
-        var help=document.createElement('small');
-            help.setAttribute('id','titleHelp');
-            help.classList.add('form-text','text-muted');
-            help.appendChild(helpValue);
-            titleInputDiv.appendChild(help);
-        titleDiv.appendChild(titleLabelDiv);
-        titleDiv.appendChild(titleInputDiv);
-        ele.append(titleDiv,titleError.ele,this.setDepartment(stageData.data,department));
-    }
-    setDepartment(stageData,defaultDepartment){
-        console.log('ProjectStageCreate::setDepartment()');
-        this.Department.setData(this.DepartmentData,defaultDepartment);
-        var departmentDiv=this.Department.get();
-        this.helplink['department']=this.Department.getLink();
-        var departmentListNames = this.DepartmentData.departmentListNames; 
-        /* CLOUSURE */
-        this.helplink['department'].onchange = function () {              
-                stageData.departmentId = this.value;
-                stageData.departmentName = departmentListNames[this.selectedIndex];  
-            };
-        return departmentDiv;
-    }
-    createLabel(h,value){
-        var titleLabelValue=document.createTextNode(value);
-        var titleLabel=document.createElement(h);
-            titleLabel.classList.add('text-center','font-weight-bold');
-            titleLabel.appendChild(titleLabelValue);
-            return titleLabel;
-    }
-    createDynamicView(helplink){
-        console.log('ProjectStageCreate::createDynamicView()');
+    createDynamicView(helplink,sectionType){
+        //console.log('ProjectStageCreate::createDynamicView()');
         var mainDiv=this.Html.getRow();
             mainDiv.classList.add('d-block');  
         var mainDivSection=this.Html.getCol(12);
             mainDivSection.classList.add('border');
             /* CREATE TEXT STAGE SECTION */
-            console.log(this.StageData.Stage);
+            //console.log(this.StageData.Stage);
             for(const prop in this.StageData.Stage.section){
                 /* CREATE SECTION */
-                mainDivSection.appendChild(this.createSection(prop,this.StageData.Stage.section,helplink));
+                mainDivSection.append(this[sectionType](prop,this.StageData.Stage.section,helplink));
             };
             /* APPEND SECTION */
             mainDiv.appendChild(mainDivSection);
              /* CREATE ADD BUTTON */
-            mainDiv.appendChild(this.createButtonCol(this.createAddSectionButton()));//iSection      
+            mainDiv.appendChild(this.createButtonCol(this.createAddSectionButton(sectionType)));//iSection      
             this.helplink['dynamic']=mainDiv;
             this.helplink['dynamicSection']=mainDivSection;
-            console.log(mainDivSection);
+            //console.log(mainDivSection);
         return mainDiv;
     }
+    createExtendedSection(iSection,section,helplink){
+        //console.log('ProjectStageCreate.createSection()');
+        var mainDiv=this.createSection(iSection,section,helplink);
+            //console.log(section);
+            mainDiv.append(this.ProjectStageTool.getSectionFooterTool(iSection,section[iSection]));
+            return mainDiv;
+    }
     createSection(iSection,section,helplink){
-        console.log('ProjectStageCreate::createSection()');
-        console.log('iSection');
-        console.log(iSection);
-        console.log('helplink:');
-        console.log(helplink);
-        console.log('iSection (iSectionField):');
-        console.log(iSection);
-        console.log('stageData:');
-        console.log(section);
+        //console.log('ProjectStageCreate.createSection()');
+        //console.log('iSection');
+        //console.log(iSection);
+        //console.log('helplink:');
+        //console.log(helplink);
+        //console.log('iSection (iSectionField):');
+        //console.log(iSection);
+        //console.log('stageData:');
+        //console.log(section);
         
         var mainDiv=this.Html.getRow(); 
-        var mainDivHeader=this.creteSectionHead(iSection); 
+        var mainDivHeader=this.Section.getHead(iSection,this.CreateProperty.modal.bg); 
         var mainDivBody=this.Html.getCol(12); 
         
             helplink.section[iSection]={
-                main:this.getHelpLinkSectionMain(),
+                main:this.Section.getHelpLink(),
                 subsection:{}
             };
             for(const iSub in section[iSection].subsection){     
@@ -362,41 +428,28 @@ class ProjectStageCreate{
             mainDiv.appendChild(mainDivHeader);  
             mainDiv.appendChild(mainDivBody);   
             this.helplink.section[iSection].main.all=mainDiv;
-            console.log(mainDiv);
-            mainDiv.appendChild(this.ProjectStageTool.getSectionFooterTool(iSection,section[iSection]));
             return mainDiv;
-    }
-    creteSectionHead(isection){
-        var mainDivHeader=this.Html.getCol(12); 
-        var hr=document.createElement('hr');
-            hr.setAttribute('class','w-100 border-1 border-secondary mt-2');//
-        var h=document.createElement('h3');    
-            h.setAttribute('class','w-100 text-center bg-info text-white');//
-            h.innerHTML='<span class="text-muted">[WIERSZ]</span> Sekcja  nr '+isection;
-            mainDivHeader.appendChild(hr);
-            mainDivHeader.appendChild(h);
-        return mainDivHeader;
     }
     createSubsection(iSection,iSub,subsection,helplinkSubsection){
         // console.log('ProjectStageCreate::createSubsection()');
         /* CREATE HELPLINK SUBSECTION */
-        helplinkSubsection[iSub]=this.getHelpLinkSubsection();
+        helplinkSubsection[iSub]=this.SubSection.getHelpLink();
         
         var mainDiv=this.Html.getRow();
         var mainDivSubsection=this.Html.getCol(12);
         var mainDivBtn=this.Html.getCol(12);
         var iRow = 0;        
-        var runFunction='createSubsectionRowGroup';
-        var runExtendedFunction='createExtendedSubsectionRow';
+        var runFunction='getSimple';
+        var runExtendedFunction='getExtended';
         for(const iR in subsection.subsectionrow){   
-            /* SET NEW HELPLINK SUBSECTION ROW */
-            helplinkSubsection[iSub].row[iR]=this.getHelpLinkSubsectionRow();
             /* DYNAMIC RUN FUNCTION CREATE SUBSECTION ROW */
-            mainDivSubsection.appendChild(this[runFunction](iSection,iSub,iR,subsection.subsectionrow,helplinkSubsection[iSub].row));
-            /* SWAP TO EXTENDED FUNCTION */
-            runFunction=runExtendedFunction;
-            /* INCREMENT iROW */
-            iRow++;
+            let StageRow=new Row(this.Html,this.Utilities,this.ProjectStageTool,this.TabStop,this.VariableList);
+                StageRow.setData(iSection,iSub,iR,subsection.subsectionrow,helplinkSubsection[iSub].row);
+                mainDivSubsection.append(StageRow[runFunction]());
+                /* SWAP TO EXTENDED FUNCTION */
+                runFunction=runExtendedFunction;
+                /* INCREMENT iROW */
+                iRow++;
         }         
         helplinkSubsection[iSub].dynamic=mainDivSubsection;
         mainDivBtn.appendChild(this.createButtonRow(this.addSubsectionRow(iSection,iSub,iRow,subsection.subsectionrow,helplinkSubsection[iSub])));            
@@ -406,135 +459,8 @@ class ProjectStageCreate{
         helplinkSubsection[iSub].all=mainDiv;
         return mainDiv;
     }
-    getHelpLinkSubsectionRow(){
-        return {
-            all:{},
-            value:{},
-            error:{}
-        };
-    }
-    getHelpLinkSubsection(){
-       return {
-            /* FOR SHOW/HIDE */
-            all:{},
-            /* FOR ADD */
-            dynamic:{},
-            /* FOR REMOVE */
-            row:{}
-        };
-    }
-    getHelpLinkSectionMain(){
-        return {
-                all:{},
-                head:{},
-                body:{}
-        };
-    }
-    /* RUN AS DYNAMIC FUNCTION */
-    createSubsectionRowGroup(isection,isub,iSubRow,subsectionrow,helplink){
-        console.log('ProjectStageCreate::createSubsectionRowGroup()');
-        var mainDiv=this.Html.getRow();
-        /* SET SUBSECTION ROW */
-        mainDiv.appendChild(this.createSubsectionRow(isection,isub,iSubRow,subsectionrow,helplink));
-        /* CREATE ERROR DIV */
-        mainDiv.appendChild(this.createTextError(helplink[iSubRow]));  
-        this.ProjectStageTool.getControlTool(isection,isub,iSubRow,subsectionrow[iSubRow],helplink[iSubRow],mainDiv,this.TabStop,this.VariableList);
-        /* SETUP HELPLINK */
-        helplink[iSubRow]['all']=mainDiv;
-        return mainDiv;
-    }
-    createExtendedSubsectionRow(isection,isub,isubrow,subsectionrow,helplink){
-        console.log('ProjectStageCreate::createExtendedSubsectionRow()');
-        var mainDiv=this.createSubsectionRowGroup(isection,isub,isubrow,subsectionrow,helplink);
-            mainDiv.childNodes[3].appendChild(this.ProjectStageTool.createExtendedTextTool(isection,isub,isubrow,subsectionrow[isubrow],helplink[isubrow]));  
-        return mainDiv;
-    }
-    createSubsectionRow(isection,isub,isubrow,subsectionrow,helplink){
-        /* console.log('ProjectStageCreate::createSubsectionRow()'); */
-        /*
-         * SET DEFAULT ATTRIBUTE d-none
-         */
-        var mainDivCol=this.Html.getCol(12);
-        var mainDiv=this.Html.getRow();
-        
-        var mainDivSectionLabel=this.Html.getRow();
-        var sectionLabel=document.createElement('h4');
-            sectionLabel.setAttribute('class','text-center w-100');
-            sectionLabel.innerHTML='<span class="text-muted">[KOLUMNA]</span> Podsekcja - '+isub+' wiersz - '+isubrow;
-        var labelDiv=this.Html.getCol(1);
-            labelDiv.classList.add('mr-0','pr-0');
-        var valueDiv=this.Html.getCol(10);
-        var removeDiv=this.Html.getCol(1);
-            removeDiv.appendChild(this.getRemoveButton(isubrow,subsectionrow,helplink));
-        var v = document.createTextNode(subsectionrow[isubrow].paragraph.property.value.toString());
-        /* LABEL */
-        var label=document.createElement('LABEL');
-            label.setAttribute('class','col-form-label');
-            label.setAttribute('for','value-'+isection+'-'+isub+'-'+isubrow);
-            label.innerHTML='<b>Wartość:</b><br/><small class=" text-muted ">['+'value-'+isection+'-'+isub+'-'+isubrow+']</small>';
-        //var input=document.createElement('input');
-        var input=document.createElement('textarea');
-            input.setAttribute('class','form-control border-1 border-info');
-            input.setAttribute('placeholder','Write...');
-            input.setAttribute('name','value-'+isection+'-'+isub+'-'+isubrow);
-            input.appendChild(v);
-           
-            input.setAttribute('rows','1');
-            
-            input.oninput = function(){
-                subsectionrow[isubrow].paragraph.property.value=this.value;
-            };
-            /* SET INPUT TEXT STYLE FROM PARAMETER */
-            
-            input.style.fontSize=subsectionrow[isubrow].paragraph.style.fontSize+subsectionrow[isubrow].paragraph.style.fontSizeMeasurement;  
-            input.style.color=subsectionrow[isubrow].paragraph.style.color;
-            input.style.backgroundColor=subsectionrow[isubrow].paragraph.style.backgroundColor;
-            input.style.fontFamily=subsectionrow[isubrow].paragraph.style.fontFamily;
-            input.style.fontWeight=this.setFontStyle(subsectionrow[isubrow].paragraph.style.fontWeight,'BOLD','NORMAL');
-            input.style.fontStyle=this.setFontStyle(subsectionrow[isubrow].paragraph.style.fontStyle,'ITALIC','');
-            input.style.textDecoration=this.setFontStyle(subsectionrow[isubrow].paragraph.style.underline,'UNDERLINE','')+" "+this.setFontStyle(subsectionrow[isubrow].paragraph.style['line-through'],'line-through','');
-            input.style.textAlign=subsectionrow[isubrow].paragraph.style.textAlign;
-            /* SETUP HELPLINK TO FIELD INPUT */
-            helplink[isubrow]={
-                text:{
-                    value:input
-                },
-                list:{
-                    /* FAKE */
-                    value:document.createElement('span')
-                },
-                image:{
-                    
-                },
-                table:{
-                    
-                }
-            };
-            labelDiv.appendChild(label);
-            valueDiv.appendChild(input);
-            mainDivSectionLabel.appendChild(sectionLabel);
-            mainDiv.appendChild(labelDiv);
-            mainDiv.appendChild(valueDiv);
-            mainDiv.appendChild(removeDiv);
-            mainDivCol.appendChild(mainDivSectionLabel);
-            mainDivCol.appendChild(mainDiv);
-            return mainDivCol;
-    }
-   
-
-    createTextError(helplink){
-        /* console.log('ProjectStageCreate::createTextError()'); */
-        var mainDiv=this.Html.getCol(12); 
-        var errorDiv=this.Html.getRow();
-            errorDiv.classList.add('alert','alert-danger','d-none','mt-1','mb-0');//d-block
-            errorDiv.innerText='Test ERROR';
-            helplink.error=errorDiv;
-            mainDiv.appendChild(errorDiv);  
-        return mainDiv;
-    }
-
     createTextToolDoubleSelect(id,title,actdata,alldata,id2,actdata2,alldata2){
-        console.log('ProjectStageCreate::createTextToolDoubleSelect()');
+        //console.log('ProjectStageCreate::createTextToolDoubleSelect()');
         var divMain = this.createInputHead(title);
         var div=document.createElement('div');
             div.setAttribute('class','input-group');//w-100 input-group  
@@ -584,7 +510,6 @@ class ProjectStageCreate{
             };
         return optionGroup;
     }
-
     setInputStyle(title,subsectionrow,def,measurement,min,max,all){
         /*console.log('ProjectStageCreate::setInputStyle()');
         console.log(subsectionrow);
@@ -601,8 +526,8 @@ class ProjectStageCreate{
             input.setAttribute('class','form-control form-control-sm w-75');
             input.setAttribute('type','number');
             input.onchange = function(){
-                console.log(def);
-                console.log(this.value);
+                //console.log(def);
+                //console.log(this.value);
                 subsectionrow.style[def]=this.value;
                 //console.log(subsectionrow.style[def]);
             };
@@ -615,33 +540,6 @@ class ProjectStageCreate{
         mainDiv.appendChild(groupDiv);
         return mainDiv;
     }
-    setFontStyle(value,trueValue,falseValue){
-        if(value==='1'){
-            return trueValue;
-        }
-        return falseValue;
-    }
-
-    getRemoveButton(isubrow,subsectionrow,helplink){
-        /* console.log('ProjectStageCreate::getRemoveButton()'); */
-        var div=this.Html.removeButton();
-            /* CLOSURE */
-            div.onclick=function(){
-                /* console.log('ProjectStageCreate::getRemoveButton() onclick()'); */
-                /* TO DO */
-                if (confirm('Potwierdź usunięcie podsekcji') === true) {
-                    helplink[isubrow].all.remove();
-                    /* NEED FOR STRICT MODE - NOT ALLOWED delete helplink */
-                    delete helplink[isubrow];
-                    delete subsectionrow[isubrow];
-                } else {
-                    // NOTHING TO DO
-                }
-            };
-        
-        return(div); 
-    }
-
     createButtonCol(button){
         //console.log('ProjectStageCreate::createButtonCol()');
         /*
@@ -688,18 +586,15 @@ class ProjectStageCreate{
                 /* ADD NEW stageData subsectionrow object */
                 subsectionrow[iRow]=self.StageData.createSubsectionRow(iRow);
                 subsectionrow[iRow].paragraph.property.valuenewline=self.Property.subsectionRowNewLine;
-                console.log(iRow);
-                console.log(subsectionrow[iRow]);
-                helplink.row[iRow]=self.getHelpLinkSubsectionRow();
-                
-                helplink.dynamic.appendChild(self.createExtendedSubsectionRow(isection,isubsection,iRow,subsectionrow,helplink.row));
-
+                let StageRow=new Row(self.Html,self.Utilities,self.ProjectStageTool,self.TabStop,self.VariableList);
+                    StageRow.setData(isection,isubsection,iRow,subsectionrow,helplink.row);
+                    helplink.dynamic.appendChild(StageRow.getExtended());  
                 /* INCREMENT SUBSECTION ROW */
                 iRow++;
             };
         return (div);
     }
-    createAddSectionButton(){
+    createAddSectionButton(sectionType){
         //console.log('ProjectStageCreate::createAddSectionButton()');
         var div=document.createElement('div');
             div.setAttribute('class','btn btn-success btn-add');
@@ -710,7 +605,7 @@ class ProjectStageCreate{
                  * CHECK IS THERE ANY ROW -> IF NO -> SWAP TO createSimleRow()
                  */
                 /* SETUP NEW SECTION in stageData */                
-                self.helplink['dynamicSection'].appendChild(self.createSection(self.StageData.iSection,self.StageData.createSection(),self.helplink));
+                self.helplink['dynamicSection'].appendChild(self[sectionType](self.StageData.iSection,self.StageData.createSection(),self.helplink));
             };     
         return (div);
     }
@@ -734,9 +629,9 @@ class ProjectStageCreate{
         var run = this.setUndoTask(this);
             cancel.onclick = 
             cancel.onclick=function(){
-               console.clear();
-               console.log('ProjectStageCreate::getCancelButton() onclick()');
-               console.log(self.ErrorStack);
+               //console.clear();
+               //console.log('ProjectStageCreate::getCancelButton() onclick()');
+               //onsole.log(self.ErrorStack);
                if(self.ErrorStack.check()){
                     if (confirm('Opuścić okno bez zapisu?') === true) {
                         //run();
@@ -747,8 +642,6 @@ class ProjectStageCreate{
                         return false;
                     }
                }
-               console.log('run');
-               console.log(run);
                if (confirm('Wyjść?') === true) {
                     run();
                }
@@ -764,15 +657,15 @@ class ProjectStageCreate{
             doc.appendChild(docLabel);
         var self = this;
             doc.onclick = function(){
-                console.clear();
+                //console.clear();
                 if(self.ErrorStack.check()){return false;};
                 self.Html.hideField(self.Modal.link['error']);
-                console.log(self.StageData.Stage);
+                //console.log(self.StageData.Stage);
                 var fd = new FormData();
                     fd.append('stage',JSON.stringify(self.StageData.Stage));
                     self.Xhr.run({
                         t:'POST',
-                        u:self.Items.router+'genProjectReportTestDoc',
+                        u:self.router+self.CreateProperty.doc.f,
                         c:true,
                         d:fd,
                         o:self.Items,
@@ -798,7 +691,7 @@ class ProjectStageCreate{
             ele.innerText='Podgląd';
             this.setPreviewButtonAction(ele);
         }
-        console.clear();
+        //console.clear();
     }
     setEditButtonAction(ele){
         /* console.log('ProjectStageCreate::setEditButtonAction()'); */
@@ -818,7 +711,7 @@ class ProjectStageCreate{
             try{
                 self.swapPreviewButton(this);
                 self.Html.hideField(self.helplink.dynamic);
-                self.DocPreview.run(self.helplink,self.StageData.Stage);
+                self.DocPreview[self.CreateProperty.preview.f](self.helplink,self.StageData.Stage);
                 self.Html.showField(self.helplink.preview.whole);
             }
             catch(error){
@@ -851,11 +744,11 @@ class ProjectStageCreate{
      * SEND INPUT DATA TO SEND 
      */
     sendInputData(fd,self){
-        console.log('ProjectStageCreate.sendInputData()');
+        //console.log('ProjectStageCreate.sendInputData()');
         if(self.ErrorStack.check()){ return false;}
         this.Xhr.run({
                 t:'POST',
-                u:this.Items.router+'confirmProjectStageText',
+                u:this.router+'confirmProjectStageText',
                 c:true,
                 d:fd,
                 o:self,
@@ -898,8 +791,10 @@ class ProjectStageCreate{
     }
     Save(response){
         console.log('ProjectStageCreate::Save');
+        //console.log(response);
         var jsonResponse=this.Items.setFieldResponse(response);
-        //console.log(jsonResponse);
+            console.log(jsonResponse);
+         
         if(!jsonResponse){
             return false;
         }        

@@ -112,6 +112,8 @@ final class UrlManager{
         ['confirmProjectStageText','LOG_INTO_STAGE'],
         ['blockConstant','LOG_INTO_STAGE'],
         ['genProjectReportTestDoc','LOG_INTO_STAGE'],
+        ['genProjectReportTestDocFooter','LOG_INTO_STAGE'],
+        ['genProjectReportTestDocHeading','LOG_INTO_STAGE'],
         ['uploadStageImage','LOG_INTO_STAGE'],
         ['uploadTmpStageImage','LOG_INTO_STAGE'],
         ['deleteStageImage','LOG_INTO_STAGE'],
@@ -133,7 +135,7 @@ final class UrlManager{
         ['pvDelete','LOG_INTO_STAGE'],
         ['getProjectVariablesSimpleList','LOG_INTO_STAGE'],
         ['saveProjectReport','SAVE_PROJ_REPORT'],
-        ['getProjectReportDoc','GEN_PROJ_REP_DOC'],
+        ['getProjectReportDoc','GEN_PROJ_REP_DOC']
     ];
         
     public function __construct(){

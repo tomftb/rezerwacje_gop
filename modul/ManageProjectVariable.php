@@ -248,9 +248,9 @@ class ManageProjectVariable extends ManageProjectVariableDatabase{
         $variable=$tmpVariableList;
         return false;
     }
-    public function parseStageVariable(&$stage){
+    public function parsePartVariable(&$part){
         $this->Log->log(0,"[".__METHOD__."]");
-        foreach($stage->section as $s){
+        foreach($part->section as $s){
             foreach($s->subsection as $su){
                 foreach($su->subsectionrow as $r){
                     self::swapVariablePropertyWithValue($r->paragraph->property->value,$r->paragraph->variable);

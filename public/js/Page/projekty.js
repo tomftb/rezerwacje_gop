@@ -1,10 +1,12 @@
 try{
     var ajax = new Ajax();
     var error = new Error();
-    var Report = new ProjectReport(window.router,window.appUrl,window.perm);
+        console.log(error);
+        error.set('overAllErr');
     var table=new Table();
         table.setAjaxLink(ajax);
         table.setErrorLink(error,'errDiv-Adapted-overall');
+        
     var defaultTask='getprojectslike';
     var fieldDisabled='y';
     var projectData=new Object();
@@ -16,8 +18,8 @@ try{
             list:new Glossary(),
             image:new Glossary()
         };
-    console.log(loggedUserPerm);
-    console.log(window);
+    //console.log(loggedUserPerm);
+    //console.log(window);
     const mainTableColumns={
         ID:{
             style:'width:70px;',
@@ -145,6 +147,7 @@ try{
     table.setColExceptions(defaultTableExceptionCol);
     table.setButtonsType('dropdown');
     loadData();
+    var Report = new ProjectReport(window.router,window.appUrl,window.perm,table);
 }
 catch(e){
     console.log('projekty.js ERROR:');

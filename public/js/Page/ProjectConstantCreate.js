@@ -12,7 +12,7 @@ class ProjectConstantCreate{
     data={};
     
     constructor(Parent){
-        console.log('ProjectConstantCreate::constructor');
+        //console.log('ProjectConstantCreate::constructor');
         this.Modal=Parent.Items.Modal;
         this.Items=Parent.Items;
         this.Constant=Parent;

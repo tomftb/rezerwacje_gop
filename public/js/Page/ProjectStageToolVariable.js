@@ -26,19 +26,19 @@ class ProjectStageToolVariable{
         return this;
     }
     setParent(ProjectStageTool){
-        console.log(ProjectStageTool);
+        //console.log(ProjectStageTool);
         this.Parent = ProjectStageTool;
         this.Html = ProjectStageTool.Html;
         this.Glossary = ProjectStageTool.Glossary;
         this.ErrorStack = ProjectStageTool.ErrorStack;
     }
     setProperty(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,VariableList){
-        console.log(isection);
-        console.log(isub);
-        console.log(iSubRow);
-        console.log(subsectionrowISubRow);
-        console.log(helplinkISubRow);
-        console.log(helplinkISubRow.text.value);
+        //console.log(isection);
+        //console.log(isub);
+        //console.log(iSubRow);
+        //console.log(subsectionrowISubRow);
+        //console.log(helplinkISubRow);
+        //console.log(helplinkISubRow.text.value);
         this.iSection =isection;
         this.iSub = isub;
         this.iRow = iSubRow;
@@ -49,23 +49,23 @@ class ProjectStageToolVariable{
         this.assignVariable();
     }
     setTool(){
-        console.log('ProjectStageToolVariable::getTool()');
+        //console.log('ProjectStageToolVariable::getTool()');
         var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('d-none','pt-1','pb-1','border','border-purple');//,'bg-light'
             mainDivCol.style.backgroundColor='#FFFFFF';
         
         var Tool2 = new ToolFields([12]);
             this.setAvailableList(Tool2);
-            console.log(Tool2);
+            //console.log(Tool2);
         var Tool3 = new ToolFields([12]);
             this.setChosenList(Tool3);
-            console.log(Tool3);
+            //console.log(Tool3);
         
         var Tool = new ToolFields([12]);
             this.setTitle(Tool,'Zmienne:','h5');
         var Tool1 = new ToolFields([4,4,4]);
             this.setMainButtons(Tool1,Tool2,Tool3);
-            console.log(Tool);
+            //console.log(Tool);
         
         //var label = this.assignImage(Tool1.getMain().childNodes[0]);
           //  Tool.set(0,this.getFile(name));//label turn off - because in load there is no file
@@ -82,7 +82,7 @@ class ProjectStageToolVariable{
         return mainDivCol;
     }
     setMainButtons(Tool,Tool2,Tool3){
-        console.log(Tool);
+        //console.log(Tool);
          Tool.Field[0].classList.add('btn-group','btn-group-toggle');
          
          var available = this.Parent.createControl('Dostępne',Tool2.get(0),'btn-outline-purple','btn-purple');//this.getAvailableList()
@@ -123,7 +123,7 @@ class ProjectStageToolVariable{
                 //ele='th'; 
                 table.childNodes[1].appendChild(tr);
             }
-             console.log(table);
+             //console.log(table);
             this.setTitle(Tool,'Dostępne:','h6');
             Tool.set(0,table);
             this.Html.addClass(Tool.Field[0],'d-none');
@@ -131,8 +131,8 @@ class ProjectStageToolVariable{
     setChosenList(Tool){
        this.setTitle(Tool,'Wskazane:','h6');
        var table = this.getListTable(['#','Nazwa:','Wartość:','Typ:','Opcje:']);
-            console.log(table);
-            console.log(table.childNodes[1]);
+            //console.log(table);
+            //console.log(table.childNodes[1]);
             this.ChosenListEle = table.childNodes[1];   
             this.setChosenVariables();
        Tool.set(0,table);
@@ -162,11 +162,11 @@ class ProjectStageToolVariable{
             this.Html.addClass(btn,'btn-purple');
         var self = this;
             btn.onclick = function(){
-                console.log('getAvailableListAction() onclick()');
-                console.log(self.selectInputStart);
-                console.log(self.selectInputEnd);
-                console.log(self.Helplink.text.value.value);
-                console.log(self.Helplink.text.value.value.length);
+                //console.log('getAvailableListAction() onclick()');
+                //console.log(self.selectInputStart);
+                //console.log(self.selectInputEnd);
+                //console.log(self.Helplink.text.value.value);
+                //console.log(self.Helplink.text.value.value.length);
                 
                 /* ON REMOVE BLOCK INPUT */
 
@@ -175,7 +175,7 @@ class ProjectStageToolVariable{
                 //self.Helplink.text.value.innerHTML=tmpValue+'['+prop.name+']';
                 /* ON END OF INPUT */
                 if((self.selectInputStart===-1 && self.selectInputEnd===-1) || (self.selectInputStart===self.selectInputEnd && self.selectInputEnd===valueLength)){
-                    console.log('END');
+                    //console.log('END');
                     self.Row.paragraph.variable.push(prop);
                     self.Row.paragraph.property.value+='['+prop.name+']';
                     self.Helplink.text.value.value=tmpValue+'['+prop.name+']';
@@ -184,7 +184,7 @@ class ProjectStageToolVariable{
                 }
                 /* ON START OF INPUT */
                 else if(self.selectInputStart===0 && self.selectInputEnd===0){
-                    console.log('BEGINNING');
+                    //console.log('BEGINNING');
                     /* APPEND PROP TO INPUT START */
                     self.Helplink.text.value.value='['+prop.name+']'+tmpValue;
                     /* APPEND PROPER TO Row paragraph object value */
@@ -197,25 +197,25 @@ class ProjectStageToolVariable{
                     //self.prependListRow(self.ChosenListEle,prop,0);
                 }
                 else if(self.selectInputStart===self.selectInputEnd){
-                    console.log('INSIDE - PARSE ALL INPUT');
+                    //console.log('INSIDE - PARSE ALL INPUT');
                     /* SET NEW LIST FROM THE BEGINNIG LIKE ON onkeyup */
                     let head = self.Helplink.text.value.value.substr(0, self.selectInputStart);
                     let tail = self.Helplink.text.value.value.substr(self.selectInputStart,valueLength);
-                    console.log(self.Helplink.text.value.value);
-                    console.log(head);
-                    console.log(tail);
+                    //console.log(self.Helplink.text.value.value);
+                    //console.log(head);
+                    //console.log(tail);
                     self.Helplink.text.value.value=head+'['+prop.name+']'+tail;
                     self.Row.paragraph.property.value=head+'['+prop.name+']'+tail;
                     /* FIX SELECTED AT END OF PROPERTY */
                     self.parseInputValue(self,self.Helplink.text.value.value);
                 }
                 else if(self.selectInputStart!==self.selectInputEnd){
-                    console.log('INSIDE RANGE - PARSE ALL INPUT');
+                    //console.log('INSIDE RANGE - PARSE ALL INPUT');
                     let head = self.Helplink.text.value.value.substr(0, self.selectInputStart);
                     let tail = self.Helplink.text.value.value.substr(self.selectInputEnd,valueLength);
-                    console.log(self.Helplink.text.value.value);
-                    console.log(head);
-                    console.log(tail);
+                    //console.log(self.Helplink.text.value.value);
+                    //console.log(head);
+                    //console.log(tail);
                     self.Helplink.text.value.value=head+'['+prop.name+']'+tail;
                     self.Row.paragraph.property.value=head+'['+prop.name+']'+tail;
                     /* FIX SELECTED AT END OF PROPERTY */
@@ -224,8 +224,8 @@ class ProjectStageToolVariable{
                 else{
                     /* unavailable  */
                 }
-                console.log(self.Helplink.text.value.value);
-                console.log(self.Row.paragraph.variable);
+                //console.log(self.Helplink.text.value.value);
+                //console.log(self.Row.paragraph.variable);
             };
             ele.appendChild(btn);
     }
@@ -267,13 +267,13 @@ class ProjectStageToolVariable{
             //this.Html.addClass(btn,'btn-purple');
         var self = this;
             btn.onclick = function(){
-                console.log('getChosenVariablesAction()');
-                console.log(this);
-                console.log(prop);
-                console.log('IDX:');
-                console.log(idx);
+                //console.log('getChosenVariablesAction()');
+                //console.log(this);
+                //console.log(prop);
+                //console.log('IDX:');
+                //console.log(idx);
                 /* COUNT VALUE VARIABLE IN ARRAY */
-                console.log('ROW VARIABLE LIST:');
+                //console.log('ROW VARIABLE LIST:');
                 //let variableIdx=new Array();
                 let variableOrdinalNumber =-1;
                 for(var i = 0;self.Row.paragraph.variable.length>i;i++){
@@ -288,36 +288,36 @@ class ProjectStageToolVariable{
                         break;
                     }
                 }
-                console.log('VARIABLE ordinal number to remove:');
-                console.log(variableOrdinalNumber);
-                console.log('ACTUALL PARAGRAPH VARIABLE LIST:');
-                console.log(self.Row.paragraph.variable);
+                //console.log('VARIABLE ordinal number to remove:');
+                //console.log(variableOrdinalNumber);
+                //console.log('ACTUALL PARAGRAPH VARIABLE LIST:');
+                //console.log(self.Row.paragraph.variable);
                 /* 
                  * SPLIT VALUE VIA VARIABLE KEY WITH CHARS [] 
                  * SPACES BETWEEN KEYS IN ARRAY ARE FOUND VARIABLE KEY
                  * */
-                console.log('SPLIT:');
+                //console.log('SPLIT:');
                 var valueSplit=self.Helplink.text.value.value.split('['+prop.name+']');
-                console.log(valueSplit);
+                //console.log(valueSplit);
 
                 var newValue='';
                 var tmpValue='';
                 /* FOUND AND REMOVE VALUE FROM INPUT */
                 for(var j=0;valueSplit.length>j;j++){
-                    console.log('j- '+j);
+                    //console.log('j- '+j);
                     newValue+=tmpValue+valueSplit[j];       
                     if(j!==variableOrdinalNumber){
-                        console.log('IDX NOT MATCH - ADD');
+                        //console.log('IDX NOT MATCH - ADD');
                         tmpValue='['+prop.name+']';
                     }
                     else{
-                        console.log('IDX MATCH - NOT ADD');
+                        //console.log('IDX MATCH - NOT ADD');
                         tmpValue='';
                     }
                      
                 }
-                console.log('newValue');
-                console.log(newValue);
+                //console.log('newValue');
+                //console.log(newValue);
                 /* UPDATE INPUT VALUE */
                 self.Helplink.text.value.value=newValue;
                 /* UPDATE Row property value */

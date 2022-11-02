@@ -73,8 +73,10 @@ class Error
     static show(value)
     {
         console.log('Error::show(value)');
+        console.log(value);
+        /* TO DO -> create virtual div*/
         Error.getDiv();
-        //console.log(Error.div);
+        console.log(Error.div);
         Error.div.innerHTML=value;
         Error.div.classList.remove("d-none");
         Error.div.classList.add("d-block");
@@ -89,6 +91,7 @@ class Error
     }
     static getDiv(){
         Error.div=document.getElementById(Error.divId);
+        console.log(Error.div);
     }
 }
 

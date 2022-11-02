@@ -11,22 +11,28 @@ class StageData{
     tabStop={};
     type='';
     title='lista';
+    part='b';
     change=false;
-    constructor(Glossary,Property,type,tabstop){
+    constructor(){
+        
+    }
+    setProperty(Glossary,Property,type,tabstop,part){
         this.Glossary = Glossary;
         this.Property=Property;
         this.type=type;
+        this.part=part;
         //this.setSubsectionRowDefault();
         this.setSubsectionRowTabStop(tabstop);
-        console.log(this.Property); 
+        //console.log(this.Property); 
     }
     createDefault(){
-        console.log('StageData::createDefault()');
+        //console.log('StageData::createDefault()');
         /* CREATE EMPTY STAGE OBJECT */
         this.Stage={
                data:{
                     title:'',
                     id:0,
+                    part:this.part,
                     /* SET PROPER AS IN SQL */
                     departmentId:this.Property.department.defaultDepartment[0].v,
                     /* name -> department name */
@@ -40,6 +46,8 @@ class StageData{
                },
                style:{
                     /* MOVE TO SECTION */
+                    backgroundColor:'#FFFFFF',
+                    backgroundColorName:'WHITE'
                     //backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','v'),
                     //backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_BACKGROUND_COLOR','n'),
                     //backgroundImage:''
@@ -79,7 +87,7 @@ class StageData{
         return subsection;
     }
     createSubsection(tmpid){
-        console.log('StageData.createSubsection()');
+        //console.log('StageData.createSubsection()');
         return {
                 data:{
                     id:0
@@ -92,7 +100,7 @@ class StageData{
             };
     }
     createDefaultSubsectionRow(){
-        console.log('StageData.createDefaultSubsectionRow()');
+        //console.log('StageData.createDefaultSubsectionRow()');
         var subsectionRow = {};
             /* FIRST ALWAYS NEW LINE */
             //var newLine = 'y';
@@ -166,35 +174,28 @@ class StageData{
         }
     }
     setStage(data){
+        //console.log('StageData.setStage()');
+        //console.log(data);
         this.Stage = data;
         this.iSection = Object.keys(this.Stage.section).length;
     }
     getDefaultSectionStyle(){
-        var sectionTextStyle={
-            
+        var style={
+            l:{
+                backgroundColor:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_SECTION_BACKGROUND_COLOR','v'),
+                backgroundColorName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_SECTION_BACKGROUND_COLOR','n'),
+                backgroundImage:'' 
+            },
+            p:{
                 backgroundColor:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_SECTION_BACKGROUND_COLOR','v'),
                 backgroundColorName:this.Glossary.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_SECTION_BACKGROUND_COLOR','n'),
                 backgroundImage:''
-            
+            }
         };
-        var sectionListStyle={
-            
-                backgroundColor:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_SECTION_BACKGROUND_COLOR','v'),
-                backgroundColorName:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_SECTION_BACKGROUND_COLOR','n'),
-                backgroundImage:''
-            
-        };
-        switch(this.type){
-            case 'l':
-                this.title='lista';
-                return sectionTextStyle;
-                break;
-            default:
-            case 'p':
-                this.title='tekst';
-                return sectionListStyle;
-                break;
-        };
+        if(!style.hasOwnProperty(this.type)){
+            return style.p;
+        }
+        return style[this.type];
     }
     getDefaultRowParagraph(){
         var rowParagraph={ 
@@ -300,17 +301,14 @@ class StageData{
         };
     }
     setSubsectionRowTabStop(tabstop){
-        console.log('StageData::setSubsectionRowTabStop()');
-        console.log(tabstop);
+        //console.log('StageData::setSubsectionRowTabStop()');
+        //console.log(tabstop);
         if(tabstop===null || tabstop===undefined){
             //console.log('nulllll');
             this.tabStop={};
             return false;
         }
         this.tabStop = tabstop;
-    }
-    getTitle(){
-        return this.title;
     }
     getFiles(){
         let files = new Array();
@@ -329,9 +327,9 @@ class StageData{
     }
     updateStageData(NewStageData){
        console.log('StageData.updateStageData()');
-       console.log('Actual Stage Data:');
+       console.log('Actual `PART` Data:');
        console.log(this.Stage);
-       console.log('New Stage Data:');
+       console.log('New `PART` Data:');
        console.log(NewStageData);
 
 
@@ -370,22 +368,23 @@ class StageData{
        }
     }
     checkStageDataId(Data,maxId){
-        //console.log('StageData.checkStageDataId()');
+       //console.log('StageData.checkStageDataId()');
+       //console.log(Data);
        if(!Data.hasOwnProperty('data')){
             console.log(Data);
             throw 'StageData.checkStageDataId()\nno `data` property';
        }
        if(!Data.data.hasOwnProperty('id')){
             console.log(Data.data);
-            throw 'StageData.checkStageDataId()\nno id `property`';
+            throw 'StageData.checkStageDataId()\nno `id` `property`';
        }
-       if(typeof(Data.data.id)!=='number'){
-            console.log(typeof(Data.data.id));
-            throw 'StageData.checkStageDataId()\nwrong data id `type`';
+       //console.log(Data.data.id);
+       var type=typeof(Data.data.id);
+       if(type!=='number'){
+            throw 'StageData.checkStageDataId()\nwrong data id `type` - `'+type+'` expected `number`';
        }
        if(Data.data.id<maxId){
-           console.log(Data.data.id);
-           throw 'StageData.checkStageDataId()\ndata `id` lower than '+maxId;
+           throw 'StageData.checkStageDataId()\ndata `id` lower than '+maxId+' - '+Data.data.id;
        }
     }
     updateStageDataSection(Data,idSection,NewStageData){
@@ -420,8 +419,8 @@ class StageData{
     }
     updateStageDataSubsection(Data,idSubsection,NewStageData,idSection){
         console.log('StageData.updateStageDataSubsection()');
-        console.log(Data);
-        console.log(idSubsection);
+        //console.log(Data);
+        //console.log(idSubsection);
             if(!NewStageData.section[idSection].hasOwnProperty('subsection')){
                throw 'NewStageData hasn\'t `subsection` property';
             }
@@ -525,7 +524,7 @@ class StageData{
                  continue;
             }
             if(idDb===0){
-                throw 'NewStageData row image data id property - wrong database id - '+idDb;
+                throw 'NewStageData `row` `image` `data` `id` property - wrong database `id` - '+idDb+' or `tmpid` not found';
             }
             switch (Image[key].data.tmp) {
             case 'y':
@@ -543,7 +542,7 @@ class StageData{
         }
          /* SAFE REMOVE */
         //console.log('SAFE REMOVE');
-        delete NewStageDataRow.image;
+        //delete NewStageDataRow.image;
         //console.log('Image with keys to remove');
         //console.log(ImageToRemove);
         //console.log('image');

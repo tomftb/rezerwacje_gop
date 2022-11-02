@@ -5,7 +5,7 @@ class ErrorStack{
     Html = new Object();
     
     constructor() {
-        console.log('ErrorStack::constructor()');
+        //console.log('ErrorStack::constructor()');
         this.Html = new Html();
         this.clearStack();
     }
@@ -75,6 +75,8 @@ class ErrorStack{
     setBlock(){
         console.log('ErrorStack::setBlock()');
         var action = function(t,b){
+                //console.log(t);
+                //console.log(b);
                 t.Html.addClass(b,"disabled");
                 b.setAttribute("disabled",'');
         };

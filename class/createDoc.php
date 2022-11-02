@@ -91,10 +91,22 @@ class createDoc extends createDocAbstract {
         $this->Log->log(0,"[".__METHOD__."]");
         //var_dump($this->projectData);
         try{
-           self::setReportStagePage();
+            self::setReportStagePage();
+            foreach($this->projectData->heading as $h){
+               self::setReportStageEle($h->section,'addHeader');
+                /* LOOP ONLY ONE */
+                break;
+            }
+            //print_r($this->projectData->footer);
+            foreach($this->projectData->footer as $f){
+                //print_r($f);
+                self::setReportStageEle($f->section,'addFooter');
+                /* LOOP ONLY ONE */
+                break;
+            }  
             foreach($this->projectData->stage as $s){
                     //var_dump($s);
-                 self::setReportStageSection($s->section);
+                self::setReportStageSection($s->section);
             }
             $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
             $objWriter->save($this->docDir.$this->fileName); 
@@ -102,12 +114,23 @@ class createDoc extends createDocAbstract {
         catch(Exception $e){
             throw new Exception($e, 1);//->getMessage()
         }
-        
+    }
+     public function genReportStageFooter(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        self::setReportStagePage();
+        self::setReportStageEle($this->projectData->section,'addFooter');
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
+        $objWriter->save($this->docDir.$this->fileName);
+    }
+     public function genReportStageHeading(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        self::setReportStagePage();
+        self::setReportStageEle($this->projectData->section,'addHeader');
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
+        $objWriter->save($this->docDir.$this->fileName);
     }
     public function genReportStage(){
         $this->Log->log(0,"[".__METHOD__."]");
-        //print_r($this->projectData);
-        /* MOVE data->valuenewline to property */
         self::setReportStagePage();
         self::setReportStageSection($this->projectData->section);
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
@@ -121,6 +144,33 @@ class createDoc extends createDocAbstract {
         //print_r($this->projectData->property);
         unset($this->projectData->style);
         unset($this->projectData->property);
+    }
+    private function setReportStageEle($Stagesection,$method='addFooter'){
+        $this->Log->log(0,"[".__METHOD__."] ".$method);
+        $this->Log->log(0,$Stagesection);
+        /* MULTIPLE COLUMN (SECTION) IS NOT ACCEPTABLE */
+        $firstRow=true;
+        $firstSection=true;
+        $breakType='continuous';
+        $run=null;
+        $actListName=uniqid('list_');
+        $actTabStopName=uniqid('tabstop_');
+        foreach($Stagesection as $s){
+            $section = self::setSectionColumn($s->subsection,$breakType);
+            $footer = $section->{$method}();
+            foreach($s->subsection as $u){
+                foreach($u->subsectionrow as $r){
+                     if($firstRow){
+                        self::checkType($r,$footer,$run,$actListName,$actTabStopName);
+                        $firstRow=false;
+                        continue;
+                     }
+                     self::checkNewLine($r,$footer,$run,$actListName,$actTabStopName);
+                }
+                $firstRow=true;
+            }
+            $firstSection=false;
+        }
     }
     private function setReportStageSection($Stagesection){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -277,7 +327,17 @@ class createDoc extends createDocAbstract {
         }
         $imageDir = ($image->data->tmp==='n') ? UPLOAD_DIR : TMP_UPLOAD_DIR;
         parent::secondCheckImage($image);
-        $item->addImage($imageDir.$image->property->uri, array('width' => $image->style->width, 'height' => $image->style->height));//, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
+        /* TO DO
+         * infront - przed tekstem
+         * tight - przyległe
+         * behind - za tekstem
+         */
+        $item->addImage($imageDir.$image->property->uri,
+                            array(  'width' => $image->style->width,
+                                    'height' => $image->style->height,
+                                    //'positioning' => 'relative',//relative absolute
+                                    //'wrappingStyle'=>'infront'//'inline', 'behind', 'infront', 'square', 'tight'
+                        ));//, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
     }
     private function setListStyle($r,$listName=''){
       
@@ -1600,10 +1660,6 @@ $row->addCell(1000)->addText('3');
                     'marginBottom' => 0
                 ));*/
          $footer->addImage('D:\WWW\rezerwacja-gop.geofizyka.pl\WWW\upload\gt_line.png', array('width' => 602, 'height' => 1,'unit'=>'px','alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
-   
-
-        
-
         $footer->addPreserveText('STRONA {PAGE} z {NUMPAGES}', array('name' => 'Lato','bold'=>true, 'size'=>7), array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
        
         //$footer->addLink('https://github.com/PHPOffice/PHPWord', 'PHPWord on GitHub');

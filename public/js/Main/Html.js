@@ -224,9 +224,9 @@ class Html{
         throw 'className IS NOT A STRING AND OBJECT!';   
     }
     removeStyle(ele,styleName){
-        console.log('Html::removeStyle');
+        //console.log('Html::removeStyle');
         //console.log(ele);
-        console.log(styleName);
+        //console.log(styleName);
         //this.isObject(ele);
         this.isString(styleName);
         const elementStyle = ele.style;
@@ -253,6 +253,30 @@ class Html{
             console.log(type);
             throw item+' IS NOT A '+expect+ '!';
         } 
+    }
+    getDropDown(list,action){
+        //console.log(list);
+        var dropDownMenu=document.createElement('div');
+            dropDownMenu.classList.add('dropdown-menu');
+            dropDownMenu.setAttribute('aria-labelledby',"dropdownMenuButton");
+            for(const prop in list){
+                let dropDownMenuEle=document.createElement('div');
+                    dropDownMenuEle.classList.add('dropdown-item');
+                    dropDownMenuEle.style.cursor = "pointer";
+                let dropDownMenuEleItem=document.createElement('span');
+                    
+                    dropDownMenuEleItem.style.fontSize="14px";
+                let dropDownMenuEleItemLabel=document.createTextNode(list[prop]);
+                    dropDownMenuEleItem.append(dropDownMenuEleItemLabel);
+                    
+                    dropDownMenuEle.onclick=function(){
+                        action(list[prop]);
+                    };
+                    
+                    dropDownMenuEle.append(dropDownMenuEleItem);
+                    dropDownMenu.append(dropDownMenuEle);
+            }
+            return dropDownMenu;
     }
 }
 

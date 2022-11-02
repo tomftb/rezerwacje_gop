@@ -14,7 +14,7 @@ class ProjectVariableCreate{
     Utilities = new Object();
     
     constructor(Parent){
-        console.log('ProjectVariableCreate::constructor');
+        //console.log('ProjectVariableCreate::constructor');
         this.Modal=Parent.Items.Modal;
         this.Items=Parent.Items;
         this.Variable=Parent;

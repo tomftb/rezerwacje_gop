@@ -70,11 +70,21 @@ class Utilities {
         return value;
    };
    cloneProperty(newObject,o){
-        console.log(o);
+        //console.log(o);
         for(const prop in o){
+            //console.log(o[prop]);
             //console.log(typeof o[prop]);
             if(typeof o[prop] === 'object' ){
-                newObject[prop]=new Object();
+                /* determine array and object */
+                //console.log(o[prop].constructor);
+                if(o[prop].constructor===Array){
+                    //console.log('Array');
+                    newObject[prop]=new Array();
+                }
+                else{
+                     //console.log('Object');
+                    newObject[prop]=new Object(); 
+                }
                 this.cloneProperty(newObject[prop],o[prop]);
             }
             else{
@@ -84,5 +94,13 @@ class Utilities {
     }
     getUid(prefix){
         return prefix+(Math.floor(Math.random() * 10000000)).toString();
+    }
+    toggleField(field){
+        if(field.classList.contains('d-none')){
+            field.classList.remove('d-none');
+        }
+        else{
+            field.classList.add('d-none');
+        }
     }
 }

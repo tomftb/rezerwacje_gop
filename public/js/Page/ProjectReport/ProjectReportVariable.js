@@ -1,5 +1,6 @@
 class ProjectReportVariable{
     Html = new Object();
+    Modal=new Object();
     ErrorStack=new Object();
     Xhr=new Object();
     StageDataUtilities=new Object();
@@ -12,7 +13,7 @@ class ProjectReportVariable{
     VariableAction=new Object();
     Glossary=new Object();
     constructor(Parent){
-        console.log('ProjectReportVariable::constructor()');
+        //console.log('ProjectReportVariable::constructor()');
         try{
             this.ErrorStack = Parent.ErrorStack;
             this.Xhr=Parent.Xhr;
@@ -21,11 +22,12 @@ class ProjectReportVariable{
             this.appUrl=Parent.appUrl;
             this.perm=Parent.perm;
             this.Html=Parent.Html;
+            this.Modal=Parent.Modal;
             this.Utilities=Parent.Utilities;
             this.Glossary=Parent.Glossary;
             this.ImageAction=new ProjectReportVariableImageAction(Parent.Modal.link['imageShiftField'],this);
             this.VariableAction=new ProjectReportVariableAction(Parent.Modal.link['variableShiftField']);
-            console.log(this);
+            //console.log(this);
         }
         catch(e){
             throw e;
@@ -76,9 +78,14 @@ class ProjectReportVariable{
         }
         var self=this;
         for(const i in Paragraph.image){
+            //console.log(i);
+            //console.log(Paragraph.image);
+            /* SET tmpid */
+            Paragraph.image[i].property.tmpid=i;
             let entry=this.getEntryEle(Paragraph.image[i].property.name,'i',"text-warning");
                 entry.onclick = function(){
-                    self.ImageAction.change(Report,Paragraph.image,i);
+                    
+                    self.ImageAction.change(self.ImageAction,Report,Paragraph.image,i);
                 };
                 variable.list.append(entry);  
                 variable.found=true;

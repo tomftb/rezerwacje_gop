@@ -8,6 +8,7 @@ class ProjectReport extends ProjectReportView
     jsonResponse=new Object();
     ErrorStack=new Object();
     Xhr=new Object();
+    StageData=new Object();
     StageDataUtilities = new Object();
     Utilities=new Object();
     Department = new Object();
@@ -17,7 +18,11 @@ class ProjectReport extends ProjectReportView
     Helplink={
         'stage':{}
     };
-    constructor(router,appUrl,perm){
+    Glossary=new Object();
+    Table=new Object();
+    ProjectReportManage=new Object();
+    Parse=new Object();
+    constructor(router,appUrl,perm,Table){
         console.log('ProjectReport::constructor()');
         try{
             super();
@@ -29,11 +34,10 @@ class ProjectReport extends ProjectReportView
             this.perm=perm;
             this.Department = new Department();
             this.Utilities=new Utilities();
-            this.ProjectReportVariable=new ProjectReportVariable(this);
-            
-        //console.log(this.router);
-        //console.log(this.appUrl);
-        //console.log(this.perm);
+            this.StageData=new StageData();
+            this.Table=Table;
+            this.Parse=new Parse();
+            this.ProjectReportManage=new ProjectReportManage(this.Html,this.Xhr,this.Utilities,router,this.Parse);
         }
         catch(e){
             throw e;
@@ -51,8 +55,6 @@ class ProjectReport extends ProjectReportView
         catch(e){
             console.log(response);
             console.log(e);
-            //this.Modal.setError(e);
-            //this.Modal.setError(e);
             this.ErrorStack.add('overall','An Application Error Has Occurred!');
             this.Modal.setError(this.ErrorStack.info['overall']);
             return false;
@@ -89,6 +91,7 @@ class ProjectReport extends ProjectReportView
         return true;
     }
     setDefaultChosenReport(){
+        //console.log('ProjectReport::setDefaultChosenReport()');
         return {
             0:{
                 data:{
@@ -99,12 +102,14 @@ class ProjectReport extends ProjectReportView
                     buffer_user_id:null,
                     change:'y' // FOR OPTIMALISATION
                 },
-                stage:{}
+                stage:{},
+                footer:new Object(),
+                heading:new Object()
             }
         };
     }
     setData(projectStageData){
-        console.log('ProjectReport::setData()');
+        //console.log('ProjectReport::setData()');
         //console.log(projectStageData);
         //console.log(projectStageData.data.value.act.hasOwnProperty('data'));
         this.ChosenReport=this.setDefaultChosenReport();
@@ -134,6 +139,7 @@ class ProjectReport extends ProjectReportView
             this.ChosenReport[0].data.id_project=projectStageData.data.value.id;
         }
         //console.log(this.ChosenReport);
+        //console.log(projectStageData.data.value.all);
         //throw 'aa';
         return projectStageData.data.value.all;
     }
@@ -182,41 +188,45 @@ class ProjectReport extends ProjectReportView
             };
             this.Xhr.setLoad(start,end);
     }
-    create(projectStageData){
+    create(projectStageData,Glossary){
         try{
             console.log('ProjectReport::create()');
-            var AvailableStages=this.setData(projectStageData);
+            //console.log(projectStageData);
             this.Modal.setLink();
             this.Modal.clearData();
             this.setModalLoad();
-            /* createHtmlElement ?? */
             this.Modal.setHead('Raport:','bg-primary');
+            this.Glossary=Glossary;
+            var AvailableStages=this.setData(projectStageData);
             this.createButtons();   
+            this.ProjectReportManage.setData(this.ChosenReport[0],projectStageData.data.value.footer,projectStageData.data.value.heading);
       
         var rowDivResult=document.createElement('div');/* ALL */
             rowDivResult.setAttribute('class','row d-none');
             rowDivResult.setAttribute('style','border:1px solid #b3b3b3; width:800px;margin-left:150px;margin-bottom:10px;');
             rowDivResult.setAttribute('id','previewProjectReportData');
             this.Modal.link['adapted'].appendChild(this.getReportDepartment());
+            this.Modal.link['adapted'].appendChild(this.ProjectReportManage.getHead());
             this.Modal.link['adapted'].appendChild(super.getHead());
             this.Modal.link['adapted'].appendChild(super.getHeadDynamicVariable());
-            //this.Modal.link['adapted'].appendChild(super.getHeadDynamicImage());
+            this.Modal.link['adapted'].appendChild(super.getHeadDynamicImage());
             this.Modal.link['adapted'].appendChild(super.getHeadData());
-
             this.Modal.link['adapted'].appendChild(super.getDataBody());
             //this.Modal.link['adapted'].appendChild(super.getReportLoad()); TO DO
             this.Modal.link['adapted'].appendChild(rowDivResult); 
+            this.ProjectReportVariable=new ProjectReportVariable(this);
+            //this.ProjectReportVariable.setFields();
             /* SET PROEJCT REPORT ID */
             //this.projectId
-
             /* SET AVAILABLE DATA */
             this.createAvaliableStage(AvailableStages);
             /* SET CHOSEN DATA */
             this.setChosenReport();
-            console.log(this.Modal.link['adapted']);
+            //console.log(this.Modal.link['adapted']);
             //console.log(this.Modal.link);
         }
         catch(e){
+            //console.log(this.Modal);
             this.Modal.setError(e);
         }
     }
@@ -226,7 +236,7 @@ class ProjectReport extends ProjectReportView
         this.Modal.link['button'].appendChild(this.btnExportToDoc());
         this.Modal.link['button'].appendChild(this.btnSaveReport());
     }
-    createAvaliableStage(AvailableStages){      
+    createAvaliableStage(AvailableStages){
         for(const prop in AvailableStages){
             let row=this.Html.getRow();
                 this.Html.addClass(row,['mt-0','mb-0']);//'border','border-info',,'rounded','border-bottom','border-info',
@@ -267,7 +277,8 @@ class ProjectReport extends ProjectReportView
         ele.appendChild(col);        
     }
     setUpChosenStageRow(response){
-        console.log('ProjectReport::parseChosenStageRow()');
+        console.log('ProjectReport.setUpChosenStageRow()');
+        
         if(!this.parseResponse(response)){
             return false;
         };
@@ -277,32 +288,37 @@ class ProjectReport extends ProjectReportView
         /* ADD TO CURRENT REPORT STAGE OBJECT -> ADD TO REPORT WITH INDEX = 0 */
         console.log('ChosenReport:');
         console.log(this.ChosenReport);
-        console.log(Object.keys(this.ChosenReport[0].stage).length);
+        //console.log(Object.keys(this.ChosenReport[0].stage).length);
         console.log('New:');
         console.log(this.jsonResponse.data);
-        var length = (Object.keys(this.ChosenReport[0].stage).length).toString();
+        console.log('uid:');
+        var uid=this.Utilities.getUid('stage');
+        console.log(uid);
+        //var length = (Object.keys(this.ChosenReport[0].stage).length).toString();
         this.ChosenReport[0].data.change='y';
-        this.ChosenReport[0].stage[length]=this.jsonResponse.data;
-        this.ChosenReport[0].stage[length].data['ordinal_number']=1;
-        //throw 'asaaaa';
+        this.ChosenReport[0].stage[uid]=this.jsonResponse.data;
+        this.ChosenReport[0].stage[uid].data['ordinal_number']=1;
+        /* ADD tmpid - id object property */
+        this.ChosenReport[0].stage[uid].property['tmpid']=uid;
         /* ADD NET ITEM */
         let variable={
                     list:{},
                     found:false,
                     all:null
                 };
-        this.ProjectReportVariable.createEntry(this.ChosenReport[0],length,variable);
+                //throw 'vvv';
+        this.ProjectReportVariable.createEntry(this.ChosenReport[0],uid,variable);
             
         if(variable.found){
             this.Html.removeClass(this.Modal.link['variables'],'d-none');
-               variable.all=super.getVariableEle(this.ChosenReport[0].stage[length],variable.list);
+               variable.all=super.getVariableEle(this.ChosenReport[0].stage[uid],variable.list);
             this.Modal.link['variables'].append(variable.all);
         }
 
-        var rowAll=this.createChosenStageRow(this.ChosenReport[0],length);//variable.all
+        var rowAll=this.createChosenStageRow(this.ChosenReport[0],uid);//variable.all
         this.Modal.link['dynamic'].append(rowAll);
         /* SET Helplink */
-        this.Helplink.stage[length]={
+        this.Helplink.stage[uid]={
             stage:rowAll,
             variable:variable.all,
             image:{}
@@ -314,11 +330,19 @@ class ProjectReport extends ProjectReportView
         //console.log(id);
         try{
             var self=this;
+            /* ProjectReportView.js */
             var row=super.getChosenStageRow();
                 row.tx.append(document.createTextNode(Report.stage[id].data.title));        
            function swap(ReportData,id,last,self){
-               //console.log('ProjectReport::createChosenStageRow().swap()');
-               //console.log(ReportData);
+                console.log('ProjectReport::createChosenStageRow().swap()');
+                //console.log('ReportData');
+                //console.log(ReportData);
+                //console.log('id');
+                //console.log(id);
+                //console.log('last');
+                //console.log(last);
+                //console.log('self');
+                //console.log(self);
                 if(last===''){
                     //console.log('NO STAGE BEFORE/AFTER');
                     return true;
@@ -329,6 +353,9 @@ class ProjectReport extends ProjectReportView
                 var tmpStage=ReportData.stage[last];
                     ReportData.stage[last]=ReportData.stage[id];
                     ReportData.stage[id]=tmpStage;
+                /* SWAMP REPORT tmpid property */
+                    ReportData.stage[last].property.tmpid=last;
+                    ReportData.stage[id].property.tmpid=id;
                     //console.log('Report stage new:');
                     //console.log(ReportData.stage[last]);
                     //console.log('Report stage old:');
@@ -341,16 +368,19 @@ class ProjectReport extends ProjectReportView
                     self.Html.removeChilds(self.Helplink.stage[last].stage);
                     
                     var checkVariableWindow=function(selfRef,idAct,lastId){
-                        //console.log('ProjectReport::createChosenStageRow().swap().checkVariableWindow()');
+                        console.log('ProjectReport::createChosenStageRow().swap().checkVariableWindow()');
                         //console.log(selfRef);
                         //console.log(idAct);
                         //console.log(lastId);
                         //self.Html.removeChilds();
-                        //console.log();
-                        selfRef.Html.removeChilds(selfRef.Modal.link['variablesLabel']);
-                        selfRef.Modal.link['variablesInput'].value='';
-                        selfRef.Modal.link['variablesSaveButton'].onclick=function(){};
-                        selfRef.Html.addClass(selfRef.Modal.link['variablesEle'],'d-none');
+                        
+                        selfRef.Html.addClass(selfRef.Modal.link['variableShiftField'],'d-none');
+                        selfRef.Html.addClass(selfRef.Modal.link['imageShiftField'],'d-none');
+                        //selfRef.Html.removeChilds(selfRef.Modal.link['variablesLabel']);
+                        //selfRef.Modal.link['variablesInput'].value='';
+                        //selfRef.Modal.link['variablesSaveButton'].onclick=function(){};
+                        //selfRef.Html.addClass(selfRef.Modal.link['variablesEle'],'d-none');
+                        /* CHECK IMAGE WINDOW */
                        // console.log();
                         //console.log(self.Modal.link['variablesSaveButton']);
                     };
@@ -373,7 +403,7 @@ class ProjectReport extends ProjectReportView
                     
                     /* checkVariable function */
                     function checkVariable(selfRef,ReportDataIn,idAct,lastId,assignVariable,checkVariableWindow){
-                        //console.log('ProjectReport::createChosenStageRow().swap().checkVariable()');
+                        console.log('ProjectReport::createChosenStageRow().swap().checkVariable()');
                        // let variableNew={
                         //    id:{},
                         //    last:{}
@@ -473,6 +503,7 @@ class ProjectReport extends ProjectReportView
                         //console.log(self.Helplink);
                         //console.log(self.Modal.link['dynamic']);
                        // console.log(self.Modal.link['variables']);   
+                       console.log(ReportData);
            };
                 row.tx.onclick = function(){
                     //console.log(Report);
@@ -548,14 +579,16 @@ class ProjectReport extends ProjectReportView
             throw 'Application error occurred! Contact with Administrator!';
         }
     }
-
     setChosenReport(){
-        console.log('ProjectReport::setChosenReport()');
+        //console.log('ProjectReport::setChosenReport()');
         //console.log(this.Modal.link['dynamic']);
         //console.log(this.ChosenReport);
         for(const report in this.ChosenReport){
              //console.log(this.ChosenReport[report]);
             for(const id in this.ChosenReport[report].stage){
+                /* SET tmpid */
+                this.ChosenReport[report].stage[id].property['tmpid']=id;
+                //console.log(this.ChosenReport[report].stage[id]);
                 /* SET DATA */
                 let variable={
                     list:{},
@@ -637,22 +670,94 @@ class ProjectReport extends ProjectReportView
     }
     /* TO DO -> WYSKAKUJACE OKIENKA W PRZEGLADARCE */
     Save(response){
-        console.log('ProjectReport::Save');
-        
+        console.log('ProjectReport::Save()');
         if(!this.parseResponse(response)){
             return false;
         }
         if(!this.parseJsonResponse()){
-            //this.ErrorStack.add('overall','OVERALL ERROR');
-            //this.Modal.setError(this.ErrorStack.info['perm']);
             return false;
-        };
-        //console.log(this.Modal.link.error);
+        };    
+        try{
+            console.log(this.ChosenReport);
+            console.log(this.jsonResponse);
+             /* UPDATE Report DATA */
+            this.updateReport();
+            /* CLEAR INPUT FILE */
+            this.Modal.setSuccess(this.jsonResponse.data.function);
+        }
+        catch(e){
+            this.ErrorStack.add('updateReportPart',e);
+            this.Modal.setError('An Application Error Has Occurred!');
+        }
+        //this.Modal.setSuccess(this.jsonResponse.data.value[0]);
+    }
+    updateReport(){
+        console.log('ProjectReport::updateReport()');
+        for(const k in this.ChosenReport){
+            //console.log('ChosenReport key - '+k);
+            this.updateReportPart(this.ChosenReport,k,'stage');
+            this.updateReportPart(this.ChosenReport,k,'footer');
+            this.updateReportPart(this.ChosenReport,k,'heading');
+        }
+        return true;
+         
+    }
+    updateReportPart(ChosenReport,k,part){
+        console.log('ProjectReport::updateReportPart()');
+        //console.log(part);
+        //console.log(ChosenReport);
+        
+        for(const prop in ChosenReport[k][part]){
+            //console.log('ChosenReport['+k+'] `'+part+'` prop - '+prop);
+            //console.log(ChosenReport[k][part][prop]);
+            this.StageData.setStage(ChosenReport[k][part][prop]);
+            let propertyId=this.getJsonReportPart(k,prop,part);
+            if(propertyId===''){
+                throw 'Response StageData `'+part+'` doesn\'n have `property` - '+prop+'';
+            }
+            //console.log(propertyId);
+            //console.log(this.jsonResponse.data.value[k][part][propertyId]);
+            this.StageData.updateStageData(this.jsonResponse.data.value[k][part][propertyId]);
+            this.ChosenReport[k].data.change='n';
+            /* TO FIX -> SET PROEPR ID VIA TMP_ID KEY */
+            this.ChosenReport[k].data.id=this.jsonResponse.data.value[k].data.id;
+            /* SET PROPER HEADING AND FOOTER */
+            this.ProjectReportManage.updateData(this.ChosenReport[k]);
+        }
+        //console.log('New ChosenReport');
+        //console.log(ChosenReport);
+    }
+    getJsonReportPart(k,prop,part){
+        //console.log('ProjectReport::getJsonReportPart()');
+        //console.log('KEY:');
+        //console.log(k);
+        //console.log('Part:');
+        //console.log(part);
+        //console.log('Json:');
         //console.log(this.jsonResponse.data.value);
-        /* CHANGE ChosenReport status */
-        this.ChosenReport[0].data.change='n';
-        this.ChosenReport[0].data.id=this.jsonResponse.data.value[1];
-        this.Modal.setSuccess(this.jsonResponse.data.value[0]);
+        //console.log(this.jsonResponse.data.value[k]);
+        //console.log(this.jsonResponse.data.value[k][part]);
+        
+        /*
+         * 
+         * TO DO -> ADD TMP KEY IN PART
+         */
+        
+        var propertyId='';
+        for(const jProp in this.jsonResponse.data.value[k][part]){
+            //console.log('Response `'+part+'` json prop - '+jProp);
+            //console.log(this.jsonResponse.data.value[k][part][jProp]);
+            /* OLD VERSION */
+            if(!this.jsonResponse.data.value[k][part][jProp].property.hasOwnProperty('tmpid')){
+                throw 'property `tmpid` NOT EXIST in Response `'+part+'` `property`';
+            }
+            if(this.jsonResponse.data.value[k][part][jProp].property.tmpid===prop){
+                //console.log('PROPERTY `tmpid` with prop '+prop+' FOUND in Response `'+part+'` `property`');
+                propertyId=jProp;
+                break;
+            }
+        }
+        return propertyId;
     }
     Doc(response){
         console.log('ProjectReport::Doc');
@@ -720,6 +825,87 @@ class ProjectReport extends ProjectReportView
     }
     btnCancelProjectReport(){
         /* REMOVE TMP FILES */
-        return functionBtn('cancel',createBtn('Wyjdź','btn btn-dark','cancelBtn'),'');
+        //cModal('AdaptedModal');
+        //ajax.getData(defaultTask);
+        //return functionBtn('cancel',createBtn('Wyjdź','btn btn-dark','cancelBtn'),'');
+        var self=this;
+        var button=document.createElement('button');
+            button.setAttribute('type','button');
+            button.classList.add('btn','btn-dark'); 
+            button.append(document.createTextNode('Zamknij'));
+            button.onclick = function(){
+                console.log('ProjectReport.btnCancelProjectReport().onclick()');
+                console.log(self.ChosenReport[0]);
+                //self.Helplink.main.classList.add('d-none');
+               // self.clearEle(span);
+               if(self.ChosenReport[0].data.change==='n'){
+                   /* CLOSE MODAL */
+                   self.closeModal();
+                   self.reloadData();
+                   return true;
+               }
+               if(confirm('Wyjść bez zapisu?')===true){
+                   /* CLOSE MODAL */
+                   /* REMOVE TMP FILES */
+                   self.closeModal();
+                   self.reloadData();
+                   self.clearData();
+                   return true;
+               }
+            };
+    return button;
+    }
+    setTable(response){
+         var d=JSON.parse(response);
+         this.Table.showTable(d['data']['value']['data']);  
+    }
+    closeModal(){
+            console.log('ProjectItems::closeModal()');
+            window.onbeforeunload = null;
+            $(this.Modal.link['main']).modal('hide');
+    };
+    reloadData(){
+
+            /* CLEAR TABLE */
+            /* SETUP DEFAULT TABLE COLUMN */
+            var xhrRun={
+                t:'GET',
+                u:this.router+'getprojectslike',
+                //u:'asdasd',
+                c:true,
+                d:null,
+                o:this,
+                m:'setTable'
+            };
+           this.Xhr.run(xhrRun);
+    }
+    clearData(){
+            console.log(this.ChosenReport[0].stage);
+            let files=new Array();
+            for(const prop in this.ChosenReport[0].stage){
+                this.StageData.setStage(this.ChosenReport[0].stage[prop]);
+                let tmpFiles=this.StageData.getFiles();
+                if(tmpFiles.length===0){
+                    continue;
+                }
+                for(var i=0;i<tmpFiles.length;i++){
+                    files.push(tmpFiles[i]);
+                }
+            }
+            //if()
+            
+            //console.log('ProjectStageCreate->setUndoTask()');
+            console.log(files);
+            console.log(files.length);
+           
+            if(files.length>0){
+                let ImageTool = new ProjectStageToolFile();
+                    ImageTool.setReportParent(this);
+                    ImageTool.deleteFiles(files,this,'successfully');  
+            }   
+        }
+    successfully(response){
+        console.log('ProjectReport.successfully()');
+        console.log(response);
     }
 }

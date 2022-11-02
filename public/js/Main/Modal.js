@@ -105,7 +105,7 @@ class Modal{
     }
     setError(e){
         //console.log(e);
-        //console.log(this.link.error);
+        //console.log(this.link);
         this.Html.removeClass(this.link['error'],['d-none','alert-success']);
         this.Html.addClass(this.link['error'],['alert-danger']);
         this.link.error.innerHTML=e;
@@ -119,4 +119,33 @@ class Modal{
         this.Html.addClass(this.link['error'],['alert-success']);
         this.link.error.innerHTML=i;
     }
+    setLoad(Xhr,appUrl){
+           //setLoadModalInfo(Xhr){
+        //console.log('ProjectItems::setLoadModalInfo()');
+        //var M = this.Modal;
+        var self=this;
+            this.loadNotify='<img src="'+appUrl+'/img/loading_60_60.gif" alt="load_gif">';
+        var start = function(){
+                self.showLoad(); 
+            };
+        var end = function(){
+                self.hideLoad();
+            };
+        Xhr.setOnLoadStart(start);
+        Xhr.setOnLoadEnd(end);
+    //} 
+    }
+    setLoadError(){
+        //console.log('ProjectItems::modalXhrError()');
+         var xhrError={
+            o:this,
+            m:'setError'
+        };
+        return xhrError;
+    }
+    //setModalError(response){
+      //  console.log('ProjectItems::setModalError()');
+       // console.log(response);
+       // this.Html.showField(this.Modal.link['error'],response);
+    //}
 }

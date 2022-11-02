@@ -5,7 +5,7 @@ class ProjectStageProperty{
     constructor() {}
     
     setData(data){
-        console.log(data);        
+        //console.log(data);        
         this.setText(data);
         //throw 'stop-tet';
         this.setDepartment(data);

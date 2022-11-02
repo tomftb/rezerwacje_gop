@@ -6,6 +6,7 @@ class ProjectStageTable{
     defaultTask='';
     appUrl='';
     router='';
+    detailsTask='detailsText';
     Table = new Object();
     head={
         0:{
@@ -37,22 +38,22 @@ class ProjectStageTable{
         1:'t'
     };
     constructor(Parent){
-        console.log('ProjectStageTable.construct()');  
+        //console.log('ProjectStageTable.construct()');  
         this.Parent=Parent;
         this.Table=Parent.Items.Table;
         this.Xhr=Parent.Items.Xhr;
         this.Html=Parent.Items.Html;
     }
     setProperties(appUrl,url){
-        console.log('ProjectConst::setProperties()');
+        //console.log('ProjectConst::setProperties()');
         this.appUrl=appUrl;
         this.router=url;
-        console.log(appUrl);
-        console.log(url);
+        //console.log(appUrl);
+        //console.log(url);
     }
     run(task){
-        console.log('ProjectStageTable.run()\ntask');
-        console.log(task);
+        //console.log('ProjectStageTable.run()\ntask');
+        //console.log(task);
         this.Table.unsetError();
         this.defaultTask=task;
          /* CLEAR TABLE */
@@ -60,10 +61,10 @@ class ProjectStageTable{
          /* SET HEAD */
         this.Table.setHead(this.head);
         /* GET DATA => SET BODY */
-        this.Table.getData(this,'setBody',task);
+        this.Table.getData(this,'setBody',this.router+task);
     }
     setBody(response){
-        console.log('ProjectStageTable::setBody()');
+        //console.log('ProjectStageTable::setBody()');
         /* CLEAR TABLE */
         this.Table.clearTable();   
         /* SET HEAD */
@@ -133,7 +134,7 @@ class ProjectStageTable{
     getShowButton(Ajax,id){
         var btn  = this.getButton('Wyświetl','btn-info');
         var AjaxRun = this.getXhrRunProperty('psDetails&id='+id);
-            AjaxRun.m='details';
+            AjaxRun.m=this.detailsTask;
             btn.onclick = function (){
                 Ajax.run(AjaxRun);
             };

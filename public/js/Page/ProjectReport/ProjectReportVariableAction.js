@@ -11,23 +11,23 @@ class ProjectReportVariableAction{
     }
     setField(self){
         var col=document.createElement('DIV');
-            col.classList.add('col-12','border','border-purple'); 
+            col.classList.add('col-12','border','border-purple','p-0'); 
             /* LABEL VARIABLE NAME */
         var span=document.createElement('span');
             span.classList.add('text-dark','font-weight-normal');
             /* LABEL */
         var p=document.createElement('p');
-            p.classList.add('h4','text-purple','m-0');
+            p.classList.add('h4','bg-purple','text-white');
         var t=document.createTextNode('Zmienna ');
             p.append(t,span,document.createTextNode(' :'));
             /* TEXTAREA */
         var input=document.createElement('textarea');
-            input.classList.add('form-control','mb-1');
+            input.classList.add('form-control');
             //this.Html.addClass(input,['form-control','mb-1']);
             input.setAttribute('rows','4');
             /* BUTTONS */
         var divRowButton=document.createElement('DIV');
-            divRowButton.classList.add('row','ml-1','mt-1','mb-1','mr-0');
+            divRowButton.classList.add('row','m-1');
         var divColButton=document.createElement('DIV');
             divColButton.classList.add('col-12','text-right','pr-0');
         var divButton=document.createElement('div');
@@ -42,7 +42,6 @@ class ProjectReportVariableAction{
             buttonCancel.onclick = function(){
                 self.Helplink.main.classList.add('d-none');
                 self.clearEle(span);
-                
             };
         var buttonSave=document.createElement('button');
             buttonSave.setAttribute('type','button');

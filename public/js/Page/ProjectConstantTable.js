@@ -52,21 +52,21 @@ class ProjectConstantTable{
     tableColException=new Array('bl');
     tableBody;
     constructor(Parent){
-        console.log('ProjectConstTable::construct()');  
-        console.log(Parent);
+        //console.log('ProjectConstTable::construct()');  
+        //console.log(Parent);
         this.Parent=Parent;
         this.Table=Parent.Items.Table;
         this.Xhr=Parent.Items.Xhr;
         this.Html=Parent.Items.Html;
     }
     setProperties(appUrl,url,defaultTask){
-        console.log('ProjectConstTable::setProperties()');
+        //console.log('ProjectConstTable::setProperties()');
         this.defaultTask=defaultTask;
         this.appUrl=appUrl;
         this.router=url;
-        console.log(appUrl);
-        console.log(defaultTask);
-        console.log(url);
+        //console.log(appUrl);
+        //console.log(defaultTask);
+        //console.log(url);
     }
     run (task){
         try{
@@ -88,7 +88,7 @@ class ProjectConstantTable{
         
     }
     setBody(response){
-        console.log('ProjectVariableTable::setBody()');
+        //console.log('ProjectVariableTable::setBody()');
         /* CLEAR TABLE */
         this.Table.clearTable();   
         /* SET HEAD */

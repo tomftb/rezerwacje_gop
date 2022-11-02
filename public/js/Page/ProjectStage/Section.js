@@ -41,7 +41,7 @@ class Section{
         //var mainDivBody=this.Html.getCol(12); 
         this.Link.body=this.Html.getCol(12); 
             Helplink.section[iSection]={
-                main:this.getHelpLinkSectionMain()
+                main:this.getHelpLink()
             };
             this.Link.head.append(this.getHeadTool(iSection,section,Helplink,this)); 
             this.helplink.section[iSection].main.head=this.Link.head;
@@ -53,18 +53,18 @@ class Section{
             //return mainDiv;
             return this.Link;
     }
-    getHead(isection){
+    getHead(isection,bg){
         var mainDivHeader=this.Html.getCol(12); 
         var hr=document.createElement('hr');
             hr.setAttribute('class','w-100 border-1 border-secondary mt-2');//
         var h=document.createElement('h3');    
-            h.setAttribute('class','w-100 text-center bg-info text-white');//
+            h.setAttribute('class','w-100 text-center '+bg+' text-white');//
             h.innerHTML='<span class="text-muted">[WIERSZ]</span> Sekcja  nr '+isection;
             mainDivHeader.appendChild(hr);
             mainDivHeader.appendChild(h);
         return mainDivHeader;
     }
-    getHelpLinkSectionMain(){
+    getHelpLink(){
         return {
                 all:{},
                 head:{},

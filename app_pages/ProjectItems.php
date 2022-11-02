@@ -40,24 +40,33 @@ final class ProjectItems extends Page{
         'Main/StageData.js',
         'Utilities/DocPreviewPage.js',
         'Utilities/DocPreview.js',
+        'Utilities/Parse.js',
         'Page/ProjectStageToolVariable.js',
         'Page/ProjectStageToolFile.js',
         'Page/ProjectStageTool.js',
-        'Page/ProjectStageProperty.js',
-        'Page/ProjectStageCreate.js',
+        'Page/ProjectStage/ProjectStageProperty.js',
+        'Page/ProjectStage/Row.js',
+        'Page/ProjectStage/SubSection.js',
+        'Page/ProjectStage/Section.js',
+        'Page/ProjectStage/ProjectStageCreateHead.js',
+        'Page/ProjectStage/ProjectStageCreate.js',
         //'Page/ProjectStageCreateText.js',
-        'Page/ProjectStageCreateTable.js',
-        'Page/ProjectStageCreateImage.js',
+        'Page/ProjectStage/ProjectStageCreateTable.js',
+        'Page/ProjectStage/ProjectStageCreateImage.js',
         //'Page/ProjectStageCreateList.js',
-        'Page/ProjectStageTable.js',
-        'Page/ProjectStage.js',
+        'Page/ProjectStage/ProjectStageTable.js',
+        'Page/ProjectStage/ProjectStage.js',
         'Page/ProjectConstantTable.js',
         'Page/ProjectConstantCreate.js',
         'Page/ProjectConstant.js',
         'Page/ProjectVariableTable.js',
         'Page/ProjectVariableCreate.js',
         'Page/ProjectVariable.js',
-        'Page/ProjectItems.js'
+        //'Page/ProjectStage/HeadingTable.js',
+        //'Page/ProjectStage/Heading.js',
+        //'Page/ProjectStage/Footer.js',
+        'Page/ProjectItems.js',
+        
         ];
     public function __construct(){
         parent::__construct();	
@@ -72,5 +81,4 @@ final class ProjectItems extends Page{
         parent::setMainPerm($this->mainPerm);
     }
     public function __destruct(){}
-
 }

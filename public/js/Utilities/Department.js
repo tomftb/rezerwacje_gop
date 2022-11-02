@@ -5,7 +5,7 @@ class Department{
     Link=new Object();
     
     constructor(){
-        console.log('Department::constructor()');
+        //console.log('Department::constructor()');
         this.Html = new Html();
     }
     get(){

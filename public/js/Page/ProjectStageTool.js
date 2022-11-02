@@ -4,21 +4,49 @@ class ProjectStageTool{
     Utilities = new Object()
     Glossary = new Object();
     Html = new Object();
+    Modal=new Object();
     Stage = new Object();   
     ErrorStack = new Object();
+    router='';
+    appUrl='';
     constructor(){
-        
+
+    }
+    setReportParent(Parent){
+        try{
+            //console.log('ProjectStageTool.setReportParent()');
+            this.Utilities=Parent.Utilities;
+            this.Glossary=Parent.Glossary;
+            this.Tool=Parent.Tool;
+            this.Modal=Parent.Modal;
+            this.router=Parent.router;
+            this.appUrl=Parent.appUrl;
+            //console.log(this);  
+        }
+        catch(e){
+            console.log(e);
+            throw 'An Application Error Has Occurred!';
+        };
     }
     setParent(Parent){
-        this.Utilities = Parent.Utilities;
-        this.Glossary = Parent.Glossary;
-        this.Html = Parent.Html;
-        this.Tool = new Tool();
-        this.Stage = Parent;
-        this.ErrorStack = Parent.ErrorStack; 
+        try{
+            this.router=Parent.router;
+            this.appUrl=Parent.appUrl;
+            this.Utilities = Parent.Utilities;
+            this.Glossary = Parent.Glossary;
+            this.Html = Parent.Html;
+            this.Modal=Parent.Modal;
+            this.Tool = new Tool(Parent.Html);
+            this.Stage = Parent;
+            this.ErrorStack = Parent.ErrorStack;  
+        }
+        catch(e){
+            console.log(e);
+            throw 'An Application Error Has Occurred!';
+        }; 
     }
     getAllOptions(Glossary,property,key,run){
-        console.log('ProjectStageTool::getAllOptions()');
+        //console.log('ProjectStageTool::getAllOptions()');
         var all = {}; 
         for(var i=0;i<Glossary.getKeyCount(key);i++){
             if(Glossary.getKeyPropertyAttribute(key,i,'v')===property){//property[key]
@@ -29,7 +57,7 @@ class ProjectStageTool{
         return all;
     }
     getIndentation(property,ele){
-        console.log('ProjectStageTool::getIndentation()');
+        //console.log('ProjectStageTool::getIndentation()');
         /*
          * property - reference for example subsectionrow.paragraph.style
          * ele - reference for example helplink
@@ -129,11 +157,17 @@ class ProjectStageTool{
         /* TO DO 
         rightEjectionMin
         rightEjectionMax               
-         */           
-        return  this.Tool.create(title,data);
+         */     
+        var Tool = this.Tool.create(title,data);
+        var run=function(value){
+            Tool.childNodes[1].childNodes[0].value=value;
+            property[keys[0]] = value;
+        };
+        this.setDropDown(Tool,run);     
+        return Tool;
     }
     getRightEjection(property,ele){
-        console.log('ProjectStageTool::getRightEjection()');
+        //console.log('ProjectStageTool::getRightEjection()');
         /*
          * property - reference for example subsectionrow.paragraph.style
          * ele - references for example helplink.text
@@ -144,18 +178,18 @@ class ProjectStageTool{
         return tool;
     }
     getLeftEjection(property,ele){
-        console.log('ProjectStageTool::getLeftEjection()');
+        //console.log('ProjectStageTool::getLeftEjection()');
         /*
          * property - reference for example subsectionrow.paragraph.style
          * ele - references for example helplink.text
          */
         var tool = this.getEjection(property,['leftEjection','leftEjectionMeasurement'],'Wcięcie z lewej strony:');
         /* SET HELPLINK */
-            ele.leftEjection=tool.childNodes[1].childNodes[0];
+            ele.leftEjection=tool.childNodes[1].childNodes[0];   
         return tool;
     }
     getParagraph(property,ele){
-        console.log('ProjectStageTool::getParagraph()');
+        //console.log('ProjectStageTool::getParagraph()');
         /*
          * property - reference for example subsectionrow.paragraph.property
          * ele - references for example helplink.tool
@@ -269,17 +303,17 @@ class ProjectStageTool{
             /* Anonymous Function */
             tool[0]['onchange']=function(t){
                 /* t - this */
-                console.log('ProjectStageTool::getExtendedTool()');
-                console.log('BEFORE:');
-                console.log(property);
-                console.log(key);
+                //console.log('ProjectStageTool::getExtendedTool()');
+               // console.log('BEFORE:');
+                //console.log(property);
+                //console.log(key);
                 /* SET PROPERTY KEY VALUE */
                 this.property[this.key[0]]=t.value;
                 /* SET SECOND PROPERTY KEY VALUE */
                 this.property[this.key[1]] = this.glossary.getItemName(item,t.value);
-                console.log('AFTER:');
-                console.log(this.property[this.key[0]]);
-                console.log(this.property[this.key[1]]);
+                //console.log('AFTER:');
+                //console.log(this.property[this.key[0]]);
+                //console.log(this.property[this.key[1]]);
             };
         return tool;
     }/* COMPLEX */
@@ -297,10 +331,10 @@ class ProjectStageTool{
             /* Anonymous Function */
             tool[0]['onchange']=function(t){
                 /* t - this */
-                console.log('ProjectStageTool::getCompleteTool()');
-                console.log(property);
-                console.log(key);
-                console.log(ele);
+                //console.log('ProjectStageTool::getCompleteTool()');
+                //console.log(property);
+                //console.log(key);
+                //console.log(ele);
                 /* SET PROPERTY KEY VALUE */
                 this.property[this.key[0]]=t.value;
                 /* SET INPUT STYLE PROPERTY */
@@ -321,7 +355,7 @@ class ProjectStageTool{
         return option;
     }
     setColorProperty(data,property,key,run){
-        console.log('ProjectStageTool::setColorProperty()');
+        //console.log('ProjectStageTool::setColorProperty()');
         data[0]['default']=this.getDefaultOption(property,key[0],key[1]);
         data[0]['all']=this.getAllOptions(this.Glossary.text,property.color,'color',run); 
     }
@@ -348,7 +382,7 @@ class ProjectStageTool{
         return this.getBackgroundColor(property,key,this.getCompleteTool(property,key,ele,this.Glossary.text,'color'));
     }
     getSimpleColor(property){
-        console.log('ProjectStageTool::getSimpleColor()');
+        //console.log('ProjectStageTool::getSimpleColor()');
         /*
          * property - reference to property
          */
@@ -362,7 +396,7 @@ class ProjectStageTool{
         return  this.Tool.create('Kolor tekstu:',data);
     }
     getExtendedColor(property,ele){
-        console.log('ProjectStageTool::getExtendedColor()');
+        //console.log('ProjectStageTool::getExtendedColor()');
         /*
          * property - reference to property
          */
@@ -376,8 +410,8 @@ class ProjectStageTool{
         return  this.Tool.create('Kolor tekstu:',data);
     }
     getSimpleAlign(property,propertyKey){
-        console.log('ProjectStageTool::getSimpleAlign()');
-        console.log(this.Glossary.text);
+        //console.log('ProjectStageTool::getSimpleAlign()');
+        //console.log(this.Glossary.text);
         var run = this.getAlign();
         var data=this.getExtendedTool(property,propertyKey,this.Glossary.text,'textAlign');
             data[0]['default']=this.getDefaultOption(property,propertyKey[0],propertyKey[1]);
@@ -385,8 +419,8 @@ class ProjectStageTool{
         return  this.Tool.create('Wyrównanie:',data);
     }
     getSimpleOrder(property,propertyKey){
-        console.log('ProjectStageTool::getSimpleOrder()');
-        console.log(this.Glossary.text);
+        //console.log('ProjectStageTool::getSimpleOrder()');
+        //console.log(this.Glossary.text);
         var run = this.getOrder();
         var data=this.getExtendedTool(property,propertyKey,this.Glossary.image,'order');
             data[0]['default']=this.getDefaultOption(property,propertyKey[0],propertyKey[1]);
@@ -394,7 +428,7 @@ class ProjectStageTool{
         return  this.Tool.create('Kolejność:',data);
     }
     getExtendedAlign(property,propertyKey,ele){
-        console.log('ProjectStageTool::getExtendedAlign()');
+        //console.log('ProjectStageTool::getExtendedAlign()');
         var run = this.getAlign();
         //var data=this.getAdvancedTool(property,key[0],ele);
         var data=this.getCompleteTool(property,propertyKey,ele,this.Glossary.text,'textAlign');
@@ -403,14 +437,14 @@ class ProjectStageTool{
         return  this.Tool.create('Wyrównanie:',data);
     }
     getAlign(){
-        console.log('ProjectStageTool::getAlign()');
+        //console.log('ProjectStageTool::getAlign()');
         var run = function(self,Glossary,key,i){
             return self.getExtendedOption(Glossary.getKeyPropertyAttribute(key,i,'v'),Glossary.getKeyPropertyAttribute(key,i,'n'),'#000000','#FFFFFF','');  
         };
         return run;
     }
     getOrder(){
-        console.log('ProjectStageTool::getOrder()');
+        //console.log('ProjectStageTool::getOrder()');
         var run = function(self,Glossary,key,i){
             return self.getExtendedOption(Glossary.getKeyPropertyAttribute(key,i,'v'),Glossary.getKeyPropertyAttribute(key,i,'n'),'#000000','#FFFFFF','');  
         };
@@ -428,7 +462,7 @@ class ProjectStageTool{
         return  this.Tool.create('Typ listy:',data); 
     }
     getListLevel(property,ele){
-        console.log('ProjectStageTool::getListLevel()');
+        //console.log('ProjectStageTool::getListLevel()');
         var multiplier = parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
         var key = ['listLevel','listLevelName'];
         var data=this.getTool(property,key);
@@ -460,7 +494,7 @@ class ProjectStageTool{
         return value;
     }
     getNewList(property){
-        console.log('ProjectStageTool::getNewList()');
+        //console.log('ProjectStageTool::getNewList()');
         var all={
             0:{
                 v:'y',
@@ -500,7 +534,7 @@ class ProjectStageTool{
         return list;
     }
     getFontFamily(property){
-        console.log('ProjectStageTool::getFontFamily()');
+        //console.log('ProjectStageTool::getFontFamily()');
         var run = function(self,Glossary,key,i){
             let v = Glossary.getKeyPropertyAttribute(key,i,'v');
             return self.getExtendedOption(v,v,'#000000','#FFFFFF',v);  
@@ -554,8 +588,10 @@ class ProjectStageTool{
          * k (key) - example ['fontSize','fontSizeMeasurement']
          */ 
         var data={
+            /* FIRST ELE PROPERTY */
             0:{
-                key:k,                
+                key:k,   
+                value:property[k[0]],
                 property:property,
                 type:'input',
                 attributes:{
@@ -563,6 +599,7 @@ class ProjectStageTool{
                     type:'number'
                 }
             },
+            /* SECOND ELE PROPERTY */
             1:this.getSizeMeasurement(property,k)
         };
         /* TO DO 
@@ -570,6 +607,29 @@ class ProjectStageTool{
         size min               
         */
         return data;  
+    }
+    getInputSizeWithSelect(property,k){
+        //console.log('ProjectStageTool.getInputSizeWithSelect()'); 
+        var data={
+            /* FIRST ELE PROPERTY */
+            0:{
+                key:k,     
+                value:property[k[0]],
+                property:property,
+                type:'input',
+                attributes:{
+                    class:'w-75',
+                    type:'number'
+                }
+            },
+            /* SECOND ELE PROPERTY */
+            1:this.getSizeMeasurement(property,k)
+        };
+        /* TO DO 
+        size max
+        size min               
+        */
+        return data; 
     }
     getSelectSize(property,k){
         /* console.log('ProjectStageTool::getSelectSize()'); */
@@ -580,6 +640,7 @@ class ProjectStageTool{
          */
         //var k=['fontSize','fontSizeMeasurement'];
         var data={
+            /* FIRST ELE PROPERTY */
             0:{
                 key:k,
                 default:{
@@ -592,6 +653,7 @@ class ProjectStageTool{
                     class:'w-75'
                 }
             },
+            /* SECOND ELE PROPERTY */
             1:this.getSizeMeasurement(property,k)
         };
         /* TO DO 
@@ -614,7 +676,13 @@ class ProjectStageTool{
         return this.Tool.create(title,data);
     }
     getSimpleSize(property){
-        var data = this.getSelectSize(property,['fontSize','fontSizeMeasurement']);
+        var data = this.getInputSizeWithSelect(property,['fontSize','fontSizeMeasurement']);
+        //var data = this.getSelectSize(property,['fontSize','fontSizeMeasurement']);
+            data[0]['onclick']=function(t){
+                //console.log('ProjectStageTool.getSimpleSize().onclick()');
+                //console.log(t);
+                //console.log(t.value);
+            };
             data[0]['onchange']=function(t){
                 /* t - this */
                 this.property[this.key[0]] = t.value; 
@@ -623,11 +691,25 @@ class ProjectStageTool{
                 /* t - this */
                 this.property[this.key[1]] = t.value;
             }; 
-        return this.Tool.create('Rozmiar tekstu:',data);
+        var run=function(value){
+            Tool.childNodes[1].childNodes[0].value=value;
+            property['fontSize'] = value;
+        };
+        var Tool = this.Tool.create('Rozmiar tekstu:',data);
+            this.setDropDown(Tool,run);     
+        return Tool;
     }
     getExtendedSize(property,ele){
-        var data = this.getSelectSize(property,['fontSize','fontSizeMeasurement']);
+        var data = this.getInputSizeWithSelect(property,['fontSize','fontSizeMeasurement']);
             data[0]['ele']=ele;
+            data[0]['onclick']=function(t){
+                //console.log('ProjectStageTool.getExtendedSize().onclick()');
+                //console.log(t);
+                //console.log(t.value);
+                
+                this.property[this.key[0]] = t.value;
+                this.ele.style[this.key[0]]=t.value+this.property[this.key[1]];
+            };
             data[0]['onchange']=function(t){
                 /* t - this */
                 this.property[this.key[0]] = t.value;
@@ -639,7 +721,16 @@ class ProjectStageTool{
                 this.property[this.key[1]] = t.value;
                 this.ele.style[this.key[0]]=this.property[this.key[0]]+t.value;
             }; 
-        return this.Tool.create('Rozmiar tekstu:',data);
+            
+             var Tool=this.Tool.create('Rozmiar tekstu:',data);
+            
+        var run=function(value){
+            Tool.childNodes[1].childNodes[0].value=value;
+            property['fontSize'] = value;
+            ele.style.fontSize=value+property['fontSizeMeasurement'];
+        };
+            this.setDropDown(Tool,run);     
+        return Tool;
     }
     getDefaultOption(property,value,name){
         var d={
@@ -661,10 +752,18 @@ class ProjectStageTool{
         }
         return value;
     }
+    getClearSizeList(min,max){
+        var sizeList=new Array();
+        for(var i=min;i<max+1;){
+            sizeList.push(i);
+            i=i+2;
+        };
+        return sizeList;
+    }
     getTabStop(TabStopRef,isection,isub,isubrow,subsectionrow,helplink){
-        console.log('ProjectStageTool::getTabStop()');
-        console.log('TABSTOP ASSIGN TO PARAGRAPH');
-        console.log(subsectionrow.paragraph.property.tabstop);
+        //console.log('ProjectStageTool::getTabStop()');
+        //console.log('TABSTOP ASSIGN TO PARAGRAPH');
+        //console.log(subsectionrow.paragraph.property.tabstop);
        
         var all=new Object();
         for(const prop in subsectionrow.paragraph.tabstop){
@@ -712,7 +811,7 @@ class ProjectStageTool{
 
         /* SET DEFAULT OPTION */
         this.setDefaultOption(subsectionrow.paragraph.property.tabstop,tool.childNodes[1].childNodes[0].childNodes[1],subsectionrow.paragraph.tabstop);
-        console.log(TabStopRef);
+        //console.log(TabStopRef);
         //throw 'aaaa';
         return  tool;
     }
@@ -724,15 +823,15 @@ class ProjectStageTool{
         TabStop.setProperty('leadingSign',this.Glossary.text.item.leadingSign); 
     }
     setDefaultOption(paragraphTabStop,option,tabstop){
-        console.log('ProjectStageTool::setDefaultOption()\r\nPARAGRAPH TABSTOP:');
-        console.log(paragraphTabStop);
+        //console.log('ProjectStageTool::setDefaultOption()\r\nPARAGRAPH TABSTOP:');
+        //console.log(paragraphTabStop);
         if(paragraphTabStop==='-1'){
-            console.log('PARAGRAM TABSTOP < 0 -> RETURN FALSE');
+            //console.log('PARAGRAM TABSTOP < 0 -> RETURN FALSE');
             //console.log(paragraphTabStop);
             return false;
         }
         if(this.Utilities.countObjectProp(tabstop)===0){
-            console.log('TABSTOP DATA LIST IS EMPTY -> RETURN FALSE');
+            //console.log('TABSTOP DATA LIST IS EMPTY -> RETURN FALSE');
             return false;
         }
         /* SET PROPER DEFAULT OPTION ON SELECT */
@@ -743,7 +842,7 @@ class ProjectStageTool{
                     return paragraphTabStop;
             }
         }
-        console.log('OPTION NOT FOUND -> RETURN FALSE');
+        //console.log('OPTION NOT FOUND -> RETURN FALSE');
         return false;
     }
     createTextToolCheckBox(id,isection,isub,isubrow,title,defaultvalue,subsectionRowAttr,helplinkValue){
@@ -760,17 +859,17 @@ class ProjectStageTool{
             input.setAttribute('type','checkbox');
             input.classList.add('form-check-input');
             input.onclick = function (){
-                console.log('ProjectStageTool::createTextToolCheckBox()');
-                console.log('ID - '+id);
-                console.log(this);
+                //console.log('ProjectStageTool::createTextToolCheckBox()');
+                //console.log('ID - '+id);
+                //console.log(this);
                 if(this.value==='0'){
                     this.value='1';
                 }
                 else{
                     this.value='0';
                 }
-                console.log(subsectionRowAttr);
-                console.log(subsectionRowAttr[id]);
+                //console.log(subsectionRowAttr);
+                //console.log(subsectionRowAttr[id]);
                 subsectionRowAttr[id]=this.value;
                 classObject.setValueCheckBoxStyle(id,this.value,helplinkValue);
             };
@@ -942,9 +1041,9 @@ class ProjectStageTool{
 
     getSectionHeadTool(iSection,section,helplink,ProjectStageCreate){// isection
         /* */
-        console.log('ProjectStageCreate::getSectionHeadTool()');
-        console.log('section');
-        console.log(section);
+        //console.log('ProjectStageCreate::getSectionHeadTool()');
+        //console.log('section');
+        //console.log(section);
         var Tool = new ToolFields([3,3,3,3]);
         
             Tool.set(0,this.setSectionSubSection(iSection,section[iSection].subsection,helplink.section[iSection].subsection,ProjectStageCreate));
@@ -985,11 +1084,11 @@ class ProjectStageTool{
        var Tool = new ToolFields([7,1,2,2]);
         //tool4.classList.add('pt-4'); 
         //console.log(this.ProjectStageTool.getTabStopList(isubrow));
-        console.log(TabStop[isubrow]);
+        //console.log(TabStop[isubrow]);
         Tool.set(0,TabStop[isubrow].create());//subsectionrow.paragraph.tabstop,isubrow
 
         mainDivCol.appendChild(Tool.getMain());
-        console.log(mainDivCol);
+        //console.log(mainDivCol);
         return mainDivCol;
     }
     createControl(label,ele,color,color2){
@@ -1020,7 +1119,7 @@ class ProjectStageTool{
             return control; 
     }
     getControlTool(isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,mainDiv,TabStop,VariableList){
-        console.log('ProjectStageCreate::getControlTool()');
+        //console.log('ProjectStageCreate::getControlTool()');
         try{
              helplinkISubRow['tool']={};
             /* CREATE TEXT TOOL */
@@ -1039,9 +1138,10 @@ class ProjectStageTool{
                 helplinkISubRow.tool['listControl']=listToolControl;
                 helplinkISubRow.tool['list']=listTool;
              /* CREATE IMAGE TOOL */
-            var ImageTool = new ProjectStageToolFile(this);
-                console.log(ImageTool);
-                ImageTool.setImage(subsectionrowISubRow);
+            var ImageTool = new ProjectStageToolFile(this.Utilities,this.Html,this.Modal,this.router,this.appUrl);
+                ImageTool.setParent(this);
+                //console.log(ImageTool);
+                ImageTool.setImage(subsectionrowISubRow.image);
                 ImageTool.setToolEle('img_'+isection.toString()+isub.toString()+iSubRow.toString());
             var VariableTool = new ProjectStageToolVariable(this,isection,isub,iSubRow,subsectionrowISubRow,helplinkISubRow,VariableList);
             var mainCol = this.Html.getCol(12);
@@ -1071,7 +1171,7 @@ class ProjectStageTool{
        
     }
     setSectionSubSection(iSection,subsection,helplinkSubsection,self){
-        console.log('ProjectStageCreate.setSectionSubSection()');
+        //console.log('ProjectStageCreate.setSectionSubSection()');
         var subSectionCount = Object.keys(subsection).length;
         var data={
             0:{
@@ -1088,7 +1188,7 @@ class ProjectStageTool{
                 glossary:this.Glossary.text,
                 /* Anonymous Function */
                 onchange:function(t){
-                    console.log('ProjectStageCreate.setSectionSubSection().onchange()');
+                    //console.log('ProjectStageCreate.setSectionSubSection().onchange()');
                     /* t - this */
                     this.oldValue=parseInt(this.oldValue,10);
                     var newValue=parseInt(t.value,10);
@@ -1163,12 +1263,12 @@ class ProjectStageTool{
         return(div); 
     }
     getSectionFooterTool(iSection,section){
-        console.log('ProjectStageCreate::getSectionFooterTool()');
+        //console.log('ProjectStageCreate::getSectionFooterTool()');
         //console.log('iSection');
         //console.log(iSection);
-        console.log('section');
-        console.log(section);
-        console.log('section');
+        //console.log('section');
+        //console.log(section);
+        //console.log('section');
         //throw 'stop';
         var mainDivCol=this.Html.getCol(12);
             mainDivCol.classList.add('bg-light','mt-1');
@@ -1197,8 +1297,8 @@ class ProjectStageTool{
         return mainDivCol;
     }
     createTextToolRadioButton(id,title,value){
-        console.log('ProjectStageCreate::createTextToolRadioButton()');
-        console.log(id);
+        //console.log('ProjectStageCreate::createTextToolRadioButton()');
+        //console.log(id);
         var maindiv=this.Html.getRow();
         var collabel=this.Html.getCol(12);
         var colvalue=this.Html.getCol(12);
@@ -1207,7 +1307,7 @@ class ProjectStageTool{
             mainlabel.innerHTML=title;  
         for (const property in value) {
             /**/
-            console.log(value[property]);    
+            //console.log(value[property]);    
             var div=this.Html.getRow();
                 div.setAttribute('class','form-check form-check-inline');
             var input=document.createElement('input');
@@ -1232,10 +1332,10 @@ class ProjectStageTool{
     }
     setRadioButtonExtend(radio,subsectionrowParagraph,run){
         /**/
-        console.log('ProjectStageCreate::setRadioButtonExtend()');
-        console.log(radio);
-        console.log('SUBSECTIONROW');
-        console.log(subsectionrowParagraph);
+        //console.log('ProjectStageCreate::setRadioButtonExtend()');
+        //console.log(radio);
+        //console.log('SUBSECTIONROW');
+        //console.log(subsectionrowParagraph);
         
         /* FIRST RUN TO SET PROPER VALUE AND onClick FUNCTION */
         var self = this;
@@ -1250,8 +1350,8 @@ class ProjectStageTool{
                 /* CLOSURE */
                 currentValue.childNodes[0].onclick = function (){
                     subsectionrowParagraph.property.valuenewline = this.value; 
-                    console.log(this.value);
-                    console.log(subsectionrowParagraph);
+                    //console.log(this.value);
+                    //console.log(subsectionrowParagraph);
                     if(run){
                         self[run.method](this.value,run);
                     };
@@ -1273,10 +1373,10 @@ class ProjectStageTool{
         return Tool.getMain();
     }
     setToolVisibility(value,run){
-        console.log('ProjectStageCreate::setToolVisibility()');
-        console.log(run);
-        console.log('value');
-        console.log(value);
+        //console.log('ProjectStageCreate::setToolVisibility()');
+        //console.log(run);
+        //console.log('value');
+        //console.log(value);
         switch(value){
             case 'l':   
             case 'y':
@@ -1291,8 +1391,8 @@ class ProjectStageTool{
         }
     }
     setToolList(value,run){
-        console.log('ProjectStageCreate::setToolList()');
-        console.log(run);
+        //console.log('ProjectStageCreate::setToolList()');
+        //console.log(run);
         if(value==='p'){
             this.hideControl(run);
             /* FIX tabstopList SELECT */
@@ -1303,7 +1403,7 @@ class ProjectStageTool{
     }
     showControl(run){
         for(const prop in run.tool){
-            console.log(run.tool[prop]);
+            //console.log(run.tool[prop]);
             if (run.helplink.tool[run.tool[prop]].style.display) {
                 run.helplink.tool[run.tool[prop]].style.removeProperty('display');
             }
@@ -1313,8 +1413,16 @@ class ProjectStageTool{
     }
     hideControl(run){
         for(const prop in run.tool){
-            console.log(run.tool[prop]);
+            //console.log(run.tool[prop]);
             run.helplink.tool[run.tool[prop]].style.setProperty('display', 'none');
         }
+    }
+    setDropDown(Tool,run){
+        Tool.classList.add('dropdown');
+        Tool.childNodes[1].append(this.Html.getDropDown(this.getClearSizeList(6,32),run));
+        Tool.childNodes[1].childNodes[0].classList.add('dropdown-toggle');
+        Tool.childNodes[1].childNodes[0].setAttribute('data-toggle','dropdown');
+        Tool.childNodes[1].childNodes[0].setAttribute('aria-haspopup',"true");
+        Tool.childNodes[1].childNodes[0].setAttribute('aria-expanded',"false");
     }
 }

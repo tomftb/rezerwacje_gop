@@ -1,4 +1,3 @@
-console.log('Xhr::');
 /* STATIC VERSION */
 class Xhr{
     static runObject;
@@ -90,13 +89,13 @@ class Xhr2 {
     LoadStart;
     uid=0;
     constructor(){
-        console.log('Xhr2::constructor()\r\nUID:');
+        //console.log('Xhr2::constructor()\r\nUID:');
         this.uid=Math.random();
-        console.log(this.uid);
+        //console.log(this.uid);
     }
     run(property){
-        console.log('Xhr2::run()\r\nUID:');
-        console.log(this.uid);
+       // console.log('Xhr2::run()\r\nUID:');
+        //console.log(this.uid);
         //console.log('TYPE:');
         //console.log(property.t);
         /*
@@ -162,7 +161,7 @@ class Xhr2 {
                 console.log("The request took too long!");
             };  
             req.onload = function(e) {
-                console.log('Xhr2::onload()');
+                //console.log('Xhr2::onload()');
                 //console.log(property);
                 if(typeof property.o[property.m] !=='function'){
                     console.log("Xhr2::onload() Wrong Object or Method!");

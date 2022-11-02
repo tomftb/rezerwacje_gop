@@ -65,7 +65,7 @@ class Table
         this.btnInfo.col=column;
     }
     setButtonsType(type){
-        console.log('TABLE::setButtonsType()');
+        //console.log('TABLE::setButtonsType()');
         /* btn-group, dropdown */
         if(type==='btn-group'){
             this.buttonsType=function(i)
@@ -84,7 +84,7 @@ class Table
         }
     }
     showTable(d){
-        console.log('Table::showTable(data)');
+        //console.log('Table::showTable(data)');
         // console.log(d);
         var defaultTableCol=document.getElementById("colDefaultTable");
             removeHtmlChilds(defaultTableCol);
@@ -242,10 +242,10 @@ class Table
     }
     /* NEW - 15.03.2022 */
     getData(o,m,task){ 
-        console.log('ProjectStageTable::getData()');
-        console.log(o);
-        console.log(m);
-        console.log(task);
+        //console.log('ProjectStageTable::getData()');
+        //console.log(o);
+        //console.log(m);
+        //console.log(task);
         /*
          * property:
          * t = type GET/POST 
@@ -302,7 +302,7 @@ class Table
         } 
     }
     setLink(){
-        //console.log('Table::setLink()');
+        //console.log('Table.setLink()');
         var tableEle = document.getElementById('mainTableDiv');
         //console.log(tableEle);
         this.link={
@@ -327,7 +327,7 @@ class Table
         };
     }
     setError(info){
-        console.log('Table::setError()');
+        //console.log('Table::setError()');
         //console.log(info);
         //console.log(this.link['error']);
         this.link['error'].classList.remove("d-none");
@@ -335,7 +335,7 @@ class Table
         this.error=true;
     }
     unsetError(){
-        console.log('Table::unsetError()');
+        //console.log('Table::unsetError()');
         this.link['error'].classList.add("d-none");
         this.link['error'].innerHTML='';
     }

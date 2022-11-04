@@ -119,7 +119,7 @@ class ProjectStage{
         }
     }
     createText(){
-        //console.log('ProjectStage::createText()');
+        console.log('ProjectStage::createText()');
         this.setDefault('show','getprojectsstagelike&p=b&d=0&v=0&b=');
         this.runCreate('prepareText','t','b');//getprojectsstagelike&p=b&d=0&v=0&b=
     }
@@ -145,6 +145,8 @@ class ProjectStage{
         this.runCreate('prepareHeading','t','h');//getprojectsstagelike&p=h&d=0&v=0&b=
     }
     runCreate(r,t,p){
+        console.log('ProjectStage::runCreate()');
+        console.log(r);
         /*
          * r - method name to run
          * t - type (t - text, l - list)

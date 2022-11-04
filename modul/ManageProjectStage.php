@@ -375,29 +375,24 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $value=array();
         /* GET DEFAULT PARAMETERS */
         $value['list'] = parent::getStageGlossaryList();
+        $value['list']['parameter']=self::getGlossaryParameter('STAGE_LIST_%');
         $value['text'] = parent::getStageGlossaryText();
+        $value['text']['parameter']=self::getGlossaryParameter('STAGE_TEXT_%');
         $value['image'] = parent::getStageGlossaryImage();
         return $value;
+    }
+    private function getGlossaryParameter($key='STAGE_TEXT_%'){
+         /* SETUP PARAMETER */
+        $parm=[];
+        foreach(parent::getStageParameters($key) as $v){
+            $parm[$v['s']]=['n'=>$v['n'],'v'=>$v['v']];
+        };
+        return $parm;
     }
     public function getNewStageDefaults(){
         $type=htmlentities(nl2br(filter_input(INPUT_GET,'type')), ENT_QUOTES,'UTF-8',FALSE);
         $this->Log->log(0,"[".__METHOD__."]\r\nTYPE - ".$type);
-        $value=self::getGlossary();
-        /* SETUP PARAMETER */
-        $parm=[];
-        foreach(parent::getStageParameters('STAGE_TEXT_%') as $v){
-            //print_r($v);
-            $parm[$v['s']]=['n'=>$v['n'],'v'=>$v['v']];
-            //$value['text']['parameter']
-        };
-        $value['text']['parameter']=$parm;
-        $parm=[];
-        foreach(parent::getStageParameters('STAGE_LIST_%') as $v){
-            //print_r($v);
-            $parm[$v['s']]=['n'=>$v['n'],'v'=>$v['v']];
-        }
-        $value['list']['parameter']=$parm;
-        $this->utilities->jsonResponse($value,'createText');
+        $this->utilities->jsonResponse(self::getGlossary(),'createText');
     }
     protected function checkDataLength($value,$label,$min,$max){
         $this->Log->log(0,"[".__METHOD__."]");

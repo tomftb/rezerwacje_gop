@@ -85,7 +85,7 @@ class createDocAbstract {
                 // works 'hidden'=>true
         ];
     }
-    protected function setAlign($align='LEFT'){
+    protected function setAlign($style){
         //'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER);
         //$this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
         //$this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
@@ -98,18 +98,36 @@ class createDocAbstract {
                 'RIGHT'=>\PhpOffice\PhpWord\SimpleType\Jc::RIGHT,
                 'JUSTIFY'=>\PhpOffice\PhpWord\SimpleType\Jc::BOTH
         ];
-        if(!array_key_exists($align,$available)){
-            Throw New Exception('WRONG TEXT ALIGN -> '.$align,0);
+        //textAlign
+        if(!property_exists($style,'textAlign')){
+            return $available['LEFT'];
         }
-        return $available[$align];
+        if(!array_key_exists($style->textAlign,$available)){
+            $this->Log->log(0,'['.__METHOD__.'] WRONG TEXT ALIGN -> '.$style->textAlign);
+            return $available['LEFT'];
+            //Throw New Exception('WRONG TEXT ALIGN -> '.$style->textAlign,0);
+        }
+        return $available[$style->textAlign];
     }
     protected function setParagraphProperties($r){
         return [
             'tabs'=>self::setTabStop($r->paragraph->tabstop),
-            'alignment'=>self::setAlign($r->paragraph->style->textAlign)
-        ];
+            'alignment'=>self::setAlign($r->paragraph->style),
+            'spaceBefore'=>self::setParagraphSpace($r->paragraph->style,'marginTop'), /* IN TWIP : 1 pkt  - 20 twip ex. 240 TWIP = 12 pkt */
+            'spaceAfter'=>self::setParagraphSpace($r->paragraph->style,'marginBottom'), /* IN TWIP 1 - 20 */
+            /* INTERLINIA */
+            'spacing'=>'100',
+            'spacingLineRule'=>'auto'/* atLeast, exact, auto */
+        ]; 
     }
-
+    private function setParagraphSpace($style,$key='marginTop'){
+        if(property_exists($style, $key)){
+            return round(intval($style->{$key},10)*20,0);
+        }
+        /* default 160 twip = 8 pkt*/
+        $this->Log->log(0,'['.__METHOD__.'] Property '.$key.' not exists in style -> return default 160 twip');
+        return 160;
+    }
     private function setTextStyle($style='1'){
         if($style==='1'){
             return true;
@@ -139,12 +157,15 @@ class createDocAbstract {
             'dot'=>'dot'
         ];
         if(!array_key_exists($sign,$available)){
-            Throw New Exception('NOT SUPPORTED SIGN -> '.$sign,0);
+            //$this->Log->log(0,'['.__METHOD__.'] Property '.$key.' not exists in style -> return default 160 twip');
+            $this->Log->log(0,'['.__METHOD__.'] NOT SUPPORTED SIGN -> '.$sign." return default - none");
+            return $available['none'];
+            //Throw New Exception('NOT SUPPORTED SIGN -> '.$sign,0);
         }
         return $available[$sign];
     }
     protected function firstCheckImage($Image){
-        $this->Log->log(0,"[".__METHOD__."]");
+        $this->Log->log(2,"[".__METHOD__."]");
         if(!is_object($Image)){
             throw new Exception('Variable `Image` is not a object!',1);
         }
@@ -164,10 +185,10 @@ class createDocAbstract {
         }
     }
     protected function secondCheckImage($Image){
-        $this->Log->log(0,"[".__METHOD__."]");
-        $this->Log->log(0,$Image);
-        $this->Log->log(0,$Image->style);
-        $this->Log->log(0,gettype($Image->style->width));
+        $this->Log->log(2,"[".__METHOD__."]");
+        $this->Log->log(2,$Image);
+        //$this->Log->log(2,$Image->style);
+        //$this->Log->log(0,gettype($Image->style->width));
         /* ONLY CHECK MAIN PROPERTY */ 
         self::checkPropertyStyle($Image);
         self::checkPropertyProperty($Image);

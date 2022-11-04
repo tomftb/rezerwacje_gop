@@ -92,18 +92,19 @@ class createDoc extends createDocAbstract {
         //var_dump($this->projectData);
         try{
             self::setReportStagePage();
+            $section=$this->phpWord->addSection();
             foreach($this->projectData->heading as $h){
-               self::setReportStageEle($h->section,'addHeader');
+                self::setReportPart($h->section,'addHeader','default',$section);
                 /* LOOP ONLY ONE */
                 break;
             }
             //print_r($this->projectData->footer);
-            foreach($this->projectData->footer as $f){
+              foreach($this->projectData->footer as $f){
                 //print_r($f);
-                self::setReportStageEle($f->section,'addFooter');
+                self::setReportPart($f->section,'addFooter','default',$section);
                 /* LOOP ONLY ONE */
                 break;
-            }  
+            }
             foreach($this->projectData->stage as $s){
                     //var_dump($s);
                 self::setReportStageSection($s->section);
@@ -118,14 +119,14 @@ class createDoc extends createDocAbstract {
      public function genReportStageFooter(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::setReportStagePage();
-        self::setReportStageEle($this->projectData->section,'addFooter');
+        self::setReportPart($this->projectData->section,'addFooter','firstPage',$this->phpWord->addSection());
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
         $objWriter->save($this->docDir.$this->fileName);
     }
      public function genReportStageHeading(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::setReportStagePage();
-        self::setReportStageEle($this->projectData->section,'addHeader');
+        self::setReportPart($this->projectData->section,'addHeader','firstPage',$this->phpWord->addSection());
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
         $objWriter->save($this->docDir.$this->fileName);
     }
@@ -145,31 +146,37 @@ class createDoc extends createDocAbstract {
         unset($this->projectData->style);
         unset($this->projectData->property);
     }
-    private function setReportStageEle($Stagesection,$method='addFooter'){
+    private function setReportPart($Stagesection,$method='addFooter',$type='default',$section){
         $this->Log->log(0,"[".__METHOD__."] ".$method);
-        $this->Log->log(0,$Stagesection);
+        //$this->Log->log(0,$Stagesection);
         /* MULTIPLE COLUMN (SECTION) IS NOT ACCEPTABLE */
         $firstRow=true;
-        $firstSection=true;
-        $breakType='continuous';
         $run=null;
         $actListName=uniqid('list_');
         $actTabStopName=uniqid('tabstop_');
         foreach($Stagesection as $s){
-            $section = self::setSectionColumn($s->subsection,$breakType);
-            $footer = $section->{$method}();
+            $part = $section->{$method}();
+            /* 
+                Footer::AUTO default, all pages except if overridden by first or even
+                Footer::FIRST each first page of the section
+                Footer::EVEN each even page of the section. Will only be applied if the evenAndOddHeaders is set to true in phpWord->settings
+             */
+            //$part->resetType();
+            $part->setType($type);
+            //$part->firstPage();
+            //$part->evenPage();
+            //evenPage Auto - default - odd pages
             foreach($s->subsection as $u){
                 foreach($u->subsectionrow as $r){
                      if($firstRow){
-                        self::checkType($r,$footer,$run,$actListName,$actTabStopName);
+                        self::checkType($r,$part,$run,$actListName,$actTabStopName);
                         $firstRow=false;
                         continue;
                      }
-                     self::checkNewLine($r,$footer,$run,$actListName,$actTabStopName);
+                     self::checkNewLine($r,$part,$run,$actListName,$actTabStopName);
                 }
                 $firstRow=true;
             }
-            $firstSection=false;
         }
     }
     private function setReportStageSection($Stagesection){
@@ -196,6 +203,7 @@ class createDoc extends createDocAbstract {
             }
             
             $section = self::setSectionColumn($s->subsection,$breakType);
+            //$this->Log->log(0,$this->phpWord->getSections());
             //var_dump($section);
             //print_r($section);
             /* COLUMNS */
@@ -319,7 +327,7 @@ class createDoc extends createDocAbstract {
     }
     private function setRunImage($image,$key=0,&$item){
         $this->Log->log(0,"[".__METHOD__."]");
-        $this->Log->log(0,$image);
+        //$this->Log->log(0,$image);
         parent::firstCheckImage($image);
         if($image->data->tmp==='d'){
             $this->Log->log(0,"[".__METHOD__."] Image tmp = d -> SKIP;");

@@ -45,7 +45,7 @@ class ProjectStageCreate{
     Utilites = new Object();
     Variable=new Object();
     VariableList=new Object();
-    
+    StageTable=new Object();
     constructor(Parent){
         //console.log('ProjectStageCreate::constructor()');
        
@@ -68,7 +68,7 @@ class ProjectStageCreate{
         this.ProjectStageTool = new ProjectStageTool();
         this.ProjectStageTool.setParent(this);
         this.Variable=Parent.Items.Variable;
-   
+        this.StageTable=Parent.StageTable;
         /* SECTION CLASS */
         this.Section=new Section(Parent.Items.Html,this.Utilities);
         /* ROW CLASS */
@@ -76,67 +76,92 @@ class ProjectStageCreate{
         /* Page/Head.js */
         this.ProjectStageCreateHead=new ProjectStageCreateHead(this,Parent.Items.Department);
     }
+    runPrepare(response){
+        try{
+           this.prepare(response);
+            /* SETUP MODAL */
+            this[this.CreateProperty.modal.action](); 
+        }
+        catch(e){
+            console.log(e);
+            this.StageTable.Table.setError(e);
+        };
+    }
     prepareText(response){
         this.CreateProperty={
             modal:{
                 title:'Dodaj etap projektu - tekst',
-                bg:'bg-info'
+                bg:'bg-info',
+                action:'setUpTextModal'
             },
             preview:{
                 f:'run'
             },
             doc:{
                 f:'genProjectReportTestDoc'
+            },
+            tool:{
+                head:'getSectionHeadAllTool'
             }
         };
-        this.prepare(response);
-        /* SETUP MODAL */
-        this.setUpTextModal();
+        this.runPrepare(response);        
     }
     prepareList(response){      
          this.CreateProperty={
             modal:{
                 title:'Dodaj etap projektu - tekst',
-                bg:'bg-info'
+                bg:'bg-info',
+                action:'setUpListModal'
             },
             preview:{
                 f:'run'
+            },
+            doc:{
+                f:'genProjectReportTestDoc'
+            },
+            tool:{
+                head:'getSectionHeadAllTool'
             }
         };
-        this.prepare(response);
-        this.setUpListModal();
+        this.runPrepare(response,);
     }
     prepareHeading(response){
          this.CreateProperty={
             modal:{
                 title:'Dodaj nagłówek',
-                bg:'bg-brown'
+                bg:'bg-brown',
+                action:'setUpHeadingModal'
             },
             preview:{
                 f:'runHeading'
             },
             doc:{
                 f:'genProjectReportTestDocHeading'
+            },
+            tool:{
+                head:'getSectionHeadMinTool'
             }
         };
-        this.prepare(response);
-        this.setUpHeadingModal();
+        this.runPrepare(response);
     }
     prepareFooter(response){
         this.CreateProperty={
             modal:{
                 title:'Dodaj stopke',
-                bg:'bg-brown'
+                bg:'bg-brown',
+                action:'setUpFooterModal'
             },
             preview:{
                 f:'runFooter'
             },
             doc:{
                 f:'genProjectReportTestDocFooter'
+            },
+            tool:{
+                head:'getSectionHeadMinTool'
             }
         };
-        this.prepare(response);
-        this.setUpFooterModal();
+        this.runPrepare(response);
     }
     prepare(response){
         try{
@@ -148,14 +173,14 @@ class ProjectStageCreate{
             this.StageData = new StageData();
             this.StageData.setProperty(this.Glossary,this.Stage.Property,this.type,null,this.part);
              /* SETUP CLEAR STAGE DATA */
-            this.StageData.createDefault();
+            this.StageData.setDefault();
             //console.log(this.ErrorStack);
             this.ErrorStack.clearStack();
         } 
         catch(err){
             console.log('ProjectStageCreate.prepare()\rERROR:');
             console.log(err);
-            throw 'An Application Error Has Occurred!';
+            throw 'An Application Error Has Occurred!'; 
         };
         
     }
@@ -244,6 +269,9 @@ class ProjectStageCreate{
             },
             doc:{
                 f:'genProjectReportTestDoc'
+            },
+            tool:{
+                head:'getSectionHeadAllTool'
             }
         };
         this.details(response,'createExtendedSection');
@@ -260,6 +288,9 @@ class ProjectStageCreate{
             ,
             doc:{
                 f:'genProjectReportTestDocHeading'
+            },
+            tool:{
+                head:'getSectionHeadMinTool'
             }
         };
         this.details(response,'createSection');
@@ -275,6 +306,9 @@ class ProjectStageCreate{
             },
             doc:{
                 f:'genProjectReportTestDocFooter'
+            },
+            tool:{
+                head:'getSectionHeadMinTool'
             }
         };
         this.details(response,'createSection');
@@ -287,8 +321,12 @@ class ProjectStageCreate{
             /* SETUP STAGE DATA */
             this.StageData = new StageData();
             this.StageData.setProperty(this.Glossary,this.Stage.Property,null,this.part);
-            this.StageData.setStage(response['stage']);
             this.VariableList=response['variable'];
+             /* IF TRUE => SEND UPDATE */
+            if(this.StageData.setStage(response['stage'])){ 
+                this.sendInputData(this);
+            }
+            
         }catch(error){
             console.log('ProjectStageCreate::details()');
             console.log(error);
@@ -422,7 +460,8 @@ class ProjectStageCreate{
                 /* CREATE SUBSECTION */
                 mainDivBody.appendChild(this.createSubsection(iSection,iSub,section[iSection].subsection[iSub],helplink.section[iSection].subsection));
             }
-            mainDivHeader.appendChild(this.ProjectStageTool.getSectionHeadTool(iSection,section,helplink,this)); 
+            mainDivHeader.appendChild(this.ProjectStageTool[this.CreateProperty.tool.head](iSection,section,helplink,this)); 
+            //mainDivHeader.appendChild(this.ProjectStageTool.getSectionHeadAllTool(iSection,section,helplink,this)); 
             this.helplink.section[iSection].main.head=mainDivHeader;
             this.helplink.section[iSection].main.body=mainDivBody;
             mainDiv.appendChild(mainDivHeader);  
@@ -731,10 +770,8 @@ class ProjectStageCreate{
                 //console.clear();
                 if(self.ErrorStack.check()){ return false;}
                 self.Html.hideField(self.Modal.link['error']);
-                var fd = new FormData();
-                    fd.append('stage',JSON.stringify(self.StageData.Stage));
                 self.checkInputData(self.StageData.Stage);
-                self.sendInputData(fd,self);
+                self.sendInputData(self);
             };
             //this.helplink['confirm']=confirm;
             this.ErrorStack.setBlockEle(confirm);
@@ -743,9 +780,11 @@ class ProjectStageCreate{
     /* 
      * SEND INPUT DATA TO SEND 
      */
-    sendInputData(fd,self){
+    sendInputData(self){
         //console.log('ProjectStageCreate.sendInputData()');
         if(self.ErrorStack.check()){ return false;}
+        var fd = new FormData();
+            fd.append('stage',JSON.stringify(self.StageData.Stage));
         this.Xhr.run({
                 t:'POST',
                 u:this.router+'confirmProjectStageText',

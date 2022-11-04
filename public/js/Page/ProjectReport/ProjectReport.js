@@ -706,7 +706,7 @@ class ProjectReport extends ProjectReportView
         console.log('ProjectReport::updateReportPart()');
         //console.log(part);
         //console.log(ChosenReport);
-        
+        this.StageData.setGlossary(this.Glossary);
         for(const prop in ChosenReport[k][part]){
             //console.log('ChosenReport['+k+'] `'+part+'` prop - '+prop);
             //console.log(ChosenReport[k][part][prop]);

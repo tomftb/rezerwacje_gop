@@ -665,7 +665,7 @@ class ProjectStageTool{
     getSimpleInputSize(property,propertyKey,title){
         var data = this.getInputSize(property,propertyKey);//['fontSize','fontSizeMeasurement']
             data[0]['value']=property[propertyKey[0]];
-        data[0]['onchange']=function(t){
+            data[0]['onchange']=function(t){
                 /* t - this */
                 this.property[this.key[0]] = t.value; 
             };
@@ -699,14 +699,33 @@ class ProjectStageTool{
             this.setDropDown(Tool,run);     
         return Tool;
     }
-    getExtendedSize(property,ele){
-        var data = this.getInputSizeWithSelect(property,['fontSize','fontSizeMeasurement']);
+    getParagraphSize(property,ele){
+        var prop={
+            key:['fontSize','fontSizeMeasurement'],
+            title:'Rozmiar tekstu:'
+        };
+        return this.getExtendedSize(property,ele,prop);
+    }
+    getParagraphSpaceBefore(property,ele){
+        //console.log(property);
+        //console.log(ele);
+        var prop={
+            key:['spaceBefore','spaceBeforeMeasurement'],
+            title:'Odstęp przed:'
+        };
+        return this.getExtendedSize(property,ele,prop);
+    }
+    getParagraphSpaceAfter(property,ele){
+        var prop={
+            key:['spaceAfter','spaceAfterMeasurement'],
+            title:'Odstęp po:'
+        };
+        return this.getExtendedSize(property,ele,prop);
+    }
+    getExtendedSize(property,ele,prop){
+        var data = this.getInputSizeWithSelect(property,prop.key);
             data[0]['ele']=ele;
-            data[0]['onclick']=function(t){
-                //console.log('ProjectStageTool.getExtendedSize().onclick()');
-                //console.log(t);
-                //console.log(t.value);
-                
+            data[0]['onclick']=function(t){                
                 this.property[this.key[0]] = t.value;
                 this.ele.style[this.key[0]]=t.value+this.property[this.key[1]];
             };
@@ -722,12 +741,12 @@ class ProjectStageTool{
                 this.ele.style[this.key[0]]=this.property[this.key[0]]+t.value;
             }; 
             
-             var Tool=this.Tool.create('Rozmiar tekstu:',data);
+            var Tool=this.Tool.create(prop.title,data);
             
         var run=function(value){
             Tool.childNodes[1].childNodes[0].value=value;
-            property['fontSize'] = value;
-            ele.style.fontSize=value+property['fontSizeMeasurement'];
+            property[prop.key[0]] = value;
+            ele.style.fontSize=value+property[prop.key[1]];
         };
             this.setDropDown(Tool,run);     
         return Tool;
@@ -1010,11 +1029,15 @@ class ProjectStageTool{
         var Tool = new ToolFields([3,3,3,3]);
 
         /* FONT SIZE */
-        Tool.set(0,this.getExtendedSize(subsectionrow.paragraph.style,helplink.text.value));
+        Tool.set(0,this.getParagraphSize(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT COLOR */
         Tool.set(0,this.getExtendedColor(subsectionrow.paragraph.style,helplink.text.value));
         /* BACKGROUND COLOR */
         Tool.set(0,this.getExtendedBackgroundColor(subsectionrow.paragraph.style,helplink.text.value));
+        /* odstep przed */
+        Tool.set(0,this.getParagraphSpaceBefore(subsectionrow.paragraph.style,helplink.text.value));
+         /* odstep po */
+        Tool.set(0,this.getParagraphSpaceAfter(subsectionrow.paragraph.style,helplink.text.value));
         /* FONT FAMILY */
         Tool.set(1,this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT ALIGN */
@@ -1038,8 +1061,19 @@ class ProjectStageTool{
 
         return mainDivCol;
     }
+     getSectionHeadMinTool(iSection,section,helplink,ProjectStageCreate){// isection
+        /* */
+        //console.log('ProjectStageCreate::getSectionHeadTool()');
+        //console.log('section');
+        //console.log(section);
+        var Tool = new ToolFields([3,3,3,3]);
+        
+            Tool.set(0,this.setNoSectionSubSection(iSection));
+            Tool.set(3,this.createRemoveSectionButton(iSection,section,helplink.section));
 
-    getSectionHeadTool(iSection,section,helplink,ProjectStageCreate){// isection
+        return Tool.getMain();
+    }
+    getSectionHeadAllTool(iSection,section,helplink,ProjectStageCreate){// isection
         /* */
         //console.log('ProjectStageCreate::getSectionHeadTool()');
         //console.log('section');
@@ -1169,6 +1203,35 @@ class ProjectStageTool{
             //this.Html.showField(this.Modal.link['error'],'An Application Error Has Occurred!');
         }
        
+    }
+    setNoSectionSubSection(iSection){
+        var formGroup=document.createElement('div');
+            formGroup.classList.add('form-group');
+        var label = document.createElement('label');
+            label.setAttribute('for','columnList'+iSection);
+            label.classList.add('text-brown');
+        var labelTitle=document.createTextNode('Wskaż ilość podsekcji ');
+        var labelTitle2=document.createTextNode('[KOLUMN]');
+        
+        var p=document.createElement('p');
+            p.classList.add('text-muted');
+        var small2=document.createElement('small');
+            small2.append(document.createTextNode('*Footer/Heading supports only one column.'));
+            p.append(small2);
+        var small=document.createElement('small');
+            small.classList.add('text-muted');
+            small.append(labelTitle2);
+            label.append(labelTitle,small,document.createTextNode(':'));
+            
+        var select=document.createElement('select');
+            select.classList.add('form-control','form-control-sm','font-weight-normal','border','text-secondary','border-secondary');
+        var option=document.createElement('option');
+            option.append(document.createTextNode('1'));
+            select.append(option);
+            formGroup.append(label,select,p);
+            //ele.append(formGroup);
+        //return  this.Tool.create('Wskaż ilość podsekcji <small class="text-muted">[KOLUMN]</small>:',data);
+        return formGroup;
     }
     setSectionSubSection(iSection,subsection,helplinkSubsection,self){
         //console.log('ProjectStageCreate.setSectionSubSection()');

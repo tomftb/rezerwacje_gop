@@ -95,7 +95,10 @@ class Glossary{
          */
         if(!k.hasOwnProperty(property)){
             console.log('Glossary::getKeyCount() KEY PROPERTY NOT EXISTS:');
+            console.log(this);
+            console.log('key:');
             console.log(key);
+            console.log('property:');
             console.log(property);
             throw 'ERROR in Glossary::getKeyProperty()';
         }

@@ -173,7 +173,7 @@ class ManageProjectVariable extends ManageProjectVariableDatabase{
          $this->Items->setBlock($id,"slo_project_stage_variable","buffer_user_id",$user);
     }
     private function swapVariablePropertyWithValue(&$value='',$variable=[]){
-        $this->Log->log(0,"[".__METHOD__."]");
+        $this->Log->log(2,"[".__METHOD__."]");
         if(count($variable)===0){
             return false;
         }
@@ -249,7 +249,7 @@ class ManageProjectVariable extends ManageProjectVariableDatabase{
         return false;
     }
     public function parsePartVariable(&$part){
-        $this->Log->log(0,"[".__METHOD__."]");
+        $this->Log->log(2,"[".__METHOD__."]");
         foreach($part->section as $s){
             foreach($s->subsection as $su){
                 foreach($su->subsectionrow as $r){

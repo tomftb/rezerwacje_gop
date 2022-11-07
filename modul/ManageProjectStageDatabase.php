@@ -127,7 +127,7 @@ class ManageProjectStageDatabase {
             //$this->stage = (object)[];
             //$data=[];
 
-            $this->stage->data=$this->dbLink->squery("SELECT s.`id`,s.`departmentId`,s.`departmentName`,s.`title`,s.`new_page` as valuenewline FROM `slo_project_stage` s WHERE s.id=:id",[':id'=>[$id,'INT']],'FETCH_OBJ','fetch');
+            $this->stage->data=$this->dbLink->squery("SELECT s.`id`,s.`departmentId`,s.`departmentName`,s.`title`,s.`new_page` as valuenewline, s.`create_user_login`,s.`create_user_email`,s.`create_date`,s.`mod_user_login`,s.`mod_user_email`,s.`mod_date` FROM `slo_project_stage` s WHERE s.id=:id",[':id'=>[$id,'INT']],'FETCH_OBJ','fetch');
             /* FIX STRING TO INT */
             $this->stage->data->id=intval($this->stage->data->id,10);
             /* SET STAGE STYLE AND PROPERTY */

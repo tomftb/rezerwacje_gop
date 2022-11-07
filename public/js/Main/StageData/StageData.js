@@ -242,7 +242,13 @@ class StageData{
                         spaceAfter:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_AFTER','v'),
                         spaceAfterMeasurement:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_AFTER_MEASUREMENT','v'),
                         spaceBefore:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_BEFORE','v'),
-                        spaceBeforeMeasurement:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_BEFORE_MEASUREMENT','v')
+                        spaceBeforeMeasurement:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_BEFORE_MEASUREMENT','v'),
+                        leading:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING','n'),
+                        leadingMin:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING_MIN','n'),
+                        leadingMax:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING_MAX','n'),
+                        leadingMeasurement:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING_MEASUREMENT','n'),
+                        leadingType:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING_TYPE','v'),
+                        leadingTypeName:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING_TYPE','n')
                     },
                     property: {
                         value:'',

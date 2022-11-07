@@ -19,8 +19,8 @@ final class PermManager{
         }
     }
     private function checkSession(){
-        $this->Log->log(0,$_SESSION);
-        $this->Log->log(0,count($_SESSION));
+        //$this->Log->log(0,$_SESSION);
+        //$this->Log->log(0,count($_SESSION));
         if(count($_SESSION)===0){
              throw new Exception('Sesja wygasła. Zaloguj się ponownie.',0);
         }

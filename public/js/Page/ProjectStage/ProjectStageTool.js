@@ -56,25 +56,54 @@ class ProjectStageTool{
         };
         return all;
     }
-    getIndentation(property,ele){
-        //console.log('ProjectStageTool::getIndentation()');
-        /*
+    getLeading(property,ele){
+        //console.log('ProjectStageTool::getLeading()');
+         /*
          * property - reference for example subsectionrow.paragraph.style
          * ele - reference for example helplink
          */  
+        //console.log(this.Glossary);
+        return this.getThreePartInput(
+                property,
+                ele,
+                {
+                    key:['leading','leadingMeasurement','leadingMin','leadingMax','leadingType','leadingTypeName'],
+                    title:'Interlinia (Odstęp międzywierszowy):',
+                    gKey:['leading','measurement']
+                }); 
+    }
+    getIndentation(property,ele){
+        //console.log('ProjectStageTool::getIndentation()');
+         /*
+         * property - reference for example subsectionrow.paragraph.style
+         * ele - reference for example helplink
+         */  
+        //console.log(this.Glossary);
+        return this.getThreePartInput(
+                property,
+                ele,
+                {
+                    key:['indentation','indentationMeasurement','indentationMin','indentationMax','indentationSpecial','indentationSpecialName'],
+                    title:'Specjalne:',
+                    gKey:['indentationSpecial','listMeasurement']
+                });
+    }
+    getThreePartInput(property,ele,prop){
+        //console.log(property);
         var data={
             0:{
                 default:{
-                    0:this.Utilities.getDefaultOptionProperties(property['indentationSpecial'],property['indentationSpecialName'])
+                        
+                    0:this.Utilities.getDefaultOptionProperties(property[prop.key[4]],property[prop.key[5]])//'indentationSpecial' 'indentationSpecialName'
                 },
-                all:this.Utilities.getDefaultList(this.Glossary.text.item.indentationSpecial,property['indentationSpecial']),
+                all:this.Utilities.getDefaultList(this.Glossary.text.item[prop.gKey[0]],property[prop.key[4]]),
                 property:property,
                 glossary:this.Glossary.text,
                 /* Anonymous Function */
                 onchange:function(t){
                     /* t - this */
-                    this.property['indentationSpecial'] = t.value;
-                    this.property['indentationSpecialName'] = this.glossary.getItemName('indentationSpecial',t.value);
+                    this.property[prop.key[4]] = t.value;
+                    this.property[prop.key[5]] = this.glossary.getItemName(prop.gKey[0],t.value);
                 },
                 type:'select',
                 attributes:{
@@ -86,7 +115,7 @@ class ProjectStageTool{
                 value:property.indentation,
                 onchange:function(t){
                     /* t - this */
-                    this.property['indentation'] = t.value;
+                    this.property[prop.key[0]] = t.value;
                 },
                 type:'input',
                 attributes:{
@@ -96,14 +125,14 @@ class ProjectStageTool{
             },   
             2:{
                 default:{
-                    0:this.Utilities.getDefaultOptionProperties(property['indentationMeasurement'],property['indentationMeasurement'])
+                    0:this.Utilities.getDefaultOptionProperties(property[prop.key[1]],property[prop.key[1]])
                 },
-                all:this.Utilities.getDefaultList(this.Glossary.text.item.listMeasurement,property['indentationMeasurement']),
+                all:this.Utilities.getDefaultList(this.Glossary.text.item[prop.gKey[1]],property[prop.key[1]]),
                 property:property,
                 /* Anonymous Function */
                 onchange:function(t){
                     /* t - this */
-                    this.property['indentationMeasurement'] = t.value;
+                    this.property[prop.key[1]] = t.value;
                 },
                 type:'select',
                 attributes:{
@@ -111,11 +140,10 @@ class ProjectStageTool{
                 }
             }
         };
-        var tool = this.Tool.create('Specjalne:',data);
-            ele.tool['indentation'] = tool;
+        var tool = this.Tool.create(prop.title,data);
+            ele.tool[prop.key[0]] = tool;
         return  tool;
     }
-
     getEjection(property,keys,title){
         //console.log('ProjectStageTool::getEjection()');
         /*
@@ -1038,6 +1066,8 @@ class ProjectStageTool{
         Tool.set(0,this.getParagraphSpaceBefore(subsectionrow.paragraph.style,helplink.text.value));
          /* odstep po */
         Tool.set(0,this.getParagraphSpaceAfter(subsectionrow.paragraph.style,helplink.text.value));
+        /* interlinia - odstęp miedzywierszowy */
+        Tool.set(0,this.getLeading(subsectionrow.paragraph.style,helplink));
         /* FONT FAMILY */
         Tool.set(1,this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT ALIGN */

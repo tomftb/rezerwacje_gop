@@ -19,9 +19,14 @@ final class PermManager{
         }
     }
     private function checkSession(){
-        if(!isset($_SESSION)){
-            throw new Exception('NO SESSION',1);
+        $this->Log->log(0,$_SESSION);
+        $this->Log->log(0,count($_SESSION));
+        if(count($_SESSION)===0){
+             throw new Exception('Sesja wygasła. Zaloguj się ponownie.',0);
         }
+        //if(!isset($_SESSION)){
+          //  throw new Exception('NO SESSION',1);
+        //}
         if(!isset($_SESSION['perm'])){
             throw new Exception('NO SESSION PERM KEY',1);
         }

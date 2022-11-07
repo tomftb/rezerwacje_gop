@@ -738,14 +738,14 @@ class ProjectStageTool{
         //console.log(property);
         //console.log(ele);
         var prop={
-            key:['spaceBefore','spaceBeforeMeasurement'],
+            key:['marginTop','marginTopMeasurement'],
             title:'Odstęp przed:'
         };
         return this.getExtendedSize(property,ele,prop);
     }
     getParagraphSpaceAfter(property,ele){
         var prop={
-            key:['spaceAfter','spaceAfterMeasurement'],
+            key:['marginBottom','marginBottomMeasurement'],
             title:'Odstęp po:'
         };
         return this.getExtendedSize(property,ele,prop);
@@ -1264,14 +1264,16 @@ class ProjectStageTool{
         return formGroup;
     }
     setSectionSubSection(iSection,subsection,helplinkSubsection,self){
-        //console.log('ProjectStageCreate.setSectionSubSection()');
+        console.log('ProjectStageCreate.setSectionSubSection()');
+        console.log(self);
         var subSectionCount = Object.keys(subsection).length;
         var data={
             0:{
                 default:{
                     0:this.Utilities.getDefaultOptionProperties(subSectionCount-1,subSectionCount)
                 },
-                all:this.getSectionCount(subSectionCount,self.Property.subsectionMax),
+                all:this.getSectionCount(subSectionCount,self.Glossary['text'].getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_MAX','v')),
+                //all:this.getSectionCount(subSectionCount,self.Property.subsectionMax),
                 self:self,
                 subsection:subsection,
                 iSection:iSection,

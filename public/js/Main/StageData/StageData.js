@@ -28,6 +28,7 @@ class StageData{
     setProperty(Glossary,Property,type,tabstop,part){
         this.Glossary = Glossary;
         this.Property=Property;
+        console.log(this.Property);
         //this.type=type;
         this.part=part;
         this.setType(type);
@@ -76,6 +77,7 @@ class StageData{
     }
     setDefault(){
         console.log('StageData::setDefault()');
+        console.log(this.Glossary);
         /* CREATE EMPTY STAGE OBJECT */
         this.Stage={
                data:{
@@ -88,7 +90,7 @@ class StageData{
                     /* SET PROPER AS IN SQL */
                     departmentName:this.Property.department.defaultDepartment[0].n,
                     /* SET SQL new_page to valuenewline */
-                    valuenewline:this.getValueChar(this.Glossary[this.type.g].getKeyPropertyAttribute('parameter','STAGE_TEXT_PAGE_FROM_NEW','v'))
+                    valuenewline:this.getValueChar(this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_PAGE_FROM_NEW','v'))//STAGE_TEXT_PAGE_FROM_NEW
                },
                property:{
                    tmpid:'0'
@@ -104,7 +106,9 @@ class StageData{
     }
     setDefaultSection(){
         console.log('StageData::setDefaultSection()');
-        for(var i=0;i<this.Property[this.type.g].sectionMin;i++){
+        //this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_PAGE_FROM_NEW','v')
+        for(var i=0;i<this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SECTION_MIN','v');i++){
+        //for(var i=0;i<this.Property[this.type.g].sectionMin;i++){
             this.createSection();
         };
     }
@@ -127,7 +131,8 @@ class StageData{
     getDefaultSubsection(){
         //console.log('StageData.createDefaultSubsection()');
         var subsection = {};
-        for(var i=0;i<this.Property[this.type.g].subsectionMin;i++){  
+        for(var i=0;i<this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SUBSECTION_MIN','v');i++){
+        //for(var i=0;i<this.Property[this.type.g].subsectionMin;i++){  
             subsection[i]=this.createSubsection(i);
         }
         return subsection;
@@ -150,7 +155,8 @@ class StageData{
         var subsectionRow = {};
             /* FIRST ALWAYS NEW LINE */
             //var newLine = 'y';
-            for(var i=0;i<this.Property[this.type.g].subsectionRowMin;i++){  
+            for(var i=0;i<this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SUBSECTION_ROW_MIN','v');i++){
+            //for(var i=0;i<this.Property[this.type.g].subsectionRowMin;i++){  
                 subsectionRow[i]=this.createSubsectionRow(i);
                // subsectionRow[i].paragraph.property.valuenewline=newLine;
                // newLine = this.Property.subsectionRowNewLine;
@@ -207,8 +213,8 @@ class StageData{
             };
     }
     getDefaultParagraphProperty(){
-        console.log(this.type);
-        console.log(this.Glossary);
+        //console.log(this.type);
+        //console.log(this.Glossary);
         return { 
                     style:{
                         fontSize:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_FONT_SIZE','v'),
@@ -239,10 +245,10 @@ class StageData{
                         indentationMeasurement:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_INDENTATION_MEASUREMENT','n'),
                         indentationSpecial:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_INDENTATION_SPECIAL','v'),
                         indentationSpecialName:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_INDENTATION_SPECIAL','n'),
-                        spaceAfter:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_AFTER','v'),
-                        spaceAfterMeasurement:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_AFTER_MEASUREMENT','v'),
-                        spaceBefore:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_BEFORE','v'),
-                        spaceBeforeMeasurement:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_BEFORE_MEASUREMENT','v'),
+                        marginBottom:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_AFTER','v'),
+                        marginBottomMeasurement:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_AFTER_MEASUREMENT','v'),
+                        marginTop:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_BEFORE','v'),
+                        marginTopMeasurement:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_BEFORE_MEASUREMENT','v'),
                         leading:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING','n'),
                         leadingMin:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING_MIN','n'),
                         leadingMax:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING_MAX','n'),

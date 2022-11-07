@@ -204,7 +204,9 @@ class ProjectStageCreate{
         this.Modal.link.form.append(this.createPreview(),this.createDynamicView(this.helplink,'createSection'));
     }
     setUpModal(){
-        //console.log('ProjectStageCreate::setUpModal()');
+        console.log('ProjectStageCreate::setUpModal()');
+        console.log(this.StageData);
+        console.log(this.Modal.link);
         try{
              /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
             this.helplink=this.getEmptyHelpLink();
@@ -223,6 +225,8 @@ class ProjectStageCreate{
             this.Modal.link['adapted'].append(form);
             /* ASSING ACTION BUTTONS */
             this.createManageButton('Dodaj');
+            /* SET INFO */
+            this.Modal.setInfo('Stage ID: N/A, Create user: N/A, Create date: N/A, Version: N/A');
         }
         catch(err){
             console.log('ProjectStageCreate::setUpModal()\r\nERROR:');
@@ -315,8 +319,9 @@ class ProjectStageCreate{
     }
     details(response,sectionType){  
         try{
-            //console.log('ProjectStageCreate.details()');
-            //console.log(sectionType);
+            console.log('ProjectStageCreate.details()');
+            console.log(response);
+            console.log(sectionType);
             //throw 'aaaaaaaaaaa';
             /* SETUP STAGE DATA */
             this.StageData = new StageData();
@@ -370,6 +375,8 @@ class ProjectStageCreate{
             this.Modal.link['adapted'].append(form);
              /* ASSING ACTION BUTTONS */
             this.createManageButton('Zapisz');          
+             /* SET INFO */
+            this.Modal.setInfo('Stage ID: '+this.StageData.Stage.data.id+', Create user: '+this.Utilities.cutName(this.StageData.Stage.data.create_user_login,11)+' ('+this.Utilities.cutName(this.StageData.Stage.data.create_user_email,30)+'), Create date: '+this.StageData.Stage.data.create_date+', Modification user: '+this.Utilities.cutName(this.StageData.Stage.data.mod_user_login,11)+' ('+this.Utilities.cutName(this.StageData.Stage.data.mod_user_email,30)+'), Version: '+this.StageData.Stage.data.mod_date);
         }
         catch(error){
             console.log('ProjectStageCreate::details()');

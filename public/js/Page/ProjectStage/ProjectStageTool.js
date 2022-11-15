@@ -1431,11 +1431,13 @@ class ProjectStageTool{
         //console.log(radio);
         //console.log('SUBSECTIONROW');
         //console.log(subsectionrowParagraph);
-        
+
+        //console.log(typeof(subsectionrowParagraph.property.valuenewline));
         /* FIRST RUN TO SET PROPER VALUE AND onClick FUNCTION */
         var self = this;
         radio.childNodes.forEach(
             function(currentValue) {//, currentIndex, listObj
+                //console.log(typeof (currentValue.childNodes[0].value));
                 if(currentValue.childNodes[0].value === subsectionrowParagraph.property.valuenewline){
                     /* REMOVE ATTRIBUTE no-checked */
                     currentValue.childNodes[0].removeAttribute('no-checked');
@@ -1445,8 +1447,8 @@ class ProjectStageTool{
                 /* CLOSURE */
                 currentValue.childNodes[0].onclick = function (){
                     subsectionrowParagraph.property.valuenewline = this.value; 
-                    //console.log(this.value);
-                    //console.log(subsectionrowParagraph);
+                    console.log(this.value);
+                    console.log(subsectionrowParagraph);
                     if(run){
                         self[run.method](this.value,run);
                     };
@@ -1455,7 +1457,8 @@ class ProjectStageTool{
         );
     }
     createExtendedTextTool(isection,isub,isubrow,subsectionrow,helplink){
-        // console.log('ProjectStageCreate::createExtendedTextTool()');
+        console.log('ProjectStageCreate::createExtendedTextTool()');
+        console.log(subsectionrow);
         var Tool = new ToolFields([5,5,2]);
         var radio = this.createTextToolRadioButton('valuenewline-'+isection+'-'+isub+'-'+isubrow,'Tekst od nowej lini?',this.Tool.getYesNowRadio());//'valuenewline-'+isection+'-'+isub+'-'+isubrow
         var run={

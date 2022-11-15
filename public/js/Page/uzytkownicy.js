@@ -1,5 +1,6 @@
 var ajax = new Ajax();
 var error = new Error();
+
     //Error.set('errDiv-Adapted-overall');
     
 var defaultTask='getUsersLike&u=0';
@@ -601,6 +602,7 @@ function postData(btn,nameOfForm)
     }; 
     if (confirmTask)
     {
+        error.set('errDiv-Adapted-overall');
         ajax.sendData(nameOfForm,'POST');
     };
 }
@@ -615,11 +617,10 @@ function reloadData()
 {
     console.log('---reloadData()---');
     cModal('AdaptedModal');
-    //ajax.getData(defaultTask);
+    error.set('overAllErr');
 }
 function loadData(){
     console.log('---loadData()---');
-    //ajax.getData(defaultTask);
     console.log(error);
     error.set('overAllErr');
     ajax.getData('getModulUsersDefaults');
@@ -636,7 +637,6 @@ document.onkeydown = function(evt)
         if (isEscape)
         {
              cModal('AdaptedModal');
-            //ajax.getData(defaultTask);
             console.log("Escape");
         }
     };

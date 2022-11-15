@@ -91,17 +91,17 @@ class Tool{
     }
     getYesNowRadio(){
         return {
-            'y':{
+            '1':{
                 check:'no-checked',
                 //id:id+'-y',
-                value:'y',
+                value:'1',
                 title:'Tak',
                 fontcolor:'text-primary'
             },
-            'n':{
+            '0':{
                 check:'no-checked',
                 //id:id+'-n',
-                value:'n',
+                value:'0',
                 title:'Nie',
                 fontcolor:'text-danger'
             }

@@ -37,6 +37,8 @@ class StageData{
         //console.log(this.Property); 
     }
     setGlossary(Glossary){
+        console.log('StageData::setGlossary()');
+        console.log(Glossary);
         this.Glossary=Glossary;
     }
     setType(type){
@@ -197,6 +199,10 @@ class StageData{
                 return 'n';
         }
     }
+    setBasicStage(){
+        console.log('StageData::setBasicStage()');
+        this.Stage = data;
+    }
     setStage(data){
         console.log('StageData::setStage()');
         //console.log(data);
@@ -213,6 +219,7 @@ class StageData{
             };
     }
     getDefaultParagraphProperty(){
+        //console.log('StageData::getDefaultParagraphProperty()');
         //console.log(this.type);
         //console.log(this.Glossary);
         return { 

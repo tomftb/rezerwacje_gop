@@ -120,7 +120,7 @@ class DocPreview extends DocPreviewPage{
             //blankPage[part].style.backgroundColor=property.style.backgroundColor;
             return blankPage;
         }
-        if(property.property.valuenewline==='y'){
+        if(property.property.valuenewline==='1'){
             console.log('SET NEW BLANK PAGE');
             var newBlankPage = super.getPage();
              /* UPDATE PAGE ATTRIBUTES */
@@ -173,7 +173,7 @@ class DocPreview extends DocPreviewPage{
         /*
          * EXCEPTION -> IF n => append to last child
          */
-        if(row.paragraph.property.valuenewline==='n' && mainDiv.hasChildNodes()){
+        if(row.paragraph.property.valuenewline==='0' && mainDiv.hasChildNodes()){
             console.log('hasChildNodes');
             console.log(mainDiv.hasChildNodes());
             mainDiv.lastChild.appendChild(this.setParagraphEle(row.paragraph));
@@ -478,7 +478,7 @@ class DocPreview extends DocPreviewPage{
         //var indentation=row.paragraph.style.indentation;
 
         switch(row.paragraph.property.valuenewline){
-            case 'n':
+            case '0':
                 /* EXCEPTION - last paragraph type is empty so this is a first element on a list or last element is list*/
                 if(lastParagraphType==='' || lastParagraphType==='l'){
                     //row.paragraph.style.indentation=indentation;
@@ -501,7 +501,7 @@ class DocPreview extends DocPreviewPage{
                 }
                
                 break;
-            case 'y':
+            case '1':
                 /* EXCEPTION */
                 
                 if(lastParagraphType==='l'){

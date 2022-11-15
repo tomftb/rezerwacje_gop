@@ -53,6 +53,7 @@ class ManageUser
         $this->inpArray=filter_input_array(INPUT_POST);
         //$this->Log->logMulti(2,$this->inpArray,__METHOD__."::POST");
         // self::checkInputFields(); /* TO DO */
+        //throw new exception('aaaa');
         self::checkUserValueLength();
         self::sqlGetUserFullData();
         self::checkUserData();

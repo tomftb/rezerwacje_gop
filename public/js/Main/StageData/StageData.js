@@ -121,7 +121,7 @@ class StageData{
             },
             style:this.getDefaultSectionStyle(),
             property:{
-                valuenewline:'y',
+                valuenewline:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SECTION_NEW_LINE','v'),
                 tmpid:this.iSection
             },
             /* CREATE EMPTY STAGE SUBSECTION - COLUMN  */
@@ -219,7 +219,7 @@ class StageData{
             };
     }
     getDefaultParagraphProperty(){
-        //console.log('StageData::getDefaultParagraphProperty()');
+        console.log('StageData::getDefaultParagraphProperty()');
         //console.log(this.type);
         //console.log(this.Glossary);
         return { 
@@ -265,7 +265,8 @@ class StageData{
                     },
                     property: {
                         value:'',
-                        valuenewline:'y',/* default */
+                        //valuenewline:'y',/* default */
+                        valuenewline:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SUBSECTION_ROW_NEW_LINE','v'),
                         paragraph:this.type.paragraph,
                         paragraphName:this.type.paragraphName,
                         tabstop:'-1'

@@ -196,8 +196,7 @@ class createDoc extends createDocAbstract {
             //print_r($this->projectData->section);
             
             /* CHECK FOR NEW PAGE */
-            
-            if($s->property->valuenewline==='y' && $firstSection===false){
+            if($s->property->valuenewline==='1' && $firstSection===false){
                 //$section->addPageBreak();
                 $breakType='newPage';
             }
@@ -373,6 +372,7 @@ class createDoc extends createDocAbstract {
         return $listName;
     }
     private function setListParagraph($r,$actTabStopName='P-Style'){
+        $this->Log->log(0,"[".__METHOD__."] Tab Stop name - ".$actTabStopName);
         //$name = 'P-Style';
         //var_dump($this->phpWord);
             /*
@@ -392,7 +392,7 @@ class createDoc extends createDocAbstract {
             'bidi'                => array(self::READ_TRUE,  'w:bidi'),
             'suppressAutoHyphens' => array(self::READ_TRUE,  'w:suppressAutoHyphens'),
                     */
-        $this->phpWord->addParagraphStyle($actTabStopName, array('align'=>parent::setAlign($r->paragraph->style->textAlign),'tabs'=>parent::setTabStop($r->paragraph->tabstop) ,'spaceAfter' => 95));
+        $this->phpWord->addParagraphStyle($actTabStopName, array('align'=>parent::setAlign($r->paragraph->style),'tabs'=>parent::setTabStop($r->paragraph->tabstop) ,'spaceAfter' => 95));
         return $actTabStopName;
     }
     private function setSectionColumn($subsection,$breakType='continuous'){
@@ -435,7 +435,7 @@ class createDoc extends createDocAbstract {
     private function checkNewLine($r,&$section,&$run,&$actListName='',&$actTabStopName=''){
         //echo __METHOD__." - ";
         //echo $r->paragraph->property->valuenewline."\r\n";
-        if($r->paragraph->property->valuenewline==='y'){
+        if($r->paragraph->property->valuenewline==='1'){
             self::checkType($r,$section,$run,$actListName,$actTabStopName);
         }
         else{

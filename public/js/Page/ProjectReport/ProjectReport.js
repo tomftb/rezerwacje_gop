@@ -197,6 +197,7 @@ class ProjectReport extends ProjectReportView
             this.setModalLoad();
             this.Modal.setHead('Raport:','bg-primary');
             this.Glossary=Glossary;
+            //this.StageData.setGlossary(this.Glossary);
             var AvailableStages=this.setData(projectStageData);
             this.createButtons();   
             this.ProjectReportManage.setData(this.ChosenReport[0],projectStageData.data.value.footer,projectStageData.data.value.heading);
@@ -849,7 +850,7 @@ class ProjectReport extends ProjectReportView
                    /* REMOVE TMP FILES */
                    self.closeModal();
                    self.reloadData();
-                   self.clearData();
+                   self.removeTmpFiles();
                    return true;
                }
             };
@@ -860,7 +861,7 @@ class ProjectReport extends ProjectReportView
          this.Table.showTable(d['data']['value']['data']);  
     }
     closeModal(){
-            console.log('ProjectItems::closeModal()');
+            console.log('ProjectReport::closeModal()');
             window.onbeforeunload = null;
             $(this.Modal.link['main']).modal('hide');
     };
@@ -879,11 +880,16 @@ class ProjectReport extends ProjectReportView
             };
            this.Xhr.run(xhrRun);
     }
-    clearData(){
+    /* 
+        REMOVE TMP FILES
+    */
+    removeTmpFiles(){
+        console.log('ProjectReport::removeTmpFiles()');
             console.log(this.ChosenReport[0].stage);
+          
             let files=new Array();
             for(const prop in this.ChosenReport[0].stage){
-                this.StageData.setStage(this.ChosenReport[0].stage[prop]);
+                this.StageData.setBasicStage(this.ChosenReport[0].stage[prop]);
                 let tmpFiles=this.StageData.getFiles();
                 if(tmpFiles.length===0){
                     continue;
@@ -892,12 +898,8 @@ class ProjectReport extends ProjectReportView
                     files.push(tmpFiles[i]);
                 }
             }
-            //if()
-            
-            //console.log('ProjectStageCreate->setUndoTask()');
             console.log(files);
             console.log(files.length);
-           
             if(files.length>0){
                 let ImageTool = new ProjectStageToolFile();
                     ImageTool.setReportParent(this);

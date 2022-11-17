@@ -109,7 +109,7 @@ class ProjectStageCreate{
     prepareList(response){      
          this.CreateProperty={
             modal:{
-                title:'Dodaj etap projektu - tekst',
+                title:'Dodaj etap projektu - lista',
                 bg:'bg-info',
                 action:'setUpListModal'
             },
@@ -169,7 +169,7 @@ class ProjectStageCreate{
                 //console.log(this.VariableList);
             this.TabStop = new TabStop();
              /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
-            this.Property=this.Stage.Property.text;
+            //this.Property=this.Stage.Property.text;
             this.StageData = new StageData();
             this.StageData.setProperty(this.Glossary,this.Stage.Property,this.type,null,this.part);
              /* SETUP CLEAR STAGE DATA */
@@ -345,7 +345,7 @@ class ProjectStageCreate{
             //this.ejectionMultiplier=parseFloat(this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v);
             this.TabStop = new TabStop();
             /* SET STAGE CREATE TEXT DEFAULT PROPERTY */
-            this.Property=this.Stage.Property.text;
+            //this.Property=this.Stage.Property.text;
             /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
             this.helplink=this.getEmptyHelpLink();
             /* TO DO IN FUTURE -> ADD setCloseModal multi id's */
@@ -629,9 +629,10 @@ class ProjectStageCreate{
         var self=this;
             div.onclick=function(){       
                 console.log('ProjectStageCreate::addSubsectionRow() onclick()');
+
                 /* ADD NEW stageData subsectionrow object */
                 subsectionrow[iRow]=self.StageData.createSubsectionRow(iRow);
-                subsectionrow[iRow].paragraph.property.valuenewline=self.Property.subsectionRowNewLine;
+                
                 let StageRow=new Row(self.Html,self.Utilities,self.ProjectStageTool,self.TabStop,self.VariableList);
                     StageRow.setData(isection,isubsection,iRow,subsectionrow,helplink.row);
                     helplink.dynamic.appendChild(StageRow.getExtended());  

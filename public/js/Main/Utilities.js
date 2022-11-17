@@ -39,6 +39,11 @@ class Utilities {
         }
         return l;
     }
+    setMmToPx(v){
+        v = parseFloat(v);
+        v = v * 3.77952755906;
+        return v;
+    }
     setCmToPx(v){
         //console.log('Utilities::setCmToPx()');
         /*
@@ -62,6 +67,35 @@ class Utilities {
         v = v * 1.3333333333;
         //console.log(v);
         return v;
+    }
+    setPktToPx(v){
+    /*
+        1cm = 28,35 pkt
+        1mm ~ 2,85 pkt
+    */
+        v = parseFloat(v);
+        v = v * 1.333166687499118;
+        return v;
+    }
+    setPxToPx(v){
+            return v;
+     }
+    getValueInPx(value,inputMeasurement){
+        console.log(value,inputMeasurement);
+        var measurement={
+            mm:'setMmToPx',
+            cm:'setCmToPx',
+            pt:'setPtToPx',
+            pkt:'setPktToPx',
+            px:'setPxToPx',            
+        }
+        try{
+            return this[measurement[inputMeasurement]](value);
+        }
+        catch(e){
+            console.log("wrong measurement, return clear value\r",e);
+            throw 'wrong measurement';
+        }
     }
     cutName(value,max){
         if(value.length>max){

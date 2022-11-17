@@ -86,6 +86,8 @@ class createDocAbstract {
         ];
     }
     protected function setAlign($style){
+        //$this->Log->log(0,"[".__METHOD__."] Style:");
+        //$this->Log->log(0,$style);
         //'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER);
         //$this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
         //$this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
@@ -121,12 +123,61 @@ class createDocAbstract {
         ]; 
     }
     private function setParagraphSpace($style,$key='marginTop'){
+        $this->Log->log(0,'['.__METHOD__.']');
+        //$this->Log->log(0,$style);
+        //$this->Log->log(0,$key);
+        $size=0;
+       // $measurement='';
         if(property_exists($style, $key)){
-            return round(intval($style->{$key},10)*20,0);
+            $size=$style->{$key};
+            
+            //return round(intval($style->{$key},10)*20,0);
         }
-        /* default 160 twip = 8 pkt*/
-        $this->Log->log(0,'['.__METHOD__.'] Property '.$key.' not exists in style -> return default 160 twip');
-        return 160;
+        else{
+            $this->Log->log(0,'['.__METHOD__.'] Property '.$key.' not exists in style -> return default 160 twip');
+            return 160;
+        }
+        if(property_exists($style, $key."Measurement")){
+            $this->Log->log(0,'['.__METHOD__.'] Property '.$key.'Measurement exists ('.$style->{$key.'Measurement'}.') in style -> calculate');
+            /* calculate measurement */
+            //$measurement=$key."Measurement";
+            switch($style->{$key.'Measurement'}){
+                default:
+                    // default if not found
+                case 'pkt':
+                    /* multiply - pkt */
+                    $size=round(floatval($style->{$key})*20,2);
+                    break;
+                case 'cm':
+                    $size=round(floatval($style->{$key})*28.35*20,2);
+                    break;
+                case 'mm':
+                    $size=round(floatval($style->{$key})*2.85*20,2);
+                    break;
+                case 'pt':
+                    //$size=round(floatval($style->{$key})*2.85*20,2);
+                    $size=round(floatval($style->{$key})*0.75000000001875*20,2);
+                    break;
+                case 'px':
+                    /* 1 px = 0,7500937499990312 pkt */
+                    //$size=round(floatval($style->{$key})*2.85*20,2);
+                    $size=round(floatval($style->{$key})*0.7500937499990312*20,2);
+                    break;
+            }
+            //return round(intval($style->{$key},10)*20,0);
+        }
+        else{
+            $this->Log->log(0,'['.__METHOD__.'] Property '.$key.'Measurement no exists style -> no calculate');
+        }
+        $this->Log->log(0,'['.__METHOD__.'] Size -> '.$size);
+        return $size;
+        
+        /* 
+         * default 160 twip = 8 pkt
+         * default 20 twip = 1 pkt
+         */
+        //$this->Log->log(0,'['.__METHOD__.'] Property '.$key.' not exists in style -> return default 160 twip');
+       
     }
     private function setTextStyle($style='1'){
         if($style==='1'){

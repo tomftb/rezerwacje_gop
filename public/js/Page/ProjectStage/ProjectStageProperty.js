@@ -1,16 +1,17 @@
 class ProjectStageProperty{
-    text={};
+    //text={};
     department = {};
   
     constructor() {}
     
     setData(data){
         //console.log(data);        
-        this.setText(data);
+        //this.setText(data);
         //throw 'stop-tet';
         this.setDepartment(data);
     }
     setText(data){
+        console.log('ProjectStageProperty::setText()');
          /* SHORTCUT */
         this.text={  
             sectionMin:data.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_SECTION_MIN','v'),
@@ -23,9 +24,9 @@ class ProjectStageProperty{
             subsectionRowNewLine:this.getValueChar(data.text.getKeyPropertyAttribute('parameter','STAGE_TEXT_SUBSECTION_ROW_NEW_LINE','v'))
         }; 
     }
-    getText(){
-        return this.text;
-    }
+    //getText(){
+      //  return this.text;
+    //}
     setDepartment(data){
         this.department={
              /* SETUP DEFAULT DEPARTMENT */

@@ -35,7 +35,7 @@ class DocPreviewPage{
             /* TO FIX -> DEFAULT WHITE #FFFFFF*/
             blankPage.style.backgroundColor=this.data.style.backgroundColor;
             //blankPage.style.backgroundColor='#FFFFFF';
-            console.log(blankPage);
+            //console.log(blankPage);
             blankPage.append(this.getHeading(),this.getBody(),this.getFooter());
             this.Link.all=blankPage;
             wholePage.appendChild(blankPage);
@@ -51,7 +51,7 @@ class DocPreviewPage{
             ele.style.paddingTop='46px';
             /* DEFAULT LEFT MARGIN 2,5 cm */ 
             ele.style.paddingLeft='92px'; /* ALL 314, MAIN 10 */
-            console.log(ele);
+            //console.log(ele);
             this.Link.heading=ele;
             return ele;
     }
@@ -63,7 +63,7 @@ class DocPreviewPage{
             ele.style.paddingBottom='46px';
             /* DEFAULT LEFT MARGIN 2,5 cm */ 
             ele.style.paddingLeft='92px'; /* ALL 314, MAIN 10 */
-            console.log(ele);
+            //console.log(ele);
             this.Link.footer=ele;
             return ele;
     }
@@ -75,7 +75,7 @@ class DocPreviewPage{
             ele.style.paddingTop='0px';
             /* DEFAULT LEFT MARGIN 2,5 cm */ 
             ele.style.paddingLeft='92px'; /* ALL 314, MAIN 10 */
-            console.log(ele);
+            //console.log(ele);
             this.Link.body=ele;
             return ele;
     }

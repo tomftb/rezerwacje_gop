@@ -56,7 +56,7 @@ class ProjectStageTool{
         };
         return all;
     }
-    getLeading(property,ele){
+    getLeading(property,helplink){
         //console.log('ProjectStageTool::getLeading()');
          /*
          * property - reference for example subsectionrow.paragraph.style
@@ -65,14 +65,14 @@ class ProjectStageTool{
         //console.log(this.Glossary);
         return this.getThreePartInput(
                 property,
-                ele,
+                helplink,
                 {
                     key:['leading','leadingMeasurement','leadingMin','leadingMax','leadingType','leadingTypeName'],
                     title:'Interlinia (Odstęp międzywierszowy):',
                     gKey:['leading','measurement']
                 }); 
     }
-    getIndentation(property,ele){
+    getIndentation(property,helplink){
         //console.log('ProjectStageTool::getIndentation()');
          /*
          * property - reference for example subsectionrow.paragraph.style
@@ -81,7 +81,7 @@ class ProjectStageTool{
         //console.log(this.Glossary);
         return this.getThreePartInput(
                 property,
-                ele,
+                helplink,
                 {
                     key:['indentation','indentationMeasurement','indentationMin','indentationMax','indentationSpecial','indentationSpecialName'],
                     title:'Specjalne:',
@@ -194,7 +194,7 @@ class ProjectStageTool{
         this.setDropDown(Tool,run);     
         return Tool;
     }
-    getRightEjection(property,ele){
+    getRightEjection(property,helplink){
         //console.log('ProjectStageTool::getRightEjection()');
         /*
          * property - reference for example subsectionrow.paragraph.style
@@ -202,10 +202,11 @@ class ProjectStageTool{
          */
         var tool = this.getEjection(property,['rightEjection','rightEjectionMeasurement'],'Wcięcie z prawej strony:');
         /* SET HELPLINK */
-            ele.rightEjection=tool.childNodes[1].childNodes[0];
+            helplink.text.rightEjection=tool.childNodes[1].childNodes[0];
+            helplink.tool['rightEjection']=tool;
         return tool;
     }
-    getLeftEjection(property,ele){
+    getLeftEjection(property,helplink){
         //console.log('ProjectStageTool::getLeftEjection()');
         /*
          * property - reference for example subsectionrow.paragraph.style
@@ -213,10 +214,11 @@ class ProjectStageTool{
          */
         var tool = this.getEjection(property,['leftEjection','leftEjectionMeasurement'],'Wcięcie z lewej strony:');
         /* SET HELPLINK */
-            ele.leftEjection=tool.childNodes[1].childNodes[0];   
+            helplink.text.leftEjection=tool.childNodes[1].childNodes[0];   
+            helplink.tool['leftEjection']=tool;
         return tool;
     }
-    getParagraph(property,ele){
+    getParagraph(property,helplink){
         //console.log('ProjectStageTool::getParagraph()');
         /*
          * property - reference for example subsectionrow.paragraph.property
@@ -239,7 +241,7 @@ class ProjectStageTool{
                     0:this.Utilities.getDefaultOptionProperties(property['paragraph'],property['paragraphName'])
                 },
                 all:this.Utilities.getDefaultList(Glossary,property['paragraph']),
-                ele:ele,
+                ele:helplink.tool,
                 property:property,
                 glossary:Glossary,
                 onchange:function(t){
@@ -276,7 +278,9 @@ class ProjectStageTool{
                 }
             }
         };
-        return  this.Tool.create('Typ:',data);
+        var tool=this.Tool.create('Typ:',data);
+            helplink.tool['paragraphType']=tool;
+        return  tool;
     }
     getTool(property,key){
         return {
@@ -455,14 +459,16 @@ class ProjectStageTool{
             data[0]['all']=this.getAllOptions(this.Glossary.image,property[propertyKey[0]],'order',run);  
         return  this.Tool.create('Kolejność:',data);
     }
-    getExtendedAlign(property,propertyKey,ele){
+    getExtendedAlign(property,propertyKey,helplink){
         //console.log('ProjectStageTool::getExtendedAlign()');
         var run = this.getAlign();
         //var data=this.getAdvancedTool(property,key[0],ele);
-        var data=this.getCompleteTool(property,propertyKey,ele,this.Glossary.text,'textAlign');
+        var data=this.getCompleteTool(property,propertyKey,helplink.text.value,this.Glossary.text,'textAlign');
             data[0]['default']=this.getDefaultOption(property,propertyKey[0],propertyKey[1]);
             data[0]['all']=this.getAllOptions(this.Glossary.text,property[propertyKey[0]],propertyKey[0],run);  
-        return  this.Tool.create('Wyrównanie:',data);
+        var tool=this.Tool.create('Wyrównanie:',data);
+            helplink.tool['align']=tool;
+        return  tool;
     }
     getAlign(){
         //console.log('ProjectStageTool::getAlign()');
@@ -703,8 +709,15 @@ class ProjectStageTool{
             }; 
         return this.Tool.create(title,data);
     }
-    getSimpleSize(property){
-        var data = this.getInputSizeWithSelect(property,['fontSize','fontSizeMeasurement']);
+    getSimpleFontSize(property){
+        var prop={
+            key:['fontSize','fontSizeMeasurement'],
+            title:'Rozmiar tekstu::'
+        };
+        return this.getSimpleSize(property,prop);
+    }
+    getSimpleSize(property,prop){
+        var data = this.getInputSizeWithSelect(property,prop.key);
         //var data = this.getSelectSize(property,['fontSize','fontSizeMeasurement']);
             data[0]['onclick']=function(t){
                 //console.log('ProjectStageTool.getSimpleSize().onclick()');
@@ -721,9 +734,9 @@ class ProjectStageTool{
             }; 
         var run=function(value){
             Tool.childNodes[1].childNodes[0].value=value;
-            property['fontSize'] = value;
+            property[prop.key[0]] = value;
         };
-        var Tool = this.Tool.create('Rozmiar tekstu:',data);
+        var Tool = this.Tool.create(prop.title,data);
             this.setDropDown(Tool,run);     
         return Tool;
     }
@@ -734,21 +747,23 @@ class ProjectStageTool{
         };
         return this.getExtendedSize(property,ele,prop);
     }
-    getParagraphSpaceBefore(property,ele){
-        //console.log(property);
-        //console.log(ele);
+    getParagraphSpaceBefore(property,helplink){
         var prop={
             key:['marginTop','marginTopMeasurement'],
             title:'Odstęp przed:'
         };
-        return this.getExtendedSize(property,ele,prop);
+        var ele=this.getSimpleSize(property,prop);
+            helplink.tool['spaceBefore']=ele;
+        return ele
     }
-    getParagraphSpaceAfter(property,ele){
+    getParagraphSpaceAfter(property,helplink){
         var prop={
             key:['marginBottom','marginBottomMeasurement'],
             title:'Odstęp po:'
         };
-        return this.getExtendedSize(property,ele,prop);
+        var ele=this.getSimpleSize(property,prop);
+            helplink.tool['spaceAfter']=ele;
+        return ele;
     }
     getExtendedSize(property,ele,prop){
         var data = this.getInputSizeWithSelect(property,prop.key);
@@ -1063,25 +1078,25 @@ class ProjectStageTool{
         /* BACKGROUND COLOR */
         Tool.set(0,this.getExtendedBackgroundColor(subsectionrow.paragraph.style,helplink.text.value));
         /* odstep przed */
-        Tool.set(0,this.getParagraphSpaceBefore(subsectionrow.paragraph.style,helplink.text.value));
-         /* odstep po */
-        Tool.set(0,this.getParagraphSpaceAfter(subsectionrow.paragraph.style,helplink.text.value));
+        Tool.set(0,this.getParagraphSpaceBefore(subsectionrow.paragraph.style,helplink));
+        /* odstep po */
+        Tool.set(0,this.getParagraphSpaceAfter(subsectionrow.paragraph.style,helplink));
         /* interlinia - odstęp miedzywierszowy */
         Tool.set(0,this.getLeading(subsectionrow.paragraph.style,helplink));
         /* FONT FAMILY */
         Tool.set(1,this.getExtendedFontFamily(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT ALIGN */
-        Tool.set(1,this.getExtendedAlign(subsectionrow.paragraph.style,['textAlign','textAlignName'],helplink.text.value));
+        Tool.set(1,this.getExtendedAlign(subsectionrow.paragraph.style,['textAlign','textAlignName'],helplink));
         /* TAB STOP */
         Tool.set(1,this.getTabStop(TabStop,isection,isub,isubrow,subsectionrow,helplink));    
         /* LEFT EJECTION */
-        Tool.set(2,this.getLeftEjection(subsectionrow.paragraph.style,helplink.text));
+        Tool.set(2,this.getLeftEjection(subsectionrow.paragraph.style,helplink));
          /* RIGHT EJECTION */
         Tool.set(2,this.getRightEjection(subsectionrow.paragraph.style,helplink));
          /* INDENTATION */
         Tool.set(2,this.getIndentation(subsectionrow.paragraph.style,helplink));
         /* PARAGRAPH TYPE */
-        Tool.set(2,this.getParagraph(subsectionrow.paragraph.property,helplink.tool));
+        Tool.set(2,this.getParagraph(subsectionrow.paragraph.property,helplink));
        
         /* SET CSS BOLD, ITALIC ... */
         //Tool.Field[3].classList.add('pt-4');
@@ -1122,7 +1137,7 @@ class ProjectStageTool{
             mainDivCol.style.backgroundColor='#e6e6e6';
         var Tool = new ToolFields([3,3,3,3]);
 
-        Tool.set(0,this.getSimpleSize(subsectionrow.list.style));
+        Tool.set(0,this.getSimpleFontSize(subsectionrow.list.style));
         Tool.set(0,this.getSimpleColor(subsectionrow.list.style));
         /* GET BackgroundColor */
         Tool.set(0,this.getSimpleBackgroundColor(subsectionrow.list.style));
@@ -1464,7 +1479,7 @@ class ProjectStageTool{
         var run={
             method:'setToolVisibility',
             helplink:helplink,
-            tool:['tabstopControl','tabstop','listControl','list']
+            tool:['tabstopControl','tabstop','listControl','list','spaceAfter','spaceBefore','indentation','leading','leftEjection','rightEjection','align','paragraphType']
         };
         this.setRadioButtonExtend(radio.childNodes[1],subsectionrow.paragraph,run);
         Tool.set(0,radio);
@@ -1477,11 +1492,11 @@ class ProjectStageTool{
         //console.log(value);
         switch(value){
             case 'l':   
-            case 'y':
+            case '1':
                 this.showControl(run);
                 break;
-            case 'n':
             case 'p':
+            case '0':
                 this.hideControl(run);
                 break;
             default:
@@ -1500,6 +1515,7 @@ class ProjectStageTool{
         }
     }
     showControl(run){
+        console.log(run.helplink.tool);
         for(const prop in run.tool){
             //console.log(run.tool[prop]);
             if (run.helplink.tool[run.tool[prop]].style.display) {

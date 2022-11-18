@@ -176,7 +176,7 @@ class DocPreview extends DocPreviewPage{
         if(row.paragraph.property.valuenewline==='0' && mainDiv.hasChildNodes()){
             console.log('hasChildNodes');
             console.log(mainDiv.hasChildNodes());
-            mainDiv.lastChild.appendChild(this.setParagraphEle(row.paragraph));
+            mainDiv.lastChild.appendChild(this.setParagraphEle(row));
             return false;
         }
         /*
@@ -532,8 +532,13 @@ class DocPreview extends DocPreviewPage{
             divWidth.style.justifyContent=row.paragraph.style.textAlign;
             //divWidth.style.border='1px solid red';
             divWidth.style.padding='0px';
-            divWidth.style.margin='0px';
-        
+            //divWidth.style.margin='0px';
+
+            /* SET MARGIN */
+
+            this.setParagraphMargin(divWidth,row,'marginTop');//ele.style.marginTop=
+            this.setParagraphMargin(divWidth,row,'marginBottom');//ele.style.marginBottom=
+
         /* LEFT EJECTION - WYSUNIECIE */
         this.setTabStopEjection(divWidth,row.paragraph.style.leftEjection);
         divWidth.appendChild(this.setParagraphEle(row));
@@ -541,22 +546,24 @@ class DocPreview extends DocPreviewPage{
     }
     setParagraphEle(row){
         console.log('DocPreview::setParagraphEle()'); 
-        var ele = document.createElement('div');//'span','p'
+        console.log(row); 
+        var ele = document.createElement('div');
             ele.style.display='inline-block';
             ele.style.border='0px solid purple';
             ele.style.padding='0px 0px 0px 0px';
-            ele.style.margin='0px';
-            
-        //var span = document.createElement('span');//'span','p'
+            ele.style.margin='0px 0px 0px 0px';
+           
+
             this.setEleStyle(ele,row.paragraph.style);
             /* SET TAB STOP */
             this.setTabStop(ele,row.paragraph);
-            //span.style.marginLeft=this.Utilities.setCmToPx(paragraph.style[marginLeft]);//
-        console.log(row);
         /* PARSE VALUE - VARIABLE */
         this.swapVariablePropertyWithValue(row.paragraph);
-        var value = document.createTextNode(row.paragraph.property.value);
-            ele.appendChild(value);
+        /*
+            ADD WHITESPACE UNICODE
+        */
+        var value=row.paragraph.property.value.replace(/\s/g,'\u00A0');
+            ele.appendChild(document.createTextNode(value));
             for(const prop in row.image){
                 var getImage = (row.image[prop].data.tmp==='n')? 'getStageImage' : 'getTmpStageImage';
                 var img = document.createElement('img');
@@ -566,8 +573,25 @@ class DocPreview extends DocPreviewPage{
                     img.setAttribute('height',row.image[prop].style.height);
                     ele.appendChild(img);
             }     
-            console.log(ele);     
+            //console.log(ele);     
         return ele;
+    }
+    setParagraphMargin(ele,row,side){
+        //console.log('DocPreview::setParagraphMargin()'); 
+        //console.log(row.paragraph.style[side],side,ele);
+        /* SET DEFAULT VALUE AND Measurement */
+        var value='0';
+        /* CHECK VALUE PROPERTY */
+        if(row.paragraph.style.hasOwnProperty(side)){
+            value=row.paragraph.style[side];
+        }
+        /* CHECK MEASUREMENT PROPERTY */
+        if(row.paragraph.style.hasOwnProperty(side+'Measurement')){
+            //value=this.Utilities.getValueInPx(value,row.paragraph.style[side+'Measurement']);    
+            value=this.Utilities.getValueInPx(value,row.paragraph.style[side+'Measurement']);    
+        }
+        //console.log(value);
+        ele.style[side]=value.toString()+'px';
     }
     setEleStyle(ele,style){
         console.log('DocPreview::setEleStyle()');  

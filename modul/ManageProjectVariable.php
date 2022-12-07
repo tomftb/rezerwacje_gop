@@ -63,12 +63,10 @@ class ManageProjectVariable extends ManageProjectVariableDatabase{
             Throw New Exception($error,0);
         }
     }
-
     # RETURN ALL NOT DELETED PROJECT FROM DB
     public function getProjectVariablesSimpleList(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->Utilities->jsonResponse(parent::getSimpleAll());
-
     }
     public function getProjectVariablesLike(){ 
         $f=htmlentities(nl2br(filter_input(INPUT_GET,'filter')), ENT_QUOTES,'UTF-8',FALSE);

@@ -15,6 +15,7 @@ class Row{
     TabStop=new Object();
     VariableList=new Object();
     constructor(Html,Utilities,ProjectStageTool,TabStop,VariableList){
+        console.log('Row::constructor()');
         this.Html=Html;
         this.Utilities=Utilities;
         this.ProjectStageTool=ProjectStageTool;
@@ -36,7 +37,7 @@ class Row{
         };
     }
     getSimple(){
-        //console.log('Row.getSimple()');
+        console.log('Row::getSimple()');
         /* SET NEW HELPLINK SUBSECTION ROW */
         this.Helplink[this.iSubRow]=this.getHelpLink();
         var mainDiv=this.Html.getRow();
@@ -50,7 +51,7 @@ class Row{
         return mainDiv;
     }
     getExtended(){
-        //console.log('Row.getExtended()');
+        console.log('Row::getExtended()');
         /* SET NEW HELPLINK SUBSECTION ROW */
         //HelplinkRow[iSubRow]=this.Row.getHelpLink(); 
         var mainDiv=this.getSimple();//iSection,iSub,iSubRow,subsectionrow,HelplinkRow

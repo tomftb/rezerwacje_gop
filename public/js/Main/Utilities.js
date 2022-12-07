@@ -41,53 +41,69 @@ class Utilities {
     }
     setMmToPx(v){
         v = parseFloat(v);
-        v = v * 3.77952755906;
-        return v;
+        return v * 3.77952755906;
     }
     setCmToPx(v){
         //console.log('Utilities::setCmToPx()');
         /*
-         * 1 cm = 37.7952755906 pixel (X)
+         * 1 cm = 37,795 275 590 551 pixel (X)
          */
         //console.log(v);
         v = parseFloat(v);
         //console.log(v);
-        v = v * 37.7952755906;
-        //console.log(v);
-        return v;
+        return v * 37.795275590551;
     }
     setPtToPx(v){
         //console.log('Utilities::setPtToPx()');
-        /*
-         * 1 cm = 37.7952755906 pixel (X)
+        /* pt - Point
+            1 cm = 37,795275590551 pixel (X)
+            1 pt = 0,013888888888889 Inch [in]
+            1 pt = 0,035277777777778 Centymetr [cm]
+            1 px = 0,026458333333333 Centymetr [cm]
          */
         //console.log(v);
         v = parseFloat(v);
         //console.log(v);
-        v = v * 1.3333333333;
-        //console.log(v);
-        return v;
+        return v * 1.3333333333;
     }
     setPktToPx(v){
     /*
         1cm = 28,35 pkt
         1mm ~ 2,85 pkt
+        1pkt = 0,0352733686067019 cm
+        1pkt = 1,333166687497388 px
     */
         v = parseFloat(v);
-        v = v * 1.333166687499118;
-        return v;
+        return v * 1.333166687497388;
     }
     setPxToPx(v){
-            return v;
-     }
+        return parseFloat(v);
+    }
+    setNaToPx(v){
+        return parseFloat(v);
+    }
+    setInToPx(v){
+        /* 1 in equal 2,54 cm */
+        v=parseFloat(v)*2.54*37.795275590551;
+        return v;
+    }
+    setPcToPx(v){
+        /* 6 pc equal 2,54 cm, 1 pc ~ 0,4233333333333333 */
+        v=parseFloat(v)*0.4233333333333333*37.795275590551;
+        return v;
+    }
+    /* TO DO -> GET CLIENT RESOLUTION FOR BETTER PX CALCULATE */
     getValueInPx(value,inputMeasurement){
-        console.log(value,inputMeasurement);
+        //console.log('Utilities::getValueInPx()',value,inputMeasurement);
         var measurement={
             mm:'setMmToPx',
             cm:'setCmToPx',
             pt:'setPtToPx',
             pkt:'setPktToPx',
-            px:'setPxToPx',            
+            px:'setPxToPx',
+            in:'setInToPx',
+            pc:'setPcToPx',
+            'n/a':'setNaToPx'         
         }
         try{
             return this[measurement[inputMeasurement]](value);

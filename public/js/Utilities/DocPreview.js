@@ -7,14 +7,17 @@ class DocPreview extends DocPreviewPage{
     Style = new Object();
     RomanList = new Object();
     AlphabeticalList = new Object();
-    
+    Paragraph = new Object();
+    TabStop = new Object();
 
     constructor(){
         super();
-        //console.log('DocPreview::constructor()');
-        this.Style = new Style();
+        console.log('DocPreview::constructor()');
+       
         this.RomanList = new RomanList();
         this.AlphabeticalList = new AlphabeticalList();
+        this.Paragraph = new DocPreviewParagraph();
+        this.TabStop = new DocPreviewTabStop();
     }
     run(helplink,data){
         console.log('DocPreview.run()');
@@ -41,20 +44,20 @@ class DocPreview extends DocPreviewPage{
         var firstSection = true;
         var blankPage = super.getPage();
         /* LOOP OVER  SECTION */   
-        console.log(this.data.section);
+        //console.log(this.data.section);
         //throw 'aaa';
         for(const property in this.data.section){
             
             blankPage = this[checkNewPage](firstSection,this.data.section[property],blankPage,part);
-            console.log(blankPage);
+            //console.log(blankPage);
             //var writePage = 
             subsectionCount=Object.keys(this.data.section[property].subsection).length;
             /* CHECK AND SETUP COLUMNS NUMBER */
             writePageSectionWidth=Math.floor(607/subsectionCount); /* minus padding left 92px */ 
             /* LOOP OVER SUBSECTION - VISIBLE */
-            console.log('subsectionCount');
-            console.log(subsectionCount);
-            console.log(this.data.section[property]);
+            //console.log('subsectionCount');
+            //console.log(subsectionCount);
+            //console.log(this.data.section[property]);
             var divSection=document.createElement('div');
                 //divSection.style.backgroundColor=this.data.style.backgroundColor;
                 divSection.style.width='699px';
@@ -72,6 +75,7 @@ class DocPreview extends DocPreviewPage{
                     writePageSection.style.margin='0px';
                     writePageSection.style.padding='0px 0px 0px 0px';
                     writePageSection.style.float='left';
+                    
                 //writePageSection.style.display='inline-block';
                 /* IN FUTURE SETUP SUBSECTION DATA */
                 /* IN FUTURE SETUP SUBSECTION PROPERTY */
@@ -83,7 +87,10 @@ class DocPreview extends DocPreviewPage{
                     var actParagraphType='';
                     var firstLine = true;
                     /* VIRTUAL - MUST BY SETUP BY RETURN */
-
+                    /* FIRST LOOP TO SETUP MAX FONT SIZE -> IN FUTER MORE OPTIONS ??*/
+                   
+                    this.Paragraph.setUpMaxFontSize(this.data.section[property].subsection[i].subsectionrow);
+                   
                     /* LOOP OVER SUBSECTION ROW */
                     for(const propSubsection in this.data.section[property].subsection[i].subsectionrow){               
                         /* SET LIST UL */
@@ -100,9 +107,11 @@ class DocPreview extends DocPreviewPage{
                         actParagraphType=this.data.section[property].subsection[i].subsectionrow[propSubsection].paragraph.property.paragraph;
                         /* END LOOP OVER SUBSECTION ROW */
                     }                     
-                /* END LOOP OVER SUBSECTION -  */   
+                    /* END LOOP OVER SUBSECTION -  */   
+                    /* CLEAR TMP PROPERTY */
+                    //this.Paragraph.removeTmpProperty(this.data.section[property].subsection[i].subsectionrow);
                 console.log(writePageSection);   
-                console.log('HEIGH:');
+                //console.log('HEIGH:');
                 /* Display the height and width of "myDIV", including padding and border: in px offsetHeight clientHeight */
                 /* IMPORTANT Why I am getting Element offsetHeight "0"? even element original height is not showing */
 
@@ -160,6 +169,7 @@ class DocPreview extends DocPreviewPage{
             default:
                 break;
         }
+
     }
     setList(mainDiv,row,actLvl,lastLevelCounter){
         console.log('DocPreview::setList()'); 
@@ -176,7 +186,7 @@ class DocPreview extends DocPreviewPage{
         if(row.paragraph.property.valuenewline==='0' && mainDiv.hasChildNodes()){
             console.log('hasChildNodes');
             console.log(mainDiv.hasChildNodes());
-            mainDiv.lastChild.appendChild(this.setParagraphEle(row));
+            mainDiv.lastChild.appendChild(this.getParagraphEle(row));
             return false;
         }
         /*
@@ -244,17 +254,23 @@ class DocPreview extends DocPreviewPage{
             divWidth.style.margin='0px';
 
         /* SET LEFT EJECTION */
-        this.setTabStopEjection(divWidth,row.paragraph.style.leftEjection);
+        this.TabStop.setEjection(divWidth,row.paragraph.style.leftEjection);
         /* SET LIST HEAD -> SET indentation,leftEjection AS VALUE NOT REFERENCE*/
         divWidth.appendChild(this.setListEleHead(row,listEleCounter));//
         
         
-        /* SET EJECTION TO 0 */
-        //row.paragraph.style.leftEjection = 0;
-        /* SET LIST BODY */
-        //;
+         /* 
+                SET MARGIN:
+                - SpaceBefore
+                - SpaceAfter
+                - LineSpacing
+            */
+
+                this.Paragraph.setSpace(divWidth,row,'marginTop');//ele.style.marginTop=
+                this.Paragraph.setSpace(divWidth,row,'marginBottom');//ele.style.marginBottom=
+                this.Paragraph.setLineSpacing(divWidth,row);
         //ele.appendChild(ele);
-        divWidth.appendChild(this.setParagraphEle(row));
+        divWidth.appendChild(this.getParagraphEle(row));
         //divWidth.appendChild(divFloat);
         div.appendChild(divWidth);
         
@@ -267,123 +283,13 @@ class DocPreview extends DocPreviewPage{
             ele.style.padding='0px 0px 0px 0px';
             ele.style.margin='0px';
             ele.style.width=this.Utilities.setCmToPx(row.paragraph.style.indentation).toString()+'px';
-        this.setEleStyle(ele,row.list.style);
+        this.Paragraph.setParagraphBoxStyle(ele,row.list.style);
         this.setListEleHeadType(ele,row.list.style.listType,listEleCounter);
         //ele.style.listStyleType=attributes.style.listType;
         
         return ele;
     }
-    setTabStopEjection(ele,leftEjection){
-        /*console.log('DocPreview::setTabStopEjection()');  
-        console.log('ELEMENT'); 
-        console.log(ele); 
-        console.log('LEFT EJECTION'); 
-        console.log(leftEjection); 
-                    */
-        if(parseFloat(leftEjection)>0){
-            ele.appendChild(this.getTabStopEle(leftEjection));
-        }
-        /*
-        console.log('ELEMENT'); 
-        console.log(ele); 
-        throw 'test-stop';
-                    */
-    }
-    setTabStop(ele,paragraph){
-        console.log('DocPreview::setTabStop()');  
-        //var tabstop = this.Utilities.setCmToPx();
-        //var leftEjectionPx = this.Utilities.setCmToPx(paragraph.style.leftEjection).toString()+'px';
-        var actTabStopPosition = 0;
-        var end = paragraph.style.leftEjection;
-        
-        //console.log('TABSTOP IDX'); 
-        //console.log(paragraph.property.tabstop);
-        //console.log('TABSTOP'); 
-        //console.log(paragraph.tabstop);
-        
-        /* COMPARE LEFT EJECTION VALUE WITH TABSTOP VALUE */
-        if(paragraph.property.tabstop<0){
-            console.log('PARAGRAPH TABSTOP IDX < 0 => EXIT - `NO TABSTOP`');
-            return false;
-        }
-        console.log(paragraph.tabstop.hasOwnProperty(paragraph.property.tabstop));
-        if(!paragraph.tabstop.hasOwnProperty(paragraph.property.tabstop)){
-            console.log('TABSTOP IDX NOT EXIST IN TABSTOP LIST -> RETURN FALSE');
-            return false;
-        }
-        
-        actTabStopPosition = paragraph.tabstop[paragraph.property.tabstop].position;
-        
-        if(paragraph.tabstop[paragraph.property.tabstop].position <= paragraph.style.leftEjection){
-            console.log('TABSTOP PROPERTY POSITION EQUAL OR IS LOWER THAN LEFT EJECTION -> RETURN TRUE');
-            return true;
-        }
-        console.log('TABSTOP PROPERTY POSITION HIGHER THAN LEFT EJECTION -> SET ALL TABSTOP AND RETURN TRUE');
-            for (const prop in paragraph.tabstop){
-                /* COMPARE POSITIONS, IF GRETER THEN LEAVE LOOP */
-                if(paragraph.tabstop[prop].position>actTabStopPosition){
-                    break;
-                }
-                console.log('append');
-                    
-                var span = this.getTabStopEle((paragraph.tabstop[prop].position)-end);
-                //var tmpText = document.createTextNode('aaaa');
-                    console.log(paragraph.tabstop[prop].leadingSign);
-                    
-                this.setTabStopDecoration(span,paragraph.tabstop[prop].leadingSign,paragraph.style.fontSize);
-                    
-                    ele.appendChild(span);
-
-                    
-                end=paragraph.tabstop[prop].position;
-            }
-        return true;
-    }
-    setTabStopDecoration(ele,sign,size){
-        ele.style.borderRight='0px';
-        ele.style.borderLeft='0px';
-        ele.style.borderTop='0px';
-        /* SIZE div 10 ? */
-        //size = size/10;
-        ele.style.borderBottom=(this.Utilities.setPtToPx(size)/10).toString()+'px';
-        switch(sign){           
-            case 'dot':
-                /* 
-                 * ONLY HTML P 
-                ele.style.textDecorationStyle='dotted';  
-                */
-                ele.style.borderStyle='dotted';
-                break;
-            case 'dash':
-                /* 
-                 * ONLY HTML P 
-                ele.style.textDecorationStyle='dashed'; 
-                */
-                ele.style.borderStyle='dashed';
-                break;
-            case 'underline':
-                /* 
-                 * ONLY HTML SPAN 
-                ele.style.textDecoration='underline';  
-                */
-                ele.style.borderStyle='solid';
-                break;
-            case 'none':
-            default:    
-                break;                
-        }
-    }
-    getTabStopEle(w){
-        /*
-         * w - width (default in cm)
-         */
-        var ele = document.createElement('div');
-            ele.style.width=this.Utilities.setCmToPx(w).toString()+'px';
-            ele.style.display='inline-block';
-            ele.style.margin='0px';
-            ele.style.padding='0px';
-        return ele;
-    }
+       
     setListEleHeadType(ele,listType,counter){
         /*
          *   console.log('DocPreview::setListEleHeadType()');  
@@ -460,50 +366,28 @@ class DocPreview extends DocPreviewPage{
         };
     }
     setParagraph(mainDiv,row,lastParagraphType,firstLine){
-        console.log('DocPreview::setParagraph()');
-        console.log(row);
-        /*
-         * var divWidth=document.createElement('div');
-        //var ele = document.createElement('div');
-            divWidth.style.width='100%';
-            divWidth.style.display='flex';
-            divWidth.style.justifyContent=row.paragraph.style.textAlign;
-            //divWidth.style.border='1px solid red';
-            divWidth.style.padding='0px';
-            divWidth.style.margin='0px';
-         */
-        
-        
-        /* SET TEMPORARY VALUE */
-        //var indentation=row.paragraph.style.indentation;
+        console.log("DocPreview::setParagraph()\nrow:",row,"\nvaluenewline:",row.paragraph.property.valuenewline);
 
         switch(row.paragraph.property.valuenewline){
             case '0':
+                console.log("lastParagraphType===\r",lastParagraphType);
                 /* EXCEPTION - last paragraph type is empty so this is a first element on a list or last element is list*/
                 if(lastParagraphType==='' || lastParagraphType==='l'){
-                    //row.paragraph.style.indentation=indentation;
+
                 }
                 else if(mainDiv.hasChildNodes()){
-                    
                     /* TO DO -> NEW TAB STOP */
-                    
                     /* CLEAR MARING LEFT */
-                    //row.paragraph.style.indentation=0;
                     row.paragraph.style.leftEjection=0;  
-                    console.log('hasChildNodes');
-                    console.log(mainDiv.hasChildNodes());
-                    mainDiv.lastChild.appendChild(this.setParagraphEle(row));
+                    mainDiv.lastChild.appendChild(this.getParagraphEle(row));
                     return true;
-                    
                 }
                 else{
-                    
+
                 }
-               
                 break;
-            case '1':
+            case '1':        
                 /* EXCEPTION */
-                
                 if(lastParagraphType==='l'){
 
                 }
@@ -528,42 +412,51 @@ class DocPreview extends DocPreviewPage{
         var divWidth=document.createElement('div');
         //var ele = document.createElement('div');
             divWidth.style.width='100%';
+            //divWidth.style.height='100px';
             divWidth.style.display='flex';
             divWidth.style.justifyContent=row.paragraph.style.textAlign;
             //divWidth.style.border='1px solid red';
             divWidth.style.padding='0px';
             //divWidth.style.margin='0px';
 
-            /* SET MARGIN */
+            /* 
+                SET MARGIN:
+                - SpaceBefore
+                - SpaceAfter
+                - LineSpacing
+            */
 
-            this.setParagraphMargin(divWidth,row,'marginTop');//ele.style.marginTop=
-            this.setParagraphMargin(divWidth,row,'marginBottom');//ele.style.marginBottom=
+            this.Paragraph.setSpace(divWidth,row,'marginTop');//ele.style.marginTop=
+            this.Paragraph.setSpace(divWidth,row,'marginBottom');//ele.style.marginBottom=
+            this.Paragraph.setLineSpacing(divWidth,row);
 
         /* LEFT EJECTION - WYSUNIECIE */
-        this.setTabStopEjection(divWidth,row.paragraph.style.leftEjection);
-        divWidth.appendChild(this.setParagraphEle(row));
-        mainDiv.appendChild(divWidth);
+            this.TabStop.setEjection(divWidth,row.paragraph.style.leftEjection);
+            divWidth.appendChild(this.getParagraphEle(row));
+            mainDiv.appendChild(divWidth);
     }
-    setParagraphEle(row){
-        console.log('DocPreview::setParagraphEle()'); 
-        console.log(row); 
+    getParagraphEle(row){
+        console.log('DocPreview::getParagraphEle()',row); 
         var ele = document.createElement('div');
             ele.style.display='inline-block';
             ele.style.border='0px solid purple';
             ele.style.padding='0px 0px 0px 0px';
             ele.style.margin='0px 0px 0px 0px';
-           
-
-            this.setEleStyle(ele,row.paragraph.style);
+            /* SET PARAGRAPH STYLE */
+            this.Paragraph.setParagraphBoxStyle(ele,row.paragraph.style);
             /* SET TAB STOP */
-            this.setTabStop(ele,row.paragraph);
+            this.TabStop.set(ele,row.paragraph);
         /* PARSE VALUE - VARIABLE */
         this.swapVariablePropertyWithValue(row.paragraph);
+        /* CLEAR EXTRA 3 margin top and bottom */
+        var p=this.Paragraph.getParagraph(ele,row);
         /*
             ADD WHITESPACE UNICODE
         */
         var value=row.paragraph.property.value.replace(/\s/g,'\u00A0');
-            ele.appendChild(document.createTextNode(value));
+            p.append(document.createTextNode(value));
+            ele.appendChild(p);
+            //ele.appendChild(document.createTextNode(value));
             for(const prop in row.image){
                 var getImage = (row.image[prop].data.tmp==='n')? 'getStageImage' : 'getTmpStageImage';
                 var img = document.createElement('img');
@@ -573,52 +466,15 @@ class DocPreview extends DocPreviewPage{
                     img.setAttribute('height',row.image[prop].style.height);
                     ele.appendChild(img);
             }     
-            //console.log(ele);     
+        //console.log(ele);     
         return ele;
-    }
-    setParagraphMargin(ele,row,side){
-        //console.log('DocPreview::setParagraphMargin()'); 
-        //console.log(row.paragraph.style[side],side,ele);
-        /* SET DEFAULT VALUE AND Measurement */
-        var value='0';
-        /* CHECK VALUE PROPERTY */
-        if(row.paragraph.style.hasOwnProperty(side)){
-            value=row.paragraph.style[side];
-        }
-        /* CHECK MEASUREMENT PROPERTY */
-        if(row.paragraph.style.hasOwnProperty(side+'Measurement')){
-            //value=this.Utilities.getValueInPx(value,row.paragraph.style[side+'Measurement']);    
-            value=this.Utilities.getValueInPx(value,row.paragraph.style[side+'Measurement']);    
-        }
-        //console.log(value);
-        ele.style[side]=value.toString()+'px';
-    }
-    setEleStyle(ele,style){
-        console.log('DocPreview::setEleStyle()');  
-        ele.style.fontSize=style.fontSize+style.fontSizeMeasurement;
-        ele.style.fontFamily=style.fontFamily;
-        ele.style.color=style.color;
-        ele.style.backgroundColor=style.backgroundColor;
-        ele.style.fontWeight='normal';
-        ele.style.marginBottom="0px";
-        
-        /* SET TEXT-DECORATION */ 
-        this.Style.setTextDecoration(ele,style);
-        /* SET FONT-WEIGHT */ 
-        if(style.fontWeight==='1'){
-            ele.style.fontWeight='bold';
-        }
-        /* SET ITALIC */ 
-        if(style.fontStyle==='1'){
-            ele.style.fontStyle='italic';
-        }
     }
     swapVariablePropertyWithValue(paragraph){
         
         //&$value='',$variable=[]
-        console.log('DocPreview::swapVariablePropertyWithValue()');
-        console.log(paragraph.property.value);
-        console.log(paragraph.variable);
+        //console.log('DocPreview::swapVariablePropertyWithValue()');
+        //console.log(paragraph.property.value);
+        //console.log(paragraph.variable);
         if(paragraph.variable.length===0){
             return false;
         }

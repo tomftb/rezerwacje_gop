@@ -48,7 +48,8 @@ class SubSection{
         //return Link;
     }
     getHelpLink(){
-       return {
+        console.log('SubSection::getHelpLink()');
+        return {
             /* FOR SHOW/HIDE */
             all:{},
             /* FOR ADD */

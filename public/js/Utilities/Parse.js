@@ -8,7 +8,9 @@ class Parse{
         //console.log('Parse.response()');
         var data={
             error:'',
-            value:new Object()
+            value:new Object(),
+            /* TO DO - parse via key */
+            key:'main'
         };
         try {
             data.value=JSON.parse(response);  

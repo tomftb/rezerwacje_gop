@@ -150,7 +150,7 @@ class createDoc extends createDocAbstract {
         $this->Log->log(0,"[".__METHOD__."] ".$method);
         //$this->Log->log(0,$Stagesection);
         /* MULTIPLE COLUMN (SECTION) IS NOT ACCEPTABLE */
-        $firstRow=true;
+        $firstRow='1';
         $run=null;
         $actListName=uniqid('list_');
         $actTabStopName=uniqid('tabstop_');
@@ -168,22 +168,14 @@ class createDoc extends createDocAbstract {
             //evenPage Auto - default - odd pages
             foreach($s->subsection as $u){
                 foreach($u->subsectionrow as $r){
-                     if($firstRow){
-                        self::checkType($r,$part,$run,$actListName,$actTabStopName);
-                        $firstRow=false;
-                        continue;
-                     }
-                     self::checkNewLine($r,$part,$run,$actListName,$actTabStopName);
+                     $this->{'newLine'.$r->paragraph->property->valuenewline}($r,$part,$run,$actListName,$actTabStopName);
                 }
-                $firstRow=true;
+                $firstRow=$r->paragraph->property->valuenewline;
             }
         }
     }
     private function setReportStageSection($Stagesection){
-        $this->Log->log(0,"[".__METHOD__."]");
-        //print_r($this->projectData->section);
-        
-        $firstRow=true;
+        $this->Log->log(0,"[".__METHOD__."]");        
         $firstSection=true;
         $breakType='continuous';
         $run=null;
@@ -192,137 +184,37 @@ class createDoc extends createDocAbstract {
         foreach($Stagesection as $s){
             /*
              * (twips )Twip to miara typograficzna, zdefiniowana jako 1⁄20 punktu typograficznego. Jeden twip ma 1⁄1440 cala lub 17,64 μm
-             */
-            //print_r($this->projectData->section);
-            
+             */            
             /* CHECK FOR NEW PAGE */
             if($s->property->valuenewline==='1' && $firstSection===false){
                 //$section->addPageBreak();
                 $breakType='newPage';
             }
-            
             $section = self::setSectionColumn($s->subsection,$breakType);
-            //$this->Log->log(0,$this->phpWord->getSections());
-            //var_dump($section);
-            //print_r($section);
             /* COLUMNS */
             foreach($s->subsection as $u){
-                //$section->addText("Regularność pomiarów danych sejsmicznychWedług podziału administracyjnego Polski projektowane zdjęcie sejsmiczne dla tematu: „Prace sejsmiczne 3D Wielkie Oczy” znajduje się w południowo-wschodniej Polsce, w obrębie województwa podkarpackiego, w powiecie jarosławskim, lubaczowskim i przemyskim (tylko punkty odbioru).Obszar badań zlokalizowany jest w obrębie koncesji poszukiwawczych: Lubaczów – Zapałów 21/97/p i Przeworsk – Jarosław - Stubno 24/99/p.Obszar projektowanego zdjęcia sejsmicznego Wielkie Oczy 3D położony jest we wschodniej części zapadliska przedkarpackiego. Głównymi elementami jego budowy geologicznej są utwory miocenu autochtonicznego i mezopaleozoiczne podłoże zbudowane z  utworów prekambru, kambru, ordowiku, syluru, jury i kredy.Otrzymaną regularność pomiarów zaprezentowano na mapach rozmieszczenia punktów wzbudzania i odbioru (Ryc. 3 1Ryc. 3 1), jak również na mapach krotności profilowania (ilości tras sejsmicznych w binach WPG) (Ryc. 3 2Ryc. 3 2), oraz mapach ");
-                //$section->addText("1");
                 /* TO DO */
                 //print_r($u->style);
                 //print_r($u->property);
                 //print_r($u->subsectionrow);
-                
-               
-                foreach($u->subsectionrow as $r){
-                    //print_r($r);
-                    //print_r($r->paragraph->property->paragraph);
-                    if($firstRow){
-                        //$this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
-                        //$this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
-                        //$textrun = $section->addTextRun(array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
-                        //$textrun->addText($r->paragraph->property->value, 'r2Style', 'p2Style');
-                        //array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100)
-                        
-                        /*
-                         * CHECK TYPE
-                         */
-                        self::checkType($r,$section,$run,$actListName,$actTabStopName);
-                        $firstRow=false;
-                        continue;
-                    }
-                    //$textrun = self::checkNewLine($section,$textrun,$r->paragraph->property->valuenewline,$r);
-                    self::checkNewLine($r,$section,$run,$actListName,$actTabStopName);
-                    
-                    
-                    //print_r($r->paragraph->style);
-                    
-                    
-                    //self::setText($textrun,$r);
-                    //print_r($r->paragraph->style);
-                    //print_r($r->paragraph->property);
-                    //print_r($r->paragraph->tabstop);
-                    //print_r($r->list->style);
-                    //print_r($r->list->property);
-                    //print_r($r->image->style);
-                    //print_r($r->image->property);
-                    //print_r($r->table->style);
-                    //print_r($r->table->property);
-                    
-                }
-                $firstRow=true;
+                self::setReportStageRow($u,$section,$run,$actListName,$actTabStopName);
             }
-            //if($s->property->valuenewline==='y' && $firstSection===false){
-                //$section->addPageBreak();
-               // $section = self::setSectionColumn($s->subsection,'newPage');
-           // }
             /* AT THE END ADD FAKE section if no more left */
-            
-            //break;
-            //$section = $this->phpWord->addSection();
-            //$section->getStyle()->setBreakType('continuous');
-            //$section->addText(" 1 subsection");
-            //self::setSectionColumn
-            //print_r($s->property);
-            //print_r($s->style);
-            //print_r($s->subsection);
              $firstSection=false;
         }
     }
-    private function checkType($r,&$section,&$run,&$actListName='',&$actTabStopName=''){
-        //echo __METHOD__." - ";
-        //echo $r->paragraph->property->paragraph." .";
-        switch($r->paragraph->property->paragraph):
-            default:
-            case 'p':
-                /* TO SET THE sAME TAB STOP - USE FRONT END TO ADD TAB STOP FOR NEW PARAGRAPH */
-                $textrun = $section->addTextRun(parent::setParagraphProperties($r)); 
-                //var_dump($this->phpWord);
-                //$rightTabStyleName = 'rightTab';
-                //$this->phpWord->addParagraphStyle($rightTabStyleName, array('tabs' => array(new \PhpOffice\PhpWord\Style\Tab('right', 1440,'dot'))));
-                $textrun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
-                array_walk($r->image,['self','setRunImage'],$textrun);
-                //$section->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style),$rightTabStyleName);
-                $run = $textrun;
-                break;
-            case 'l':
-                self::setListItem($r,$section,$run,$actListName,$actTabStopName);                
-                break;
-        endswitch;
-    }
-    private function checkTypeInLine($r,&$run){
-        //echo __METHOD__." - ";
-        //echo $r->paragraph->property->paragraph." .";
-        switch($r->paragraph->property->paragraph):
-            default:
-            case 'p':
-                //self::setText($run,$r);
-                $run->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
-            case 'l':
-                //self::setText($run,$r);
-                $run->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
-        endswitch;
-    }
-    private function setListItem($r,&$section,&$run,&$actListName='',&$actTabStopName=''){
-        //$this->phpWord->addSection();
-        //echo "Act list name - ".$actListName.', nowa lista - ';
-        //print_r($r->list->property->newList);
-        //echo '.';
-        if($r->list->property->newList==='y'){
-            /* SET NEW LIST NAME */
-            $actListName=uniqid('list_');
-            $actTabStopName=uniqid('tabstop_');
-            /* RESET TAB STOP */
+    private function setReportStageRow($subsection,$section,$run,$actListName,$actTabStopName){
+        $this->Log->log(0,'['.__METHOD__.'] START');
+        /* FIRST ROW ALWAYS START FROM NEW LINE */
+        $firstRow='1';
+        parent::setUpMaxFontSize($subsection->subsectionrow);
+        foreach($subsection->subsectionrow as $r){
+            $this->Log->log(0,'['.__METHOD__.'] ROW');
+            /* RUN VIA NEW LINE 1,0 */
+            $this->{'newLine'.$r->paragraph->property->valuenewline}($r,$section,$run,$actListName,$actTabStopName);
+            array_walk($r->image,['self','setRunImage'],$run);
+            $firstRow=$r->paragraph->property->valuenewline;
         }
-        //echo 'act list name - '.$actListName.' ';
-        //echo 'act tab stop name - '.$actTabStopName.' ';
-        $listItemRun = $section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r,$actListName), self::setListParagraph($r,$actTabStopName));
-        //self::setText($listItemRun,$r);
-        $listItemRun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
-        array_walk($r->image,['self','setRunImage'],$listItemRun);
-        
-        $run = $listItemRun;
     }
     private function setRunImage($image,$key=0,&$item){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -431,16 +323,38 @@ class createDoc extends createDocAbstract {
                         'colsSpace' => 2880/$cols  // 2880/$cols              
                     )
                 );
-    }    
-    private function checkNewLine($r,&$section,&$run,&$actListName='',&$actTabStopName=''){
-        //echo __METHOD__." - ";
-        //echo $r->paragraph->property->valuenewline."\r\n";
-        if($r->paragraph->property->valuenewline==='1'){
-            self::checkType($r,$section,$run,$actListName,$actTabStopName);
+    }
+    private function newLine1($r,&$section,&$run,&$actListName='',&$actTabStopName=''){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->{'set'.$r->paragraph->property->paragraph.'Item'}($r,$section,$run,$actListName,$actTabStopName);
+    }
+    private function newLine0($r,&$section,&$run,&$actListName='',&$actTabStopName=''){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $run->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
+        //array_walk($r->image,['self','setRunImage'],$run);
+    }
+    private function setpItem($r,&$section,&$run,&$actListName,&$actTabStopName){
+         $this->Log->log(0,"[".__METHOD__."]");
+         /* TO SET THE sAME TAB STOP - USE FRONT END TO ADD TAB STOP FOR NEW PARAGRAPH */
+         $textrun = $section->addTextRun(parent::setParagraphProperties($r)); 
+         //$this->phpWord->addParagraphStyle($rightTabStyleName, array('tabs' => array(new \PhpOffice\PhpWord\Style\Tab('right', 1440,'dot'))));
+         $textrun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
+         //array_walk($r->image,['self','setRunImage'],$textrun);
+         $run = $textrun;
+    }
+    private function setlItem($r,&$section,&$run,&$actListName,&$actTabStopName){
+        $this->Log->log(0,"[".__METHOD__."]");
+        if($r->list->property->newList==='y'){
+            /* SET NEW LIST NAME */
+            $actListName=uniqid('list_');
+            $actTabStopName=uniqid('tabstop_');
+            /* RESET TAB STOP */
         }
-        else{
-            self::checkTypeInLine($r,$run);
-        }
+        $listItemRun = $section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r,$actListName), self::setListParagraph($r,$actTabStopName));
+        //self::setText($listItemRun,$r);
+        $listItemRun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
+        //array_walk($r->image,['self','setRunImage'],$listItemRun);   
+        $run = $listItemRun; 
     }
     public function createProjectReport(){
         $this->Log->log(0,"[".__METHOD__."]"); 

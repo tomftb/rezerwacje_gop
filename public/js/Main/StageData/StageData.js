@@ -26,9 +26,10 @@ class StageData{
         this.StageDataRefill=new StageDataRefill();
     }
     setProperty(Glossary,Property,type,tabstop,part){
+        //console.log('StageData::setProperty()');
         this.Glossary = Glossary;
         this.Property=Property;
-        console.log(this.Property);
+        //console.log(this.Property);
         //this.type=type;
         this.part=part;
         this.setType(type);
@@ -92,8 +93,9 @@ class StageData{
                     /* SET PROPER AS IN SQL */
                     departmentName:this.Property.department.defaultDepartment[0].n,
                     /* SET SQL new_page to valuenewline */
-                    valuenewline:this.getValueChar(this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_PAGE_FROM_NEW','v'))//STAGE_TEXT_PAGE_FROM_NEW
-               },
+                    //valuenewline:this.getValueChar(this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_PAGE_FROM_NEW','v'))//STAGE_TEXT_PAGE_FROM_NEW
+                    valuenewline:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_PAGE_FROM_NEW','v')//STAGE_TEXT_PAGE_FROM_NEW
+                },
                property:{
                    tmpid:'0'
                },
@@ -115,6 +117,7 @@ class StageData{
         };
     }
     createSection(){    
+        console.log('StageData::createSection()');
         this.Stage.section[this.iSection]={
             data:{
                 id:0
@@ -140,7 +143,7 @@ class StageData{
         return subsection;
     }
     createSubsection(tmpid){
-        //console.log('StageData.createSubsection()');
+        console.log('StageData::createSubsection()');
         return {
                 data:{
                     id:0
@@ -153,19 +156,17 @@ class StageData{
             };
     }
     createDefaultSubsectionRow(){
-        //console.log('StageData.createDefaultSubsectionRow()');
+        console.log('StageData::createDefaultSubsectionRow()');
         var subsectionRow = {};
             /* FIRST ALWAYS NEW LINE */
-            //var newLine = 'y';
             for(var i=0;i<this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SUBSECTION_ROW_MIN','v');i++){
-            //for(var i=0;i<this.Property[this.type.g].subsectionRowMin;i++){  
                 subsectionRow[i]=this.createSubsectionRow(i);
-               // subsectionRow[i].paragraph.property.valuenewline=newLine;
-               // newLine = this.Property.subsectionRowNewLine;
+                console.log(subsectionRow[i]);
             };
             return subsectionRow;
     }
     createSubsectionRow(tmpid){
+        console.log('StageData::createSubsectionRow()');
         /* RUN SET DEFAULT -> TO PREVENT REFERENCES */
         return {
                 data:{
@@ -191,16 +192,16 @@ class StageData{
         switch(value){
             case 0:
             case '0':
-                return 'n';
+                return '0';
             case 1:
             case '1':
-                return 'y';
+                return '1';
             default:
-                return 'n';
+                return '0';
         }
     }
     setBasicStage(){
-        console.log('StageData::setBasicStage()');
+        //console.log('StageData::setBasicStage()');
         this.Stage = data;
     }
     setStage(data){
@@ -220,8 +221,7 @@ class StageData{
     }
     getDefaultParagraphProperty(){
         console.log('StageData::getDefaultParagraphProperty()');
-        //console.log(this.type);
-        //console.log(this.Glossary);
+        console.log(this.type.gk,this.type.g,this.Glossary);
         return { 
                     style:{
                         fontSize:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_FONT_SIZE','v'),
@@ -256,16 +256,15 @@ class StageData{
                         marginBottomMeasurement:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_AFTER_MEASUREMENT','v'),
                         marginTop:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_BEFORE','v'),
                         marginTopMeasurement:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SPACE_BEFORE_MEASUREMENT','v'),
-                        leading:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING','n'),
-                        leadingMin:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING_MIN','n'),
-                        leadingMax:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING_MAX','n'),
-                        leadingMeasurement:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING_MEASUREMENT','n'),
-                        leadingType:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING_TYPE','v'),
-                        leadingTypeName:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LEADING_TYPE','n')
+                        lineSpacing:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LINE_SPACING','v'),
+                        lineSpacingName:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LINE_SPACING','n'),
+                        lineSpacingMin:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LINE_SPACING_MIN','n'),
+                        lineSpacingMax:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LINE_SPACING_MAX','n'),
+                        lineSpacingMeasurement:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LINE_SPACING_MEASUREMENT','n'),
+                        lineSpacingValue:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_LINE_SPACING_VALUE','v')
                     },
                     property: {
                         value:'',
-                        //valuenewline:'y',/* default */
                         valuenewline:this.Glossary[this.type.g].getKeyPropertyAttribute('parameter',this.type.gk+'_SUBSECTION_ROW_NEW_LINE','v'),
                         paragraph:this.type.paragraph,
                         paragraphName:this.type.paragraphName,

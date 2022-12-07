@@ -10,12 +10,12 @@ class DocPreviewPage{
         all:new Object()
     }
     constructor(){
-        //console.log('DocPreviewPage::constructor()');
+        console.log('DocPreviewPage::constructor()');
         this.Html=new Html();
         this.Utilities = new Utilities();
     }
     getPage(){
-        console.log('DocPreview::getPage()');   
+        //console.log('DocPreview::getPage()');   
         //console.log(this.helplink);
         //console.log(this.data);
         //throw 'aaa';

@@ -356,7 +356,8 @@ class ProjectItems{
         this.Xhr.setOnLoadEnd(end);
     }
     parseResponse(response){
-        //console.log('ProjectItems::parseResponse()');
+        console.log('ProjectItems::parseResponse()');
+        //console.log(response);
         try {
             var json=this.Parse.getJson(response);
             //var data = JSON.parse(response);  
@@ -372,8 +373,8 @@ class ProjectItems{
         }
         if(json.error!==''){
             console.log(json.error);
-            this.ErrorStack.add('main','Application error occurred! Contact with Administrator!');
-            throw 'Application error occurred! Contact with Administrator!';
+            this.ErrorStack.add('main',json.error);
+            throw json.error;
         }
         return json.value;
     }

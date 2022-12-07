@@ -44,7 +44,9 @@ final class Logger{
 		self::$filename = fopen(self::$logName, "a") or die(__METHOD__."Unable to open file!");
     }
     public static function getLogLvl(){
-        return $this->log;
+        /* PHP .config CONST */
+        return LOG_LVL;
+        //return $this->log;
     }
     protected function setLogName(){
 		self::setDir();

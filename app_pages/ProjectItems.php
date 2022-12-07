@@ -40,6 +40,8 @@ final class ProjectItems extends Page{
         'Main/StageData/StageDataRefill.js',
         'Main/StageData/StageDataUpdate.js',
         'Main/StageData/StageData.js',
+        'Utilities/DocPreviewTabStop.js',
+        'Utilities/DocPreviewParagraph.js',
         'Utilities/DocPreviewPage.js',
         'Utilities/DocPreview.js',
         'Utilities/Parse.js',

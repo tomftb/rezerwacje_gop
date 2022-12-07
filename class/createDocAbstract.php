@@ -4,17 +4,32 @@ class createDocAbstract {
     public function construct__(){
         $this->Log=Logger::init();
     }
+    public function __call($name='',$arg=array()){
+        $this->Log->log(0,'['.__METHOD__.']');
+        $this->Log->log(0,$name);
+        $this->Log->log(0,$arg);
+    }
     protected function getTwip($size=0,$measurement='cm'){
-        /* check - minus size */
+        $this->Log->log(0,'['.__METHOD__.'] size -> '.$size.' measurement -> '.$measurement);
+        /* check - minus size returned value in MS WORD equal value/20 */
         switch($measurement):
             case 'mm':
                 $size=$size/10;
             case 'cm':
                 return \PhpOffice\PhpWord\Shared\Converter::cmToTwip($size);
+            case 'n/a':/* n/a -> set default */
+            case 'pkt':/* 1cm ~ 28,34645669291339 pt/pkt */
+            case 'pt':
             case 'point':
                 return \PhpOffice\PhpWord\Shared\Converter::pointToTwip($size);
+            case 'in':
             case 'inch':
                 return \PhpOffice\PhpWord\Shared\Converter::inchToTwip($size);
+            case 'pc':        
+                return \PhpOffice\PhpWord\Shared\Converter::inchToTwip($size/6);
+            case 'px':
+            case 'pixel':
+                    return \PhpOffice\PhpWord\Shared\Converter::inchToTwip($size/96);
             default:
                 Throw New Exception('NOT SUPPORTED MEASUREMENT -> '.$measurement,0);  
         endswitch;
@@ -44,16 +59,24 @@ class createDocAbstract {
         }
         return $available[$listType];
     }
-    protected function convertToPt($size=0,$measurement='pt'){
+    /* SWAP WITH PhpWord/Shared/Converted */
+    protected function convertToPt($size='0',$measurement='pt'){
+        $this->Log->log(0,'['.__METHOD__.'] size -> '.$size.', measurement -> '.$measurement);
         switch($measurement):
-            case 'px':
-                return $size*0.75;
-            case 'pt':
-                return $size;
-            default:
-                Throw New Exception('NOT SUPPORTED MEASUREMENT -> '.$measurement,0);
+            case 'pkt':
+                    $size=floatval($size)/28.35;
+                    $measurement='cm';
+                    break;
+                /* EXCEPTION */
+            case 'n/a':
+                    $measurement='pt';
+                    break;
+            //default:
+                //Throw New Exception('NOT SUPPORTED MEASUREMENT -> '.$measurement,0);
         endswitch;
+        return \PhpOffice\PhpWord\Shared\Converter::cssToPoint($size.$measurement);
     }
+     
     protected function setFont($rStyle){
         /* TO DO -> CHECK EXISTS */
         /* AVAILABLE
@@ -112,14 +135,20 @@ class createDocAbstract {
         return $available[$style->textAlign];
     }
     protected function setParagraphProperties($r){
+        /* GET TWIP */
+        $spacingLineValue=self::setSpacingLineValue($r->paragraph->style);
+        /* FIX FOR n/a */
+        self::setSpacingLineValueMeasurement($r->paragraph->style,$spacingLineValue);
+        /* SET TO POINT */
+        $setSpacingLineRule=self::setSpacingLineRule($r->paragraph->style,$spacingLineValue);
         return [
             'tabs'=>self::setTabStop($r->paragraph->tabstop),
             'alignment'=>self::setAlign($r->paragraph->style),
             'spaceBefore'=>self::setParagraphSpace($r->paragraph->style,'marginTop'), /* IN TWIP : 1 pkt  - 20 twip ex. 240 TWIP = 12 pkt */
             'spaceAfter'=>self::setParagraphSpace($r->paragraph->style,'marginBottom'), /* IN TWIP 1 - 20 */
             /* INTERLINIA */
-            'spacing'=>'100',
-            'spacingLineRule'=>'auto'/* atLeast, exact, auto */
+            'spacing'=>$spacingLineValue,
+            'spacingLineRule'=>$setSpacingLineRule
         ]; 
     }
     private function setParagraphSpace($style,$key='marginTop'){
@@ -141,29 +170,8 @@ class createDocAbstract {
             $this->Log->log(0,'['.__METHOD__.'] Property '.$key.'Measurement exists ('.$style->{$key.'Measurement'}.') in style -> calculate');
             /* calculate measurement */
             //$measurement=$key."Measurement";
-            switch($style->{$key.'Measurement'}){
-                default:
-                    // default if not found
-                case 'pkt':
-                    /* multiply - pkt */
-                    $size=round(floatval($style->{$key})*20,2);
-                    break;
-                case 'cm':
-                    $size=round(floatval($style->{$key})*28.35*20,2);
-                    break;
-                case 'mm':
-                    $size=round(floatval($style->{$key})*2.85*20,2);
-                    break;
-                case 'pt':
-                    //$size=round(floatval($style->{$key})*2.85*20,2);
-                    $size=round(floatval($style->{$key})*0.75000000001875*20,2);
-                    break;
-                case 'px':
-                    /* 1 px = 0,7500937499990312 pkt */
-                    //$size=round(floatval($style->{$key})*2.85*20,2);
-                    $size=round(floatval($style->{$key})*0.7500937499990312*20,2);
-                    break;
-            }
+            $size=self::getTwip(floatval($style->{$key}),$style->{$key.'Measurement'});
+            //$size=self::getTwip($style->{$key},$style->{$key.'Measurement'});
             //return round(intval($style->{$key},10)*20,0);
         }
         else{
@@ -178,6 +186,70 @@ class createDocAbstract {
          */
         //$this->Log->log(0,'['.__METHOD__.'] Property '.$key.' not exists in style -> return default 160 twip');
        
+    }
+    private function setSpacingLineRule($style,&$spacingLineValue=1){
+        /* atLeast, exact, auto */
+        $this->Log->log(0,'['.__METHOD__.']');
+        //$this->Log->log(0,$style);
+        $lineSpacing='auto';
+        if(!property_exists($style,'lineSpacing')){
+            $this->Log->log(0,'Property lineSpacing not exists, set default => auto');
+            return $lineSpacing;
+        }
+        switch($style->{'lineSpacing'}){                 
+                case 'exactly':
+                    $lineSpacing='exact';
+                    break;
+                case 'atLeast':
+                    $lineSpacing='atLeast';
+                    break;
+                case 'single':/* LEAVE PhpWord default 240 TWIP */
+                    $spacingLineValue=0;
+                    break;
+                case 'double':/* LEAVE PhpWord default 240 TWIP + 240 TWIP*/
+                    $spacingLineValue=240;
+                    break;
+                case 'oneAndHalf':
+                    $spacingLineValue=120;
+                    break;
+                case 'auto':
+                     $this->Log->log(0,'auto');
+                    /* TO POINT AND MULTIPLY MS WORD MEASUREMENT 0.0834 */
+                default:
+                    $this->Log->log(0,'default');
+                    /* 
+                     * FIX for additional PhpWord 240 TWIP
+                     * vendor/phpword/src/PhpWord/Writer/Word2007/Style/Spacing.php => write();
+                     */
+                    $spacingLineValue-=240;
+                    break;
+            }
+        $this->Log->log(0,'lineSpacing `'.$style->{'lineSpacing'}."`\rreturn type => ".$lineSpacing."\rreturn value => ".$spacingLineValue);   
+        return $lineSpacing;
+    }
+    private function setSpacingLineValue($style){
+        $this->Log->log(0,'['.__METHOD__.']');
+        /* 200 - 10 pkt */
+        $size='0';
+        $measurement='pkt';
+        if(property_exists($style,'lineSpacingValue')){
+            $size=$style->lineSpacingValue;
+        }
+         if(property_exists($style,'lineSpacingMeasurement')){
+            $measurement=$style->lineSpacingMeasurement;
+        }
+        return self::getTwip($size,$measurement);  
+    }
+    private function setSpacingLineValueMeasurement($style,&$spacingLineValue=1){
+        $this->Log->log(0,'['.__METHOD__.']');
+            switch($style->{'lineSpacingMeasurement'}){  
+                case 'n/a':
+                    $this->Log->log(0,'n/a');
+                    $spacingLineValue*=12;
+                    break;
+                default: /* nothing to do */
+                    break;
+            }
     }
     private function setTextStyle($style='1'){
         if($style==='1'){
@@ -196,7 +268,7 @@ class createDocAbstract {
         */
         $tabStop=[];
         foreach($rTabStop as $v){
-            array_push($tabStop,new \PhpOffice\PhpWord\Style\Tab($v->alignment, self::getTwip($v->position,$v->measurement),self::getLeadingSign($v->leadingSign)));
+            array_push($tabStop,new \PhpOffice\PhpWord\Style\Tab($v->alignment, self::getTwip(floatval($v->position),$v->measurement),self::getLeadingSign($v->leadingSign)));
         }
         return $tabStop;
     }
@@ -270,6 +342,47 @@ class createDocAbstract {
         if($t!==$type){
             throw new Exception($ObjectName.' property `'.$property.'` != `'.$type.'`!',1);
         }
+    }
+    protected function setUpMaxFontSize(&$allRow){
+        $this->Log->log(0,"[".__METHOD__."]");
+        //$this->Log->log(0,$allRow);
+        /* 
+            TO DO
+            CAN BE CHANGET TO ANOTHER NAME WITH MORE FUNCTIONS    
+        */
+        $tmp= new stdClass();
+        $i=-1;
+        foreach($allRow as $prop => $v){
+            if($v->paragraph->property->valuenewline==='1'){
+                $i++;
+                $mfs=self::getMax(0,$v->paragraph->style);
+                $tmp->{$i}=new stdClass();
+                $tmp->{$i}->{'key'}=array($prop);
+                $tmp->{$i}->{'maxFontSize'}=$mfs;
+                continue;
+            }
+            
+            array_push($tmp->{$i}->key,$prop);
+            $tmp->{$i}->maxFontSize=self::getMax($tmp->{$i}->maxFontSize,$allRow->{$prop}->paragraph->style);
+        }
+        /* SET TMP MAX SIZE */
+        foreach($allRow as $prop => &$v){
+            foreach($tmp as $tv){
+                if(in_array($prop,$tv->key)){
+                    //$v->paragraph->{'tmp'}=new stdClass();
+                    $v->paragraph->{'tmp'} = new stdClass();
+                    $v->paragraph->{'tmp'}->{'maxFontSize'}=$tv->maxFontSize;
+                }
+            }
+        }  
+    }
+    private function getMax($actMax,$rowParagraphStyle){
+        $fs=self::convertToPt($rowParagraphStyle->fontSize,$rowParagraphStyle->fontSizeMeasurement);
+        if($fs>$actMax){
+            /* RETURN NEW MAX */
+            return $fs;
+        }
+        return $actMax;
     }
 }
 

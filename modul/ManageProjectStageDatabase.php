@@ -31,7 +31,7 @@ class ManageProjectStageDatabase {
             'textAlign'=>$this->DatabaseUtilities->getStyle(1),
             'measurement'=>$this->DatabaseUtilities->getStyle(2),
             'department'=>$this->DatabaseUtilities->getUserDepartment($_SESSION['userid']),
-            'leading'=>$this->DatabaseUtilities->getSloList('l'),
+            'lineSpacing'=>$this->DatabaseUtilities->getSloList('l'),
             'indentationSpecial'=>$this->DatabaseUtilities->getSloList('s'),
             'listMeasurement'=>$this->DatabaseUtilities->getSloList('m'),
             'leadingSign'=>$this->DatabaseUtilities->getSloList('ls'),
@@ -540,7 +540,7 @@ class ManageProjectStageDatabase {
          self::insertTabStop($id,$data,$table,$run);
     }
     public function insertExtendedTabStop($id=0,$data,$table='slo_project_stage_subsection_row_p_tabstop'){
-         $this->Log->log(0,"[".__METHOD__."]");
+         $this->Log->log(0,"[".__METHOD__."] TabStop:");
          $this->Log->log(0,$data);
         //var_dump($data);
         $run = function($parm,$table,$dbLink,$dbUtilities){
@@ -552,8 +552,9 @@ class ManageProjectStageDatabase {
         self::insertTabStop($id,$data,$table,$run);
     }
     private function insertTabStop($id=0,$data=[],$table='slo_project_stage_subsection_row_p_tabstop',$run){
-        $this->Log->log(2,"[".__METHOD__."]\r\n ID DB SUBSECTION ROW - ".$id);
+        $this->Log->log(0,"[".__METHOD__."]\r\n ID DB SUBSECTION ROW - ".$id);
         $parm=[];
+        
         foreach($data as $k => $v){
             $this->Log->log(0,$k);
             $this->Log->log(0,$v);

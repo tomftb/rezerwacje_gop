@@ -47,8 +47,7 @@ class ProjectStageCreate{
     VariableList=new Object();
     StageTable=new Object();
     constructor(Parent){
-        //console.log('ProjectStageCreate::constructor()');
-       
+        console.log('ProjectStageCreate::constructor()');
         /*
          * Stage - object
          */
@@ -204,9 +203,9 @@ class ProjectStageCreate{
         this.Modal.link.form.append(this.createPreview(),this.createDynamicView(this.helplink,'createSection'));
     }
     setUpModal(){
-        console.log('ProjectStageCreate::setUpModal()');
-        console.log(this.StageData);
-        console.log(this.Modal.link);
+        //console.log('ProjectStageCreate::setUpModal()');
+        //console.log(this.StageData);
+        //console.log(this.Modal.link);
         try{
              /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
             this.helplink=this.getEmptyHelpLink();
@@ -319,19 +318,15 @@ class ProjectStageCreate{
     }
     details(response,sectionType){  
         try{
-            console.log('ProjectStageCreate.details()');
-            console.log(response);
-            console.log(sectionType);
-            //throw 'aaaaaaaaaaa';
+            console.log("ProjectStageCreate::details()\nresponse:",response,"\nsectionType:",sectionType);
             /* SETUP STAGE DATA */
             this.StageData = new StageData();
-            this.StageData.setProperty(this.Glossary,this.Stage.Property,null,this.part);
+            this.StageData.setProperty(this.Glossary,this.Stage.Property,this.type,null,this.part);
             this.VariableList=response['variable'];
              /* IF TRUE => SEND UPDATE */
             if(this.StageData.setStage(response['stage'])){ 
                 this.sendInputData(this);
             }
-            
         }catch(error){
             console.log('ProjectStageCreate::details()');
             console.log(error);
@@ -386,7 +381,6 @@ class ProjectStageCreate{
         }
         /* IN ANOTHER BLOCK TRY CATCH TO PREVENT OPEN MODAL IF ERROR EXISTS TO HIDE ERROR SHOWED IN TABLE  */
         this.runModal();
-        
     }
     runModal(){
         try{
@@ -438,14 +432,14 @@ class ProjectStageCreate{
         return mainDiv;
     }
     createExtendedSection(iSection,section,helplink){
-        //console.log('ProjectStageCreate.createSection()');
+        console.log('ProjectStageCreate.createExtendedSection()');
         var mainDiv=this.createSection(iSection,section,helplink);
             //console.log(section);
             mainDiv.append(this.ProjectStageTool.getSectionFooterTool(iSection,section[iSection]));
             return mainDiv;
     }
     createSection(iSection,section,helplink){
-        //console.log('ProjectStageCreate.createSection()');
+        console.log('ProjectStageCreate.createSection()');
         //console.log('iSection');
         //console.log(iSection);
         //console.log('helplink:');
@@ -477,7 +471,7 @@ class ProjectStageCreate{
             return mainDiv;
     }
     createSubsection(iSection,iSub,subsection,helplinkSubsection){
-        // console.log('ProjectStageCreate::createSubsection()');
+        console.log('ProjectStageCreate::createSubsection()');
         /* CREATE HELPLINK SUBSECTION */
         helplinkSubsection[iSub]=this.SubSection.getHelpLink();
         
@@ -628,11 +622,11 @@ class ProjectStageCreate{
         /* SET CLASS OBJECT */
         var self=this;
             div.onclick=function(){       
-                console.log('ProjectStageCreate::addSubsectionRow() onclick()');
+                console.log('ProjectStageCreate::addSubsectionRow() onclick()');//,'TabStop:',self.TabStop
 
                 /* ADD NEW stageData subsectionrow object */
                 subsectionrow[iRow]=self.StageData.createSubsectionRow(iRow);
-                
+                //console.log(subsectionrow[iRow]);
                 let StageRow=new Row(self.Html,self.Utilities,self.ProjectStageTool,self.TabStop,self.VariableList);
                     StageRow.setData(isection,isubsection,iRow,subsectionrow,helplink.row);
                     helplink.dynamic.appendChild(StageRow.getExtended());  
@@ -764,7 +758,8 @@ class ProjectStageCreate{
             catch(error){
                 console.log('ProjectStageCreate::setPreviewButtonAction()');
                 console.log(error);
-                self.Html.showField(self.Modal.link['error'],'An Application Error Has Occurred!');
+                self.Modal.setError('An Application Error Has Occurred!');
+                //self.Html.showField(self.Modal.link['error'],'An Application Error Has Occurred!');
             }
         };
     }

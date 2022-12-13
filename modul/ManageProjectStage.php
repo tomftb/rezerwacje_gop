@@ -1,14 +1,13 @@
 <?php
 class ManageProjectStage extends ManageProjectStageDatabase
 {
-    protected $filter='';
     private $stageData=array();
     private $lastStageId=0;
     private $dbLink;
     private $actProjectStageData=array();
     private $brTag='';
     private $Items;
-
+    private $filter=array('getProjectStages','getProjectDeletedStages','getProjectHiddenStages','getProjectHiddenAndDeletedStages','getProjectAllStages');
     function __construct(){
         parent::__construct();
         $this->utilities=NEW Utilities();
@@ -20,11 +19,39 @@ class ManageProjectStage extends ManageProjectStageDatabase
         parent::__destruct();
     }
     # RETURN ALL NOT DELETED PROJECT FROM DB
-    public function getprojectsstagelike(){ 
+    public function getProjectStages(){ 
+        self::returnStages(self::getSelectedStages("AND s.`wsk_v`='0' AND s.`wsk_u`='0' AND s.`id`>0 AND (s.`id`=:id OR s.`title` LIKE :f) ORDER BY s.`id` ASC"));
+    } 
+    public function getProjectDeletedStages(){ 
+        self::returnStages(self::getSelectedStages("AND s.`wsk_v`='0' AND s.`wsk_u`='1' AND s.`id`>0 AND (s.`id`=:id OR s.`title` LIKE :f) ORDER BY s.`id` ASC"));
+    }
+    public function getProjectHiddenStages(){ 
+        self::returnStages(self::getSelectedStages("AND s.`wsk_v`='1' AND s.`wsk_u`='0' AND s.`id`>0 AND (s.`id`=:id OR s.`title` LIKE :f) ORDER BY s.`id` ASC"));
+    }
+    public function getProjectHiddenAndDeletedStages(){ 
+        self::returnStages(self::getSelectedStages("AND (s.`wsk_v`='1' OR s.`wsk_u`='1') AND s.`id`>0 AND (s.`id`=:id OR s.`title` LIKE :f) ORDER BY s.`id` ASC"));
+    }
+    public function getProjectAllStages(){ 
+        self::returnStages(self::getSelectedStages("AND s.`id`>0 AND (s.`id`=:id OR s.`title` LIKE :f) ORDER BY s.`id` ASC"));
+    }
+    private function getSelectedStages($SQL="AND s.`id`>0 AND s.`title` LIKE :f ORDER BY s.`id` ASC"){
         $this->Log->log(0,"[".__METHOD__."]");
-        $data['data']=self::getAllStage(filter_input(INPUT_GET,'p'));
-        $data['headTitle']='Etapy';
-        $this->utilities->jsonResponse($data,'');
+        $POST=filter_input_array(INPUT_POST);
+        $this->Log->log(0,$POST);
+        $f=htmlentities(nl2br($POST['f']), ENT_QUOTES,'UTF-8',FALSE);
+        $parm[':p']=[htmlentities(nl2br($POST['p']), ENT_QUOTES,'UTF-8',FALSE),'STR'];
+        $parm[':f']=['%'.$f.'%','STR'];
+        /* reurn 0 when is a char/string, else return number */
+        $parm[':id']=array(intval($f,10),'INT');       
+        $this->Log->log(0,$SQL);
+        $this->Log->log(0,$parm);
+        $this->Items->unsetBlock($POST['b'],'slo_project_stage','buffer_user_id',$_SESSION['userid']);
+        return parent::getStages("WHERE s.`part`=:p ".$SQL,$parm);
+    }
+    private function returnStages($data){
+        $response['data']=$data;
+        $response['headTitle']='Etapy';
+        $this->utilities->jsonResponse($response,'');
     }
     public function getAllStage($part){
         $this->Log->log(0,"[".__METHOD__."]part:");
@@ -87,8 +114,11 @@ class ManageProjectStage extends ManageProjectStageDatabase
         $this->Log->log(0,"[".__METHOD__."]");
         $this->utilities->setGet('id',$this->inpArray);
         $data['stage'] = parent::getStageFullData($this->inpArray['id']);
+        //print_r($data['stage']);
         $Variable = new ManageProjectVariable();
-        $data['variable'] = $Variable->getSimpleAll();
+        $data['variable'] = $Variable->getSimpleAll();        
+        $this->Items->checkBlock($data['stage']->data->{'bu'},$data['stage']->data->{'bl'},$_SESSION['userid']);
+        $this->Items->setBlock($this->inpArray['id'],"slo_project_stage","buffer_user_id",$_SESSION['userid']);
         $this->utilities->jsonResponseData($data);
     }
 
@@ -111,17 +141,15 @@ class ManageProjectStage extends ManageProjectStageDatabase
         self::setChangeState();
         parent::hideStage();
         $this->Items->setBlock($this->data['id'],"slo_project_stage","buffer_user_id",'');
-        //Throw new Exception('TEST'.__LINE__,0);
-        //$this->utilities->jsonResponse(self::getPro,'cModal');
-        self::getprojectsstagelike('b');
+        /* DYNAMIC RUN */
+        self::runFilter();
     }
     public function psDelete(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::setChangeState();
         parent::deleteStage();
         $this->Items->setBlock($this->data['id'],"slo_project_stage","buffer_user_id",'');
-        //$this->utilities->jsonResponse('','cModal');
-        self::getprojectsstagelike('b');
+        self::runFilter();
     }
     public function psCreate()
     {
@@ -132,6 +160,15 @@ class ManageProjectStage extends ManageProjectStageDatabase
         self::createStage();
         self::addProjectStage();
         $this->utilities->jsonResponse('','cModal');
+    }
+    private function runFilter(){
+        $f=filter_input(INPUT_POST,'filter');
+        if(in_array($f,$this->filter)){
+            self::{$f}();
+        }
+        else{
+            self::{$this->filter[0]}();
+        }
     }
     private function checkInputFields(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -187,9 +224,7 @@ class ManageProjectStage extends ManageProjectStageDatabase
             else{
                 /* NON NUMERIC FIELD */
             }
-            
         }
-
         self::checkStageFileInserted();
     }
     private function createStageData($id,$field,$value){
@@ -446,7 +481,6 @@ class ManageProjectStage extends ManageProjectStageDatabase
             Throw New Exception ($this->error,0);
         }
         $id=parent::manageStage();  
-        //self::getprojectsstagelike();
         $this->utilities->jsonResponse(parent::getStageFullData($id),'Zapis się powiódł');   
     }
     private function checkValue($key='',&$prefix){

@@ -60,6 +60,9 @@ class ManageProjectItems{
     public function setBlock($idRecord='0',$table='',$column='',$userId=0){
         /* USERID  = 0 => IT WILL BY NOTIFING AS UNBLOCK */
         $this->Log->log(0,"[".__METHOD__."] SET/UNSET BUFFER USER ID => ".$userId);
+        //$this->Log->log(0,$idRecord);
+        //$this->Log->log(0,$table);
+        //$this->Log->log(0,$column);
         $this->dbLink->setQuery("UPDATE `".$table."` SET `".$column."`=:buffer_user_id WHERE `id`=:id",
                 [
                     ':id'=>[$idRecord,'INT'],

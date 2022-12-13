@@ -37,7 +37,7 @@ class Html{
     setDisabled(ele){
         ele.classList.add("disabled");
         ele.setAttribute('disabled','');
-        console.log(ele);
+        //console.log(ele);
     }
     confirmButton(label,c,id){    
         var button=document.createElement('button');

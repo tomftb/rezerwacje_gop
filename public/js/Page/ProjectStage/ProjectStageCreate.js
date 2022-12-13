@@ -240,18 +240,12 @@ class ProjectStageCreate{
     setUndoTask(self){
         var run = function(){
             let files = self.StageData.getFiles();
-            //console.log('ProjectStageCreate.setUndoTask()');
-            //console.log('This object data:');
-            //console.log(self);
-            //console.log('Stage object data:');
-            //console.log(self.Stage);
-            //console.log('Items defaultTask:');
-            //console.log(self.Items.default);
-            //console.log(files);
+            console.log('ProjectStageCreate.setUndoTask()');
+            var fd = self.Stage.getFilterData(self.StageData.Stage.data.id);
             if(files.length<1){
                 console.log(self);
                 self.Items.closeModal();
-                self.Items.reloadData(self.Items.default.object,'setResponse',self.Items.default.task+self.StageData.Stage.data.id);
+                self.Items.filterOutReloadData(fd,'setResponse');
             }
             else{
                 let ImageTool = new ProjectStageToolFile();
@@ -656,10 +650,7 @@ class ProjectStageCreate{
         var previewLabel = document.createTextNode('Podgląd');
             preview.appendChild(previewLabel);
             this.setPreviewButtonAction(preview); 
-
-        //this.Items.getCancelButton(this.Stage,'show',this.Stage.defaultTask+this.StageData.Stage.data.id);
         this.Modal.link['button'].appendChild(this.getCancelButton());
-        //this.Modal.link['button'].appendChild(this.Items.getCancelButton(this.Stage,'show',this.Stage.defaultTask+this.data.data['value']['stage'].id));
         this.Modal.link['button'].appendChild(preview);
         this.Modal.link['button'].appendChild(this.getDocButton());
         this.Modal.link['button'].appendChild(this.getConfirmButton(btnLabel));
@@ -670,9 +661,6 @@ class ProjectStageCreate{
         var run = this.setUndoTask(this);
             cancel.onclick = 
             cancel.onclick=function(){
-               //console.clear();
-               //console.log('ProjectStageCreate::getCancelButton() onclick()');
-               //onsole.log(self.ErrorStack);
                if(self.ErrorStack.check()){
                     if (confirm('Opuścić okno bez zapisu?') === true) {
                         //run();

@@ -19,20 +19,7 @@ class ProjectConstantCreate{
         this.Html=Parent.Items.Html;
         this.Xhr=Parent.Items.Xhr2;
     }
-    //create(){
-      //  try{
-         //   this.fieldDisabled=false;
-            //this.getData('getProjectConstantsList','prepare');   
-            
-       // }
-      //  catch(error){
-         //   console.log('ProjectConstantCreate::prepare()');
-         //   console.log(error);
-          //  throw 'An Application Error Has Occurred!';
-       // }
-        //this.Glossary=this.Items.Glossary['const'];
-    //}
-    /* pcDetails */
+    /* details */
     details(response){
         try{
             console.log('ProjectConstantCreate::details()');
@@ -41,8 +28,7 @@ class ProjectConstantCreate{
             console.log(this.data['data']['value']['const']);
             /* TO DO IN FUTURE -> ADD setCloseModal multi id's */
             this.Modal.clearData();
-            //this.Items.setCloseModal(this.Constant,'show',this.Constant.defaultTask+this.data['data']['value']['const'].i);
-            this.Items.setCloseModal(this.Constant.setUndoTask(this.Constant,this.Constant.defaultTask+this.data['data']['value']['const'].i));
+            this.Items.setCloseModal(this.Constant.setUndoTask(this,this.data['data']['value']['const'].i));
             /* CLEAR ERROR STACK */
             this.ErrorStack={};
             /* SET CONSTS */
@@ -145,21 +131,16 @@ class ProjectConstantCreate{
         };
         this.Xhr.run(xhrParm);
     }
-    create(){//prepare(response)
-        console.log('ProjectConstantCreate::prepareConst()');  
+    create(){
+        console.log('ProjectConstantCreate::create()');  
         try{
-            //this.data =this.Items.parseResponse(response);
             /* disabled -> check in backend */
             this.fieldDisabled=false;
-            //this.allConsts=this.data['data']['value']['all'];
             this.ErrorStack={};
-            //console.log(this.allConsts);
             /* RUN FROM XHR */
-            //console.log(ProjectConst.data);
             this.iField=0;
-            this.Modal.clearData();
-            //this.Items.setCloseModal(this.Constant,'show',this.Constant.defaultTask+'0');    
-            this.Items.setCloseModal(this.Constant.setUndoTask(this.Constant,this.Constant.defaultTask+'0')); 
+            this.Modal.clearData();  
+            this.Items.setCloseModal(this.Constant.setUndoTask(this,'0')); 
             var form=document.createElement('FORM');
             this.setInputConst(form,'','','0',this.getRemoveButtonCol(this.iField));
             this.Modal.link['adapted'].appendChild(form);
@@ -169,26 +150,22 @@ class ProjectConstantCreate{
             this.setConfirmButton('0');
         }
         catch(error){
-            console.log('ProjectConstantCreate::prepare()');
+            console.log('ProjectConstantCreate::create()');
             console.log(error);
             /* AFTER XHR -> RUN TABLE ERROR */
             this.Items.Table.setError('An Application Error Has Occurred!');
             return false;
-            //this.Html.showField(ele,error);
-            //throw 'An Application Error Has Occurred!';
         }
         /* IN ANOTHER BLOCK TRY CATCH TO PREVENT OPEN MODAL IF ERROR EXISTS TO HIDE ERROR SHOWED IN TABLE  */
         try{
             this.Items.prepareModal('Nowa stała','bg-warning');
         }
         catch(error){
-            console.log('ProjectConstantCreate::prepare()');
+            console.log('ProjectConstantCreate::create()');
             console.log(error);
             //throw 'An Application Error Has Occurred!';
             this.Items.Table.setError('An Application Error Has Occurred!');
         }
-        
-        
     }
     setInputConst(form,constName,constValue,constId,rmButton){
         console.log('ProjectConstantCreate::setInputConst()\r\nCONST ID:'+constId+'\r\niField:'+this.iField);
@@ -357,21 +334,25 @@ class ProjectConstantCreate{
             row.appendChild(col1);
         return row;
     }
-    setConfirmButton(){
+    setConfirmButton(id){
         console.log('ProjectConstantCreate::setConfirmButton()');
         var group=this.Html.getGroupButton();
-            group.appendChild(this.Items.getCancelButton(this.Constant,'show',this.Constant.defaultTask+'0'));
+            group.appendChild(this.getCancelButton('0'));
         var confirm=document.createElement('button');
             confirm.setAttribute('class','btn btn-primary');
             confirm.innerText='Zatwierdź';
-        var Main = this;
+        var self= this;
             confirm.onclick=function(){
-                const fd = new FormData(Main.Modal.link['form']);
-                Main.checkConst(fd);
-                Main.sendConst(fd);
+                const fd = new FormData(self.Modal.link['form']);
+                    
+                self.checkConst(fd);
+                /* ADD FILTER INPUT */
+                fd.append('filter',self.Items.default.url.active);
+                fd.append('f',self.Items.filter.search.value);
+                /* BLOCK ID */
+                fd.append('b',id);
+                self.sendConst(fd);
             };
-            
-            
             group.appendChild(confirm);
         this.Modal.link['button'].appendChild(group);
         this.Modal.link['buttonConfirm']=confirm;
@@ -385,12 +366,10 @@ class ProjectConstantCreate{
             confirm.setAttribute('class','btn btn-warning');
             confirm.innerText='Edytuj';
         if(blockUser){
-            //confirm.setAttribute('disabled','');
+            this.Modal.setError('Actual blocked by user: '+blockUser);
             this.Html.setDisabled(confirm);
-            this.Html.showField(this.Modal.link['error'],'Actual blocked by user: '+blockUser);
         }
         else{
-            
             var ProjectConstCreate = this;
                 confirm.onclick=function(){
                     /* RUN EDIT MODE */
@@ -403,13 +382,18 @@ class ProjectConstantCreate{
         this.Items.Modal.link['buttonConfirm']=confirm;
     }
     getCancelButton(idRecord){
+        console.log('ProjectConstantCreate::getCancelButton()');
         var cancel=this.Html.cancelButton('Anuluj');
         var self = this;
             cancel.onclick=function(){
                 if (confirm('Anulować?') === true) {
                     console.log('ProjectItems::getCancelButton() cancel.onclick');
                     window.onbeforeunload = null;
-                    self.Constant.ConstantTable.run(window.router+'getprojectsconstantslike&u=0&v=0&b='+idRecord);
+                        var action={
+                            'u':self.Items.default.url.active,
+                            'd':self.Items.getFilterData(idRecord)
+                        };
+                        self.Constant.ConstantTable.runPOST(action);
                     self.Modal.closeModal();
                 }
                 else{ 
@@ -446,7 +430,7 @@ class ProjectConstantCreate{
             case 'id':
                 break;
             default:
-                alert('ProjectConstantCreate::checkInputConst() Error occurred!');
+                this.Modal.setError('ProjectConstantCreate::checkInputConst() Error occurred!');
                 console.log('ProjectConstantCreate::checkInputConst() WRONG INPUT - '+input);
           }
     }
@@ -467,29 +451,6 @@ class ProjectConstantCreate{
             this.setEnabled(this.Modal.link['buttonConfirm']);
         }   
     }
-    /* DISABLED -> CHECK ON BACKED */
-   // checkInputConstExist(inputName,inputNumber,inputValue){
-       // console.log('ProjectConstantCreate::checkInputConstExist()\r\n'+inputValue);
-        /* CHECK IS NOT ALREADY ERROR SETUP */
-      //  if(this.ErrorStack[inputName+'Err'+inputNumber].err==='y'){
-         //   console.log('ALREADY ERROR');
-         //   return false;
-       // }
-        //inputValue=inputValue.trim();
-       // console.log('CONSTS FROM DATABASE');
-        //console.log(ProjectConst.allConsts);
-       // for(var i=0; i<this.allConsts.length;i++){
-            //console.log(ProjectConst.allConsts[i]);
-           // if(this.allConsts[i][inputName]===inputValue){
-               // this.ErrorStack[inputName+'Err'+inputNumber].err='y';
-                //this.Items.setError(this.ErrorStack[inputName+'Err'+inputNumber].ele,'Wprowadzona wartość już istnieje! Wartość modyfikowana <b>'+this.allConsts[i]['mod_date']+'</b> przez <b>'+this.allConsts[i]['mod_user_full_name']+'</b>.');
-                //this.Html.showField(this.ErrorStack[inputName+'Err'+inputNumber].ele,'Wprowadzona wartość już istnieje! Wartość modyfikowana <b>'+this.allConsts[i]['mod_date']+'</b> przez <b>'+this.allConsts[i]['mod_user_full_name']+'</b>.');
-                //this.errorStatus=true;
-               // this.Html.setDisabled(this.Modal.link['buttonConfirm']);
-               // break;
-           // }
-       // }
-   // }
     newConstRow(title,placeholder,id,value){
         var row=document.createElement('DIV');
             row.setAttribute('class','form-group row');
@@ -553,16 +514,13 @@ class ProjectConstantCreate{
                 return false;
             }
             //Xhr.loadNotify=Modal.link['extra'];
-            console.log(this.Items.appurl);
-
+            console.log(this.Items.router);
             var xhrParm={
                 t:"POST",
                 u:this.Items.router+'confirmProjectConstant',
                 /* FOR POST SET TRUE */
                 c:true,
                 d:fd,
-                //o:this.Items,
-                //m:'setModalResponse'
                 o:this.Constant,
                 m:'setResponse'
             };

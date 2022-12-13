@@ -68,6 +68,14 @@ class ProjectVariableTable{
         //console.log(defaultTask);
         //console.log(url);
     }
+    runPOST(action){
+        console.log('ProjectVariableTable::runPost()',action);
+        this.Table.unsetError();
+        /* SET HEAD */
+        this.Table.setHead(this.head);
+        /* GET DATA => SET BODY */
+        this.Table.receivePost(this,'setBody',router+action.u,action.d);
+    }
     run (task){
         try{
             this.Table.unsetError();
@@ -84,45 +92,41 @@ class ProjectVariableTable{
         }
         
     }
-    setBody(response){
-        //console.log('ProjectVariableTable::setBody()');
+    updateBody(responseData){
+        console.log(responseData);
         /* CLEAR TABLE */
-        this.Table.clearTable();   
+        this.Table.clearTable();
         /* SET HEAD */
         this.Table.setHead(this.head);
+        /* UPDATE BODY DATA */
+        for(const prop in responseData.data.value.data){
+            this.updateBodyRow(responseData.data.value.data[prop]);
+        }
+    }
+    setBody(response){
+        //console.log('ProjectVariableTable::setBody()');
         /* PARSE RESPONSE */
         var data = this.Parent.Items.setTableResponse(response);
-        if(this.Table.error){return false;};
-        /* SET BODY DATA */
-        for(const prop in data.data.value.data){
-            this.setBodyRow(data.data.value.data[prop]);
-        } 
+        if(this.Table.error){
+            console.log('Table error:',this.Table.error);
+            return false;
+        };
+        this.updateBody(data);
     }
-    setBodyRow(bodyRow){
-        /*
-        console.log('ProjectVariableTable::setBodyRow()');
-        console.log(bodyRow);
-        */       
+    updateBodyRow(bodyRow){      
         var tr=document.createElement('TR');
-
-            for(const prop in this.body){           
-                tr.appendChild(this.setBodyRowColData(bodyRow[this.body[prop]]));
-            };
-            tr.appendChild(this.setBodyRowColButton(bodyRow));
-            
+        for(const prop in this.body){           
+            tr.appendChild(this.setBodyRowColData(bodyRow[this.body[prop]]));
+        };
+        tr.appendChild(this.setBodyRowColButton(bodyRow));
         this.Table.link['body'].appendChild(tr);
     }
-    setBodyRowCol(){
-        //console.log('ProjectVariableTable::setBodyRowCol()');
-        var col=document.createElement('TD');
-        /* TO DO SOME ATTRBIUTES */
-        return col;
-    }
     setBodyRowColData(value){
-        var col = this.setBodyRowCol();
+        var col = document.createElement('TD');
             col.innerHTML=value;
             return col;
     }
+
     setBlockUserInfo(ele,value){
         if(value==='' || value===null){ return true; };
         var small=document.createElement('small');
@@ -136,7 +140,7 @@ class ProjectVariableTable{
     }
     setBodyRowColButton(value){
         //console.log('ProjectVariableTable::setBodyRowColButton()');
-        var col = this.setBodyRowCol();
+        var col = document.createElement('TD');//setBodyRowCol();
         var buttonGroup=this.setButtonGroup(value);
             col.appendChild(buttonGroup);
             this.setBlockUserInfo(col,value.bl);

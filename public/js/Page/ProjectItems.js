@@ -22,13 +22,41 @@ class ProjectItems{
     Footer=new Object();
     Heading=new Object();
     loadModal;
-    //defaultTask='getprojectsstagelike&d=0&v=0&b=';
     default={
             object:{},
             method:'',
-            task:'getprojectsstagelike&d=0&v=0&b='
+            title:{
+                label:'Etapy',
+                'text-color':'text-info'
+            },
+            url:{
+                primary:'getProjectStages',
+                active:'getProjectStages',
+                hidden:'',
+                deleted:'',
+                hiddenAndDeleted:'',
+                all:''
+            }
     };
-    
+    /* SET PROPERTY LIKE ELE */
+    filter={
+        'hidden':{
+            value:'0',
+            checked:false
+        },
+        'deleted':{
+            value:'0',
+            checked:false
+        },
+        'all':{
+            value:'0',
+            checked:false
+        },
+        'search':{
+            value:''
+        }
+    };
+
     Glossary=new Object();
     constructor(appUrl,url){
         //console.log('ProjectItems::constructor()'); 
@@ -56,10 +84,10 @@ class ProjectItems{
         this.Variable=new ProjectVariable(this); 
         this.Stage=new ProjectStage(this);
     }
-    getXhrParm(type,task,method){
+    getXhrParm(type,url,method){
         return {
                 t:type,
-                u:this.router+task,
+                u:this.router+url,
                 c:true,
                 d:null,
                 o:this,
@@ -86,7 +114,7 @@ class ProjectItems{
         /* SETUP STAGE PROPERTY */
         this.Stage.Property.setData(this.Glossary);
         /* run default table table */
-        this.Stage.show();
+        this.Stage.clearShow();
     }
     setUrl(appUrl,url){
         //console.log('ProjectItems::setUrl()'); 
@@ -218,10 +246,8 @@ class ProjectItems{
         //console.log(this.Modal.link['close'].parentNode);
         this.Modal.link['close'].parentNode.removeAttribute('data-dismiss');
     }
-    setCloseModal(run){//classToRun,methodToRun,taskToRun,
-        //console.log('ProjectItems::setCloseModal()');
-        /* SET CLOSE ACTION BUTTON */
-        //var Items=this;
+    setCloseModal(run){
+        console.log('ProjectItems::setCloseModal()');
         /* CLOSURE */
         var self = this;
         var checkError = function (){
@@ -255,11 +281,24 @@ class ProjectItems{
             else {}
         };
     }
-    reloadData(classToRun,methodToRun,taskToRun){
-        //console.log('ProjectItems::reloadData()');
-        //console.log(classToRun);
-        //console.log(methodToRun);
-        //console.log(taskToRun);
+    filterOutReloadData(fd,m){
+        console.log('ProjectItems::filterOutReloadData()');
+        var xhrRun={
+            t:'POST',
+            u:this.router+this.default.url.active,
+            c:true,
+            d:fd,
+            o:this.default.object,
+            m:m
+        };
+        this.Xhr.run(xhrRun);
+    }
+    reloadData(o,m,u){
+        console.log('ProjectItems::reloadData()');
+        console.log(this.default);
+        console.log(o);
+        console.log(m);
+        console.log(u);
         /* CLEAR TABLE */
         this.Table.clearTable();   
         /*
@@ -273,12 +312,11 @@ class ProjectItems{
          */
         var xhrRun={
             t:'GET',
-            u:this.router+taskToRun,
-            //u:'asdasd',
+            u:this.router+u,
             c:true,
             d:null,
-            o:classToRun,
-            m:methodToRun
+            o:o,
+            m:m
         };
         this.Xhr.run(xhrRun);
     }
@@ -292,52 +330,94 @@ class ProjectItems{
             alert('ProjectItems::setProperties() Error occured!');
         }
     }
-    getCancelButton(classToRun,methodToRun,taskToRun){
-        /*
-        console.log('ProjectItems::getCancelButton()');
-        console.log('Oboject:');
-        console.log(classToRun);
-        console.log('Method:');
-        console.log(methodToRun);
-        console.log('Task:');
-        console.log(taskToRun);
-        */
+    getCancelButton(fd,m){
+        console.log('ProjectItems::getCancelButton()',fd,m);
         var cancel=this.Html.cancelButton('Anuluj');
         var self = this;
             cancel.onclick=function(){
                 if (confirm('Anulować?') === true) {
                     self.Modal.closeModal();
                     window.onbeforeunload = null;
-                    classToRun[methodToRun](taskToRun);
+                    self.filterOutReloadData(fd,m);
                 }
                 else{ 
                 }
-               
             };
         return cancel;
     }
-    filter(value){
-        console.log('ProjectItems::filter()');
-        console.log(value);
+    setFilterValue(ele){
+        //console.log('ProjectItems::setFilterValue()');
+        this.filter.search=ele;
+    }
+    filterOut(ele){
+        console.log('ProjectItems::filterOut()');
+        console.log(ele.parentNode.parentNode.childNodes[0].value);
+        this.filter.search=ele.parentNode.parentNode.childNodes[0];
+        this.designateUrl();
+        this.default.object.show();
     }
     hidden(ele){
         console.log('ProjectItems::hidden()');
-        console.log(ele);
-        if(ele.value==='n'){
-            ele.value='y';
-        }
-        else{
-            ele.value='n';
-        }
+        this.changeValue(ele);
+        console.log(this.default);
+        this.filter.hidden=ele;
+        this.designateUrl();
+        this.default.object.show();
     }
     deleted(ele){
         console.log('ProjectItems::deleted()');
         console.log(ele);
-        if(ele.value==='n'){
-            ele.value='y';
+        this.changeValue(ele);
+        this.filter.deleted=ele;
+        this.designateUrl();
+        this.default.object.show();
+    }
+    all(ele){
+        console.log('ProjectItems::all()');
+        console.log(ele);
+        this.changeValue(ele);
+        this.filter.all=ele;
+        this.designateUrl();
+        this.default.object.show();
+    }
+    designateUrl(){
+        console.log(this.filter.hidden.value);
+        console.log(this.filter.deleted.value);
+        console.log(this.filter.all.value);
+        switch (this.filter.hidden.value+this.filter.deleted.value+this.filter.all.value) {
+            case '100':
+              console.log('Only hidden');
+              this.default.url.active=this.default.url.hidden;
+              break;
+            case '110':
+                console.log('hidden and deleted');
+                this.default.url.active=this.default.url.hiddenAndDeleted;
+                break;
+            case '010':
+                console.log('only deleted');
+                this.default.url.active=this.default.url.deleted;
+                break;
+            case '001':
+            case '011':
+            case '101':
+            case '111':
+              console.log('all');
+              this.default.url.active=this.default.url.all;
+              break;
+            case '000':
+            default:
+              console.log(`default 000`);
+              this.default.url.active=this.default.url.primary;
+          }
+    }
+    changeValue(ele){
+        console.log('ProjectItems::changeValue()');
+        console.log(ele,ele.value,typeof(ele.value));
+        if(ele.value==='0'){
+            ele.value='1';
         }
         else{
-            ele.value='n';
+            ele.value='0';
         }
     }
     setLoadInfo(){
@@ -378,9 +458,8 @@ class ProjectItems{
         }
         return json.value;
     }
-    setChangeDataState(i,t,f,g,btnLabel,titleClass,o,m,ta){
+    setChangeDataState(i,t,f,g,btnLabel,titleClass,fd,m){
         //console.log('ProjectItems::setChangeDataState()');
-        //console.log(i);
         /*
             i - id
             t - tile
@@ -388,7 +467,12 @@ class ProjectItems{
             g - glossary
             o - object
             m - method
-            ta - task
+            u - url (task)
+            fd - {
+                f - filtr search value
+                p - part (Stage)
+                b - block id
+            }
         */
         
         var form=this.Html.getForm();
@@ -396,7 +480,7 @@ class ProjectItems{
             h.setAttribute('class','text-'+titleClass+' mb-3 text-center font-weight-bold');
             h.innerHTML=t;
         
-        form.appendChild(this.Html.getInput('id',i,'hidden'));
+            form.appendChild(this.Html.getInput('id',i,'hidden'));
         this.setChangeStateFields(form,g);
         this.Modal.link['form']=form; 
         this.Modal.link['adapted'].appendChild(h);
@@ -405,47 +489,29 @@ class ProjectItems{
         var confirmButton=this.Html.confirmButton(btnLabel,'btn btn-'+titleClass,f);   
             /* CLOSURE */
             confirmButton.onclick = function () {  
-                /*
-                console.log('ProjectItems::setChangeDataState() onclick()');
-                console.log('id data:');
-                console.log(i);
-                console.log('modal title');
-                console.log(t);
-                console.log('function to execute :');
-                console.log(f);
-                console.log('glossary:');
-                console.log(g);
-                console.log('object to run:');
-                console.log(o);
-                console.log('method to run:');
-                console.log(m);
-                console.log('method cancel task:');
-                console.log(ta);
-                */
-                const fd = new FormData(form);
-                var xhrRun={
+                let fdLocal = new FormData(form);
+                for(let prop of fd.entries()){
+                    //console.log(prop[0],prop[1]);
+                    fdLocal.append(prop[0],prop[1]);
+                }
+                fdLocal.append('filter',self.default.url.active);
+                let xhrRun={
                     t:'POST',
                     u:self.router+f,
                     c:true,
-                    d:fd,
-                    o:o,//Items,
-                    m:m//'setModalResponse'
+                    d:fdLocal,
+                    o:self.default.object,
+                    m:m
                 };
-                //var xhrError={
-                //    o:Items,
-                //    m:'setModalResponse'
-                //};
                 if(confirm('Potwierdź wykonanie akcji')){   
                     //console.log(xhrRun);
                     //Items.Xhr2.setOnError(xhrError);
                     self.Xhr2.run(xhrRun);
                 };
             };
-             //self.Constant.ConstantTable.run(window.router+'getprojectsconstantslike&u=0&v=0&b='+idRecord);
-        this.Modal.link['button'].appendChild(this.getCancelButton(o,m,ta));//this.default.object,this.default.method,this.default.task+i
+        this.Modal.link['button'].appendChild(this.getCancelButton(fd,m));
         this.Modal.link['button'].appendChild(confirmButton);
     }
-    
     closeModal(){
         //console.log('ProjectItems::closeModal()');
         window.onbeforeunload = null;
@@ -468,20 +534,28 @@ class ProjectItems{
     setModalResponse(response){
         //console.log('ProjectItems::setModalResponse()');
         //console.log(response);
+        var data={
+            data:{
+                value:{
+                    data:{}
+                }
+            },
+            info:'',
+            status:1
+        };
         try {
-            this.parseResponse(response);
+            var data=this.parseResponse(response);
             /* CLOSE MODAL IF OK */
             this.closeModal(); 
-            return true;
+            return data;
         }
         catch (error) {
             console.log(error);
             /* SHOW ERROR MODAL */ 
            this.Modal.setError(error);
            //this.Html.showField(this.Modal.link['error'],error);
-           return false;
+           return data;
         }
-        return false;
     }
     setFieldResponse(response){
         //console.log('ProjectItems::setFieldResponse()');
@@ -541,6 +615,77 @@ class ProjectItems{
     }
     successfully(){
        // console.log('ProjectItems.successfully()');
+    }
+    setClearDefault(o,m,t){
+        //console.log('ProjectItems.setClearDefault()');
+        //console.log(o.url);   
+        /*
+        o - object
+        m - method
+        t - title
+        */     
+        this.filter.search.value='';
+        this.filter.hidden.checked=false;
+        this.filter.deleted.checked=false;
+        this.filter.all.checked=false;
+        this.filter.hidden.value='0';
+        this.filter.deleted.value='0';
+        this.filter.all.value='0';
+        this.setDefaultTitle(t);
+        this.setDefault(o,m,o.url);
+    }
+    setDefaultActionUrl(o,m,t){
+        //console.log('ProjectItems::setDefaultActionUrl()',o,m,t);
+        this.setDefaultAction(o,m);
+        this.setDefaultActiveUrl(o.url);
+        this.setDefaultTitle(t);
+    }
+    setDefaultAction(o,m){
+        this.default.object=o;
+        this.default.method=m;
+    }
+    setDefault(o,m,u){
+        this.setDefaultUrl(u);
+        this.setDefaultAction(o,m);
+    }
+    setDefaultTitle(t){
+        //console.log('ProjectItems::setDefaultTitle()');
+        for(const prop in t){
+            //console.log(prop,t[prop]);
+            this.default.title[prop]=t[prop];
+        }
+    }
+    setDefaultActiveUrl(u){
+        //console.log('ProjectItems.setDefaultActiveUrl()');  
+        //console.log(this.default.url);     
+        //console.log(u);    
+        /* FIRST RUN Create from button list, set proper url */
+        if(this.default.url.primary!==u.primary){
+            /* SET VALUE, NOT OBJECT, IF OBJECT IT SET REFERENCES */
+            this.setDefaultUrl(u);
+        };
+    }
+    setDefaultUrl(u){
+        this.default.url.active=u.primary;
+        this.default.url.primary=u.primary;
+        this.default.url.hidden=u.hidden;
+        this.default.url.deleted=u.deleted;
+        this.default.url.hiddenAndDeleted=u.hiddenAndDeleted;
+        this.default.url.all=u.all;
+    }
+    setTitle(){
+        var title=document.getElementById('headTitle');
+        //console.log(title.parentNode);
+        title.innerHTML=this.default.title.label;
+        /* text-info */
+        title.parentNode.classList.remove('text-info','text-warning','text-purple','text-brown');
+        title.parentNode.classList.add(this.default.title['text-color']);
+    }
+    getFilterData(id){
+        var fd = new FormData();
+            fd.append('f',this.filter.search.value);
+            fd.append('b',id);
+        return fd;
     }
 }
 try{

@@ -29,8 +29,6 @@ class ProjectVariableCreate{
                 error:this.Modal.link.error
             };
     }
-
-    /* pcDetails */
     details(response){
         try{
             console.log('ProjectVariableCreate::details()');
@@ -38,15 +36,12 @@ class ProjectVariableCreate{
             this.data =this.Items.parseResponse(response);
             console.log(this.data);
             console.log(this.data['data']['value']['variable'].i);
-            //console.log(this.data['data']['value']['const']);
             /* TO DO IN FUTURE -> ADD setCloseModal multi id's */
             this.Modal.clearData();
-            //this.Items.setCloseModal(this.Variable,'show',this.Variable.defaultTask+this.data['data']['value']['const'].i);
-            this.Items.setCloseModal(this.Variable.setUndoTask(this.Variable,this.Variable.defaultTask+this.data['data']['value']['variable'].i));
+            this.Items.setCloseModal(this.Variable.setUndoTask(this,this.data['data']['value']['variable'].i));
             /* CLEAR ERROR STACK */
             this.ErrorStack.clearStack();
             /* TURN OFF */
-            //this.defined=this.data['data']['value']['all'];
             this.fieldDisabled=true;
             this.iField=0;
             /* form,constName,constValue,constId,rmButton */
@@ -155,16 +150,11 @@ class ProjectVariableCreate{
             this.Helplink=this.getHelplink();
             this.fieldDisabled=false;
             /* TURN OFF */
-            //this.data =this.Items.parseResponse(response);
-            //this.defined=this.data['data']['value']['all'];
-            //console.log(this.defined);
             this.ErrorStack.clearStack();
             /* RUN FROM XHR */
-            //console.log(ProjectConst.data);
             this.iField=0;
             this.Modal.clearData();
-            //this.Items.setCloseModal(this.Variable,'show',this.Variable.defaultTask+'0');    
-            this.Items.setCloseModal(this.Variable.setUndoTask(this.Variable,this.Variable.defaultTask+'0')); 
+            this.Items.setCloseModal(this.Variable.setUndoTask(this,'0'));
             var form=document.createElement('FORM');
             this.setInput(form,{n:'',v:'',i:0});
             this.Modal.link['adapted'].appendChild(form);
@@ -179,8 +169,6 @@ class ProjectVariableCreate{
             /* AFTER XHR -> RUN TABLE ERROR */
             this.Items.Table.setError('An Application Error Has Occurred!');
             return false;
-            //this.Html.showField(ele,error);
-            //throw 'An Application Error Has Occurred!';
         }
         /* IN ANOTHER BLOCK TRY CATCH TO PREVENT OPEN MODAL IF ERROR EXISTS TO HIDE ERROR SHOWED IN TABLE  */
         try{
@@ -350,7 +338,8 @@ class ProjectVariableCreate{
     setConfirmButton(id){
         console.log('ProjectVariableCreate::setConfirmButton()');
         var group=this.Html.getGroupButton();
-            group.appendChild(this.Items.getCancelButton(this.Variable,'show',this.Variable.defaultTask+id));
+            //group.appendChild(this.Items.getCancelButton(this.Variable,'show',this.Variable.defaultTask+id));
+            group.appendChild(this.Items.getCancelButton(this.Items.getFilterData(id),'show'));
         var confirm=document.createElement('button');
             confirm.classList.add('btn','btn-primary');
             confirm.appendChild(document.createTextNode('Zatwierdź'));   
@@ -361,6 +350,11 @@ class ProjectVariableCreate{
                 console.log(data);
                 if(data){
                     fd.append('data',JSON.stringify(data));
+                    /* ADD FILTER INPUT */
+                    fd.append('filter',self.Items.default.url.active);
+                    fd.append('f',self.Items.filter.search.value);
+                    /* BLOCK ID */
+                    fd.append('b',id);
                     self.send(self,fd);
                 }
             };
@@ -373,8 +367,10 @@ class ProjectVariableCreate{
         console.log('ProjectVariableCreate::setEditButtons()');
         console.log(blockUser);
         console.log(this.Variable.defaultTask+idRecord);
-        var group=this.Items.Html.getGroupButton();                
-            group.appendChild(this.Items.getCancelButton(this.Variable,'show',this.Variable.defaultTask+idRecord));
+        var group=this.Items.Html.getGroupButton();       
+      
+            //group.appendChild(this.Items.getCancelButton(this.Variable,'show',this.Variable.defaultTask+idRecord));
+            group.appendChild(this.Items.getCancelButton(this.Items.getFilterData(idRecord),'show'));
         var confirm=document.createElement('button');
             confirm.setAttribute('class','btn btn-warning');
             confirm.innerText='Edytuj';
@@ -456,19 +452,6 @@ class ProjectVariableCreate{
             throw 'Wprowadzona wartość zawiera niedozwolone znaki, nie spełnia wymagań co do ilości znaków lub konstrukcji!';
         } 
     }
-    /* TURN OFF 
-    checkInputExist(self,key,value){
-        console.log('ProjectVariableCreate::checkInputExist()');
-        value=value.trim();
-        for(var i=0; i<self.defined.length;i++){
-            console.log(self.defined[i][key]);
-            if(self.defined[i][key]===value){
-                throw 'Wprowadzona wartość już istnieje! Wartość modyfikowana '+self.defined[i]['mod_date']+' przez '+self.defined[i]['mod_user_full_name']+'.';
-                break;
-            }
-        }
-    }
-    */
     getErrorDiv(ele,helplink){
         var col=this.Html.getCol(1);
             //col.classList.add('mb-0','pb-0');
@@ -490,8 +473,7 @@ class ProjectVariableCreate{
         console.log('ProjectVariableCreate::send()');
         try{
             console.log(self.Modal.link['form']);
-            //Xhr.loadNotify=Modal.link['extra'];
-            console.log(self.Items.appurl);
+
             var xhrParm={
                 t:"POST",
                 u:self.Items.router+'confirmProjectVariable',

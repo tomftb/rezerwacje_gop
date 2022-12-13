@@ -2,44 +2,44 @@ class ProjectVariable{
     VariableTable = new Object();
     VariableCreate = new Object ();
     Items= new Object ();
-    defaultTask='getProjectVariablesLike&u=0&v=0&b=';    
+    //defaultTask='getProjectVariablesLike&u=0&v=0&b=';
+    url={
+        primary:'getProjectVariables',
+        active:'getProjectVariables',
+        hidden:'getProjectHiddenVariables',
+        deleted:'getProjectDeletedVariables',
+        hiddenAndDeleted:'getProjectHiddenAndDeletedVariables',
+        all:'getProjectAllVariables'
+    };    
+    title={
+        label:'Zmienne',
+        'text-color':'text-purple'
+    };
     constructor(Items) {
         //console.log('ProjectVariable::constructor()');
         this.Items = Items;
         this.VariableTable = new ProjectVariableTable(this);  
-        this.VariableTable.setProperties(Items.appurl,Items.router,this.defaultTask);
+        this.VariableTable.setProperties(Items.appurl,Items.router,this.url.active);
         this.VariableCreate = new ProjectVariableCreate(this);
     }
-    show(task){
-        //console.log('ProjectVariable::show()');
-        if(task){
-            this.runShow(task);
-        }
-        else{
-            this.runShow(this.defaultTask);
-        }
+    clearShow(){
+        console.log('ProjectStage::clearShow()');
+        this.Items.setClearDefault(this,'show',this.title);
+        this.Items.setTitle();
+        this.show();
     }
-    runShow(t){
-        //console.log('ProjectVariable::runShow()');
-        //console.log(t);
-        /* SET PAGE TITLE */
-        document.getElementById('headTitle').innerHTML='Zmienne';   
-        this.Items.default={
-            task:t,
-            object:this,
-            method:'show'
+    show(){
+        console.log('ProjectConstant::show()');
+        console.log(this.Items.default);
+        var action={
+            'u':this.Items.default.url.active,
+            'd':this.getFilterData(0)
         };
-        //console.log(this.defaultTask); 
-        this.VariableTable.run(this.Items.router+t);
+        this.VariableTable.runPOST(action);
     }
     create(){
         try{
-            //console.log('ProjectVariable::create()');
-            this.Items.default={
-                task:this.defaultTask,
-                object:this,
-                method:'show'
-            };
+            this.Items.setDefaultActionUrl(this,'show',this.title);
             this.VariableCreate.create();
         }
         catch(error){
@@ -51,11 +51,7 @@ class ProjectVariable{
     details(response){
         try{
             console.log('ProjectVariable::create()');
-            this.Items.default={
-                task:this.defaultTask,
-                object:this,
-                method:'show'
-            };
+            this.Items.setDefaultAction(this,'show');
             this.VariableCreate.details(response);
         }
         catch(error){
@@ -65,19 +61,21 @@ class ProjectVariable{
         };
     }
     prepare(response,btnLabel,btnClass){
-        //console.log('ProjectVariable::prepare()');
+        console.log('ProjectVariable::prepare()');
         /* SET UP STAGE DATA */
         var data=this.Items.parseResponse(response);
+        var fd = this.getFilterData(data['data']['value']['variable'].i) 
             this.Items.Modal.clearData();
             this.Items.setCloseModal(this.setUndoTask(this,this.defaultTask+data['data']['value']['variable'].i));
-            this.Items.setChangeDataState(data['data']['value']['variable'].i,data['data']['value']['variable'].n,data['data']['function'],data['data']['value']['slo'],btnLabel,btnClass,this,'setResponse',window.router+this.defaultTask+data['data']['value']['variable'].i);
-            this.Items.Modal.setInfo("Project Stage ID: "+data['data']['value']['variable'].i+", Create user: "+data['data']['value']['variable'].cu+" ("+data['data']['value']['variable'].cul+"), Create date: "+data['data']['value']['variable'].cd);
-        
+            this.Items.setChangeDataState(data['data']['value']['variable'].i,data['data']['value']['variable'].n,data['data']['function'],data['data']['value']['slo'],btnLabel,btnClass,fd,'setResponse');
+            this.Items.Modal.setInfo("Project Variable ID: "+data['data']['value']['variable'].i+", Create user: "+data['data']['value']['variable'].cu+" ("+data['data']['value']['variable'].cul+"), Create date: "+data['data']['value']['variable'].cd);
     }
-    setUndoTask(self,task){
+    setUndoTask(self,id){
+        console.log('ProjectConstant::setUndoTask()');
         var run = function(){
-            self.Items.Modal.closeModal();
-            self.Items.reloadData(self.Items.Variable,'setResponse',task);    
+                self.Items.Modal.closeModal();
+            var fd = self.Items.getFilterData(id);
+                self.Items.filterOutReloadData(fd,'setResponse');
        };
        return run;          
     }
@@ -120,8 +118,18 @@ class ProjectVariable{
         }
     }
     setResponse(response){
-        if(this.Items.setModalResponse(response)){
-            this.VariableTable.setBody(response);
+        console.log('ProjectVariable::setResponse()');
+        var data = this.Items.setModalResponse(response)
+        if(data.status===1 || data.status==='1'){
+            return false;
         }
+        this.Items.setTitle();
+        this.VariableTable.updateBody(data); 
+    }
+    getFilterData(id){
+        var fd = new FormData();
+            fd.append('f',this.Items.filter.search.value);
+            fd.append('b',id);
+        return fd;
     }
 }

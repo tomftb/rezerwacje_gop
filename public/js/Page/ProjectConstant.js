@@ -3,54 +3,70 @@ class ProjectConstant{
     ConstantTable = new Object();
     ConstantCreate = new Object ();
     Items= new Object ();
-    defaultTask='getprojectsconstantslike&u=0&v=0&b=';
     Utilities = new Object();
+    url={
+        primary:'getProjectConstants',
+        active:'getProjectConstants',
+        hidden:'getProjectHiddenConstants',
+        deleted:'getProjectDeletedConstants',
+        hiddenAndDeleted:'getProjectHiddenAndDeletedConstants',
+        all:'getProjectAllConstants'
+    };
+    title={
+        label:'Stałe',
+        'text-color':'text-warning'
+    };
     constructor(Items) {
         //console.log('ProjectConstant::constructor()');
         this.Items = Items;
         this.Utilities = Items.Utilites;
         this.ConstantTable = new ProjectConstantTable(this);  
-        this.ConstantTable.setProperties(Items.appurl,Items.router,this.defaultTask);
+        this.ConstantTable.setProperties(Items.appurl,Items.router,this.url.active);
         this.ConstantCreate = new ProjectConstantCreate(this);
     }
+    clearShow(){
+        console.log('ProjectStage::clearShow()');
+        this.Items.setTitle();
+        this.Items.setClearDefault(this,'show',this.title);
+        this.show();
+    }
     show(){
-        //console.log('ProjectConstant::show()');  
-        /* SET PAGE TITLE */
-        document.getElementById('headTitle').innerHTML='Stałe';
-        //console.log(this.ConstantTable);     
-        this.Items.default={
-            task:this.defaultTask,
-            object:this,
-            method:'show'
+        console.log('ProjectConstant::show()');
+        console.log(this.Items.default);
+        var action={
+            'u':this.Items.default.url.active,
+            'd':this.getFilterData(0)
         };
-        //console.log(this.defaultTask); 
-        this.ConstantTable.run(this.Items.router+this.defaultTask);
+        this.ConstantTable.runPOST(action);
     }
     create(){
         try{
             console.log('ProjectConstant::create()');
-            this.Items.default={
-                task:this.defaultTask,
-                object:this,
-                method:'show'
-            };
+            console.log(this.url);
+            this.Items.setDefaultActionUrl(this,'show',this.title);
+            console.log(this.Items.default);
             this.ConstantCreate.create();
         }
         catch(error){
             console.log(error);
             this.ConstantTable.Table.setError('An AnApplication Error Has Occurred!');
-            
             return false;
         };
+    }
+    prepare(response,btnLabel,btnClass){
+        console.log('ProjectConstant::prepare()');
+        /* SET UP STAGE DATA */
+        var data=this.Items.parseResponse(response);
+        var fd = this.getFilterData(data['data']['value']['const'].i) 
+            this.Items.Modal.clearData();
+            this.Items.setCloseModal(this.setUndoTask(this,this.defaultTask+data['data']['value']['const'].i));
+            this.Items.setChangeDataState(data['data']['value']['const'].i,data['data']['value']['const'].n,data['data']['function'],data['data']['value']['slo'],btnLabel,btnClass,fd,'setResponse');
+            this.Items.Modal.setInfo("Project Const ID: "+data['data']['value']['const'].i+", Create user: "+data['data']['value']['const'].cu+" ("+data['data']['value']['const'].cul+"), Create date: "+data['data']['value']['const'].cd);
     }
     details(response){
         try{
             console.log('ProjectConstant::create()');
-            this.Items.default={
-                task:this.defaultTask,
-                object:this,
-                method:'show'
-            };
+            this.Items.setDefaultAction(this,'show');
             this.ConstantCreate.details(response);
         }
         catch(error){
@@ -59,21 +75,12 @@ class ProjectConstant{
             return false;
         };
     }
-    prepare(response,btnLabel,btnClass){
-        console.log('ProjectConstant::prepare()');
-        /* SET UP STAGE DATA */
-        var data=this.Items.parseResponse(response);
-            this.Items.Modal.clearData();
-            this.Items.setCloseModal(this.setUndoTask(this,this.defaultTask+data['data']['value']['const'].i));
-            this.Items.setChangeDataState(data['data']['value']['const'].i,data['data']['value']['const'].n,data['data']['function'],data['data']['value']['slo'],btnLabel,btnClass,this,'setResponse',window.router+this.defaultTask+data['data']['value']['const'].i);
-            this.Items.Modal.setInfo("Project Stage ID: "+data['data']['value']['const'].i+", Create user: "+data['data']['value']['const'].cu+" ("+data['data']['value']['const'].cul+"), Create date: "+data['data']['value']['const'].cd);
-        
-    }
-    setUndoTask(self,task){
+    setUndoTask(self,id){
+        console.log('ProjectConstant::setUndoTask()');
         var run = function(){
             self.Items.Modal.closeModal();
-            //self.Items.reloadData(self,'show',task);      
-            self.Items.reloadData(self.Items.Constant,'setResponse',task);    
+            var fd = self.Items.getFilterData(id);
+            self.Items.filterOutReloadData(fd,'setResponse');
        };
        return run;          
     }
@@ -117,8 +124,17 @@ class ProjectConstant{
     }
     setResponse(response){
         console.log('ProjectConstant::setResponse()');
-        if(this.Items.setModalResponse(response)){
-            this.ConstantTable.setBody(response);
+        var data = this.Items.setModalResponse(response)
+        if(data.status===1 || data.status==='1'){
+            return false;
         }
+        this.Items.setTitle();
+        this.ConstantTable.updateBody(data); 
+    }
+    getFilterData(id){
+        var fd = new FormData();
+            fd.append('f',this.Items.filter.search.value);
+            fd.append('b',id);
+        return fd;
     }
 }

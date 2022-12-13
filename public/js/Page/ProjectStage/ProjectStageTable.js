@@ -51,33 +51,49 @@ class ProjectStageTable{
         //console.log(appUrl);
         //console.log(url);
     }
+    runPOST(action){
+        console.log('ProjectStageTable::runPost()',action);
+        this.Table.unsetError();
+        /* SET HEAD */
+        this.Table.setHead(this.head);
+        /* GET DATA => SET BODY */
+
+        this.Table.receivePost(this,'setBody',router+action.u,action.d);
+    }
     run(task){
         //console.log('ProjectStageTable.run()\ntask');
         //console.log(task);
         this.Table.unsetError();
         this.defaultTask=task;
-         /* CLEAR TABLE */
+        /* CLEAR TABLE */
         this.Table.clearTable();   
          /* SET HEAD */
         this.Table.setHead(this.head);
         /* GET DATA => SET BODY */
         this.Table.getData(this,'setBody',this.router+task);
     }
-    setBody(response){
-        //console.log('ProjectStageTable::setBody()');
+    updateBody(responseData){
+        console.log(responseData);
         /* CLEAR TABLE */
-        this.Table.clearTable();   
+        this.Table.clearTable();
         /* SET HEAD */
         this.Table.setHead(this.head);
+        /* UPDATE BODY DATA */
+        for(const prop in responseData.data.value.data){
+            this.updateBodyRow(responseData.data.value.data[prop]);
+        }
+    }
+    setBody(response){
+        //console.log('ProjectStageTable::setBody()');
         /* PARSE RESPONSE */
         var data = this.Parent.Items.setTableResponse(response);
-        if(this.Table.error){return false;};
-        /* SET BODY DATA */
-        for(const prop in data.data.value.data){
-            this.setBodyRow(data.data.value.data[prop]);
-        } 
+        if(this.Table.error){
+            console.log('Table error:',this.Table.error);
+            return false;
+        };
+        this.updateBody(data);
     }
-    setBodyRow(bodyRow){      
+    updateBodyRow(bodyRow){      
         var tr=document.createElement('TR');
         for(const prop in this.body){           
             tr.appendChild(this.setBodyRowColData(bodyRow[this.body[prop]]));

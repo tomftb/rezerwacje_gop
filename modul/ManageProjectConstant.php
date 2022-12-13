@@ -7,7 +7,7 @@
  */
 class ManageProjectConstant extends ManageProjectConstantDatabase{
     private $Utilities;
-    
+    private $filter=array('getProjectConstants','getProjectDeletedConstants','getProjectHiddenConstants','getProjectHiddenAndDeletedConstants','getProjectAllConstants');
     public function __construct(){
         parent::__construct();
         $this->Log->log(0,"[".__METHOD__."]");
@@ -16,39 +16,38 @@ class ManageProjectConstant extends ManageProjectConstantDatabase{
     public function __destruct(){
         parent::__destruct();
     }
+    private function runFilter(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $f=filter_input(INPUT_POST,'filter');
+        if(in_array($f,$this->filter)){
+            self::{$f}();
+        }
+        else{
+            self::{$this->filter[0]}();
+        }
+    }
     public function getProjectConstantsList(){
         $this->Utilities->jsonResponse(['all'=>parent::getConstants()],'prepareConst');
     }
     public function confirmProjectConstant(){
         $this->inpArray= filter_input_array(INPUT_POST);
-        //echo "POST\r\n";
         /* inpArray => ManageProjectConstDatabase() */
         if(!$this->inpArray){
             Throw New Exception('Wprowadź co najmniej jedną stałą.',0); 
         }
-        //print_r($this->inpArray);
         array_walk($this->inpArray, array($this,'parseConstant'));
-
         array_walk($this->newData, array($this,'parseConstantUnique'));
         if($this->error){
            Throw New Exception($this->error,0); 
         }
-        //Throw New Exception('['.__METHOD__.'::'.__LINE__.'] TEST STOP',0); 
-        
         array_map([$this,'dbManageConstant'],$this->newData);
-        
-        //Throw New Exception('['.__METHOD__.'::'.__LINE__.'] TEST STOP',0); 
-        self::getprojectsconstantslike();
+        self::runFilter();
     }
     private function parseConstant(&$value='',$key=''){
         $this->Log->log(0,"[".__METHOD__."]");
         /*
          * REMOVE WHITE CHAR FROM BEGINING AND END OF STRING
          */
-        //$value=trim($value);
-        //if($value===''){
-        //    $this->error.='['.$key.'] Pole nie może być puste<br/>';
-        //}
          /*
          * EXPLODE KEY VIA CHAR `-`
          */
@@ -70,6 +69,13 @@ class ManageProjectConstant extends ManageProjectConstantDatabase{
                     $this->Log->log(0,"[".__METHOD__."] ID => ".$value);
                     $this->newData[$tmpKey[1]][$tmpKey[0]]=$value;
                 break;
+            /* BLOCK ID - > the same like id... */
+            case 'b':
+                break;
+            /* FILTER -> Filter function to execute, f - input search value */
+            case 'f':
+            case 'filter':
+                break;
             default:
                 Throw New Exception('['.__METHOD__.'] UNAVAILABLE KEY -> '.$key,1);
             break;
@@ -86,51 +92,42 @@ class ManageProjectConstant extends ManageProjectConstantDatabase{
         /* PARSE CONST UNIQUE */
         parent::checkConstantUnique($key,$value['nazwa'],'nazwa',$value['id']);
         parent::checkConstantUnique($key,$value['wartosc'],'wartosc',$value['id']);
-       
     }
-        # RETURN ALL NOT DELETED PROJECT FROM DB
-    public function getprojectsconstantslike(){ 
-        /*FILTER_SANITIZE_STRING => Remove all HTML tags from a string:*/
-        //$f="%".filter_input(INPUT_GET,'filter',FILTER_SANITIZE_STRING)."%";
-        $f=htmlentities(nl2br(filter_input(INPUT_GET,'filter')), ENT_QUOTES,'UTF-8',FALSE);
-        //$f=filter_input(INPUT_GET,'filter');
-        //$f='a';
-        $this->Log->log(0,"[".__METHOD__."] FILTER => ".$f);
-        $this->Log->logMulti(0,filter_input_array(INPUT_GET));
+    public function getProjectConstants(){ 
+        self::returnConstants(self::getSelectedConstants("s.`wsk_v`='0' AND s.`wsk_u`='0' AND s.`id`>0 AND (s.`id`=:id OR s.`nazwa` LIKE :f OR s.`wartosc` LIKE :f) ORDER BY s.`id` ASC"));
+    } 
+    public function getProjectDeletedConstants(){ 
+        self::returnConstants(self::getSelectedConstants("s.`wsk_v`='0' AND s.`wsk_u`='1' AND s.`id`>0 AND (s.`id`=:id OR s.`nazwa` LIKE :f OR s.`wartosc` LIKE :f) ORDER BY s.`id` ASC"));
+    }
+    public function getProjectHiddenConstants(){ 
+        self::returnConstants(self::getSelectedConstants("s.`wsk_v`='1' AND s.`wsk_u`='0' AND s.`id`>0 AND (s.`id`=:id OR s.`nazwa` LIKE :f OR s.`wartosc` LIKE :f) ORDER BY s.`id` ASC"));
+    }
+    public function getProjectHiddenAndDeletedConstants(){ 
+        self::returnConstants(self::getSelectedConstants("(s.`wsk_v`='1' OR s.`wsk_u`='1') AND s.`id`>0 AND (s.`id`=:id OR s.`nazwa` LIKE :f OR s.`wartosc` LIKE :f) ORDER BY s.`id` ASC"));
+    }
+    public function getProjectAllConstants(){ 
+        self::returnConstants(self::getSelectedConstants("s.`id`>0 AND (s.`id`=:id OR s.`nazwa` LIKE :f OR s.`wartosc` LIKE :f)  ORDER BY s.`id` ASC"));
+    }
+    private function getSelectedConstants($SQL="s.`id`>0 AND (s.`nazwa` LIKE :f OR s.`wartosc` LIKE :f) ORDER BY s.`id` ASC"){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $POST=filter_input_array(INPUT_POST);
+        $this->Log->log(0,$POST);
+        $f=htmlentities(nl2br($POST['f']), ENT_QUOTES,'UTF-8',FALSE);
+        $parm[':f']=['%'.$f.'%','STR'];
+        /* reurn 0 when is a char/string, else return number */
+        $parm[':id']=array(intval($f,10),'INT');       
+        $this->Log->log(0,$SQL);
+        $this->Log->log(0,$parm);
+        $this->Items->unsetBlock($POST['b'],'slo_project_stage_const','buffer_user_id',$_SESSION['userid']);
         $select="SELECT s.`id` as 'i', s.`nazwa` as 'n',s.`wartosc` as 'v',s.`buffer_user_id` as 'bu',b.`login` as 'bl' FROM `slo_project_stage_const` s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id`";
-        $where='';
-        $query_data=[];
-        if(is_numeric($f)){
-            $this->Log->log(0,"[".__METHOD__."] FILTER is numeric ");
-            $f_int=intval($f,10);
-            $query_data[':id']=array($f_int,'INT');
-            $where="WHERE s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND s.`id` LIKE (s.`id` LIKE :id OR s.`nazwa` LIKE :nazwa) ORDER BY s.`id` ASC";
-        }
-        else{
-            $this->Log->log(0,"[".__METHOD__."] FILTER not numeric ");
-            $query_data[':wartosc']=array('%'.$f.'%','STR');
-            $where="WHERE s.`wsk_u`=:wsk_u AND s.`wsk_v`=:wsk_v AND (s.`nazwa` LIKE :nazwa OR s.`wartosc` LIKE :wartosc) ORDER BY s.`id` ASC";
-        }
-        $this->inpArray['u']=$this->Items->setGetWsk('u');
-        $this->inpArray['b']=$this->Items->setGetWsk('b');
-        $this->inpArray['v']=$this->Items->setGetWsk('v');
-        $this->inpArray['wskb']=$this->Items->unsetBlock($this->inpArray['b'],'slo_project_stage_const','buffer_user_id',$_SESSION['userid']);
-        $query_data[':wsk_u']=array($this->inpArray['u'],'STR');
-        $query_data[':wsk_v']=array($this->inpArray['v'],'STR');
-        $query_data[':nazwa']=array('%'.$f.'%','STR');
-        
-        /* 
-         * TO DO => SEARCH IN VALUE (LEFT JOIN)
-           $query_data[':value']=array('%'.$f.'%','STR');
-         * 
-         */
- 
-        $return['data']=parent::getConstantsLike($select.$where,$query_data);  
-        $return['headTitle']='Stałe';
-        // Throw New Exception('['.__METHOD__.']'.__LINE__.' TEST',1);
-        $this->Utilities->jsonResponse($return,'runModal');
+        $response['data']=parent::getConstantsLike($select." WHERE ".$SQL,$parm);
+        $response['headTitle']='Stałe';
+        return $response;
     }
-     public function getProjectConstantHideSlo(){
+    private function returnConstants($response){
+        return $this->Utilities->jsonResponse($response,'');
+    }
+    public function getProjectConstantHideSlo(){
         $this->Log->log(0,"[".__METHOD__."]");
         $this->newData=[
             'id'=>filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT)
@@ -168,7 +165,7 @@ class ManageProjectConstant extends ManageProjectConstantDatabase{
         $this->Items->checkBlock($this->newData['wskb']['bu'],$this->newData['wskb']['bl'],$_SESSION['userid']);
         parent::hideConstant();
         self::block($this->newData['id'],$_SESSION['userid']);
-        self::getprojectsconstantslike();
+        self::runFilter();
     }
     public function pcDelete(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -178,7 +175,7 @@ class ManageProjectConstant extends ManageProjectConstantDatabase{
         $this->Items->checkBlock($this->newData['wskb']['bu'],$this->newData['wskb']['bl'],$_SESSION['userid']);
         parent::deleteConstant();
         self::block($this->newData['id'],'');
-        self::getprojectsconstantslike();
+        self::runFilter();
     }
     public function blockConstant(){
         $this->Log->log(0,"[".__METHOD__."]");

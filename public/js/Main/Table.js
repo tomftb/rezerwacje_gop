@@ -242,27 +242,29 @@ class Table
     }
     /* NEW - 15.03.2022 */
     getData(o,m,task){ 
-        //console.log('ProjectStageTable::getData()');
-        //console.log(o);
-        //console.log(m);
-        //console.log(task);
-        /*
+        this.receive(o,m,'GET',task,true,null);
+    }
+    receivePost(o,m,u,d){
+        console.log('Table::receiveData()');
+        this.receive(o,m,'POST',u,true,d);
+    }
+    receive(o,m,t,u,c,d){
+         /*
          * property:
-         * t = type GET/POST 
+         * o = object
+         * m = method
+         * t = POST 
          * u = url
          * c = capture
          * d = data
-         * o = object
-         * m = method
          */
-        var xhrRun={
-            t:'GET',
-            u:task,
-            //u:'asdasd',
-            c:true,
-            d:null,
+         var xhrRun={
             o:o,
-            m:m 
+            m:m,
+            t:t,
+            u:u,
+            c:c,
+            d:d
         };
         var xhrError={
             o:this,
@@ -270,7 +272,6 @@ class Table
         };
         /* SET XHR ON ERROR */
         this.Xhr.setOnError(xhrError);
-        /* SET XHR LOAD */
         this.Xhr.run(xhrRun);
     }
     setHead(head){
@@ -338,5 +339,6 @@ class Table
         //console.log('Table::unsetError()');
         this.link['error'].classList.add("d-none");
         this.link['error'].innerHTML='';
+        this.error=false;
     }
 }

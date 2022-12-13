@@ -95,6 +95,8 @@ class createDocAbstract {
         $textrun->addText('spacing', array('spacing' => 120));
         $textrun->addText('kerning', array('kerning' => 10));
         */
+        $this->Log->log(0,"[".__METHOD__."] Style:");
+        $this->Log->log(0,$rStyle);
         return [
             'name' => $rStyle->fontFamily,
             'size' => self::convertToPt($rStyle->fontSize,$rStyle->fontSizeMeasurement),
@@ -102,7 +104,7 @@ class createDocAbstract {
             'bgColor' => $rStyle->backgroundColor,
             'bold' => self::setTextStyle($rStyle->fontWeight),
             'italic'=>self::setTextStyle($rStyle->fontStyle),
-            'underline' => self::setTextStyle($rStyle->underline),
+            'underline' => self::setTextUnderline($rStyle->underline),
             'strikethrough' => self::setTextStyle($rStyle->{'line-through'}),
                 //works -> height ? 'position'=>1000,
                 // works 'hidden'=>true
@@ -257,6 +259,15 @@ class createDocAbstract {
         }
         else{
             return false;
+        }
+    }
+    private function setTextUnderline($style='1'){
+        /* TO DO => Underline, single, dash, dotted, etc. */
+        if($style==='1'){
+            return 'single';
+        }
+        else{
+            return '';
         }
     }
     protected function setTabStop($rTabStop){

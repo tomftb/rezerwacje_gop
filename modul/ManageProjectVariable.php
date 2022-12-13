@@ -7,8 +7,7 @@
  */
 class ManageProjectVariable extends ManageProjectVariableDatabase{
     private $Utilities;
-    //private $Items;
-    
+    private $filter=array('getProjectVariables','getProjectHiddenVariables','getProjectDeletedVariables','getProjectHiddenAndDeletedVariables','getProjectAllVariables');
     public function __construct(){
         parent::__construct();
         $this->Log->log(0,"[".__METHOD__."]");
@@ -17,6 +16,16 @@ class ManageProjectVariable extends ManageProjectVariableDatabase{
     }
     public function __destruct(){
         parent::__destruct();
+    }
+    private function runFilter(){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $f=filter_input(INPUT_POST,'filter');
+        if(in_array($f,$this->filter)){
+            self::{$f}();
+        }
+        else{
+            self::{$this->filter[0]}();
+        }
     }
     public function getProjectVariablesList(){
         $this->Utilities->jsonResponse(['all'=>parent::getVariables()],'prepareVariable');
@@ -35,7 +44,7 @@ class ManageProjectVariable extends ManageProjectVariableDatabase{
         }
         self::parseVariable();
         array_walk($this->input,['parent','manageVariable']);
-        self::getProjectVariablesLike();
+        self::runFilter();
     }
     private function parse(&$error,&$first,$key='name-0',$value='',$preg='',$type='string'){
         if(!preg_match($preg,$value)){
@@ -68,45 +77,40 @@ class ManageProjectVariable extends ManageProjectVariableDatabase{
         $this->Log->log(0,"[".__METHOD__."]");
         $this->Utilities->jsonResponse(parent::getSimpleAll());
     }
-    public function getProjectVariablesLike(){ 
-        $f=htmlentities(nl2br(filter_input(INPUT_GET,'filter')), ENT_QUOTES,'UTF-8',FALSE);
-        $this->Log->log(0,"[".__METHOD__."] FILTER => ".$f);
-        $this->Log->logMulti(0,filter_input_array(INPUT_GET));
+    public function getProjectVariables(){ 
+        self::returnVariables(self::getSelectedVariables("s.`hidden`='0' AND s.`deleted`='0' AND s.`id`>0 AND (s.`id`=:id OR s.`name` LIKE :f OR s.`value` LIKE :f) ORDER BY s.`id` ASC"));
+    } 
+    public function getProjectDeletedVariables(){ 
+        self::returnVariables(self::getSelectedVariables("s.`hidden`='0' AND s.`deleted`='1' AND s.`id`>0 AND (s.`id`=:id OR s.`name` LIKE :f OR s.`value` LIKE :f) ORDER BY s.`id` ASC"));
+    }
+    public function getProjectHiddenVariables(){ 
+        self::returnVariables(self::getSelectedVariables("s.`hidden`='1' AND s.`deleted`='0' AND s.`id`>0 AND (s.`id`=:id OR s.`name` LIKE :f OR s.`value` LIKE :f) ORDER BY s.`id` ASC"));
+    }
+    public function getProjectHiddenAndDeletedVariables(){ 
+        self::returnVariables(self::getSelectedVariables("(s.`hidden`='1' OR s.`deleted`='1') AND s.`id`>0 AND (s.`id`=:id OR s.`name` LIKE :f OR s.`value` LIKE :f) ORDER BY s.`id` ASC"));
+    }
+    public function getProjectAllVariables(){ 
+        self::returnVariables(self::getSelectedVariables("s.`id`>0 AND (s.`id`=:id OR s.`name` LIKE :f OR s.`value` LIKE :f)  ORDER BY s.`id` ASC"));
+    }
+    private function getSelectedVariables($SQL="s.`id`>0 AND (s.`name` LIKE :f OR s.`value` LIKE :f) ORDER BY s.`id` ASC"){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $POST=filter_input_array(INPUT_POST);
+        $this->Log->log(0,$POST);
+        $f=htmlentities(nl2br($POST['f']), ENT_QUOTES,'UTF-8',FALSE);
+        $parm[':f']=['%'.$f.'%','STR'];
+        /* reurn 0 when is a char/string, else return number */
+        $parm[':id']=array(intval($f,10),'INT');       
+        $this->Log->log(0,$SQL);
+        $this->Log->log(0,$parm);
+        $this->Items->unsetBlock($POST['b'],'slo_project_stage_variable','buffer_user_id',$_SESSION['userid']);
         $select="SELECT s.`id` as 'i', s.`name` as 'n',s.`value` as 'v',s.`buffer_user_id` as 'bu',b.`login` as 'bl' FROM `slo_project_stage_variable` s LEFT JOIN `uzytkownik` as b ON s.`buffer_user_id`=b.`id`";
-        $where='';
-        $query_data=[];
-        if(is_numeric($f)){
-            $this->Log->log(0,"[".__METHOD__."] FILTER is numeric ");
-            $f_int=intval($f,10);
-            $query_data[':id']=array($f_int,'INT');
-            $where="WHERE s.`deleted`=:deleted AND s.`hidden`=:hidden AND s.`id` LIKE (s.`id` LIKE :id OR s.`name` LIKE :name) ORDER BY s.`id` ASC";
-        }
-        else{
-            $this->Log->log(0,"[".__METHOD__."] FILTER not numeric ");
-            $query_data[':value']=array('%'.$f.'%','STR');
-            $where="WHERE s.`deleted`=:deleted AND s.`hidden`=:hidden AND (s.`name` LIKE :name OR s.`value` LIKE :value) ORDER BY s.`id` ASC";
-        }
-        $this->input=null;
-        $this->input['u']=$this->Items->setGetWsk('u');
-        $this->input['b']=$this->Items->setGetWsk('b');
-        $this->input['v']=$this->Items->setGetWsk('v');
-        $this->input['buffer']=$this->Items->unsetBlock($this->input['b'],'slo_project_stage_variable','buffer_user_id',$_SESSION['userid']);
-        $query_data[':deleted']=array($this->input['u'],'STR');
-        $query_data[':hidden']=array($this->input['v'],'STR');
-        $query_data[':name']=array('%'.$f.'%','STR');
-        
-        /* 
-         * TO DO => SEARCH IN VALUE (LEFT JOIN)
-           $query_data[':value']=array('%'.$f.'%','STR');
-         * 
-         */
- 
-        $return['data']=parent::getAll($select.$where,$query_data);  
-        $return['headTitle']='Stałe';
-        // Throw New Exception('['.__METHOD__.']'.__LINE__.' TEST',1);
-        
-        $this->Utilities->jsonResponse($return,'runModal');
-     }
+        $response['data']=parent::getAll($select." WHERE ".$SQL,$parm);
+        $response['headTitle']='Stałe';
+        return $response;
+    }
+    private function returnVariables($response){
+        return $this->Utilities->jsonResponse($response,'');
+    }
      public function getProjectVariableHideSlo(){
         self::getSlo('pvHide');
     }
@@ -146,14 +150,14 @@ class ManageProjectVariable extends ManageProjectVariableDatabase{
         self::preapareData();
         parent::changeState('1','hidden','hidden_reason');
         self::block($this->newData['id'],$_SESSION['userid']);
-        self::getProjectVariablesLike();
+        self::runFilter();
     }
     public function pvDelete(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::preapareData();
         parent::changeState('1','deleted','deleted_reason');
         self::block($this->newData['id'],'');
-        self::getProjectVariablesLike();
+        self::runFilter();
     }
     public function blockVariable(){
         $this->Log->log(0,"[".__METHOD__."]");

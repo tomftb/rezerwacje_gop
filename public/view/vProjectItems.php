@@ -10,7 +10,7 @@
             <div class="btn pull-left mt-0" > 
                 <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
                     <div class="btn-group" role="group">
-                        <button class="btn btn-info text-white" type="button" onclick="Items.Stage.show()">
+                        <button class="btn btn-info text-white" type="button" onclick="Items.Stage.clearShow()">
                         Etapy
                         </button>
                         <button type="button" class="btn  btn-info dropdown-toggle dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -25,7 +25,7 @@
                         </div>
                     </div>
                     <div class="btn-group" role="group">
-                      <button class="btn btn-warning text-white" type="button" onclick="Items.Constant.show()">
+                      <button class="btn btn-warning text-white" type="button" onclick="Items.Constant.clearShow()">
                         Stałe
                       </button>
                       <button type="button" class="btn  btn-warning dropdown-toggle dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -37,7 +37,7 @@
                       </div>
                     </div>
                      <div class="btn-group" role="group">
-                      <button class="btn btn-purple text-white" type="button" onclick="Items.Variable.show()">
+                      <button class="btn btn-purple text-white" type="button" onclick="Items.Variable.clearShow()">
                         Zmienne
                       </button>
                       <button type="button" class="btn  btn-purple dropdown-toggle dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -76,32 +76,24 @@
             </div>
         </div>
         <div class="col-6 mb-0 mt-0" >
-                    <!--
-                    <div class="form-group form-check mt-0">
-                    <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" value="0" onclick="ProjectItems.filterHiddenData(this)">
-                        <small>Pokaż ukryte</small>
-                    </label>
-                    </div>
-                    -->
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search...">
-                    <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button" onclick="Items.filter(this.value)">
-                            <i class="fa fa-search"></i>
-                        </button>
-                    </div>
+                <div class="input-group"><input type="text" class="form-control" placeholder="Szukaj..." onkeyup="Items.setFilterValue(this)" ><div class="input-group-append"><button class="btn btn-secondary" type="button" onclick="Items.filterOut(this)"><i class="fa fa-search"></i></button></div>
                   </div>
                     <div class="form-group form-check-inline mt-0">
                     <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" value="n" onclick="Items.hidden(this)">
+                        <input type="checkbox" class="form-check-input" value="0" onclick="Items.hidden(this)">
                         <small class="text-secondary">Pokaż ukryte</small>
                     </label>
                     </div>
                     <div class="form-group form-check-inline mt-0 ">
                     <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" value="n"  onclick="Items.deleted(this)">
+                        <input type="checkbox" class="form-check-input" value="0" onclick="Items.deleted(this)">
                         <small class="text-danger">Pokaż usunięte</small>
+                    </label>
+                    </div>
+                    <div class="form-group form-check-inline mt-0 ">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" value="0" onclick="Items.all(this)">
+                        <small class="text-primary">Pokaż wszystkie</small>
                     </label>
                     </div>
             </div>

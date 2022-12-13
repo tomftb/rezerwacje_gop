@@ -210,7 +210,7 @@ class createDoc extends createDocAbstract {
         parent::setUpMaxFontSize($subsection->subsectionrow);
         foreach($subsection->subsectionrow as $r){
             $this->Log->log(0,'['.__METHOD__.'] ROW');
-            /* RUN VIA NEW LINE 1,0 */
+            /* DYNAMIC RUN FUNCTION, newLine1 newLine0 (RUN VIA NEW LINE 1,0) */
             $this->{'newLine'.$r->paragraph->property->valuenewline}($r,$section,$run,$actListName,$actTabStopName);
             array_walk($r->image,['self','setRunImage'],$run);
             $firstRow=$r->paragraph->property->valuenewline;
@@ -326,6 +326,7 @@ class createDoc extends createDocAbstract {
     }
     private function newLine1($r,&$section,&$run,&$actListName='',&$actTabStopName=''){
         $this->Log->log(0,"[".__METHOD__."]");
+        /* DYNAMIC RUN */
         $this->{'set'.$r->paragraph->property->paragraph.'Item'}($r,$section,$run,$actListName,$actTabStopName);
     }
     private function newLine0($r,&$section,&$run,&$actListName='',&$actTabStopName=''){

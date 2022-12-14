@@ -200,7 +200,7 @@ class StageData{
                 return '0';
         }
     }
-    setBasicStage(){
+    setBasicStage(data){
         //console.log('StageData::setBasicStage()');
         this.Stage = data;
     }
@@ -303,7 +303,11 @@ class StageData{
                         //listNewElement:'y',
                         //listNewElementName:'Nowy element',
                         newList:'n',
-                        newListName:'Kontynuacja'
+                        newListName:'Kontynuacja',
+                        chapter:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_CHAPTER_DEFAULT','v'),/* 0 - no, 1 - yes */
+                        chapterMultiplier:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_CHAPTER_MULTIPLIER','v'),/* 0 - no, 1 - yes */
+                        chapterLevel:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_CHAPTER_DEFAULT_LVL','v'), /* default range from 1 to 7 */
+                        chapterLevelMax:this.Glossary.list.getKeyPropertyAttribute('parameter','STAGE_LIST_CHAPTER_MAX_LVL','v') /* default range from 1 to 7 */
                     }  
         };
     }

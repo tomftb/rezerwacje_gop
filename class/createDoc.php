@@ -47,6 +47,7 @@ class createDoc extends createDocAbstract {
          */
         //print_r($this->phpWord);
         self::setDocInfo();
+        self::setLanguage();
     }
     private function setDocInfo(){
         $properties = $this->phpWord ->getDocInfo();
@@ -65,7 +66,13 @@ class createDoc extends createDocAbstract {
             $properties->setModified(mktime(0, 0, 0, 3, 14, 2022));
             $properties->setSubject('TEMAT DOKUMENTU');
             $properties->setKeywords('SŁOWA KLUCZOWE');
-          
+          /*
+            $phpWord->getSettings()->setHideGrammaticalErrors(true);
+            $phpWord->getSettings()->setHideSpellingErrors(true);
+           */
+    }
+    private function setLanguage(){
+        $this->phpWord->getSettings()->setThemeFontLang(new PhpOffice\PhpWord\Style\Language('PL_PL'));//PhpOffice\PhpWord\Style\Language::FR_BE francuski belgijski
     }
     private function throwError($d='',$l=0){
         Throw New Exception ($d,$l);
@@ -186,7 +193,7 @@ class createDoc extends createDocAbstract {
             }
         }
     }
-    private function setReportStageSection($Stagesection,&$firstSection=true,&$breakType='continuous',&$run=null,&$actListName='list_',&$actTabStopName='tabstop_'){
+    private function setReportStageSection($Stagesection,&$firstSection=true,$breakType='continuous',$run=null,$actListName='list_',$actTabStopName='tabstop_'){
         $this->Log->log(0,"[".__METHOD__."]");        
         foreach($Stagesection as $s){
             /*

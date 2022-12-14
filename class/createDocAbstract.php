@@ -96,7 +96,7 @@ class createDocAbstract {
         $textrun->addText('kerning', array('kerning' => 10));
         */
         $this->Log->log(0,"[".__METHOD__."] Style:");
-        $this->Log->log(0,$rStyle);
+        //$this->Log->log(0,$rStyle);
         return [
             'name' => $rStyle->fontFamily,
             'size' => self::convertToPt($rStyle->fontSize,$rStyle->fontSizeMeasurement),

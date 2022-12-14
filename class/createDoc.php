@@ -105,9 +105,15 @@ class createDoc extends createDocAbstract {
                 /* LOOP ONLY ONE */
                 break;
             }
+            /* only first secton true on a;; stage report*/
+            $firstSection=true;
+            $breakType='continuous';
+            $run=null;
+            $actListName=uniqid('list_');
+            $actTabStopName=uniqid('tabstop_');
             foreach($this->projectData->stage as $s){
                     //var_dump($s);
-                self::setReportStageSection($s->section);
+                self::setReportStageSection($s->section,$firstSection,$breakType,$run,$actListName,$actTabStopName);
             }
             $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
             $objWriter->save($this->docDir.$this->fileName); 
@@ -133,7 +139,13 @@ class createDoc extends createDocAbstract {
     public function genReportStage(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::setReportStagePage();
-        self::setReportStageSection($this->projectData->section);
+        /* FIRST SECTION ALWAYS FROM NEW PAGE IN STAGE */
+        $firstSection=true;
+        $breakType='continuous';
+        $run=null;
+        $actListName=uniqid('list_');
+        $actTabStopName=uniqid('tabstop_');
+        self::setReportStageSection($this->projectData->section,$firstSection,$breakType,$run,$actListName,$actTabStopName);
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
         $objWriter->save($this->docDir.$this->fileName);
     }
@@ -174,13 +186,8 @@ class createDoc extends createDocAbstract {
             }
         }
     }
-    private function setReportStageSection($Stagesection){
+    private function setReportStageSection($Stagesection,&$firstSection=true,&$breakType='continuous',&$run=null,&$actListName='list_',&$actTabStopName='tabstop_'){
         $this->Log->log(0,"[".__METHOD__."]");        
-        $firstSection=true;
-        $breakType='continuous';
-        $run=null;
-        $actListName=uniqid('list_');
-        $actTabStopName=uniqid('tabstop_');
         foreach($Stagesection as $s){
             /*
              * (twips )Twip to miara typograficzna, zdefiniowana jako 1⁄20 punktu typograficznego. Jeden twip ma 1⁄1440 cala lub 17,64 μm

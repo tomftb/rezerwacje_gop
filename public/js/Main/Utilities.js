@@ -120,13 +120,26 @@ class Utilities {
         return value;
    };
    cloneProperty(newObject,o){
-        //console.log(o);
+        //console.log('newObject:',newObject,"oldObject:",o);
         for(const prop in o){
-            //console.log(o[prop]);
-            //console.log(typeof o[prop]);
+            //console.log('Value:',o[prop],"Type:",typeof o[prop]);
             if(typeof o[prop] === 'object' ){
-                /* determine array and object */
+                //console.log('object');
+                if(o[prop]===null){
+                    //console.log('is null');
+                    newObject[prop]=null;
+                    this.cloneProperty(newObject[prop],o[prop]);
+                    /* SKIP */
+                    continue;
+                }
                 //console.log(o[prop].constructor);
+                /* determine array and object */
+                //if(!o[prop].hasOwnProperty('constructor')){
+                   // console.log('constructor prop not exists');
+                    /* SKIP */
+                   // continue;
+               // }
+                
                 if(o[prop].constructor===Array){
                     //console.log('Array');
                     newObject[prop]=new Array();
@@ -151,6 +164,16 @@ class Utilities {
         }
         else{
             field.classList.add('d-none');
+        }
+    }
+    checkbox(ele){
+        if(ele.value==='1'){
+            ele.value='0';
+            ele.checked=false;
+        }
+        else{
+            ele.value='1';
+            ele.checked=true;
         }
     }
 }

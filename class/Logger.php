@@ -11,7 +11,7 @@ final class Logger{
     private function __construct($from){
         self::setLogName();
         self::open(); 
-		self::log(0,'Logger construct => '.$from,__METHOD__);
+	self::log(0,'Logger construct => '.$from,__METHOD__);
     }
     public static function init($from=''){
 		/* CHECK AND INITIALISE Logger (Singleton) CLASS */

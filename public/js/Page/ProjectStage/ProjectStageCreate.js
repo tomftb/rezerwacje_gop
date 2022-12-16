@@ -80,10 +80,11 @@ class ProjectStageCreate{
            this.prepare(response);
             /* SETUP MODAL */
             this[this.CreateProperty.modal.action](); 
+            this.runModal();
         }
         catch(e){
             console.log(e);
-            this.StageTable.Table.setError(e);
+            this.StageTable.Table.setError('An Application Error Has Occurred!');
         };
     }
     prepareText(response){
@@ -203,14 +204,14 @@ class ProjectStageCreate{
         this.Modal.link.form.append(this.createPreview(),this.createDynamicView(this.helplink,'createSection'));
     }
     setUpModal(){
-        //console.log('ProjectStageCreate::setUpModal()');
+        console.log('ProjectStageCreate::setUpModal()');
         //console.log(this.StageData);
         //console.log(this.Modal.link);
         try{
              /* SET DEFAULT (EMPTY) LINK TO MODAL ELEMENT*/
-            this.helplink=this.getEmptyHelpLink();
-            /* CLEAR DATA MODAL */
-            this.Modal.clearData();
+             this.helplink=this.getEmptyHelpLink();
+             /* CLEAR DATA MODAL */
+             this.Modal.clearData();
             /* SET CLOSE BUTTON */
             //console.log(this.StageData.Stage); 
             this.Items.setCloseModal(this.setUndoTask(this));
@@ -229,12 +230,10 @@ class ProjectStageCreate{
         }
         catch(err){
             console.log('ProjectStageCreate::setUpModal()\r\nERROR:');
-            console.log(err);
-            this.Items.Table.setError('An Application Error Has Occurred!');
-            return false;
+            throw err;
         }
         /* IN ANOTHER BLOCK TRY CATCH TO PREVENT OPEN MODAL IF ERROR EXISTS TO HIDE ERROR SHOWED IN TABLE  */
-        this.runModal();
+        
     }
 
     setUndoTask(self){
@@ -371,19 +370,20 @@ class ProjectStageCreate{
             console.log('ProjectStageCreate::details()');
             console.log(error);
             throw 'An Application Error Has Occurred!';
+            //this.Modal.setError(error);
             return false;
         }
         /* IN ANOTHER BLOCK TRY CATCH TO PREVENT OPEN MODAL IF ERROR EXISTS TO HIDE ERROR SHOWED IN TABLE  */
         this.runModal();
     }
     runModal(){
+        console.log('ProjectStageCreate::runModal()');
         try{
             this.Items.prepareModal(this.CreateProperty.modal.title,this.CreateProperty.modal.bg);   
         }
-        catch(error){
+       catch(error){
             console.log('ProjectStageCreate::details()');
-            console.log(error);
-            throw 'An Application Error Has Occurred!';
+            throw error;
         }
     }
     getEmptyHelpLink(){

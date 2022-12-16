@@ -91,6 +91,7 @@ final class createDoc extends createDocAbstract {
             $propertyRun=self::getStageStartingProperty();
             foreach($this->projectData->stage as $s){
                     //var_dump($s);
+                $this->Chapter->setReportStageChapterList($s->section);
                 self::setReportStageSection($s->section,$propertyRun);
             }
             $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');

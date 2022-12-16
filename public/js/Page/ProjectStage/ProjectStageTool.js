@@ -908,39 +908,30 @@ class ProjectStageTool{
         //console.log('OPTION NOT FOUND -> RETURN FALSE');
         return false;
     }
-    createTextToolCheckBox(id,isection,isub,isubrow,title,defaultvalue,subsectionRowAttr,helplinkValue){
-        
-        //if(defaultvalue)
-          
-        var classObject=this;
-        
+    createTextToolCheckBox(id,eleId,title,defaultvalue,subsectionRowAttr,helplinkValue){
+    //createTextToolCheckBox(id,isection,isub,isubrow,title,defaultvalue,subsectionRowAttr,helplinkValue){
+        var self=this;
         var div=document.createElement('div');
             div.setAttribute('class','form-check mt-1');
         var input=document.createElement('input');
-            input.setAttribute('name',id+'-'+isection+'-'+isub+'-'+isubrow);
-            //input.setAttribute('id',id+'-'+isection+'-'+isub+'-'+isubrow);
+            input.setAttribute('name',id+'-'+eleId);
             input.setAttribute('type','checkbox');
             input.classList.add('form-check-input');
             input.onclick = function (){
-                //console.log('ProjectStageTool::createTextToolCheckBox()');
-                //console.log('ID - '+id);
-                //console.log(this);
                 if(this.value==='0'){
                     this.value='1';
                 }
                 else{
                     this.value='0';
                 }
-                //console.log(subsectionRowAttr);
-                //console.log(subsectionRowAttr[id]);
                 subsectionRowAttr[id]=this.value;
-                classObject.setValueCheckBoxStyle(id,this.value,helplinkValue);
+                self.setValueCheckBoxStyle(id,this.value,helplinkValue);
             };
             this.setTextDecorationToolEntryCheck(input,defaultvalue);
             
         var label=document.createElement('label');
             label.setAttribute('class','form-check-label');
-            label.setAttribute('for',id+'-'+isection+'-'+isub+'-'+isubrow);
+            label.setAttribute('for',id+'-'+eleId);
             label.innerHTML=title;
        div.appendChild(input);
        div.appendChild(label);
@@ -986,15 +977,15 @@ class ProjectStageTool{
         
         return fullProp;
     }
-    setTextDecorationToolEntry(decorationProp,tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
+    setTextDecorationToolEntry(decorationProp,tool4,eleId,subsectionRowAttr,helplinkValue){
+    //setTextDecorationToolEntry(decorationProp,tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
         /*
             decorationProp.n. - name
             decorationProp.v - value
          */
         var prop = this.setTextDecorationToolEntryProperties(decorationProp,subsectionRowAttr);
-        
-        var input = this.createTextToolCheckBox(prop.inputName,isection,isub,isubrow,prop.label,prop.check,subsectionRowAttr,helplinkValue);
-        
+        var input = this.createTextToolCheckBox(prop.inputName,eleId,prop.label,prop.check,subsectionRowAttr,helplinkValue);
+        //var input = this.createTextToolCheckBox(prop.inputName,isection,isub,isubrow,prop.label,prop.check,subsectionRowAttr,helplinkValue);
         tool4.appendChild(input);
     }
     setTextDecorationToolEntryCheck(input,check){
@@ -1058,11 +1049,13 @@ class ProjectStageTool{
                 return tmpvalue;
             }
     }
-    getTextDecoration(tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
+    getTextDecoration(tool4,eleId,subsectionRowAttr,helplinkValue){
+    //getTextDecoration(tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
         //console.log('ProjectStageTool::createTextDecorationTool()');
         tool4.classList.add('pt-4');
         for(const prop of this.Glossary.text.getKey('decoration').entries()) {
-            this.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue);  
+            this.setTextDecorationToolEntry(prop[1],tool4,eleId,subsectionRowAttr,helplinkValue); 
+            //this.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue);  
         } 
     }
     getTextTool(isection,isub,isubrow,subsectionrow,helplink,TabStop){
@@ -1137,7 +1130,7 @@ class ProjectStageTool{
             mainDivCol.classList.add('d-none','pt-1','pb-1');
             mainDivCol.style.backgroundColor='#e6e6e6';
         var Tool = new ToolFields([3,3,3,3]);
-
+        var eleId=isection.toString()+'-'+isub.toString()+'-'+isubrow.toString();
         Tool.set(0,this.getSimpleFontSize(subsectionrow.list.style));
         Tool.set(0,this.getSimpleColor(subsectionrow.list.style));
         /* GET BackgroundColor */
@@ -1145,16 +1138,21 @@ class ProjectStageTool{
         /* GET FONT FAMILY SELECT */
         Tool.set(0,this.getSimpleFontFamily(subsectionrow.list.style));
         /* SET CSS BOLD, ITALIC ... */
-        this.getTextDecoration(Tool.get(3),isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
+        //this.getTextDecoration(Tool.get(3),isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
+        this.getTextDecoration(Tool.get(3),eleId,subsectionrow.list.style,helplink.list.value); 
         /* LIST LEVEL  */
         Tool.set(1,this.getListLevel(subsectionrow,helplink));
         /* LIST TYPE  */
         Tool.set(1,this.getListType(subsectionrow.list.style));
+        /* INPUT CHECKBOX CHAPTER */  
+        Tool.set(0,this.getChapterInput(eleId,subsectionrow.list));
+        /* INPUT SELECT CHAPTER */  
+        Tool.set(0,this.getChapterLevel(subsectionrow));
         /* CONTINUE/NEW ELEMENT */
         Tool.set(2,this.getNewList(subsectionrow.list.property));
         
-      
         mainDivCol.appendChild(Tool.getMain());
+        console.log(mainDivCol);
         return mainDivCol;
     }
     getTabStopTool(isection,isub,isubrow,subsectionrow,helplink,TabStop){
@@ -1170,6 +1168,64 @@ class ProjectStageTool{
         mainDivCol.appendChild(Tool.getMain());
         //console.log(mainDivCol);
         return mainDivCol;
+    }
+    getChapterInput(eleId,subsectionrowList){
+        console.log('ProjectStageCreateList::getChapterInput()',subsectionrowList);
+        
+        var self=this;
+        var div100=document.createElement('DIV');
+            div100.classList.add('w-100','mt-2');
+            div100.style.border='1px solid #CCD1D1';
+            div100.style.borderBottom='0px solid #CCD1D1';
+            
+            //div100.style.backgroundColor='#bdc3c7';
+        var div=document.createElement('DIV');
+            div.classList.add('form-check','mt-1');
+        var input=document.createElement('INPUT');
+            input.setAttribute('type','checkbox');
+            input.setAttribute('id',eleId+'-chapter');
+            input.value=subsectionrowList.property.chapter;
+            input.classList.add('form-check-input');
+            input.onclick=function(){
+                /* t - this */
+                self.Utilities.checkbox(this);
+                console.log(this);
+                console.log(this.value);
+                subsectionrowList.property.chapter=this.value;
+            }
+            if(subsectionrowList.property.chapter==='1'){
+                input.checked=true;
+            }
+            /* RUN ONCE TO SETUp */
+            console.log(input);
+            //throw 'aaaaa';
+            //self.Utilities.checkbox(input);
+        var label=document.createElement('LABEL');
+            label.classList.add('form-check-label','text-info');
+            label.setAttribute('for',eleId+'-chapter');
+            label.appendChild(document.createTextNode('Dodać do spisu treści?'));
+            /* ADD PROEPRTY */
+            div.append(input,label);
+            div100.append(div);
+            return div100;
+    }
+    getChapterLevel(subsectionrow){
+        console.log('ProjectStageTool::getChapterLevel()',subsectionrow,this.Glossary.list.item.parameter);
+        var key = ['chapterLevel','chapterLevel'];
+        var data=this.getTool(subsectionrow,key);
+            data[0]['default']=this.getDefaultOption(subsectionrow.list.property,key[0],key[1]);
+            data[0]['property']=subsectionrow;
+            data[0]['onchange']= function(t){
+                /* t - this */
+                subsectionrow.list.property['chapterLevel']=t.value;
+            };
+            data[0]['all']=this.getListLevelList(subsectionrow.list.property.chapterLevel,subsectionrow.list.property.chapterLevelMax); 
+            var tool=this.Tool.create('Poziom spisu treści:',data); 
+                tool.style.border='1px solid #CCD1D1';
+                tool.style.borderTop='0px solid #CCD1D1';
+                tool.classList.remove('mt-2');
+        return  tool;
+        //return  this.Tool.create('Poziom spisu treści (mnożnik - '+this.Glossary.list.item.parameter.STAGE_LIST_MULTIPLIER.v.toString()+'):',data); 
     }
     createControl(label,ele,color,color2){
         /* CONTROL */
@@ -1243,8 +1299,8 @@ class ProjectStageTool{
                 mainDiv.appendChild(VariableTool.getTool());
         }
         catch(error){
-            console.log('ProjectStageTool::getControlTool() ERROR');
-            console.log(error);
+            //console.log('ProjectStageTool::getControlTool() ERROR');
+            //console.log(error);
             throw error;
             //this.Html.showField(this.Modal.link['error'],'An Application Error Has Occurred!');
         }

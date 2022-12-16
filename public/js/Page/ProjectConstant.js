@@ -25,9 +25,9 @@ class ProjectConstant{
         this.ConstantCreate = new ProjectConstantCreate(this);
     }
     clearShow(){
-        console.log('ProjectStage::clearShow()');
-        this.Items.setTitle();
+        console.log('ProjectConstant::clearShow()');
         this.Items.setClearDefault(this,'show',this.title);
+        this.Items.setTitle();
         this.show();
     }
     show(){

@@ -89,9 +89,14 @@ final class createDoc extends createDocAbstract {
             self::loopStagePart($this->projectData->footer,'addFooter',$section);
             /* only first secton true on a;; stage report*/
             $propertyRun=self::getStageStartingProperty();
+            /* CHAPTER */
+            foreach($this->projectData->stage as $s){
+                  $this->Chapter->setReportStageChapterList($s->section);
+            }
+            $this->Chapter->pageBreak();
             foreach($this->projectData->stage as $s){
                     //var_dump($s);
-                $this->Chapter->setReportStageChapterList($s->section);
+               
                 self::setReportStageSection($s->section,$propertyRun);
             }
             $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
@@ -129,6 +134,7 @@ final class createDoc extends createDocAbstract {
         $this->Log->log(0,"[".__METHOD__."]");
         self::setReportStagePage();
         $this->Chapter->setReportStageChapterList($this->projectData->section);
+        $this->Chapter->pageBreak();
         /* FIRST SECTION ALWAYS FROM NEW PAGE IN STAGE */
         $propertyRun=self::getStageStartingProperty();
         self::setReportStageSection($this->projectData->section,$propertyRun);

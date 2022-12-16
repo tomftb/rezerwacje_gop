@@ -27,7 +27,7 @@ final class createDocChapter{
     public function setReportStageChapterList($StageSection){
         $this->Log->log(0,"[".__METHOD__."]");//"[".__NAMESPACE__."]
         self::loopSection($StageSection);
-        self::{$this->setChapterSection[1]}();
+        //self::{$this->setChapterSection[1]}();
     }
     private function setPageBreak(){
         $this->Log->log(0,"[".__METHOD__."]");
@@ -178,5 +178,9 @@ final class createDocChapter{
                 [
                     'spaceAfter' => 95
                 ]);
+    }
+    public function pageBreak(){
+        /* execute or not page break */
+        self::{$this->setChapterSection[1]}();
     }
 }

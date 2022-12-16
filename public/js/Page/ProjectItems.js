@@ -245,6 +245,7 @@ class ProjectItems{
         // REMOVE data-dismiss="modal" 
         //console.log(this.Modal.link['close'].parentNode);
         this.Modal.link['close'].parentNode.removeAttribute('data-dismiss');
+        
     }
     setCloseModal(run){
         console.log('ProjectItems::setCloseModal()');

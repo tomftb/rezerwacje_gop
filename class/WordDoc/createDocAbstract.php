@@ -1,13 +1,14 @@
 <?php
+namespace WordDoc;
+
 class createDocAbstract {
     protected $Log;
-    public function construct__(){
-        $this->Log=Logger::init();
+    public function construct__($Log){
+        $this->Log=$Log;//Logger::init();
+        $this->Log->log(0,'['.__METHOD__.']');
     }
     public function __call($name='',$arg=array()){
-        $this->Log->log(0,'['.__METHOD__.']');
-        $this->Log->log(0,$name);
-        $this->Log->log(0,$arg);
+        Throw New \Exception("[".__METHOD__.'] Method '.$name.' not found!',1);
     }
     protected function getTwip($size=0,$measurement='cm'){
         $this->Log->log(0,'['.__METHOD__.'] size -> '.$size.' measurement -> '.$measurement);
@@ -244,13 +245,16 @@ class createDocAbstract {
     }
     private function setSpacingLineValueMeasurement($style,&$spacingLineValue=1){
         $this->Log->log(0,'['.__METHOD__.']');
-            switch($style->{'lineSpacingMeasurement'}){  
-                case 'n/a':
-                    $this->Log->log(0,'n/a');
-                    $spacingLineValue*=12;
-                    break;
-                default: /* nothing to do */
-                    break;
+        if(!property_exists($style,'lineSpacingMeasurement')){
+            return false;
+        }
+        switch($style->{'lineSpacingMeasurement'}){  
+            case 'n/a':
+                $this->Log->log(0,'n/a');
+                $spacingLineValue*=12;
+            break;
+            default: /* nothing to do */
+                break;
             }
     }
     private function setTextStyle($style='1'){
@@ -361,13 +365,13 @@ class createDocAbstract {
             TO DO
             CAN BE CHANGET TO ANOTHER NAME WITH MORE FUNCTIONS    
         */
-        $tmp= new stdClass();
+        $tmp= new \stdClass();// GLOBAL SCOPE
         $i=-1;
         foreach($allRow as $prop => $v){
             if($v->paragraph->property->valuenewline==='1'){
                 $i++;
                 $mfs=self::getMax(0,$v->paragraph->style);
-                $tmp->{$i}=new stdClass();
+                $tmp->{$i}=new \stdClass();// GLOBAL SCOPE
                 $tmp->{$i}->{'key'}=array($prop);
                 $tmp->{$i}->{'maxFontSize'}=$mfs;
                 continue;
@@ -380,8 +384,8 @@ class createDocAbstract {
         foreach($allRow as $prop => &$v){
             foreach($tmp as $tv){
                 if(in_array($prop,$tv->key)){
-                    //$v->paragraph->{'tmp'}=new stdClass();
-                    $v->paragraph->{'tmp'} = new stdClass();
+                    //$v->paragraph->{'tmp'}=new \stdClass();
+                    $v->paragraph->{'tmp'} = new \stdClass();// GLOBAL SCOPE
                     $v->paragraph->{'tmp'}->{'maxFontSize'}=$tv->maxFontSize;
                 }
             }
@@ -395,5 +399,6 @@ class createDocAbstract {
         }
         return $actMax;
     }
+
 }
 

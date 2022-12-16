@@ -191,7 +191,7 @@ final class ManageProject extends DatabaseProject implements ManageProjectComman
         $this->utilities->isValueEmpty($id);
         $sql[':id']=[$id,'INT'];
         $projectDetails=$this->dbLink->squery('SELECT `create_date`,`create_user_full_name`,`create_user_email`,`rodzaj_umowy`,`numer_umowy`,`temat_umowy`,`klient`,`kier_grupy`,`term_realizacji` as \'d-term_realizacji\',`harm_data`,`koniec_proj` as \'d-koniec_proj\',`nadzor`,`kier_osr`,`technolog`,`klient`,`typ` as \'typ_umowy\',`system`,`r_dane`,`j_dane`,`quota` FROM `projekt_nowy` WHERE `id`=:id AND `wsk_u`=0 ',$sql)[0];
-        $doc = new createDoc($projectDetails,$_FILES,'Project_'.$this->utilities->getData(),'.docx',APP_ROOT.UPLOAD_PROJECT_DOC_DIR);
+        $doc = new \WordDoc\createDoc($projectDetails,$_FILES,'Project'.$this->utilities->getData(),'.docx',UPLOAD_PROJECT_REPORT_DOC_DIR,$this->Log);
         $doc->createProjectReport();
         $this->utilities->jsonResponse($doc->getDocName(),'downloadProjectDoc');
     }

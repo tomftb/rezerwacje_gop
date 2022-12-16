@@ -57,11 +57,12 @@ final class ManageProjectReport extends ManageProjectReportDatabase implements I
             //print_r($s);
             $variable->parsePartVariable($s);
         }
-        $Doc = new createDoc($dataJson,[],'ProjectReport','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
+        $Doc = new WordDoc\createDoc($dataJson,[],'ProjectReport','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR,$this->Log);
         $Doc->genProjectReport();
         $this->Utilities->jsonResponse($Doc->getDocName(),'');
     }
     private function preareReportTestDoc(){
+        $this->Log->log(0,"[".__METHOD__."]");
         $post=filter_input_array(INPUT_POST);
          /* parse data */
         if(empty($post)){ Throw New Exception ('NO STAGE REPORT DATA',0);}
@@ -74,19 +75,19 @@ final class ManageProjectReport extends ManageProjectReportDatabase implements I
     }
     public function genProjectReportTestDocFooter(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $doc = new createDoc(self::preareReportTestDoc(),[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
+        $doc = new WordDoc\createDoc(self::preareReportTestDoc(),[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR,$this->Log);
         $doc->genReportStageFooter();
         $this->Utilities->jsonResponse($doc->getDocName(),'downloadProjectReportDoc');
     }
     public function genProjectReportTestDocHeading(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $doc = new createDoc(self::preareReportTestDoc(),[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
+        $doc = new WordDoc\createDoc(self::preareReportTestDoc(),[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR,$this->Log);
         $doc->genReportStageHeading();
         $this->Utilities->jsonResponse($doc->getDocName(),'downloadProjectReportDoc');
     }
      public function genProjectReportTestDoc(){
         $this->Log->log(0,"[".__METHOD__."]");
-        $doc = new createDoc(self::preareReportTestDoc(),[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR);
+        $doc = new WordDoc\createDoc(self::preareReportTestDoc(),[],'TestProjectStage','.docx',UPLOAD_PROJECT_REPORT_DOC_DIR,$this->Log);
         $doc->genReportStage();
         $this->Utilities->jsonResponse($doc->getDocName(),'downloadProjectReportDoc');
     }

@@ -56,44 +56,40 @@ final class createDocChapter{
     }
     private function checkChapterProperty(&$row){
         $this->Log->log(0,"[".__METHOD__."]");
+        $setChapter1=function(&$t){
+            $this->Log->log(0,"[".__METHOD__."] CHAPTER = 1 => SET CHAPTER PROPERTIES");
+            self::{$t->setChapterSection[0]}();
+        };
+        $setChapter0=function(&$t){
+            $this->Log->log(0,"[".__METHOD__."] CHAPTER = 0");
+        };
         try{
             if(!property_exists($row->list->property, 'chapter')){  
                 return false;
             }
             $row->list->property->chapter=strval($row->list->property->chapter);
-            $this->Log->log(0,"chapter STRING VAL => ".$row->list->property->chapter);
-            if($row->list->property->chapter!=='1' && $row->list->property->chapter!=='0'){  
-                return false;
+            if($row->list->property->chapter!=='1' && $row->list->property->chapter!=='0'){
+                throw new \Exception ('Wrong chapter property value -> '.$row->list->property->chapter,1);
             }
             if(!property_exists($row->list->property, 'listLevel')){
                 return false;
             }
-            $row->list->property->listLevel=intval($row->list->property->listLevel);
-            $this->Log->log(0,"listLevel STRING VAL => ".strval($row->list->property->listLevel));
+            $row->list->property->chapterLevel=intval($row->list->property->chapterLevel);
             /* TO DO -> SET LIST LEVE RANGE FROM listLevelMin to listLevelMax */
-            if(!in_array($row->list->property->listLevel,Array ('1','2','3','4','5','6','7'))){
-                return false;
+            if(!in_array($row->list->property->chapterLevel,range(1, intval($row->list->property->chapterLevelMax)))){
+                throw new \Exception ('Chapter list level out of range -> '.strval($row->list->property->chapterLevel).' max -> '.strval($row->list->property->chapterLevelMax),1);
             }
-            $this->Log->log(0,"NEW LINE VAL => ".strval($row->paragraph->property->valuenewline));
-            self::{'setChapter'.$row->list->property->chapter}();
-            //self::{'newLine'.$row->paragraph->property->valuenewline.$row->list->property->chapter}($row);
+            ${'setChapter'.$row->list->property->chapter}($this);
             self::{'setChapterPosition'.$row->paragraph->property->valuenewline.$row->list->property->chapter}($row);
         }
         catch(Exception $e){
             $this->Log->log(0,$e);
         }
     }
-    private function setChapter1(){
-        $this->Log->log(0,"[".__METHOD__."] CHAPTER = 1 => SET CHAPTER PROPERTIES");
-        self::{$this->setChapterSection[0]}();
-    }
-    private function setChapter0(){
-         $this->Log->log(0,"[".__METHOD__."] CHAPTER = 0");
-    }
     private function setChapterPosition11($row){
         $this->Log->log(0,"[".__METHOD__."] CHAPTER LIST START NEW POSITION");
         /* SET NEW LIST POSITION */
-        $listItemRun = $this->section->addListItemRun($row->list->property->listLevel-1,$this->chapterName,$this->chapterParagraphName);
+        $listItemRun = $this->section->addListItemRun($row->list->property->chapterLevel-1,$this->chapterName,$this->chapterParagraphName);
         $listItemRun->addText($row->paragraph->property->value,$this->chapterFontName); 
         $this->textRun = $listItemRun;
         /* SET ACTIVE LIST METHOD TO EXECUTE */

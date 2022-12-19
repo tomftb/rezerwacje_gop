@@ -909,7 +909,6 @@ class ProjectStageTool{
         return false;
     }
     createTextToolCheckBox(id,eleId,title,defaultvalue,subsectionRowAttr,helplinkValue){
-    //createTextToolCheckBox(id,isection,isub,isubrow,title,defaultvalue,subsectionRowAttr,helplinkValue){
         var self=this;
         var div=document.createElement('div');
             div.setAttribute('class','form-check mt-1');
@@ -938,7 +937,7 @@ class ProjectStageTool{
        return div;
     }
     setTextDecorationToolEntryProperties(decorationProp,subsectionRowAttr){
-        // console.log('ProjectStageTool::setTextDecorationToolEntryProperties()');
+        console.log('ProjectStageTool::setTextDecorationToolEntryProperties()');
         if (!('v' in decorationProp) || !('n' in decorationProp)){
             //console.log('Decoration Property don\'t have key v or n');
             return false;
@@ -978,33 +977,25 @@ class ProjectStageTool{
         return fullProp;
     }
     setTextDecorationToolEntry(decorationProp,tool4,eleId,subsectionRowAttr,helplinkValue){
-    //setTextDecorationToolEntry(decorationProp,tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
         /*
             decorationProp.n. - name
             decorationProp.v - value
          */
         var prop = this.setTextDecorationToolEntryProperties(decorationProp,subsectionRowAttr);
         var input = this.createTextToolCheckBox(prop.inputName,eleId,prop.label,prop.check,subsectionRowAttr,helplinkValue);
-        //var input = this.createTextToolCheckBox(prop.inputName,isection,isub,isubrow,prop.label,prop.check,subsectionRowAttr,helplinkValue);
         tool4.appendChild(input);
     }
     setTextDecorationToolEntryCheck(input,check){
         /*
-         * console.log('ProjectStageTool::setTextDecorationToolEntryCheck()');
-         * console.log(check);
+          console.log('ProjectStageTool::setTextDecorationToolEntryCheck()',input,check);
          */
-       
-        /* NO PARAMETER */
-        if(check===''){
-            input.setAttribute('value','1');            
-        }
-        if(parseInt(check,10)===1){
+        if(check==='1'){
             input.setAttribute('value','1');
             input.setAttribute('checked',''); 
         }
         else{
            input.setAttribute('value','0');
-        }     
+        }   
     }
     setValueCheckBoxStyle(id,value,helplinkValue){
         // console.log('ProjectStageTool::setValueCheckBoxStyle()');
@@ -1050,12 +1041,10 @@ class ProjectStageTool{
             }
     }
     getTextDecoration(tool4,eleId,subsectionRowAttr,helplinkValue){
-    //getTextDecoration(tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue){
         //console.log('ProjectStageTool::createTextDecorationTool()');
         tool4.classList.add('pt-4');
         for(const prop of this.Glossary.text.getKey('decoration').entries()) {
             this.setTextDecorationToolEntry(prop[1],tool4,eleId,subsectionRowAttr,helplinkValue); 
-            //this.setTextDecorationToolEntry(prop[1],tool4,isection,isub,isubrow,subsectionRowAttr,helplinkValue);  
         } 
     }
     getTextTool(isection,isub,isubrow,subsectionrow,helplink,TabStop){
@@ -1064,7 +1053,7 @@ class ProjectStageTool{
             mainDivCol.classList.add('d-none','pt-1','pb-1');//,'bg-light'
             mainDivCol.style.backgroundColor='#e6e6e6';
         var Tool = new ToolFields([3,3,3,3]);
-
+        var eleId=isection.toString()+'-'+isub.toString()+'-'+isubrow.toString();
         /* FONT SIZE */
         Tool.set(0,this.getParagraphSize(subsectionrow.paragraph.style,helplink.text.value));
         /* TEXT COLOR */
@@ -1093,11 +1082,8 @@ class ProjectStageTool{
         Tool.set(2,this.getParagraph(subsectionrow.paragraph.property,helplink));
        
         /* SET CSS BOLD, ITALIC ... */
-        //Tool.Field[3].classList.add('pt-4');
-        this.getTextDecoration(Tool.get(3),isection,isub,isubrow,subsectionrow.paragraph.style,helplink.text.value); 
-
+        this.getTextDecoration(Tool.get(3),eleId,subsectionrow.paragraph.style,helplink.text.value); 
         mainDivCol.appendChild(Tool.getMain());
-
         return mainDivCol;
     }
      getSectionHeadMinTool(iSection,section,helplink,ProjectStageCreate){// isection
@@ -1138,7 +1124,6 @@ class ProjectStageTool{
         /* GET FONT FAMILY SELECT */
         Tool.set(0,this.getSimpleFontFamily(subsectionrow.list.style));
         /* SET CSS BOLD, ITALIC ... */
-        //this.getTextDecoration(Tool.get(3),isection,isub,isubrow,subsectionrow.list.style,helplink.list.value); 
         this.getTextDecoration(Tool.get(3),eleId,subsectionrow.list.style,helplink.list.value); 
         /* LIST LEVEL  */
         Tool.set(1,this.getListLevel(subsectionrow,helplink));

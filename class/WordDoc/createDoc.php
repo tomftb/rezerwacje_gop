@@ -93,6 +93,7 @@ final class createDoc extends createDocAbstract {
             foreach($this->projectData->stage as $s){
                   $this->Chapter->setReportStageChapterList($s->section);
             }
+            $this->Chapter->lastTabStop();
             $this->Chapter->pageBreak();
             foreach($this->projectData->stage as $s){
                     //var_dump($s);
@@ -134,6 +135,7 @@ final class createDoc extends createDocAbstract {
         $this->Log->log(0,"[".__METHOD__."]");
         self::setReportStagePage();
         $this->Chapter->setReportStageChapterList($this->projectData->section);
+        $this->Chapter->lastTabStop();
         $this->Chapter->pageBreak();
         /* FIRST SECTION ALWAYS FROM NEW PAGE IN STAGE */
         $propertyRun=self::getStageStartingProperty();
@@ -319,7 +321,8 @@ final class createDoc extends createDocAbstract {
     private function setpItem($r,&$propertyRun,&$section){
          $this->Log->log(0,"[".__METHOD__."] SET PARAGRAPH ITEM");
          /* TO SET THE sAME TAB STOP - USE FRONT END TO ADD TAB STOP FOR NEW PARAGRAPH */
-         $newTextRun = $section->addTextRun(parent::setParagraphProperties($r)); 
+         $newTextRun = $section->addTextRun(parent::setParagraphProperties($r));
+         self::addTabStop($r,$newTextRun);
          $newTextRun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
          $propertyRun['run'] = $newTextRun;
     }
@@ -377,5 +380,17 @@ final class createDoc extends createDocAbstract {
     }
     function _desctruct(){
         $this->Log->log(0,"[".__METHOD__."]");
+    }
+    private function addTabStop($r,&$newTextRun){
+       // $this->Log->log(0,$r);
+         //$this->Log->log(0,"[".__METHOD__."] TABSTOP VALUE:");
+         //$this->Log->log(0,$r->paragraph->property->tabstop);
+         //$this->Log->log(0,"[".__METHOD__."] TABSTOP LIST:");
+         //$this->Log->log(0,$r->paragraph->tabstop);
+         for($i=-1;$i<intval($r->paragraph->property->tabstop,10);$i++){
+             $newTextRun->addText("\t",null);
+         }
+        /* WITH PARAGRAPH FORMATING TABSTOP ?*/ 
+        //$newTextRun->addText("\t\t",parent::setFont($r->paragraph->style));
     }
 }

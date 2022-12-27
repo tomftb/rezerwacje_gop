@@ -8,6 +8,9 @@
 class ManageProjectVariable extends ManageProjectVariableDatabase{
     private $Utilities;
     private $filter=array('getProjectVariables','getProjectHiddenVariables','getProjectDeletedVariables','getProjectHiddenAndDeletedVariables','getProjectAllVariables');
+    const OPEN='[';
+    const CLOSE=']';
+    
     public function __construct(){
         parent::__construct();
         $this->Log->log(0,"[".__METHOD__."]");
@@ -187,19 +190,19 @@ class ManageProjectVariable extends ManageProjectVariableDatabase{
         for($i = 0; $i<strlen($value);$i++){
                  $char = substr($value,$i, 1);
                 //console.log(char);
-                if($char==='['){
+                if($char===self::OPEN){
                     $open=true;     
                     $newValue.=$char;
                     /*SKIP NEXT CHECK*/
                     continue;
                 }
                 /*IN FUTER SKIP WHITE SPACES */
-                if($open===true && $char!==']'){
+                if($open===true && $char!==self::CLOSE){
                     $tmpVariable.=$char;
                     /*SKIP NEXT CHECK*/
                     continue;
                 }
-                if($char===']' && $open===true && $tmpVariable!==''){
+                if($char===self::CLOSE && $open===true && $tmpVariable!==''){
                     self::swapProperty($newValue,$tmpVariable,$variable);
                     $tmpVariable='';
                     $open=false; 
@@ -213,6 +216,7 @@ class ManageProjectVariable extends ManageProjectVariableDatabase{
         return true;
     }
     private function swapProperty(&$newValue='',$tmpVariable='',&$variable=[]){
+         $this->Log->log(0,"[".__METHOD__."]");
         //echo "tmp value:\r\n";
         //echo $newValue."\r\n";
         //echo "tmp variable:\r\n";

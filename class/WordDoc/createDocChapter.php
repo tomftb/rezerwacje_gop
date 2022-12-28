@@ -13,10 +13,17 @@ final class createDocChapter{
     private $chapterParagraphName='';
     private $textRun=null;
     private $activeList='deactivatedListPosition';//  activatedListPosition
+    const mainChapterLevel=1;
+    /* CURRENT MAIN CHAPTER VALUE */
+    private $currentMainChapterValue=0;
+    /* TRAITS */
+    use createDocChapterImage;
     public function __construct(&$Log,&$phpWord,$Parent){
         $this->Log=$Log;
         $this->Parent=$Parent;
         $this->phpWord=$phpWord;
+        //$this->ChapterImage=new WordDoc\createDocChapterImage();
+        
     }
     public function __destruct(){
         
@@ -27,6 +34,7 @@ final class createDocChapter{
     public function setReportStageChapterList($StageSection){
         $this->Log->log(0,"[".__METHOD__."]");//"[".__NAMESPACE__."]
         self::loopSection($StageSection);
+        $this->Log->log(0,"[".__METHOD__."] LAST CHAPTER LEVEL => ".$this->currentMainChapterValue);
         //self::{$this->setChapterSection[1]}();
     }
     private function setPageBreak(){
@@ -80,14 +88,20 @@ final class createDocChapter{
                 throw new \Exception ('Chapter list level out of range -> '.strval($row->list->property->chapterLevel).' max -> '.strval($row->list->property->chapterLevelMax),1);
             }
             ${'setChapter'.$row->list->property->chapter}($this);
+            
             self::{'setChapterPosition'.$row->paragraph->property->valuenewline.$row->list->property->chapter}($row);
+            /* NEW DESCRIPTION NUMBER */
+            $this->setDescriptionNumber($row,$this->currentMainChapterValue);
         }
         catch(Exception $e){
             $this->Log->log(0,$e);
         }
     }
-    private function setChapterPosition11($row){
+    private function setChapterPosition11(&$row){
         $this->Log->log(0,"[".__METHOD__."] CHAPTER LIST START NEW POSITION:");
+        $this->resetImgNumber();
+        /* UPDATE CURRENT CHAPTER LEVEL */
+        self::updateCurrentMainChapterValue($row);
         /* ADD TAB STOP TO LAST TEXTRUN, BEFORE BEGIN NEW ONE CHAPTER*/
         self::{$this->setChapterSection[2]}();
         /* SET NEW LIST POSITION */
@@ -218,5 +232,11 @@ final class createDocChapter{
         $this->Log->log(0,"[".__METHOD__."]");
         /* LAST TAB STOP */
         self::{$this->setChapterSection[4]}();
+    }
+    private function updateCurrentMainChapterValue(&$row){
+        $this->Log->log(0,"[".__METHOD__."] ".$row->list->property->chapterLevel);
+        if(self::mainChapterLevel===$row->list->property->chapterLevel){
+            $this->currentMainChapterValue++;
+        }
     }
 }

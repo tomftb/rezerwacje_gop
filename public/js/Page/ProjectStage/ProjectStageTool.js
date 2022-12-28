@@ -1205,7 +1205,7 @@ class ProjectStageTool{
                 subsectionrow.list.property['chapterLevel']=t.value;
             };
             data[0]['all']=this.getListLevelList(subsectionrow.list.property.chapterLevel,subsectionrow.list.property.chapterLevelMax); 
-            var tool=this.Tool.create('Poziom spisu treści:',data); 
+            var tool=this.Tool.create('Określ stopień w spisie treści:',data); 
                 tool.style.border='1px solid #CCD1D1';
                 tool.style.borderTop='0px solid #CCD1D1';
                 tool.classList.remove('mt-2');

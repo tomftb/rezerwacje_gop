@@ -13,6 +13,7 @@ final class createDocChapter{
     private $chapterParagraphName='';
     private $textRun=null;
     private $activeList='deactivatedListPosition';//  activatedListPosition
+    private $RowRun='chapter';
     const mainChapterLevel=1;
     /* CURRENT MAIN CHAPTER VALUE */
     private $currentMainChapterValue=0;
@@ -51,7 +52,7 @@ final class createDocChapter{
         self::loop($s->subsection,'loopRow');
     }
     private function loopRow($u){
-        self::loop($u->subsectionrow,'chapter');
+        self::loop($u->subsectionrow,$this->RowRun);
     }
     private function loop($data,$run){
         foreach($data as $v){
@@ -112,7 +113,7 @@ final class createDocChapter{
         /* SET ACTIVE LIST METHOD TO EXECUTE */
         $this->activeList='activatedListPosition';
         $this->setChapterSection[2]='insertRemaningTabStop';
-        $this->setChapterSection[4]='insertRemaningTabStop';
+        $this->setChapterSection[3]='insertRemaningTabStop';
     }
     private function setChapterPosition00($row){
         $this->Log->log(0,"[".__METHOD__."] CHAPTER LIST ADD TO POSITION");
@@ -138,7 +139,7 @@ final class createDocChapter{
         $this->Log->log(0,"[".__METHOD__."] ");
         $this->Log->log(0,$row->paragraph->property->value);
         $this->textRun->addText($row->paragraph->property->value,$this->chapterFontName);//,$this->chapterFontName
-        $this->setChapterSection[4]='insertRemaningTabStop';
+        $this->setChapterSection[3]='insertRemaningTabStop';
     }
     private function deactivatedListPosition(){
         $this->Log->log(0,"[".__METHOD__."] ");
@@ -231,12 +232,16 @@ final class createDocChapter{
     public function lastTabStop(){
         $this->Log->log(0,"[".__METHOD__."]");
         /* LAST TAB STOP */
-        self::{$this->setChapterSection[4]}();
+        self::{$this->setChapterSection[3]}();
     }
     private function updateCurrentMainChapterValue(&$row){
         $this->Log->log(0,"[".__METHOD__."] ".$row->list->property->chapterLevel);
         if(self::mainChapterLevel===$row->list->property->chapterLevel){
             $this->currentMainChapterValue++;
         }
+    }
+    protected function setFont($style){
+        $this->Log->log(0,"[".__METHOD__."]");
+        $this->Parent->setFont($style);
     }
 }

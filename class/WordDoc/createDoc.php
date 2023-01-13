@@ -12,6 +12,7 @@ final class createDoc extends createDocAbstract {
     private $styleStack=array();
     private $textRun;
     private $Chapter;
+    private $section;
     /*
      * VARIABLE DETERMINATES ADD NEW SECTION FOR EACH ELEMENT LINK TITIE, TEXTAREA...
      * false - the same section
@@ -84,9 +85,9 @@ final class createDoc extends createDocAbstract {
         //var_dump($this->projectData);
         try{
             self::setReportStagePage();
-            $section=$this->phpWord->addSection();
-            self::loopStagePart($this->projectData->heading,'addHeader',$section);
-            self::loopStagePart($this->projectData->footer,'addFooter',$section);
+            $this->section=$this->phpWord->addSection();
+            self::loopStagePart($this->projectData->heading,'addHeader');
+            self::loopStagePart($this->projectData->footer,'addFooter');
             /* only first secton true on a;; stage report*/
             $propertyRun=self::getStageStartingProperty();
             /* CHAPTER */
@@ -107,10 +108,10 @@ final class createDoc extends createDocAbstract {
             throw new Exception($e, 1);//->getMessage()
         }
     }
-    private function loopStagePart($data,$execute,&$section){
+    private function loopStagePart($data,$execute){
         $this->Log->log(0,"[".__METHOD__."] ".$execute);
         foreach($data as $d){
-            self::setReportPart($d->section,$execute,'default',$section);
+            self::setReportPart($d->section,$execute,'default');
             /* LOOP ONLY ONE */
             return;
          }
@@ -118,16 +119,16 @@ final class createDoc extends createDocAbstract {
      public function genReportStageFooter(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::setReportStagePage();
-        $section=$this->phpWord->addSection();
-        self::setReportPart($this->projectData->section,'addFooter','firstPage',$section);
+        $this->section=$this->phpWord->addSection();
+        self::setReportPart($this->projectData->section,'addFooter','firstPage');
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
         $objWriter->save($this->docDir.$this->fileName);
     }
      public function genReportStageHeading(){
         $this->Log->log(0,"[".__METHOD__."]");
         self::setReportStagePage();
-        $section=$this->phpWord->addSection();
-        self::setReportPart($this->projectData->section,'addHeader','firstPage',$section);
+        $this->section=$this->phpWord->addSection();
+        self::setReportPart($this->projectData->section,'addHeader','firstPage');
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord, 'Word2007');
         $objWriter->save($this->docDir.$this->fileName);
     }
@@ -140,6 +141,7 @@ final class createDoc extends createDocAbstract {
         /* FIRST SECTION ALWAYS FROM NEW PAGE IN STAGE */
         $propertyRun=self::getStageStartingProperty();
         self::setReportStageSection($this->projectData->section,$propertyRun);
+       
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord,'Word2007');
         $objWriter->save($this->docDir.$this->fileName);
     }
@@ -159,7 +161,7 @@ final class createDoc extends createDocAbstract {
         unset($this->projectData->style);
         unset($this->projectData->property);
     }
-    private function setReportPart($Stagesection,$method='addFooter',$type='default',&$section){
+    private function setReportPart($Stagesection,$method='addFooter',$type='default'){
         $this->Log->log(0,"[".__METHOD__."] ".$method);
         //$this->Log->log(0,$Stagesection);
         /* MULTIPLE COLUMN (SECTION) IS NOT ACCEPTABLE */
@@ -170,7 +172,7 @@ final class createDoc extends createDocAbstract {
             'actTabStopName'=>uniqid('list_')
         ];
         foreach($Stagesection as $s){
-            $part = $section->{$method}();
+            $part = $this->section->{$method}();
             /* 
                 Footer::AUTO default, all pages except if overridden by first or even
                 Footer::FIRST each first page of the section
@@ -193,11 +195,11 @@ final class createDoc extends createDocAbstract {
         $this->Log->log(0,"[".__METHOD__."]");        
         foreach($Stagesection as $s){
             self::setBreakType($s->property->valuenewline,$propertyRun['firstSection'],$propertyRun['breakType']);
-            $section = self::setSectionColumn($s->subsection,$propertyRun['breakType']);
+            $this->section = self::setSectionColumn(count(get_object_vars($s->subsection)),$propertyRun['breakType']);
             /* COLUMNS */
             foreach($s->subsection as $u){
                 self::setSubSectionProperty($u);
-                self::setReportStageRow($u,$section,$propertyRun);
+                self::setReportStageRow($u,$propertyRun);
             }
             /* AT THE END ADD FAKE section if no more left */
             $propertyRun['firstSection']=false;
@@ -216,7 +218,7 @@ final class createDoc extends createDocAbstract {
         //print_r($u->property);
         //print_r($u->subsectionrow);
     }
-    private function setReportStageRow($subsection,$section,&$propertyRun){
+    private function setReportStageRow($subsection,&$propertyRun){
         $this->Log->log(0,'['.__METHOD__.'] START');
         /* FIRST ROW ALWAYS START FROM NEW LINE */
         $firstRow='1';
@@ -224,7 +226,7 @@ final class createDoc extends createDocAbstract {
         foreach($subsection->subsectionrow as $r){
             $this->Log->log(0,'['.__METHOD__.'] ROW');
             /* DYNAMIC RUN FUNCTION, newLine1 newLine0 (RUN VIA NEW LINE 1,0) */
-            self::{'newLine'.$r->paragraph->property->valuenewline}($r,$propertyRun,$section);
+            self::{'newLine'.$r->paragraph->property->valuenewline}($r,$propertyRun);
             array_walk($r->image,['self','setRunImage'],$propertyRun['run']);
             $firstRow=$r->paragraph->property->valuenewline;
         }
@@ -298,9 +300,8 @@ final class createDoc extends createDocAbstract {
         $this->phpWord->addParagraphStyle($actTabStopName, array('align'=>parent::setAlign($r->paragraph->style),'tabs'=>parent::setTabStop($r->paragraph->tabstop) ,'spaceAfter' => 95));
         return $actTabStopName;
     }
-    private function setSectionColumn($subsection,$breakType='continuous'){
+    private function setSectionColumn($cols=1,$breakType='continuous'){
         $this->Log->log(0,"[".__METHOD__."]");
-        $cols=count(get_object_vars($subsection));
         return $this->phpWord->addSection(
                     array(
                         'colsNum'   =>  $cols, //$cols
@@ -309,30 +310,37 @@ final class createDoc extends createDocAbstract {
                     )
                 );
     }
-    private function newLine1($r,&$propertyRun,&$section){
+    private function newLine1($r,&$propertyRun){
         $this->Log->log(0,"[".__METHOD__."] NEW LINE = TRUE");
         /* DYNAMIC RUN => setpItem, setlItem */
-        self::{'set'.$r->paragraph->property->paragraph.'Item'}($r,$propertyRun,$section);
+        self::checkSystemNewLineConst($r,$propertyRun,'set'.$r->paragraph->property->paragraph.'Item');
+        //self::{'set'.$r->paragraph->property->paragraph.'Item'}($r,$propertyRun);
     }
     private function newLine0($r,&$propertyRun){
         $this->Log->log(0,"[".__METHOD__."] NEW LINE = FALSE");
+       // $propertyRun['run']->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
+        /* CHECK FOR SYSTEM CONSTS */
+        self::checkSystemInLineConst($r,$propertyRun);  
+    }
+    private function inLine($r,&$propertyRun){
         $propertyRun['run']->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
     }
-    private function setpItem($r,&$propertyRun,&$section){
+    private function setpItem($r,&$propertyRun){
          $this->Log->log(0,"[".__METHOD__."] SET PARAGRAPH ITEM");
          /* TO SET THE sAME TAB STOP - USE FRONT END TO ADD TAB STOP FOR NEW PARAGRAPH */
-         $newTextRun = $section->addTextRun(parent::setParagraphProperties($r));
+         $newTextRun = $this->section->addTextRun(parent::setParagraphProperties($r));
          self::addTabStop($r,$newTextRun);
          $newTextRun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));
          $propertyRun['run'] = $newTextRun;
+         
     }
-    private function setlItem($r,&$propertyRun,&$section){
+    private function setlItem($r,&$propertyRun){
         $this->Log->log(0,"[".__METHOD__."] SET LIST ITEM");
         self::{'setNewList_'.$r->list->property->newList}($propertyRun['actListName']);
         self::{'setNewTabStop_'.$r->list->property->newList}($propertyRun['actTabStopName']);
-        $listItemRun = $section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r,$propertyRun['actListName']), self::setListParagraph($r,$propertyRun['actTabStopName']));
+        $listItemRun = $this->section->addListItemRun($r->list->property->listLevel-1, self::setListStyle($r,$propertyRun['actListName']), self::setListParagraph($r,$propertyRun['actTabStopName']));
         $listItemRun->addText($r->paragraph->property->value,parent::setFont($r->paragraph->style));  
-        $propertyRun['run'] = $listItemRun; 
+        $propertyRun['run'] = $listItemRun;
     }
     private function setNewList_y(&$actListName){
         $this->Log->log(0,"[".__METHOD__."] SETUP NEW LIST");
@@ -353,20 +361,20 @@ final class createDoc extends createDocAbstract {
         /* Note: any element you append to a document must reside inside of a Section. */
         // Adding an empty Section to the document...
         $this->Log->log(0,"[".__METHOD__."] BEFORE SECTION");
-        $section = $this->phpWord->addSection();
+        $this->section = $this->phpWord->addSection();
         $this->Log->log(0,"[".__METHOD__."] SECTION");
         $text = "some text";
         $this->phpWord->addFontStyle('r2Style', array('bold'=>false, 'italic'=>false, 'size'=>12));
         $this->phpWord->addParagraphStyle('p2Style', array('align'=>\PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter'=>100));
-        $section->addText($text, 'r2Style', 'p2Style');
+        $this->section->addText($text, 'r2Style', 'p2Style');
         $this->Log->log(0,"[".__METHOD__."] AFTER addText");
         // Adding Text element to the Section having font styled by default...
-        $section->addText( 'Do Realizacji: '.$this->projectData['rodzaj_umowy'],array('size'=>22,'color' => 'FF8080'));
-        $section->addText( 'Numer: '.$this->projectData['rodzaj_umowy']);
-        $section->addText( 'Do kierowania grupą (Lider) powołuje : '.$this->projectData['nadzor']);
-        $section->addText( 'Temat: '.$this->projectData['rodzaj_umowy']);
-        $section->addText( 'Typ: '.$this->projectData['typ_umowy']);
-        $section->addText( 'System: '.$this->projectData['system']);
+        $this->section->addText( 'Do Realizacji: '.$this->projectData['rodzaj_umowy'],array('size'=>22,'color' => 'FF8080'));
+        $this->section->addText( 'Numer: '.$this->projectData['rodzaj_umowy']);
+        $this->section->addText( 'Do kierowania grupą (Lider) powołuje : '.$this->projectData['nadzor']);
+        $this->section->addText( 'Temat: '.$this->projectData['rodzaj_umowy']);
+        $this->section->addText( 'Typ: '.$this->projectData['typ_umowy']);
+        $this->section->addText( 'System: '.$this->projectData['system']);
         $this->Log->log(0,"[".__METHOD__."] AFTER multiply addText");
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->phpWord,'Word2007');
         $objWriter->save($this->docDir.$this->fileName);
@@ -392,5 +400,32 @@ final class createDoc extends createDocAbstract {
          }
         /* WITH PARAGRAPH FORMATING TABSTOP ?*/ 
         //$newTextRun->addText("\t\t",parent::setFont($r->paragraph->style));
+    }
+        //function createImageDescriptionList(&$WordSection,$row){
+        /* USE EXTERNAL SECTION */
+        //$this->Log->log(0,"[".__METHOD__."]");
+        
+
+   //}
+    private function checkSystemInLineConst($r,&$propertyRun){
+         /* CREATE IMAGE DESCRIPTION LIST */
+         //$this->Chapter->createImageDescriptionList($this->section,$r);//newPage
+         self::{'createImageDescriptionList'.strval(preg_match('/.*{IMG_DESCR_LIST}.*/i',$r->paragraph->property->value))}($r,$propertyRun,'inLine');
+    }
+    private function createImageDescriptionList0($r,&$propertyRun,$execute){
+        $this->Log->log(0,"[".__METHOD__."]");
+        self::{$execute}($r,$propertyRun);
+    }
+    private function createImageDescriptionList1($r,&$propertyRun,$execute){
+        /* TO DO explode via system const */
+        $this->Log->log(0,"[".__METHOD__."]");
+        $value=explode('{IMG_DESCR_LIST}',$r->paragraph->property->value);
+        $this->Log->log(0,$value);
+        $this->Chapter->createImageDescriptionList($this->section);
+    }
+    private function checkSystemNewLineConst($r,&$propertyRun,$execute){
+         /* CREATE IMAGE DESCRIPTION LIST */
+         //$this->Chapter->createImageDescriptionList($this->section,$r);//newPage
+         self::{'createImageDescriptionList'.strval(preg_match('/.*{IMG_DESCR_LIST}.*/i',$r->paragraph->property->value))}($r,$propertyRun,$execute);
     }
 }
